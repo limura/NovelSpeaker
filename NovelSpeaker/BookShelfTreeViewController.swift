@@ -1,25 +1,82 @@
 //
-//  BookShelfRATreeViewController.swift
+//  BookShelfTreeViewController.swift
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2017/10/26.
-//  Copyright © 2017年 IIMURA Takuji. All rights reserved.
+//  Created by 飯村卓司 on 2024/06/22.
+//  Copyright © 2024 IIMURA Takuji. All rights reserved.
 //
 
+import Foundation
 import UIKit
-import RATreeView
 import RealmSwift
 import Eureka
 
-/*
+enum BookShelfSelectionState {
+    case unselected
+    case partiallySelected
+    case fullySelected
+}
+
 class BookShelfRATreeViewCellData {
     public var novelID:String?
     public var childrens:[BookShelfRATreeViewCellData]?
     public var title:String?
+    var isExpanded: Bool = false
+    weak var parentNode: BookShelfRATreeViewCellData?
+    var selectionState: BookShelfSelectionState = .unselected
+    
+    var labelText: String {
+        get {
+            return title ?? "-"
+        }
+    }
+    
+    var childNodeCount: Int {
+        get {
+            return childrens?.count ?? 0
+        }
+    }
+    func addChild(_ child: BookShelfRATreeViewCellData) {
+        if childrens == nil {
+            childrens = [child]
+        }else{
+            childrens?.append(child)
+        }
+        child.parentNode = self
+    }
+    
+    func updateSelectionState() {
+        if childrens?.isEmpty ?? true {
+            return
+        }
+        
+        let selectedCount = childrens?.filter { $0.selectionState == .fullySelected }.count ?? 0
+        if selectedCount == childrens?.count {
+            selectionState = .fullySelected
+        } else if selectedCount > 0 {
+            selectionState = .partiallySelected
+        } else {
+            selectionState = .unselected
+        }
+    }
+    
+    func toggleSelection() {
+        switch selectionState {
+        case .unselected, .partiallySelected:
+            selectionState = .fullySelected
+            childrens?.forEach { $0.selectionState = .fullySelected }
+        case .fullySelected:
+            selectionState = .unselected
+            childrens?.forEach { $0.selectionState = .unselected }
+        }
+    }
 }
 
 func == (lhs: BookShelfRATreeViewCellData, rhs: BookShelfRATreeViewCellData) -> Bool {
     if lhs.novelID == rhs.novelID && lhs.title == rhs.title {
+        if lhs.childrens == nil && rhs.childrens == nil {
+            return true
+        }
         if let lhsc = lhs.childrens, let rhsc = rhs.childrens {
             if lhsc == rhsc {
                 return true
@@ -29,11 +86,10 @@ func == (lhs: BookShelfRATreeViewCellData, rhs: BookShelfRATreeViewCellData) -> 
     return false
 }
 extension BookShelfRATreeViewCellData: Equatable {}
-*/
 
-class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RATreeViewDelegate, UIScrollViewDelegate, RealmObserverResetDelegate {
+class BookShelfTreeViewController:UITableViewController, RealmObserverResetDelegate {
     var displayDataArray : [BookShelfRATreeViewCellData] = [];
-    var treeView:RATreeView?
+    var showCheckboxes: Bool = false  // チェックボックスの表示/非表示を制御
     var searchText:String? = nil
     var searchButton:UIBarButtonItem = UIBarButtonItem()
     var switchFolderButton:UIBarButtonItem = UIBarButtonItem()
@@ -41,6 +97,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     var iCloudPushButton:UIBarButtonItem = UIBarButtonItem()
     var stopDownloadButton:UIBarButtonItem = UIBarButtonItem()
     var resumeSpeechFloatingButton:FloatingButton? = nil
+    var toggleCheckboxButton:UIBarButtonItem = UIBarButtonItem()
     var nextViewStoryID: String?
     var isNextViewNeedResumeSpeech:Bool = false
     var isNextViewNeedUpdateReadDate:Bool = true
@@ -48,36 +105,16 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     var novelArrayNotificationToken : NotificationToken? = nil
     var globalStateNotificationToken: NotificationToken? = nil
     var novelTagNotificationToken : NotificationToken? = nil
-    
-    static var instance:BookShelfRATreeViewController? = nil
 
+    static var instance:BookShelfTreeViewController? = nil
     override func viewDidLoad() {
         super.viewDidLoad()
-        BookShelfRATreeViewController.instance = self
+        BookShelfTreeViewController.instance = self
         StoryHtmlDecoder.shared.LoadSiteInfoIfNeeded()
 
-        let treeView = RATreeView()
-        view.addSubview(treeView)
-        treeView.frame = view.bounds
-        treeView.dataSource = self
-        treeView.delegate = self
-        treeView.scrollView.delegate = self
-        treeView.register(UINib(nibName: BookShelfTreeViewCell.id, bundle: nil), forCellReuseIdentifier: String(describing: BookShelfTreeViewCell.self))
-        let guide:UILayoutGuide
-        if #available(iOS 11.0, *) {
-            guide = self.view.safeAreaLayoutGuide
-        } else {
-            guide = self.view.layoutMarginsGuide
-        }
-        treeView.topAnchor.constraint(equalTo: guide.topAnchor, constant: 0).isActive = true
-        treeView.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 2).isActive = true
-        treeView.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -2).isActive = true
-        treeView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 0).isActive = true
-        treeView.translatesAutoresizingMaskIntoConstraints = false
-        treeView.estimatedRowHeight = 44
-        treeView.rowHeight = UITableView.automaticDimension
-        self.treeView = treeView
+        tableView.register(UINib(nibName: BookShelfTreeViewCell.id, bundle: nil), forCellReuseIdentifier: String(describing: BookShelfTreeViewCell.self))
         
+
         // このタイミングで StorySpeaker のインスタンスを作っておきます。
         // Realm observe が走るので、main thread で作っておかねばならぬらしい(´・ω・`)
         _ = StorySpeaker.shared
@@ -92,6 +129,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }else{
             self.switchFolderButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfRATreeViewController_ExpandFolderButton", comment: "フォルダ開閉"), style: UIBarButtonItem.Style.done, target: self, action: #selector(switchFolderButtonClicked))
         }
+        self.toggleCheckboxButton = UIBarButtonItem(title: NSLocalizedString("BookShelfTreeViewController_ToggleCheckboxButton", comment: "選択"), style: .plain, target: self, action: #selector(toggleCheckboxesButtonTapped))
+
         self.assinButtons()
 
         if NiftyUtility.IsVersionUped() {
@@ -103,6 +142,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 self.pushNextView(novelID: novel.novelID, isNeedSpeech: false, isNeedUpdateReadDate: false)
             }
         }
+        
         // reloadAllDataAndScrollToCurrentReadingContent() がかなり時間かかる場合があるので、
         // 初期値を置いてからロードは別threadでやらせます。
         // ここで時間を取られて起動に時間がかかったとみなされてシステムから殺されるという挙動が確認されたための対処になります。
@@ -114,12 +154,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             self.displayDataArray = [
                 dummyCell
             ]
-            self.treeView?.reloadData()
+            self.tableView.reloadData()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 self.reloadAllDataAndScrollToCurrentReadingContent()
             }
         }
-        
+
         NiftyUtility.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
             if text.count > 0 {
                 DispatchQueue.main.async {
@@ -135,7 +175,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         #if !targetEnvironment(macCatalyst)
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshControlValueChangedEvent), for: .valueChanged)
-        treeView.scrollView.addSubview(refreshControl)
+        self.refreshControl = refreshControl
         #endif
         RealmObserverHandler.shared.AddDelegate(delegate: self)
         registObserver()
@@ -149,7 +189,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.HilightCurrentReadingNovel()
+        self.HighlightCurrentReadingNovel(doScroll: false)
         self.assignCloudPullPushButtonStatus()
     }
     
@@ -166,11 +206,921 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         // Dispose of any resources that can be recreated.
     }
     
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated)
-        self.treeView?.setEditing(editing, animated: animated)
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destinationViewController.
+        // Pass the selected object to the new view controller.
+        if segue.identifier == "bookShelfToReaderSegue" {
+            if let nextViewController = segue.destination as? SpeechViewController {
+                nextViewController.storyID = nextViewStoryID
+                nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
+                nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
+            }
+        }else if segue.identifier == "bookShelfToWebViewReaderSegue"{
+            if let nextViewController = segue.destination as? WebSpeechViewController {
+                nextViewController.targetStoryID = nextViewStoryID
+                nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
+                nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
+            }
+        }
+    }
+    
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        var num = 0
+        for node in displayDataArray {
+            num += 1
+            if node.isExpanded {
+                num += node.childNodeCount
+            }
+        }
+        return num
+    }
+    
+    func getNode(indexPath: IndexPath) -> (BookShelfRATreeViewCellData, Int)? {
+        var num = 0
+        for node in displayDataArray {
+            if indexPath.row == num {
+                return (node, 0)
+            }
+            num += 1
+            if node.isExpanded {
+                let target = indexPath.row - num
+                if node.childNodeCount > target, let childrens = node.childrens {
+                    return (childrens[target], 1)
+                }
+                num += node.childNodeCount
+            }
+        }
+        return nil
+    }
+    func getIndexPath(node:BookShelfRATreeViewCellData) -> IndexPath? {
+        var num = 0
+        for folderNode in displayDataArray {
+            if folderNode == node {
+                return IndexPath(row: num, section: 0)
+            }
+            num += 1
+            if folderNode.isExpanded, let childrens = folderNode.childrens {
+                for novelNode in childrens {
+                    if novelNode == node {
+                        return IndexPath(row: num, section: 0)
+                    }
+                    num += 1
+                }
+            }
+        }
+        return nil
+    }
+    func searchIndexPathFor(novelID:String) -> IndexPath? {
+        var num = 0
+        for folderNode in displayDataArray {
+            if folderNode.novelID == novelID {
+                return IndexPath(row: num, section: 0)
+            }
+            num += 1
+            if folderNode.isExpanded, let childrens = folderNode.childrens {
+                for novelNode in childrens {
+                    if novelNode.novelID == novelID {
+                        return IndexPath(row: num, section: 0)
+                    }
+                    num += 1
+                }
+            }
+        }
+        return nil
+    }
+    func searchFolderIndexPathFor(title:String) -> IndexPath? {
+        var num = 0
+        for folderNode in displayDataArray {
+            if folderNode.childrens != nil && folderNode.title == title {
+                return IndexPath(row: num, section: 0)
+            }
+            num += 1
+            if folderNode.isExpanded, let childrens = folderNode.childrens {
+                num += childrens.count
+            }
+        }
+        return nil
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        /*
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as! CustomTableViewCell
+        if let (node, indentLevel) = getNode(indexPath: indexPath) {
+            cell.configure(with: node, indentLevel: indentLevel, showCheckbox: showCheckboxes)
+            cell.checkboxTapHandler = { [weak self] in
+                self?.checkboxTapped(for: indexPath)
+            }
+        } else {
+            cell.textLabel?.text = indexPath.description
+        }
+        return cell
+        */
+        
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: BookShelfTreeViewCell.self)) as? BookShelfTreeViewCell else {
+            fatalError()
+        }
+        guard let (item, indentLevel) = getNode(indexPath: indexPath) else { return cell }
+        cell.checkboxTapHandler = { [weak self] in
+            self?.checkboxTapped(for: indexPath)
+        }
+        
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let novelID = item.novelID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                let likeLevel = RealmGlobalState.GetInstanceWith(realm: realm)?.calcLikeLevel(novelID: novelID) ?? 0
+                cell.cellSetup(novel: novel, treeLevel: indentLevel, likeLevel: likeLevel, showCheckbox: self.showCheckboxes)
+            }else if let title = item.title {
+                func getChildNovelIDs(itemArray:[BookShelfRATreeViewCellData]) -> [String] {
+                    var childrenArray:[String] = []
+                    for child in itemArray {
+                        if let novelID = child.novelID {
+                            childrenArray.append(novelID)
+                        }else if let childrens = child.childrens{
+                            childrenArray.append(contentsOf: getChildNovelIDs(itemArray: childrens))
+                        }
+                    }
+                    return childrenArray
+                }
+                let childrenIDArray:[String]
+                if let childrens = item.childrens {
+                    childrenIDArray = getChildNovelIDs(itemArray: childrens)
+                }else{
+                    childrenIDArray = []
+                }
+                cell.cellSetup(title: title, treeLevel: indentLevel, watchNovelIDArray: childrenIDArray, showCheckbox: self.showCheckboxes)
+            }
+        }
+        
+        return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        guard let (node, _) = getNode(indexPath: indexPath) else { return false }
+        if let novelID = node.novelID {
+            return RealmUtil.RealmBlock { (realm) -> Bool in
+                let likeLevel = RealmGlobalState.GetInstanceWith(realm: realm)?.calcLikeLevel(novelID: novelID) ?? 0
+                return likeLevel <= 0
+            }
+        }
+        return false
+    }
+    
+    func deleteNovel(item: BookShelfRATreeViewCellData, indexPath: IndexPath, novelID: String) {
+        DispatchQueue.main.async {
+            NiftyUtility.EasyDialogNoButton(
+                viewController: self,
+                title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
+                message: nil,
+                completion: { (dialog) in
+                DispatchQueue.main.async {
+                    RealmUtil.Write(withoutNotifying: [self.novelArrayNotificationToken]) { (realm) in
+                        if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                            novel.delete(realm: realm)
+                        }
+                    }
+                    item.parentNode?.childrens?.removeAll(where: {$0.novelID == novelID})
+                    self.displayDataArray.removeAll(where: {$0.novelID == novelID})
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false) {
+                            self.tableView.beginUpdates()
+                            self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                            self.tableView.endUpdates()
+                        }
+                    }
+                }
+            })
+        }
     }
 
+    // 削除されたりした時に呼ばれるぽい
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            if let (node, _) = getNode(indexPath: indexPath), let novelID = node.novelID {
+                deleteNovel(item: node, indexPath: indexPath, novelID: novelID)
+            }
+        }
+    }
+    
+    func checkboxTapped(for indexPath: IndexPath) {
+        guard let (node, _) = getNode(indexPath: indexPath) else { return }
+        
+        node.toggleSelection()
+        updateParentSelectionStates(for: node)
+        tableView.reloadData()
+    }
+
+    func toggleCheckboxes() {
+        showCheckboxes.toggle()
+        updateToggleStateForVisibleCells()
+    }
+    @objc func toggleCheckboxesButtonTapped() {
+        toggleCheckboxes()
+    }
+    private func updateToggleStateForVisibleCells() {
+        guard let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows else { return }
+        
+        for indexPath in indexPathsForVisibleRows {
+            if let cell = tableView.cellForRow(at: indexPath) as? BookShelfTreeViewCell {
+                if self.showCheckboxes {
+                    cell.displayCheckBoxButton()
+                }else{
+                    cell.hideCheckBoxButton()
+                }
+            }
+        }
+    }
+
+    func updateParentSelectionStates(for node: BookShelfRATreeViewCellData) {
+        var currentNode = node.parentNode
+        while let parent = currentNode {
+            parent.updateSelectionState()
+            currentNode = parent.parentNode
+        }
+    }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let (node, _) = getNode(indexPath: indexPath) else { return }
+        if node.childrens != nil {
+            toggleFolderExpandState(node: node)
+            if self.isFolderExpanded() {
+                self.setExpandIcon()
+            }else{
+                self.setCollapseIcon()
+            }
+            return
+        }
+        if let novelID = node.novelID {
+            // currentReadingNovelID の小説を開いた(最後に開いていた小説を開いた)なら、
+            // updateReadDate は呼ばないで良いという事にします。
+            let currentReadingNovelID:String = RealmUtil.RealmBlock { (realm) -> String in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return "" }
+                return globalState.currentReadingNovelID
+            }
+            pushNextView(novelID: novelID, isNeedSpeech: false, isNeedUpdateReadDate: currentReadingNovelID != novelID)
+        }
+    }
+    
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if let floatingButton = self.resumeSpeechFloatingButton {
+            let isEnd = floatingButton.scrollViewDidScroll(scrollView)
+            if isEnd {
+                self.resumeSpeechFloatingButton = nil
+            }
+        }
+    }
+    
+    #if !targetEnvironment(macCatalyst)
+    @objc func refreshControlValueChangedEvent(sendor:UIRefreshControl) {
+        sendor.endRefreshing()
+        refreshButtonClicked(sender: self)
+    }
+    #endif
+
+    // 検索条件やソート条件を考慮した上での NarouContent の Array を返します
+    func getNovelArray(realm: Realm, sortType:NarouContentSortType) -> [RealmNovel]? {
+        let startTime = DispatchTime.now()
+        defer {
+            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "BookShelfRATreeViewController.getNovelArray()")
+        }
+        guard var allNovels = RealmNovel.GetAllObjectsWith(realm: realm) else { return nil }
+        if let searchText = self.searchText, searchText.count > 0 {
+            allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", searchText, searchText)
+        }
+        switch sortType {
+        case .Ncode:
+            return Array(allNovels.sorted(byKeyPath: "novelID", ascending: true))
+        case .NovelUpdatedAtWithFolder:
+            fallthrough
+        case .NovelUpdatedAt:
+            return Array(allNovels.sorted(byKeyPath: "lastDownloadDate", ascending: false))
+        case .LastReadDate:
+            return Array(allNovels.sorted(byKeyPath: "lastReadDate", ascending: false))
+        case .Writer:
+            return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
+        case .LikeLevel:
+            let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
+            let sortedNovels = allNovels.sorted { (a, b) -> Bool in
+                return globalState?.calcLikeLevel(novelID: a.novelID) ?? 0 > globalState?.calcLikeLevel(novelID: b.novelID) ?? 0
+            }
+            return sortedNovels
+        case .WebSite:
+            // .WebSite はどうせ host を key とした辞書に入れてからsortするのでここでsortして返す意味がありません。
+            return Array(allNovels)
+        case .CreatedDate:
+            return Array(allNovels.sorted(byKeyPath: "createdDate", ascending: false))
+        case .Title:
+            fallthrough
+        case .SelfCreatedFolder:
+            fallthrough
+        case .KeywordTag:
+            fallthrough
+        @unknown default:
+            return Array(allNovels.sorted(byKeyPath: "title", ascending: false))
+        }
+    }
+    
+    // 単純な本棚データの作成
+    func createSimpleBookShelfRATreeViewCellDataTree(sortType:NarouContentSortType) -> (Bool,[BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: sortType) else { return (false,[]) }
+            var result:[BookShelfRATreeViewCellData] = []
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return (false, result)
+        }
+    }
+    
+    // 更新日時でフォルダ分けします(フォルダ分けする版)
+    func createUpdateDateBookShelfRATreeViewCellDataTreeWithFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.NovelUpdatedAt) else { return (false,[]) }
+            struct filterStruct {
+                let title:String
+                let date:Date
+            }
+            let filterList = [
+                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1DayAgo", comment: "1日前まで"), date: Date(timeIntervalSinceNow: -60*60*24)),
+                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo7DayAgo", comment: "7日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*7)),
+                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo30DayAgo", comment: "30日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30)),
+                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo6MonthsAgo", comment: "6ヶ月前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30*6)),
+                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1YearAgo", comment: "1年前まで"), date: Date(timeIntervalSinceNow: -60*60*24*365)),
+                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_BeforeThat", comment: "それ以前"), date: Date(timeIntervalSinceNow: -60*60*24*365*100)),
+            ]
+            var result = [] as [BookShelfRATreeViewCellData]
+            var prevDate = Date(timeIntervalSinceNow: 9999999999)
+            for filter in filterList {
+                let folder = BookShelfRATreeViewCellData()
+                folder.title = filter.title
+                folder.childrens = []
+                for novel in novels.sorted(by: {$0.lastDownloadDate < $1.lastDownloadDate}) {
+                    let lastDownloadDate = novel.lastDownloadDate
+                    if lastDownloadDate <= prevDate && lastDownloadDate > filter.date {
+                        let data = BookShelfRATreeViewCellData()
+                        data.novelID = novel.novelID
+                        data.title = novel.title
+                        folder.addChild(data)
+                    }
+                }
+                result.append(folder)
+                prevDate = filter.date
+            }
+            return (true, result)
+        }
+    }
+
+    // 更新日時でフォルダ分けします(フォルダ分けしない版)
+    func createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
+        let startTime = DispatchTime.now()
+        defer {
+            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
+        }
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.NovelUpdatedAt) else { return (false,[]) }
+            let startTime = DispatchTime.now()
+            defer {
+                FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder/create [BookShelfRATreeViewCellData]")
+            }
+            var result = [] as [BookShelfRATreeViewCellData]
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return (false, result)
+        }
+    }
+
+    // 作者名でフォルダ分けします
+    func createWriterBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.Title) else { return (false,[]) }
+            var dic = [String:Any]()
+            for novel in novels {
+                if var array = dic[novel.writer] as? [RealmNovel]{
+                    array.append(novel)
+                    dic[novel.writer] = array
+                }else{
+                    var array = [RealmNovel]()
+                    array.append(novel)
+                    dic[novel.writer] = array
+                }
+            }
+            var targets = [String]()
+            for key in dic.keys {
+                targets.append(key)
+            }
+            targets.sort(){ $0 < $1 }
+            
+            var result = [BookShelfRATreeViewCellData]()
+            for target in targets {
+                let folder = BookShelfRATreeViewCellData()
+                folder.childrens = [BookShelfRATreeViewCellData]()
+                folder.title = target == "" ? NSLocalizedString("BookShelfRATreeViewController_UnknownWriter", comment: "(作者名不明)") : target
+                if let novels = dic[target] as? [RealmNovel] {
+                    for novel in novels.sorted(by: {$0.title < $1.title}) {
+                        let data = BookShelfRATreeViewCellData()
+                        data.novelID = novel.novelID
+                        data.title = novel.title
+                        folder.addChild(data)
+                    }
+                }
+                result.append(folder)
+            }
+            return (true, result)
+        }
+    }
+    
+    // 自作のフォルダでフォルダ分けします
+    func createBookShelfTagFolderRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.Title), let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return (false,[]) }
+            var result = [BookShelfRATreeViewCellData]()
+            var listedNovelIDSet = Set<String>()
+            var novelID2NovelMap = [String:RealmNovel]()
+            for novel in novels {
+                novelID2NovelMap[novel.novelID] = novel
+            }
+            for tag in tags {
+                guard let novels = tag.targetNovelArrayFrom(novelID2NovelMap: novelID2NovelMap) else { continue }
+                let folder = BookShelfRATreeViewCellData()
+                folder.childrens = [BookShelfRATreeViewCellData]()
+                folder.title = tag.name
+                for novel in novels {
+                    let data = BookShelfRATreeViewCellData()
+                    data.novelID = novel.novelID
+                    folder.addChild(data)
+                    listedNovelIDSet.insert(novel.novelID)
+                }
+                result.append(folder)
+            }
+            result.sort(by: { (a, b) -> Bool in
+                a.title! < b.title!
+            })
+            var noListedNovels = [RealmNovel]()
+            for novel in novels {
+                if listedNovelIDSet.contains(novel.novelID) { continue }
+                noListedNovels.append(novel)
+            }
+            if noListedNovels.count > 0 {
+                let folder = BookShelfRATreeViewCellData()
+                folder.title = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
+                folder.childrens = [BookShelfRATreeViewCellData]()
+                for novel in noListedNovels {
+                    let data = BookShelfRATreeViewCellData()
+                    data.novelID = novel.novelID
+                    data.title = novel.title
+                    folder.addChild(data)
+                }
+                result.append(folder)
+            }
+            return (true, result)
+        }
+    }
+    
+    // キーワード(Tag)でフォルダ分けします
+    func createBookShelfKeywordTagRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            // ２つ以上の小説が登録されていないタグは無視します。
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.Title), let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Keyword)?.filter({ (tag) -> Bool in
+                return tag.targetNovelIDArray.count >= 2
+            }) else { return (false,[]) }
+            var result = [BookShelfRATreeViewCellData]()
+            var listedNovelIDSet = Set<String>()
+            var novelIDToNovelMap:[String:RealmNovel] = [:]
+            for novel in novels {
+                novelIDToNovelMap[novel.novelID] = novel
+            }
+            for tag in tags {
+                let folder = BookShelfRATreeViewCellData()
+                folder.childrens = [BookShelfRATreeViewCellData]()
+                folder.title = tag.name
+                for novelID in tag.targetNovelIDArray {
+                    if let novel = novelIDToNovelMap[novelID] {
+                        let data = BookShelfRATreeViewCellData()
+                        data.novelID = novel.novelID
+                        data.title = novel.title
+                        folder.addChild(data)
+                        listedNovelIDSet.insert(novel.novelID)
+                    }
+                }
+                result.append(folder)
+            }
+            result.sort(by: { (a, b) -> Bool in
+                a.title! < b.title!
+            })
+            var noListedNovels = [RealmNovel]()
+            for novel in novels {
+                if listedNovelIDSet.contains(novel.novelID) { continue }
+                noListedNovels.append(novel)
+            }
+            if noListedNovels.count > 0 {
+                let folder = BookShelfRATreeViewCellData()
+                folder.title = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
+                folder.childrens = [BookShelfRATreeViewCellData]()
+                for novel in noListedNovels {
+                    let data = BookShelfRATreeViewCellData()
+                    data.novelID = novel.novelID
+                    folder.addChild(data)
+                }
+                result.append(folder)
+            }
+            return (true, result)
+        }
+    }
+
+    // 小説を開いた日時でフォルダ分けします(フォルダ分けしない版)
+    func createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
+        let startTime = DispatchTime.now()
+        defer {
+            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder")
+        }
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.LastReadDate) else { return (false,[]) }
+            var result = [] as [BookShelfRATreeViewCellData]
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return (false, result)
+        }
+    }
+
+    // 小説のお気に入りレベルで並べ替えます
+    func createLikeLevelBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.LikeLevel) else { return (false,[]) }
+            var result = [] as [BookShelfRATreeViewCellData]
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return (false, result)
+        }
+    }
+    
+    func HostStringToLocalizedString(host:String) -> String {
+        let convertTable:[String:String] = [
+            "novelspeaker.example.com": NSLocalizedString("BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com", comment: "自作小説"),
+        ]
+        guard let name = convertTable[host] else { return host }
+        return name
+    }
+    
+    // Webサイト(host)で並べ替えます
+    func createWebSiteBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
+            guard var novels = getNovelArray(realm: realm, sortType: NarouContentSortType.WebSite) else { return (false, []) }
+            var hostToNovelMap:[String:[RealmNovel]] = [:]
+            let noListedString = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
+            for novel in novels {
+                let host = URL(string: novel.novelID)?.host ?? noListedString
+                if hostToNovelMap[host] == nil {
+                    hostToNovelMap[host] = [RealmNovel]()
+                }
+                hostToNovelMap[host]?.append(novel)
+            }
+            var result = [BookShelfRATreeViewCellData]()
+            for host in hostToNovelMap.keys {
+                let folder = BookShelfRATreeViewCellData()
+                folder.childrens = [BookShelfRATreeViewCellData]()
+                folder.title = HostStringToLocalizedString(host: host)
+                guard let novelSorted = hostToNovelMap[host]?.sorted(by: {$0.title < $1.title}) else { continue }
+                for novel in novelSorted {
+                    let data = BookShelfRATreeViewCellData()
+                    data.novelID = novel.novelID
+                    data.title = novel.title
+                    folder.addChild(data)
+                }
+                result.append(folder)
+            }
+            result.sort(by: { (a, b) -> Bool in
+                a.title! < b.title!
+            })
+            return (true, result)
+        }
+    }
+    
+    // 本棚に登録された順でフォルダ分けします(フォルダ分けしない版)
+    func createCreatedDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.CreatedDate) else { return (false,[]) }
+            var result = [] as [BookShelfRATreeViewCellData]
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return (false, result)
+        }
+    }
+    
+    func getBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
+        let startTime = DispatchTime.now()
+        defer {
+            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
+        }
+        var sortType:NarouContentSortType = .Title
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+            sortType = globalState.bookShelfSortType
+        }
+        switch sortType {
+        case .Ncode: fallthrough
+        case .Title:
+            return createSimpleBookShelfRATreeViewCellDataTree(sortType: sortType)
+        case .NovelUpdatedAtWithFolder:
+            return createUpdateDateBookShelfRATreeViewCellDataTreeWithFolder()
+        case .NovelUpdatedAt:
+            return createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder()
+        case .LastReadDate:
+            return createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder()
+        case .Writer:
+            return createWriterBookShelfRATreeViewCellDataTree()
+        case .SelfCreatedFolder:
+            return createBookShelfTagFolderRATreeViewCellDataTree()
+        case .KeywordTag:
+            return createBookShelfKeywordTagRATreeViewCellDataTree()
+        case .LikeLevel:
+            return createLikeLevelBookShelfRATreeViewCellDataTreeWithoutFolder()
+        case .WebSite:
+            return createWebSiteBookShelfRATreeViewCellDataTree()
+        case .CreatedDate:
+            return createCreatedDateBookShelfRATreeViewCellDataTreeWithoutFolder()
+        default:
+            break
+        }
+        return createSimpleBookShelfRATreeViewCellDataTree(sortType: NarouContentSortType.Title)
+    }
+    
+    // targetNode.isExpanded の状態を反映させます。
+    // この時、すでに表示されている部分にだけ反映させるので tableView.reloadAll() とは違う動きをします。
+    func applyFolderExpandStateTo(node:BookShelfRATreeViewCellData, completion:(()->Void)?) {
+        guard let targetNodeIndexPath = getIndexPath(node: node) else { return }
+        var indexPaths: [IndexPath] = []
+        
+        let startIndex = targetNodeIndexPath.row + 1
+        let endIndex = startIndex + node.childNodeCount
+        for index in startIndex..<endIndex {
+            indexPaths.append(IndexPath(row: index, section: targetNodeIndexPath.section))
+        }
+        
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.tableView.beginUpdates()
+                if node.isExpanded {
+                    self.tableView.insertRows(at: indexPaths, with: .automatic)
+                } else {
+                    self.tableView.deleteRows(at: indexPaths, with: .automatic)
+                }
+                self.tableView.endUpdates()
+                self.checkAndUpdateSwitchFolderButtonImage()
+            }, completion: { finished in
+                if finished {
+                    completion?()
+                }
+            })
+        }
+    }
+    func toggleFolderExpandState(node:BookShelfRATreeViewCellData, completion:(()->Void)? = nil) {
+        node.isExpanded = !node.isExpanded
+        applyFolderExpandStateTo(node: node, completion: completion)
+    }
+    func expandFolder(node:BookShelfRATreeViewCellData, completion:(()->Void)? = nil) {
+        if node.isExpanded == true {
+            completion?()
+            return
+        }
+        toggleFolderExpandState(node: node, completion: completion)
+    }
+    func collapseFolder(node:BookShelfRATreeViewCellData, completion:(()->Void)? = nil) {
+        if node.isExpanded == false {
+            completion?()
+            return
+        }
+        toggleFolderExpandState(node: node, completion: completion)
+    }
+
+    func addPreviousNovelSpeakButtonIfNeeded(){
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if RealmGlobalState.GetInstanceWith(realm: realm)?.isOpenRecentNovelInStartTime ?? true {
+                return
+            }
+
+            guard let lastReadStory = RealmGlobalState.GetLastReadStory(realm: realm), let lastReadNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: lastReadStory.novelID) else {
+                return
+            }
+            if let storyCount = lastReadNovel.lastChapterNumber, lastReadStory.chapterNumber >= storyCount && (lastReadStory.readLocation(realm: realm) + 5) >= lastReadStory.content.lengthOfBytes(using: .utf8) {
+                return
+            }
+            let lastReadNovelID = lastReadNovel.novelID
+            let lastReadNovelTitle = lastReadNovel.title
+
+            if let oldFloatingButton = self.resumeSpeechFloatingButton {
+                oldFloatingButton.hide()
+                self.resumeSpeechFloatingButton = nil
+            }
+            self.resumeSpeechFloatingButton = FloatingButton.createNewFloatingButton()
+            guard let floatingButton = self.resumeSpeechFloatingButton else {
+                return
+            }
+            floatingButton.assignToView(view: self.tableView, currentOffset: self.tableView.contentOffset, text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovelTitle), animated: true) {
+                floatingButton.hideAnimate()
+                self.resumeSpeechFloatingButton = nil
+                if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
+                    DispatchQueue.main.async {
+                        let lock = NSLock()
+                        var isDismiss:Bool = false
+                        let dialog = NiftyUtility.EasyDialogBuilder(self)
+                            .text(content: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_Message", comment: "iCloud上のデータ同期を待っています。\n同期が完了した場合、自動で再生を開始します。(なお、完了判定は失敗する事があります)"))
+                            .addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_DismissButton", comment: "同期を待たずに再生を開始する")) { (dialog) in
+                                lock.lock()
+                                defer { lock.unlock() }
+                                if isDismiss == true { return }
+                                isDismiss = true
+                                dialog.dismiss(animated: false) {
+                                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+                                }
+                            }.addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_CancelButton", comment: "再生をキャンセルする")) { (dialog) in
+                                lock.lock()
+                                defer { lock.unlock() }
+                                if isDismiss == true { return }
+                                isDismiss = true
+                                dialog.dismiss(animated: true, completion: nil)
+                            }.build()
+                        dialog.show()
+                        func syncWatcher() {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                                lock.lock()
+                                defer { lock.unlock() }
+                                guard let self = self, isDismiss == false else { return }
+                                if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
+                                    syncWatcher()
+                                    return
+                                }
+                                isDismiss = true
+                                dialog.dismiss(animated: false) {
+                                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+                                }
+                            }
+                        }
+                        syncWatcher()
+                    }
+                }else{
+                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+                }
+            }
+        }
+    }
+    
+    func HighlightNovel(novelID:String, doScroll:Bool, completion:(()->Void)? = nil) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            for cellItem in self.displayDataArray {
+                // tree が展開されるのは一段目までです(´・ω・`)
+                if let childrens = cellItem.childrens {
+                    for cellItemChild in childrens {
+                        if cellItemChild.novelID == novelID {
+                            self.expandFolder(node: cellItem) {
+                                if let indexPath = self.getIndexPath(node: cellItemChild) {
+                                    DispatchQueue.main.async {
+                                        let isVisible = self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false
+                                        self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: !doScroll ? .none : isVisible ? .none : .middle)
+                                    }
+                                }
+                            }
+                            completion?()
+                            return
+                        }
+                    }
+                }
+                if cellItem.novelID == novelID, let indexPath = self.getIndexPath(node: cellItem)  {
+                    DispatchQueue.main.async {
+                        let isVisible = self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false
+                        self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: !doScroll ? .none : isVisible ? .none : .middle)
+                        self.checkAndUpdateSwitchFolderButtonImage()
+                    }
+                    completion?()
+                    return
+                }
+            }
+            completion?()
+        }
+    }
+    func HighlightCurrentReadingNovel(doScroll:Bool, completion:(()->Void)? = nil) {
+        let novelID:String? = RealmUtil.RealmBlock { (realm) -> String? in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return nil }
+            return globalState.currentReadingNovelID
+        }
+        guard let targetNovelID = novelID else {
+            completion?()
+            return
+        }
+        HighlightNovel(novelID: targetNovelID, doScroll: doScroll, completion: completion)
+    }
+    
+    func setExpandIcon() {
+        DispatchQueue.main.async {
+            self.switchFolderButton.image = UIImage(systemName: "rectangle.compress.vertical")
+        }
+    }
+    func setCollapseIcon() {
+        DispatchQueue.main.async {
+            self.switchFolderButton.image = UIImage(systemName: "rectangle.expand.vertical")
+        }
+    }
+    
+    func checkAndUpdateSwitchFolderButtonImage() {
+        if isFolderExpanded() {
+            setExpandIcon()
+        }else{
+            setCollapseIcon()
+        }
+    }
+    
+    func reloadAllData(doScroll: Bool, completion:(()->Void)? = nil) {
+        // 表示されているものを元にスクロール位置を合わせようと努力します
+        var displayedCellDataArray:[BookShelfRATreeViewCellData] = []
+        var selectedNovelID:String? = nil
+        NiftyUtility.DispatchSyncMainQueue {
+            if let visibleIndexPaths = self.tableView.indexPathsForVisibleRows {
+                let x = self.tableView.contentOffset.x
+                let y = self.tableView.contentOffset.y + self.tableView.adjustedContentInset.top
+                let width = self.tableView.bounds.size.width
+                let height = self.tableView.bounds.size.height - self.tableView.adjustedContentInset.top - self.tableView.adjustedContentInset.bottom
+                let visibleRect = CGRect(x: x, y: y, width: width, height: height)
+                for visibleIndexPath in visibleIndexPaths {
+                    let cellRect = self.tableView.rectForRow(at: visibleIndexPath)
+                    if visibleRect.contains(cellRect), let (cellData, _) = self.getNode(indexPath: visibleIndexPath) {
+                        displayedCellDataArray.append(cellData)
+                    }
+                }
+            }
+            if let selectedIndexPath = self.tableView.indexPathsForSelectedRows?.first, let (cellData, _) = self.getNode(indexPath: selectedIndexPath), let novelID = cellData.novelID {
+                selectedNovelID = novelID
+            }
+        }
+        let (hasFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
+        do {
+            let beforeArray = self.displayDataArray
+            let afterArray = displayDataArray
+            for n in 0..<beforeArray.count {
+                if n >= afterArray.count { break }
+                let before = beforeArray[n]
+                let after = afterArray[n]
+                if before.title == after.title && before.childrens != nil && after.childrens != nil {
+                    after.isExpanded = before.isExpanded
+                }
+            }
+        }
+        self.displayDataArray = displayDataArray
+        NiftyUtility.DispatchSyncMainQueue {
+            UIView.animate(withDuration: 0.0) {
+                self.tableView.reloadData()
+            } completion: { finished in
+                if finished {
+                    if hasFolder {
+                        self.switchFolderButton.isEnabled = true
+                    }else{
+                        self.switchFolderButton.isEnabled = false
+                    }
+                    if let selectedNovelID = selectedNovelID {
+                        self.HighlightNovel(novelID: selectedNovelID, doScroll: doScroll, completion: completion)
+                    }else {
+                        self.HighlightCurrentReadingNovel(doScroll: doScroll, completion: completion)
+                    }
+                }
+            }
+        }
+    }
+
+    func reloadAllDataAndScrollToCurrentReadingContent(){
+        DispatchQueue.global(qos: .userInitiated).async {
+            let startTime = DispatchTime.now()
+            defer {
+                FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
+                FunctionExecutionMetrics.shared.PrintMetrics()
+            }
+            self.reloadAllData(doScroll: true)
+        }
+    }
+    
     func StopObservers() {
         novelArrayNotificationToken = nil
         globalStateNotificationToken = nil
@@ -204,8 +1154,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     break
                 case .update(let objects, let deletions, let insertions, let modifications):
                     if deletions.count > 0 || insertions.count > 0 {
-                        DispatchQueue.main.async {
-                            self.reloadAllData()
+                        DispatchQueue.global(qos: .userInteractive).async {
+                            self.reloadAllData(doScroll: false)
                         }
                         return
                     }
@@ -222,8 +1172,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                             // 既に先頭がその小説なら表示しなおす必要は無い
                                             continue
                                         }
-                                        DispatchQueue.main.async {
-                                            self.reloadAllData()
+                                        DispatchQueue.global(qos: .userInteractive).async {
+                                            self.reloadAllData(doScroll: false)
                                         }
                                         return
                                     }
@@ -239,8 +1189,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                             // 既に先頭がその小説なら表示しなおす必要は無い
                                             continue
                                         }
-                                        DispatchQueue.main.async {
-                                            self.reloadAllData()
+                                        if let novelID = self.displayDataArray.first?.childrens?.first?.novelID, novelID == obj.novelID {
+                                            // フォルダ分けされていたとしても、最初のフォルダの最初の要素であれば表示しなおす必要はない
+                                            continue
+                                        }
+                                        DispatchQueue.global(qos: .userInteractive).async {
+                                            self.reloadAllData(doScroll: false)
                                         }
                                         return
                                     }
@@ -293,8 +1247,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                         return globalState.bookShelfSortType
                     }
                     if sortType != .KeywordTag { return }
-                    DispatchQueue.main.async {
-                        self.reloadAllData()
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        self.reloadAllData(doScroll: false)
                     }
                 }
             })
@@ -377,520 +1331,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         assignLeftBarButtons()
     }
 
-    // 検索条件やソート条件を考慮した上での NarouContent の Array を返します
-    func getNovelArray(realm: Realm, sortType:NarouContentSortType) -> [RealmNovel]? {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "BookShelfRATreeViewController.getNovelArray()")
-        }
-        guard var allNovels = RealmNovel.GetAllObjectsWith(realm: realm) else { return nil }
-        if let searchText = self.searchText, searchText.count > 0 {
-            allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", searchText, searchText)
-        }
-        switch sortType {
-        case .Ncode:
-            return Array(allNovels.sorted(byKeyPath: "novelID", ascending: true))
-        case .NovelUpdatedAtWithFolder:
-            fallthrough
-        case .NovelUpdatedAt:
-            return Array(allNovels.sorted(byKeyPath: "lastDownloadDate", ascending: false))
-        case .LastReadDate:
-            return Array(allNovels.sorted(byKeyPath: "lastReadDate", ascending: false))
-        case .Writer:
-            return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
-        case .LikeLevel:
-            let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
-            let sortedNovels = allNovels.sorted { (a, b) -> Bool in
-                return globalState?.calcLikeLevel(novelID: a.novelID) ?? 0 > globalState?.calcLikeLevel(novelID: b.novelID) ?? 0
-            }
-            return sortedNovels
-        case .WebSite:
-            return allNovels.sorted(by: { (a, b) -> Bool in
-                guard let ah = URL(string: a.novelID)?.host, let bh = URL(string: b.novelID)?.host else {
-                    return a.novelID < b.novelID
-                }
-                return ah < bh
-            })
-        case .CreatedDate:
-            return Array(allNovels.sorted(byKeyPath: "createdDate", ascending: false))
-        case .Title:
-            fallthrough
-        case .SelfCreatedFolder:
-            fallthrough
-        case .KeywordTag:
-            fallthrough
-        @unknown default:
-            return Array(allNovels.sorted(byKeyPath: "title", ascending: false))
-        }
-    }
-    
-    // 単純な本棚データの作成
-    func createSimpleBookShelfRATreeViewCellDataTree(sortType:NarouContentSortType) -> (Bool,[BookShelfRATreeViewCellData]) {
-        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: sortType) else { return (false,[]) }
-            var result:[BookShelfRATreeViewCellData] = []
-            for novel in novels {
-                let data = BookShelfRATreeViewCellData()
-                data.childrens = nil
-                data.novelID = novel.novelID
-                data.title = novel.title
-                result.append(data)
-            }
-            return (false, result)
-        }
-    }
-    
-    // 更新日時でフォルダ分けします(フォルダ分けする版)
-    func createUpdateDateBookShelfRATreeViewCellDataTreeWithFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
-        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.NovelUpdatedAt) else { return (false,[]) }
-            struct filterStruct {
-                let title:String
-                let date:Date
-            }
-            let filterList = [
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1DayAgo", comment: "1日前まで"), date: Date(timeIntervalSinceNow: -60*60*24)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo7DayAgo", comment: "7日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*7)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo30DayAgo", comment: "30日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo6MonthsAgo", comment: "6ヶ月前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30*6)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1YearAgo", comment: "1年前まで"), date: Date(timeIntervalSinceNow: -60*60*24*365)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_BeforeThat", comment: "それ以前"), date: Date(timeIntervalSinceNow: -60*60*24*365*100)),
-            ]
-            var result = [] as [BookShelfRATreeViewCellData]
-            var prevDate = Date(timeIntervalSinceNow: 9999999999)
-            for filter in filterList {
-                let folder = BookShelfRATreeViewCellData()
-                folder.title = filter.title
-                folder.childrens = []
-                for novel in novels.sorted(by: {$0.lastDownloadDate < $1.lastDownloadDate}) {
-                    let lastDownloadDate = novel.lastDownloadDate
-                    if lastDownloadDate <= prevDate && lastDownloadDate > filter.date {
-                        let data = BookShelfRATreeViewCellData()
-                        data.novelID = novel.novelID
-                        data.title = novel.title
-                        folder.childrens?.append(data)
-                    }
-                }
-                result.append(folder)
-                prevDate = filter.date
-            }
-            return (true, result)
-        }
-    }
-
-    // 更新日時でフォルダ分けします(フォルダ分けしない版)
-    func createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
-        }
-        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.NovelUpdatedAt) else { return (false,[]) }
-            let startTime = DispatchTime.now()
-            defer {
-                FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder/create [BookShelfRATreeViewCellData]")
-            }
-            var result = [] as [BookShelfRATreeViewCellData]
-            for novel in novels {
-                let data = BookShelfRATreeViewCellData()
-                data.childrens = nil
-                data.novelID = novel.novelID
-                data.title = novel.title
-                result.append(data)
-            }
-            return (false, result)
-        }
-    }
-
-    // 作者名でフォルダ分けします
-    func createWriterBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
-        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.Title) else { return (false,[]) }
-            var dic = [String:Any]()
-            for novel in novels {
-                if var array = dic[novel.writer] as? [RealmNovel]{
-                    array.append(novel)
-                    dic[novel.writer] = array
-                }else{
-                    var array = [RealmNovel]()
-                    array.append(novel)
-                    dic[novel.writer] = array
-                }
-            }
-            var targets = [String]()
-            for key in dic.keys {
-                targets.append(key)
-            }
-            targets.sort(){ $0 < $1 }
-            
-            var result = [BookShelfRATreeViewCellData]()
-            for target in targets {
-                let folder = BookShelfRATreeViewCellData()
-                folder.childrens = [BookShelfRATreeViewCellData]()
-                folder.title = target == "" ? NSLocalizedString("BookShelfRATreeViewController_UnknownWriter", comment: "(作者名不明)") : target
-                if let novels = dic[target] as? [RealmNovel] {
-                    for novel in novels.sorted(by: {$0.title < $1.title}) {
-                        let data = BookShelfRATreeViewCellData()
-                        data.novelID = novel.novelID
-                        data.title = novel.title
-                        folder.childrens?.append(data)
-                    }
-                }
-                result.append(folder)
-            }
-            return (true, result)
-        }
-    }
-    
-    // 自作のフォルダでフォルダ分けします
-    func createBookShelfTagFolderRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
-        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.Title), let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return (false,[]) }
-            var result = [BookShelfRATreeViewCellData]()
-            var listedNovelIDSet = Set<String>()
-            var novelID2NovelMap = [String:RealmNovel]()
-            for novel in novels {
-                novelID2NovelMap[novel.novelID] = novel
-            }
-            for tag in tags {
-                guard let novels = tag.targetNovelArrayFrom(novelID2NovelMap: novelID2NovelMap) else { continue }
-                let folder = BookShelfRATreeViewCellData()
-                folder.childrens = [BookShelfRATreeViewCellData]()
-                folder.title = tag.name
-                for novel in novels {
-                    let data = BookShelfRATreeViewCellData()
-                    data.novelID = novel.novelID
-                    folder.childrens?.append(data)
-                    listedNovelIDSet.insert(novel.novelID)
-                }
-                result.append(folder)
-            }
-            result.sort(by: { (a, b) -> Bool in
-                a.title! < b.title!
-            })
-            var noListedNovels = [RealmNovel]()
-            for novel in novels {
-                if listedNovelIDSet.contains(novel.novelID) { continue }
-                noListedNovels.append(novel)
-            }
-            if noListedNovels.count > 0 {
-                let folder = BookShelfRATreeViewCellData()
-                folder.title = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
-                folder.childrens = [BookShelfRATreeViewCellData]()
-                for novel in noListedNovels {
-                    let data = BookShelfRATreeViewCellData()
-                    data.novelID = novel.novelID
-                    data.title = novel.title
-                    folder.childrens?.append(data)
-                }
-                result.append(folder)
-            }
-            return (true, result)
-        }
-    }
-    
-    // キーワード(Tag)でフォルダ分けします
-    func createBookShelfKeywordTagRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
-        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
-            // ２つ以上の小説が登録されていないタグは無視します。
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.Title), let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Keyword)?.filter({ (tag) -> Bool in
-                return tag.targetNovelIDArray.count >= 2
-            }) else { return (false,[]) }
-            var result = [BookShelfRATreeViewCellData]()
-            var listedNovelIDSet = Set<String>()
-            var novelIDToNovelMap:[String:RealmNovel] = [:]
-            for novel in novels {
-                novelIDToNovelMap[novel.novelID] = novel
-            }
-            for tag in tags {
-                let folder = BookShelfRATreeViewCellData()
-                folder.childrens = [BookShelfRATreeViewCellData]()
-                folder.title = tag.name
-                for novelID in tag.targetNovelIDArray {
-                    if let novel = novelIDToNovelMap[novelID] {
-                        let data = BookShelfRATreeViewCellData()
-                        data.novelID = novel.novelID
-                        data.title = novel.title
-                        folder.childrens?.append(data)
-                        listedNovelIDSet.insert(novel.novelID)
-                    }
-                }
-                result.append(folder)
-            }
-            result.sort(by: { (a, b) -> Bool in
-                a.title! < b.title!
-            })
-            var noListedNovels = [RealmNovel]()
-            for novel in novels {
-                if listedNovelIDSet.contains(novel.novelID) { continue }
-                noListedNovels.append(novel)
-            }
-            if noListedNovels.count > 0 {
-                let folder = BookShelfRATreeViewCellData()
-                folder.title = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
-                folder.childrens = [BookShelfRATreeViewCellData]()
-                for novel in noListedNovels {
-                    let data = BookShelfRATreeViewCellData()
-                    data.novelID = novel.novelID
-                    folder.childrens?.append(data)
-                }
-                result.append(folder)
-            }
-            return (true, result)
-        }
-    }
-
-    // 小説を開いた日時でフォルダ分けします(フォルダ分けしない版)
-    func createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder")
-        }
-        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.LastReadDate) else { return (false,[]) }
-            var result = [] as [BookShelfRATreeViewCellData]
-            for novel in novels {
-                let data = BookShelfRATreeViewCellData()
-                data.childrens = nil
-                data.novelID = novel.novelID
-                data.title = novel.title
-                result.append(data)
-            }
-            return (false, result)
-        }
-    }
-
-    // 小説のお気に入りレベルで並べ替えます
-    func createLikeLevelBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
-        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.LikeLevel) else { return (false,[]) }
-            var result = [] as [BookShelfRATreeViewCellData]
-            for novel in novels {
-                let data = BookShelfRATreeViewCellData()
-                data.childrens = nil
-                data.novelID = novel.novelID
-                data.title = novel.title
-                result.append(data)
-            }
-            return (false, result)
-        }
-    }
-    
-    func HostStringToLocalizedString(host:String) -> String {
-        let convertTable:[String:String] = [
-            "novelspeaker.example.com": NSLocalizedString("BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com", comment: "自作小説"),
-        ]
-        guard let name = convertTable[host] else { return host }
-        return name
-    }
-    
-    // Webサイト(host)で並べ替えます
-    func createWebSiteBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
-        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.WebSite) else { return (false,[]) }
-            let hosts = novels.map { (novel) -> String in
-                guard let host = URL(string: novel.novelID)?.host else { return NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)") }
-                return host
-            }.reduce([], {$0.contains($1) ? $0 : $0 + [$1]}).sorted()
-            var result = [BookShelfRATreeViewCellData]()
-            var listedNovelIDSet = Set<String>()
-            for host in hosts {
-                let folder = BookShelfRATreeViewCellData()
-                folder.childrens = [BookShelfRATreeViewCellData]()
-                folder.title = HostStringToLocalizedString(host: host)
-                for novel in novels.filter({ (novel) -> Bool in
-                    guard let novelHost = URL(string: novel.novelID)?.host else { return false }
-                    return novelHost == host
-                }).sorted(by: {$0.title < $1.title}) {
-                    let data = BookShelfRATreeViewCellData()
-                    data.novelID = novel.novelID
-                    data.title = novel.title
-                    folder.childrens?.append(data)
-                    listedNovelIDSet.insert(novel.novelID)
-                }
-                result.append(folder)
-            }
-            result.sort(by: { (a, b) -> Bool in
-                a.title! < b.title!
-            })
-            let noListedNovels = novels.filter({listedNovelIDSet.contains($0.novelID) == false})
-            if noListedNovels.count > 0 {
-                let folder = BookShelfRATreeViewCellData()
-                folder.title = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
-                folder.childrens = [BookShelfRATreeViewCellData]()
-                for novel in noListedNovels {
-                    let data = BookShelfRATreeViewCellData()
-                    data.title = novel.title
-                    data.novelID = novel.novelID
-                    folder.childrens?.append(data)
-                }
-                result.append(folder)
-            }
-            return (true, result)
-        }
-    }
-    
-    // 本棚に登録された順でフォルダ分けします(フォルダ分けしない版)
-    func createCreatedDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
-        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.CreatedDate) else { return (false,[]) }
-            var result = [] as [BookShelfRATreeViewCellData]
-            for novel in novels {
-                let data = BookShelfRATreeViewCellData()
-                data.childrens = nil
-                data.novelID = novel.novelID
-                data.title = novel.title
-                result.append(data)
-            }
-            return (false, result)
-        }
-    }
-
-
-
-    func getBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
-        }
-        var sortType:NarouContentSortType = .Title
-        RealmUtil.RealmBlock { (realm) -> Void in
-            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-            sortType = globalState.bookShelfSortType
-        }
-        switch sortType {
-        case .Ncode: fallthrough
-        case .Title:
-            return createSimpleBookShelfRATreeViewCellDataTree(sortType: sortType)
-        case .NovelUpdatedAtWithFolder:
-            return createUpdateDateBookShelfRATreeViewCellDataTreeWithFolder()
-        case .NovelUpdatedAt:
-            return createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder()
-        case .LastReadDate:
-            return createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder()
-        case .Writer:
-            return createWriterBookShelfRATreeViewCellDataTree()
-        case .SelfCreatedFolder:
-            return createBookShelfTagFolderRATreeViewCellDataTree()
-        case .KeywordTag:
-            return createBookShelfKeywordTagRATreeViewCellDataTree()
-        case .LikeLevel:
-            return createLikeLevelBookShelfRATreeViewCellDataTreeWithoutFolder()
-        case .WebSite:
-            return createWebSiteBookShelfRATreeViewCellDataTree()
-        case .CreatedDate:
-            return createCreatedDateBookShelfRATreeViewCellDataTreeWithoutFolder()
-        default:
-            break
-        }
-        return createSimpleBookShelfRATreeViewCellDataTree(sortType: NarouContentSortType.Title)
-    }
-    
-    func scrollToCurrentReadingContent() {
-        return // XXX testing
-        /*
-        DispatchQueue.global(qos: .userInitiated).async {
-            guard let novelID = RealmUtil.RealmBlock(block: { realm in
-                return RealmGlobalState.GetLastReadNovel(realm: realm)?.novelID
-            }) else { return }
-            
-            for cellItem in self.displayDataArray {
-                // tree が展開されるのは一段目までです(´・ω・`)
-                if let childrens = cellItem.childrens {
-                    for cellItemChild in childrens {
-                        if cellItemChild.novelID == novelID {
-                            DispatchQueue.main.async {
-                                self.treeView?.beginUpdates()
-                                self.treeView?.expandRow(forItem: cellItem)
-                                self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
-                                self.treeView?.endUpdates()
-                                self.addPreviousNovelSpeakButtonIfNeeded()
-                                self.setExpandIcon()
-                            }
-                            return
-                        }
-                    }
-                }
-                if cellItem.novelID == novelID {
-                    DispatchQueue.main.async {
-                        self.treeView?.beginUpdates()
-                        self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
-                        self.treeView?.endUpdates()
-                        self.addPreviousNovelSpeakButtonIfNeeded()
-                        self.setCollapseIcon()
-                    }
-                    return
-                }
-            }
-        }
-         */
-    }
-    
-    func setExpandIcon() {
-        if #available(iOS 13.0, *) {
-            DispatchQueue.main.async {
-                self.switchFolderButton.image = UIImage(systemName: "rectangle.compress.vertical")
-            }
-        }
-    }
-    func setCollapseIcon() {
-        if #available(iOS 13.0, *) {
-            DispatchQueue.main.async {
-                self.switchFolderButton.image = UIImage(systemName: "rectangle.expand.vertical")
-            }
-        }
-    }
-
-    func checkAndUpdateSwitchFolderButtonImage() {
-        if isFolderExpanded() {
-            setExpandIcon()
-        }else{
-            setCollapseIcon()
-        }
-    }
-    
-    func reloadAllData() {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "BookShelfRATreeViewController.reloadAllData()")
-        }
-        let (hasFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
-        self.displayDataArray = displayDataArray
-        let treeViewReloadDataStartTime = DispatchTime.now()
-        NiftyUtility.DispatchSyncMainQueue {
-            self.treeView?.reloadData()
-        }
-        FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: treeViewReloadDataStartTime, functionName: "BookShelfRATreeViewController.reloadAllData()/treeView.reloadData()")
-        let hilightCurrentReadingNovelStartTime = DispatchTime.now()
-        self.HilightCurrentReadingNovel()
-        FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: hilightCurrentReadingNovelStartTime, functionName: "BookShelfRATreeViewController.reloadAllData()/HilightCurrentReadingNovel()")
-        if hasFolder {
-            self.switchFolderButton.isEnabled = true
-        }else{
-            self.switchFolderButton.isEnabled = false
-        }
-    }
-
-    func reloadAllData(completion:(()->Void)?) {
-        UIView.animate(withDuration: 0.0) {
-            self.reloadAllData()
-        } completion: { (finished) in
-            completion?()
-        }
-    }
-
-    func reloadAllDataAndScrollToCurrentReadingContent(){
-        DispatchQueue.global(qos: .userInitiated).async {
-            let startTime = DispatchTime.now()
-            defer {
-                FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
-                FunctionExecutionMetrics.shared.PrintMetrics()
-            }
-            self.reloadAllData()
-            self.scrollToCurrentReadingContent()
-        }
-    }
-
     func showVersionUpNotice(){
         NiftyUtility.EasyDialogBuilder(self)
             .title(title: NSLocalizedString("BookShelfTableViewController_AnnounceNewViersion", comment: "アップデートされました"))
@@ -943,6 +1383,31 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         self.iCloudPullButton.isEnabled = isEnabled
         self.iCloudPushButton.isEnabled = isEnabled
     }
+    
+    func isFolderExpanded() -> Bool {
+        for cellData in self.displayDataArray {
+            if cellData.isExpanded && cellData.childrens?.count ?? 0 > 0 {
+                return true
+            }
+        }
+        return false
+    }
+    
+    @objc func switchFolderButtonClicked(sender:Any) {
+        DispatchQueue.main.async {
+            let isExpanded = self.isFolderExpanded()
+            let doExpand = !isExpanded
+            for node in self.displayDataArray {
+                node.isExpanded = doExpand
+            }
+            if doExpand {
+                self.setExpandIcon()
+            }else{
+                self.setCollapseIcon()
+            }
+            self.tableView.reloadData()
+        }
+    }
 
     func getDisplayStringToSortTypeDictionary() -> [String:NarouContentSortType]{
         return [
@@ -980,40 +1445,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         return NarouContentSortType.NovelUpdatedAt
     }
-    
-    func isFolderExpanded() -> Bool {
-        for cellData in self.displayDataArray {
-            if cellData.childrens?.count ?? 0 > 0, self.treeView?.isCell(forItemExpanded: cellData) ?? false {
-                return true
-            }
-        }
-        return false
-    }
-    
-    @objc func switchFolderButtonClicked(sender:Any) {
-        DispatchQueue.main.async {
-            let isExpanded = self.isFolderExpanded()
-            NiftyUtility.EasyDialogNoButton(viewController: self, title: NSLocalizedString("BookShelfRATreeViewController_NowSwitchingFolderMessage", comment: "フォルダ開閉中……"), message: nil) { (dialog) in
-                DispatchQueue.main.async {
-                    self.treeView?.beginUpdates()
-                    for cellItem in self.displayDataArray {
-                        if let childrens = cellItem.childrens, childrens.count > 0 {
-                            if isExpanded {
-                                self.treeView?.collapseRow(forItem: cellItem, with: RATreeViewRowAnimationNone)
-                                self.setCollapseIcon()
-                            }else{
-                                self.treeView?.expandRow(forItem: cellItem, with: RATreeViewRowAnimationNone)
-                                self.setExpandIcon()
-                            }
-                        }
-                    }
-                    self.treeView?.endUpdates()
-                    dialog.dismiss(animated: false, completion: nil)
-                }
-            }
-        }
-    }
-    
+
     @objc func sortTypeSelectButtonClicked(sender:Any) {
         let selectTargets = getDisplayStringToSortTypeDictionary().map({ (arg0) -> String in
             let (key, _) = arg0
@@ -1024,15 +1456,20 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         func finish(result:String?) {
             guard let selectedText = result else { return }
             let sortType = self.convertDisplayStringToSortType(key: selectedText)
-            DispatchQueue.main.async {
-                RealmUtil.RealmBlock { (realm) -> Void in
+            DispatchQueue.global(qos: .userInteractive).async {
+                let isChanged = RealmUtil.RealmBlock { (realm) -> Bool in
                     if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                        let prevSortType = globalState.bookShelfSortType
+                        RealmUtil.WriteWith(realm: realm) { (realm) -> Void in
                             globalState.bookShelfSortType = sortType
                         }
+                        return sortType != prevSortType
                     }
+                    return false
                 }
-                self.reloadAllData()
+                if isChanged {
+                    self.reloadAllData(doScroll: true)
+                }
             }
         }
         EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { (vc) in
@@ -1073,8 +1510,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }else{
                 self.searchButton.title = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索") + "(" + newFilterString + ")"
             }
-            DispatchQueue.main.async {
-                self.reloadAllData()
+            DispatchQueue.global(qos: .userInteractive).async {
+                self.reloadAllData(doScroll: true)
             }
             dialog.dismiss(animated: false, completion: nil)
         }
@@ -1093,32 +1530,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
 
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-        if segue.identifier == "bookShelfToReaderSegue" {
-            if let nextViewController = segue.destination as? SpeechViewController {
-                nextViewController.storyID = nextViewStoryID
-                nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
-                nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
-            }
-        }else if segue.identifier == "bookShelfToWebViewReaderSegue"{
-            if let nextViewController = segue.destination as? WebSpeechViewController {
-                nextViewController.targetStoryID = nextViewStoryID
-                nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
-                nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
-            }
-        }
-    }
     func showNovelInformation(novelID:String) {
         let nextViewController = NovelDetailViewController()
         nextViewController.novelID = novelID
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
-    
+
     // 次のビューに飛ばします。
     func pushNextView(novelID:String, isNeedSpeech: Bool, isNeedUpdateReadDate: Bool){
         NovelDownloader.flushWritePool(novelID: novelID)
@@ -1172,7 +1589,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     return
                 }
                 if let story = novel.firstChapterWith(realm: realm) {
-                    print("sendStoryID: \(nextViewStoryID ?? "unknown"), story.chapterNumber \(story.chapterNumber)")
                     self.PushToNovelSpeechViewController(nextViewStoryID: story.storyID, isNextViewNeedResumeSpeech: isNeedSpeech, isNextViewNeedUpdateReadDate: isNeedUpdateReadDate)
                 }
                 return
@@ -1196,342 +1612,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
     
-    func treeView(_ treeView: RATreeView, numberOfChildrenOfItem item: Any?) -> Int {
-        if item == nil {
-            return self.displayDataArray.count
-        }
-        if let data = item as? BookShelfRATreeViewCellData? {
-            if let childrens = data?.childrens {
-                return childrens.count
-            }
-        }
-        return 0
-    }
-    
-    func treeView(_ treeView: RATreeView, cellForItem item: Any?) -> UITableViewCell {
-        guard let cell = treeView.dequeueReusableCell(withIdentifier: String(describing: BookShelfTreeViewCell.self)) as? BookShelfTreeViewCell,
-            let item = item as? BookShelfRATreeViewCellData else {
-                fatalError()
-        }
-        
-        let level = treeView.levelForCell(forItem: item)
-
-        RealmUtil.RealmBlock { (realm) -> Void in
-            if let novelID = item.novelID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                let likeLevel = RealmGlobalState.GetInstanceWith(realm: realm)?.calcLikeLevel(novelID: novelID) ?? 0
-                cell.cellSetup(novel: novel, treeLevel: level, likeLevel: likeLevel)
-            }else if let title = item.title {
-                func getChildNovelIDs(itemArray:[BookShelfRATreeViewCellData]) -> [String] {
-                    var childrenArray:[String] = []
-                    for child in itemArray {
-                        if let novelID = child.novelID {
-                            childrenArray.append(novelID)
-                        }else if let childrens = child.childrens{
-                            childrenArray.append(contentsOf: getChildNovelIDs(itemArray: childrens))
-                        }
-                    }
-                    return childrenArray
-                }
-                let childrenIDArray:[String]
-                if let childrens = item.childrens {
-                    childrenIDArray = getChildNovelIDs(itemArray: childrens)
-                }else{
-                    childrenIDArray = []
-                }
-                cell.cellSetup(title: title, treeLevel: level, watchNovelIDArray: childrenIDArray)
-            }
-        }
-        
-        return cell
-    }
-    
-    func treeView(_ treeView: RATreeView, child index: Int, ofItem item: Any?) -> Any {
-        if item == nil {
-            // item == nil なら一番上ということ
-            return self.displayDataArray[index]
-        } else if let item = item as? BookShelfRATreeViewCellData {
-            if let childrens = item.childrens {
-                return childrens[index]
-            }
-            fatalError()
-        } else {
-            fatalError()
-        }
-    }
-    
-    /// セルが選択された時
-    func treeView(_ treeView: RATreeView, didSelectRowForItem item: Any) {
-        if let data = item as? BookShelfRATreeViewCellData {
-            if let novelID = data.novelID {
-                // currentReadingNovelID の小説を開いた(最後に開いていた小説を開いた)なら、
-                // updateReadDate は呼ばないで良いという事にします。
-                let currentReadingNovelID:String = RealmUtil.RealmBlock { (realm) -> String in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return "" }
-                    return globalState.currentReadingNovelID
-                }
-                pushNextView(novelID: novelID, isNeedSpeech: false, isNeedUpdateReadDate: currentReadingNovelID != novelID)
-            }
-        }
-    }
-
-    func treeView(_ treeView: RATreeView, canEditRowForItem item: Any) -> Bool {
-        return RealmUtil.RealmBlock { (realm) -> Bool in
-            if let data = item as? BookShelfRATreeViewCellData {
-                if let novelID = data.novelID {
-                    let likeLevel = RealmGlobalState.GetInstanceWith(realm: realm)?.calcLikeLevel(novelID: novelID) ?? 0
-                    return likeLevel <= 0
-                }
-            }
-            return false
-        }
-    }
-    
-    func treeView(_ treeView: RATreeView, didExpandRowForItem item: Any) {
-        self.checkAndUpdateSwitchFolderButtonImage()
-    }
-    
-    func treeView(_ treeView: RATreeView, didCollapseRowForItem item: Any) {
-        self.checkAndUpdateSwitchFolderButtonImage()
-    }
-
-    func reloadAllAndReopenCells() {
-        var expandedFolderList:[BookShelfRATreeViewCellData] = []
-        let visibleCells = self.treeView?.visibleCells()
-        for data in self.displayDataArray {
-            if let childrens = data.childrens, childrens.count > 0 {
-                if self.treeView?.isCell(forItemExpanded: data) ?? false {
-                    expandedFolderList.append(data)
-                }
-            }
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.reloadAllData {
-                DispatchQueue.main.async {
-                    UIView.animate(withDuration: 0.0) {
-                        for data in expandedFolderList {
-                            self.treeView?.expandRow(forItem: data, with: RATreeViewRowAnimationNone)
-                        }
-                    } completion: { (result) in
-                        if let data = visibleCells?.first as? BookShelfRATreeViewCellData {
-                            print("scroll to: \(data.title ?? "-")")
-                            self.treeView?.scrollToRow(forItem: data, at: RATreeViewScrollPositionTop, animated: true)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    func deleteNovel(item: Any, novelID: String) {
-        DispatchQueue.main.async {
-            NiftyUtility.EasyDialogNoButton(
-                viewController: self,
-                title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
-                message: nil,
-                completion: { (dialog) in
-                DispatchQueue.main.async {
-                    RealmUtil.Write(withoutNotifying: [self.novelArrayNotificationToken]) { (realm) in
-                        if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                            novel.delete(realm: realm)
-                        }
-                    }
-                    DispatchQueue.main.async {
-                        dialog.dismiss(animated: false) {
-                            let parent = self.treeView?.parent(forItem: item)
-                            if let parent = parent as? BookShelfRATreeViewCellData, let childrens = parent.childrens {
-                                for (idx, cellData) in childrens.enumerated() {
-                                    if let thisNovelID = cellData.novelID, novelID == thisNovelID {
-                                        self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
-                                        break
-                                    }
-                                }
-                            }else{
-                                for (idx, cellData) in self.displayDataArray.enumerated() {
-                                    if let thisNovelID = cellData.novelID, novelID == thisNovelID {
-                                        self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
-                                        break
-                                    }
-                                }
-                            }
-                            self.reloadAllAndReopenCells()
-                        }
-                    }
-                }
-            })
-        }
-    }
-
-    // 削除されたりした時に呼ばれるぽい
-    func treeView(_ treeView: RATreeView, commit editingStyle: UITableViewCell.EditingStyle, forRowForItem item: Any) {
-        if editingStyle == UITableViewCell.EditingStyle.delete {
-            guard let data = item as? BookShelfRATreeViewCellData, let novelID = data.novelID else { return }
-            let title:String
-            if let titleString = data.title {
-                title = titleString
-            }else{
-                title = "-"
-            }
-            RealmUtil.RealmBlock { (realm) -> Void in
-                if RealmGlobalState.GetInstanceWith(realm: realm)?.IsNeedConfirmDeleteBook ?? false {
-                    NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("BookShelfTableViewController_WarningForDeleteBookTitle", comment: "本の削除"), message: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookMessage", comment: "本を削除しますか？\n") + title, button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookOKButtonTitle", comment: "削除"), button2Action: {
-                        self.deleteNovel(item: item, novelID: novelID)
-                    })
-                }else{
-                    deleteNovel(item: item, novelID: novelID)
-                }
-            }
-        }
-        else if editingStyle == UITableViewCell.EditingStyle.insert {
-            print("editingStyle == .insert")
-        }
-    }
-    
-    // cell の高さを求められる時に呼ばれる
-    func treeView(_ treeView: RATreeView, heightForRowForItem item: Any) -> CGFloat {
-        let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
-        return fontForFontSize.lineHeight + 10.5 + 12
-    }
-    func treeView(_ treeView: RATreeView, estimatedHeightForRowForItem item: Any) -> CGFloat {
-        let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
-        return fontForFontSize.lineHeight + 10.5 + 12
-    }
-
-    #if !targetEnvironment(macCatalyst)
-    @objc func refreshControlValueChangedEvent(sendor:UIRefreshControl) {
-        sendor.endRefreshing()
-        DispatchQueue.global(qos: .background).async {
-            RealmUtil.RealmBlock { (realm) -> Void in
-                guard let novels = RealmNovel.GetAllObjectsWith(realm: realm)?.filter("isNotNeedUpdateCheck = false") else { return }
-                NovelDownloadQueue.shared.addQueueArray(novelArray: novels)
-            }
-        }
-    }
-    #endif
-
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if let floatingButton = self.resumeSpeechFloatingButton {
-            let isEnd = floatingButton.scrollViewDidScroll(scrollView)
-            if isEnd {
-                self.resumeSpeechFloatingButton = nil
-            }
-        }
-    }
-    
-    func addPreviousNovelSpeakButtonIfNeeded(){
-        RealmUtil.RealmBlock { (realm) -> Void in
-            if RealmGlobalState.GetInstanceWith(realm: realm)?.isOpenRecentNovelInStartTime ?? true {
-                return
-            }
-
-            guard let lastReadStory = RealmGlobalState.GetLastReadStory(realm: realm), let lastReadNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: lastReadStory.novelID) else {
-                return
-            }
-            if let storyCount = lastReadNovel.lastChapterNumber, lastReadStory.chapterNumber >= storyCount && (lastReadStory.readLocation(realm: realm) + 5) >= lastReadStory.content.lengthOfBytes(using: .utf8) {
-                return
-            }
-            let lastReadNovelID = lastReadNovel.novelID
-            let lastReadNovelTitle = lastReadNovel.title
-
-            if let oldFloatingButton = self.resumeSpeechFloatingButton {
-                oldFloatingButton.hide()
-                self.resumeSpeechFloatingButton = nil
-            }
-            self.resumeSpeechFloatingButton = FloatingButton.createNewFloatingButton()
-            guard let floatingButton = self.resumeSpeechFloatingButton else {
-                return
-            }
-            
-            floatingButton.assignToView(view: (self.treeView?.scrollView)!, currentOffset: self.treeView?.scrollView.contentOffset ?? CGPoint(x: -1, y: -1), text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovelTitle), animated: true) {
-                floatingButton.hideAnimate()
-                self.resumeSpeechFloatingButton = nil
-                if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
-                    DispatchQueue.main.async {
-                        let lock = NSLock()
-                        var isDismiss:Bool = false
-                        let dialog = NiftyUtility.EasyDialogBuilder(self)
-                            .text(content: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_Message", comment: "iCloud上のデータ同期を待っています。\n同期が完了した場合、自動で再生を開始します。(なお、完了判定は失敗する事があります)"))
-                            .addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_DismissButton", comment: "同期を待たずに再生を開始する")) { (dialog) in
-                                lock.lock()
-                                defer { lock.unlock() }
-                                if isDismiss == true { return }
-                                isDismiss = true
-                                dialog.dismiss(animated: false) {
-                                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
-                                }
-                            }.addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_CancelButton", comment: "再生をキャンセルする")) { (dialog) in
-                                lock.lock()
-                                defer { lock.unlock() }
-                                if isDismiss == true { return }
-                                isDismiss = true
-                                dialog.dismiss(animated: true, completion: nil)
-                            }.build()
-                        dialog.show()
-                        func syncWatcher() {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                                lock.lock()
-                                defer { lock.unlock() }
-                                guard let self = self, isDismiss == false else { return }
-                                if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
-                                    syncWatcher()
-                                    return
-                                }
-                                isDismiss = true
-                                dialog.dismiss(animated: false) {
-                                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
-                                }
-                            }
-                        }
-                        syncWatcher()
-                    }
-                }else{
-                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
-                }
-            }
-        }
-    }
-
-    func HighlightNovel(novelID:String) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            for cellItem in self.displayDataArray {
-                // tree が展開されるのは一段目までです(´・ω・`)
-                if let childrens = cellItem.childrens {
-                    for cellItemChild in childrens {
-                        if cellItemChild.novelID == novelID {
-                            DispatchQueue.main.async {
-                                self.treeView?.beginUpdates()
-                                self.treeView?.expandRow(forItem: cellItem)
-                                self.treeView?.selectRow(forItem: cellItemChild, animated: false, scrollPosition: RATreeViewScrollPositionNone)
-                                self.treeView?.endUpdates()
-                                self.setExpandIcon()
-                            }
-                            return
-                        }
-                    }
-                }
-                if cellItem.novelID == novelID {
-                    DispatchQueue.main.async {
-                        //self.treeView?.beginUpdates()
-                        self.treeView?.selectRow(forItem: cellItem, animated: false, scrollPosition: RATreeViewScrollPositionNone)
-                        //self.treeView?.endUpdates()
-                        self.checkAndUpdateSwitchFolderButtonImage()
-                    }
-                    return
-                }
-            }
-        }
-    }
-    func HilightCurrentReadingNovel() {
-        let novelID:String? = RealmUtil.RealmBlock { (realm) -> String? in
-            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return nil }
-            return globalState.currentReadingNovelID
-        }
-        guard let targetNovelID = novelID else { return }
-        HighlightNovel(novelID: targetNovelID)
-    }
-    
     static func LoadWebPageOnWebImportTab(url:URL) {
-        BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: url)
-        return
         guard let instance = instance else { return }
         DispatchQueue.main.async {
             /// XXX TODO: 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
@@ -1542,8 +1623,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
     static func ReloadWebPageOnWebImportTab() {
-        BookShelfTreeViewController.ReloadWebPageOnWebImportTab()
-        return
         guard let instance = instance else { return }
         DispatchQueue.main.async {
             /// XXX TODO: 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
@@ -1553,8 +1632,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
     static func OpenNovelOnBookShelf(novelID:String){
-        BookShelfTreeViewController.OpenNovelOnBookShelf(novelID: novelID)
-        return
         guard let instance = instance else { return  }
         DispatchQueue.main.async {
             return RealmUtil.RealmBlock { realm in
@@ -1571,12 +1648,5 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
         }
     }
-    
-    func treeView(_ treeView: RATreeView, shouldExpandRowForItem item: Any) -> Bool {
-        if let cellNode = item as? BookShelfRATreeViewCellData {
-            return cellNode.childrens != nil
-        }
-        print("shouldExpandRowForItem unknown item got.")
-        return false
-    }
+
 }

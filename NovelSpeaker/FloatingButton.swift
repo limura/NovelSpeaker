@@ -69,7 +69,7 @@ class FloatingButton: UIView {
         self.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 1.0).isActive = true
     }
     
-    @objc public func assignToView(view:UIView, text:String, animated:Bool, bottomConstraintAppend:CGFloat = 0.0, buttonClicked:@escaping () -> Void){
+    @objc public func assignToView(view:UIView, currentOffset:CGPoint, text:String, animated:Bool, bottomConstraintAppend:CGFloat = 0.0, buttonClicked:@escaping () -> Void){
         if #available(iOS 11.0, *) {
             view.addSubview(self.view)
         }else{
@@ -91,6 +91,7 @@ class FloatingButton: UIView {
         button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         button.titleLabel?.numberOfLines = 0
+        self.scrollViewStartPoint = currentOffset
         if animated {
             showAnimate()
         }

@@ -431,7 +431,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
                 self.lastChapterNumber = lastChapterNumber
             }
             let aliveButtonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting
-            self.assignUpperButtons(novel: novel, aliveButtonSettings: aliveButtonSettings)
+            self.assignUpperButtons(novelID: novel.novelID, novelType: novel.type, aliveButtonSettings: aliveButtonSettings)
             self.webViewDisplayWholeText = nil
             if story.url.count > 0, novel.type == .URL, let url = URL(string: story.url), displaySetting?.viewType == .webViewOriginal {
                 self.isNeedCollectDisplayLocation = true
@@ -618,7 +618,7 @@ body.NovelSpeakerBody {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 let storyID = StorySpeaker.shared.storyID
                                 guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
-                                self.assignUpperButtons(novel: novel, aliveButtonSettings: buttonSettings)
+                                self.assignUpperButtons(novelID: novel.novelID, novelType: novel.type, aliveButtonSettings: buttonSettings)
                             }
                         }
                         if property.name == "isEnableSwipeOnStoryView" {
@@ -778,7 +778,7 @@ body.NovelSpeakerBody {
             DispatchQueue.main.async {
                 self.currentReadStoryIDChangeAlertFloatingButton = FloatingButton.createNewFloatingButton()
                 guard let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
-                floatingButton.assignToView(view: self.view, text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true, bottomConstraintAppend: -32.0) {
+                floatingButton.assignToView(view: self.view, currentOffset: CGPoint(x: -1, y: -1), text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true, bottomConstraintAppend: -32.0) {
                     StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: false)
                     floatingButton.hideAnimate()
                 }
@@ -792,7 +792,7 @@ body.NovelSpeakerBody {
     var skipBackwardButtonItem:UIBarButtonItem? = nil
     var skipForwardButtonItem:UIBarButtonItem? = nil
     var showTableOfContentsButtonItem:UIBarButtonItem? = nil
-    func assignUpperButtons(novel:RealmNovel, aliveButtonSettings:[SpeechViewButtonSetting]) {
+    func assignUpperButtons(novelID: String, novelType: NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
         var barButtonArray:[UIBarButtonItem] = []
         
         for buttonSetting in aliveButtonSettings {
@@ -801,21 +801,21 @@ body.NovelSpeakerBody {
             case .openCurrentWebPage:
                 let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(openCurrentWebPageButtonClicked(_:)))
                 webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_CurrentWebPageButton_VoiceOverTitle", comment: "現在のページをWeb取込タブで開く")
-                if novel.type == .URL {
+                if novelType == .URL {
                     barButtonArray.append(webPageButton)
                 }
             case .openWebPage:
                 let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:)))
                 webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
-                if novel.type == .URL {
+                if novelType == .URL {
                     barButtonArray.append(webPageButton)
                 }
             case .reload:
-                if novel.type == .URL {
+                if novelType == .URL {
                     barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(urlRefreshButtonClicked(_:))))
                 }
             case .share:
-                if novel.type == .URL {
+                if novelType == .URL {
                     let shareButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action:   #selector(shareButtonClicked(_:)))
                     self.shareButtonItem = shareButtonItem
                     barButtonArray.append(shareButtonItem)

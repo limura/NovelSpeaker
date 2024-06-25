@@ -247,7 +247,7 @@ class NiftyUtility: NSObject {
                             NovelDownloadQueue.shared.addQueue(novelID: novelID)
                             DispatchQueue.main.async {
                                 if let floatingButton = FloatingButton.createNewFloatingButton() {
-                                    floatingButton.assignToView(view: viewController.view, text: NSLocalizedString("NiftyUtility_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), animated: true, buttonClicked: {})
+                                    floatingButton.assignToView(view: viewController.view, currentOffset: CGPoint(x: -1, y: -1), text: NSLocalizedString("NiftyUtility_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), animated: true, buttonClicked: {})
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                                         floatingButton.hideAnimate()
                                     })

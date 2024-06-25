@@ -20,6 +20,8 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
     @IBOutlet weak var readProgressView: UIProgressView!
     @IBOutlet weak var treeDepthImageViewWidthConstraint: NSLayoutConstraint!
     @IBOutlet weak var likeButton: UIButton!
+    @IBOutlet weak var checkboxButton: UIButton!
+    @IBOutlet weak var checkboxButtonWidthConstraint: NSLayoutConstraint!
     
     var storyObserverToken: NotificationToken? = nil
     var storyForNovelArrayObserverToken: NotificationToken? = nil
@@ -29,6 +31,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
     var bookmarkObserverToken: NotificationToken? = nil
     var watchNovelIDArray:[String] = []
     var hasChildFolder:Bool = false
+    var checkboxTapHandler: (() -> Void)? = nil
     
     static let staticRealmQueue:DispatchQueue? = DispatchQueue(label: "NovelSpeakerBookShelfTableCellQueue")
     let realmQueue:DispatchQueue? = BookShelfTreeViewCell.staticRealmQueue
@@ -105,6 +108,18 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                 self.newImageView.isHidden = true
             }
         }
+    }
+    func displayCheckBoxButton() {
+        let buttonWidth = CGFloat(44)
+        self.checkboxButton.removeConstraint(self.checkboxButtonWidthConstraint)
+        self.checkboxButtonWidthConstraint = self.checkboxButton.widthAnchor.constraint(equalToConstant: buttonWidth)
+        self.checkboxButtonWidthConstraint.isActive = true
+    }
+    func hideCheckBoxButton() {
+        let buttonWidth = CGFloat(0)
+        self.checkboxButton.removeConstraint(self.checkboxButtonWidthConstraint)
+        self.checkboxButtonWidthConstraint = self.checkboxButton.widthAnchor.constraint(equalToConstant: buttonWidth)
+        self.checkboxButtonWidthConstraint.isActive = true
     }
     func applyDepth(treeLevel:Int) {
         let depthWidth = CGFloat(self.depthWidth * Float(treeLevel))
@@ -446,7 +461,18 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
     }
     
-    func cellSetup(novel:RealmNovel, treeLevel:Int, likeLevel:Int) {
+    private func updateCheckboxImage(for state: BookShelfSelectionState) {
+        switch state {
+        case .unselected:
+            checkboxButton.setImage(UIImage(systemName: "square"), for: .normal)
+        case .partiallySelected:
+            checkboxButton.setImage(UIImage(systemName: "minus.square"), for: .normal)
+        case .fullySelected:
+            checkboxButton.setImage(UIImage(systemName: "checkmark.square"), for: .normal)
+        }
+    }
+
+    func cellSetup(novel:RealmNovel, treeLevel:Int, likeLevel:Int, showCheckbox:Bool = false, checkboxState:BookShelfSelectionState? = nil) {
         self.watchNovelIDArray = [novel.novelID]
         applyDepth(treeLevel: treeLevel)
         let title = novel.title
@@ -467,11 +493,19 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         applyCurrentReadingPointToIndicatorWith(novel: novel)
         applyLikeStarStatus(likeLevel: likeLevel, novelID: novel.novelID)
         self.likeButton.isHidden = false
+        if showCheckbox {
+            self.displayCheckBoxButton()
+        }else{
+            self.hideCheckBoxButton()
+        }
+        if let state = checkboxState {
+            self.updateCheckboxImage(for: state)
+        }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
 
-    func cellSetup(title:String, treeLevel: Int, watchNovelIDArray: [String]) {
+    func cellSetup(title:String, treeLevel: Int, watchNovelIDArray: [String], showCheckbox:Bool = false, checkboxState:BookShelfSelectionState? = nil) {
         self.watchNovelIDArray = watchNovelIDArray
         applyDepth(treeLevel: treeLevel)
         if title.count <= 0 {
@@ -487,6 +521,14 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         self.hasChildFolder = true
         self.readProgressView.isHidden = true
         self.likeButton.isHidden = true
+        if showCheckbox {
+            self.displayCheckBoxButton()
+        }else{
+            self.hideCheckBoxButton()
+        }
+        if let state = checkboxState {
+            self.updateCheckboxImage(for: state)
+        }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
@@ -544,5 +586,9 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                 }
             }
         }
+    }
+    
+    @IBAction func checkboxButtonClicked(_ sender: Any) {
+        checkboxTapHandler?()
     }
 }

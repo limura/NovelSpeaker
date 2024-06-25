@@ -64,7 +64,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
             RealmUtil.RealmBlock { (realm) -> Void in
                 if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID){
-                    loadNovel(novel: novel, aliveButtonSettings: RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting)
+                    loadNovel(novelID: novel.novelID, novelTitle: novel.title, novelType: novel.type, aliveButtonSettings: RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting)
                 }
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
                     self.storySpeaker.SetStory(story: story, withUpdateReadDate: isNeedUpdateReadDate)
@@ -204,7 +204,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         menuController.menuItems = []
     }
     
-    func assignUpperButtons(novel:RealmNovel, aliveButtonSettings:[SpeechViewButtonSetting]) {
+    func assignUpperButtons(novelID: String, novelType:NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
+        let startTime = DispatchTime.now()
+        defer {
+            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "SpeechViewController.assignUpperButtons")
+        }
         var barButtonArray:[UIBarButtonItem] = []
         
         for buttonSetting in aliveButtonSettings {
@@ -213,21 +217,21 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             case .openCurrentWebPage:
                 let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(openCurrentWebPageButtonClicked(_:)))
                 webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_CurrentWebPageButton_VoiceOverTitle", comment: "現在のページをWeb取込タブで開く")
-                if novel.type == .URL {
+                if novelType == .URL {
                     barButtonArray.append(webPageButton)
                 }
             case .openWebPage:
                 let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:)))
                 webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
-                if novel.type == .URL {
+                if novelType == .URL {
                     barButtonArray.append(webPageButton)
                 }
             case .reload:
-                if novel.type == .URL || (novel.type == .UserCreated && NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novel.novelID)) {
+                if novelType == .URL || (novelType == .UserCreated && NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novelID)) {
                     barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(urlRefreshButtonClicked(_:))))
                 }
             case .share:
-                if novel.type == .URL {
+                if novelType == .URL {
                     let shareButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action:   #selector(shareButtonClicked(_:)))
                     self.shareButtonItem = shareButtonItem
                     barButtonArray.append(shareButtonItem)
@@ -289,10 +293,16 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         navigationItem.rightBarButtonItems = barButtonArray
     }
     
-    func loadNovel(novel:RealmNovel, aliveButtonSettings: [SpeechViewButtonSetting]) {
-        assignUpperButtons(novel: novel, aliveButtonSettings: aliveButtonSettings)
-        navigationItem.title = novel.title
-        observeNovel(novelID: novel.novelID)
+    func loadNovel(novelID: String, novelTitle: String, novelType:NovelType, aliveButtonSettings: [SpeechViewButtonSetting]) {
+        let startTime = DispatchTime.now()
+        defer {
+            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "SpeechViewController.loadNovel")
+        }
+        NiftyUtility.DispatchSyncMainQueue {
+            self.assignUpperButtons(novelID: novelID, novelType: novelType, aliveButtonSettings: aliveButtonSettings)
+            self.navigationItem.title = novelTitle
+            self.observeNovel(novelID: novelID)
+        }
     }
     
     func applyChapterListChange() {
@@ -385,11 +395,18 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             let storyID = story.storyID
             let novelID = story.novelID
             if let currentStoryID = self.storyID, novelID != RealmStoryBulk.StoryIDToNovelID(storyID: currentStoryID), let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                self.loadNovel(novel: novel, aliveButtonSettings: RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting)
+                let title = novel.title
+                let type = novel.type
+                let buttonSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting
+                NiftyUtility.DispatchSyncMainQueue {
+                    self.loadNovel(novelID: novelID, novelTitle: title, novelType: type, aliveButtonSettings: buttonSetting)
+                }
             }
             let readLocation = story.readLocation(realm: realm)
             if let currentStoryID = self.storyID, currentStoryID != storyID {
-                self.observeStory(storyID: storyID)
+                NiftyUtility.DispatchSyncMainQueue {
+                    self.observeStory(storyID: storyID)
+                }
             }
             self.storyID = storyID
             self.applyChapterListChange()
@@ -444,7 +461,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         if property.name == "speechViewButtonSettingArrayData" {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
-                                self.assignUpperButtons(novel: novel, aliveButtonSettings: buttonSettings)
+                                self.assignUpperButtons(novelID: novel.novelID, novelType: novel.type, aliveButtonSettings: buttonSettings)
                             }
                         }
                         if property.name == "isEnableSwipeOnStoryView" {
@@ -1096,7 +1113,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             DispatchQueue.main.async {
                 self.currentReadStoryIDChangeAlertFloatingButton = FloatingButton.createNewFloatingButton()
                 guard let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
-                floatingButton.assignToView(view: self.view, text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true, bottomConstraintAppend: -32.0) {
+                floatingButton.assignToView(view: self.view, currentOffset: CGPoint(x: -1, y: -1), text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true, bottomConstraintAppend: -32.0) {
                     self.storySpeaker.SetStory(story: story, withUpdateReadDate: false)
                     floatingButton.hideAnimate()
                 }

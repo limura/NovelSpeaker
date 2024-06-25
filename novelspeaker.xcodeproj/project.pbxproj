@@ -185,6 +185,7 @@
 		21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */; };
 		21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */; };
 		21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC81B21273C0A00F74092 /* UpdateMemo.txt */; };
+		21CCE43A2C26D73800D62564 /* BookShelfTreeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CCE4392C26D73800D62564 /* BookShelfTreeViewController.swift */; };
 		21CE8EA6241677ED00C9DB7F /* ScrollableVStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CE8EA5241677EC00C9DB7F /* ScrollableVStack.swift */; };
 		21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */; };
 		21D3979E1FC95CBB0018F883 /* earth@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D3979B1FC95CB90018F883 /* earth@2x.png */; };
@@ -515,6 +516,7 @@
 		21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataToRealmTool.swift; sourceTree = "<group>"; };
 		21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSoundPlayer.swift; sourceTree = "<group>"; };
 		21CAC81B21273C0A00F74092 /* UpdateMemo.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UpdateMemo.txt; sourceTree = "<group>"; };
+		21CCE4392C26D73800D62564 /* BookShelfTreeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookShelfTreeViewController.swift; sourceTree = "<group>"; };
 		21CE8EA5241677EC00C9DB7F /* ScrollableVStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollableVStack.swift; sourceTree = "<group>"; };
 		21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogViewControllerSwift.swift; sourceTree = "<group>"; };
 		21D3979B1FC95CB90018F883 /* earth@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "earth@2x.png"; sourceTree = "<group>"; };
@@ -1036,6 +1038,7 @@
 			children = (
 				21724EE51972C7B400DF6DC4 /* CustomViews */,
 				21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */,
+				21CCE4392C26D73800D62564 /* BookShelfTreeViewController.swift */,
 				21648009229092A200A183DF /* SpeechViewController.swift */,
 				21D9C16426524C2500CC5AE9 /* WebSpeechViewController.swift */,
 				212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */,
@@ -1644,6 +1647,7 @@
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
 				21D7B10F256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
 				2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */,
+				21CCE43A2C26D73800D62564 /* BookShelfTreeViewController.swift in Sources */,
 				216631EB268E9C9300F80C1D /* MenuButtonHandler.swift in Sources */,
 				212F6176258723C200822737 /* NovelLikeOrderSettingViewController.swift in Sources */,
 				212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */,
