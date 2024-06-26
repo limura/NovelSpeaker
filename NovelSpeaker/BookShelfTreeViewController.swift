@@ -785,7 +785,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     // Webサイト(host)で並べ替えます
     func createWebSiteBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
         return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
-            guard var novels = getNovelArray(realm: realm, sortType: NarouContentSortType.WebSite) else { return (false, []) }
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.WebSite) else { return (false, []) }
             var hostToNovelMap:[String:[RealmNovel]] = [:]
             let noListedString = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
             for novel in novels {
@@ -933,58 +933,60 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             let lastReadNovelID = lastReadNovel.novelID
             let lastReadNovelTitle = lastReadNovel.title
 
-            if let oldFloatingButton = self.resumeSpeechFloatingButton {
-                oldFloatingButton.hide()
-                self.resumeSpeechFloatingButton = nil
-            }
-            self.resumeSpeechFloatingButton = FloatingButton.createNewFloatingButton()
-            guard let floatingButton = self.resumeSpeechFloatingButton else {
-                return
-            }
-            floatingButton.assignToView(view: self.tableView, currentOffset: self.tableView.contentOffset, text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovelTitle), animated: true) {
-                floatingButton.hideAnimate()
-                self.resumeSpeechFloatingButton = nil
-                if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
-                    DispatchQueue.main.async {
-                        let lock = NSLock()
-                        var isDismiss:Bool = false
-                        let dialog = NiftyUtility.EasyDialogBuilder(self)
-                            .text(content: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_Message", comment: "iCloud上のデータ同期を待っています。\n同期が完了した場合、自動で再生を開始します。(なお、完了判定は失敗する事があります)"))
-                            .addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_DismissButton", comment: "同期を待たずに再生を開始する")) { (dialog) in
-                                lock.lock()
-                                defer { lock.unlock() }
-                                if isDismiss == true { return }
-                                isDismiss = true
-                                dialog.dismiss(animated: false) {
-                                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
-                                }
-                            }.addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_CancelButton", comment: "再生をキャンセルする")) { (dialog) in
-                                lock.lock()
-                                defer { lock.unlock() }
-                                if isDismiss == true { return }
-                                isDismiss = true
-                                dialog.dismiss(animated: true, completion: nil)
-                            }.build()
-                        dialog.show()
-                        func syncWatcher() {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                                lock.lock()
-                                defer { lock.unlock() }
-                                guard let self = self, isDismiss == false else { return }
-                                if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
-                                    syncWatcher()
-                                    return
-                                }
-                                isDismiss = true
-                                dialog.dismiss(animated: false) {
-                                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+            DispatchQueue.main.async {
+                if let oldFloatingButton = self.resumeSpeechFloatingButton {
+                    oldFloatingButton.hide()
+                    self.resumeSpeechFloatingButton = nil
+                }
+                self.resumeSpeechFloatingButton = FloatingButton.createNewFloatingButton()
+                guard let floatingButton = self.resumeSpeechFloatingButton else {
+                    return
+                }
+                floatingButton.assignToView(view: self.tableView, currentOffset: self.tableView.contentOffset, text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovelTitle), animated: true) {
+                    floatingButton.hideAnimate()
+                    self.resumeSpeechFloatingButton = nil
+                    if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
+                        DispatchQueue.main.async {
+                            let lock = NSLock()
+                            var isDismiss:Bool = false
+                            let dialog = NiftyUtility.EasyDialogBuilder(self)
+                                .text(content: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_Message", comment: "iCloud上のデータ同期を待っています。\n同期が完了した場合、自動で再生を開始します。(なお、完了判定は失敗する事があります)"))
+                                .addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_DismissButton", comment: "同期を待たずに再生を開始する")) { (dialog) in
+                                    lock.lock()
+                                    defer { lock.unlock() }
+                                    if isDismiss == true { return }
+                                    isDismiss = true
+                                    dialog.dismiss(animated: false) {
+                                        self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+                                    }
+                                }.addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_CancelButton", comment: "再生をキャンセルする")) { (dialog) in
+                                    lock.lock()
+                                    defer { lock.unlock() }
+                                    if isDismiss == true { return }
+                                    isDismiss = true
+                                    dialog.dismiss(animated: true, completion: nil)
+                                }.build()
+                            dialog.show()
+                            func syncWatcher() {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                                    lock.lock()
+                                    defer { lock.unlock() }
+                                    guard let self = self, isDismiss == false else { return }
+                                    if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
+                                        syncWatcher()
+                                        return
+                                    }
+                                    isDismiss = true
+                                    dialog.dismiss(animated: false) {
+                                        self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+                                    }
                                 }
                             }
+                            syncWatcher()
                         }
-                        syncWatcher()
+                    }else{
+                        self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
                     }
-                }else{
-                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
                 }
             }
         }
@@ -1000,23 +1002,33 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                             self.expandFolder(node: cellItem) {
                                 if let indexPath = self.getIndexPath(node: cellItemChild) {
                                     DispatchQueue.main.async {
-                                        let isVisible = self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false
-                                        self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: !doScroll ? .none : isVisible ? .none : .middle)
+                                        UIView.animate(withDuration: 0.0) {
+                                            let isVisible = self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false
+                                            self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: !doScroll ? .none : isVisible ? .none : .middle)
+                                        } completion: { finished in
+                                            if finished {
+                                                completion?()
+                                            }
+                                        }
                                     }
                                 }
                             }
-                            completion?()
                             return
                         }
                     }
                 }
                 if cellItem.novelID == novelID, let indexPath = self.getIndexPath(node: cellItem)  {
                     DispatchQueue.main.async {
-                        let isVisible = self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false
-                        self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: !doScroll ? .none : isVisible ? .none : .middle)
+                        UIView.animate(withDuration: 0.0) {
+                            let isVisible = self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false
+                            self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: !doScroll ? .none : isVisible ? .none : .middle)
+                        } completion: { finished in
+                            if finished {
+                                completion?()
+                            }
+                        }
                         self.checkAndUpdateSwitchFolderButtonImage()
                     }
-                    completion?()
                     return
                 }
             }
@@ -1117,7 +1129,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
                 FunctionExecutionMetrics.shared.PrintMetrics()
             }
-            self.reloadAllData(doScroll: true)
+            self.reloadAllData(doScroll: true) {
+                self.addPreviousNovelSpeakButtonIfNeeded()
+            }
         }
     }
     
