@@ -221,6 +221,88 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     func createSettingsTable(){
         var section = Section()
         #if false
+        section
+        <<< ButtonRow() {
+            $0.title = "べんちまーく！"
+        }.onCellSelection({
+            (cellOf, row) in
+            func check_isDeleted_sorted() -> [BookShelfRATreeViewCellData] {
+                let startTime = DispatchTime.now()
+                defer {
+                    FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "check_isDeleted_sorted")
+                }
+                let novels = RealmUtil.RealmBlock { realm in
+                    return RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "lastReadDate", ascending: false)
+                }
+                guard let novels = novels else { return [] }
+                var result = [] as [BookShelfRATreeViewCellData]
+                for novel in novels {
+                    let data = BookShelfRATreeViewCellData()
+                    data.childrens = nil
+                    data.novelID = novel.novelID
+                    data.title = novel.title
+                    result.append(data)
+                }
+                return result
+            }
+            func check_sorted_isDeleted() -> [BookShelfRATreeViewCellData] {
+                let startTime = DispatchTime.now()
+                defer {
+                    FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "check_sorted_isDeleted")
+                }
+                let novels = RealmUtil.RealmBlock { realm in
+                    return realm.objects(RealmNovel.self).sorted(byKeyPath: "lastReadDate", ascending: false).filter("isDeleted = false")
+                }
+                var result = [] as [BookShelfRATreeViewCellData]
+                for novel in novels {
+                    let data = BookShelfRATreeViewCellData()
+                    data.childrens = nil
+                    data.novelID = novel.novelID
+                    data.title = novel.title
+                    result.append(data)
+                }
+                return result
+            }
+            let cds = check_isDeleted_sorted()
+            let csd = check_sorted_isDeleted()
+            print("cds: \(cds.count)")
+            print("csd: \(csd.count)")
+            let metrics = FunctionExecutionMetrics.shared.GetMetricsByString()
+            print(metrics)
+            UIPasteboard.general.string = metrics
+            let alert = UIAlertController(
+                title: "ベンチ結果",
+                message: metrics,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        })
+        section
+        <<< ButtonRow() {
+            $0.title = "ベンチ結果表示"
+        }.onCellSelection({ (cellOf, row) in
+            let metrics = FunctionExecutionMetrics.shared.GetMetricsByString()
+            print(metrics)
+            UIPasteboard.general.string = metrics
+            let alert = UIAlertController(
+                title: "ベンチ結果",
+                message: metrics,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        })
+        section
+        <<< ButtonRow() {
+            $0.title = "ベンチ結果print"
+        }.onCellSelection({ (cellOf, row) in
+            let metrics = FunctionExecutionMetrics.shared.GetMetricsByString()
+            print(metrics)
+            UIPasteboard.general.string = metrics
+        })
+        #endif
+        #if false
             section
             <<< ButtonRow() {
                 $0.title = "ダミーログ追加"

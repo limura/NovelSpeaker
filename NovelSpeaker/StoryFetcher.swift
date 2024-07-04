@@ -664,6 +664,11 @@ class StoryFetcher {
             tagSet.formUnion(Set<String>(newTagArray))
             return Array(tagSet)
         }
+        //print("-----\nsiteInfoArray.count: \(currentState.siteInfoArray.count)")
+        //for (n, siteInfo) in currentState.siteInfoArray.enumerated() {
+        //    print("\(n): \(siteInfo.resourceUrl ?? "nil")")
+        //}
+        //print("-----")
         
         var tryedResourceUrlArray:[String] = []
         for siteInfo in currentState.siteInfoArray {
@@ -671,6 +676,7 @@ class StoryFetcher {
                 tryedResourceUrlArray.append(resourceUrl)
             }
             let pageElement = siteInfo.decodePageElement(xmlDocument: htmlDocument).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            //print("checking SiteInfo. pageElement.count: \(pageElement.count), siteInfo.pageElement: \(siteInfo.pageElement), siteInfoArray.count: \(currentState.siteInfoArray.count), siteInfo: \(siteInfo.description)")
             let nextUrl = siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url)
             let firstPageLink = siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url)
             let forceErrorElementIsAlive_ErrorMessage:String?
@@ -689,6 +695,7 @@ class StoryFetcher {
                 forceClickButton = nil
             }
             if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil && forceClickButton == nil && forceErrorElementIsAlive_ErrorMessage == nil {
+                //print("continue: \(siteInfo.resourceUrl ?? "nil")")
                 continue
             }
             #else
@@ -700,6 +707,7 @@ class StoryFetcher {
                 continue
             }
             #endif
+            //print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), nextButton: \(nextButton != nil ? "has" : "nil"), firstPageButton: \(firstPageButton != nil ? "has" : "nil"), (forceClickButton: \(forceClickButton != nil ? "has" : "nil"), && siteInfo.isNeedHeadless: \(siteInfo.isNeedHeadless), && forceErrorElementIsAlive_ErrorMessage: \(forceErrorElementIsAlive_ErrorMessage ?? "nil"))")
             //print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), hitSiteInfo: \(siteInfo)")
             #if !os(watchOS)
             successAction?(
