@@ -267,7 +267,7 @@ class SearchResultBlock {
                         builder = builder
                             .addButton(title: NSLocalizedString("NovelSearchViewController_OpenWebImportButtonTitle", comment: "Web取込 タブで開いて確認する"), callback: { dialog in
                                 dialog.dismiss(animated: false) {
-                                    BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: self.url)
+                                    BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: self.url)
                                 }
                             })
                     }
@@ -764,7 +764,7 @@ class WebSiteSection : Decodable {
             section <<< ButtonRow() {
                 $0.title = NSLocalizedString("NovelSearchViewController_OpenWebSiteButtonText", comment: "Web取込タブで開く")
             }.onCellSelection({ (buttonCellOf, buttonRow) in
-                BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: webSiteURL)
+                BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: webSiteURL)
             })
         }
         return section

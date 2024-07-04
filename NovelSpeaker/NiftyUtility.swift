@@ -164,7 +164,7 @@ class NiftyUtility: NSObject {
                 builder = builder.addButton(title: NSLocalizedString("NiftyUtility_ImportRetryToWebImportTabButton", comment: "Web取込タブで開き直してみる(ログインが必要な場合はこちらで直るかもしれません)"), callback: { (dialog) in
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false) {
-                            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
+                            BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: url)
                         }
                     }
                 })
@@ -233,7 +233,7 @@ class NiftyUtility: NSObject {
                                             comment: "既存の小説を開く"
                                         ),
                                         button1Action: {
-                                            BookShelfRATreeViewController.OpenNovelOnBookShelf(novelID: duplicatedNovelID)
+                                            BookShelfTreeViewController.OpenNovelOnBookShelf(novelID: duplicatedNovelID)
                                         },
                                         button2Title: nil,
                                         button2Action: nil
@@ -274,7 +274,7 @@ class NiftyUtility: NSObject {
                 builder = builder.addButton(title: NSLocalizedString("NiftyUtility_ImportRetryToWebImportTabButton", comment: "Web取込タブで開き直してみる(ログインが必要な場合はこちらで直るかもしれません)"), callback: { (dialog) in
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false) {
-                            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: state.url)
+                            BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: state.url)
                         }
                     }
                 })

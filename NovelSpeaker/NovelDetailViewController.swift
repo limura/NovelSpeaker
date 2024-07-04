@@ -176,7 +176,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
     }
     
     func openInWebImportTab(url:URL) {
-        BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
+        BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: url)
     }
     
     func createCells() {

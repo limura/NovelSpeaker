@@ -1949,7 +1949,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             return RealmUtil.RealmBlock { realm in
                 guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
                 let targetTabIndex = 0
-                guard let navigationController = instance.tabBarController?.viewControllers?[targetTabIndex] as? UINavigationController, let bookShelfTreeViewController = navigationController.viewControllers.first as? BookShelfRATreeViewController else {
+                guard let navigationController = instance.tabBarController?.viewControllers?[targetTabIndex] as? UINavigationController, let bookShelfTreeViewController = navigationController.viewControllers.first as? BookShelfTreeViewController else {
                     return
                 }
                 navigationController.popToRootViewController(animated: false)
@@ -1960,5 +1960,4 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             }
         }
     }
-
 }

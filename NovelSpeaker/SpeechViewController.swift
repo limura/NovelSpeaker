@@ -905,7 +905,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             guard let storyID = self.storyID, let urlString = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID)?.url, let url = URL(string: urlString) else {
                 return
             }
-            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
+            BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: url)
         }
     }
     @objc func safariButtonClicked(_ sender: UIBarButtonItem) {
@@ -913,7 +913,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             guard let storyID = self.storyID, let urlString = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.url, let url = URL(string: urlString) else {
                 return
             }
-            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
+            BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: url)
         }
     }
     func CheckFolderAndStartSpeech() {

@@ -222,7 +222,7 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
                 globalState.cookieArrayData = Data()
             }
         }
-        BookShelfRATreeViewController.ReloadWebPageOnWebImportTab()
+        BookShelfTreeViewController.ReloadWebPageOnWebImportTab()
     }
 #endif
 }

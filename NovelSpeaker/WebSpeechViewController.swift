@@ -961,7 +961,7 @@ body.NovelSpeakerBody {
             guard let urlString = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID)?.url, let url = URL(string: urlString) else {
                 return
             }
-            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
+            BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: url)
         }
     }
     @objc func safariButtonClicked(_ sender: UIBarButtonItem) {
@@ -970,7 +970,7 @@ body.NovelSpeakerBody {
             guard storyID.count > 0, let urlString = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.url, let url = URL(string: urlString) else {
                 return
             }
-            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
+            BookShelfTreeViewController.LoadWebPageOnWebImportTab(url: url)
         }
     }
     
