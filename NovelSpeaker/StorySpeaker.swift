@@ -190,7 +190,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     var queuedSetStoryCompletionArray:[((_ story:Story)->Void)] = []
 
     func SetStoryAsync(story:Story, withUpdateReadDate:Bool) {
-        RealmUtil.RealmDispatchQueueAsyncBlock(queue: DispatchQueue.main) { (realm) in
+        //RealmUtil.RealmDispatchQueueAsyncBlock(queue: DispatchQueue.main) { (realm) in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: BookShelfTreeViewCell.staticRealmQueue) { (realm) in
             self.speaker.StopSpeech()
             let storyID = story.storyID
             let readLocation = story.readLocation(realm: realm)
@@ -207,7 +208,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
 
             self.storyID = storyID
             if withUpdateReadDate {
-                self.updateReadDate(realm: realm, storyID: storyID, contentCount: story.content.unicodeScalars.count, readLocation: readLocation)
+                self.updateReadDate(storyID: storyID, contentCount: story.content.unicodeScalars.count, readLocation: readLocation)
             }
             self.observeStory(storyID: self.storyID)
             self.observeBookmark(novelID: story.novelID)
@@ -245,7 +246,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         if currentQueuedStory == nil {
             SetStoryAsync(story: story, withUpdateReadDate: withUpdateReadDate)
         }
-        self.AnnounceSetStory(story: story)
     }
 
     // 読み上げに用いられる小説の章を設定します。
@@ -480,17 +480,19 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
-    func updateReadDate(realm: Realm, storyID:String, contentCount:Int, readLocation:Int) {
+    func updateReadDate(storyID:String, contentCount:Int, readLocation:Int) {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
-        RealmUtil.WriteWith(realm: realm, withoutNotifying: self.updateDateWithoutNotifyingTokens) { (realm) in
-            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                novel.lastReadDate = Date()
-                novel.m_readingChapterStoryID = storyID
-                novel.m_readingChapterContentCount = contentCount
-                novel.m_readingChapterReadingPoint = readLocation
-            }
-            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.currentReadingNovelID != novelID {
-                globalState.currentReadingNovelID = novelID
+        DispatchQueue.main.async { // TODO: withoutNotifying を使う時は thread をあわせる必要があるんだけど、元のthreadって main でいいんだっけってなチェック的なものはどこでするんだ？
+            RealmUtil.Write(withoutNotifying: self.updateDateWithoutNotifyingTokens) { realm in
+                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                    novel.lastReadDate = Date()
+                    novel.m_readingChapterStoryID = storyID
+                    novel.m_readingChapterContentCount = contentCount
+                    novel.m_readingChapterReadingPoint = readLocation
+                }
+                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.currentReadingNovelID != novelID {
+                    globalState.currentReadingNovelID = novelID
+                }
             }
         }
     }
@@ -588,17 +590,19 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             if withMaxSpeechTimeReset == true {
                 // withMaxSpeechTimeReset == true なら、ユーザからの手動操作であるという事として
                 // 読み上げ位置を更新します。
-                self.updateReadDate(realm: realm, storyID: story.storyID, contentCount: story.content.unicodeScalars.count, readLocation: story.readLocation(realm: realm))
+                self.updateReadDate(storyID: story.storyID, contentCount: story.content.unicodeScalars.count, readLocation: story.readLocation(realm: realm))
             }
         }
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStartSpeechEvent(storyID: self.storyID)
         }
         let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setActive(true, options: [])
-        }catch{
-            print("audioSession.setActive(true) failed")
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try audioSession.setActive(true, options: [])
+            }catch{
+                print("audioSession.setActive(true) failed")
+            }
         }
         #if !os(watchOS)
         if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
@@ -621,20 +625,24 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func StopAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setActive(false, options: [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation])
-        }catch(let err){
-            print("audioSession.setActive(false) failed: \(err.localizedDescription)")
-            // このエラーが発生した後、読み上げが失敗し続けてしまう場合があります。
-            // そのような場合、AVSpeechSynthesizer を作り直さないと問題は解消しないようです。
-            // ただ、このエラーは上記の問題を踏まなかった場合でも発生する場合があります(というか、上記の問題以外の問題で発生する場合の方が多いようです)。
-            // その場合、下記の reloadSynthesizer() をする必要は無いので回避したいのですが、
-            // 回避する方法が思いつかない……
-            // err を参照しても同じエラーみたい(localizedDescription で出てくるエラーが「操作を完了できませんでした。（OSStatusエラー560030580）」の固定値みたいなのでそれぞれの違いが判断できない)ので頼れないので詰んだ感じ。(´・ω・`)
-            self.speaker.reloadSynthesizer()
-            // で、作り直した後に一度でも発話しておかないと、最初の発話時に時間がかかるんじゃないかな？
-            // と、思ったんですがどうやらそういう小細工は必要なさそうでした。どういう事なんだ。(´・ω・`)
-            //self.speaker.resetRegisterdVoices()
+        DispatchQueue.global(qos: .userInteractive).async {
+            do {
+                try audioSession.setActive(false, options: [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation])
+            }catch(let err){
+                print("audioSession.setActive(false) failed: \(err.localizedDescription)")
+                // このエラーが発生した後、読み上げが失敗し続けてしまう場合があります。
+                // そのような場合、AVSpeechSynthesizer を作り直さないと問題は解消しないようです。
+                // ただ、このエラーは上記の問題を踏まなかった場合でも発生する場合があります(というか、上記の問題以外の問題で発生する場合の方が多いようです)。
+                // その場合、下記の reloadSynthesizer() をする必要は無いので回避したいのですが、
+                // 回避する方法が思いつかない……
+                // err を参照しても同じエラーみたい(localizedDescription で出てくるエラーが「操作を完了できませんでした。（OSStatusエラー560030580）」の固定値みたいなのでそれぞれの違いが判断できない)ので頼れないので詰んだ感じ。(´・ω・`)
+                DispatchQueue.main.async {
+                    self.speaker.reloadSynthesizer()
+                }
+                // で、作り直した後に一度でも発話しておかないと、最初の発話時に時間がかかるんじゃないかな？
+                // と、思ったんですがどうやらそういう小細工は必要なさそうでした。どういう事なんだ。(´・ω・`)
+                //self.speaker.resetRegisterdVoices()
+            }
         }
     }
     
@@ -1393,7 +1401,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                     return result
                                 }) {
                                     for novelID in folder.targetNovelIDArray {
-                                        print(novelID)
                                         guard let novel = novelDictionary[novelID], let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) else { continue }
                                         speechNextNovelWith(realm: realm, title: novel.title, story: story)
                                         return
@@ -1412,7 +1419,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 return result
                             }) {
                                 for novelID in folder.targetNovelIDArray {
-                                    print(novelID)
                                     guard let novel = novelDictionary[novelID], let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) else { continue }
                                     speechNextNovelWith(realm: realm, title: novel.title, story: story)
                                     return
