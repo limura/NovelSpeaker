@@ -1324,7 +1324,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     
     func reloadAllData(doScroll: Bool, completion:(()->Void)? = nil) {
         // 表示されているものを元にスクロール位置を合わせようと努力します
-        var displayedCellDataArray:[BookShelfRATreeViewCellData] = []
         var selectedNovelID:String? = nil
         NiftyUtility.DispatchSyncMainQueue {
             if let selectedIndexPath = self.tableView.indexPathsForSelectedRows?.first, let (cellData, _) = self.getNode(indexPath: selectedIndexPath), let novelID = cellData.novelID {
