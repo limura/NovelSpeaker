@@ -316,6 +316,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         for buttonSetting in buttonSettingArray {
             if buttonSetting.isOn == false { continue }
             switch buttonSetting.type {
+            case .multiSelect:
+                break
             case .downloadStatus:
                 break
             case .edit:
@@ -913,7 +915,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         DispatchQueue.global(qos: .background).async {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let novels = RealmNovel.GetAllObjectsWith(realm: realm)?.filter("isNotNeedUpdateCheck = false") else { return }
-                NovelDownloadQueue.shared.addQueueArray(novelArray: novels)
+                NovelDownloadQueue.shared.addQueueArray(novelArray: ThreadSafeReference(to: novels))
             }
         }
     }
@@ -1402,7 +1404,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         DispatchQueue.global(qos: .background).async {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let novels = RealmNovel.GetAllObjectsWith(realm: realm)?.filter("isNotNeedUpdateCheck = false") else { return }
-                NovelDownloadQueue.shared.addQueueArray(novelArray: novels)
+                NovelDownloadQueue.shared.addQueueArray(novelArray: ThreadSafeReference(to: novels))
             }
         }
     }

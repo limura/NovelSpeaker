@@ -116,6 +116,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         self.checkboxButtonWidthConstraint.isActive = true
     }
     func hideCheckBoxButton() {
+        self.checkboxButton.setImage(UIImage(), for: .normal)
         let buttonWidth = CGFloat(0)
         self.checkboxButton.removeConstraint(self.checkboxButtonWidthConstraint)
         self.checkboxButtonWidthConstraint = self.checkboxButton.widthAnchor.constraint(equalToConstant: buttonWidth)
@@ -461,7 +462,11 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
     }
     
-    private func updateCheckboxImage(for state: BookShelfSelectionState) {
+    func updateCheckboxImage(for state: BookShelfSelectionState, showCheckbox: Bool) {
+        if showCheckbox == false {
+            checkboxButton.setImage(UIImage(), for: .normal)
+            return
+        }
         switch state {
         case .unselected:
             checkboxButton.setImage(UIImage(systemName: "square"), for: .normal)
@@ -493,13 +498,13 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         applyCurrentReadingPointToIndicatorWith(novel: novel)
         applyLikeStarStatus(likeLevel: likeLevel, novelID: novel.novelID)
         self.likeButton.isHidden = false
+        if let state = checkboxState {
+            self.updateCheckboxImage(for: state, showCheckbox: showCheckbox)
+        }
         if showCheckbox {
             self.displayCheckBoxButton()
         }else{
             self.hideCheckBoxButton()
-        }
-        if let state = checkboxState {
-            self.updateCheckboxImage(for: state)
         }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         RealmObserverHandler.shared.AddDelegate(delegate: self)
@@ -521,13 +526,13 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         self.hasChildFolder = true
         self.readProgressView.isHidden = true
         self.likeButton.isHidden = true
+        if let state = checkboxState {
+            self.updateCheckboxImage(for: state, showCheckbox: showCheckbox)
+        }
         if showCheckbox {
             self.displayCheckBoxButton()
         }else{
             self.hideCheckBoxButton()
-        }
-        if let state = checkboxState {
-            self.updateCheckboxImage(for: state)
         }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         RealmObserverHandler.shared.AddDelegate(delegate: self)

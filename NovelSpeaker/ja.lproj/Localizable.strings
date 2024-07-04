@@ -728,6 +728,7 @@
 "BookShelfRATreeViewController_ExpandFolderButton" = "フォルダ開閉";
 "BookShelfRATreeViewController_NowSwitchingFolderMessage" = "フォルダ開閉中……";
 "BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle" = "フォルダ開閉";
+"BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel" = "複数選択";
 "BookShelfRATreeViewController_iCloudPullButton_VoiceOverText" = "iCloud上の更新データの強制読み込み";
 "BookShelfRATreeViewController_iCloudPullButtonTitle" = "iCloudから取得";
 "BookShelfRATreeViewController_iCloudPushButton_VoiceOverText" = "iCloudへのデータアップロードを開始";
@@ -737,6 +738,26 @@
 "BookShelfRATreeViewController_stopDownloadButton_VoiceOverText" = "ダウンロードを停止";
 "BookShelfRATreeViewController_stopDownloadButtonTitle" = "停止";
 "BookShelfRATreeViewController_InitialDummyCellTitle" = "本棚の小説を読み込んでいます……";
+"BookShelfTreeViewController_checkboxselected_targetTitles_section" = "対象の小説";
+"BookShelfTreeViewController_checkboxselected_CreateBackupFile" = "バックアップファイルの生成";
+"BookShelfTreeViewController_checkboxselected_StopUpdateCheck" = "更新を確認しないよう設定する";
+"BookShelfTreeViewController_checkboxselected_DeleteNovel" = "小説を削除する";
+"BookShelfTreeViewController_checkboxselected_confirm_delete" = "本当に%d件の小説を削除して良いですか？";
+"BookShelfTreeViewController_checkboxselected_EnableUpdateCheck" = "更新を確認するよう設定する";
+"BookShelfTreeViewController_checkboxselected_EnableLikeCheck" = "お気に入りに登録する";
+"BookShelfTreeViewController_checkboxselected_DisableLikeCheck" = "お気に入り登録を外す";
+"BookShelfTreeViewController_checkboxselected_StopUpdateCheck_done_mesage" = "%d件の小説で更新確認を行わないように設定しました";
+"BookShelfTreeViewController_checkboxselected_EnableUpdateCheck_done_mesage" = "%d件の小説で更新確認を行うように設定しました";
+"BookShelfTreeViewController_checkboxselected_EnableLikeCheck_done_mesage" = "%d件の小説をお気に入りに設定しました";
+"BookShelfTreeViewController_checkboxselected_DisableLikeCheck_done_mesage" = "%d件の小説をお気に入りから外しました";
+"BookShelfTreeViewController_checkboxselected_confirm_delete_done_mesage" = "%d件の小説を削除しました";
+"BookShelfTreeViewController_checkboxselected_EnableLikeCheck_working" = "%d件をお気に入りに登録中";
+"BookShelfTreeViewController_checkboxselected_StopUpdateCheck_working" = "%d件の小説の更新確認を停止中";
+"BookShelfTreeViewController_checkboxselected_EnableUpdateCheck_working" = "%d件の小説の更新確認を有効にしています";
+"BookShelfTreeViewController_refreshButtonClicked_startingDownload_dialog" = "更新確認を開始しています\n小説の数が多いと開始登録に時間がかかります。\n(このダイアログは開始登録が終了すると自動で消えますが、手動で消すこともできます。ただし、手動で消した場合でも開始登録が継続されますので注意してください)";
+"BookShelfTreeViewController_refreshButtonClicked_startingDownload_dialog_neverAskMeSwitch" = "以降このダイアログを出さない";
+"BookShelfTreeViewController_checkboxselected_QueueNovelUpdateCheck" = "更新確認を行う";
+"BookShelfTreeViewController_checkboxselected_confirm_delete_working" = "%d個の小説を削除中";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";
@@ -873,6 +894,7 @@
 "BookshelfViewButtonType_iCloudPull" = "iCloud上の更新データの強制取り込みを開始する(通常は必要ありません)";
 "BookshelfViewButtonType_iCloudPush" = "端末側のデータの「全て」をiCloudへ送信ししなおし始める(通常は必要ありませんし、本当に全てのデータをiCloud側に送信しますので通信量が増えますし、全てを送信し終えるには時間がかかるはずです)";
 "BookshelfViewButtonType_stopDownload" = "実行中の全てのダウンロードを止める";
+"BookshelfViewButtonType_multiSelect" = "複数小説の選択・操作";
 
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: 何も読み込めませんでした。なお、ネットワーク接続に問題がある場合などでもこのエラーが発生する場合があります。";
 

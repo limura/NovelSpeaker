@@ -127,6 +127,14 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                             $0.cell.imageView?.image = image
                         }
                     }.onChange({_ in self.saveCurrentSetting()})
+                case .multiSelect:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("BookshelfViewButtonType_multiSelect", comment: "複数小説の選択・操作")
+                        $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                        $0.cell.imageView?.image = UIImage(systemName: "checkmark.square")
+                    }
                 }
             }
         }

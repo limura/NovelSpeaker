@@ -41,6 +41,44 @@ class DownloadQueueHolder: NSObject {
     fileprivate var queue:[String:[QueueItem]] = [String:[QueueItem]]()
     var nowDownloading = [String:String]()
     
+    func addQueue(novelArray:ThreadSafeReference<Results<RealmNovel>>) {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let novelArray = realm.resolve(novelArray) else { return }
+            let novelLikeOrder = RealmGlobalState.GetInstanceWith(realm: realm)?.novelLikeOrder ?? List<String>()
+            
+            self.lock.lock()
+            defer { self.lock.unlock() }
+            for novel in novelArray {
+                if novel.isNotNeedUpdateCheck { continue }
+                if novel.type == .UserCreated {
+#if !os(watchOS)
+                    if NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novel.novelID) {
+                        NovelSpeakerUtility.CheckAndUpdateRgisterdOuterNovel(novelID: novel.novelID)
+                    }
+#endif
+                    continue
+                }
+                if novel.type != .URL { continue }
+                let updateFrequency = novel.updateFrequency(novelLikeOrder: novelLikeOrder)
+                let item = QueueItem(novelID: novel.novelID, updateFrequency: updateFrequency)
+                let hostName = item.hostName
+                if var queueList = queue[hostName], queueList.filter({$0.novelID == item.novelID}).first == nil {
+                    queueList.append(item)
+                    queue[hostName] = queueList
+                }else{
+                    queue[hostName] = [item]
+                }
+            }
+            for hostName in queue.keys {
+                if let queueList = queue[hostName] {
+                    queue[hostName] = queueList.sorted(by: { (a, b) -> Bool in
+                        a.updateFrequency > b.updateFrequency
+                    })
+                }
+            }
+        }
+    }
+    
     func addQueue(novelID:String) {
         var updateFrequencyTmp:Double? = nil
         guard novelID.count > 0 else { return }
@@ -586,32 +624,22 @@ class NovelDownloadQueue : NSObject {
         self.downloadStart()
     }
 
-    func addQueueArray(novelArray:Results<RealmNovel>) {
+    var AddQueueIsActive = false
+    func addQueueArray(novelArray:ThreadSafeReference<Results<RealmNovel>>) {
+        if AddQueueIsActive { return }
+        AddQueueIsActive = true
+        defer { AddQueueIsActive = false }
         self.downloadStop()
-        for novel in novelArray {
-            if novel.type == .UserCreated {
-                #if !os(watchOS)
-                if NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novel.novelID) {
-                    NovelSpeakerUtility.CheckAndUpdateRgisterdOuterNovel(novelID: novel.novelID)
-                }
-                #endif
-                continue
-            }
-            if novel.type != .URL { continue }
-            self.queueHolder.addQueue(novelID: novel.novelID)
-        }
+        self.queueHolder.addQueue(novelArray: novelArray)
         NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
         self.downloadStart()
     }
     
     func addQueueArray(novelIDArray:[String]) {
-        self.downloadStop()
-        for novelID in novelIDArray {
-            if novelID.hasPrefix(NovelSpeakerUtility.UserCreatedContentPrefix) { continue }
-            self.queueHolder.addQueue(novelID: novelID)
-            NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+        RealmUtil.RealmBlock { realm in
+            guard let novelArray = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: novelIDArray) else { return }
+            self.addQueueArray(novelArray: ThreadSafeReference(to: novelArray))
         }
-        self.downloadStart()
     }
     
     func ClearAllDownloadQueue() {

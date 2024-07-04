@@ -737,6 +737,7 @@
 "BookShelfRATreeViewController_ExpandFolderButton" = "SwitchFolder";
 "BookShelfRATreeViewController_NowSwitchingFolderMessage" = "Switching folder...";
 "BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle" = "Switch folder";
+"BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel" = "Multiple Selection";
 "BookShelfRATreeViewController_iCloudPullButton_VoiceOverText" = "Start loading data on iCloud";
 "BookShelfRATreeViewController_iCloudPullButtonTitle" = "Get from iCloud";
 "BookShelfRATreeViewController_iCloudPushButton_VoiceOverText" = "Start uploading data to iCloud";
@@ -746,6 +747,27 @@
 "BookShelfRATreeViewController_stopDownloadButton_VoiceOverText" = "Stop download";
 "BookShelfRATreeViewController_stopDownloadButtonTitle" = "Stop";
 "BookShelfRATreeViewController_InitialDummyCellTitle" = "Reading a novel on the bookshelf...";
+"BookShelfTreeViewController_checkboxselected_targetTitles_section" = "Target novels";
+"BookShelfTreeViewController_checkboxselected_CreateBackupFile" = "Create backup file";
+"BookShelfTreeViewController_checkboxselected_StopUpdateCheck" = "Set to never check for updates";
+"BookShelfTreeViewController_checkboxselected_DeleteNovel" = "Delete novel";
+"BookShelfTreeViewController_checkboxselected_confirm_delete" = "Are you sure you want to delete %d novels?";
+"BookShelfTreeViewController_checkboxselected_EnableUpdateCheck" = "Set it to check for updates on those novels";
+"BookShelfTreeViewController_checkboxselected_EnableLikeCheck" = "Add to Favorites";
+"BookShelfTreeViewController_checkboxselected_DisableLikeCheck" = "Remove from Favorites";
+"BookShelfTreeViewController_checkboxselected_StopUpdateCheck_done_mesage" = "Set to not check for updates on %d novels";
+"BookShelfTreeViewController_checkboxselected_EnableUpdateCheck_done_mesage" = "Set to check for updates with %d novels";
+"BookShelfTreeViewController_checkboxselected_EnableLikeCheck_done_mesage" = "%d novels have been added to your favorites.";
+"BookShelfTreeViewController_checkboxselected_DisableLikeCheck_done_mesage" = "%d novels were removed from your favorites.";
+"BookShelfTreeViewController_checkboxselected_confirm_delete_done_mesage" = "%d novels deleted";
+"BookShelfTreeViewController_checkboxselected_EnableLikeCheck_working" = "%d items in your favorites";
+"BookShelfTreeViewController_checkboxselected_StopUpdateCheck_working" = "%d novels are being stopped to check for updates";
+"BookShelfTreeViewController_checkboxselected_EnableUpdateCheck_working" = "%d novel update checks enabled";
+"BookShelfTreeViewController_refreshButtonClicked_startingDownload_dialog" = "Start checking for updates\nIf the number of novels is large, it will take time to register the start.\n(This dialog will disappear automatically when the start registration is completed, but you can also turn it off manually. However, please note that even if you manually delete the dialog, the start registration will continue.)";
+"BookShelfTreeViewController_refreshButtonClicked_startingDownload_dialog_neverAskMeSwitch" = "Prevent this dialog from appearing thereafter";
+"BookShelfTreeViewController_checkboxselected_QueueNovelUpdateCheck" = "Check for updates";
+"BookShelfTreeViewController_checkboxselected_confirm_delete_working" = "%d novels are being deleted.";
+
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
@@ -883,6 +905,7 @@
 "BookshelfViewButtonType_iCloudPull" = "Initiate forced capture of data on iCloud (usually not needed)";
 "BookshelfViewButtonType_iCloudPush" = "Start sending \"all\" of the data on the terminal side to iCloud again (usually it is not necessary, and since all the data is really sent to iCloud side, the communication volume will increase and it will take time to finish sending all It should take)";
 "BookshelfViewButtonType_stopDownload" = "Stop all running downloads";
+"BookshelfViewButtonType_multiSelect" = "Select and operate multiple novels";
 
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: I couldn't read anything. Note that this error may occur even if there is a problem with the network connection.";
 
