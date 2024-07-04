@@ -190,8 +190,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     var queuedSetStoryCompletionArray:[((_ story:Story)->Void)] = []
 
     func SetStoryAsync(story:Story, withUpdateReadDate:Bool) {
-        //RealmUtil.RealmDispatchQueueAsyncBlock(queue: DispatchQueue.main) { (realm) in
-        RealmUtil.RealmDispatchQueueAsyncBlock(queue: BookShelfTreeViewCell.staticRealmQueue) { (realm) in
+        #if !os(watchOS)
+        let queue = BookShelfTreeViewCell.staticRealmQueue
+        #else
+        let queue = DispatchQueue.main
+        #endif
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: queue) { (realm) in
             self.speaker.StopSpeech()
             let storyID = story.storyID
             let readLocation = story.readLocation(realm: realm)
