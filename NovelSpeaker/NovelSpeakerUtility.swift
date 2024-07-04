@@ -2567,42 +2567,43 @@ class NovelSpeakerUtility: NSObject {
     #if !os(watchOS)
     static func CreateNovelOnlyBackup(novelIDArray:[String], viewController:UIViewController, successAction:((_ filePath:URL, _ fileName: String)->Void)? = nil) {
         let labelTag = 100
-        let dialog = NiftyUtility.EasyDialogBuilder(viewController)
-            .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
-            .build()
         DispatchQueue.main.async {
-            dialog.show()
-        }
-        let fileNamePrefix:String
-        if novelIDArray.count == 1, let novelID = novelIDArray.first, let title = RealmUtil.RealmBlock(block: { (realm) -> String? in
-                return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.title
-        }), title.count > 0 {
-            fileNamePrefix = title + "_"
-        }else{
-            fileNamePrefix = ""
-        }
-        DispatchQueue.global(qos: .utility).async {
-            guard let backupData = NovelSpeakerUtility.CreateBackupData(forNovelIDArray: novelIDArray, forStorySaveNovelIDArray: novelIDArray, isOnlyNovelData: true, fileNamePrefix: fileNamePrefix, progress: { (description) in
-                DispatchQueue.main.async {
-                    if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
-                        label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"
-                            + description
-                    }
+            let dialog = NiftyUtility.EasyDialogBuilder(viewController)
+                .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
+                .build()
+            dialog.show {
+                let fileNamePrefix:String
+                if novelIDArray.count == 1, let novelID = novelIDArray.first, let title = RealmUtil.RealmBlock(block: { (realm) -> String? in
+                        return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.title
+                }), title.count > 0 {
+                    fileNamePrefix = title + "_"
+                }else{
+                    fileNamePrefix = ""
                 }
-            }) else {
-                DispatchQueue.main.async {
-                    dialog.dismiss(animated: false) {
+                DispatchQueue.global(qos: .utility).async {
+                    guard let backupData = NovelSpeakerUtility.CreateBackupData(forNovelIDArray: novelIDArray, forStorySaveNovelIDArray: novelIDArray, isOnlyNovelData: true, fileNamePrefix: fileNamePrefix, progress: { (description) in
                         DispatchQueue.main.async {
-                            NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                            if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
+                                label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"
+                                    + description
+                            }
+                        }
+                    }) else {
+                        DispatchQueue.main.async {
+                            dialog.dismiss(animated: false) {
+                                DispatchQueue.main.async {
+                                    NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                }
+                            }
+                        }
+                        return
+                    }
+                    let fileName = backupData.lastPathComponent
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false) {
+                            successAction?(backupData, fileName)
                         }
                     }
-                }
-                return
-            }
-            let fileName = backupData.lastPathComponent
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false) {
-                    successAction?(backupData, fileName)
                 }
             }
         }
@@ -3057,6 +3058,18 @@ class NovelSpeakerUtility: NSObject {
     static func SetIsNotClearToAboutBlankOnDownloadBrowserUrl(IsDisplay:Bool){
         let defaults = UserDefaults.standard
         defaults.setValue(IsDisplay, forKey: IsNotClearToAboutBlankOnDownloadBrowserUrlKey)
+        defaults.synchronize()
+    }
+
+    static let IsNotDisplayUpdateCheckDialogKey = "IsNotDisplayUpdateCheckDialog"
+    static func IsNotDisplayUpdateCheckDialog() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [IsNotDisplayUpdateCheckDialogKey: false])
+        return defaults.bool(forKey: IsNotDisplayUpdateCheckDialogKey)
+    }
+    static func SetIsNotDisplayUpdateCheckDialog(IsDisplay:Bool){
+        let defaults = UserDefaults.standard
+        defaults.setValue(IsDisplay, forKey: IsNotDisplayUpdateCheckDialogKey)
         defaults.synchronize()
     }
 
