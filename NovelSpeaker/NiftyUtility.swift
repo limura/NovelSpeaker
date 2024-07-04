@@ -518,6 +518,34 @@ class NiftyUtility: NSObject {
 
     #if !os(watchOS)
     @discardableResult
+    @objc public static func EasyDialogOneButtonWithSwitch(viewController: UIViewController, title: String?, message: String?, switchMessage:String? = nil, switchValue:Bool = false, button1Title: String?, button1Action:((Bool)->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
+        var dialog = EasyDialogBuilder(viewController)
+        if let title = title {
+            dialog = dialog.title(title: title)
+        }
+        if let message = message {
+            dialog = dialog.label(text: message, textAlignment: .left)
+        }
+        if let switchMessage = switchMessage {
+            dialog = dialog.switchField(tag: 200, message: switchMessage, value: switchValue)
+        }
+        func getSwitchValue(dialog:EasyDialog) -> Bool {
+            guard let switchView =  dialog.view.viewWithTag(200) as? UISwitch else { return false }
+            return switchView.isOn
+        }
+        dialog = dialog.addButton(title: button1Title != nil ? button1Title! : NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+            dialog.dismiss(animated: false, completion: {
+                if let button1Action = button1Action {
+                    button1Action(getSwitchValue(dialog: dialog))
+                }
+            })
+        })
+        let builded = dialog.build()
+        builded.show { completion?(builded) }
+        return builded
+    }
+    
+    @discardableResult
     @objc public static func EasyDialogTwoButtonWithSwitch(viewController: UIViewController, title: String?, message: String?, switchMessage:String? = nil, switchValue:Bool = false, button1Title: String?, button1Action:((Bool)->Void)?, button2Title: String?, button2Action:((Bool)->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialogBuilder(viewController)
         if let title = title {
