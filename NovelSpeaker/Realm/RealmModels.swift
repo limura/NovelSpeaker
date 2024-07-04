@@ -1624,7 +1624,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             return cachedStory
         }
         guard let bulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber), let storyArray = bulk.LoadStoryArray() else { return nil }
-        print("bulk.LoadStoryArray(): storyArray.count \(storyArray.count)")
+        //print("bulk.LoadStoryArray(): storyArray.count \(storyArray.count)")
         let bulkIndex = (chapterNumber - 1) % bulkCount
         if bulkIndex < 0 || storyArray.count <= bulkIndex {
             return nil
@@ -2446,6 +2446,7 @@ enum BookshelfViewButtonTypes:String, Codable {
     case downloadStatus = "downloadStatus"
     case switchFolder = "switchFolder"
     case stopDownload = "stopDownload"
+    case multiSelect = "multiSelect"
 }
 
 struct BookshelfViewButtonSetting: Codable {
@@ -2456,6 +2457,7 @@ struct BookshelfViewButtonSetting: Codable {
         //BookshelfViewButtonSetting(type: .iCloudPull, isOn: false),
         //BookshelfViewButtonSetting(type: .iCloudPush, isOn: false),
         //BookshelfViewButtonSetting(type: .search, isOn: false),
+        BookshelfViewButtonSetting(type: .multiSelect, isOn: true),
         BookshelfViewButtonSetting(type: .switchFolder, isOn: true),
         //BookshelfViewButtonSetting(type: .downloadStatus, isOn: false),
         BookshelfViewButtonSetting(type: .order, isOn: true),
