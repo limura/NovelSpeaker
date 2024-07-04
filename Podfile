@@ -24,7 +24,6 @@ target 'NovelSpeaker' do
   pod 'FTLinearActivityIndicator'
   pod 'SSZipArchive'
 
-  pod "RATreeView", "~> 2.1.2"
   #pod 'IceCream', :git => 'https://github.com/caiyue1993/IceCream.git'
   #pod 'Realm', "<= 10.7.7"
   pod 'IceCream'

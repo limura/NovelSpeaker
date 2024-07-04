@@ -97,7 +97,6 @@
 		21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */; };
 		21647FFC228CF44900A183DF /* UpdateLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFB228CF44900A183DF /* UpdateLogViewController.swift */; };
 		21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFF228D5EE000A183DF /* EditBookViewController.swift */; };
-		21648002228F180E00A183DF /* BookShelfRATreeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */; };
 		21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648005229003E100A183DF /* BookShelfTreeViewCell.swift */; };
 		21648008229003E200A183DF /* BookShelfTreeViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21648006229003E100A183DF /* BookShelfTreeViewCell.xib */; };
 		2164800A229092A200A183DF /* SpeechViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648009229092A200A183DF /* SpeechViewController.swift */; };
@@ -401,7 +400,6 @@
 		21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateSpeechModSettingViewControllerSwift.swift; sourceTree = "<group>"; };
 		21647FFB228CF44900A183DF /* UpdateLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateLogViewController.swift; sourceTree = "<group>"; };
 		21647FFF228D5EE000A183DF /* EditBookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookViewController.swift; sourceTree = "<group>"; };
-		21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookShelfRATreeViewController.swift; sourceTree = "<group>"; };
 		21648005229003E100A183DF /* BookShelfTreeViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookShelfTreeViewCell.swift; sourceTree = "<group>"; };
 		21648006229003E100A183DF /* BookShelfTreeViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BookShelfTreeViewCell.xib; sourceTree = "<group>"; };
 		21648009229092A200A183DF /* SpeechViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechViewController.swift; sourceTree = "<group>"; };
@@ -1037,7 +1035,6 @@
 			isa = PBXGroup;
 			children = (
 				21724EE51972C7B400DF6DC4 /* CustomViews */,
-				21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */,
 				21CCE4392C26D73800D62564 /* BookShelfTreeViewController.swift */,
 				21648009229092A200A183DF /* SpeechViewController.swift */,
 				21D9C16426524C2500CC5AE9 /* WebSpeechViewController.swift */,
@@ -1473,7 +1470,6 @@
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
 				"${BUILT_PRODUCTS_DIR}/Kanna-iOS/Kanna.framework",
 				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
-				"${BUILT_PRODUCTS_DIR}/RATreeView/RATreeView.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-iOS/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift-iOS/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SSZipArchive-iOS/SSZipArchive.framework",
@@ -1487,7 +1483,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FTLinearActivityIndicator.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kanna.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSColorPicker.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RATreeView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SSZipArchive.framework",
@@ -1688,7 +1683,6 @@
 				21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */,
 				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
-				21648002228F180E00A183DF /* BookShelfRATreeViewController.swift in Sources */,
 				215A668F2AA4C2DF00207383 /* SpeechModCheckViewController.swift in Sources */,
 				210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */,
 				210EFEDC23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
