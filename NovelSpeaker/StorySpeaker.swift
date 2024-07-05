@@ -219,8 +219,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
 
             // queueに入っていたらしょうがないので再度自分を呼び出す(´・ω・`)
             self.queuedSetStoryStoryLock.lock()
-            defer { self.queuedSetStoryStoryLock.unlock() }
             if let queuedStory = self.queuedSetStoryStory, queuedStory.storyID != story.storyID {
+                self.queuedSetStoryStoryLock.unlock()
                 self.SetStoryAsync(story: queuedStory, withUpdateReadDate: withUpdateReadDate)
                 return
             }
@@ -229,6 +229,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 completion(story)
             }
             self.queuedSetStoryCompletionArray.removeAll()
+            self.queuedSetStoryStoryLock.unlock()
             self.AnnounceSetStory(story: story)
         }
     }
