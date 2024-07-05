@@ -261,7 +261,7 @@ class RobotsFileTool {
     // ・robots.txt が存在するホストの場合は (おおよそ)fileCacheTimeoutSecond の間隔で
     // ・robots.txt が存在しないホストの場合は memoryCacheTimeoutSecond の間隔で
     // 再読み込みが行われるようになる……はずです。
-    var robotsCacheArray:[URL:RobotsCache] = [:]
+    var robotsCacheArray:[String:RobotsCache] = [:]
 
     static func URLToRobotsURL(url:URL) -> URL? {
         return URL(string: "/robots.txt", relativeTo: url)
@@ -276,7 +276,7 @@ class RobotsFileTool {
         NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: cacheFileName, expireTimeinterval: fileCacheTimeoutSecond, canRecoverOldFile: true, successAction: { (data) in
             completion?(RobotsCache.Decode(robotsURL: targetURL, data: data))
         }) { (err) in
-            // リクエストに失敗した場合、404 などの 4** なら arrow だけれど、ネットワークエラーやサーバエラー(5**)なら disarrow らしいんだけどどうしたら
+            // リクエストに失敗した場合、404 などの 4** なら arrow だけれど、ネットワークエラーやサーバエラー(5**)なら disarrow らしいんだけどどうしたら(根拠: https://developers.google.com/search/docs/crawling-indexing/robots/robots_txt?hl=ja )
             completion?(nil)
         }
     }
@@ -293,7 +293,7 @@ class RobotsFileTool {
         }
         #endif
         lock.lock()
-        robotsCacheArray[cache.robotsURL] = cache
+        robotsCacheArray[cache.robotsURL.absoluteString] = cache
         lock.unlock()
     }
     
@@ -301,7 +301,7 @@ class RobotsFileTool {
         lock.lock()
         defer { lock.unlock() }
         let cacheExpireDate = Date(timeIntervalSinceNow: -memoryCacheTimeoutSecond)
-        var expiredArray:[URL] = []
+        var expiredArray:[String] = []
         for cache in robotsCacheArray {
             if cache.value.createdDate < cacheExpireDate {
                 expiredArray.append(cache.key)
@@ -317,7 +317,7 @@ class RobotsFileTool {
         let cacheExpireDate = Date(timeIntervalSinceNow: -memoryCacheTimeoutSecond)
         guard let robotsURL = RobotsFileTool.URLToRobotsURL(url: url) else { resultHandler?(true); return }
         lock.lock()
-        let robotsCache = robotsCacheArray.filter({ $0.value.robotsURL == robotsURL }).first?.value
+        let robotsCache = robotsCacheArray[robotsURL.absoluteString]
         lock.unlock()
         if let robotsCache = robotsCache, robotsCache.createdDate > cacheExpireDate {
             // キャッシュにあったのでそれを使います
