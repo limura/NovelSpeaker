@@ -160,7 +160,18 @@ class DownloadQueueHolder: NSObject {
     func GetCurrentDownloadStatusSummary() -> String {
         self.lock.lock()
         defer { self.lock.unlock() }
-        return queue.map({"\($0.key): \($0.value.count)"}).joined(separator: "\n")
+        var resultMap:[String:Int] = [:]
+        for (key, item) in queue {
+            resultMap[key] = item.count
+        }
+        for host in nowDownloading.keys {
+            if var v = resultMap[host] {
+                v += 1
+            }else{
+                resultMap[host] = 1
+            }
+        }
+        return resultMap.map({"\($0.key): \($0.value)"}).joined(separator: "\n")
     }
     func ClearAllQueue() {
         self.lock.lock()

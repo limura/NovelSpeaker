@@ -404,7 +404,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         // TODO: 現在これで取得できるのは Queue に入っているものだけなので、ダウンロード中のものが確認できないためこのままでは駄目です。
         var summary = NovelDownloadQueue.shared.GetCurrentDownloadStatusSummary()
         if summary.count <= 0 {
-            summary = NSLocalizedString("BookShelfTreeViewController_downloadStatusBarButtonTapped_no_download_found", comment: "されていませんでした。")
+            summary = NSLocalizedString("BookShelfTreeViewController_downloadStatusBarButtonTapped_no_download_found", comment: "ダウンロードは実行されていませんでした。")
         }
         DispatchQueue.main.async {
             NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: summary, buttonTitle: nil, buttonAction: nil)

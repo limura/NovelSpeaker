@@ -768,7 +768,7 @@
 "BookShelfTreeViewController_refreshButtonClicked_startingDownload_dialog_neverAskMeSwitch" = "Prevent this dialog from appearing thereafter";
 "BookShelfTreeViewController_checkboxselected_QueueNovelUpdateCheck" = "Check for updates";
 "BookShelfTreeViewController_checkboxselected_confirm_delete_working" = "%d novels are being deleted.";
-
+"BookShelfTreeViewController_downloadStatusBarButtonTapped_no_download_found" = "There is no download currently running";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
