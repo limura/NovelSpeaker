@@ -157,6 +157,11 @@ class DownloadQueueHolder: NSObject {
         }
         return result
     }
+    func GetCurrentDownloadStatusSummary() -> String {
+        self.lock.lock()
+        defer { self.lock.unlock() }
+        return queue.map({"\($0.key): \($0.value.count)"}).joined(separator: "\n")
+    }
     func ClearAllQueue() {
         self.lock.lock()
         defer { self.lock.unlock() }
@@ -671,6 +676,9 @@ class NovelDownloadQueue : NSObject {
     }
     func GetCurrentQueuedNovelIDArray() -> [String] {
         return self.queueHolder.GetCurrentQueuedNovelIDArray()
+    }
+    func GetCurrentDownloadStatusSummary() -> String {
+        return self.queueHolder.GetCurrentDownloadStatusSummary()
     }
 
     #if !os(watchOS)

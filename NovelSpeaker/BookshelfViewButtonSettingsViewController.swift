@@ -53,7 +53,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_DownloadStatus", comment: "ダウンロード状態の確認")
                         $0.value = setting.isOn
                         if #available(iOS 13.0, *) {
-                            $0.cell.imageView?.image = UIImage(systemName: "gauge")
+                            $0.cell.imageView?.image = UIImage(systemName: "waveform.badge.magnifyingglass")
                         }
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
