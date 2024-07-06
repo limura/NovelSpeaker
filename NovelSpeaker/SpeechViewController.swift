@@ -205,10 +205,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func assignUpperButtons(novelID: String, novelType:NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "SpeechViewController.assignUpperButtons")
-        }
         var barButtonArray:[UIBarButtonItem] = []
         
         for buttonSetting in aliveButtonSettings {
@@ -294,10 +290,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func loadNovel(novelID: String, novelTitle: String, novelType:NovelType, aliveButtonSettings: [SpeechViewButtonSetting]) {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "SpeechViewController.loadNovel")
-        }
         NiftyUtility.DispatchSyncMainQueue {
             self.assignUpperButtons(novelID: novelID, novelType: novelType, aliveButtonSettings: aliveButtonSettings)
             self.navigationItem.title = novelTitle

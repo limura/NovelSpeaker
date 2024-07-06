@@ -149,9 +149,15 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             self.displayDataArray = [
                 dummyCell
             ]
-            self.tableView.reloadData()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                self.reloadAllDataAndScrollToCurrentReadingContent()
+            DispatchQueue.main.async {
+                UIView.animate(withDuration: 0.0) {
+                    self.tableView.reloadData()
+                    self.tableView.layoutIfNeeded()
+                } completion: { finished in
+                    if finished {
+                        self.reloadAllDataAndScrollToCurrentReadingContent()
+                    }
+                }
             }
         }
 
@@ -731,10 +737,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
 
     // 検索条件やソート条件を考慮した上での NarouContent の Array を返します
     func getNovelArray(realm: Realm, sortType:NarouContentSortType) -> [RealmNovel]? {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "BookShelfRATreeViewController.getNovelArray()")
-        }
         guard var allNovels = RealmNovel.GetAllObjectsWith(realm: realm) else { return nil }
         if let searchText = self.searchText, searchText.count > 0 {
             allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", searchText, searchText)
@@ -829,16 +831,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
 
     // 更新日時でフォルダ分けします(フォルダ分けしない版)
     func createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
-        }
         return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
             guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.NovelUpdatedAt) else { return (false,[]) }
-            let startTime = DispatchTime.now()
-            defer {
-                FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder/create [BookShelfRATreeViewCellData]")
-            }
             var result = [] as [BookShelfRATreeViewCellData]
             for novel in novels {
                 let data = BookShelfRATreeViewCellData()
@@ -995,10 +989,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
 
     // 小説を開いた日時でフォルダ分けします(フォルダ分けしない版)
     func createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime, functionName: "createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder")
-        }
         return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
             guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.LastReadDate) else { return (false,[]) }
             var result = [] as [BookShelfRATreeViewCellData]
@@ -1089,10 +1079,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     }
     
     func getBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
-        let startTime = DispatchTime.now()
-        defer {
-            FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
-        }
         var sortType:NarouContentSortType = .Title
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
@@ -1139,7 +1125,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
         
         DispatchQueue.main.async {
-            UIView.animate(withDuration: 0.3, animations: {
+            UIView.animate(withDuration: 0.0, animations: {
                 self.tableView.beginUpdates()
                 if node.isExpanded {
                     self.tableView.insertRows(at: indexPaths, with: .automatic)
@@ -1147,6 +1133,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     self.tableView.deleteRows(at: indexPaths, with: .automatic)
                 }
                 self.tableView.endUpdates()
+                self.tableView.layoutIfNeeded()
                 self.checkAndUpdateSwitchFolderButtonImage()
             }, completion: { finished in
                 if finished {
@@ -1267,6 +1254,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                             }
                                         }
                                     }
+                                }else{
+                                    completion?()
                                 }
                             }
                             return
@@ -1360,6 +1349,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         NiftyUtility.DispatchSyncMainQueue {
             UIView.animate(withDuration: 0.0) {
                 self.tableView.reloadData()
+                self.tableView.layoutIfNeeded()
             } completion: { finished in
                 if finished {
                     if hasFolder {
@@ -1379,11 +1369,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
 
     func reloadAllDataAndScrollToCurrentReadingContent(){
         DispatchQueue.global(qos: .userInitiated).async {
-            let startTime = DispatchTime.now()
-            defer {
-                FunctionExecutionMetrics.shared.RecordExecutionTime(startTime: startTime)
-                FunctionExecutionMetrics.shared.PrintMetrics()
-            }
             self.reloadAllData(doScroll: true) {
                 self.addPreviousNovelSpeakButtonIfNeeded()
             }
