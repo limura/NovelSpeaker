@@ -411,7 +411,12 @@ class StoryHtmlDecoder {
     
     var IsSiteInfoReady: Bool {
         get {
-            return siteInfoArrayArray.reduce(0, {$0 + $1.count}) > 0
+            return readySiteInfoCount > 0
+        }
+    }
+    var readySiteInfoCount: Int {
+        get {
+            return siteInfoArrayArray.reduce(0, {$0 + $1.count})
         }
     }
     
@@ -560,7 +565,6 @@ class StoryHtmlDecoder {
     
     // 標準のSiteInfoを非同期で読み込みます。
     func LoadSiteInfo(completion:((Error?)->Void)? = nil) {
-        print("LoadSiteInfo in.")
         var errorMessage:String? = nil
         func announceLoadEnd(errorString:String?) {
             lock.lock()
@@ -568,7 +572,6 @@ class StoryHtmlDecoder {
             let targetArray = siteInfoLoadDoneHandlerArray
             siteInfoLoadDoneHandlerArray.removeAll()
             lock.unlock()
-            print("LoadSiteInfo end: count: \(self.siteInfoArrayArray.count), first.count: \(self.siteInfoArrayArray.first?.count ?? -1)")
             for handler in targetArray {
                 handler(errorString)
             }

@@ -507,6 +507,7 @@
 "NiftyUtility_CanNotAddToBookshelfBody" = "Add to bookshelf failed.";
 "NiftyUtility_ImportError" = "Import error";
 "NiftyUtility_ImportedButNoTextFound" = "The import of the document was completed, but the content was empty. It may happen, for example, in the case of an HTML document in which all contents are generated in JavaScript. Although NovelSpeaker developers may not be able to do, from the opinion request form etc. of NovelSpeaker's support site side, please report with the URL where this error occurred along with the procedure until an error occurs You may be able to solve it.";
+"NiftyUtility_ImportError_readySiteInfoCount_too_small" =  "It seems that the information (SiteInfo) used to distinguish the main text of each website has not been loaded. It is likely that the loading of SiteInfo has failed. Please move to a place with a good connection and try \"Settings tab\" -> \"Get SiteInfo again\". Also, the details of the error may be output to \"Settings tab\" -> \"Notification of in-app error\", so please check that.";
 "NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle" = "Failed to add a novel to the bookshelf.";
 "NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage" = "Possible causes such as the already registered novel.";
 "NiftyUtility_FailedAboutAddNewNovel_DuplicateNovelID_OpenNovelButton" = "Open existed novel";
@@ -1226,7 +1227,7 @@ Fixing the problem
 
 - Fixed the problem that \"All novels\" was always set to \"Applicable target\" when moving from \"Settings tab\" -> \"Correction of reading\" to \"Details of correction of reading\".
 - In \"Settings tab\" -> \"Correction of reading\" -> \"Details of correction of reading\", try to select \"Save\" etc. with either \"Before reading\" or \"After reading\" blank. Fixed an issue that caused strange behavior after an error occurred.
-- When I pressed \"Settings tab\" -> \"Re-acquire SiteInfo\", \"Manual SiteInfo loading was completed\" was added to \"In-app error notification\" without waiting for SiteInfo loading to finish. Fixed a problem that had been closed
+- When I pressed \"Settings tab\" -> \"Get SiteInfo again\", \"Manual SiteInfo loading was completed\" was added to \"Notification of in-app error\" without waiting for SiteInfo loading to finish. Fixed a problem that had been closed
 
 
 # Version 2.2.2

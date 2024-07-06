@@ -498,6 +498,7 @@
 "NiftyUtility_CanNotAddToBookshelfBody" = "本棚への追加に失敗しました。";
 "NiftyUtility_ImportError" = "取り込み失敗";
 "NiftyUtility_ImportedButNoTextFound" = "取り込みは完了しましたが、内容が空でした。全ての内容がJavaScriptで生成されるHTML文書の場合などに起こることがあるかもしれません。ことせかい の開発側でできることはあまりないかもしれませんが、一応、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません";
+"NiftyUtility_ImportError_readySiteInfoCount_too_small" =  "Webサイト様毎の本文部分などを判別するための情報(SiteInfo)が読み込まれていないようです。恐らくはSiteInfoの読み込みに失敗していると考えられます。通信環境の良いところに移動して「設定タブ」→「SiteInfoを取得し直す」をお試しください。また、「設定タブ」→「アプリ内エラーのお知らせ」にエラーの詳細が出力されている可能性がありますので、確認していただけると助かります。";
 "NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle" = "小説の本棚への追加に失敗しました。";
 "NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage" = "既に登録されている小説などの原因が考えられます。";
 "NiftyUtility_FailedAboutAddNewNovel_DuplicateNovelID_OpenNovelButton" = "本棚側の小説を開く";

@@ -131,6 +131,9 @@ class NiftyUtility: NSObject {
         if isRecoverbleErrorString(error: error) && MFMailComposeViewController.canSendMail() {
             var errorMessage = error
             errorMessage += NSLocalizedString("NiftyUtility_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
+            if StoryHtmlDecoder.shared.readySiteInfoCount <= 0 {
+                errorMessage += NSLocalizedString("NiftyUtility_ImportError_readySiteInfoCount_too_small", comment: "Webサイト様毎の本文部分などを判別するための情報(SiteInfo)が読み込まれていないようです。恐らくはSiteInfoの読み込みに失敗していると考えられます。通信環境の良いところに移動して「設定タブ」→「SiteInfoを取得し直す」をお試しください。また、「設定タブ」→「アプリ内エラーのお知らせ」にエラーの詳細が出力されている可能性がありますので、確認していただけると助かります。")
+            }
             var builder = EasyDialogBuilder(viewController)
             builder = builder.title(title: NSLocalizedString("NiftyUtility_ImportError", comment: "取り込み失敗"))
             .textView(content: errorMessage, heightMultiplier: 0.45)
@@ -153,6 +156,8 @@ class NiftyUtility: NSObject {
                             + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
                             + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
                             + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
+                            + "\nready SiteInfo count: \(StoryHtmlDecoder.shared.readySiteInfoCount)"
+                            + "\nfirst SiteInfo resourceUrl: \(StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url?.absoluteString ?? "-").first?.resourceUrl ?? "?")"
                         picker.setMessageBody(messageBody, isHTML: false)
                         DummyMailComposeViewController.shared.currentViewController = viewController
                         picker.mailComposeDelegate = DummyMailComposeViewController.shared
