@@ -1617,7 +1617,14 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                         guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return .Title }
                         return globalState.bookShelfSortType
                     }
-                    if sortType != .KeywordTag { return }
+                    switch sortType {
+                    case .KeywordTag:
+                        break
+                    case .SelfCreatedFolder:
+                        break
+                    default:
+                        return
+                    }
                     DispatchQueue.global(qos: .userInteractive).async {
                         self.reloadAllData(doScroll: false)
                     }
