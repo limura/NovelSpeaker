@@ -424,8 +424,9 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm)
             let readLocation = story.readLocation(realm: realm)
             self.currentViewTypeCache = displaySetting?.viewType
+            let novelTitle = novel.title
             DispatchQueue.main.async {
-                self.title = novel.title
+                self.title = novelTitle
             }
             if let lastChapterNumber = novel.lastChapterNumber {
                 self.lastChapterNumber = lastChapterNumber
@@ -468,12 +469,17 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             }
             self.isNeedCollectDisplayLocation = false
             let (fg, bg) = getForegroundBackgroundColor()
-            self.webSpeechTool.applyFromNovelSpeakerString(webView: webView, content: story.content, foregroundColor: fg, backgroundColor: bg, displaySetting: displaySetting, baseURL: nil) {
-                self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1) {
-                    if let overrideLocation = overrideLocation, overrideLocation > 0 {
-                        self.webSpeechTool.scrollToIndex(location: overrideLocation, length: 1, scrollRatio: scrollRatio ?? 0.5)
-                    }else{
-                        self.webSpeechTool.scrollToIndex(location: readLocation, length: 1, scrollRatio: 0.3)
+            let font = displaySetting?.font
+            let viewType = displaySetting?.viewType
+            let lineSpacingDisplayValue = displaySetting?.lineSpacingDisplayValue
+            DispatchQueue.main.async {
+                self.webSpeechTool.applyFromNovelSpeakerString(webView: webView, content: story.content, foregroundColor: fg, backgroundColor: bg, font: font, viewType: viewType, lineSpacingDisplayValue: lineSpacingDisplayValue, baseURL: nil) {
+                    self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1) {
+                        if let overrideLocation = overrideLocation, overrideLocation > 0 {
+                            self.webSpeechTool.scrollToIndex(location: overrideLocation, length: 1, scrollRatio: scrollRatio ?? 0.5)
+                        }else{
+                            self.webSpeechTool.scrollToIndex(location: readLocation, length: 1, scrollRatio: 0.3)
+                        }
                     }
                 }
             }
@@ -870,7 +876,9 @@ body.NovelSpeakerBody {
         barButtonArray.append(startStopButtonItem)
         barButtonArray.reverse()
 
-        navigationItem.rightBarButtonItems = barButtonArray
+        DispatchQueue.main.async {
+            self.navigationItem.rightBarButtonItems = barButtonArray
+        }
     }
     
     //MARK: @objc Delegate methods
@@ -1214,8 +1222,10 @@ body.NovelSpeakerBody {
         self.readingChapterStoryUpdateDate = Date()
         self.speakerDisplayWholeText = StorySpeaker.shared.GenerateWholeDisplayText()
         self.loadStoryWithoutStorySpeakerWith(story: story)
-        self.observeStory(storyID: story.storyID)
-        self.observeNovel(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: story.storyID))
+        DispatchQueue.main.async {
+            self.observeStory(storyID: story.storyID)
+            self.observeNovel(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: story.storyID))
+        }
         self.applyChapterListChange()
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false

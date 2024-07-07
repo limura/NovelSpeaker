@@ -90,8 +90,8 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         webView.loadHTMLString(html, baseURL: baseURL)
     }
     
-    public func applyFromNovelSpeakerString(webView:CustomWKWebView, content: String, foregroundColor: UIColor, backgroundColor: UIColor, displaySetting: RealmDisplaySetting?, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
-        let html = createContentHTML(content: content, foregroundColor: foregroundColor, backgroundColor: backgroundColor, displaySetting: displaySetting)
+    public func applyFromNovelSpeakerString(webView:CustomWKWebView, content: String, foregroundColor: UIColor, backgroundColor: UIColor, font:UIFont?, viewType:RealmDisplaySetting.ViewType?, lineSpacingDisplayValue: CGFloat?, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
+        let html = createContentHTML(content: content, foregroundColor: foregroundColor, backgroundColor: backgroundColor, font: font, viewType: viewType, lineSpacingDisplayValue: lineSpacingDisplayValue)
         applyFromHtmlString(webView: webView, html: html, baseURL: baseURL, completionHandler: completionHandler)
     }
     
@@ -292,7 +292,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         return text.replacingOccurrences(of: "\\|([^|(]+?)[(]([^)]+?)[)]", with: "<ruby> $1<rt> $2 </rt></ruby>", options: .regularExpression, range: text.range(of: text)).replacingOccurrences(of: "\r\n", with: "  <br>").replacingOccurrences(of: "\n", with: " <br>")
     }
     
-    func createContentHTML(content:String, foregroundColor:UIColor, backgroundColor:UIColor, displaySetting: RealmDisplaySetting?) -> String {
+    func createContentHTML(content:String, foregroundColor:UIColor, backgroundColor:UIColor, font:UIFont?, viewType:RealmDisplaySetting.ViewType?, lineSpacingDisplayValue: CGFloat?) -> String {
         var fontSetting:String = "font: -apple-system-title1;"
         var fontSize:String = "18px"
         let letterSpacing:String = "0.03em"
@@ -313,11 +313,10 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             backgroundColorCSS = ""
         }
 
-        if let displaySetting = displaySetting {
-            let displayFont = displaySetting.font
+        if let displayFont = font, let viewType = viewType, let lineSpacingDisplayValue = lineSpacingDisplayValue {
             let fontWeight = displayFont.fontDescriptor.symbolicTraits.contains(.traitBold) ? "bold" : "normal"
             let fontStyle = displayFont.fontDescriptor.symbolicTraits.contains(.traitItalic) ? "italic" : "normal"
-            fontSetting = "font-family: '\(displaySetting.font.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
+            fontSetting = "font-family: '\(displayFont.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
             // font-size を UIFont の size と合わせるには、
             // 1. UIFont の .pointSize を使う
             // 2. html 側に <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'> を設定して端末毎のリサイズをやめさせる
@@ -325,12 +324,12 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             // from: https://developer.apple.com/forums/thread/128293
             let localPixelMagnification:CGFloat = 1 //UIScreen.main.scale
             fontSize = "\(displayFont.pointSize * localPixelMagnification)px"
-            let lineSpacePix = (displayFont.lineHeight + displaySetting.lineSpacingDisplayValue) * localPixelMagnification
+            let lineSpacePix = (displayFont.lineHeight + lineSpacingDisplayValue) * localPixelMagnification
             lineHeight = "\(lineSpacePix)px"
-            if displaySetting.viewType == .webViewVertical {
+            if viewType == .webViewVertical {
                 // text-combine-upright の digit は WkWebView では未実装らしいけども。(´・ω・`)
                 verticalModeCSS = "writing-mode: vertical-rl; text-combine-upright: digit 2;"
-            }else if displaySetting.viewType == .webViewVertical2Column {
+            }else if viewType == .webViewVertical2Column {
                 verticalModeCSS = "writing-mode: vertical-rl; text-combine-upright: digit 2;"
                 // 上下2段で表示します。
                 // んだけどこれ、読み上げ時の読み上げ位置表示でのスクロールと壊滅的に合わないです(´・ω・`)
@@ -341,7 +340,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
                     width: 100vw; /* 横を横幅に合わせる */
                     """
             }
-            switch displaySetting.viewType {
+            switch viewType {
             case .normal, .webViewOriginal:
                 break
             case .webViewHorizontal, .webViewVertical2Column:
