@@ -1612,15 +1612,21 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     break
                 case .initial(_):
                     break
-                case .update(_, deletions: _, insertions: _, modifications: _):
+                case .update(let objects, deletions: _, insertions: _, modifications: _):
                     let sortType = RealmUtil.RealmBlock { (realm) -> NarouContentSortType in
                         guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return .Title }
                         return globalState.bookShelfSortType
                     }
                     switch sortType {
                     case .KeywordTag:
+                        if objects.filter({$0.type == RealmNovelTag.TagType.Keyword}).count <= 0 {
+                            return
+                        }
                         break
                     case .SelfCreatedFolder:
+                        if objects.filter({$0.type == RealmNovelTag.TagType.Folder}).count <= 0 {
+                            return
+                        }
                         break
                     default:
                         return
