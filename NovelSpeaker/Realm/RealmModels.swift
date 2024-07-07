@@ -3228,6 +3228,26 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
             realm.add(tag, update: .modified)
         }
     }
+    static func AddTag(realm: Realm, name:String, novelIDArray: [String], type: String) {
+        guard let novelArray = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: novelIDArray) else { return }
+        let cleanNovelIDArray = Array(novelArray.map({$0.novelID}))
+        let tagName = NovelSpeakerUtility.CleanTagString(tag: name)
+        if tagName.count <= 0 || cleanNovelIDArray.count <= 0 {
+            return
+        }
+        if let tag = SearchWith(realm: realm, name: tagName, type: type) {
+            let cleanNovelIDSet = Set(cleanNovelIDArray)
+            let currentNovelIDSet = Set(tag.targetNovelIDArray)
+            let unionNovelIDSet = cleanNovelIDSet.union(currentNovelIDSet)
+            tag.targetNovelIDArray.removeAll()
+            tag.targetNovelIDArray.append(objectsIn: Array(unionNovelIDSet))
+            realm.add(tag, update: .modified)
+        }else{
+            let tag = CreateNewTag(name: tagName, type: type)
+            tag.targetNovelIDArray.append(objectsIn: cleanNovelIDArray)
+            realm.add(tag, update: .modified)
+        }
+    }
     
     static func CreateUniqueID(name:String, type:String) -> String {
         return "\(type)\n\(name)"
@@ -3244,6 +3264,13 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
             return String(tagID[..<index])
         }
         return ""
+    }
+    
+    static func UnrefFor(realm:Realm, name:String, type:String, novelIDArray:[String]) {
+        guard let tag = SearchWith(realm: realm, name: name, type: type) else { return }
+        let newValue = Array(tag.targetNovelIDArray.filter({!novelIDArray.contains($0)}))
+        tag.targetNovelIDArray.removeAll()
+        tag.targetNovelIDArray.append(objectsIn: newValue)
     }
     
     func unref(realm:Realm, novelID:String) {

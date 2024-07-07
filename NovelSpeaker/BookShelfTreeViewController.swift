@@ -598,6 +598,116 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                             })
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
+                                    "BookShelfTreeViewController_checkboxselected_AssignFolder",
+                                    comment: "フォルダへ追加・削除する"
+                                )
+                                $0.cell.textLabel?.numberOfLines = 0
+                                $0.cell.accessibilityTraits = .button
+                            }.onCellSelection({ cell, row in
+                                epvc.close(animated: false) {
+                                    var folder2NovelIDMap:[String:[String]] = [:]
+                                    RealmUtil.RealmBlock { realm in
+                                        guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
+                                        for folder in folderArray {
+                                            folder2NovelIDMap[folder.name] = Array(folder.targetNovelIDArray)
+                                        }
+                                    }
+                                    let firstTimeFolder2NovelIDMap = folder2NovelIDMap
+                                    EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { epvc in
+                                        func getFolderImageSystemName(folderName:String) -> String {
+                                            let targetFolderNovelIDSet = Set(folder2NovelIDMap[folderName] ?? [])
+                                            let checkedNovelIDSet = Set(checkedNovelIDArray)
+                                            let and = targetFolderNovelIDSet.intersection(checkedNovelIDSet)
+                                            if and.count == 0 {
+                                                return "square"
+                                            }
+                                            if checkedNovelIDArray.count == and.count {
+                                                return "checkmark.square"
+                                            }
+                                            return "minus.square"
+                                        }
+                                        func loopFolderAssign(folderName:String, completion:(()->Void)?) {
+                                            switch getFolderImageSystemName(folderName: folderName) {
+                                            case "checkmark.square":
+                                                DispatchQueue.global(qos: .userInitiated).async {
+                                                    RealmUtil.Write { realm in
+                                                        RealmNovelTag.UnrefFor(realm: realm, name: folderName, type: RealmNovelTag.TagType.Folder, novelIDArray: checkedNovelIDArray)
+                                                    }
+                                                    folder2NovelIDMap[folderName] = []
+                                                    completion?()
+                                                }
+                                                break
+                                            case "square":
+                                                // 空の場合は初期状態に戻す
+                                                DispatchQueue.global(qos: .userInitiated).async {
+                                                    let newValue = firstTimeFolder2NovelIDMap[folderName] ?? checkedNovelIDArray
+                                                    RealmUtil.Write { realm in
+                                                        RealmNovelTag.AddTag(realm: realm, name: folderName, novelIDArray: newValue, type: RealmNovelTag.TagType.Folder)
+                                                    }
+                                                    folder2NovelIDMap[folderName] = newValue
+                                                    completion?()
+                                                }
+                                                break
+                                            case "minus.square":
+                                                fallthrough
+                                            default:
+                                                DispatchQueue.global(qos: .userInitiated).async {
+                                                    RealmUtil.Write { realm in
+                                                        RealmNovelTag.AddTag(realm: realm, name: folderName, novelIDArray: checkedNovelIDArray, type: RealmNovelTag.TagType.Folder)
+                                                    }
+                                                    folder2NovelIDMap[folderName] = checkedNovelIDArray
+                                                    completion?()
+                                                }
+                                                break
+                                            }
+                                        }
+                                        func addButton(title:String, process:((_ cell:ButtonCellOf<String>)->Void)?) {
+                                            section <<< ButtonRow() {
+                                                $0.title = title
+                                                $0.cell.textLabel?.numberOfLines = 0
+                                                $0.cell.accessibilityTraits = .button
+                                                $0.cell.imageView?.image = UIImage(systemName: getFolderImageSystemName(folderName: title))
+                                            }.onCellSelection({ cell, row in
+                                                process?(cell)
+                                            })
+                                        }
+                                        let section = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle", comment: "追加・削除対象のフォルダ"))
+                                        let folderNames = RealmUtil.RealmBlock { realm -> [String] in
+                                            guard let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return [] }
+                                            return Array(tags.map({$0.name}))
+                                        }
+                                        for name in folderNames {
+                                            addButton(title: name) { cell in
+                                                loopFolderAssign(folderName: name) {
+                                                    DispatchQueue.main.async {
+                                                        cell.imageView?.image = UIImage(systemName: getFolderImageSystemName(folderName: name))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        section <<< ButtonRow() {
+                                            $0.title = NSLocalizedString("Close_button", comment: "Close")
+                                            $0.cell.textLabel?.numberOfLines = 0
+                                            $0.cell.accessibilityTraits = .button
+                                        }.onCellSelection({ cell, row in
+                                            epvc.close(animated: true, completion: nil)
+                                        })
+                                        epvc.form +++ section
+                                        let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説") + "(\(checkedNovelIDArray.count))")
+                                        for novelID in checkedNovelIDArray {
+                                            let novelTitle = novelIDTitleMap[novelID]
+                                            novelSection <<< LabelRow() {
+                                                $0.title = novelTitle ?? "-"
+                                                $0.cell.textLabel?.numberOfLines = 0
+                                                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                                            }
+                                        }
+                                        epvc.form +++ novelSection
+                                    }, parentViewController: self, animated: true, completion: nil)
+                                }
+                            })
+                            buttonSection <<< ButtonRow() {
+                                $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_DeleteNovel",
                                     comment: "小説を削除する"
                                 )

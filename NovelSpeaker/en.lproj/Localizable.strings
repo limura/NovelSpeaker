@@ -12,6 +12,7 @@
 "Cancel_button" = "Cancel";
 "Disagree_Button" = "Disagree";
 "Agree_Button" = "Agree";
+"Close_button" = "Close";
 //"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
 
 "WatchOS_NowloadingText" = "Loading...";
@@ -769,6 +770,9 @@
 "BookShelfTreeViewController_checkboxselected_QueueNovelUpdateCheck" = "Check for updates";
 "BookShelfTreeViewController_checkboxselected_confirm_delete_working" = "%d novels are being deleted.";
 "BookShelfTreeViewController_downloadStatusBarButtonTapped_no_download_found" = "There is no download currently running";
+"BookShelfTreeViewController_checkboxselected_AssignFolder" = "Adding and Removing from a Folder";
+"BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle" = "Folder to be added/deleted";
+
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";

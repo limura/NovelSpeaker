@@ -12,6 +12,7 @@
 "Cancel_button" = "キャンセル";
 "Disagree_Button" = "同意しない";
 "Agree_Button" = "同意する";
+"Close_button" = "閉じる";
 //"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
 
 "WatchOS_NowloadingText" = "読込中……";
@@ -760,6 +761,8 @@
 "BookShelfTreeViewController_checkboxselected_QueueNovelUpdateCheck" = "更新確認を行う";
 "BookShelfTreeViewController_checkboxselected_confirm_delete_working" = "%d個の小説を削除中";
 "BookShelfTreeViewController_downloadStatusBarButtonTapped_no_download_found" = "ダウンロードは実行されていませんでした";
+"BookShelfTreeViewController_checkboxselected_AssignFolder" = "フォルダへ追加・削除する";
+"BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle" = "追加・削除対象のフォルダ";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";
