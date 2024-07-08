@@ -855,6 +855,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             }
             return
         }
+        // フォルダの開閉以外であれば、チェックボックスの選択をしたことにする
+        if self.showCheckboxes {
+            self.checkboxTapped(for: indexPath)
+            return
+        }
         if let novelID = node.novelID {
             // currentReadingNovelID の小説を開いた(最後に開いていた小説を開いた)なら、
             // updateReadDate は呼ばないで良いという事にします。
