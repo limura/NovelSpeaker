@@ -422,6 +422,13 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         updateToggleStateForVisibleCells()
     }
     @objc func toggleCheckboxesButtonTapped() {
+        if NovelSpeakerUtility.IsNotDisplayNovelMultiSelectCheckbox() == false && self.showCheckboxes == false {
+            NiftyUtility.EasyDialogOneButtonWithSwitch(viewController: self, title: nil, message: NSLocalizedString("BookShelfTreeViewController_toggleCheckboxesButtonTapped_InformationMessage", comment: "小説の複数選択モードに入りました。\nこのモードを抜けるには先ほど押したボタンをもう一度押す必要があります。"), switchMessage: NSLocalizedString("BookShelfTreeViewController_toggleCheckboxesButtonTapped_Information_IsNotDisplayInformationSwitch", comment: "このメッセージを二度と出さない"), button1Title: nil) { isNotDisplay in
+                NovelSpeakerUtility.SetIsNotDisplayNovelMultiSelectCheckbox(IsDisplay: isNotDisplay)
+            }
+            toggleCheckboxes()
+            return
+        }
         if self.showCheckboxes == true {
             // チェックボックスが表示されていて、チェックされているものがあるのなら、それらに対してなにかをする
             var checkedNovelIDArray:[String] = []

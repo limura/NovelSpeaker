@@ -3072,6 +3072,17 @@ class NovelSpeakerUtility: NSObject {
         defaults.setValue(IsDisplay, forKey: IsNotDisplayUpdateCheckDialogKey)
         defaults.synchronize()
     }
+    static let IsNotDisplayNovelMultiSelectCheckboxKey = "IsNotDisplayNovelMultiSelectCheckbox"
+    static func IsNotDisplayNovelMultiSelectCheckbox() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [IsNotDisplayNovelMultiSelectCheckboxKey: false])
+        return defaults.bool(forKey: IsNotDisplayNovelMultiSelectCheckboxKey)
+    }
+    static func SetIsNotDisplayNovelMultiSelectCheckbox(IsDisplay:Bool){
+        let defaults = UserDefaults.standard
+        defaults.setValue(IsDisplay, forKey: IsNotDisplayNovelMultiSelectCheckboxKey)
+        defaults.synchronize()
+    }
 
     static let OuterNovelFileAttributesKey = "OuterNovelFileAttributesKey"
     struct OuterNovelFileAttributes: Codable {
