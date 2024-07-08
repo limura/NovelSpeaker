@@ -763,6 +763,7 @@
 "BookShelfTreeViewController_downloadStatusBarButtonTapped_no_download_found" = "ダウンロードは実行されていませんでした";
 "BookShelfTreeViewController_checkboxselected_AssignFolder" = "フォルダへ追加・削除する";
 "BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle" = "追加・削除対象のフォルダ";
+"BookShelfTreeViewController_toggleCheckBoxesButtonTapped_firstMenu_title" = "選択された小説への操作";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";

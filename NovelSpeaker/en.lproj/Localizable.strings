@@ -772,7 +772,7 @@
 "BookShelfTreeViewController_downloadStatusBarButtonTapped_no_download_found" = "There is no download currently running";
 "BookShelfTreeViewController_checkboxselected_AssignFolder" = "Adding and Removing from a Folder";
 "BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle" = "Folder to be added/deleted";
-
+"BookShelfTreeViewController_toggleCheckBoxesButtonTapped_firstMenu_title" = "Operations on selected novels";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
