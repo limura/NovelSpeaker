@@ -40,6 +40,7 @@ class EurekaViewController: FormViewController {
 // Eurekaを使った popup を作る時の utility
 class EurekaPopupViewController: FormViewController, UIPopoverPresentationControllerDelegate {
     var formSetupMethod:((_ form:EurekaPopupViewController)->Void)? = nil
+    var willDisappear:(()->Void)? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,6 +49,11 @@ class EurekaPopupViewController: FormViewController, UIPopoverPresentationContro
         self.popoverPresentationController?.delegate = self
         formSetupMethod?(self)
         //self.preferredContentSize = self.view.intrinsicContentSize
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.willDisappear?()
     }
     
     func close(animated:Bool, completion:(()->Void)?) {
