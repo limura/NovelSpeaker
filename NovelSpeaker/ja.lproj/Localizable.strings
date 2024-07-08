@@ -764,6 +764,8 @@
 "BookShelfTreeViewController_checkboxselected_AssignFolder" = "フォルダへ追加・削除する";
 "BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle" = "追加・削除対象のフォルダ";
 "BookShelfTreeViewController_toggleCheckBoxesButtonTapped_firstMenu_title" = "選択された小説への操作";
+"BookShelfTreeViewController_toggleCheckboxesButtonTapped_InformationMessage" = "小説の複数選択モードに入りました。\nこのモードを抜けるには先ほど押したボタンをもう一度押す必要があります。";
+"BookShelfTreeViewController_toggleCheckboxesButtonTapped_Information_IsNotDisplayInformationSwitch" = "このメッセージを二度と出さない";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";
