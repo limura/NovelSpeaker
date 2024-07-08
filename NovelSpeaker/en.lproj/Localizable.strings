@@ -956,14 +956,30 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.4
 
-- Fixed an issue where a-f in hexadecimal notation matched only lowercase letters when identifying URIs.
-- Fixed an issue where the scroll bar was not displayed on the bookshelf screen
+- You can now search by folder name or novel name in the \"Settings tab\" -> \"Edit folder\"
+- Added a button to change the folder name to the \"Settings tab\" -> \"Edit folder\"
+- Renovated bookshelf screen
+- Added \"Multiple Selection\" to the button displayed in the upper right corner of the bookshelf screen
+- When the bookshelf screen is in folder division mode, the number of novels stored in the folder is displayed
+- When there are many novels to check for updates at once, the time it took to register the update check has been slightly sped up (it took about 10 seconds in some cases).
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.9.4
+
+Changes in interface/internal operation
+
+- You can now search by folder name or novel name in the \"Settings tab\" -> \"Edit folder\"
+- Added a button to change the folder name to the \"Settings tab\" -> \"Edit folder\"
+- Renovated bookshelf screen
+- Added \"Multiple Selection\" to the button displayed in the upper right corner of the bookshelf screen
+- When the bookshelf screen is in folder division mode, the number of novels stored in the folder is displayed
+- When there are many novels to check for updates at once, the time it took to register the update check has been slightly sped up (it took about 10 seconds in some cases).
+
+
 Version 2.9.3
 
 Fixing the problem

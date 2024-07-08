@@ -945,14 +945,28 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.4
 
-- URIと識別するものについて、16進数表記の a-f が小文字のみにマッチしている問題を解消
-- 本棚画面でスクロールバーが表示されていなかった問題を修正
+- 「設定タブ」->「自作フォルダを編集する」でフォルダ名や小説名での検索ができるように
+- 本棚画面を刷新
+- 本棚画面の右上に表示されるボタンに「複数小説の選択・操作」を追加
+- 本棚画面でフォルダ分割されるモードの場合、フォルダに格納されている小説の数を表示するように
+- 一度に更新確認を行う小説が多い場合、更新確認登録に時間がかかっていた(場合によっては10秒程度かかっていた)ものを少し高速化
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.9.4
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」->「自作フォルダを編集する」でフォルダ名や小説名での検索ができるように
+- 本棚画面を刷新
+- 本棚画面の右上に表示されるボタンに「複数小説の選択・操作」を追加
+- 本棚画面でフォルダ分割されるモードの場合、フォルダに格納されている小説の数を表示するように
+- 一度に更新確認を行う小説が多い場合、更新確認登録に時間がかかっていた(場合によっては10秒程度かかっていた)ものを少し高速化
+
+
 Version 2.9.3
 
 問題の修正
