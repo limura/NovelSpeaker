@@ -421,6 +421,132 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
         updateToggleStateForVisibleCells()
     }
+    
+    func RunFolderManagePopupView(checkedFolder2NovelIDMap: [String:[String]], novelIDTitleMap: [String:String], checkedNovelIDArray: [String]) {
+        var folder2NovelIDMap:[String:[String]] = [:]
+        func getFolderImageSystemName(folderName:String) -> String {
+            let targetFolderNovelIDSet = Set(folder2NovelIDMap[folderName] ?? [])
+            let checkedNovelIDSet = Set(checkedNovelIDArray)
+            let and = targetFolderNovelIDSet.intersection(checkedNovelIDSet)
+            if and.count == 0 {
+                return "square"
+            }
+            if checkedNovelIDArray.count == and.count {
+                return "checkmark.square"
+            }
+            return "minus.square"
+        }
+        // フォルダへの登録や登録解除を行います。
+        // 登録されていない状態では以前の状態に戻します。
+        // 単純に追加登録や削除をしてしまうとフォルダ内の順番がおかしくなるので注意してください
+        func loopFolderAssign(folderName:String, completion:(()->Void)?) {
+            switch getFolderImageSystemName(folderName: folderName) {
+            case "checkmark.square":
+                // 全てが選択されているのなら、選択を外す
+                DispatchQueue.global(qos: .userInitiated).async {
+                    RealmUtil.Write { realm in
+                        RealmNovelTag.UnrefFor(realm: realm, name: folderName, type: RealmNovelTag.TagType.Folder, novelIDArray: checkedNovelIDArray)
+                    }
+                    folder2NovelIDMap[folderName] = (firstTimeFolder2NovelIDMap[folderName] ?? folder2NovelIDMap[folderName] ?? []).filter({!checkedNovelIDArray.contains($0)})
+                    completion?()
+                }
+                break
+            case "square":
+                // 空の場合は初期状態に戻す
+                guard let newValue = firstTimeFolder2NovelIDMap[folderName] else { return }
+                // ただし、初期状態が未選択だった場合は単に追加する必要があります。
+                // 単に追加するのは "minus.square" と同じ処理なので fallthrough します。
+                let firstFolderNovelIDSet = Set(firstTimeFolder2NovelIDMap[folderName] ?? [])
+                let checkedNovelIDSet = Set(checkedNovelIDArray)
+                if checkedFolder2NovelIDMap[folderName]?.count ?? 0 > 0 || !firstFolderNovelIDSet.intersection(checkedNovelIDSet).isEmpty {
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        RealmUtil.Write { realm in
+                            RealmNovelTag.AddTag(realm: realm, name: folderName, novelIDArray: newValue, type: RealmNovelTag.TagType.Folder)
+                        }
+                        folder2NovelIDMap[folderName] = newValue
+                        completion?()
+                    }
+                    break
+                }
+                fallthrough
+            case "minus.square":
+                fallthrough
+            default:
+                // 一部が登録されているのであれば、残りを追加する形で登録します
+                DispatchQueue.global(qos: .userInitiated).async {
+                    guard var newValue = firstTimeFolder2NovelIDMap[folderName] else { return }
+                    newValue.append(contentsOf: checkedNovelIDArray.filter({!newValue.contains($0)}))
+                    RealmUtil.Write { realm in
+                        RealmNovelTag.AddTag(realm: realm, name: folderName, novelIDArray: newValue, type: RealmNovelTag.TagType.Folder)
+                    }
+                    folder2NovelIDMap[folderName] = newValue
+                    completion?()
+                }
+                break
+            }
+        }
+        func addButton(title:String, section: Section, process:((_ cell:ButtonCellOf<String>)->Void)?) {
+            section <<< ButtonRow() {
+                $0.title = title
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.accessibilityTraits = .button
+                $0.cell.imageView?.image = UIImage(systemName: getFolderImageSystemName(folderName: title))
+            }.onCellSelection({ cell, row in
+                process?(cell)
+            })
+        }
+        RealmUtil.RealmBlock { realm in
+            guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
+            for folder in folderArray {
+                folder2NovelIDMap[folder.name] = Array(folder.targetNovelIDArray)
+            }
+        }
+        let firstTimeFolder2NovelIDMap = folder2NovelIDMap
+        EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { epvc in
+            let section = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle", comment: "追加・削除対象のフォルダ"))
+            let folderNames = RealmUtil.RealmBlock { realm -> [String] in
+                guard let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return [] }
+                return Array(tags.map({$0.name}))
+            }
+            for name in folderNames.sorted(by: {$0 < $1}) {
+                addButton(title: name, section: section) { cell in
+                    loopFolderAssign(folderName: name) {
+                        DispatchQueue.main.async {
+                            cell.imageView?.image = UIImage(systemName: getFolderImageSystemName(folderName: name))
+                        }
+                    }
+                }
+            }
+            epvc.form +++ section
+            let closeSection = Section ()
+            closeSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("Close_button", comment: "Close")
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.accessibilityTraits = .button
+            }.onCellSelection({ cell, row in
+                epvc.close(animated: true, completion: nil)
+            })
+            epvc.form +++ closeSection
+            let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説") + "(\(checkedFolder2NovelIDMap.map({$0.value.count}).reduce(0, {$0 + $1})))")
+            for (folderName, novelIDArray) in checkedFolder2NovelIDMap {
+                for novelID in novelIDArray {
+                    let novelTitle = novelIDTitleMap[novelID]
+                    novelSection <<< LabelRow() {
+                        $0.title = "\(folderName) / \(novelTitle ?? "-")"
+                        $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                    }
+                }
+            }
+            epvc.form +++ novelSection
+            epvc.willDisappear = {
+                for topNode in self.displayDataArray {
+                    topNode.updateSelectionState()
+                }
+            }
+        }, parentViewController: self, animated: true, completion: nil)
+    }
+    
     @objc func toggleCheckboxesButtonTapped() {
         if NovelSpeakerUtility.IsNotDisplayNovelMultiSelectCheckbox() == false && self.showCheckboxes == false {
             NiftyUtility.EasyDialogOneButtonWithSwitch(viewController: self, title: nil, message: NSLocalizedString("BookShelfTreeViewController_toggleCheckboxesButtonTapped_InformationMessage", comment: "小説の複数選択モードに入りました。\nこのモードを抜けるには先ほど押したボタンをもう一度押す必要があります。"), switchMessage: NSLocalizedString("BookShelfTreeViewController_toggleCheckboxesButtonTapped_Information_IsNotDisplayInformationSwitch", comment: "このメッセージを二度と出さない"), button1Title: nil) { isNotDisplay in
@@ -458,9 +584,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             if checkedNovelIDArray.count > 0 {
                 DispatchQueue.global(qos: .userInteractive).async {
                     DispatchQueue.main.async {
-                        EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: {
-                            epvc in
-                            let buttonSection = Section(NSLocalizedString("BookShelfTreeViewController_toggleCheckBoxesButtonTapped_firstMenu_title", comment: "選択された小説への操作"))
+                        func AddNovelUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_QueueNovelUpdateCheck",
@@ -473,6 +597,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                     self.addQueueToNovelDownload(novelIDArray: checkedNovelIDArray)
                                 }
                             })
+                        }
+                        func AddStopUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_StopUpdateCheck",
@@ -510,6 +636,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                     }
                                 })
                             })
+                        }
+                        func AddEnableUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_EnableUpdateCheck",
@@ -544,6 +672,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                     }
                                 })
                             })
+                        }
+                        func AddEnableLikeCheckButton(buttonSection: Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_EnableLikeCheck",
@@ -578,6 +708,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                     }
                                 })
                             })
+                        }
+                        func AddDisableLikeCheckButton(buttonSection: Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_DisableLikeCheck",
@@ -608,6 +740,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                     }
                                 })
                             })
+                        }
+                        func AddAssignFolderButton(buttonSection: Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_AssignFolder",
@@ -617,130 +751,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                 $0.cell.accessibilityTraits = .button
                             }.onCellSelection({ cell, row in
                                 epvc.close(animated: false) {
-                                    var folder2NovelIDMap:[String:[String]] = [:]
-                                    RealmUtil.RealmBlock { realm in
-                                        guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
-                                        for folder in folderArray {
-                                            folder2NovelIDMap[folder.name] = Array(folder.targetNovelIDArray)
-                                        }
-                                    }
-                                    let firstTimeFolder2NovelIDMap = folder2NovelIDMap
-                                    EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { epvc in
-                                        func getFolderImageSystemName(folderName:String) -> String {
-                                            let targetFolderNovelIDSet = Set(folder2NovelIDMap[folderName] ?? [])
-                                            let checkedNovelIDSet = Set(checkedNovelIDArray)
-                                            let and = targetFolderNovelIDSet.intersection(checkedNovelIDSet)
-                                            if and.count == 0 {
-                                                return "square"
-                                            }
-                                            if checkedNovelIDArray.count == and.count {
-                                                return "checkmark.square"
-                                            }
-                                            return "minus.square"
-                                        }
-                                        // フォルダへの登録や登録解除を行います。
-                                        // 登録されていない状態では以前の状態に戻します。
-                                        // 単純に追加登録や削除をしてしまうとフォルダ内の順番がおかしくなるので注意してください
-                                        func loopFolderAssign(folderName:String, completion:(()->Void)?) {
-                                            switch getFolderImageSystemName(folderName: folderName) {
-                                            case "checkmark.square":
-                                                // 全てが選択されているのなら、選択を外す
-                                                DispatchQueue.global(qos: .userInitiated).async {
-                                                    RealmUtil.Write { realm in
-                                                        RealmNovelTag.UnrefFor(realm: realm, name: folderName, type: RealmNovelTag.TagType.Folder, novelIDArray: checkedNovelIDArray)
-                                                    }
-                                                    folder2NovelIDMap[folderName] = (firstTimeFolder2NovelIDMap[folderName] ?? folder2NovelIDMap[folderName] ?? []).filter({!checkedNovelIDArray.contains($0)})
-                                                    completion?()
-                                                }
-                                                break
-                                            case "square":
-                                                // 空の場合は初期状態に戻す
-                                                guard let newValue = firstTimeFolder2NovelIDMap[folderName] else { return }
-                                                // ただし、初期状態が未選択だった場合は単に追加する必要があります。
-                                                // 単に追加するのは "minus.square" と同じ処理なので fallthrough します。
-                                                let firstFolderNovelIDSet = Set(firstTimeFolder2NovelIDMap[folderName] ?? [])
-                                                let checkedNovelIDSet = Set(checkedNovelIDArray)
-                                                if checkedFolder2NovelIDMap[folderName]?.count ?? 0 > 0 || !firstFolderNovelIDSet.intersection(checkedNovelIDSet).isEmpty {
-                                                    DispatchQueue.global(qos: .userInitiated).async {
-                                                        RealmUtil.Write { realm in
-                                                            RealmNovelTag.AddTag(realm: realm, name: folderName, novelIDArray: newValue, type: RealmNovelTag.TagType.Folder)
-                                                        }
-                                                        folder2NovelIDMap[folderName] = newValue
-                                                        completion?()
-                                                    }
-                                                    break
-                                                }
-                                                fallthrough
-                                            case "minus.square":
-                                                fallthrough
-                                            default:
-                                                // 一部が登録されているのであれば、残りを追加する形で登録します
-                                                DispatchQueue.global(qos: .userInitiated).async {
-                                                    guard var newValue = firstTimeFolder2NovelIDMap[folderName] else { return }
-                                                    newValue.append(contentsOf: checkedNovelIDArray.filter({!newValue.contains($0)}))
-                                                    RealmUtil.Write { realm in
-                                                        RealmNovelTag.AddTag(realm: realm, name: folderName, novelIDArray: newValue, type: RealmNovelTag.TagType.Folder)
-                                                    }
-                                                    folder2NovelIDMap[folderName] = newValue
-                                                    completion?()
-                                                }
-                                                break
-                                            }
-                                        }
-                                        func addButton(title:String, process:((_ cell:ButtonCellOf<String>)->Void)?) {
-                                            section <<< ButtonRow() {
-                                                $0.title = title
-                                                $0.cell.textLabel?.numberOfLines = 0
-                                                $0.cell.accessibilityTraits = .button
-                                                $0.cell.imageView?.image = UIImage(systemName: getFolderImageSystemName(folderName: title))
-                                            }.onCellSelection({ cell, row in
-                                                process?(cell)
-                                            })
-                                        }
-                                        let section = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle", comment: "追加・削除対象のフォルダ"))
-                                        let folderNames = RealmUtil.RealmBlock { realm -> [String] in
-                                            guard let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return [] }
-                                            return Array(tags.map({$0.name}))
-                                        }
-                                        for name in folderNames.sorted(by: {$0 < $1}) {
-                                            addButton(title: name) { cell in
-                                                loopFolderAssign(folderName: name) {
-                                                    DispatchQueue.main.async {
-                                                        cell.imageView?.image = UIImage(systemName: getFolderImageSystemName(folderName: name))
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        epvc.form +++ section
-                                        let closeSection = Section ()
-                                        closeSection <<< ButtonRow() {
-                                            $0.title = NSLocalizedString("Close_button", comment: "Close")
-                                            $0.cell.textLabel?.numberOfLines = 0
-                                            $0.cell.accessibilityTraits = .button
-                                        }.onCellSelection({ cell, row in
-                                            epvc.close(animated: true, completion: nil)
-                                        })
-                                        epvc.form +++ closeSection
-                                        let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説") + "(\(checkedFolder2NovelIDMap.map({$0.value.count}).reduce(0, {$0 + $1})))")
-                                        for (folderName, novelIDArray) in checkedFolder2NovelIDMap {
-                                            for novelID in novelIDArray {
-                                                let novelTitle = novelIDTitleMap[novelID]
-                                                novelSection <<< LabelRow() {
-                                                    $0.title = "\(folderName) / \(novelTitle ?? "-")"
-                                                    $0.cell.textLabel?.numberOfLines = 0
-                                                    $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                                                }
-                                            }
-                                        }
-                                        epvc.form +++ novelSection
-                                        epvc.willDisappear = {
-                                            for topNode in self.displayDataArray {
-                                                topNode.updateSelectionState()
-                                            }
-                                        }
-                                    }, parentViewController: self, animated: true, completion: nil)
+                                    self.RunFolderManagePopupView(checkedFolder2NovelIDMap: checkedFolder2NovelIDMap, novelIDTitleMap: novelIDTitleMap, checkedNovelIDArray: checkedNovelIDArray)
                                 }
                             })
+                        }
+                        func AddDeleteNovelButton(buttonSection: Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_DeleteNovel",
@@ -778,6 +793,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                     }
                                 })
                             })
+                        }
+                        func AddCreateBackupFileButton(buttonSection: Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
                                     "BookShelfTreeViewController_checkboxselected_CreateBackupFile",
@@ -798,8 +815,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                     }
                                 })
                             })
-                            epvc.form +++ buttonSection
-                            let cancelSection = Section()
+                        }
+                        func AddCancelButton(cancelSection: Section, epvc:EurekaPopupViewController) {
                             cancelSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString("Cancel_button", comment: "Cancel")
                                 $0.cell.textLabel?.numberOfLines = 0
@@ -807,6 +824,21 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                             }.onCellSelection({ cell, row in
                                 epvc.close(animated: true, completion: nil)
                             })
+                        }
+                        EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: {
+                            epvc in
+                            let buttonSection = Section(NSLocalizedString("BookShelfTreeViewController_toggleCheckBoxesButtonTapped_firstMenu_title", comment: "選択された小説への操作"))
+                            AddNovelUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
+                            AddStopUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
+                            AddEnableUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
+                            AddEnableLikeCheckButton(buttonSection: buttonSection, epvc: epvc)
+                            AddDisableLikeCheckButton(buttonSection: buttonSection, epvc: epvc)
+                            AddAssignFolderButton(buttonSection: buttonSection, epvc: epvc)
+                            AddDeleteNovelButton(buttonSection: buttonSection, epvc: epvc)
+                            AddCreateBackupFileButton(buttonSection: buttonSection, epvc: epvc)
+                            epvc.form +++ buttonSection
+                            let cancelSection = Section()
+                            AddCancelButton(cancelSection: cancelSection, epvc: epvc)
                             epvc.form +++ cancelSection
                             let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説") + "(\(checkedNovelIDArray.count))")
                             for novelID in checkedNovelIDArray {
