@@ -376,6 +376,8 @@
 "SpeechViewController_SearchByText_Found_Announce_to_VoiceOverUser_Formated" = "%@";
 "SpeechViewController_SearchByTextButton_AccessibilityLabel" = "Search within the page";
 "SpeechViewController_KeyboardShortcut_StartStopSpeech_Title" = "Speech start/stop";
+"SpeechViewController_LoadingFailed_GlobalStateIsNull" = "Failed to load text. Failed to load global settings.";
+"SpeechViewController_LoadingFailed_GlobalStateIsNull" = "Failed to load text. Could not load novel page.";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";

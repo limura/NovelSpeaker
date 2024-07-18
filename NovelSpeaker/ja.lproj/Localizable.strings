@@ -343,6 +343,8 @@
 "SpeechViewController_SearchByText_Found_Announce_to_VoiceOverUser_Formated" = "%@";
 "SpeechViewController_SearchByTextButton_AccessibilityLabel" = "ページ内を検索";
 "SpeechViewController_KeyboardShortcut_StartStopSpeech_Title" = "発話の開始/停止";
+"SpeechViewController_LoadingFailed_GlobalStateIsNull" = "本文の読み込みに失敗しました。全体設定を読み込めませんでした。";
+"SpeechViewController_LoadingFailed_GlobalStateIsNull" = "本文の読み込みに失敗しました。小説のページを読み込めませんでした。";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";

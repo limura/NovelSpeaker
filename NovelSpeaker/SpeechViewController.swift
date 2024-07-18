@@ -68,6 +68,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
                     self.storySpeaker.SetStory(story: story, withUpdateReadDate: isNeedUpdateReadDate)
+                }else{
+                    self.applyStoryText(
+                        text: NSLocalizedString(
+                            "SpeechViewController_LoadingFailed_GlobalStateIsNull",
+                            comment: "本文の読み込みに失敗しました。小説のページを読み込めませんでした。"
+                        )
+                    )
                 }
             }
             self.observeStory(storyID: storyID)
@@ -159,6 +166,12 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         self.applyStoryText(text: NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……"))
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
+                self.applyStoryText(
+                    text: NSLocalizedString(
+                        "SpeechViewController_LoadingFailed_GlobalStateIsNull",
+                        comment: "本文の読み込みに失敗しました。全体設定を読み込めませんでした。"
+                    )
+                )
                 return
             }
             if let displaySetting = globalState.defaultDisplaySettingWith(realm: realm) {
