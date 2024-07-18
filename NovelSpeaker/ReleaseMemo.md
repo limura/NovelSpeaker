@@ -3928,3 +3928,28 @@ Version 2.9.4
 - Added "Multiple Selection" to the button displayed in the upper right corner of the bookshelf screen
 - When the bookshelf screen is in folder division mode, the number of novels stored in the folder is displayed
 - When there are many novels to check for updates at once, the time it took to register the update check has been slightly sped up (it took about 10 seconds in some cases).
+
+
+Version 2.10.0
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」->「小説を削除する時に確認する」をONにしていても本棚画面で小説を削除しようとした時に確認画面が出なくなっていた問題を修正
+- 「設定タブ」で「小説を削除するときに確認する」がONの場合の時に「本棚画面でスワイプや「編集」から小説を削除できないようにする」のON/OFF設定を追加します
+
+今回の修正は本棚画面での小説の削除に関するものです。前者のものは以前できていたものが新しく作り直した本棚画面では未実装になっていたというものです。これについては完全にこちらの手落ちになります。申し訳ありません。
+また、後者のものは前者の問題が Version 2.9.4(一つ前のもの) のリリース直後にお寄せ頂いたということから、恐らくは誤操作してしまってのお問い合わせかと推測したところから来ています。本棚画面では小説を左にスワイプすると右側に「削除」メニューが出てきて、すぐに小説を削除できるのですが、この操作が発生しやすいのではないかということを考えています。
+そうであるとすれば、そもそも削除メニューが出てこないようにすることでこの問題を根本から回避できるはずです。ということで、後者のオプションについてはその問題を根本から排除するためのON/OFF設定となります。
+
+以上となります。
+
+さて、残念なことに私はお問い合わせ対応に疲れ果てていますため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。ただ、現在は開発をほぼ停止しておりますので、お問い合わせされない問題についてはただ待っていても直りませんのでお問い合わせしていただいたほうが良さそうに思います。とはいっても、私がお問い合わせへの対応に疲れ果てていて嫌がっているという事はご理解の上、お問い合わせいただけますと助かります。特に、不都合報告の場合は可能な限りの情報を書いてください。簡単に設定や問題の起きている小説やその本文を送信できる仕組みもつけています。できるだけ利用してください。再現手順を書くのが面倒くさい気持ちはわかりますが、あなたの環境とは違う私の環境でも再現できるように「前提条件も含めて」書いてください。こちらの手元で再現できない問題には対処できません。具体的には、『ことせかい を一旦削除した後に再インストールして(つまり初期状態にして)、その後問題が起こる設定を入れた(例えば「このバックアップファイルを適用した」)後(初期状態から問題が発生できる形に整えるまでの手順の明示)、この手順でボタンを押すと(具体的な手順の明示)、本来はこうなって欲しいところがこうなってしまう(問題点の明示と期待した動作の明示)』といった事が示され、「その示された問題がこちらの手元の端末でも同様に発生する」必要があります。情報量の少ないお問い合わせを読んで私が推測に推測を重ねて実験して再現せず「お手数おかけして申し訳ありませんが詳しく教えてください」と返信メールを書くという形で疲弊するのにはもう飽きました。本当に勘弁してください。よろしくお願いいたします。
+
+
+Version 2.10.0
+
+Changes in interface/internal operation
+
+- Fixed an issue where the confirmation screen would not appear when trying to delete a novel on the bookshelf screen even if "Confirm when deleting a novel" was turned on in the "Settings tab"
+- Added an ON/OFF setting for "Prevent novels from being deleted by swiping or clicking "Edit" on the bookshelf screen\" when "Confirm when deleting a novel" is turned on in the "Settings tab".
+
