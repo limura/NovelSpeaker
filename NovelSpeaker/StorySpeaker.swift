@@ -225,11 +225,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 return
             }
             self.queuedSetStoryStory = nil
-            for completion in self.queuedSetStoryCompletionArray {
-                completion(story)
-            }
+            let completionArray = self.queuedSetStoryCompletionArray
             self.queuedSetStoryCompletionArray.removeAll()
             self.queuedSetStoryStoryLock.unlock()
+            for completion in completionArray {
+                completion(story)
+            }
             self.AnnounceSetStory(story: story)
         }
     }
