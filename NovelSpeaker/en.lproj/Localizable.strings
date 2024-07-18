@@ -256,6 +256,7 @@
 "SettingTableViewController_LikeButtonDialogType_dialogAlwaysRequested:" = "check anytime";
 "SettingTableViewController_IsDisplaySpeechModChange" = "Change the color of the text that will be replaced on the novel text screen";
 "SettingTableViewController_IsNotClearToAboutBlankOnDownloadBrowserUrl" = "Don't move to about:blank after download finished";
+"SettingTableViewController_IsDeleteBlockOnBookshelfTreeView" = "Prevent novels from being deleted by swiping or clicking \"Edit\" on the bookshelf screen (Even if this is ON, if you want to delete a novel, you can do so from the multiple novel selection screen)";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "Define";
@@ -958,18 +959,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.4
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.0
 
-- You can now search by folder name or novel name in the \"Settings tab\" -> \"Edit folder\"
-- Added a button to change the folder name to the \"Settings tab\" -> \"Edit folder\"
-- Renovated bookshelf screen
-- Added \"Multiple Selection\" to the button displayed in the upper right corner of the bookshelf screen
-- When the bookshelf screen is in folder division mode, the number of novels stored in the folder is displayed
-- When there are many novels to check for updates at once, the time it took to register the update check has been slightly sped up (it took about 10 seconds in some cases).
+- Fixed an issue where the confirmation screen would not appear when trying to delete a novel on the bookshelf screen even if \"Confirm when deleting a novel\" was turned on in the \"Settings tab\"
+- Added an ON/OFF setting for \"Prevent novels from being deleted by swiping or clicking \"Edit\" on the bookshelf screen\" when \"Confirm when deleting a novel\" is turned on in the \"Settings tab\".
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.0
+
+Changes in interface/internal operation
+
+- Fixed an issue where the confirmation screen would not appear when trying to delete a novel on the bookshelf screen even if \"Confirm when deleting a novel\" was turned on in the \"Settings tab\"
+- Added an ON/OFF setting for \"Prevent novels from being deleted by swiping or clicking \"Edit\" on the bookshelf screen\" when \"Confirm when deleting a novel\" is turned on in the \"Settings tab\".
+
+
 Version 2.9.4
 
 Changes in interface/internal operation

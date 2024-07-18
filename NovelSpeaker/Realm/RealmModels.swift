@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 14
+    static let currentSchemaVersion : UInt64 = 15
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -2854,6 +2854,7 @@ enum LikeButtonDialogType: Int {
     @objc dynamic var isDisableNarouRuby = false
     @objc dynamic var isNeedDisableIdleTimerWhenSpeechTime = false
     @objc dynamic var likeButtonDialogType: Int = LikeButtonDialogType.noDialog.rawValue
+    @objc dynamic var isDeleteBlockOnBookshelfTreeView = false
     let novelLikeOrder = List<String>()
     let menuItemsNotRemoved = List<String>()
     let preferredSiteInfoURLList = List<String>()

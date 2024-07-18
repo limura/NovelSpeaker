@@ -1060,6 +1060,34 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             section
+            <<< SwitchRow("isDeleteBlockOnBookshelfTreeView") { row in
+                row.title = NSLocalizedString(
+                    "SettingTableViewController_IsDeleteBlockOnBookshelfTreeView",
+                    comment: "本棚画面でスワイプや「編集」から小説を削除できないようにする(これがONの場合でも、削除したい場合は小説の複数選択画面から行うことができます)"
+                )
+                row.hidden = .function(["isNeedConfirmDeleteBook"], { form -> Bool in
+                    let row: RowOf<Bool>! = form.rowBy(tag: "isNeedConfirmDeleteBook")
+                    return row.value ?? false == false
+                })
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    let isDeleteBlockOnBookshelfTreeView = RealmGlobalState.GetInstanceWith(realm: realm)?.isDeleteBlockOnBookshelfTreeView ?? false
+                    row.value = isDeleteBlockOnBookshelfTreeView
+                }
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    let prevState = globalState.isDeleteBlockOnBookshelfTreeView
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
+                        globalState.isDeleteBlockOnBookshelfTreeView = value
+                    }
+                    if prevState != value {
+                        BookShelfTreeViewController.RefreshBookshelf()
+                    }
+                }
+            })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_AutoSplitStringSetting", comment:"テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)")
                 $0.cell.textLabel?.numberOfLines = 0

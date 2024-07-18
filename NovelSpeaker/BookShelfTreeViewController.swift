@@ -347,6 +347,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     }
     
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        let isDeleteBlockOnBookshelfTreeView = RealmUtil.RealmBlock { realm -> Bool in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return false }
+            return globalState.IsNeedConfirmDeleteBook && globalState.isDeleteBlockOnBookshelfTreeView
+        }
+        if isDeleteBlockOnBookshelfTreeView { return false }
         guard let (node, _) = getNode(indexPath: indexPath) else { return false }
         if let novelID = node.novelID {
             return RealmUtil.RealmBlock { (realm) -> Bool in
@@ -2226,6 +2231,13 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     instance.tabBarController?.selectedIndex = targetTabIndex
                 })
             }
+        }
+    }
+    
+    static func RefreshBookshelf() {
+        guard let instance = instance else { return }
+        DispatchQueue.main.async {
+            instance.tableView.reloadData()
         }
     }
 }

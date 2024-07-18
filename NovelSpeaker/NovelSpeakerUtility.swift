@@ -1561,6 +1561,9 @@ class NovelSpeakerUtility: NSObject {
                 if let isNeedDisableIdleTimerWhenSpeechTime = dic.object(forKey: "isNeedDisableIdleTimerWhenSpeechTime") as? NSNumber {
                     globalState.isNeedDisableIdleTimerWhenSpeechTime = isNeedDisableIdleTimerWhenSpeechTime.boolValue
                 }
+                if let isDeleteBlockOnBookshelfTreeView = dic.object(forKey: "isDeleteBlockOnBookshelfTreeView") as? NSNumber {
+                    globalState.isDeleteBlockOnBookshelfTreeView = isDeleteBlockOnBookshelfTreeView.boolValue
+                }
                 if let supportRotationMask = dic.object(forKey: "supportRotationMask") as? NSNumber {
                     if supportRotationMask.uintValue == UIInterfaceOrientationMask.all.rawValue {
                         NovelSpeakerUtility.supportRotationMask = .all
@@ -2231,6 +2234,7 @@ class NovelSpeakerUtility: NSObject {
                 "menuItemsNotRemoved": Array(globalState.menuItemsNotRemoved),
                 "likeButtonDialogType": globalState.likeButtonDialogType,
                 "preferredSiteInfoURLList": Array(globalState.preferredSiteInfoURLList),
+                "isDeleteBlockOnBookshelfTreeView": globalState.isDeleteBlockOnBookshelfTreeView,
             ]
         }
     }
