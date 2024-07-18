@@ -2120,6 +2120,17 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
                 return setting.targetNovelIDArray.contains(anyTarget) || setting.targetNovelIDArray.contains(novelID)
         })
     }
+    
+    static func SearchSettingsForContainsAnyNovelID(realm: Realm, novelIDArray:[String]) -> LazyFilterSequence<Results<RealmSpeechModSetting>>? {
+        return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false").filter({ (setting) -> Bool in
+            for novelID in novelIDArray {
+                if setting.targetNovelIDArray.contains(novelID) {
+                    return true
+                }
+            }
+            return false
+        })
+    }
 
     func unref(realm:Realm, novelID:String) {
         if let index = targetNovelIDArray.index(of: novelID) {

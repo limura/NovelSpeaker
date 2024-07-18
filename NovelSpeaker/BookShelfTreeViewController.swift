@@ -765,6 +765,81 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                 }
                             })
                         }
+                        func AddAssignUniqueSpeechModButton(buttonSection: Section, epvc: EurekaPopupViewController) {
+                            buttonSection <<< ButtonRow() {
+                                $0.title = NSLocalizedString(
+                                    "BookShelfTreeViewController_checkboxselected_AssignUniqueSpeechMod",
+                                    comment: "小説用の読みの修正に追加・削除する"
+                                )
+                                $0.cell.textLabel?.numberOfLines = 0
+                                $0.cell.accessibilityTraits = .button
+                            }.onCellSelection({ cell, row in
+                                epvc.close(animated: false, completion: {
+                                    EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { epvc in
+                                        func getSpeechModCheckSystemIconName(speechMod:ThreadSafeReference<RealmSpeechModSetting>, novelIDArray:[String]) -> String {
+                                            return RealmUtil.RealmBlock { realm -> String in
+                                                guard let speechMod = realm.resolve(speechMod) else { return "square" }
+                                                let speechModNovelIDSet = Set(speechMod.targetNovelIDArray)
+                                                let targetNovelIDSet = Set(novelIDArray)
+                                                if targetNovelIDSet.isSubset(of: speechModNovelIDSet) {
+                                                    return "checkmark.square"
+                                                }else if targetNovelIDSet.intersection(speechModNovelIDSet).isEmpty {
+                                                    return "square"
+                                                }else {
+                                                    return "minus.square"
+                                                }
+                                            }
+                                        }
+                                        func addSpeechModButton(buttonSection:Section, speechMod:ThreadSafeReference<RealmSpeechModSetting>, title: String) {
+                                            
+                                            buttonSection <<< ButtonRow() {
+                                                $0.title = title
+                                                $0.cell.textLabel?.numberOfLines = 0
+                                                $0.cell.accessibilityTraits = .button
+                                            }.onCellSelection({ cell, row in
+                                                switch getSpeechModCheckSystemIconName(speechMod: speechMod, novelIDArray: checkedNovelIDArray) {
+                                                case "checkmark.square":
+                                                    // TODO: このあたりから再開する
+                                                    break
+                                                case "square":
+                                                    break
+                                                case "minus.square":
+                                                    fallthrough
+                                                default:
+                                                    break
+                                                }
+                                            })
+                                        }
+                                        let buttonSection = Section()
+                                        RealmUtil.RealmBlock { realm in
+                                            let targetSpeechModArray = RealmSpeechModSetting.SearchSettingsForContainsAnyNovelID(realm: realm, novelIDArray: checkedNovelIDArray)
+                                            
+                                        }
+                                        epvc.form +++ buttonSection
+                                        let closeSection = Section ()
+                                        closeSection <<< ButtonRow() {
+                                            $0.title = NSLocalizedString("Close_button", comment: "Close")
+                                            $0.cell.textLabel?.numberOfLines = 0
+                                            $0.cell.accessibilityTraits = .button
+                                        }.onCellSelection({ cell, row in
+                                            epvc.close(animated: true, completion: nil)
+                                        })
+                                        epvc.form +++ closeSection
+                                        let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説"))
+                                        for novelID in checkedNovelIDArray {
+                                            let novelTitle = novelIDTitleMap[novelID]
+                                            novelSection <<< LabelRow() {
+                                                $0.title = "\(novelTitle ?? "-")"
+                                                $0.cell.textLabel?.numberOfLines = 0
+                                                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                                            }
+                                        }
+                                        epvc.form +++ novelSection
+
+                                    }, parentViewController: self, animated: true, completion: nil)
+                                })
+                            })
+                        }
                         func AddDeleteNovelButton(buttonSection: Section, epvc:EurekaPopupViewController) {
                             buttonSection <<< ButtonRow() {
                                 $0.title = NSLocalizedString(
