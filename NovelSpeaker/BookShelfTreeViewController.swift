@@ -388,7 +388,17 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             if let (node, _) = getNode(indexPath: indexPath), let novelID = node.novelID {
-                deleteNovel(item: node, indexPath: indexPath, novelID: novelID)
+                let title = node.title ?? "-"
+                let isNeedCheckDelete = RealmUtil.RealmBlock { realm -> Bool in
+                    RealmGlobalState.GetInstanceWith(realm: realm)?.IsNeedConfirmDeleteBook ?? false
+                }
+                if isNeedCheckDelete {
+                    NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("BookShelfTableViewController_WarningForDeleteBookTitle", comment: "本の削除"), message: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookMessage", comment: "本を削除しますか？\n") + title, button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookOKButtonTitle", comment: "削除"), button2Action: {
+                        self.deleteNovel(item: node, indexPath: indexPath, novelID: novelID)
+                    })
+                }else{
+                    deleteNovel(item: node, indexPath: indexPath, novelID: novelID)
+                }
             }
         }
     }
