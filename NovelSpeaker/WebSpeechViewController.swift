@@ -1059,7 +1059,9 @@ body.NovelSpeakerBody {
             RealmUtil.RealmBlock { (realm) -> Void in
                 StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: false) {
                     StorySpeaker.shared.SkipBackward(realm: realm, length: 30) {
-                        StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)", isNeedRepeatSpeech: true)
+                        RealmUtil.RealmBlock { realm in
+                            StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)", isNeedRepeatSpeech: true)
+                        }
                     }
                 }
             }

@@ -996,8 +996,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.storySpeaker.StopSpeech(realm: realm, stopAudioSession:false) {
                     self.storySpeaker.SkipBackward(realm: realm, length: 30) {
-                        self.clearSearchView()
-                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し戻すボタン).\(#function)", isNeedRepeatSpeech: true)
+                        RealmUtil.RealmBlock { realm in
+                            self.clearSearchView()
+                            self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し戻すボタン).\(#function)", isNeedRepeatSpeech: true)
+                        }
                     }
                 }
             }
