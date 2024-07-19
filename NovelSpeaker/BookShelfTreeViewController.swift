@@ -154,9 +154,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     self.tableView.reloadData()
                     self.tableView.layoutIfNeeded()
                 } completion: { finished in
-                    if finished {
+                    //if finished { // この finished が false で呼び出されるタイミングがあるぽいので finished は確認しないことにします
                         self.reloadAllDataAndScrollToCurrentReadingContent()
-                    }
+                    //}
                 }
             }
         }
@@ -1412,9 +1412,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 self.tableView.layoutIfNeeded()
                 self.checkAndUpdateSwitchFolderButtonImage()
             }, completion: { finished in
-                if finished {
+                // if finished { // この finished が false で呼び出されるタイミングがあるぽいので finished は確認しないことにします
                     completion?()
-                }
+                //}
             })
         }
     }
@@ -1525,9 +1525,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                             let isVisible = self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false
                                             self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: !doScroll ? .none : isVisible ? .none : .middle)
                                         } completion: { finished in
-                                            if finished {
+                                            //if finished { // この finished が false で呼び出されるタイミングがあるぽいので finished は確認しないことにします
                                                 completion?()
-                                            }
+                                            //}
                                         }
                                     }
                                 }else{
@@ -1544,9 +1544,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                             let isVisible = self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false
                             self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: !doScroll ? .none : isVisible ? .none : .middle)
                         } completion: { finished in
-                            if finished {
+                            //if finished { // この finished が false で呼び出されるタイミングがあるぽいので finished は確認しないことにします
                                 completion?()
-                            }
+                            //}
                         }
                         self.checkAndUpdateSwitchFolderButtonImage()
                     }
@@ -1588,13 +1588,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     }
     
     func reloadAllData(doScroll: Bool, completion:(()->Void)? = nil) {
-        // 表示されているものを元にスクロール位置を合わせようと努力します
-        var selectedNovelID:String? = nil
-        NiftyUtility.DispatchSyncMainQueue {
-            if let selectedIndexPath = self.tableView.indexPathsForSelectedRows?.first, let (cellData, _) = self.getNode(indexPath: selectedIndexPath), let novelID = cellData.novelID {
-                selectedNovelID = novelID
-            }
-        }
         let (hasFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
         do {
             let beforeArray = self.displayDataArray
@@ -1621,13 +1614,18 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 }
             }
         }
-        self.displayDataArray = displayDataArray
-        NiftyUtility.DispatchSyncMainQueue {
+        DispatchQueue.main.async {
+            // 表示されているものを元にスクロール位置を合わせようと努力します
+            var selectedNovelID:String? = nil
+            if let selectedIndexPath = self.tableView.indexPathsForSelectedRows?.first, let (cellData, _) = self.getNode(indexPath: selectedIndexPath), let novelID = cellData.novelID {
+                selectedNovelID = novelID
+            }
+            self.displayDataArray = displayDataArray
             UIView.animate(withDuration: 0.0) {
                 self.tableView.reloadData()
                 self.tableView.layoutIfNeeded()
             } completion: { finished in
-                if finished {
+                //if finished { // この finished が false で呼び出されるタイミングがあるぽいので finished は確認しないことにします
                     if hasFolder {
                         self.switchFolderButton.isEnabled = true
                     }else{
@@ -1638,7 +1636,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     }else {
                         self.HighlightCurrentReadingNovel(doScroll: doScroll, completion: completion)
                     }
-                }
+                //}
             }
         }
     }

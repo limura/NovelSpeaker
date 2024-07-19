@@ -111,9 +111,9 @@ class FloatingButton: UIView {
             self.view.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
             self.view.alpha = 0
         }) { (finished) in
-            if finished {
+            //if finished { // この finished が false で呼び出されるタイミングがあるぽいので finished は確認しないことにします
                 self.view.removeFromSuperview()
-            }
+            //}
         }
     }
     
