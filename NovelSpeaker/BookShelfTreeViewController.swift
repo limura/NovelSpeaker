@@ -1590,31 +1590,36 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     func reloadAllData(doScroll: Bool, completion:(()->Void)? = nil) {
         let (hasFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
         do {
+            func transferSelectionStates(before: [BookShelfRATreeViewCellData], after: inout [BookShelfRATreeViewCellData]) {
+                // beforeのnovelIDをキー、selectionStateを値とするDictionaryを作成
+                let selectionStateMap = Dictionary(uniqueKeysWithValues: before.filter({$0.novelID != nil}).map { ($0.novelID ?? "", $0.selectionState) })
+                
+                // afterの各要素に対して、対応するselectionStateを適用
+                for i in 0..<after.count {
+                    guard let novelID = after[i].novelID else { continue }
+                    if let state = selectionStateMap[novelID] {
+                        after[i].selectionState = state
+                    }
+                }
+            }
+            
             let beforeArray = self.displayDataArray
-            let afterArray = displayDataArray
+            var afterArray = displayDataArray
             for n in 0..<beforeArray.count {
                 if n >= afterArray.count { break }
                 let before = beforeArray[n]
                 let after = afterArray[n]
-                if before.title == after.title, let beforeChildrens = before.childrens, let afterChildrens = after.childrens {
+                if before.title == after.title, let beforeChildrens = before.childrens, var afterChildrens = after.childrens {
                     // 開いている状態をコピー
                     after.isExpanded = before.isExpanded
                     // チェック状態をコピー(フォルダの中の分)
                     if before.selectionState != .unselected {
-                        for before in beforeChildrens {
-                            guard let beforeNovelID = before.novelID else { continue }
-                            if let after = afterChildrens.filter({$0.novelID == beforeNovelID}).first {
-                                after.selectionState = before.selectionState
-                            }
-                        }
+                        transferSelectionStates(before: beforeChildrens, after: &afterChildrens)
                     }
                 }
-                // チェック状態をコピー(フォルダの外の分)
-                guard let beforeNovelID = before.novelID else { continue }
-                if let afterNode = afterArray.filter({$0.novelID == beforeNovelID}).first {
-                    afterNode.selectionState = before.selectionState
-                }
             }
+            // チェック状態をコピー(フォルダの外の分)
+            transferSelectionStates(before: beforeArray, after: &afterArray)
         }
         DispatchQueue.main.async {
             // 表示されているものを元にスクロール位置を合わせようと努力します
