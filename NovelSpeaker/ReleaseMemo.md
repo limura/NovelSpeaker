@@ -3937,9 +3937,16 @@ Version 2.10.0
 - 「設定タブ」->「小説を削除する時に確認する」をONにしていても本棚画面で小説を削除しようとした時に確認画面が出なくなっていた問題を修正
 - 「設定タブ」で「小説を削除するときに確認する」がONの場合の時に「本棚画面でスワイプや「編集」から小説を削除できないようにする」のON/OFF設定を追加します
 
-今回の修正は本棚画面での小説の削除に関するものです。前者のものは以前できていたものが新しく作り直した本棚画面では未実装になっていたというものです。これについては完全にこちらの手落ちになります。申し訳ありません。
+問題の修正
+
+- 再生時にロック画面から次のページや少し先の文を読ませたりするとアプリが強制終了する問題を修正
+
+今回の修正は大きく分けて2つになります。
+前者は本棚画面での小説の削除に関するものです。前者のものは以前できていたものが新しく作り直した本棚画面では未実装になっていたというものです。これについては完全にこちらの手落ちになります。申し訳ありません。
 また、後者のものは前者の問題が Version 2.9.4(一つ前のもの) のリリース直後にお寄せ頂いたということから、恐らくは誤操作してしまってのお問い合わせかと推測したところから来ています。本棚画面では小説を左にスワイプすると右側に「削除」メニューが出てきて、すぐに小説を削除できるのですが、この操作が発生しやすいのではないかということを考えています。
 そうであるとすれば、そもそも削除メニューが出てこないようにすることでこの問題を根本から回避できるはずです。ということで、後者のオプションについてはその問題を根本から排除するためのON/OFF設定となります。
+
+後者は問題の修正です。こちらは表記そのままのものを修正しています。
 
 以上となります。
 
@@ -3953,3 +3960,6 @@ Changes in interface/internal operation
 - Fixed an issue where the confirmation screen would not appear when trying to delete a novel on the bookshelf screen even if "Confirm when deleting a novel" was turned on in the "Settings tab"
 - Added an ON/OFF setting for "Prevent novels from being deleted by swiping or clicking "Edit" on the bookshelf screen\" when "Confirm when deleting a novel" is turned on in the "Settings tab".
 
+Fixing the problem
+
+- Fixes an issue where the app would crash if you tried to read the next page or a sentence ahead from the lock screen during playback.
