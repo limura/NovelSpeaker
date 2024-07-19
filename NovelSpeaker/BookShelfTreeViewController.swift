@@ -1600,10 +1600,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     // 開いている状態をコピー
                     after.isExpanded = before.isExpanded
                     // チェック状態をコピー(フォルダの中の分)
-                    for before in beforeChildrens {
-                        guard let beforeNovelID = before.novelID else { continue }
-                        if let after = afterChildrens.filter({$0.novelID == beforeNovelID}).first {
-                            after.selectionState = before.selectionState
+                    if before.selectionState != .unselected {
+                        for before in beforeChildrens {
+                            guard let beforeNovelID = before.novelID else { continue }
+                            if let after = afterChildrens.filter({$0.novelID == beforeNovelID}).first {
+                                after.selectionState = before.selectionState
+                            }
                         }
                     }
                 }
