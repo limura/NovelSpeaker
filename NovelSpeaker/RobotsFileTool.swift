@@ -275,6 +275,7 @@ class RobotsFileTool {
         let cacheFileName = "robotsCache_\(scheme):\(host):\(port)"
         NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: cacheFileName, expireTimeinterval: fileCacheTimeoutSecond, canRecoverOldFile: true, successAction: { (data) in
             completion?(RobotsCache.Decode(robotsURL: targetURL, data: data))
+            return true
         }) { (err) in
             // リクエストに失敗した場合、404 などの 4** なら arrow だけれど、ネットワークエラーやサーバエラー(5**)なら disarrow らしいんだけどどうしたら(根拠: https://developers.google.com/search/docs/crawling-indexing/robots/robots_txt?hl=ja )
             completion?(nil)

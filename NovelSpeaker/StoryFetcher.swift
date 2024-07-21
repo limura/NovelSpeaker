@@ -603,7 +603,7 @@ class StoryHtmlDecoder {
                             "targetURL": targetURL.absoluteString,
                         ], isForDebug: false)
                         siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
-                        return
+                        return false
                     }
                     siteInfoArray.sort { (a, b) -> Bool in
                         guard let aPattern = a.url?.pattern else { return false }
@@ -618,6 +618,7 @@ class StoryHtmlDecoder {
                     }
                     self.lock.unlock()
                     siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
+                    return true
                 }) { (err) in
                     let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "SiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nもし、「設定タブ」→「内部データ参照用URLの設定」で設定値を書き換えている場合、それらの値が正しいものかどうかを再度確認してください。それでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。")
                     AppInformationLogger.AddLog(message: message, appendix: [

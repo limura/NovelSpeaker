@@ -810,6 +810,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     func fetchSearchInfoJSON(url: URL, successAction: ((Data) -> Void)?, failedAction:((Error?) -> Void)? ) {
         NiftyUtility.FileCachedHttpGet(url: url, cacheFileName: NovelSearchViewController.SearchInfoCacheFileName, expireTimeinterval: searchInfoExpireTimeInterval, canRecoverOldFile: true, successAction: { (data) in
             successAction?(data)
+            return true
         }) { (err) in
             failedAction?(err)
         }

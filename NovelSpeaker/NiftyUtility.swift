@@ -1524,25 +1524,24 @@ class NiftyUtility: NSObject {
         return data
     }
     
-    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, canRecoverOldFile:Bool = false, requestTimeout:TimeInterval? = nil, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?) {
+    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, canRecoverOldFile:Bool = false, requestTimeout:TimeInterval? = nil, successAction:((Data)->Bool)?, failedAction:((Error?)->Void)?) {
         if let data = GetCachedHttpGetCachedData(url: url, cacheFileName: cacheFileName, expireTimeinterval: expireTimeinterval) {
-            successAction?(data)
+            _ = successAction?(data)
             return
         }
         httpGet(url: url, timeoutInterval: requestTimeout, successAction: { (data, encoding) in
-            if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName), let dataZiped = compress(data: data) {
-                do {
-                    try dataZiped.write(to: cacheFilePath, options: Data.WritingOptions.atomic)
-                }catch{
-                    print("cache file write error. for url: \(url.absoluteString)")
+            if successAction?(data) ?? true {
+                if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName), let dataZiped = compress(data: data) {
+                    do {
+                        try dataZiped.write(to: cacheFilePath, options: Data.WritingOptions.atomic)
+                    }catch{
+                        print("cache file write error. for url: \(url.absoluteString)")
+                    }
                 }
             }
-            successAction?(data)
         }) { (err) in
-            if canRecoverOldFile, let cacheFilePath = GetCacheFilePath(fileName: cacheFileName),
-                FileManager.default.fileExists(atPath: cacheFilePath.path), let dataZiped = try? Data(contentsOf: cacheFilePath),
-                let data = decompress(data: dataZiped) {
-                successAction?(data)
+            if canRecoverOldFile, let data = GetCachedHttpGetCachedData(url: url, cacheFileName: cacheFileName, expireTimeinterval: nil) {
+                _ = successAction?(data)
                 return
             }
             failedAction?(err)
