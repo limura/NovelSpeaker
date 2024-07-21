@@ -411,7 +411,9 @@ class StoryHtmlDecoder {
     
     var IsSiteInfoReady: Bool {
         get {
-            return readySiteInfoCount > 0
+            // 設定されているSiteInfo URLのリスト分だけ正しくSiteInfoが読み込めていることを確認することにします
+            let targetURLArray = getLoadTargetURLs()
+            return targetURLArray.filter({$0 != nil}).count <= self.siteInfoArrayArray.filter({$0.count > 0}).count
         }
     }
     var readySiteInfoCount: Int {
