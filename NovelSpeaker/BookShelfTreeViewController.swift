@@ -150,13 +150,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 dummyCell
             ]
             DispatchQueue.main.async {
-                UIView.animate(withDuration: 0.0) {
-                    self.tableView.reloadData()
-                    self.tableView.layoutIfNeeded()
-                } completion: { finished in
-                    //if finished { // この finished が false で呼び出されるタイミングがあるぽいので finished は確認しないことにします
-                        self.reloadAllDataAndScrollToCurrentReadingContent()
-                    //}
+                self.tableView.reloadData()
+                self.tableView.layoutIfNeeded()
+                // UIView.animate(...) で括るのは止めて、以前動いていたパターンに置き換えておきます。
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    self.reloadAllDataAndScrollToCurrentReadingContent()
                 }
             }
         }
