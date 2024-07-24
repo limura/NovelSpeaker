@@ -62,7 +62,10 @@ class DownloadQueueHolder: NSObject {
                 let updateFrequency = novel.updateFrequency(novelLikeOrder: novelLikeOrder)
                 let item = QueueItem(novelID: novel.novelID, updateFrequency: updateFrequency)
                 let hostName = item.hostName
-                if var queueList = queue[hostName], queueList.filter({$0.novelID == item.novelID}).first == nil {
+                if var queueList = queue[hostName] {
+                    if queueList.filter({$0.novelID == item.novelID}).first != nil {
+                        continue
+                    }
                     queueList.append(item)
                     queue[hostName] = queueList
                 }else{
@@ -531,6 +534,7 @@ class NovelDownloadQueue : NSObject {
     }
     
     func GetFreeFetcher() -> (UUID, StoryFetcher) {
+        let uuid = UUID()
         fetcherPoolLock.lock()
         defer { fetcherPoolLock.unlock() }
         if let result = fetcherPool.reduce(nil, { (result, tuple) -> (UUID, StoryFetcher)? in
@@ -543,7 +547,6 @@ class NovelDownloadQueue : NSObject {
             fetcherPool[uuid] = (true, fetcher)
             return result
         }
-        let uuid = UUID()
         let fetcher = StoryFetcher()
         fetcherPool[uuid] = (true, fetcher)
         return (uuid, fetcher)
