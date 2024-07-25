@@ -45,6 +45,7 @@ class DownloadQueueHolder: NSObject {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let novelArray = realm.resolve(novelArray) else { return }
             let novelLikeOrder = RealmGlobalState.GetInstanceWith(realm: realm)?.novelLikeOrder ?? List<String>()
+            let downloadingNovelIDArray = GetCurrentDownloadingNovelIDArray()
             
             self.lock.lock()
             defer { self.lock.unlock() }
@@ -59,6 +60,7 @@ class DownloadQueueHolder: NSObject {
                     continue
                 }
                 if novel.type != .URL { continue }
+                if downloadingNovelIDArray.contains(novel.novelID) { continue }
                 let updateFrequency = novel.updateFrequency(novelLikeOrder: novelLikeOrder)
                 let item = QueueItem(novelID: novel.novelID, updateFrequency: updateFrequency)
                 let hostName = item.hostName
