@@ -3248,15 +3248,32 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
             return
         }
         if let tag = SearchWith(realm: realm, name: tagName, type: type) {
-            let cleanNovelIDSet = Set(cleanNovelIDArray)
-            let currentNovelIDSet = Set(tag.targetNovelIDArray)
-            let unionNovelIDSet = cleanNovelIDSet.union(currentNovelIDSet)
-            tag.targetNovelIDArray.removeAll()
-            tag.targetNovelIDArray.append(objectsIn: Array(unionNovelIDSet))
+            for novelID in cleanNovelIDArray {
+                if !tag.targetNovelIDArray.contains(novelID) {
+                    tag.targetNovelIDArray.append(novelID)
+                }
+            }
             realm.add(tag, update: .modified)
-        }else{
+        } else {
             let tag = CreateNewTag(name: tagName, type: type)
             tag.targetNovelIDArray.append(objectsIn: cleanNovelIDArray)
+            realm.add(tag, update: .modified)
+        }
+    }
+    static func OverrideTagLinkedNovelIDArray(realm: Realm, name:String, novelIDArray: [String], type: String) {
+        guard let novelArray = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: novelIDArray) else { return }
+        let cleanNovelIDArray = Array(novelArray.map({$0.novelID}))
+        let tagName = NovelSpeakerUtility.CleanTagString(tag: name)
+        if tagName.count <= 0 || cleanNovelIDArray.count <= 0 || cleanNovelIDArray.count != novelIDArray.count {
+            return
+        }
+        if let tag = SearchWith(realm: realm, name: tagName, type: type) {
+            tag.targetNovelIDArray.removeAll()
+            tag.targetNovelIDArray.append(objectsIn: novelIDArray)
+            realm.add(tag, update: .modified)
+        } else {
+            let tag = CreateNewTag(name: tagName, type: type)
+            tag.targetNovelIDArray.append(objectsIn: novelIDArray)
             realm.add(tag, update: .modified)
         }
     }

@@ -474,7 +474,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 if checkedFolder2NovelIDMap[folderName]?.count ?? 0 > 0 || !firstFolderNovelIDSet.intersection(checkedNovelIDSet).isEmpty {
                     DispatchQueue.global(qos: .userInitiated).async {
                         RealmUtil.Write { realm in
-                            RealmNovelTag.AddTag(realm: realm, name: folderName, novelIDArray: newValue, type: RealmNovelTag.TagType.Folder)
+                            RealmNovelTag.OverrideTagLinkedNovelIDArray(realm: realm, name: folderName, novelIDArray: newValue, type: RealmNovelTag.TagType.Folder)
                         }
                         folder2NovelIDMap[folderName] = newValue
                         completion?()
