@@ -763,7 +763,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
     }
     
     override public func viewWillDisappear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+        super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
     }
     
