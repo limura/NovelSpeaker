@@ -964,6 +964,7 @@
 - Fixed an issue where the confirmation screen would not appear when trying to delete a novel on the bookshelf screen even if \"Confirm when deleting a novel\" was turned on in the \"Settings tab\"
 - Added an ON/OFF setting for \"Prevent novels from being deleted by swiping or clicking \"Edit\" on the bookshelf screen\" when \"Confirm when deleting a novel\" is turned on in the \"Settings tab\".
 - Fixes an issue where the app would crash if you tried to read the next page or a sentence ahead from the lock screen during playback.
+- Fixed a problem where the order of folders would be messed up when adding novels to a folder using the multiple selection function on the bookshelf screen.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -978,6 +979,7 @@ Changes in interface/internal operation
 Fixing the problem
 
 - Fixes an issue where the app would crash if you tried to read the next page or a sentence ahead from the lock screen during playback.
+- Fixed a problem where the order of folders would be messed up when adding novels to a folder using the multiple selection function on the bookshelf screen.
 
 
 Version 2.9.4

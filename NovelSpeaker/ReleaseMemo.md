@@ -3940,6 +3940,7 @@ Version 2.10.0
 問題の修正
 
 - 再生時にロック画面から次のページや少し先の文を読ませたりするとアプリが強制終了する問題を修正
+- 本棚画面で複数選択機能を使ってフォルダに小説を追加した場合にフォルダの並び順が滅茶苦茶になってしまう問題を修正
 
 今回の修正は大きく分けて2つになります。
 前者は本棚画面での小説の削除に関するものです。前者のものは以前できていたものが新しく作り直した本棚画面では未実装になっていたというものです。これについては完全にこちらの手落ちになります。申し訳ありません。
@@ -3963,3 +3964,4 @@ Changes in interface/internal operation
 Fixing the problem
 
 - Fixes an issue where the app would crash if you tried to read the next page or a sentence ahead from the lock screen during playback.
+- Fixed a problem where the order of folders would be messed up when adding novels to a folder using the multiple selection function on the bookshelf screen.
