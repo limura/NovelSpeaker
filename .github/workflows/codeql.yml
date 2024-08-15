@@ -64,6 +64,8 @@ jobs:
       run: |
         sudo gem install cocoapods
         pod install
+        sh linkSZTextViewHeader.sh
+        sh patch.sh
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
