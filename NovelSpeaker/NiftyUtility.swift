@@ -156,8 +156,8 @@ class NiftyUtility: NSObject {
                             + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
                             + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
                             + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
-                            + "\nready SiteInfo count: \(StoryHtmlDecoder.shared.readySiteInfoCount)"
                             + "\nfirst SiteInfo resourceUrl: \(StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url?.absoluteString ?? "-").first?.resourceUrl ?? "?")"
+                            + "\nready SiteInfo description:\n\(StoryHtmlDecoder.shared.readySiteInfoDescription)"
                         picker.setMessageBody(messageBody, isHTML: false)
                         DummyMailComposeViewController.shared.currentViewController = viewController
                         picker.mailComposeDelegate = DummyMailComposeViewController.shared

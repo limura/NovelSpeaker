@@ -421,6 +421,20 @@ class StoryHtmlDecoder {
             return siteInfoArrayArray.reduce(0, {$0 + $1.count})
         }
     }
+    var readySiteInfoDescription: String {
+        get {
+            var resultArray:[String] = []
+            let siteInfoURLArray = getLoadTargetURLs()
+            for (index, siteInfoArray) in siteInfoArrayArray.enumerated() {
+                var description = "\(index): count: \(siteInfoArray.count)"
+                if siteInfoURLArray.count > index, let url = siteInfoURLArray[index] {
+                    description += ", \(generateCacheFileName(url: url, index: index)) <- \(url.absoluteString)"
+                }
+                resultArray.append(description)
+            }
+            return resultArray.joined(separator: "\n")
+        }
+    }
     
     static func DecodeSiteInfoData(data:Data) -> [StorySiteInfo]? {
         guard let result = try? JSONDecoder().decode([StorySiteInfo].self, from: data) else { return nil }
