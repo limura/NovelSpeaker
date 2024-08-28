@@ -647,42 +647,28 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
 
     func textViewScrollTo(readLocation:Int) {
-        guard let swiftText = self.textView.text, readLocation >= 0 else {
+        let minLines = 2
+        let maxLines = 4
+
+        guard let startPosition = textView.position(from: textView.beginningOfDocument, offset: readLocation) else {
             return
         }
-        let text = swiftText as NSString
-        let textLength = text.length
-        var location = readLocation
-        
-        if textLength <= 0 {
-            location = 0
-        }else if location >= textLength {
-            location = textLength - 1
-        }
-        var range = NSRange(location: location, length: 1)
 
-        let maxLineCount = 5
-        let minAppendLength = 15
-        let maxAppendLength = 120
-        var appendLength = 0
-        var lineCount = 0
-        var index = location
-        while index < textLength {
-            if let c = UnicodeScalar(text.character(at: index)), CharacterSet.newlines.contains(c) {
-                lineCount += 1
-                if lineCount > maxLineCount && appendLength > minAppendLength {
-                    break
-                }
-            }
-            appendLength += 1
-            if appendLength > maxAppendLength {
-                break
-            }
-            index += 1
-        }
-        range.location = location;
-        range.length = appendLength
-        self.textView.scrollRangeToVisible(range)
+        let startRect = textView.caretRect(for: startPosition)
+        let lineHeight = textView.font?.lineHeight ?? 0
+
+        let minHeight = lineHeight * CGFloat(minLines)
+        let maxHeight = lineHeight * CGFloat(maxLines)
+
+        let visibleHeight = textView.bounds.height
+        let heightToUse = min(maxHeight, visibleHeight)
+        
+        let visibleRect = CGRect(x: startRect.origin.x,
+                                 y: startRect.origin.y,
+                                 width: startRect.size.width,
+                                 height: min(heightToUse, visibleHeight))
+
+        textView.scrollRectToVisible(visibleRect, animated: true)
     }
     
     func pushToEditStory() {
