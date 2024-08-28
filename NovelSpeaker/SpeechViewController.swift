@@ -193,6 +193,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         nextChapterButton.accessibilityLabel = NSLocalizedString("SpeechViewController_NextChapterButton_VoiceOverTitle", comment: "次のページ")
 
         setCustomUIMenu()
+        
+        self.textView.layoutManager.allowsNonContiguousLayout = false
     }
     
     func assignSwipeRecognizer() {
@@ -647,28 +649,18 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
 
     func textViewScrollTo(readLocation:Int) {
-        let minLines = 2
-        let maxLines = 4
-
+        let beginOffsetY = textView.contentOffset.y
         guard let startPosition = textView.position(from: textView.beginningOfDocument, offset: readLocation) else {
             return
         }
-
         let startRect = textView.caretRect(for: startPosition)
-        let lineHeight = textView.font?.lineHeight ?? 0
-
-        let minHeight = lineHeight * CGFloat(minLines)
-        let maxHeight = lineHeight * CGFloat(maxLines)
-
         let visibleHeight = textView.bounds.height
-        let heightToUse = min(maxHeight, visibleHeight)
-        
+        let targetY = max(0, startRect.origin.y - visibleHeight * 0.7)
         let visibleRect = CGRect(x: startRect.origin.x,
-                                 y: startRect.origin.y,
+                                 y: targetY,
                                  width: startRect.size.width,
-                                 height: min(heightToUse, visibleHeight))
-
-        textView.scrollRectToVisible(visibleRect, animated: true)
+                                 height: visibleHeight)
+        self.textView.scrollRectToVisible(visibleRect, animated: true)
     }
     
     func pushToEditStory() {
