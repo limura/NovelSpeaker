@@ -615,8 +615,11 @@ class StoryHtmlDecoder {
             if let targetURL = targetURLArray[index] {
                 NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: generateCacheFileName(url: targetURL, index: index), expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
                     guard var siteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: data) else {
+                        let firstLine = String(data: data, encoding: .utf8)?.getFirstLines(lineCount: 3, maxCharacterCount: 100)
                         AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData", comment: "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSON形式ではないようです。"), appendix: [
                             "targetURL": targetURL.absoluteString,
+                            "first part": firstLine ?? "-",
+                            "data count": "\(data.count)",
                         ], isForDebug: false)
                         siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
                         return false
