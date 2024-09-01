@@ -1080,8 +1080,8 @@ class NiftyUtility: NSObject {
         }
     }
     
-    public static func httpGet(url: URL, timeoutInterval:TimeInterval? = nil, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
-        httpRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, successAction: successAction, failedAction: failedAction)
+    public static func httpGet(url: URL, timeoutInterval:TimeInterval? = nil, isNeedHeadless:Bool = false, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
+        httpRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, isNeedHeadless: isNeedHeadless, successAction: successAction, failedAction: failedAction)
     }
     
     public static func httpPost(url: URL, data:Data, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
@@ -1524,12 +1524,12 @@ class NiftyUtility: NSObject {
         return data
     }
     
-    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, canRecoverOldFile:Bool = false, requestTimeout:TimeInterval? = nil, successAction:((Data)->Bool)?, failedAction:((Error?)->Void)?) {
+    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, canRecoverOldFile:Bool = false, requestTimeout:TimeInterval? = nil, isNeedHeadless:Bool = false, successAction:((Data)->Bool)?, failedAction:((Error?)->Void)?) {
         if let data = GetCachedHttpGetCachedData(url: url, cacheFileName: cacheFileName, expireTimeinterval: expireTimeinterval) {
             _ = successAction?(data)
             return
         }
-        httpGet(url: url, timeoutInterval: requestTimeout, successAction: { (data, encoding) in
+        httpGet(url: url, timeoutInterval: requestTimeout, isNeedHeadless: isNeedHeadless, successAction: { (data, encoding) in
             if successAction?(data) ?? true {
                 if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName), let dataZiped = compress(data: data) {
                     do {
