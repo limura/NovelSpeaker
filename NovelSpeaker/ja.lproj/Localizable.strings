@@ -846,7 +846,7 @@
 "StoryHtmlDecoder_testSiteInfoURLValid_Error_InvalidURL" = "有効なURL文字列ではないようです。";
 "StoryHtmlDecoder_testSiteInfoURLValid_Error_GetURLFailed" = "指定されたURLからの読み出しには成功したようですが、期待されている内容ではなく、JSONからSiteInfoの読み出しに失敗しています。正しいデータであるかどうか確認してください。";
 "StoryHtmlDecoder_testSiteInfoURLValid_Error_GetRequestError" = "指定されたURLからの読み出しに失敗しています。正しいURLを記入していることや、ネットワーク接続状態などを確認してください。";
-"StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData" = "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSON形式ではないようです。\n認証の必要なネットワーク二接続している時にSiteInfoの読み込みが発生した場合などにこの問題が報告されることがあります。その場合はネットワーク状況の良い所に移動し、「設定タブ」→「SiteInfoを取得し直す」を選択した後、「設定タブ」→「アプリ内エラーのお知らせ」に追加されたメッセージでエラーが無い事を確認してみてください。";
+"StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData" = "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されている JSON または TSV 形式ではないようです。\n認証の必要なネットワークに接続している時にSiteInfoの読み込みが発生した場合などにこの問題が報告されることがあります。その場合はネットワーク状況の良い所に移動し、「設定タブ」→「SiteInfoを取得し直す」を選択した後、「設定タブ」→「アプリ内エラーのお知らせ」に追加されたメッセージでエラーが無い事を確認してみてください。";
 
 "AutoSplitStringSettingViewController_Title" = "テキスト分割文字列の設定";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_Error_NoText" = "空文字列は指定できません";

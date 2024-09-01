@@ -399,6 +399,7 @@ class StoryHtmlDecoder {
     
     static let AutopagerizeSiteInfoJSONURL = "http://wedata.net/databases/AutoPagerize/items.json"
     static let NovelSpeakerSiteInfoJSONURL = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
+    static let NovelSpeakerSiteInfoTSVURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=tsv"
 
     // シングルトンにしている。
     static let shared = StoryHtmlDecoder()
@@ -436,9 +437,71 @@ class StoryHtmlDecoder {
         }
     }
     
-    static func DecodeSiteInfoData(data:Data) -> [StorySiteInfo]? {
-        guard let result = try? JSONDecoder().decode([StorySiteInfo].self, from: data) else { return nil }
+    static func DecodeTSVSiteInfoData(data:Data) -> [StorySiteInfo]? {
+        guard let tsvString = String(data: data, encoding: .utf8) else { return nil }
+        // 行ごとにデータを分割
+        var lines:[String] = []
+        tsvString.enumerateLines { line, stop in
+            lines.append(line)
+        }
+        //let lines = tsvString.split(separator: "\r\n").map { String($0) }
+        
+        // 1行目は表題として使用
+        guard let headerLine = lines.first else { return nil }
+        
+        let headers = headerLine.components(separatedBy: "\t")
+        
+        var result: [StorySiteInfo] = []
+        // 2行目以降はデータとして処理
+        for line in lines.dropFirst() {
+            let values = line.components(separatedBy: "\t").map({$0 == "" ? nil : $0})
+            var dict = [String: String]()
+            
+            for (header, value) in zip(headers, values) {
+                dict[header] = value
+            }
+            
+            guard let pageElement = dict["pageElement"] else { continue }
+            
+            // StorySiteInfoの各プロパティにマッピング
+            let storySiteInfo = StorySiteInfo(
+                pageElement: pageElement,
+                url: dict["url"],
+                title: dict["title"],
+                subtitle: dict["subtitle"],
+                firstPageLink: dict["firstPageLink"],
+                nextLink: dict["nextLink"],
+                tag: dict["tag"],
+                author: dict["author"],
+                isNeedHeadless: dict["isNeedHeadless"],
+                injectStyle: dict["injectStyle"],
+                nextButton: dict["nextButton"],
+                firstPageButton: dict["firstPageButton"],
+                waitSecondInHeadless: Double(dict["waitSecondInHeadless"] ?? "0"),
+                forceClickButton: dict["forceClickButton"],
+                resourceUrl: dict["resourceUrl"],
+                overrideUserAgent: dict["overrideUserAgent"],
+                forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
+                scrollTo: dict["scrollTo"],
+                isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"]
+            )
+            //print("add StorySiteInfo: \(storySiteInfo)")
+            result.append(storySiteInfo)
+        }
+        if result.count <= 0 {
+            //print("result.count <= 0: \(result.count), lines: \(lines)")
+            return nil
+        }
         return result
+    }
+    
+    static func DecodeSiteInfoData(data:Data) -> [StorySiteInfo]? {
+        // とりあえずJSONとしてデコードしようとしてみます。
+        if let result = try? JSONDecoder().decode([StorySiteInfo].self, from: data), result.count > 0 {
+            return result
+        }
+        // 駄目ならTSVとしてデコードしようとしてみます。
+        return DecodeTSVSiteInfoData(data: data)
     }
     
     static func testSiteInfoURLValid(urlString:String, completion: @escaping (_ errorString: String?, _ urlString: String)->Void) {
@@ -470,6 +533,8 @@ class StoryHtmlDecoder {
             return "AutopagerizeSiteInfoCache"
         case StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL:
             return "NovelSpeakerSiteInfoCache"
+        case StoryHtmlDecoder.NovelSpeakerSiteInfoTSVURL:
+            return "novelSpeakerSiteInfoTSVCache"
         default:
             break
         }
@@ -491,7 +556,7 @@ class StoryHtmlDecoder {
                 if let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
                     loadTargetUrls.append(novelSpeakerURL)
                 }else{
-                    loadTargetUrls.append(URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL))
+                    loadTargetUrls.append(URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoTSVURL))
                     if globalState.novelSpeakerSiteInfoURL != "" {
                         AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_NovelSPeakerSiteInfoURL", comment: "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.novelSpeakerSiteInfoURL], isForDebug: false)
                     }
@@ -613,10 +678,10 @@ class StoryHtmlDecoder {
                 return
             }
             if let targetURL = targetURLArray[index] {
-                NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: generateCacheFileName(url: targetURL, index: index), expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
+                NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: generateCacheFileName(url: targetURL, index: index), expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, isNeedHeadless: false /*targetURL.absoluteString.starts(with: "https://docs.google.com/spreadsheets/")*/, successAction: { (data) in
                     guard var siteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: data) else {
                         let firstLine = String(data: data, encoding: .utf8)?.getFirstLines(lineCount: 3, maxCharacterCount: 100)
-                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData", comment: "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSON形式ではないようです。"), appendix: [
+                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData", comment: "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSONまたはTSV形式ではないようです。"), appendix: [
                             "targetURL": targetURL.absoluteString,
                             "first part": firstLine ?? "-",
                             "data count": "\(data.count)",
