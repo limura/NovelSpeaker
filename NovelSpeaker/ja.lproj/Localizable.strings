@@ -948,16 +948,24 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.1
 
-- 「設定タブ」->「小説を削除する時に確認する」をONにしていても本棚画面で小説を削除しようとした時に確認画面が出なくなっていた問題を修正
-- 「設定タブ」で「小説を削除するときに確認する」がONの場合の時に「本棚画面でスワイプや「編集」から小説を削除できないようにする」のON/OFF設定を追加
-- 再生時にロック画面から次のページや少し先の文を読ませたりするとアプリが強制終了する問題を修正
-- 本棚画面で複数選択機能を使ってフォルダに小説を追加した場合にフォルダの並び順が滅茶苦茶になってしまう問題を修正
+- 読み上げ中にスクロールする位置の計算方法を変更
+- 文字数が多いページを開いた時にスクロール周りがうまく動かなかった問題へ対処
+- ことせかい 向けのSiteInfoを取得する先のURLをGoogleスプレッドシートのTSVに変更
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.1
+
+インタフェース・内部動作の変更
+
+- 読み上げ中にスクロールする位置の計算方法を変更
+- 文字数が多いページを開いた時にスクロール周りがうまく動かなかった問題へ対処
+- ことせかい 向けのSiteInfoを取得する先のURLをGoogleスプレッドシートのTSVに変更
+
+
 Version 2.10.0
 
 インタフェース・内部動作の変更
