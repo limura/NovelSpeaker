@@ -155,7 +155,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             $0.title = NSLocalizedString("RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSampleButton", comment: "標準設定データのURLを開く")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ (cellOf, row) in
-            if let url = URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL) {
+            if let url = URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoTSVURL) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
         })
