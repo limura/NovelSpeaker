@@ -3508,7 +3508,16 @@ class NovelSpeakerUtility: NSObject {
     static func ResetMemoryUsage() {
         MemoryUsageValidChecked = false
     }
-
+    #if !os(watchOS)
+    static func GetAppStoreAppVersionInfo(completion: @escaping (Date?, String?, Error?)->Void) {
+        let appStoreURLString = "https://apps.apple.com/jp/app/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84/id914344185"
+        guard let appStoreURL = URL(string: appStoreURLString) else {
+            completion(nil, nil, GenerateNSError(msg: "can not decode URL String: \(appStoreURLString)"))
+            return
+        }
+        NiftyUtility.GetAppStoreAppVersionInfo(appStoreURL: appStoreURL, completion: completion)
+    }
+    #endif
     /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     static let isDisableWillSpeakRangeKey = "isDisableWillSpeakRange"
     static func GetIsDisableWillSpeakRange() -> Bool {

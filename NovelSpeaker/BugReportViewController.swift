@@ -129,6 +129,12 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 $0.hidden = true
                 $0.tag = "HiddenImportantInformationSectionHeader"
             }
+            <<< LabelRow("HiddenUpdateVersionAliveLabelRow") {
+                $0.title = ""
+                $0.hidden = true
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .body, compatibleWith: UITraitCollection(legibilityWeight: .bold))
+            }
             <<< LabelRow("HiddenImportantInformationLabelRow") {
                 $0.title = ""
                 $0.hidden = true
@@ -475,7 +481,27 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     }
             }, failedAction: nil)
         }
-
+        NovelSpeakerUtility.GetAppStoreAppVersionInfo { date, version, err in
+            if let latestVersion = version,
+               let infoDictionary = Bundle.main.infoDictionary,
+               let shortVersion = infoDictionary["CFBundleShortVersionString"] as? String,
+               latestVersion != shortVersion {
+                DispatchQueue.main.async {
+                    if let labelRow = self.form.rowBy(tag: "HiddenUpdateVersionAliveLabelRow") as? LabelRow {
+                        labelRow.title = NSLocalizedString(
+                            "BugReportViewController_UpdateVersionAlivedMessage",
+                            comment: "ことせかい の更新されたバージョンがあるようです。お問い合わせをされる前に、AppStoreアプリから ことせかい をアップデートし、それでも問題が発生するかどうかをご確認の上お問い合わせいただけますと助かります。"
+                        )
+                        labelRow.hidden = false
+                        labelRow.evaluateHidden()
+                        if let section = self.form.sectionBy(tag: "HiddenImportantInformationSectionHeader") {
+                            section.hidden = false
+                            section.evaluateHidden()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override func didReceiveMemoryWarning() {

@@ -138,7 +138,7 @@ class NiftyUtility: NSObject {
             builder = builder.title(title: NSLocalizedString("NiftyUtility_ImportError", comment: "取り込み失敗"))
             .textView(content: errorMessage, heightMultiplier: 0.45)
             .addButton(title: NSLocalizedString("NiftyUtility_ImportError_SendProblemReportButton", comment: "報告メールを作成"), callback: { (dialog) in
-                dialog.dismiss(animated: false) {
+                func CreateMail() {
                     DispatchQueue.main.async {
                         let picker = MFMailComposeViewController()
                         //picker.mailComposeDelegate = self;
@@ -149,19 +149,46 @@ class NiftyUtility: NSObject {
                             return (globalState.preferredSiteInfoURLList.map{$0}, globalState.novelSpeakerSiteInfoURL, globalState.autopagerizeSiteInfoURL)
                         }
                         let messageBody = NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
-                            + "\n\n------\nurl: \(url?.absoluteString ?? "-")"
-                            + "\napp version: \(NiftyUtility.GetAppVersionString())"
-                            + "\niOS version: \(UIDevice.current.systemVersion)"
-                            + "\ndevice model: \(UIDevice.modelName)"
-                            + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
-                            + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
-                            + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
-                            + "\nfirst SiteInfo resourceUrl: \(StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url?.absoluteString ?? "-").first?.resourceUrl ?? "?")"
-                            + "\nready SiteInfo description:\n\(StoryHtmlDecoder.shared.readySiteInfoDescription)"
+                        + "\n\n------\nurl: \(url?.absoluteString ?? "-")"
+                        + "\napp version: \(NiftyUtility.GetAppVersionString())"
+                        + "\niOS version: \(UIDevice.current.systemVersion)"
+                        + "\ndevice model: \(UIDevice.modelName)"
+                        + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
+                        + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
+                        + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
+                        + "\nfirst SiteInfo resourceUrl: \(StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url?.absoluteString ?? "-").first?.resourceUrl ?? "?")"
+                        + "\nready SiteInfo description:\n\(StoryHtmlDecoder.shared.readySiteInfoDescription)"
                         picker.setMessageBody(messageBody, isHTML: false)
                         DummyMailComposeViewController.shared.currentViewController = viewController
                         picker.mailComposeDelegate = DummyMailComposeViewController.shared
                         viewController.present(picker, animated: true, completion: nil)
+                    }
+                }
+                NovelSpeakerUtility.GetAppStoreAppVersionInfo { date, versionString, err in
+                    let isValidVersion:Bool
+                    if let latestVersion = versionString, let infoDictionary = Bundle.main.infoDictionary,
+                       let shortVersion = infoDictionary["CFBundleShortVersionString"] as? String,
+                       latestVersion != shortVersion {
+                        isValidVersion = false
+                    }else{
+                        isValidVersion = true
+                    }
+                    if isValidVersion {
+                        DispatchQueue.main.async {
+                            dialog.dismiss(animated: false) {
+                                CreateMail()
+                            }
+                        }
+                        return
+                    }
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false) {
+                            DispatchQueue.main.async {
+                                EasyDialogTwoButton(viewController: viewController, title: nil, message: NSLocalizedString("NiftyUtility_checkUrlAndConifirmToUser_ErrorHandle_NewVersionAppAlivedMessage", comment: "AppStoreに登録されている ことせかい のバージョンと、現在実行されている ことせかい のバージョンが違うようです。念の為、AppStore アプリから ことせかい をアップデートした後に同様の問題があるかを確認してからお試しください。"), button1Title: NSLocalizedString("NiftyUtility_checkUrlAndConifirmToUser_ErrorHandle_NewVersionAppAlivedMessage_ForceSendMail", comment: "報告メールを作成"), button1Action: {
+                                    CreateMail()
+                                }, button2Title: nil, button2Action: nil)
+                            }
+                        }
                     }
                 }
             })
@@ -1350,8 +1377,17 @@ class NiftyUtility: NSObject {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone.autoupdatingCurrent
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        return formatter.date(from: iso8601String)
+        let formatArray:[String] = [
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+        ]
+        for format in formatArray {
+            formatter.dateFormat = format
+            if let result = formatter.date(from: iso8601String) {
+                return result
+            }
+        }
+        return nil
     }
     
     @objc static public func DispatchSyncMainQueue(block:(()->Void)?) -> Void {
@@ -2004,6 +2040,40 @@ class NiftyUtility: NSObject {
         // https://qiita.com/takecian/items/b106675e0b2ded41db57
         return NSClassFromString("XCTest") != nil // nil じゃなかったらテスト実行中
     }
+    
+    #if !os(watchOS)
+    static func GetAppStoreAppVersionInfo(appStoreURL:URL, completion: @escaping (Date?, String?, Error?)->Void) {
+        httpGet(url: appStoreURL) { content, headerCharset in
+            let lastUpdateDateXpath = "//div[contains(@class,'whats-new__latest')]//time[@datetime]/@datetime"
+            let lastUpdateVersionXpath = "//div[contains(@class,'whats-new__latest')]//p[contains(@class,'whats-new__latest__version')]"
+            guard let html = String(data: content, encoding: headerCharset ?? .utf8), let htmlDocument = try? HTML(html: html, encoding: headerCharset ?? .utf8) else {
+                completion(nil, nil, NovelSpeakerUtility.GenerateNSError(msg: "decode data failed. content length: \(content.count)"))
+                return
+            }
+            
+            let lastUpdateDateString = FilterXpathWithConvertString(xmlDocument: htmlDocument, xpath: lastUpdateDateXpath)
+            let lastUpdateDate:Date?
+            if let decodedDate = ISO8601String2Date(iso8601String: lastUpdateDateString) {
+                lastUpdateDate = decodedDate
+            }else{
+                lastUpdateDate = nil
+            }
+            
+            let latestVersionPString = FilterXpathWithConvertString(xmlDocument: htmlDocument, xpath: lastUpdateVersionXpath)
+            let regex = try! NSRegularExpression(pattern: "\\d+(\\.\\d+)+")
+            let results = regex.matches(in: latestVersionPString, range: NSRange(location: 0, length: latestVersionPString.utf16.count))
+            let latestVersion:String?
+            if let result = results.first {
+                latestVersion = (latestVersionPString as NSString).substring(with: result.range)
+            }else{
+                latestVersion = nil
+            }
+            completion(lastUpdateDate, latestVersion, nil)
+        } failedAction: { err in
+            completion(nil, nil, err)
+        }
+    }
+    #endif
 }
 
 extension String {
