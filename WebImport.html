@@ -145,10 +145,11 @@ Web取込機能はWeb上で発表される小説を読み込むために、以�
 <p>
 以下に<a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>を編集しようとした時のガイドを書いておきます。
 </p>
+<p>2024/09/05 追記: Version 2.10.1 以降からは ことせかい用 の SiteInfo については Googleスプレッドシート側 での提供となりました。とはいえ、「設定タブ」→「内部データ参照用URLの設定」内の「ことせかい用SITEINFO」欄に指定するURLの先に設定する内容に関わることでもありますので、ここの記述は残しておきます。</p>
 <p>
 編集を行うには、OpenID と xpath を書く知識が必要です。また、編集作業に貢献していただいても ことせかい の開発者側からは特に何の報酬も出せません事は予めご承知おきください。
 </p>
-<h4 id="WeData">wedata について</h4>
+<del><h4 id="WeData">wedata について</h4>
 <p>
 <a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>は、<a href="http://wedata.net/">wedata</a>というサービスを利用させて頂いています。
 wedata は「Wikiのように誰でも書換えられるデータベースを作成するシステムです」と説明されています。詳しくはwedataサイトの<a href="http://wedata.net/help/about">wedataについて</a>を参照してください。
@@ -158,8 +159,10 @@ wedata は「Wikiのように誰でも書換えられるデータベースを作
 OpenID は<a href="http://developer.hatena.ne.jp/ja/documents/other/apis/openid">はてな</a> などで取得することができます。
 どこか適切な所で取得してください。
 </p>
-<p>
+</del>
+<p>2024/09/05 追記: 上記の通り、今では ことせかい用 の SiteInfo については wedata様 は利用していませんため、これらの記述については必要ありません。また、Googleスプレッドシートで運用しております ことせかい用 の SiteInfo の編集権限については、申請ベースで運用することとします。編集権限がほしい方は、アプリ内やサポートサイトからGoogleスプレッドシートを使いたいGoogleアカウントを添えてお問い合わせください。</p>
 <h4 id="xpath">xpath について</h4>
+<p>
 xpath は XML や HTML の文書について、そのエレメント(特定の部分)を指定するための言語です。<a href="https://www.google.co.jp/search?q=xpath+%E6%9B%B8%E3%81%8D%E6%96%B9">「xpath 書き方」で検索</a> したりすると、ざっくりとした書き方とかは解るかと思います。
 </p>
 <p>
