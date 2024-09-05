@@ -3509,15 +3509,81 @@ class NovelSpeakerUtility: NSObject {
         MemoryUsageValidChecked = false
     }
     #if !os(watchOS)
-    static func GetAppStoreAppVersionInfo(completion: @escaping (Date?, String?, Error?)->Void) {
+    static func GetAppStoreAppVersionInfo(completion: @escaping (Date?, String?, Error?) -> Void) {
         let appStoreURLString = "https://apps.apple.com/jp/app/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84/id914344185"
+        let cacheFileName = "NovelSpeaker_AppStore_Cache"
+        let cacheFileExpireTimeInterval:TimeInterval = 60*30
         guard let appStoreURL = URL(string: appStoreURLString) else {
             completion(nil, nil, GenerateNSError(msg: "can not decode URL String: \(appStoreURLString)"))
             return
         }
-        NiftyUtility.GetAppStoreAppVersionInfo(appStoreURL: appStoreURL, completion: completion)
+        NiftyUtility.GetAppStoreAppVersionInfo(appStoreURL: appStoreURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeInterval) { date, version, err in
+            completion(date, version, err)
+            if version != nil {
+                return true
+            }
+            return false
+        }
     }
     #endif
+    struct AppStoreWebPageXpath : Decodable {
+        var latestDate:String?
+        var latestShortVersion:String?
+        init(){
+            latestDate = "//div[contains(@class,'whats-new__latest')]//time[@datetime]/@datetime"
+            latestShortVersion = "//div[contains(@class,'whats-new__latest')]//p[contains(@class,'whats-new__latest__version')]"
+        }
+    }
+    struct NovelSpeakerRemoteConfig : Decodable {
+        var appStoreWebPageXpath:AppStoreWebPageXpath?
+    }
+    static func GetNovelSpeakerRemoteConfig(completion: @escaping (NovelSpeakerRemoteConfig)->Void) {
+        let defaultSetting = NovelSpeakerRemoteConfig(
+            appStoreWebPageXpath: AppStoreWebPageXpath()
+        )
+        guard let url = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/NovelSpeakerRemoteConfig.json") else {
+            completion(defaultSetting)
+            return
+        }
+        // nil なら defaultSetting で上書きします
+        func overrideDefaultSetting(config:NovelSpeakerRemoteConfig) -> NovelSpeakerRemoteConfig {
+            var remoteConfig = config
+            if remoteConfig.appStoreWebPageXpath == nil {
+                remoteConfig.appStoreWebPageXpath = defaultSetting.appStoreWebPageXpath
+            }else{
+                remoteConfig.appStoreWebPageXpath!.latestDate = remoteConfig.appStoreWebPageXpath!.latestDate ?? defaultSetting.appStoreWebPageXpath?.latestDate
+                remoteConfig.appStoreWebPageXpath!.latestShortVersion = remoteConfig.appStoreWebPageXpath!.latestShortVersion ?? defaultSetting.appStoreWebPageXpath?.latestShortVersion
+            }
+            return remoteConfig
+        }
+        let remoteConfigCacheFileName = "NovelSpeakerRemoteConfigCache"
+        let expireTimeInterval:TimeInterval = 60*60*6
+        NiftyUtility.FileCachedHttpGet(url: url, cacheFileName: remoteConfigCacheFileName, expireTimeinterval: expireTimeInterval) { data in
+            let decoder = JSONDecoder()
+            var remoteConfig:NovelSpeakerRemoteConfig
+            if let httpRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: data) {
+                remoteConfig = httpRemoteConfig
+            } else {
+                guard let cachedData = NiftyUtility.GetCachedHttpGetCachedData(url: url, cacheFileName: remoteConfigCacheFileName, expireTimeinterval: nil), let cacheRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: cachedData) else {
+                    completion(defaultSetting)
+                    return false
+                }
+                completion(cacheRemoteConfig)
+                return false // デコードできなかったので false を返してキャッシュの上書きは許さないことにします
+            }
+            
+            completion(overrideDefaultSetting(config: remoteConfig))
+            return true
+        } failedAction: { err in
+            let decoder = JSONDecoder()
+            guard let cachedData = NiftyUtility.GetCachedHttpGetCachedData(url: url, cacheFileName: remoteConfigCacheFileName, expireTimeinterval: nil), let cacheRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: cachedData) else {
+                completion(defaultSetting)
+                return
+            }
+            completion(overrideDefaultSetting(config: cacheRemoteConfig))
+        }
+    }
+
     /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     static let isDisableWillSpeakRangeKey = "isDisableWillSpeakRange"
     static func GetIsDisableWillSpeakRange() -> Bool {

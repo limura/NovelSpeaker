@@ -2042,35 +2042,38 @@ class NiftyUtility: NSObject {
     }
     
     #if !os(watchOS)
-    static func GetAppStoreAppVersionInfo(appStoreURL:URL, completion: @escaping (Date?, String?, Error?)->Void) {
-        httpGet(url: appStoreURL) { content, headerCharset in
-            let lastUpdateDateXpath = "//div[contains(@class,'whats-new__latest')]//time[@datetime]/@datetime"
-            let lastUpdateVersionXpath = "//div[contains(@class,'whats-new__latest')]//p[contains(@class,'whats-new__latest__version')]"
-            guard let html = String(data: content, encoding: headerCharset ?? .utf8), let htmlDocument = try? HTML(html: html, encoding: headerCharset ?? .utf8) else {
-                completion(nil, nil, NovelSpeakerUtility.GenerateNSError(msg: "decode data failed. content length: \(content.count)"))
-                return
+    static func GetAppStoreAppVersionInfo(appStoreURL:URL, cacheFileName: String, expireTimeinterval: TimeInterval, completion: @escaping (Date?, String?, Error?) -> Bool) {
+        NovelSpeakerUtility.GetNovelSpeakerRemoteConfig { remoteConfig in
+            let defaultAppStoreWebPageXpath = NovelSpeakerUtility.AppStoreWebPageXpath()
+            let lastUpdateDateXpath = remoteConfig.appStoreWebPageXpath?.latestDate ?? defaultAppStoreWebPageXpath.latestDate!
+            let lastUpdateVersionXpath = remoteConfig.appStoreWebPageXpath?.latestShortVersion ?? defaultAppStoreWebPageXpath.latestShortVersion!
+            FileCachedHttpGet(url: appStoreURL, cacheFileName: cacheFileName, expireTimeinterval: expireTimeinterval) { content in
+                guard let html = String(data: content, encoding: .utf8), let htmlDocument = try? HTML(html: html, encoding: .utf8) else {
+                    _ = completion(nil, nil, NovelSpeakerUtility.GenerateNSError(msg: "GetAppStoreAppVersionInfo() decode data failed. content length: \(content.count)"))
+                    return false
+                }
+                
+                let lastUpdateDateString = FilterXpathWithConvertString(xmlDocument: htmlDocument, xpath: lastUpdateDateXpath)
+                let lastUpdateDate:Date?
+                if let decodedDate = ISO8601String2Date(iso8601String: lastUpdateDateString) {
+                    lastUpdateDate = decodedDate
+                }else{
+                    lastUpdateDate = nil
+                }
+                
+                let latestVersionPString = FilterXpathWithConvertString(xmlDocument: htmlDocument, xpath: lastUpdateVersionXpath)
+                let regex = try! NSRegularExpression(pattern: "\\d+(\\.\\d+)+")
+                let results = regex.matches(in: latestVersionPString, range: NSRange(location: 0, length: latestVersionPString.utf16.count))
+                let latestVersion:String?
+                if let result = results.first {
+                    latestVersion = (latestVersionPString as NSString).substring(with: result.range)
+                }else{
+                    latestVersion = nil
+                }
+                return completion(lastUpdateDate, latestVersion, nil)
+            } failedAction: { err in
+                _ = completion(nil, nil, err)
             }
-            
-            let lastUpdateDateString = FilterXpathWithConvertString(xmlDocument: htmlDocument, xpath: lastUpdateDateXpath)
-            let lastUpdateDate:Date?
-            if let decodedDate = ISO8601String2Date(iso8601String: lastUpdateDateString) {
-                lastUpdateDate = decodedDate
-            }else{
-                lastUpdateDate = nil
-            }
-            
-            let latestVersionPString = FilterXpathWithConvertString(xmlDocument: htmlDocument, xpath: lastUpdateVersionXpath)
-            let regex = try! NSRegularExpression(pattern: "\\d+(\\.\\d+)+")
-            let results = regex.matches(in: latestVersionPString, range: NSRange(location: 0, length: latestVersionPString.utf16.count))
-            let latestVersion:String?
-            if let result = results.first {
-                latestVersion = (latestVersionPString as NSString).substring(with: result.range)
-            }else{
-                latestVersion = nil
-            }
-            completion(lastUpdateDate, latestVersion, nil)
-        } failedAction: { err in
-            completion(nil, nil, err)
         }
     }
     #endif
