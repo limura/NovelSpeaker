@@ -351,7 +351,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 guard let voiceName = row.value else {
                     return
                 }
-                guard let voice = AVSpeechSynthesisVoice.speechVoices().filter({$0.name == voiceName}).first else {
+                guard let voice = AVSpeechSynthesisVoice.speechVoices().filter({$0.language == currentSetting.locale && $0.name == voiceName}).first else {
                     return
                 }
                 guard  let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else {
