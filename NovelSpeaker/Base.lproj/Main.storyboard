@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -1508,7 +1508,8 @@ THE SOFTWARE.
                         <viewLayoutGuide key="safeArea" id="ZHI-m6-f76"/>
                         <constraints>
                             <constraint firstItem="Atz-vc-WDz" firstAttribute="leading" secondItem="P4K-uK-bhG" secondAttribute="trailing" constant="8" id="Ctr-Od-bva"/>
-                            <constraint firstAttribute="bottom" secondItem="Atz-vc-WDz" secondAttribute="bottom" constant="48" id="EzX-e7-p4g"/>
+                            <constraint firstItem="RsE-pW-sT4" firstAttribute="top" secondItem="OiG-7z-gqj" secondAttribute="bottom" constant="1" id="DGl-hw-Lqv"/>
+                            <constraint firstItem="ZHI-m6-f76" firstAttribute="bottom" secondItem="Atz-vc-WDz" secondAttribute="bottom" constant="-1" id="EzX-e7-p4g"/>
                             <constraint firstItem="RsE-pW-sT4" firstAttribute="leading" secondItem="ZHI-m6-f76" secondAttribute="leading" id="I1N-PN-iuW"/>
                             <constraint firstItem="Atz-vc-WDz" firstAttribute="trailing" secondItem="ZHI-m6-f76" secondAttribute="trailing" id="OXR-VO-Zov"/>
                             <constraint firstItem="P4K-uK-bhG" firstAttribute="leading" secondItem="xzg-Fa-5p1" secondAttribute="trailing" constant="8" id="Ucv-Wk-fDc"/>
@@ -1740,8 +1741,8 @@ THE SOFTWARE.
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="IyG-FH-EcD"/>
-        <segue reference="zcY-Ej-AY3"/>
+        <segue reference="FvL-jm-emj"/>
+        <segue reference="wOu-8d-Sto"/>
         <segue reference="DiM-k6-LVA"/>
     </inferredMetricsTieBreakers>
     <resources>
@@ -1761,13 +1762,13 @@ THE SOFTWARE.
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondarySystemBackgroundColor">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGroupedBackgroundColor">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
