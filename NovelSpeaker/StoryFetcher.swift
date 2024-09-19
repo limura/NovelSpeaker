@@ -678,22 +678,69 @@ class StoryHtmlDecoder {
                 return
             }
             if let targetURL = targetURLArray[index] {
-                NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: generateCacheFileName(url: targetURL, index: index), expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, isNeedHeadless: false /*targetURL.absoluteString.starts(with: "https://docs.google.com/spreadsheets/")*/, successAction: { (data) in
-                    guard var siteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: data) else {
-                        let firstLine = String(data: data, encoding: .utf8)?.getFirstLines(lineCount: 3, maxCharacterCount: 100)
-                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData", comment: "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSONまたはTSV形式ではないようです。"), appendix: [
+                let cacheFileName = generateCacheFileName(url: targetURL, index: index)
+                let cachedFileData = NiftyUtility.GetCachedHttpGetCachedData(url: targetURL, cacheFileName: cacheFileName, expireTimeinterval: nil)
+                NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, isNeedHeadless: false /*targetURL.absoluteString.starts(with: "https://docs.google.com/spreadsheets/")*/, successAction: { (data) in
+                    func decodeSiteInfoArrayData(data: Data, cachedData: Data?) -> ([StorySiteInfo]?, Bool) {
+                        var isValidData = false
+                        var siteInfoArray:[StorySiteInfo]
+                        if let httpSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: data) {
+                            siteInfoArray = httpSiteInfoArray
+                            isValidData = true
+                        } else {
+                            guard let cachedData = cachedFileData, let cachedSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: cachedData) else {
+                                let firstLine = String(data: data, encoding: .utf8)?.getFirstLines(lineCount: 3, maxCharacterCount: 100)
+                                AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData", comment: "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSONまたはTSV形式ではないようです。"), appendix: [
+                                    "targetURL": targetURL.absoluteString,
+                                    "first part": firstLine ?? "-",
+                                    "data count": "\(data.count)",
+                                ], isForDebug: false)
+                                return (nil, false)
+                            }
+                            let firstLine = String(data: data, encoding: .utf8)?.getFirstLines(lineCount: 3, maxCharacterCount: 100)
+                            AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData_Recoverd", comment: "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSONまたはTSV形式ではないようです。\nなお、以前正常に取得できていたデータから内容を復元できたのでそれを利用して処理を続けます。"), appendix: [
+                                "targetURL": targetURL.absoluteString,
+                                "first part": firstLine ?? "-",
+                                "data count": "\(data.count)",
+                            ], isForDebug: false)
+                            siteInfoArray = cachedSiteInfoArray
+                        }
+                        siteInfoArray.sort { (a, b) -> Bool in
+                            guard let aPattern = a.url?.pattern else { return false }
+                            guard let bPattern = b.url?.pattern else { return true }
+                            return aPattern.count > bPattern.count
+                        }
+                        return (siteInfoArray, isValidData)
+                    }
+                    let (siteInfoArray, isValidData) = decodeSiteInfoArrayData(data: data, cachedData: cachedFileData)
+                    if let siteInfoArray = siteInfoArray {
+                        self.lock.lock()
+                        if index < self.siteInfoArrayArray.count {
+                            self.siteInfoArrayArray[index] = siteInfoArray
+                        }else{
+                            self.siteInfoArrayArray.append(siteInfoArray)
+                        }
+                        self.lock.unlock()
+                    }
+                    siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
+                    return isValidData
+                }) { (err) in
+                    guard let cachedFileData = cachedFileData, let cachedSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: cachedFileData) else {
+                        let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "SiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nもし、「設定タブ」→「内部データ参照用URLの設定」で設定値を書き換えている場合、それらの値が正しいものかどうかを再度確認してください。それでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。")
+                        AppInformationLogger.AddLog(message: message, appendix: [
                             "targetURL": targetURL.absoluteString,
-                            "first part": firstLine ?? "-",
-                            "data count": "\(data.count)",
+                            "lastError": err?.localizedDescription ?? "nil"
                         ], isForDebug: false)
+                        addErrorMessage(message: message)
                         siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
-                        return false
+                        return
                     }
-                    siteInfoArray.sort { (a, b) -> Bool in
-                        guard let aPattern = a.url?.pattern else { return false }
-                        guard let bPattern = b.url?.pattern else { return true }
-                        return aPattern.count > bPattern.count
-                    }
+                    let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError_Recoverd", comment: "SiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nもし、「設定タブ」→「内部データ参照用URLの設定」で設定値を書き換えている場合、それらの値が正しいものかどうかを再度確認してください。それでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。\nなお、以前正常に取得できていたデータから内容を復元できたのでそれを利用して処理を続けます。")
+                    AppInformationLogger.AddLog(message: message, appendix: [
+                        "targetURL": targetURL.absoluteString,
+                        "lastError": err?.localizedDescription ?? "nil"
+                    ], isForDebug: false)
+                    let siteInfoArray = cachedSiteInfoArray
                     self.lock.lock()
                     if index < self.siteInfoArrayArray.count {
                         self.siteInfoArrayArray[index] = siteInfoArray
@@ -701,15 +748,6 @@ class StoryHtmlDecoder {
                         self.siteInfoArrayArray.append(siteInfoArray)
                     }
                     self.lock.unlock()
-                    siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
-                    return true
-                }) { (err) in
-                    let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "SiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nもし、「設定タブ」→「内部データ参照用URLの設定」で設定値を書き換えている場合、それらの値が正しいものかどうかを再度確認してください。それでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。")
-                    AppInformationLogger.AddLog(message: message, appendix: [
-                        "targetURL": targetURL.absoluteString,
-                        "lastError": err?.localizedDescription ?? "nil"
-                    ], isForDebug: false)
-                    addErrorMessage(message: message)
                     siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
                 }
             }
