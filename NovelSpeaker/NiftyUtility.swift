@@ -2044,6 +2044,10 @@ class NiftyUtility: NSObject {
     #if !os(watchOS)
     static func GetAppStoreAppVersionInfo(appStoreURL:URL, cacheFileName: String, expireTimeinterval: TimeInterval, completion: @escaping (Date?, String?, Error?) -> Bool) {
         NovelSpeakerUtility.GetNovelSpeakerRemoteConfig { remoteConfig in
+            if let latestVersion = remoteConfig.latestVersion {
+                _ = completion(nil, latestVersion, nil)
+                return
+            }
             let defaultAppStoreWebPageXpath = NovelSpeakerUtility.AppStoreWebPageXpath()
             let lastUpdateDateXpath = remoteConfig.appStoreWebPageXpath?.latestDate ?? defaultAppStoreWebPageXpath.latestDate!
             let lastUpdateVersionXpath = remoteConfig.appStoreWebPageXpath?.latestShortVersion ?? defaultAppStoreWebPageXpath.latestShortVersion!

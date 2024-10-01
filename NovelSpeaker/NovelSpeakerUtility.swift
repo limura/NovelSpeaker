@@ -3536,6 +3536,7 @@ class NovelSpeakerUtility: NSObject {
     }
     struct NovelSpeakerRemoteConfig : Decodable {
         var appStoreWebPageXpath:AppStoreWebPageXpath?
+        var latestVersion:String?
     }
     static func GetNovelSpeakerRemoteConfig(completion: @escaping (NovelSpeakerRemoteConfig)->Void) {
         let defaultSetting = NovelSpeakerRemoteConfig(
