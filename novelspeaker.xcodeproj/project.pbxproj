@@ -182,6 +182,7 @@
 		21C759FA2287123500956B73 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
 		21C759FC2287127800956B73 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21C759FB2287127700956B73 /* CloudKit.framework */; };
 		21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */; };
+		21C8A9662CA825A700F6CD4B /* FloatingWindowViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C8A9652CA8259000F6CD4B /* FloatingWindowViewController.swift */; };
 		21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */; };
 		21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC81B21273C0A00F74092 /* UpdateMemo.txt */; };
 		21CCE43A2C26D73800D62564 /* BookShelfTreeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CCE4392C26D73800D62564 /* BookShelfTreeViewController.swift */; };
@@ -512,6 +513,7 @@
 		21C759F92287123500956B73 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
 		21C759FB2287127700956B73 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataToRealmTool.swift; sourceTree = "<group>"; };
+		21C8A9652CA8259000F6CD4B /* FloatingWindowViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingWindowViewController.swift; sourceTree = "<group>"; };
 		21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSoundPlayer.swift; sourceTree = "<group>"; };
 		21CAC81B21273C0A00F74092 /* UpdateMemo.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UpdateMemo.txt; sourceTree = "<group>"; };
 		21CCE4392C26D73800D62564 /* BookShelfTreeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookShelfTreeViewController.swift; sourceTree = "<group>"; };
@@ -723,6 +725,7 @@
 				21C52BDD2626BDD800EE4768 /* EurekaPopupViewController.swift */,
 				216631EA268E9C9200F80C1D /* MenuButtonHandler.swift */,
 				21DF09A628375FFC009930EA /* SearchFloatingView.swift */,
+				21C8A9652CA8259000F6CD4B /* FloatingWindowViewController.swift */,
 			);
 			name = CustomViews;
 			sourceTree = "<group>";
@@ -1662,6 +1665,7 @@
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				216631E92688772700F80C1D /* ScrollPullAndFireHandler.swift in Sources */,
 				21DF09A728375FFC009930EA /* SearchFloatingView.swift in Sources */,
+				21C8A9662CA825A700F6CD4B /* FloatingWindowViewController.swift in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21C52BDE2626BDD800EE4768 /* EurekaPopupViewController.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
@@ -2254,7 +2258,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.10.4;
+				CURRENT_PROJECT_VERSION = 2.10.5;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2268,7 +2272,7 @@
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.10.1;
+				MARKETING_VERSION = 2.10.2;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -Xfrontend -warn-long-expression-type-checking=100 -Xfrontend -warn-long-function-bodies=100";
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2292,7 +2296,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.10.4;
+				CURRENT_PROJECT_VERSION = 2.10.5;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2306,7 +2310,7 @@
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.10.1;
+				MARKETING_VERSION = 2.10.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

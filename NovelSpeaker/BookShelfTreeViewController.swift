@@ -101,6 +101,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     var nextViewStoryID: String?
     var isNextViewNeedResumeSpeech:Bool = false
     var isNextViewNeedUpdateReadDate:Bool = true
+    var multiSelectFloatingViewController:FloatingWindowViewController!
     
     var novelArrayNotificationToken : NotificationToken? = nil
     var globalStateNotificationToken: NotificationToken? = nil
@@ -179,6 +180,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         RealmObserverHandler.shared.AddDelegate(delegate: self)
         registObserver()
         registNotificationCenter()
+        multiSelectFloatingViewController = FloatingWindowViewController()
     }
     
     deinit {
@@ -197,6 +199,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         if let floatingButton = self.resumeSpeechFloatingButton {
             floatingButton.hide()
             self.resumeSpeechFloatingButton = nil
+        }
+        if self.showCheckboxes {
+            self.toggleCheckboxes()
         }
     }
 
@@ -406,12 +411,39 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
     }
     
+    func countAndUpdateMultiSelectFloatingViewControllerSelectCount() {
+        DispatchQueue.global(qos: .userInteractive).async {
+            func countCheckedNovel(targets:[BookShelfRATreeViewCellData]) -> Int {
+                var count = 0
+                for target in targets {
+                    if target.novelID != nil {
+                        if target.selectionState == .fullySelected {
+                            count += 1
+                        }
+                        continue
+                    }
+                    if let childrens = target.childrens {
+                        count += countCheckedNovel(targets: childrens)
+                    }
+                }
+                return count
+            }
+            let checkedNovelCount = countCheckedNovel(targets: self.displayDataArray)
+            self.updateMultiSelectFloatingViewControllerSelectCount(selectCount: checkedNovelCount)
+            DispatchQueue.main.async {
+                self.multiSelectFloatingViewController.setButtonState(identity: "actionButton", isEnabled: checkedNovelCount > 0)
+                self.multiSelectFloatingViewController.setButtonState(identity: "clearButton", isEnabled: checkedNovelCount > 0)
+            }
+        }
+    }
+    
     func checkboxTapped(for indexPath: IndexPath) {
         guard let (node, _) = getNode(indexPath: indexPath) else { return }
         
         node.toggleSelection()
         updateParentSelectionStates(for: node)
         tableView.reloadData()
+        countAndUpdateMultiSelectFloatingViewControllerSelectCount()
     }
     
     @objc func downloadStatusButtonTapped() {
@@ -424,12 +456,55 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: summary, buttonTitle: nil, buttonAction: nil)
         }
     }
+    
+    func updateMultiSelectFloatingViewControllerSelectCount(selectCount: Int) {
+        DispatchQueue.main.async {
+            if self.multiSelectFloatingViewController.isFloatingWindowOpened {
+                let format = NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_StateLabel", comment: "選択数: %@")
+                let formatedCount = String.localizedStringWithFormat("%d", selectCount)
+                let text = String(format: format, formatedCount)
+                self.multiSelectFloatingViewController.setLabelText(identity: "stateLabel", text: text)
+            }
+        }
+    }
+    
+    func initMultiSelectFloatingWindow() {
+        multiSelectFloatingViewController.addButton(title: NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_BackNormalModeButtonLabel", comment: "＜ 戻る"), identity: "backButton") {
+            self.toggleCheckboxes()
+        }
+        multiSelectFloatingViewController.addButton(title: NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_ClearButtonLabel", comment: "クリア"), identity: "clearButton") {
+            DispatchQueue.global(qos: .userInteractive).async {
+                func uncheckSelected(targetArray: [BookShelfRATreeViewCellData]) {
+                    for target in targetArray {
+                        target.selectionState = .unselected
+                        if let childrens = target.childrens {
+                            uncheckSelected(targetArray: childrens)
+                        }
+                    }
+                }
+                uncheckSelected(targetArray: self.displayDataArray)
+                self.countAndUpdateMultiSelectFloatingViewControllerSelectCount()
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }
+        multiSelectFloatingViewController.addButton(title: NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_SelectFunctionButtonLabel", comment: "操作▼"), identity: "actionButton") {
+            self.actionMultiSelectedNovels()
+        }
+        multiSelectFloatingViewController.addLabel(text: String(format: NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_StateLabel", comment: "選択数: %@"), "-"), identity: "stateLabel")
+        //multiSelectFloatingViewController.addTextField(placeholder: "ここに入力してください", identity: "textField")
+        self.countAndUpdateMultiSelectFloatingViewControllerSelectCount()
+    }
 
     func toggleCheckboxes() {
         showCheckboxes.toggle()
         if showCheckboxes {
+            multiSelectFloatingViewController.showFloatingWindow(in: NiftyUtility.toplevelViewController ?? self.parent ?? self, yPositionFactor: 0.1)
+            initMultiSelectFloatingWindow()
             self.toggleCheckboxButton.image = UIImage(systemName: "checkmark.square.fill")
         }else{
+            multiSelectFloatingViewController.closeFloatingWindow()
             self.toggleCheckboxButton.image = UIImage(systemName: "checkmark.square")
         }
         updateToggleStateForVisibleCells()
@@ -560,6 +635,385 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }, parentViewController: self, animated: true, completion: nil)
     }
     
+    func actionMultiSelectedNovels() {
+        // チェックボックスが表示されていて、チェックされているものがあるのなら、それらに対してなにかをする
+        var checkedNovelIDArray:[String] = []
+        var novelIDTitleMap:[String:String] = [:]
+        var checkedFolder2NovelIDMap:[String:[String]] = [:]
+        for topNode in self.displayDataArray {
+            if topNode.selectionState != .unselected, let childrens = topNode.childrens {
+                let folderName = topNode.title ?? "-"
+                checkedFolder2NovelIDMap[folderName] = []
+                for childNode in childrens {
+                    if childNode.selectionState == .fullySelected, let novelID = childNode.novelID {
+                        checkedFolder2NovelIDMap[folderName]?.append(novelID)
+                        checkedNovelIDArray.append(novelID)
+                        if let title = childNode.title {
+                            novelIDTitleMap[novelID] = title
+                        }
+                    }
+                }
+            }
+            if topNode.selectionState == .fullySelected, let novelID = topNode.novelID {
+                checkedNovelIDArray.append(novelID)
+                if let title = topNode.title {
+                    novelIDTitleMap[novelID] = title
+                }
+            }
+        }
+        if checkedNovelIDArray.count > 0 {
+            DispatchQueue.global(qos: .userInteractive).async {
+                DispatchQueue.main.async {
+                    func AddNovelUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_QueueNovelUpdateCheck",
+                                comment: "更新確認を行う"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: true) {
+                                self.addQueueToNovelDownload(novelIDArray: checkedNovelIDArray)
+                            }
+                        })
+                    }
+                    func AddStopUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_StopUpdateCheck",
+                                comment: "更新を確認しないよう設定する"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({
+                            cell,
+                            row in
+                            epvc.close(animated: false,
+                                       completion: {
+                                NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_StopUpdateCheck_working", comment: "%d件の小説の更新確認を停止しています"), checkedNovelIDArray.count)) { dialog in
+                                    DispatchQueue.global(qos: .userInitiated).async {
+                                        RealmUtil.Write { realm in
+                                            for novelID in novelIDTitleMap.keys {
+                                                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                                                    novel.isNotNeedUpdateCheck = true
+                                                    realm.add(novel, update: .modified)
+                                                }
+                                            }
+                                        }
+                                        DispatchQueue.main.async {
+                                            dialog.dismiss(animated: false) {
+                                                NiftyUtility.EasyDialogMessageDialog(
+                                                    viewController: self,
+                                                    message: String(format: NSLocalizedString(
+                                                        "BookShelfTreeViewController_checkboxselected_StopUpdateCheck_done_mesage",
+                                                        comment: "%d件の小説で更新確認を行わないように設定しました"
+                                                    ), checkedNovelIDArray.count)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+                        })
+                    }
+                    func AddEnableUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_EnableUpdateCheck",
+                                comment: "更新を確認するよう設定する"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: false, completion: {
+                                NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_EnableUpdateCheck_working", comment: "%d件の小説の更新確認を有効にしています"), checkedNovelIDArray.count)) { dialog in
+                                    DispatchQueue.global(qos: .userInitiated).async {
+                                        RealmUtil.Write { realm in
+                                            for novelID in novelIDTitleMap.keys {
+                                                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                                                    novel.isNotNeedUpdateCheck = false
+                                                    realm.add(novel, update: .modified)
+                                                }
+                                            }
+                                        }
+                                        DispatchQueue.main.async {
+                                            dialog.dismiss(animated: false) {
+                                                NiftyUtility.EasyDialogMessageDialog(
+                                                    viewController: self,
+                                                    message: String(format: NSLocalizedString(
+                                                        "BookShelfTreeViewController_checkboxselected_EnableUpdateCheck_done_mesage",
+                                                        comment: "%d件の小説で更新確認を行うように設定しました"
+                                                    ), checkedNovelIDArray.count)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+                        })
+                    }
+                    func AddEnableLikeCheckButton(buttonSection: Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_EnableLikeCheck",
+                                comment: "お気に入りに登録する"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: false, completion: {
+                                NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_EnableLikeCheck_working", comment: "%d件をお気に入りに登録中"), checkedNovelIDArray.count)) { dialog in
+                                    DispatchQueue.global(qos: .userInitiated).async {
+                                        RealmUtil.Write { realm in
+                                            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                                            for novelID in novelIDTitleMap.keys {
+                                                if globalState.novelLikeOrder.contains(novelID) == false {
+                                                    globalState.novelLikeOrder.append(novelID)
+                                                }
+                                            }
+                                        }
+                                        DispatchQueue.main.async {
+                                            dialog.dismiss(animated: false) {
+                                                NiftyUtility.EasyDialogMessageDialog(
+                                                    viewController: self,
+                                                    message: String(format: NSLocalizedString(
+                                                        "BookShelfTreeViewController_checkboxselected_EnableLikeCheck_done_mesage",
+                                                        comment: "%d件の小説をお気に入りに設定しました"
+                                                    ), checkedNovelIDArray.count)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+                        })
+                    }
+                    func AddDisableLikeCheckButton(buttonSection: Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_DisableLikeCheck",
+                                comment: "お気に入り登録を外す"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: true, completion: {
+                                DispatchQueue.global(qos: .userInitiated).async {
+                                    RealmUtil.Write { realm in
+                                        guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                                        for novelID in novelIDTitleMap.keys {
+                                            if let index = globalState.novelLikeOrder.index(of: novelID) {
+                                                globalState.novelLikeOrder.remove(at: index)
+                                            }
+                                        }
+                                    }
+                                    DispatchQueue.main.async {
+                                        NiftyUtility.EasyDialogMessageDialog(
+                                            viewController: self,
+                                            message: String(format: NSLocalizedString(
+                                                "BookShelfTreeViewController_checkboxselected_DisableLikeCheck_done_mesage",
+                                                comment: "%d件の小説をお気に入りから外しました"
+                                            ), checkedNovelIDArray.count)
+                                        )
+                                    }
+                                }
+                            })
+                        })
+                    }
+                    func AddAssignFolderButton(buttonSection: Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_AssignFolder",
+                                comment: "フォルダへ追加・削除する"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: false) {
+                                self.RunFolderManagePopupView(checkedFolder2NovelIDMap: checkedFolder2NovelIDMap, novelIDTitleMap: novelIDTitleMap, checkedNovelIDArray: checkedNovelIDArray)
+                            }
+                        })
+                    }
+                    func AddAssignUniqueSpeechModButton(buttonSection: Section, epvc: EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_AssignUniqueSpeechMod",
+                                comment: "小説用の読みの修正に追加・削除する"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: false, completion: {
+                                EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { epvc in
+                                    func getSpeechModCheckSystemIconName(speechMod:ThreadSafeReference<RealmSpeechModSetting>, novelIDArray:[String]) -> String {
+                                        return RealmUtil.RealmBlock { realm -> String in
+                                            guard let speechMod = realm.resolve(speechMod) else { return "square" }
+                                            let speechModNovelIDSet = Set(speechMod.targetNovelIDArray)
+                                            let targetNovelIDSet = Set(novelIDArray)
+                                            if targetNovelIDSet.isSubset(of: speechModNovelIDSet) {
+                                                return "checkmark.square"
+                                            }else if targetNovelIDSet.intersection(speechModNovelIDSet).isEmpty {
+                                                return "square"
+                                            }else {
+                                                return "minus.square"
+                                            }
+                                        }
+                                    }
+                                    func addSpeechModButton(buttonSection:Section, speechMod:ThreadSafeReference<RealmSpeechModSetting>, title: String) {
+                                        
+                                        buttonSection <<< ButtonRow() {
+                                            $0.title = title
+                                            $0.cell.textLabel?.numberOfLines = 0
+                                            $0.cell.accessibilityTraits = .button
+                                        }.onCellSelection({ cell, row in
+                                            switch getSpeechModCheckSystemIconName(speechMod: speechMod, novelIDArray: checkedNovelIDArray) {
+                                            case "checkmark.square":
+                                                // TODO: このあたりから再開する
+                                                break
+                                            case "square":
+                                                break
+                                            case "minus.square":
+                                                fallthrough
+                                            default:
+                                                break
+                                            }
+                                        })
+                                    }
+                                    let buttonSection = Section()
+                                    RealmUtil.RealmBlock { realm in
+                                        let targetSpeechModArray = RealmSpeechModSetting.SearchSettingsForContainsAnyNovelID(realm: realm, novelIDArray: checkedNovelIDArray)
+                                        
+                                    }
+                                    epvc.form +++ buttonSection
+                                    let closeSection = Section ()
+                                    closeSection <<< ButtonRow() {
+                                        $0.title = NSLocalizedString("Close_button", comment: "Close")
+                                        $0.cell.textLabel?.numberOfLines = 0
+                                        $0.cell.accessibilityTraits = .button
+                                    }.onCellSelection({ cell, row in
+                                        epvc.close(animated: true, completion: nil)
+                                    })
+                                    epvc.form +++ closeSection
+                                    let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説"))
+                                    for novelID in checkedNovelIDArray {
+                                        let novelTitle = novelIDTitleMap[novelID]
+                                        novelSection <<< LabelRow() {
+                                            $0.title = "\(novelTitle ?? "-")"
+                                            $0.cell.textLabel?.numberOfLines = 0
+                                            $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                                        }
+                                    }
+                                    epvc.form +++ novelSection
+
+                                }, parentViewController: self, animated: true, completion: nil)
+                            })
+                        })
+                    }
+                    func AddDeleteNovelButton(buttonSection: Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_DeleteNovel",
+                                comment: "小説を削除する"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: false, completion: {
+                                DispatchQueue.main.async {
+                                    NiftyUtility.EasyDialogTwoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_confirm_delete", comment: "本当に%d件の小説を削除して良いですか？"), checkedNovelIDArray.count), button1Title: NSLocalizedString("Cancel_button", comment: "Cancel"), button1Action: nil, button2Title: NSLocalizedString("OK_button", comment: "OK")) {
+                                        NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_confirm_delete_working", comment: "%d個の小説を削除中"), checkedNovelIDArray.count)) { dialog in
+                                            DispatchQueue.global(qos: .userInitiated).async {
+                                                RealmUtil.Write { realm in
+                                                    for novelID in novelIDTitleMap.keys {
+                                                        if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                                                            novel.delete(realm: realm)
+                                                        }
+                                                    }
+                                                }
+                                                DispatchQueue.main.async {
+                                                    dialog.dismiss(animated: false) {
+                                                        NiftyUtility.EasyDialogMessageDialog(
+                                                            viewController: self,
+                                                            message: String(format: NSLocalizedString(
+                                                                "BookShelfTreeViewController_checkboxselected_confirm_delete_done_mesage",
+                                                                comment: "%d件の小説を削除しました"
+                                                            ), checkedNovelIDArray.count)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+                        })
+                    }
+                    func AddCreateBackupFileButton(buttonSection: Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_CreateBackupFile",
+                                comment: "バックアップファイルの生成"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: false, completion: {
+                                NovelSpeakerUtility.CreateNovelOnlyBackup(novelIDArray: checkedNovelIDArray, viewController: self) { (fileUrl, fileName) in
+                                    DispatchQueue.main.async {
+                                        let activityViewController = UIActivityViewController(activityItems: [fileUrl], applicationActivities: nil)
+                                        let frame = UIScreen.main.bounds
+                                        activityViewController.popoverPresentationController?.sourceView = self.view
+                                        activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+                                        self.present(activityViewController, animated: true, completion: nil)
+                                    }
+                                }
+                            })
+                        })
+                    }
+                    func AddCancelButton(cancelSection: Section, epvc:EurekaPopupViewController) {
+                        cancelSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString("Cancel_button", comment: "Cancel")
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: true, completion: nil)
+                        })
+                    }
+                    EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: {
+                        epvc in
+                        let buttonSection = Section(NSLocalizedString("BookShelfTreeViewController_toggleCheckBoxesButtonTapped_firstMenu_title", comment: "選択された小説への操作"))
+                        AddNovelUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
+                        AddStopUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
+                        AddEnableUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
+                        AddEnableLikeCheckButton(buttonSection: buttonSection, epvc: epvc)
+                        AddDisableLikeCheckButton(buttonSection: buttonSection, epvc: epvc)
+                        AddAssignFolderButton(buttonSection: buttonSection, epvc: epvc)
+                        AddDeleteNovelButton(buttonSection: buttonSection, epvc: epvc)
+                        AddCreateBackupFileButton(buttonSection: buttonSection, epvc: epvc)
+                        epvc.form +++ buttonSection
+                        let cancelSection = Section()
+                        AddCancelButton(cancelSection: cancelSection, epvc: epvc)
+                        epvc.form +++ cancelSection
+                        let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説") + "(\(checkedNovelIDArray.count))")
+                        for novelID in checkedNovelIDArray {
+                            let novelTitle = novelIDTitleMap[novelID]
+                            novelSection <<< LabelRow() {
+                                $0.title = novelTitle ?? "-"
+                                $0.cell.textLabel?.numberOfLines = 0
+                                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                            }
+                        }
+                        epvc.form +++ novelSection
+                    },
+                    parentViewController: self,
+                    animated: true,
+                    completion: nil)
+                }
+            }
+        }
+    }
+    
     @objc func toggleCheckboxesButtonTapped() {
         if NovelSpeakerUtility.IsNotDisplayNovelMultiSelectCheckbox() == false && self.showCheckboxes == false {
             NiftyUtility.EasyDialogOneButtonWithSwitch(viewController: self, title: nil, message: NSLocalizedString("BookShelfTreeViewController_toggleCheckboxesButtonTapped_InformationMessage", comment: "小説の複数選択モードに入りました。\nこのモードを抜けるには先ほど押したボタンをもう一度押す必要があります。"), switchMessage: NSLocalizedString("BookShelfTreeViewController_toggleCheckboxesButtonTapped_Information_IsNotDisplayInformationSwitch", comment: "このメッセージを二度と出さない"), button1Title: nil) { isNotDisplay in
@@ -569,382 +1023,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             return
         }
         if self.showCheckboxes == true {
-            // チェックボックスが表示されていて、チェックされているものがあるのなら、それらに対してなにかをする
-            var checkedNovelIDArray:[String] = []
-            var novelIDTitleMap:[String:String] = [:]
-            var checkedFolder2NovelIDMap:[String:[String]] = [:]
-            for topNode in self.displayDataArray {
-                if topNode.selectionState != .unselected, let childrens = topNode.childrens {
-                    let folderName = topNode.title ?? "-"
-                    checkedFolder2NovelIDMap[folderName] = []
-                    for childNode in childrens {
-                        if childNode.selectionState == .fullySelected, let novelID = childNode.novelID {
-                            checkedFolder2NovelIDMap[folderName]?.append(novelID)
-                            checkedNovelIDArray.append(novelID)
-                            if let title = childNode.title {
-                                novelIDTitleMap[novelID] = title
-                            }
-                        }
-                    }
-                }
-                if topNode.selectionState == .fullySelected, let novelID = topNode.novelID {
-                    checkedNovelIDArray.append(novelID)
-                    if let title = topNode.title {
-                        novelIDTitleMap[novelID] = title
-                    }
-                }
-            }
-            if checkedNovelIDArray.count > 0 {
-                DispatchQueue.global(qos: .userInteractive).async {
-                    DispatchQueue.main.async {
-                        func AddNovelUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_QueueNovelUpdateCheck",
-                                    comment: "更新確認を行う"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: true) {
-                                    self.addQueueToNovelDownload(novelIDArray: checkedNovelIDArray)
-                                }
-                            })
-                        }
-                        func AddStopUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_StopUpdateCheck",
-                                    comment: "更新を確認しないよう設定する"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({
-                                cell,
-                                row in
-                                epvc.close(animated: false,
-                                           completion: {
-                                    NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_StopUpdateCheck_working", comment: "%d件の小説の更新確認を停止しています"), checkedNovelIDArray.count)) { dialog in
-                                        DispatchQueue.global(qos: .userInitiated).async {
-                                            RealmUtil.Write { realm in
-                                                for novelID in novelIDTitleMap.keys {
-                                                    if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                                                        novel.isNotNeedUpdateCheck = true
-                                                        realm.add(novel, update: .modified)
-                                                    }
-                                                }
-                                            }
-                                            DispatchQueue.main.async {
-                                                dialog.dismiss(animated: false) {
-                                                    NiftyUtility.EasyDialogMessageDialog(
-                                                        viewController: self,
-                                                        message: String(format: NSLocalizedString(
-                                                            "BookShelfTreeViewController_checkboxselected_StopUpdateCheck_done_mesage",
-                                                            comment: "%d件の小説で更新確認を行わないように設定しました"
-                                                        ), checkedNovelIDArray.count)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                })
-                            })
-                        }
-                        func AddEnableUpdateCheckButton(buttonSection:Section, epvc:EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_EnableUpdateCheck",
-                                    comment: "更新を確認するよう設定する"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: false, completion: {
-                                    NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_EnableUpdateCheck_working", comment: "%d件の小説の更新確認を有効にしています"), checkedNovelIDArray.count)) { dialog in
-                                        DispatchQueue.global(qos: .userInitiated).async {
-                                            RealmUtil.Write { realm in
-                                                for novelID in novelIDTitleMap.keys {
-                                                    if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                                                        novel.isNotNeedUpdateCheck = false
-                                                        realm.add(novel, update: .modified)
-                                                    }
-                                                }
-                                            }
-                                            DispatchQueue.main.async {
-                                                dialog.dismiss(animated: false) {
-                                                    NiftyUtility.EasyDialogMessageDialog(
-                                                        viewController: self,
-                                                        message: String(format: NSLocalizedString(
-                                                            "BookShelfTreeViewController_checkboxselected_EnableUpdateCheck_done_mesage",
-                                                            comment: "%d件の小説で更新確認を行うように設定しました"
-                                                        ), checkedNovelIDArray.count)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                })
-                            })
-                        }
-                        func AddEnableLikeCheckButton(buttonSection: Section, epvc:EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_EnableLikeCheck",
-                                    comment: "お気に入りに登録する"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: false, completion: {
-                                    NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_EnableLikeCheck_working", comment: "%d件をお気に入りに登録中"), checkedNovelIDArray.count)) { dialog in
-                                        DispatchQueue.global(qos: .userInitiated).async {
-                                            RealmUtil.Write { realm in
-                                                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                                                for novelID in novelIDTitleMap.keys {
-                                                    if globalState.novelLikeOrder.contains(novelID) == false {
-                                                        globalState.novelLikeOrder.append(novelID)
-                                                    }
-                                                }
-                                            }
-                                            DispatchQueue.main.async {
-                                                dialog.dismiss(animated: false) {
-                                                    NiftyUtility.EasyDialogMessageDialog(
-                                                        viewController: self,
-                                                        message: String(format: NSLocalizedString(
-                                                            "BookShelfTreeViewController_checkboxselected_EnableLikeCheck_done_mesage",
-                                                            comment: "%d件の小説をお気に入りに設定しました"
-                                                        ), checkedNovelIDArray.count)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                })
-                            })
-                        }
-                        func AddDisableLikeCheckButton(buttonSection: Section, epvc:EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_DisableLikeCheck",
-                                    comment: "お気に入り登録を外す"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: true, completion: {
-                                    DispatchQueue.global(qos: .userInitiated).async {
-                                        RealmUtil.Write { realm in
-                                            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                                            for novelID in novelIDTitleMap.keys {
-                                                if let index = globalState.novelLikeOrder.index(of: novelID) {
-                                                    globalState.novelLikeOrder.remove(at: index)
-                                                }
-                                            }
-                                        }
-                                        DispatchQueue.main.async {
-                                            NiftyUtility.EasyDialogMessageDialog(
-                                                viewController: self,
-                                                message: String(format: NSLocalizedString(
-                                                    "BookShelfTreeViewController_checkboxselected_DisableLikeCheck_done_mesage",
-                                                    comment: "%d件の小説をお気に入りから外しました"
-                                                ), checkedNovelIDArray.count)
-                                            )
-                                        }
-                                    }
-                                })
-                            })
-                        }
-                        func AddAssignFolderButton(buttonSection: Section, epvc:EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_AssignFolder",
-                                    comment: "フォルダへ追加・削除する"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: false) {
-                                    self.RunFolderManagePopupView(checkedFolder2NovelIDMap: checkedFolder2NovelIDMap, novelIDTitleMap: novelIDTitleMap, checkedNovelIDArray: checkedNovelIDArray)
-                                }
-                            })
-                        }
-                        func AddAssignUniqueSpeechModButton(buttonSection: Section, epvc: EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_AssignUniqueSpeechMod",
-                                    comment: "小説用の読みの修正に追加・削除する"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: false, completion: {
-                                    EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { epvc in
-                                        func getSpeechModCheckSystemIconName(speechMod:ThreadSafeReference<RealmSpeechModSetting>, novelIDArray:[String]) -> String {
-                                            return RealmUtil.RealmBlock { realm -> String in
-                                                guard let speechMod = realm.resolve(speechMod) else { return "square" }
-                                                let speechModNovelIDSet = Set(speechMod.targetNovelIDArray)
-                                                let targetNovelIDSet = Set(novelIDArray)
-                                                if targetNovelIDSet.isSubset(of: speechModNovelIDSet) {
-                                                    return "checkmark.square"
-                                                }else if targetNovelIDSet.intersection(speechModNovelIDSet).isEmpty {
-                                                    return "square"
-                                                }else {
-                                                    return "minus.square"
-                                                }
-                                            }
-                                        }
-                                        func addSpeechModButton(buttonSection:Section, speechMod:ThreadSafeReference<RealmSpeechModSetting>, title: String) {
-                                            
-                                            buttonSection <<< ButtonRow() {
-                                                $0.title = title
-                                                $0.cell.textLabel?.numberOfLines = 0
-                                                $0.cell.accessibilityTraits = .button
-                                            }.onCellSelection({ cell, row in
-                                                switch getSpeechModCheckSystemIconName(speechMod: speechMod, novelIDArray: checkedNovelIDArray) {
-                                                case "checkmark.square":
-                                                    // TODO: このあたりから再開する
-                                                    break
-                                                case "square":
-                                                    break
-                                                case "minus.square":
-                                                    fallthrough
-                                                default:
-                                                    break
-                                                }
-                                            })
-                                        }
-                                        let buttonSection = Section()
-                                        RealmUtil.RealmBlock { realm in
-                                            let targetSpeechModArray = RealmSpeechModSetting.SearchSettingsForContainsAnyNovelID(realm: realm, novelIDArray: checkedNovelIDArray)
-                                            
-                                        }
-                                        epvc.form +++ buttonSection
-                                        let closeSection = Section ()
-                                        closeSection <<< ButtonRow() {
-                                            $0.title = NSLocalizedString("Close_button", comment: "Close")
-                                            $0.cell.textLabel?.numberOfLines = 0
-                                            $0.cell.accessibilityTraits = .button
-                                        }.onCellSelection({ cell, row in
-                                            epvc.close(animated: true, completion: nil)
-                                        })
-                                        epvc.form +++ closeSection
-                                        let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説"))
-                                        for novelID in checkedNovelIDArray {
-                                            let novelTitle = novelIDTitleMap[novelID]
-                                            novelSection <<< LabelRow() {
-                                                $0.title = "\(novelTitle ?? "-")"
-                                                $0.cell.textLabel?.numberOfLines = 0
-                                                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                                            }
-                                        }
-                                        epvc.form +++ novelSection
-
-                                    }, parentViewController: self, animated: true, completion: nil)
-                                })
-                            })
-                        }
-                        func AddDeleteNovelButton(buttonSection: Section, epvc:EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_DeleteNovel",
-                                    comment: "小説を削除する"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: false, completion: {
-                                    DispatchQueue.main.async {
-                                        NiftyUtility.EasyDialogTwoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_confirm_delete", comment: "本当に%d件の小説を削除して良いですか？"), checkedNovelIDArray.count), button1Title: NSLocalizedString("Cancel_button", comment: "Cancel"), button1Action: nil, button2Title: NSLocalizedString("OK_button", comment: "OK")) {
-                                            NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: String(format: NSLocalizedString("BookShelfTreeViewController_checkboxselected_confirm_delete_working", comment: "%d個の小説を削除中"), checkedNovelIDArray.count)) { dialog in
-                                                DispatchQueue.global(qos: .userInitiated).async {
-                                                    RealmUtil.Write { realm in
-                                                        for novelID in novelIDTitleMap.keys {
-                                                            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                                                                novel.delete(realm: realm)
-                                                            }
-                                                        }
-                                                    }
-                                                    DispatchQueue.main.async {
-                                                        dialog.dismiss(animated: false) {
-                                                            NiftyUtility.EasyDialogMessageDialog(
-                                                                viewController: self,
-                                                                message: String(format: NSLocalizedString(
-                                                                    "BookShelfTreeViewController_checkboxselected_confirm_delete_done_mesage",
-                                                                    comment: "%d件の小説を削除しました"
-                                                                ), checkedNovelIDArray.count)
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                })
-                            })
-                        }
-                        func AddCreateBackupFileButton(buttonSection: Section, epvc:EurekaPopupViewController) {
-                            buttonSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString(
-                                    "BookShelfTreeViewController_checkboxselected_CreateBackupFile",
-                                    comment: "バックアップファイルの生成"
-                                )
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: false, completion: {
-                                    NovelSpeakerUtility.CreateNovelOnlyBackup(novelIDArray: checkedNovelIDArray, viewController: self) { (fileUrl, fileName) in
-                                        DispatchQueue.main.async {
-                                            let activityViewController = UIActivityViewController(activityItems: [fileUrl], applicationActivities: nil)
-                                            let frame = UIScreen.main.bounds
-                                            activityViewController.popoverPresentationController?.sourceView = self.view
-                                            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
-                                            self.present(activityViewController, animated: true, completion: nil)
-                                        }
-                                    }
-                                })
-                            })
-                        }
-                        func AddCancelButton(cancelSection: Section, epvc:EurekaPopupViewController) {
-                            cancelSection <<< ButtonRow() {
-                                $0.title = NSLocalizedString("Cancel_button", comment: "Cancel")
-                                $0.cell.textLabel?.numberOfLines = 0
-                                $0.cell.accessibilityTraits = .button
-                            }.onCellSelection({ cell, row in
-                                epvc.close(animated: true, completion: nil)
-                            })
-                        }
-                        EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: {
-                            epvc in
-                            let buttonSection = Section(NSLocalizedString("BookShelfTreeViewController_toggleCheckBoxesButtonTapped_firstMenu_title", comment: "選択された小説への操作"))
-                            AddNovelUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
-                            AddStopUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
-                            AddEnableUpdateCheckButton(buttonSection: buttonSection, epvc: epvc)
-                            AddEnableLikeCheckButton(buttonSection: buttonSection, epvc: epvc)
-                            AddDisableLikeCheckButton(buttonSection: buttonSection, epvc: epvc)
-                            AddAssignFolderButton(buttonSection: buttonSection, epvc: epvc)
-                            AddDeleteNovelButton(buttonSection: buttonSection, epvc: epvc)
-                            AddCreateBackupFileButton(buttonSection: buttonSection, epvc: epvc)
-                            epvc.form +++ buttonSection
-                            let cancelSection = Section()
-                            AddCancelButton(cancelSection: cancelSection, epvc: epvc)
-                            epvc.form +++ cancelSection
-                            let novelSection = Section(NSLocalizedString("BookShelfTreeViewController_checkboxselected_targetTitles_section", comment: "対象の小説") + "(\(checkedNovelIDArray.count))")
-                            for novelID in checkedNovelIDArray {
-                                let novelTitle = novelIDTitleMap[novelID]
-                                novelSection <<< LabelRow() {
-                                    $0.title = novelTitle ?? "-"
-                                    $0.cell.textLabel?.numberOfLines = 0
-                                    $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                                }
-                            }
-                            epvc.form +++ novelSection
-                        },
-                        parentViewController: self,
-                        animated: true,
-                        completion: nil)
-                    }
-                }
-            }
+            self.actionMultiSelectedNovels()
         }
         toggleCheckboxes()
     }
@@ -1587,18 +1666,25 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     
     func reloadAllData(doScroll: Bool, completion:(()->Void)? = nil) {
         let (hasFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
+        var selectedNovelCount = 0
         do {
-            func transferSelectionStates(before: [BookShelfRATreeViewCellData], after: inout [BookShelfRATreeViewCellData]) {
+            // before から after に selectionState をコピーします。
+            func transferSelectionStates(before: [BookShelfRATreeViewCellData], after: inout [BookShelfRATreeViewCellData]) -> Int {
                 // beforeのnovelIDをキー、selectionStateを値とするDictionaryを作成
                 let selectionStateMap = Dictionary(uniqueKeysWithValues: before.filter({$0.novelID != nil}).map { ($0.novelID ?? "", $0.selectionState) })
                 
+                var selectedNovelCount = 0
                 // afterの各要素に対して、対応するselectionStateを適用
                 for i in 0..<after.count {
                     guard let novelID = after[i].novelID else { continue }
                     if let state = selectionStateMap[novelID] {
                         after[i].selectionState = state
+                        if state == .fullySelected {
+                            selectedNovelCount += 1
+                        }
                     }
                 }
+                return selectedNovelCount
             }
             
             let beforeArray = self.displayDataArray
@@ -1612,12 +1698,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     after.isExpanded = before.isExpanded
                     // チェック状態をコピー(フォルダの中の分)
                     if before.selectionState != .unselected {
-                        transferSelectionStates(before: beforeChildrens, after: &afterChildrens)
+                        selectedNovelCount += transferSelectionStates(before: beforeChildrens, after: &afterChildrens)
                     }
                 }
             }
             // チェック状態をコピー(フォルダの外の分)
-            transferSelectionStates(before: beforeArray, after: &afterArray)
+            selectedNovelCount += transferSelectionStates(before: beforeArray, after: &afterArray)
         }
         DispatchQueue.main.async {
             // 表示されているものを元にスクロール位置を合わせようと努力します
@@ -1626,6 +1712,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 selectedNovelID = novelID
             }
             self.displayDataArray = displayDataArray
+            self.updateMultiSelectFloatingViewControllerSelectCount(selectCount: selectedNovelCount)
             UIView.animate(withDuration: 0.0) {
                 self.tableView.reloadData()
                 self.tableView.layoutIfNeeded()

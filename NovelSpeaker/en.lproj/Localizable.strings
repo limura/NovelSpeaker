@@ -779,8 +779,12 @@
 "BookShelfTreeViewController_checkboxselected_AssignFolder" = "Adding and Removing from a Folder";
 "BookShelfTreeViewController_checkboxselected_AssignFolder_MenuTitle" = "Folder to be added/deleted";
 "BookShelfTreeViewController_toggleCheckBoxesButtonTapped_firstMenu_title" = "Operations on selected novels";
-"BookShelfTreeViewController_toggleCheckboxesButtonTapped_InformationMessage" = "You have entered novel multiple selection mode. \nTo exit this mode, you must press the button you pressed earlier again.";
+"BookShelfTreeViewController_toggleCheckboxesButtonTapped_InformationMessage" = "You have entered novel multiple selection mode. \nTo exit this mode, you need to press the same button again or press \"Back\" on the floating window.";
 "BookShelfTreeViewController_toggleCheckboxesButtonTapped_Information_IsNotDisplayInformationSwitch" = "Don't show this message again";
+"BookShelfTreeViewController_MultiSelectFloatingViewController_StateLabel" = "Selected: %@";
+"BookShelfTreeViewController_MultiSelectFloatingViewController_ClearButtonLabel" = "Clear";
+"BookShelfTreeViewController_MultiSelectFloatingViewController_SelectFunctionButtonLabel" = "Actions ▼";
+"BookShelfTreeViewController_MultiSelectFloatingViewController_BackNormalModeButtonLabel" = "< Back";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
