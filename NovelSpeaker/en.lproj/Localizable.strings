@@ -968,15 +968,36 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.2
 
-- Changed the way the scroll position is calculated during reading.
-- Addressed an issue where scrolling did not work properly when opening a page with a large number of characters.
-- Changed the URL for obtaining SiteInfo for KotoSekai to a Google Spreadsheet TSV.
+- When making an inquiry from within the app, a warning will be displayed if the latest version is not working.
+- Changed the behavior when retrieving SiteInfo.
+- A floating window will be displayed when entering \"multiple selection mode\" on the \"bookshelf screen.\"
+- Fixed an issue where eloquence voices could not be selected in the expected language.
+- Fixed an issue where a gap was created at the bottom of the novel text screen due to the tab bar being moved to the top of the screen in iPad OS 18.
+- Fixed an issue where the vertical width of the \"◀ (back to previous page button)\" at the bottom of the novel text screen was incorrect, causing a small portion of the bottom left of the novel text to be missing.
+
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
-"UpdateLogViewController_UpdateLog" = "Version 2.10.1
+"UpdateLogViewController_UpdateLog" = "
+Version 2.10.2
+
+Changes in interface/internal operation
+
+- When making an inquiry from within the app, a warning will be displayed if the latest version is not working.
+- Changed the behavior when retrieving SiteInfo.
+- A floating window will be displayed when entering \"multiple selection mode\" on the \"bookshelf screen.\"
+
+Fixing the problem
+
+- Fixed an issue where eloquence voices could not be selected in the expected language.
+- Fixed an issue where a gap was created at the bottom of the novel text screen due to the tab bar being moved to the top of the screen in iPad OS 18.
+- Fixed an issue where the vertical width of the \"◀ (back to previous page button)\" at the bottom of the novel text screen was incorrect, causing a small portion of the bottom left of the novel text to be missing.
+
+
+
+Version 2.10.1
 
 Changes in interface/internal operation
 

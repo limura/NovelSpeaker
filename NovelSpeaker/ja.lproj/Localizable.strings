@@ -957,15 +957,33 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.2
 
-- 読み上げ中にスクロールする位置の計算方法を変更
-- 文字数が多いページを開いた時にスクロール周りがうまく動かなかった問題へ対処
-- ことせかい 向けのSiteInfoを取得する先のURLをGoogleスプレッドシートのTSVに変更
+- アプリ内からの問い合わせ時に、最新バージョンで動作していない場合に警告を表示するように
+- SiteInfoの取得時の動作を変更
+- 「本棚画面」で「複数選択モード」に入ったときにフローティングウインドウを表示するように
+- eloquence voices が期待された言語で選択できない問題を修正
+- iPad OS 18 でタブバーが画面上部に移動したことで小説本文画面の下部に隙間が空いている問題に対応
+- 小説本文画面の下部の「◀(前のページに戻るボタン)」の縦幅がおかしくなっていて小説本文部分の左下が少し欠けていた問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.2
+
+インタフェース・内部動作の変更
+
+- アプリ内からの問い合わせ時に、最新バージョンで動作していない場合に警告を表示するように
+- SiteInfoの取得時の動作を変更
+- 「本棚画面」で「複数選択モード」に入ったときにフローティングウインドウを表示するように
+
+問題の修正
+
+- eloquence voices が期待された言語で選択できない問題を修正
+- iPad OS 18 でタブバーが画面上部に移動したことで小説本文画面の下部に隙間が空いている問題に対応
+- 小説本文画面の下部の「◀(前のページに戻るボタン)」の縦幅がおかしくなっていて小説本文部分の左下が少し欠けていた問題を修正
+
+
 Version 2.10.1
 
 インタフェース・内部動作の変更
