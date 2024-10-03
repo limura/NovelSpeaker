@@ -106,6 +106,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     var novelArrayNotificationToken : NotificationToken? = nil
     var globalStateNotificationToken: NotificationToken? = nil
     var novelTagNotificationToken : NotificationToken? = nil
+    
+    let multiSelectMenuView = DynamicHorizontalStackView()
 
     static var instance:BookShelfTreeViewController? = nil
     override func viewDidLoad() {
@@ -181,6 +183,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         registObserver()
         registNotificationCenter()
         multiSelectFloatingViewController = FloatingWindowViewController()
+        setupMultiSelectMenuView()
+        updateMultiSelectHeaderVisibility(isHeaderVisible: false)
     }
     
     deinit {
@@ -429,10 +433,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 return count
             }
             let checkedNovelCount = countCheckedNovel(targets: self.displayDataArray)
-            self.updateMultiSelectFloatingViewControllerSelectCount(selectCount: checkedNovelCount)
+            self.updateMultiSelectViewSelectCount(selectCount: checkedNovelCount)
             DispatchQueue.main.async {
-                self.multiSelectFloatingViewController.setButtonState(identity: "actionButton", isEnabled: checkedNovelCount > 0)
-                self.multiSelectFloatingViewController.setButtonState(identity: "clearButton", isEnabled: checkedNovelCount > 0)
+                //self.multiSelectFloatingViewController.setButtonState(identity: "actionButton", isEnabled: checkedNovelCount > 0)
+                //self.multiSelectFloatingViewController.setButtonState(identity: "clearButton", isEnabled: checkedNovelCount > 0)
+                self.multiSelectMenuView.setButtonEnabled(identifier: "actionButton", isEnabled: checkedNovelCount > 0)
+                self.multiSelectMenuView.setButtonEnabled(identifier: "clearButton", isEnabled: checkedNovelCount > 0)
             }
         }
     }
@@ -457,14 +463,82 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
     }
     
-    func updateMultiSelectFloatingViewControllerSelectCount(selectCount: Int) {
-        DispatchQueue.main.async {
-            if self.multiSelectFloatingViewController.isFloatingWindowOpened {
-                let format = NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_StateLabel", comment: "選択数: %@")
-                let formatedCount = String.localizedStringWithFormat("%d", selectCount)
-                let text = String(format: format, formatedCount)
-                self.multiSelectFloatingViewController.setLabelText(identity: "stateLabel", text: text)
+    func setupMultiSelectMenuView() {
+        multiSelectMenuView.backgroundColor = .systemGray6
+        multiSelectMenuView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(multiSelectMenuView)
+        
+        NSLayoutConstraint.activate([
+            multiSelectMenuView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            multiSelectMenuView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            multiSelectMenuView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+        ])
+        
+        multiSelectMenuView.addButton(identifier: "backButton", title: NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_BackNormalModeButtonLabel", comment: "＜ 戻る")) {
+            self.toggleCheckboxes()
+        }
+        multiSelectMenuView.addButton(identifier: "clearButton", title: NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_ClearButtonLabel", comment: "クリア")) {
+            DispatchQueue.global(qos: .userInteractive).async {
+                func uncheckSelected(targetArray: [BookShelfRATreeViewCellData]) {
+                    for target in targetArray {
+                        target.selectionState = .unselected
+                        if let childrens = target.childrens {
+                            uncheckSelected(targetArray: childrens)
+                        }
+                    }
+                }
+                uncheckSelected(targetArray: self.displayDataArray)
+                self.countAndUpdateMultiSelectFloatingViewControllerSelectCount()
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
             }
+        }
+        multiSelectMenuView.addButton(identifier: "actionButton", title: NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_SelectFunctionButtonLabel", comment: "操作▼")) {
+            self.actionMultiSelectedNovels()
+        }
+        multiSelectMenuView.addLabel(identifier: "stateLabel", text: String(format: NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_StateLabel", comment: "選択数: %@"), "-"))
+        //multiSelectFloatingViewController.addTextField(placeholder: "ここに入力してください", identity: "textField")
+        self.countAndUpdateMultiSelectFloatingViewControllerSelectCount()
+    }
+    
+    private func updateMultiSelectHeaderVisibility(isHeaderVisible: Bool) {
+        DispatchQueue.main.async {
+            let currentTopInset = self.tableView.contentInset.top
+            UIView.animate(withDuration: 0.3) {
+                let newHeight:CGFloat
+                let windowHeight:CGFloat
+                if isHeaderVisible {
+                    newHeight = self.multiSelectMenuView.showView()
+                    windowHeight = -newHeight
+                }else{
+                    windowHeight = self.multiSelectMenuView.hideView() * 2
+                    newHeight = 0
+                }
+                let newInset = UIEdgeInsets(top: newHeight, left: 0, bottom: 0, right: 0)
+                self.tableView.contentInset = newInset
+                self.tableView.scrollIndicatorInsets = newInset
+                // このあたりの計算、なんでこれでうまくいくのかよくわからん……
+                // マイナスにしたり2倍にしたりしてて本当によくわからん。(´・ω・`)
+                let heightDifference = windowHeight - currentTopInset
+                let currentOffset = self.tableView.contentOffset
+                let newOffset = CGPoint(x: currentOffset.x, y: currentOffset.y + heightDifference)
+                self.tableView.setContentOffset(newOffset, animated: true)
+                
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    
+    func updateMultiSelectViewSelectCount(selectCount: Int) {
+        DispatchQueue.main.async {
+            let format = NSLocalizedString("BookShelfTreeViewController_MultiSelectFloatingViewController_StateLabel", comment: "選択数: %@")
+            let formatedCount = String.localizedStringWithFormat("%d", selectCount)
+            let text = String(format: format, formatedCount)
+            if self.multiSelectFloatingViewController.isFloatingWindowOpened {
+                //self.multiSelectFloatingViewController.setLabelText(identity: "stateLabel", text: text)
+            }
+            self.multiSelectMenuView.updateLabelText(identifier: "stateLabel", text: text)
         }
     }
     
@@ -500,11 +574,13 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     func toggleCheckboxes() {
         showCheckboxes.toggle()
         if showCheckboxes {
-            multiSelectFloatingViewController.showFloatingWindow(in: NiftyUtility.toplevelViewController ?? self.parent ?? self, yPositionFactor: 0.1)
-            initMultiSelectFloatingWindow()
+            //multiSelectFloatingViewController.showFloatingWindow(in: NiftyUtility.toplevelViewController ?? self.parent ?? self, yPositionFactor: 0.1)
+            //initMultiSelectFloatingWindow()
+            updateMultiSelectHeaderVisibility(isHeaderVisible: true)
             self.toggleCheckboxButton.image = UIImage(systemName: "checkmark.square.fill")
         }else{
-            multiSelectFloatingViewController.closeFloatingWindow()
+            //multiSelectFloatingViewController.closeFloatingWindow()
+            updateMultiSelectHeaderVisibility(isHeaderVisible: false)
             self.toggleCheckboxButton.image = UIImage(systemName: "checkmark.square")
         }
         updateToggleStateForVisibleCells()
@@ -1712,7 +1788,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 selectedNovelID = novelID
             }
             self.displayDataArray = displayDataArray
-            self.updateMultiSelectFloatingViewControllerSelectCount(selectCount: selectedNovelCount)
+            self.updateMultiSelectViewSelectCount(selectCount: selectedNovelCount)
             UIView.animate(withDuration: 0.0) {
                 self.tableView.reloadData()
                 self.tableView.layoutIfNeeded()
