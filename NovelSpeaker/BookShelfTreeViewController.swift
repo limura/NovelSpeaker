@@ -112,6 +112,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     static var instance:BookShelfTreeViewController? = nil
     override func viewDidLoad() {
         super.viewDidLoad()
+        multiSelectFloatingViewController = FloatingWindowViewController()
+        setupMultiSelectMenuView()
+        updateMultiSelectHeaderVisibility(isHeaderVisible: false)
         BookShelfTreeViewController.instance = self
         StoryHtmlDecoder.shared.LoadSiteInfoIfNeeded()
 
@@ -182,9 +185,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         RealmObserverHandler.shared.AddDelegate(delegate: self)
         registObserver()
         registNotificationCenter()
-        multiSelectFloatingViewController = FloatingWindowViewController()
-        setupMultiSelectMenuView()
-        updateMultiSelectHeaderVisibility(isHeaderVisible: false)
     }
     
     deinit {
@@ -507,20 +507,21 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             let currentTopInset = self.tableView.contentInset.top
             UIView.animate(withDuration: 0.3) {
                 let newHeight:CGFloat
-                let windowHeight:CGFloat
                 if isHeaderVisible {
                     newHeight = self.multiSelectMenuView.showView()
-                    windowHeight = -newHeight
                 }else{
-                    windowHeight = self.multiSelectMenuView.hideView() * 2
+                    _ = self.multiSelectMenuView.hideView()
                     newHeight = 0
                 }
                 let newInset = UIEdgeInsets(top: newHeight, left: 0, bottom: 0, right: 0)
                 self.tableView.contentInset = newInset
                 self.tableView.scrollIndicatorInsets = newInset
-                // このあたりの計算、なんでこれでうまくいくのかよくわからん……
-                // マイナスにしたり2倍にしたりしてて本当によくわからん。(´・ω・`)
-                let heightDifference = windowHeight - currentTopInset
+                var heightDifference = currentTopInset - newHeight
+                // TODO: なんでこれが必要になるのかよくわからん……
+                // でもこれをしておかないと一番上の状態で multiSelectHeaderView を消すと一番上の表示が見切れてしまう。(´・ω・`)
+                if newHeight == 0 && self.tableView.contentOffset.y < heightDifference*(-2) {
+                    heightDifference = 0
+                }
                 let currentOffset = self.tableView.contentOffset
                 let newOffset = CGPoint(x: currentOffset.x, y: currentOffset.y + heightDifference)
                 self.tableView.setContentOffset(newOffset, animated: true)
