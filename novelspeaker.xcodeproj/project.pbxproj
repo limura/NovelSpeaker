@@ -160,6 +160,7 @@
 		21AA7FCF25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
+		21B4B1132CAEA11600CEED5A /* DynamicHorizontalStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B4B1122CAEA10B00CEED5A /* DynamicHorizontalStackView.swift */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
 		21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F9196037BB009658B7 /* AVFoundation.framework */; };
 		21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
@@ -485,6 +486,7 @@
 		21AED5D419B335CF00CE846D /* ReleaseMemo.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReleaseMemo.md; sourceTree = "<group>"; };
 		21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummySoundLooper.swift; sourceTree = "<group>"; };
 		21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Silent3sec.mp3; sourceTree = "<group>"; };
+		21B4B1122CAEA10B00CEED5A /* DynamicHorizontalStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicHorizontalStackView.swift; sourceTree = "<group>"; };
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
 		21B539F719603737009658B7 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		21B539F9196037BB009658B7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -716,6 +718,7 @@
 		21724EE51972C7B400DF6DC4 /* CustomViews */ = {
 			isa = PBXGroup;
 			children = (
+				21B4B1122CAEA10B00CEED5A /* DynamicHorizontalStackView.swift */,
 				2166693B257548DB00B5B735 /* PickerViewDialog.swift */,
 				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
 				2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */,
@@ -1640,6 +1643,7 @@
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
 				2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */,
+				21B4B1132CAEA11600CEED5A /* DynamicHorizontalStackView.swift in Sources */,
 				216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */,
 				21D9C1672652602900CC5AE9 /* WebSpeechViewTool.swift in Sources */,
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
@@ -2258,7 +2262,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.10.5;
+				CURRENT_PROJECT_VERSION = 2.10.6;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2296,7 +2300,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.10.5;
+				CURRENT_PROJECT_VERSION = 2.10.6;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

@@ -972,7 +972,7 @@
 
 - When making an inquiry from within the app, a warning will be displayed if the latest version is not working.
 - Changed the behavior when retrieving SiteInfo.
-- A floating window will be displayed when entering \"multiple selection mode\" on the \"bookshelf screen.\"
+- A special menu will now be displayed when you enter \"multiple selection mode\" on the \"bookshelf screen\"
 - Fixed an issue where eloquence voices could not be selected in the expected language.
 - Fixed an issue where a gap was created at the bottom of the novel text screen due to the tab bar being moved to the top of the screen in iPad OS 18.
 - Fixed an issue where the vertical width of the \"◀ (back to previous page button)\" at the bottom of the novel text screen was incorrect, causing a small portion of the bottom left of the novel text to be missing.
@@ -987,7 +987,7 @@ Changes in interface/internal operation
 
 - When making an inquiry from within the app, a warning will be displayed if the latest version is not working.
 - Changed the behavior when retrieving SiteInfo.
-- A floating window will be displayed when entering \"multiple selection mode\" on the \"bookshelf screen.\"
+- A special menu will now be displayed when you enter \"multiple selection mode\" on the \"bookshelf screen\"
 
 Fixing the problem
 
