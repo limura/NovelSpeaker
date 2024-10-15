@@ -957,18 +957,20 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.3
 
-- アプリ内からの問い合わせ時に、最新バージョンで動作していない場合に警告を表示するように
-- SiteInfoの取得時の動作を変更
-- 「本棚画面」で「複数選択モード」に入ったときに専用メニューを表示するように
-- eloquence voices が期待された言語で選択できない問題を修正
-- iPad OS 18 でタブバーが画面上部に移動したことで小説本文画面の下部に隙間が空いている問題に対応
-- 小説本文画面の下部の「◀(前のページに戻るボタン)」の縦幅がおかしくなっていて小説本文部分の左下が少し欠けていた問題を修正
+- Safari等からのシェア機能からの ことせかい 呼び出しが正しく動作しなくなっていた問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.3
+
+問題の修正
+
+- Safari等からのシェア機能からの ことせかい 呼び出しが正しく動作しなくなっていた問題を修正
+
+
 Version 2.10.2
 
 インタフェース・内部動作の変更
