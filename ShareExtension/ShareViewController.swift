@@ -88,7 +88,11 @@ class ShareViewController: UIViewController {
         while responder != nil {
             if let application = responder as? UIApplication {
                 let selector = sel_registerName("openURL:")
-                application.perform(selector, with: customUrlSchemeURL)
+                // application.perform(...) を使うと古いAPIを使ってしまうみたいなので open() に変えます。
+                // というかこういうエラーが出ていた。(´・ω・`)
+                // BUG IN CLIENT OF UIKIT: The caller of UIApplication.openURL(_:) needs to migrate to the non-deprecated UIApplication.open(_:options:completionHandler:). Force returning false (NO).
+                //application.perform(selector, with: customUrlSchemeURL)
+                application.open(customUrlSchemeURL)
                 break
             }
             responder = responder?.next
