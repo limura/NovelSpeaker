@@ -3,5 +3,5 @@
     "latestDate": "//div[contains(@class,'whats-new__latest')]//time[@datetime]/@datetime",
     "latestShortVersion": "//div[contains(@class,'whats-new__latest')]//p[contains(@class,'whats-new__latest__version')]"
   },
-  "latestVersion": "2.10.2"
+  "latestVersion": "2.10.3"
 }
