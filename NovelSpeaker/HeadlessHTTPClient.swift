@@ -105,6 +105,9 @@ class HeadlessHttpClient {
             ActivityIndicatorManager.enable(id: requestID)
             let request = self.generateUrlRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL)
             func LoadNext() {
+                if let layoutEngine = self.erik.layoutEngine as? WebKitLayoutEngine {
+                    layoutEngine.pageLoadTimeout = timeoutInterval + 2.5
+                }
                 self.erik.load(urlRequest: request) { (document, err) in
                     ActivityIndicatorManager.disable(id: requestID)
                     if let err = err {
