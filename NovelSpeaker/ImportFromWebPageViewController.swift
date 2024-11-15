@@ -535,7 +535,7 @@ li {
     }
     
     // 認証周りのチェックに呼ばれる
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping @MainActor (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         //print("webView:didReceive challenge:completionHandler called.")
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
             guard let serverTrust = challenge.protectionSpace.serverTrust else {
@@ -546,7 +546,9 @@ li {
             // それに伴って CFError を受け取らずに単に SecTrustEvaluateWithError が true を返すかどうかだけで判定するようにします。
             DispatchQueue.global(qos: .utility).async {
                 if SecTrustEvaluateWithError(serverTrust, nil) == false {
-                    completionHandler(.rejectProtectionSpace, nil)
+                    MainActor.assumeIsolated {
+                        completionHandler(.rejectProtectionSpace, nil)
+                    }
                     return
                 }
                 DispatchQueue.main.async {
@@ -595,7 +597,7 @@ li {
     }
     
     // _blank へな link をそのまま表示させる、みたいな奴
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void) {
         if navigationAction.navigationType == .linkActivated {
             if navigationAction.targetFrame == nil
                 || !navigationAction.targetFrame!.isMainFrame {
@@ -656,7 +658,7 @@ li {
     }
     
     // JavaScript で Alertされた時
-    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping  @MainActor () -> Void) {
         if alertBlock {
             completionHandler()
             return
@@ -690,7 +692,7 @@ li {
     }
 
     // テキスト入力を迫られた場合のハンドラ
-    func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
+    func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping  @MainActor (String?) -> Void) {
         var hostString = NSLocalizedString("ImportFromWebPageViewController_UnknownHost", comment: "不明なホスト")
         if let host = self.wkWebView?.url?.host {
             hostString = host
@@ -708,7 +710,7 @@ li {
     }
     
     // OK/NGが聞かれた時のハンドラ
-    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping  @MainActor (Bool) -> Void) {
         var hostString = NSLocalizedString("ImportFromWebPageViewController_UnknownHost", comment: "不明なホスト")
         if let host = self.wkWebView?.url?.host {
             hostString = host
@@ -755,7 +757,7 @@ extension ImportFromWebPageViewController: WKDownloadDelegate {
         return path
     }
     
-    func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+    func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping  @MainActor (URL?) -> Void) {
         let downloadFilePath = ImportFromWebPageViewController.GetDownloadTempolaryFilePath(fileName: suggestedFilename)
         self.downloadFileUrl = downloadFilePath
         completionHandler(downloadFilePath)

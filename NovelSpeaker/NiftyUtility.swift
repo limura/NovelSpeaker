@@ -299,7 +299,7 @@ class NiftyUtility: NSObject {
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: nil)
                     }
-                    RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: titleString)
+                    _ = RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: titleString)
                 })
             }
             if isNeedFallbackImportFromWebPageTab == true {

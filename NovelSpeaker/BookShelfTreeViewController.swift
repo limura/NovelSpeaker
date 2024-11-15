@@ -2387,7 +2387,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         guard let instance = instance else { return  }
         DispatchQueue.main.async {
             return RealmUtil.RealmBlock { realm in
-                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+                guard RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) != nil else { return }
                 let targetTabIndex = 0
                 guard let navigationController = instance.tabBarController?.viewControllers?[targetTabIndex] as? UINavigationController, let bookShelfTreeViewController = navigationController.viewControllers.first as? BookShelfTreeViewController else {
                     return

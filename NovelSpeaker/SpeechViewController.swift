@@ -649,7 +649,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
 
     func textViewScrollTo(readLocation:Int) {
-        let beginOffsetY = textView.contentOffset.y
         guard let startPosition = textView.position(from: textView.beginningOfDocument, offset: readLocation) else {
             return
         }
