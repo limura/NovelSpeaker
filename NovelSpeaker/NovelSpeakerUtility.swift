@@ -3087,6 +3087,17 @@ class NovelSpeakerUtility: NSObject {
         defaults.setValue(IsDisplay, forKey: IsNotDisplayNovelMultiSelectCheckboxKey)
         defaults.synchronize()
     }
+    static let IsNeedOverrideTabBarTraitsKey = "IsNeedOverrideTabBarTraits"
+    static func IsNeedOverrideTabBarTraits() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [IsNeedOverrideTabBarTraitsKey: false])
+        return defaults.bool(forKey: IsNeedOverrideTabBarTraitsKey)
+    }
+    static func SetIsNeedOverrideTabBarTraits(IsNeed:Bool){
+        let defaults = UserDefaults.standard
+        defaults.setValue(IsNeed, forKey: IsNeedOverrideTabBarTraitsKey)
+        defaults.synchronize()
+    }
 
     static let OuterNovelFileAttributesKey = "OuterNovelFileAttributesKey"
     struct OuterNovelFileAttributes: Codable {

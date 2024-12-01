@@ -1226,6 +1226,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            // ipad only feature.
+            if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
+                section
+                <<< SwitchRow("isNeedoverrideTabBarTraitsRow") { (row) in
+                    row.title = NSLocalizedString("SettingTableViewController_overrideTabBarTraitsRow", comment:"タブの表示を画面下部にする(非推奨です。また、アプリ再起動後に適用されます)")
+                    row.cell.textLabel?.numberOfLines = 0
+                    row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                    row.value = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
+                }.onChange({ row in
+                    if let value = row.value {
+                        NovelSpeakerUtility.SetIsNeedOverrideTabBarTraits(IsNeed: value)
+                    }
+                })
+            }
 
             if UIDevice.current.userInterfaceIdiom == .phone {
                 section

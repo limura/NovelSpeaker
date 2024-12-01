@@ -200,6 +200,7 @@
 "SettingTableViewController_IsDisplaySpeechModChange" = "小説本文画面で、読み替えが行われる文字の色を変える";
 "SettingTableViewController_IsNotClearToAboutBlankOnDownloadBrowserUrl" = "ダウンロード終了後に about:blank に移動させない";
 "SettingTableViewController_IsDeleteBlockOnBookshelfTreeView" = "本棚画面でスワイプや「編集」から小説を削除できないようにする(これがONの場合でも、削除したい場合は小説の複数選択画面から行うことができます)";
+"SettingTableViewController_overrideTabBarTraitsRow" = "タブの表示を画面下部にする(非推奨です。また、アプリ再起動後に適用されます)";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";
