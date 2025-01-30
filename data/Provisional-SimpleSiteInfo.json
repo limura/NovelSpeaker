@@ -34,7 +34,7 @@
     "subtitle": "//div[@class='p-novel__subtitle-episode']",
     "firstPageLink": "//header[following-sibling::div//div[@class='p-eplist']/div/a[contains(@href,'/n') and @class='p-eplist__subtitle']]/nav/a[contains(@href,'/novelview/infotop/ncode/')]|//header[following-sibling::div//div[@class='p-eplist']/div/a[contains(@href,'/n') and @class='p-eplist__subtitle']]/nav/div/a[contains(@href,'/novelview/infotop/ncode/')]|//div[@id='infodata']/div[@id='pre_info']/a[contains(@href,'/n') and contains(text(),'1エピソード目を読む')]|//div[@id='novelindex_button']/a[contains(@href,'/n') and contains(text(),'1エピソード目を読む')]|//div[@id='contents_main' and not(descendant::a[contains(text(),'1エピソード目を読む')])]/div[@id='novelindex_button']/a[contains(@href,'/n') and contains(text(),'作品を読む')]",
     "isNeedHeadless": "true",
-    "nextLink": "//article[not(descendant::div[@class='p-eplist'])]//a[contains(@class,'c-pager__item--next')]",
+    "nextLink": "//article[not(descendant::div[@class='p-eplist'])]//a[contains(@class,'c-pager__item--next')]|//div[contains(@class,'c-pager')]//a[contains(@class,'c-pager__item--next') and @href]",
     "url": "^https?://(ncode|novel18)\\.syosetu\\.com/",
     "tag": "//table[@id='noveltable1']/tbody/tr[child::th[text()='キーワード']]/td|//div[@id='novel_contents']/div[@class='info_inbox' and preceding-sibling::div[@class='h3' and text()='キーワード'] and following-sibling::div[@class='h3' and text()='掲載日']]",
     "author": "//meta[@name='twitter:creator']/@content",
