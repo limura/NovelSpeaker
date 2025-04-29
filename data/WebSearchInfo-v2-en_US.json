@@ -230,7 +230,7 @@
         "webSiteURL": "https://www.akatsuki-novels.com/",
         "title": "Akatsuki",
         "HTTPMethod": "GET",
-        "isNeedHeadless": false,
+        "isNeedHeadless": true,
         "url": "https://www.akatsuki-novels.com/novels/index/",
         "querySeparator": "/",
         "queryJoinner": "~",

@@ -229,7 +229,7 @@
 	"webSiteURL": "https://www.akatsuki-novels.com/",
         "title": "暁",
         "HTTPMethod": "GET",
-        "isNeedHeadless": false,
+        "isNeedHeadless": true,
         "url": "https://www.akatsuki-novels.com/novels/index/",
         "memo": "暁はクエリの連結が / で、key=value の = に当たるものが ~ になっていて、POSTで送信すべきとなっているけれど GET でも受け付けてくれるという謎の仕様のようです。また、検索文字列のような文字列を引数とする場合、謎の16進(?)に変換しなければならないようなので、これは使えない事にします。",
         "querySeparator": "/",
