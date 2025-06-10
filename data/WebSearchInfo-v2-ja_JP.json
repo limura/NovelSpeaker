@@ -1493,6 +1493,114 @@
         }
     },
     {
+		"isDisabled": true,
+		"allowDataVersion": 2,
+		"webSiteURL": "https://tales.note.com/",
+		"announce": "検索結果の最初に表示されるもの(恐らく最大50件)しかリストされず、それ以降のものは検出できません。完全な検索を行いたい場合は、「このサイトを Web取込 タブで開く」からWeb取込タブに移行して検索を行ってください。",
+		"memo": "multiSelect が ifNoSelectionThenEmptyQuery がサポートされている allowDataVersion: 2 でないと動かないので multiSelect を排除したものを同じ名前で登録しています。multiSelect が無効になっているものは一つしたにあり、isDisabled: false になっています。",
+        "title": "Tales_testing",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+		"waitSecondInHeadless": 1.0,
+        "url": "https://tales.note.com/search/works?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "q"},
+            {"queryType": "multiSelect", "displayText": "優先条件", "queryName": "contentWarningNames",  "ifNoSelectionThenEmptyQuery": true, "separator": ",",
+                "multiSelect": {
+					"残酷描写あり": "cruel",
+					"暴力描写あり": "violent",
+					"性描写あり": "sexual"
+				}
+			},
+            {"queryType": "multiSelect", "displayText": "除外条件", "queryName": "excludeContentWarningNames", "ifNoSelectionThenEmptyQuery": true, "separator": ",",
+                "multiSelect": {
+					"残酷描写あり": "cruel",
+					"暴力描写あり": "violent",
+					"性描写あり": "sexual"
+				}
+			},
+			{"queryType": "multiSelect", "displayText": "カテゴリー", "queryName": "genreNames",  "ifNoSelectionThenEmptyQuery": true,"separator": ",",
+                "multiSelect": {
+					"異世界ファンタジー": "isekai",
+					"現代ファンタジー": "fantasy",
+					"ミステリー": "mystery",
+					"ホラー": "horror",
+					"ラブコメ": "romcom",
+					"ロマンス": "romance",
+					"青春": "youth",
+					"仕事・人間ドラマ": "family",
+					"SF": "sf",
+					"歴史・時代": "historical",
+					"創作論・評論": "critique"
+				}
+			},
+            {"queryType": "radio", "displayText": "スキ数", "queryName": "", "defaultValue": "",
+                "radio": {
+                    "0: 指定なし": "",
+					"1: 〜9": "likeCount=lessThan10",
+					"2: 10〜": "likeCount=over10",
+					"3: 100〜": "likeCount=over100",
+					"4: 1,000〜": "likeCount=over1000",
+					"5: 10,000〜": "likeCount=over10000"
+				}
+			},
+            {"queryType": "radio", "displayText": "文字数", "queryName": "", "defaultValue": "",
+                "radio": {
+                    "0: 指定なし": "",
+					"1: 短編(2万文字未満)": "characterCount=lessThan20000",
+					"2: 中編(2万文字〜10万文字)": "characterCount=over20000",
+					"3: 長編(10万文字〜50万文字)": "characterCount=over100000",
+					"4: 大長編(50万文字〜)": "characterCount=over500000"
+				}
+			}
+        ],
+        "result": {
+            "block": "//div[@data-sentry-element='Element' and @data-sentry-component='ImpTracker']",
+            "nextLink": "",
+            "title": "//h3",
+            "url": "//a[@title]/@href"
+        }
+    },
+    {
+		"isDisabled": false,
+		"webSiteURL": "https://tales.note.com/",
+		"announce": "検索結果の最初に表示されるもの(恐らく最大50件)しかリストされず、それ以降のものは検出できません。完全な検索を行いたい場合は、「このサイトを Web取込 タブで開く」からWeb取込タブに移行して検索を行ってください。",
+		"memo": "multiSelect が ifNoSelectionThenEmptyQuery がサポートされている allowDataVersion: 2 でないと動かないので multiSelect を排除したものを同じ名前で登録しています。multiSelect が有効になっているものは一つ上にあり、isDisabled: true になっています。",
+        "title": "Tales",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+		"waitSecondInHeadless": 1.0,
+        "url": "https://tales.note.com/search/works?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "q"},
+            {"queryType": "radio", "displayText": "スキ数", "queryName": "", "defaultValue": "",
+                "radio": {
+                    "0: 指定なし": "",
+					"1: 〜9": "likeCount=lessThan10",
+					"2: 10〜": "likeCount=over10",
+					"3: 100〜": "likeCount=over100",
+					"4: 1,000〜": "likeCount=over1000",
+					"5: 10,000〜": "likeCount=over10000"
+				}
+			},
+            {"queryType": "radio", "displayText": "文字数", "queryName": "", "defaultValue": "",
+                "radio": {
+                    "0: 指定なし": "",
+					"1: 短編(2万文字未満)": "characterCount=lessThan20000",
+					"2: 中編(2万文字〜10万文字)": "characterCount=over20000",
+					"3: 長編(10万文字〜50万文字)": "characterCount=over100000",
+					"4: 大長編(50万文字〜)": "characterCount=over500000"
+				}
+			}
+        ],
+        "result": {
+            "block": "//div[@data-sentry-element='Element' and @data-sentry-component='ImpTracker']",
+            "nextLink": "",
+            "title": "//h3",
+            "url": "//a[@title]/@href"
+        }
+    },
+    {
 	"isDisabled": true,
 	"allowDataVersion": 999999,
 	"webSiteURL": "",
