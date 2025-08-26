@@ -1,0 +1,6 @@
+{
+  "data_version" : "2.1.0",
+  "misc_settings" : {
+    "novelSpeakerSiteInfoURL" : "https:\/\/raw.githubusercontent.com\/limura\/NovelSpeaker\/refs\/heads\/gh-pages\/data\/NovelSpeaker-SiteInfo-temp.tsv"
+  }
+}
