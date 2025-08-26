@@ -208,6 +208,7 @@
 "SettingTableViewController_IsEnableSwipeOnStoryView" = "Make it possible to turn pages by swiping left and right on the novel text screen";
 "SettingsTableViewController_AppInformation" = "Notification of in-app error";
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "Notification of in-app error (including for debugging)";
+"SettingTableViewController_AppInformation_IncludeForDebug_OutputByJSON" = "Notification of in-app error(JSON)";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "Clear notification";
 "SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "Copy notification";
 

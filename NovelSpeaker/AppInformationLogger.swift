@@ -8,10 +8,121 @@
 
 import Foundation
 
+struct AnyCodable: Codable, Equatable, CustomStringConvertible {
+    let value: Any
+    
+    init(_ value: Any?) {
+        self.value = value ?? NSNull()
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        
+        if let stringValue = try? container.decode(String.self) {
+            value = stringValue
+        } else if let intValue = try? container.decode(Int.self) {
+            value = intValue
+        } else if let doubleValue = try? container.decode(Double.self) {
+            value = doubleValue
+        } else if let boolValue = try? container.decode(Bool.self) {
+            value = boolValue
+        } else if let dateValue = try? container.decode(Date.self) {
+            value = dateValue
+        } else if let arrayValue = try? container.decode([AnyCodable].self) {
+            value = arrayValue.map { $0.value }
+        } else if let dictionaryValue = try? container.decode([String: AnyCodable].self) {
+            value = dictionaryValue.mapValues { $0.value }
+        } else {
+            value = NSNull()
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        
+        switch value {
+        case let stringValue as String:
+            try container.encode(stringValue)
+        case let intValue as Int:
+            try container.encode(intValue)
+        case let doubleValue as Double:
+            try container.encode(doubleValue)
+        case let boolValue as Bool:
+            try container.encode(boolValue)
+        case let dateValue as Date:
+            try container.encode(dateValue)
+        case let arrayValue as [Any]:
+            try container.encode(arrayValue.map { AnyCodable($0) })
+        case let dictionaryValue as [String: Any]:
+            try container.encode(dictionaryValue.mapValues { AnyCodable($0) })
+        default:
+            try container.encodeNil()
+        }
+    }
+    
+    // Equatableプロトコル準拠
+    static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
+        switch (lhs.value, rhs.value) {
+        case (let lhsValue as String, let rhsValue as String):
+            return lhsValue == rhsValue
+        case (let lhsValue as Int, let rhsValue as Int):
+            return lhsValue == rhsValue
+        case (let lhsValue as Double, let rhsValue as Double):
+            return lhsValue == rhsValue
+        case (let lhsValue as Bool, let rhsValue as Bool):
+            return lhsValue == rhsValue
+        case (let lhsValue as Date, let rhsValue as Date):
+            return lhsValue == rhsValue
+        case (let lhsValue as [AnyCodable], let rhsValue as [AnyCodable]):
+            return lhsValue == rhsValue
+        case (let lhsValue as [String: AnyCodable], let rhsValue as [String: AnyCodable]):
+            return lhsValue == rhsValue
+        case (is NSNull, is NSNull):
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var description: String {
+        get {
+            switch value {
+            case let stringValue as String:
+                return stringValue
+            case let intValue as Int:
+                return "\(intValue)"
+            case let doubleValue as Double:
+                return "\(doubleValue)"
+            case let boolValue as Bool:
+                return "\(boolValue)"
+            case let dateValue as Date:
+                return "\(dateValue)"
+            case let arrayValue as [AnyCodable]:
+                return "[" + arrayValue.map { $0.description }.joined(separator: ", ") + "]"
+            case let dictionaryValue as [String: AnyCodable]:
+                return "{" + dictionaryValue.map { (key: String, value: AnyCodable) in
+                    print("AnyCodable description dictionaryValue.map(AnyCodable): \(key): ", value)
+                    return "\(key): \(value.description)"
+                }.joined(separator: ", ") + "}"
+            case let dictionaryValue as [String: Any]:
+                return "{" + dictionaryValue.map { (key: String, value: Any) in
+                    print("AnyCodable description dictionaryValue.map(Any): \(key): ", value)
+                    if let codableValue = value as? AnyCodable {
+                        return "\(key): \(codableValue.description)"
+                    }
+                    return "\(key): \(value)"
+                }.joined(separator: ", ") + "}"
+            default:
+                return "-"
+            }
+        }
+    }
+}
+
 struct AppInformationLog: Codable, CustomStringConvertible {
     let message:String
     let date:Date
-    let appendix:[String:String]
+    let appendix:[String:AnyCodable]
     let isForDebug:Bool
     let file:String
     let line:Int
@@ -49,6 +160,14 @@ class AppInformationLogger : NSObject {
     static var delegate:AppInformationAliveDelegate? = nil
     
     @objc static func AddLog(message:String, appendix:[String:String] = [:], isForDebug:Bool, file:String = #file, line:Int = #line, function:String = #function) {
+        var appendixAny:[String:AnyCodable] = [:]
+        for (key,value) in appendix {
+            appendixAny[key] = AnyCodable(value)
+        }
+        AddLogWithStruct(message: message, appendix: appendixAny, isForDebug: isForDebug, file:file, line:line, function:function)
+    }
+    
+    static func AddLogWithStruct(message:String, appendix:[String:AnyCodable] = [:], isForDebug:Bool, file:String = #file, line:Int = #line, function:String = #function) {
         let log = AppInformationLog(message: message, date: Date(), appendix: appendix, isForDebug: isForDebug, file: file, line: line, function: function)
         print(log)
         let encoder = JSONEncoder()
@@ -156,6 +275,21 @@ class AppInformationLogger : NSObject {
             if isIncludeDebugLog == false && info.isForDebug == true { return "" }
             return info.description
         }).filter({$0 != ""}).reversed().joined(separator: "\n")
+    }
+    
+    static func LoadLogObjectArrayAsJSON(isIncludeDebugLog:Bool) -> String? {
+        let logArray = LoadLogObjectArray(isIncludeDebugLog: isIncludeDebugLog)
+        if !JSONSerialization.isValidJSONObject(logArray) {
+            print("invalid JSON object: \(logArray)")
+            return nil
+        }
+        let json:Data
+        do {
+            json = try JSONSerialization.data(withJSONObject: logArray)
+        }catch{
+            return nil
+        }
+        return String(data: json, encoding: .utf8)
     }
     
     static func ClearLogs() {

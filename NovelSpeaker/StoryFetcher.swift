@@ -287,6 +287,59 @@ extension StorySiteInfo: CustomStringConvertible {
         result += "\""
         return result
     }
+    // WARN: AppInformationLogger で定義されている AnyCodable を利用しています
+    var JSONdescription: [String:AnyCodable] {
+        var result:[String:AnyCodable] = [:]
+        result["pageElement"] = AnyCodable(pageElement)
+        if let title = title {
+            result["title"] = AnyCodable(title)
+        }
+        if let subtitle = subtitle {
+            result["subtitle"] = AnyCodable(subtitle)
+        }
+        if let nextLink = nextLink {
+            result["nextLink"] = AnyCodable(nextLink)
+        }
+        if let firstPageLink = firstPageLink {
+            result["firstPageLink"] = AnyCodable(firstPageLink)
+        }
+        if let author = author {
+            result["author"] = AnyCodable(author)
+        }
+        if let tag = tag {
+            result["tag"] = AnyCodable(tag)
+        }
+        result["isNeedHeadless"] = AnyCodable(isNeedHeadless ? "true" : "false")
+        if let injectStyle = injectStyle {
+            result["injectStyle"] = AnyCodable(injectStyle)
+        }
+        if let nextButton = nextButton {
+            result["nextButton"] = AnyCodable(nextButton)
+        }
+        if let firstPageButton = firstPageButton {
+            result["firstPageButton"] = AnyCodable(firstPageButton)
+        }
+        if let waitSecondInHeadless = waitSecondInHeadless {
+            result["waitSecondInHeadless"] = AnyCodable(waitSecondInHeadless)
+        }
+        if let forceClickButton = forceClickButton {
+            result["forceClickButton"] = AnyCodable(forceClickButton)
+        }
+        if let resourceUrl = resourceUrl {
+            result["resourceUrl"] = AnyCodable(resourceUrl)
+        }
+        if let overrideUserAgent = overrideUserAgent {
+            result["overrideUserAgent"] = AnyCodable(overrideUserAgent)
+        }
+        if let forceErrorMessageAndElement = forceErrorMessageAndElement {
+            result["forceErrorMessageAndElement"] = AnyCodable(forceErrorMessageAndElement)
+        }
+        if let scrollTo = scrollTo {
+            result["scrollTo"] = AnyCodable(scrollTo)
+        }
+        result["isNeedWhitespaceSplitForTag"] = AnyCodable(isNeedWhitespaceSplitForTag)
+        return result
+    }
 }
 
 extension StorySiteInfo : Decodable {
@@ -781,6 +834,7 @@ class StoryFetcher {
     
     func DecodeDocument(currentState:StoryState, html:String?, encoding:String.Encoding, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
         // TODO: この辺りに取得したHTMLをlogに吐くような奴を作っておくと良さげ？
+        print("DecodeDocument: html:\n-----\n\(html ?? "nil")\n-----")
         guard let html = html, let htmlDocument = try? HTML(html: html, encoding: encoding) else {
             failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_Parse", comment: "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)"))
             return
@@ -821,7 +875,7 @@ class StoryFetcher {
                 forceClickButton = nil
             }
             if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil && forceClickButton == nil && forceErrorElementIsAlive_ErrorMessage == nil {
-                //print("continue: \(siteInfo.resourceUrl ?? "nil")")
+                //print("this siteInfo not match. continue. siteInfo: \(siteInfo.description)\n  pageElement.count: \(pageElement.count)\n  nextUrl: \(nextUrl?.absoluteString ?? "nil") \n  firstPageLink: \(firstPageLink?.absoluteString ?? "nil")\n  firstPageButton: \(firstPageButton == nil ? "nil" : "not nil")\n  forceClickButton: \(forceClickButton == nil ? "nil" : "not nil")\n  forceErrorElementIsAlive_ErrorMessage: \(forceErrorElementIsAlive_ErrorMessage ?? "nil")")
                 continue
             }
             #else
@@ -833,7 +887,24 @@ class StoryFetcher {
                 continue
             }
             #endif
-            //print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), nextButton: \(nextButton != nil ? "has" : "nil"), firstPageButton: \(firstPageButton != nil ? "has" : "nil"), (forceClickButton: \(forceClickButton != nil ? "has" : "nil"), && siteInfo.isNeedHeadless: \(siteInfo.isNeedHeadless), && forceErrorElementIsAlive_ErrorMessage: \(forceErrorElementIsAlive_ErrorMessage ?? "nil"))")
+            #if false // 詳細なログが必要な場合は true にします
+            AppInformationLogger.AddLogWithStruct(
+                message: "取り込み動作ログ",
+                appendix: [
+                    "how": AnyCodable("1ページ読み込み中"),
+                    "URL": AnyCodable(currentState.url.absoluteString),
+                    "適用されたSiteInfo": AnyCodable(siteInfo.JSONdescription),
+                    "抽出された本文": AnyCodable(pageElement),
+                    "nextUrl": AnyCodable(nextUrl?.absoluteString ?? "nil"),
+                    "firstPageLink": AnyCodable(firstPageLink?.absoluteString ?? "nil"),
+                    "nextButton": AnyCodable(nextButton?.text ?? "nil"),
+                    "firstPageButton": AnyCodable(firstPageButton?.text ?? "nil"),
+                    "forceClickButton": AnyCodable(forceClickButton?.text ?? "nil"),
+                ],
+                isForDebug: true
+            )
+            #endif
+            print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), nextButton: \(nextButton != nil ? "has" : "nil"), firstPageButton: \(firstPageButton != nil ? "has" : "nil"), (forceClickButton: \(forceClickButton != nil ? "has" : "nil"), && siteInfo.isNeedHeadless: \(siteInfo.isNeedHeadless), && forceErrorElementIsAlive_ErrorMessage: \(forceErrorElementIsAlive_ErrorMessage ?? "nil")), siteInfo.description: \(siteInfo.description), siteInfo.pageElement: \"\(siteInfo.pageElement)\", siteInfo.nextLink: \(siteInfo.nextLink ?? "-")")
             //print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), hitSiteInfo: \(siteInfo)")
             #if !os(watchOS)
             successAction?(
@@ -1098,7 +1169,7 @@ class StoryFetcher {
         let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
         print("\(url.absoluteString)\nsiteInfo.count: \(siteInfoArray.count) (最初のだけ表示します)")
         if let siteInfo = siteInfoArray.first {
-            print("--\nurl:\(siteInfo.url?.pattern ?? "nil")\npageElement: \(siteInfo.pageElement)\nresourceUrl: \(siteInfo.resourceUrl ?? "nil")\nforceErrorMessageAndElement: \(siteInfo.forceErrorMessageAndElement ?? "nil")")
+            print("--\n\(siteInfo.description)")
         }
         return CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: previousContent)
     }

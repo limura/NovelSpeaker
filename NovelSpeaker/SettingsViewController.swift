@@ -1719,6 +1719,29 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             section
             <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_AppInformation_IncludeForDebug_OutputByJSON", comment:"アプリ内エラーのお知らせをJSONで取り出す")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ cell, row in
+                guard let logJSONString = AppInformationLogger.LoadLogObjectArrayAsJSON(isIncludeDebugLog: true) else {
+                    return
+                }
+                DispatchQueue.main.async {
+                    // UIActivityViewController を作成して表示
+                    let activityViewController = UIActivityViewController(activityItems: [logJSONString], applicationActivities: nil)
+                    
+                    // iPad対応（Popover表示用）
+                    if let popoverController = activityViewController.popoverPresentationController {
+                        popoverController.sourceView = self.view
+                        popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+                        popoverController.permittedArrowDirections = []
+                    }
+                    
+                    // Activity View Controllerを表示
+                    self.present(activityViewController, animated: true, completion: nil)
+                }
+            })
+            section
+            <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in

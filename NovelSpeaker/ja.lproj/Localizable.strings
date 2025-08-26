@@ -180,6 +180,7 @@
 "SettingsViewController_isDebugMenuAlreadyEnabled_Title" = "このデバッグ用メニューを常にONにする";
 "SettingsTableViewController_AppInformation" = "アプリ内エラーのお知らせ";
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "アプリ内エラーのお知らせ(デバッグ用も含む)";
+"SettingTableViewController_AppInformation_IncludeForDebug_OutputByJSON" = "アプリ内エラーのお知らせをJSONで取り出す";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "今あるお知らせを全て消す";
 "SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "このお知らせをコピーする";
 "SettingsViewController_DontUsallyUseSection_Title" = "通常は使用する必要の無いもの";

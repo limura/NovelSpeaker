@@ -53,7 +53,7 @@
 		212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */; };
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
-		212E41352CFC3C9500E7901C /* T raitOverrideTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212E41342CFC3C7600E7901C /* T raitOverrideTabBarController.swift */; };
+		212E41352CFC3C9500E7901C /* TraitOverrideTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212E41342CFC3C7600E7901C /* TraitOverrideTabBarController.swift */; };
 		212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */; };
 		212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */; };
 		212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */; };
@@ -359,7 +359,7 @@
 		212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
 		212852DD19B1D101001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		212852E019B1ECAD001A75DC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		212E41342CFC3C7600E7901C /* T raitOverrideTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "T raitOverrideTabBarController.swift"; sourceTree = "<group>"; };
+		212E41342CFC3C7600E7901C /* TraitOverrideTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraitOverrideTabBarController.swift; sourceTree = "<group>"; };
 		212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerSettingsViewController.swift; sourceTree = "<group>"; };
 		212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechWaitSettingViewController.swift; sourceTree = "<group>"; };
 		212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSectionConfigsViewController.swift; sourceTree = "<group>"; };
@@ -720,7 +720,7 @@
 		21724EE51972C7B400DF6DC4 /* CustomViews */ = {
 			isa = PBXGroup;
 			children = (
-				212E41342CFC3C7600E7901C /* T raitOverrideTabBarController.swift */,
+				212E41342CFC3C7600E7901C /* TraitOverrideTabBarController.swift */,
 				21B4B1122CAEA10B00CEED5A /* DynamicHorizontalStackView.swift */,
 				2166693B257548DB00B5B735 /* PickerViewDialog.swift */,
 				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
@@ -1652,7 +1652,7 @@
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
 				21D7B10F256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
 				2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */,
-				212E41352CFC3C9500E7901C /* T raitOverrideTabBarController.swift in Sources */,
+				212E41352CFC3C9500E7901C /* TraitOverrideTabBarController.swift in Sources */,
 				21CCE43A2C26D73800D62564 /* BookShelfTreeViewController.swift in Sources */,
 				216631EB268E9C9300F80C1D /* MenuButtonHandler.swift in Sources */,
 				212F6176258723C200822737 /* NovelLikeOrderSettingViewController.swift in Sources */,
