@@ -77,11 +77,13 @@ class MultiSelectQuery: SearchQuery, Decodable {
     let multiSelect:[String:String]
     let separator:String
     var enableTargets:Set<String> = Set()
-    init(displayText:String, queryName:String, multiSelect:[String:String], separator:String, defaultTargets:[String]?){
+    let ifNoSelectionThenEmptyQuery:Bool
+    init(displayText:String, queryName:String, multiSelect:[String:String], separator:String, defaultTargets:[String]?, ifNoSelectionThenEmptyQuery:Bool = false){
         self.displayText = displayText
         self.queryName = queryName
         self.multiSelect = multiSelect
         self.separator = separator
+        self.ifNoSelectionThenEmptyQuery = ifNoSelectionThenEmptyQuery
         if let defaultTargets = defaultTargets?.filter({ str in
             return multiSelect.keys.contains(str)
         }) {
@@ -114,6 +116,9 @@ class MultiSelectQuery: SearchQuery, Decodable {
             if let value = self.multiSelect[key] {
                 queryArray.append(value)
             }
+        }
+        if queryArray.isEmpty && ifNoSelectionThenEmptyQuery {
+            return ""
         }
         // queryName が空であれば、separator で join しただけの物を返します。
         // つまり、separator を "&" にして、multiSelect の value に "hoge=1" 的な物を入れておけば、
@@ -610,6 +615,7 @@ class WebSiteSection : Decodable {
             let defaultValue:String?
             let multiSelectDefaultTargets:[String]?
             let urlReplaceTarget:String?
+            let ifNoSelectionThenEmptyQuery:Bool?
         }
         var generatedValues:[SearchQuery] = []
         if let queryArray = try? values.decode([DummySearchQuery].self, forKey: .values) {
@@ -621,7 +627,7 @@ class WebSiteSection : Decodable {
                     }
                 case "multiSelect":
                     if let displayText = query.displayText, let multiSelect = query.multiSelect, let separator = query.separator {
-                        generatedValues.append(MultiSelectQuery(displayText: displayText, queryName: query.queryName, multiSelect: multiSelect, separator: separator, defaultTargets:query.multiSelectDefaultTargets))
+                        generatedValues.append(MultiSelectQuery(displayText: displayText, queryName: query.queryName, multiSelect: multiSelect, separator: separator, defaultTargets:query.multiSelectDefaultTargets, ifNoSelectionThenEmptyQuery: query.ifNoSelectionThenEmptyQuery ?? false))
                     }
                 case "radio":
                     if let displayText = query.displayText, let radio = query.radio {
@@ -778,7 +784,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     static let SearchInfoCacheFileName = "SearchInfoData.json"
     static let HeadlessHTTPClientKey = "NovelSearchViewControllerHeadlessHTTPClientKey"
     let searchInfoExpireTimeInterval:TimeInterval = 60*60*6 // 6時間
-    static let CURRENT_ALLOW_DATA_VERSION = 1
+    static let CURRENT_ALLOW_DATA_VERSION = 2
     
     override func viewDidLoad() {
         super.viewDidLoad()
