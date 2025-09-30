@@ -2625,7 +2625,7 @@ class NovelSpeakerUtility: NSObject {
                 RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: selectedStoryID)) { (story) -> Bool in
                     guard let searchString = searchString else { return true }
                     if searchString.count <= 0 { return true }
-                    return story.content.contains(searchString)
+                    return story.content.contains(searchString) || story.subtitle.contains(searchString)
                 } iterate: { (story) in
                     displayTextArray.append("\(story.chapterNumber): \(story.GetSubtitle())")
                 }

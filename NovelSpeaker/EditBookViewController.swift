@@ -26,7 +26,8 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
     @IBOutlet weak var cursorMoveUpButton: UIButton!
     @IBOutlet weak var cursorMoveDownButton: UIButton!
     @IBOutlet weak var cursorMoveLeftButton: UIButton!
-
+    @IBOutlet weak var subTitleTextField: UITextField!
+    
     /* TODO: 自前で配置すると色がおかしくなるので当面は封印します(´・ω・`)
     let titleTextField: UITextField = UITextField(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
     let movePreviousButton: UIButton = UIButton(type: .system)
@@ -123,6 +124,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         
         self.addChapterButton.accessibilityLabel = NSLocalizedString("EditBookViewController_AddNewChapterButtonTitle", comment: "章を追加")
         self.deleteChapterButton.accessibilityLabel = NSLocalizedString("EditBookViewController_DeleteChapterButtonTitle", comment: "この章を削除")
+        self.subTitleTextField.accessibilityLabel = NSLocalizedString("EditBookViewController_SubTitleTextField_AccesibilityLabel", comment: "この章のサブタイトル")
         assignCursorKeyButtons()
         
         self.caretView.alpha = 0.4
@@ -655,6 +657,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                     }
                 }
                 if let maxChapterNumber = novel.lastChapterNumber {
+                    self.subTitleTextField.text = story.GetSubtitle()
                     self.chapterNumberIndicatorLabel.text = "\(chapterNumber)/\(maxChapterNumber)"
                     self.chapterNumberIndicatorLabel.removeConstraint(self.chapterNumberIndicatorLabelWidthConstraint)
                     self.chapterNumberIndicatorLabel.sizeToFit()
@@ -706,11 +709,14 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
             var story:Story
             if let storyObj = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID) {
                 story = storyObj
-                if story.content == content { return }
+                if story.content == content && (story.GetSubtitle() == subTitleTextField.text || (subTitleTextField.text?.count ?? 0 == 0)) { return }
             }else{
                 story = Story()
                 story.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.currentStoryID)
                 story.chapterNumber = 1
+            }
+            if let subtitle = subTitleTextField.text, subtitle.count > 0 {
+                story.subtitle = subtitle
             }
             story.content = content.replacingOccurrences(of: "\u{00}", with: "")
             RealmUtil.WriteWith(realm: realm) { (realm) in
