@@ -32,6 +32,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     @IBOutlet weak var safariButton: UIBarButtonItem!
     
     let getCookiesStringHandler = "getCookiesStringHandler"
+    let deleteBookmarkHandler = "deleteBookmarkHandler"
     let sharedWKProcessPool = WKProcessPool()
     
     @objc public var openTargetUrl:URL? = nil
@@ -231,6 +232,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         let controller = WKUserContentController()
         controller.addUserScript(userScript)
         controller.add(self, name: self.getCookiesStringHandler)
+        controller.add(self, name: self.deleteBookmarkHandler)
         
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
@@ -250,6 +252,30 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         if message.name == self.getCookiesStringHandler {
             if let cookiesString = message.body as? String {
                 self.cookiesString = cookiesString
+            }
+        }
+        if message.name == self.deleteBookmarkHandler {
+            if let targetUrlString = message.body as? String, let targetUrl = URL(string: targetUrlString) {
+                let bookmarks = self.getBookmark()
+                guard let targetBookmark = bookmarks.reduce(into: [String: URL](), { result, dictionary in
+                    result.merge(dictionary) { (_, new) in new }
+                }).filter({$0.value == targetUrl}).first else {
+                    return
+                }
+                print("targetBookmark: \(targetBookmark.value), \(targetBookmark.key)")
+                NiftyUtility.EasyDialogTwoButton(
+                    viewController: self,
+                    title: NSLocalizedString(
+                        "ImportFromWebPageViewController_RemoveBookmark",
+                        comment: "ブックマークの削除"
+                    ),
+                    message: String(format: NSLocalizedString("ImportFromWebPageViewController_RemoveBookmark_Confirm", comment: "%s\nを削除しますか？"), "\(targetBookmark.key)\n\(targetUrl.absoluteString)"),
+                    button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
+                    button1Action: nil,
+                    button2Title: NSLocalizedString("ImportFromWebPageViewController_RemoveBookmark_Delete", comment: "削除")) {
+                        self.delBookmark(url: targetUrl)
+                        self.loadHomePage()
+                    }
             }
         }
     }
@@ -387,10 +413,19 @@ li {
         let bookmarks = getBookmark()
         for bookmark in bookmarks {
             for (name, url) in bookmark {
-                homePageHtmlString += "<li><a href=\"" + url.absoluteString + "\">" + name + "</a></li>"
+                homePageHtmlString += "<li><a href=\"" + url.absoluteString + "\">" + name + "</a>&nbsp;<button onclick=\"deleteBookmark('\(url.absoluteString)')\")>🗑️</button></li>"
             }
         }
         homePageHtmlString += "</ul>"
+        homePageHtmlString += """
+            <script>
+                function deleteBookmark(url){
+                    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.deleteBookmarkHandler) {
+                        window.webkit.messageHandlers.deleteBookmarkHandler.postMessage(url);
+                    }
+                }
+            </script>
+            """
         homePageHtmlString += "</body></html>"
         if let wkWebView = self.wkWebView {
             wkWebView.loadHTMLString(homePageHtmlString, baseURL: nil)

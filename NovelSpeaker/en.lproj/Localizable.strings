@@ -496,6 +496,9 @@
 "ImportFromWebPageViewController_DidDownloadNovelSpeakerBackupFileOK" = "Apply";
 "ImportFromWebPageViewController_ApplyNovelSpeakerBackupFile_Success" = "Backup file applied";
 "ImportFromWebPageViewController_ApplyNovelSpeakerBackupFile_Failed" = "Failed to apply backup file";
+"ImportFromWebPageViewController_RemoveBookmark" = "Delete bookmark";
+"ImportFromWebPageViewController_RemoveBookmark_Confirm" = "Do you want to delete\n%@ ?";
+"ImportFromWebPageViewController_RemoveBookmark_Delete" = "Delete";
 
 "UriLoader_NSURLConnectionRequestFailed" = "Failed conneting with servers. (Check your internet status)";
 "UriLoader_HTTPResponseIsInvalid" = "The server has not returned a valid response. (Server returned error code: \"%ld\") There may be occasions where login are required.However if this problem proceeds feel free to contact support via e-mails";

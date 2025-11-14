@@ -487,6 +487,9 @@
 "ImportFromWebPageViewController_DidDownloadNovelSpeakerBackupFileOK" = "適用する";
 "ImportFromWebPageViewController_ApplyNovelSpeakerBackupFile_Success" = "バックアップファイルを適用しました";
 "ImportFromWebPageViewController_ApplyNovelSpeakerBackupFile_Failed" = "バックアップファイルの適用に失敗しました";
+"ImportFromWebPageViewController_RemoveBookmark" = "ブックマークの削除";
+"ImportFromWebPageViewController_RemoveBookmark_Confirm" = "%@\nを削除しますか？";
+"ImportFromWebPageViewController_RemoveBookmark_Delete" = "削除";
 
 "UriLoader_NSURLConnectionRequestFailed" = "Webサーバからの取得に失敗しました。(恐らくは接続に失敗しています。ネットワーク状況を確認してください。また、外出中など携帯電話網でしか接続されていない時でこの状況が発生する場合は、設定→携帯電話網ではダウンロードしないようにする の設定項目がONになっている可能性が考えられます)";
 "UriLoader_HTTPResponseIsInvalid" = "サーバから返されたステータスコードが正常値(200 OK等)ではなく、\"%ld\" を返されました。ログインが必要なサイトなどでこのエラーが出ている場合は対応は難しいと思われます。といっても、対応できる問題かもわかりませんので、ことせかい のサポートサイト側のご意見ご要望フォームや設定→開発者に問い合わせる等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂ければと思います";
