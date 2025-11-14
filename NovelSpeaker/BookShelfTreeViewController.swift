@@ -128,7 +128,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         self.title = NSLocalizedString("BookShelfRATreeViewController_Title", comment: "本棚")
         
         // 編集ボタン等を配置
-        self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .done, target: self, action: #selector(searchButtonClicked))
+        self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .plain, target: self, action: #selector(searchButtonClicked))
         self.switchFolderButton = UIBarButtonItem.init(image: UIImage(systemName: "rectangle.expand.vertical"), style: .plain, target: self, action: #selector(switchFolderButtonClicked))
         self.switchFolderButton.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle", comment: "フォルダ開閉")
 
@@ -1988,7 +1988,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             case .switchFolder:
                 barButtonItemArray.append(self.switchFolderButton)
             case .order:
-                barButtonItemArray.append(UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"), style: UIBarButtonItem.Style.done, target: self, action: #selector(sortTypeSelectButtonClicked)))
+                barButtonItemArray.append(UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(sortTypeSelectButtonClicked)))
             case .reload:
                 barButtonItemArray.append(UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.refresh, target: self, action: #selector(refreshButtonClicked)))
             case .search:
@@ -2036,7 +2036,21 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 break
             }
         }
-        self.navigationItem.rightBarButtonItems = barButtonItemArray.reversed()
+        if #available(iOS 26.0, *) {
+            // そのままだと画像のボタンと文字のボタンで別グループとされてしまうのですが
+            // 全てを一つのグループにするのはそれはそれで大変そうなので全てを別のグループとするために .fixedSpace(0) を間に入れます
+            var spacedBarButtonItemArray:[UIBarButtonItem] = []
+            let spacer:UIBarButtonItem = .fixedSpace(0)
+            for (index, item) in barButtonItemArray.reversed().enumerated() {
+                spacedBarButtonItemArray.append(item)
+                if index < barButtonItemArray.count - 1 {
+                    spacedBarButtonItemArray.append(spacer)
+                }
+            }
+            self.navigationItem.rightBarButtonItems = spacedBarButtonItemArray
+        } else {
+            self.navigationItem.rightBarButtonItems = barButtonItemArray.reversed()
+        }
     }
     
     func assignLeftBarButtons() {
