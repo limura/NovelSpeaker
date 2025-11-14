@@ -21,7 +21,7 @@ class AutoSplitStringSettingViewController: UITableViewController, RealmObserver
         
         // 追加ボタンとEditボタンと検索ボタンをつけます。
         let addButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.add, target: self, action: #selector(AutoSplitStringSettingViewController.addButtonClicked))
-        navigationItem.rightBarButtonItems = [self.editButtonItem, addButton]
+        navigationItem.rightBarButtonItems = [self.editButtonItem, .fixedSpace(0), addButton]
         self.tableView.isEditing = false
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: defaultCellID)
         self.title = NSLocalizedString("AutoSplitStringSettingViewController_Title", comment: "テキスト分割文字列の設定")

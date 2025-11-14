@@ -22,7 +22,7 @@ class NovelKeywordTagSelecterViewController: FormViewController, RealmObserverRe
         
         let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonClicked(_:)))
         let searchButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:)))
-        self.navigationItem.rightBarButtonItems = [addButton, searchButton]
+        self.navigationItem.rightBarButtonItems = [addButton, .fixedSpace(0), searchButton]
         
         self.createCells()
         self.observeRealmNovelTag()

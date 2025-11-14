@@ -49,6 +49,7 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
 
         self.navigationItem.rightBarButtonItems = [
             UIBarButtonItem(title: NSLocalizedString("TextSizeSettingViewController_FontSettingTitle", comment: "字体設定"), style: .plain, target: self, action: #selector(fontSettingButtonClicked(_:))),
+            .fixedSpace(0),
             UIBarButtonItem(title: NSLocalizedString("TextSizeSettinvViewController_ColorSettingTitle", comment: "色設定"), style: .plain, target: self, action: #selector(colorSettingButtonClicked(_:))),
         ]
         registNotificationCenter()

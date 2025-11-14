@@ -32,7 +32,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, RealmObs
         // 追加ボタンとEditボタンと検索ボタンをつけます。
         let addButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.add, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.addButtonClicked))
         let filterButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.search, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.filterButtonClicked))
-        navigationItem.rightBarButtonItems = [addButton, editButtonItem, filterButton]
+        navigationItem.rightBarButtonItems = [addButton, .fixedSpace(0), editButtonItem, .fixedSpace(0), filterButton]
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     

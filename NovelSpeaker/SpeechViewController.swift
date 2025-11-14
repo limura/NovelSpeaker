@@ -301,7 +301,21 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         barButtonArray.append(startStopButtonItem)
         barButtonArray.reverse()
 
-        navigationItem.rightBarButtonItems = barButtonArray
+        if #available(iOS 26.0, *) {
+            // そのままだと画像のボタンと文字のボタンで別グループとされてしまうのですが
+            // 全てを一つのグループにするのはそれはそれで大変そうなので全てを別のグループとするために .fixedSpace(0) を間に入れます
+            var spacedBarButtonItemArray:[UIBarButtonItem] = []
+            let spacer:UIBarButtonItem = .fixedSpace(0)
+            for (index, item) in barButtonArray.enumerated() {
+                spacedBarButtonItemArray.append(item)
+                if index < barButtonArray.count - 1 {
+                    spacedBarButtonItemArray.append(spacer)
+                }
+            }
+            self.navigationItem.rightBarButtonItems = spacedBarButtonItemArray
+        } else {
+            navigationItem.rightBarButtonItems = barButtonArray
+        }
     }
     
     func loadNovel(novelID: String, novelTitle: String, novelType:NovelType, aliveButtonSettings: [SpeechViewButtonSetting]) {
