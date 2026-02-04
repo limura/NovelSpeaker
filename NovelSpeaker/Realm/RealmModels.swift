@@ -1616,7 +1616,11 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         if bulkIndex < 0 || storyArray.count <= bulkIndex {
             return nil
         }
-        return storyArray[bulkIndex]
+        let storyAtIndex = storyArray[bulkIndex]
+        if storyAtIndex.chapterNumber == chapterNumber {
+            return storyAtIndex
+        }
+        return storyArray.first(where: { $0.chapterNumber == chapterNumber })
     }
     
     static func SearchStoryWith(realm:Realm, novelID:String, chapterNumber:Int) -> Story? {
@@ -1625,11 +1629,11 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
         guard let bulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber), let storyArray = bulk.LoadStoryArray() else { return nil }
         //print("bulk.LoadStoryArray(): storyArray.count \(storyArray.count)")
-        let bulkIndex = (chapterNumber - 1) % bulkCount
-        if bulkIndex < 0 || storyArray.count <= bulkIndex {
-            return nil
+        if let story = StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber) {
+            storyCache = story
+            return story
         }
-        return storyArray[bulkIndex]
+        return nil
     }
     static func SearchStoryWith(realm:Realm, storyID:String) -> Story? {
         return SearchStoryWith(realm:realm, novelID: StoryIDToNovelID(storyID: storyID), chapterNumber: StoryIDToChapterNumber(storyID: storyID))
@@ -3421,4 +3425,3 @@ extension RealmBookmark: CKRecordRecoverable {
 }
 extension RealmBookmark: CanWriteIsDeleted {
 }
-

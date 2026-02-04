@@ -124,6 +124,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     // 表示される直前に呼ばれる
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         applyTheme()
     }
     

@@ -196,6 +196,16 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         super.viewWillAppear(animated)
         self.HighlightCurrentReadingNovel(doScroll: false)
         self.assignCloudPullPushButtonStatus()
+
+        self.navigationController?.navigationBar.backgroundColor = UIColor.clear
+        /*let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.backgroundColor = .clear
+        appearance.shadowColor = .clear
+
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance*/
     }
     
     override func viewWillDisappear(_ animated: Bool) {

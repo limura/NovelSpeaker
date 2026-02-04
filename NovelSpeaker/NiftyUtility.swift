@@ -24,6 +24,8 @@ import MessageUI
 #endif
 
 class NiftyUtility: NSObject {
+    // For tests: observe outgoing HTTP requests without changing behavior.
+    static var httpRequestObserver: ((URL) -> Void)?
     // 分割すべき大きさで、分割できそうな文字列であれば分割して返します
     static func CheckShouldSeparate(text:String) -> [String]? {
         guard let realm = try? RealmUtil.GetRealm(), let textCountSeparatorArray = RealmGlobalState.GetInstanceWith(realm: realm)?.autoSplitStringList else { return nil }
@@ -139,29 +141,31 @@ class NiftyUtility: NSObject {
             .textView(content: errorMessage, heightMultiplier: 0.45)
             .addButton(title: NSLocalizedString("NiftyUtility_ImportError_SendProblemReportButton", comment: "報告メールを作成"), callback: { (dialog) in
                 func CreateMail() {
-                    DispatchQueue.main.async {
-                        let picker = MFMailComposeViewController()
-                        //picker.mailComposeDelegate = self;
-                        picker.setToRecipients(["limuraproducts@gmail.com"])
-                        picker.setSubject(NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
-                        let (preferredSiteInfoURLList,novelSpeakerSiteInfoURL,autopagerizeSiteInfoURL) = RealmUtil.RealmBlock { realm -> ([String], String, String) in
-                            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return ([], "", "") }
-                            return (globalState.preferredSiteInfoURLList.map{$0}, globalState.novelSpeakerSiteInfoURL, globalState.autopagerizeSiteInfoURL)
+                    StoryHtmlDecoder.shared.getReadySiteInfoDescription() { (readySiteInfoDescription) in
+                        DispatchQueue.main.async {
+                            let picker = MFMailComposeViewController()
+                            //picker.mailComposeDelegate = self;
+                            picker.setToRecipients(["limuraproducts@gmail.com"])
+                            picker.setSubject(NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
+                            let (preferredSiteInfoURLList,novelSpeakerSiteInfoURL,autopagerizeSiteInfoURL) = RealmUtil.RealmBlock { realm -> ([String], String, String) in
+                                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return ([], "", "") }
+                                return (globalState.preferredSiteInfoURLList.map{$0}, globalState.novelSpeakerSiteInfoURL, globalState.autopagerizeSiteInfoURL)
+                            }
+                            let messageBody = NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
+                            + "\n\n------\nurl: \(url?.absoluteString ?? "-")"
+                            + "\napp version: \(NiftyUtility.GetAppVersionString())"
+                            + "\niOS version: \(UIDevice.current.systemVersion)"
+                            + "\ndevice model: \(UIDevice.modelName)"
+                            + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
+                            + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
+                            + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
+                            + "\nfirst SiteInfo resourceUrl: \(StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url?.absoluteString ?? "-").first?.resourceUrl ?? "?")"
+                            + "\nready SiteInfo description:\n\(readySiteInfoDescription)"
+                            picker.setMessageBody(messageBody, isHTML: false)
+                            DummyMailComposeViewController.shared.currentViewController = viewController
+                            picker.mailComposeDelegate = DummyMailComposeViewController.shared
+                            viewController.present(picker, animated: true, completion: nil)
                         }
-                        let messageBody = NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
-                        + "\n\n------\nurl: \(url?.absoluteString ?? "-")"
-                        + "\napp version: \(NiftyUtility.GetAppVersionString())"
-                        + "\niOS version: \(UIDevice.current.systemVersion)"
-                        + "\ndevice model: \(UIDevice.modelName)"
-                        + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
-                        + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
-                        + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
-                        + "\nfirst SiteInfo resourceUrl: \(StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url?.absoluteString ?? "-").first?.resourceUrl ?? "?")"
-                        + "\nready SiteInfo description:\n\(StoryHtmlDecoder.shared.readySiteInfoDescription)"
-                        picker.setMessageBody(messageBody, isHTML: false)
-                        DummyMailComposeViewController.shared.currentViewController = viewController
-                        picker.mailComposeDelegate = DummyMailComposeViewController.shared
-                        viewController.present(picker, animated: true, completion: nil)
                     }
                 }
                 NovelSpeakerUtility.GetAppStoreAppVersionInfo { date, versionString, err in
@@ -1021,6 +1025,7 @@ class NiftyUtility: NSObject {
 
     static let httpRequestDefaultTimeoutInterval:TimeInterval = 10
     public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval? = httpRequestDefaultTimeoutInterval, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, headlessClientKey:String? = nil, withWaitSecond:Double? = nil, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+        httpRequestObserver?(url)
         #if !os(watchOS)
         if isNeedHeadless {
             var headlessClient:HeadlessHttpClient? = nil

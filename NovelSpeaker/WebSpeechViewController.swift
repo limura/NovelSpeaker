@@ -85,6 +85,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     
     override func viewWillAppear(_ animated: Bool) {
         StorySpeaker.shared.AddDelegate(delegate: self)
+        self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         applyTheme()
     }
     

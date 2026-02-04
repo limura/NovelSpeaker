@@ -3548,6 +3548,15 @@ class NovelSpeakerUtility: NSObject {
     struct NovelSpeakerRemoteConfig : Decodable {
         var appStoreWebPageXpath:AppStoreWebPageXpath?
         var latestVersion:String?
+        var novelSpeakerSiteInfoTSVURL:String?
+        var autopagerizeSiteInfoURL:String?
+    }
+    static func GetNovelSpeakerRemoteConfigAsync() async -> NovelSpeakerRemoteConfig {
+        return await withCheckedContinuation { continuation in
+            GetNovelSpeakerRemoteConfig { config in
+                continuation.resume(returning:config)
+            }
+        }
     }
     static func GetNovelSpeakerRemoteConfig(completion: @escaping (NovelSpeakerRemoteConfig)->Void) {
         let defaultSetting = NovelSpeakerRemoteConfig(

@@ -354,10 +354,22 @@ class NovelDownloader : NSObject {
         RealmUtil.RealmBlock { (realm) -> Void in
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
                 // novel.m_lastChapterStoryID は無視して StoryBulk 側のデータを使う事にします
-                let (_, _, lastStory) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
-                lastChapter = lastStory
+                let (_, lastChapterNumber, overallLastStory) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
+                // 途中で chapterNumber が歯抜けになっている場合には、その一つ前の chapter から読み込みを再開できるようにします。
+                // chapterNumber == 0 の場合のみ(初回キック時のみ)ギャップ検出による再開位置の変更を行います。
+                if chapterNumber == 0,
+                   let continuousLastStory = RealmStoryBulk.FindMissingOrLastPreviousStoryWith(realm: realm, novelID: novel.novelID),
+                   let overallLastStory = overallLastStory,
+                   continuousLastStory.chapterNumber < lastChapterNumber {
+                    // continuousLastStory.chapterNumber + 1 以降のどこかで欠番が発生していると判断できるので、
+                    // その一つ前の章 (continuousLastStory) から再読み込みを開始します。
+                    lastChapter = continuousLastStory
+                    BehaviorLogger.AddLogSimple(description: "startDownload: detected missing chapter. novelID: \(novelID), restartFromChapter: \(continuousLastStory.chapterNumber), lastChapterNumber: \(lastChapterNumber)")
+                }else{
+                    lastChapter = overallLastStory
+                }
                 // 一応 m_lastChapterStoryID が違うようであれば書き換えておきます。
-                if let lastStory = lastStory {
+                if let lastStory = overallLastStory {
                     if novel.m_lastChapterStoryID != RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStory.chapterNumber) {
                         RealmUtil.WriteWith(realm: realm) { realm in
                             novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStory.chapterNumber)
@@ -391,7 +403,7 @@ class NovelDownloader : NSObject {
             }
         }
         let queuedDate = Date()
-        let state:StoryState
+        var state:StoryState
         if let currentState = currentState {
             state = currentState
         }else if let lastDownloadURL = lastDownloadURLTmp {
@@ -400,6 +412,20 @@ class NovelDownloader : NSObject {
         }else{
             failedSearchNovel(hint: "currentState and lastDownloadURL is nil.")
             return
+        }
+        // Skip already-downloaded continuous ranges (when the next chapter also exists).
+        // This reduces unnecessary access while still allowing next-link discovery.
+        RealmUtil.RealmBlock { realm in
+            var nextChapter = chapterNumber
+            var updatedState = state
+            while RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapter) != nil,
+                  let nextStory = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapter + 1),
+                  let nextUrl = URL(string: nextStory.url) {
+                nextChapter += 1
+                updatedState = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: updatedState.siteInfoArray, url: nextUrl, cookieString: updatedState.cookieString, previousContent: nil)
+            }
+            chapterNumber = nextChapter
+            state = updatedState
         }
         fetcher.FetchNext(currentState: state, successAction: { (state) in
             if isDownloadStop {
@@ -432,12 +458,18 @@ class NovelDownloader : NSObject {
                     }
                 }
                 var nextChapterNumber = chapterNumber
-                // まだ読み込まれていない章であれば追加するために writePool に入れておきます。
-                if let content = state.content, (lastChapter?.chapterNumber ?? 0) < chapterNumber {
+                // まだ保存されていない章であれば追加するために writePool に入れておきます。
+                // 既に同じ chapterNumber の Story が存在する場合は追加せず読み飛ばします。
+                if let content = state.content {
+                    print("NDMCT: FetchNext chapter=\(chapterNumber) hasContent=\(content.count) exists=\(RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber) != nil)")
                     if content.count <= 0 {
                         // 登録できそうな章ではあったけれど内容が無い場合は登録しません。
                         // その場合は nextChapterNumber が増えることもありません。
-                    }else{
+                    } else if RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber) != nil {
+                        // 既に存在する章だったようなので読み飛ばします
+                        print("story \(chapterNumber) not add queue (already exists story)")
+                        nextChapterNumber += 1
+                    } else {
                         var story = Story()
                         story.novelID = novelID
                         story.chapterNumber = chapterNumber
@@ -451,9 +483,9 @@ class NovelDownloader : NSObject {
                         addWritePool(novelID: novelID, story: story)
                         nextChapterNumber += 1
                     }
-                }else{
-                    // 既に存在する章だったようなので読み飛ばします
-                    print("story \(chapterNumber) not add queue (maybe, no content or already exists story)")
+                } else {
+                    // content が無い(何も取り込めなかった)場合は読み飛ばします
+                    print("story \(chapterNumber) not add queue (no content)")
                     nextChapterNumber += 1
                 }
                 if !state.IsNextAlive {

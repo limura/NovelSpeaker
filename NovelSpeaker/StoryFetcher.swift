@@ -463,30 +463,32 @@ class StoryHtmlDecoder {
         ]
     }
     
-    var IsSiteInfoReady: Bool {
-        get {
+    func getIsSiteInfoReady(completion: @escaping (Bool)->Void) {
+        NovelSpeakerUtility.GetNovelSpeakerRemoteConfig { config in
             // 設定されているSiteInfo URLのリスト分だけ正しくSiteInfoが読み込めていることを確認することにします
-            let targetURLArray = getLoadTargetURLs()
-            return targetURLArray.filter({$0 != nil}).count <= self.siteInfoArrayArray.filter({$0.count > 0}).count
+            let targetURLArray = self.getLoadTargetURLs(config: config)
+            let result = targetURLArray.filter({$0 != nil}).count <= self.siteInfoArrayArray.filter({$0.count > 0}).count
+            completion(result)
         }
     }
+    
     var readySiteInfoCount: Int {
         get {
             return siteInfoArrayArray.reduce(0, {$0 + $1.count})
         }
     }
-    var readySiteInfoDescription: String {
-        get {
+    func getReadySiteInfoDescription(completion: @escaping (String)->Void) {
+        NovelSpeakerUtility.GetNovelSpeakerRemoteConfig { config in
+            let siteInfoURLArray = self.getLoadTargetURLs(config: config)
             var resultArray:[String] = []
-            let siteInfoURLArray = getLoadTargetURLs()
-            for (index, siteInfoArray) in siteInfoArrayArray.enumerated() {
+            for (index, siteInfoArray) in self.siteInfoArrayArray.enumerated() {
                 var description = "\(index): count: \(siteInfoArray.count)"
                 if siteInfoURLArray.count > index, let url = siteInfoURLArray[index] {
-                    description += ", \(generateCacheFileName(url: url, index: index)) <- \(url.absoluteString)"
+                    description += ", \(self.generateCacheFileName(url: url, index: index)) <- \(url.absoluteString)"
                 }
                 resultArray.append(description)
             }
-            return resultArray.joined(separator: "\n")
+            completion(resultArray.joined(separator: "\n"))
         }
     }
     
@@ -594,8 +596,20 @@ class StoryHtmlDecoder {
         return "SiteInfoCache_\(index)"
     }
     
-    func getLoadTargetURLs() -> [URL?] {
+    func getLoadTargetURLs(config: NovelSpeakerUtility.NovelSpeakerRemoteConfig? = nil) -> [URL?] {
         var loadTargetUrls:[URL?] = []
+        let novelSpeakerSiteInfoTSVURL:String
+        let autopagerizeSiteInfoJSONURL:String
+        if let tsvURL = config?.novelSpeakerSiteInfoTSVURL {
+            novelSpeakerSiteInfoTSVURL = tsvURL
+        }else{
+            novelSpeakerSiteInfoTSVURL = StoryHtmlDecoder.NovelSpeakerSiteInfoTSVURL
+        }
+        if let siteInfoURL = config?.autopagerizeSiteInfoURL {
+            autopagerizeSiteInfoJSONURL = siteInfoURL
+        }else{
+            autopagerizeSiteInfoJSONURL = StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL
+        }
         RealmUtil.RealmBlock { realm in
             // 優先度の高いSiteInfoArrayを先に登録します。
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
@@ -609,7 +623,7 @@ class StoryHtmlDecoder {
                 if let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
                     loadTargetUrls.append(novelSpeakerURL)
                 }else{
-                    loadTargetUrls.append(URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoTSVURL))
+                    loadTargetUrls.append(URL(string: novelSpeakerSiteInfoTSVURL))
                     if globalState.novelSpeakerSiteInfoURL != "" {
                         AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_NovelSPeakerSiteInfoURL", comment: "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.novelSpeakerSiteInfoURL], isForDebug: false)
                     }
@@ -621,7 +635,7 @@ class StoryHtmlDecoder {
                 if let autopagerizeURL = URL(string: globalState.autopagerizeSiteInfoURL) {
                     loadTargetUrls.append(autopagerizeURL)
                 }else{
-                    loadTargetUrls.append(URL(string: StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL))
+                    loadTargetUrls.append(URL(string: autopagerizeSiteInfoJSONURL))
                     if globalState.autopagerizeSiteInfoURL != "" {
                         AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "次点のSiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.autopagerizeSiteInfoURL], isForDebug: false)
                     }
@@ -636,14 +650,16 @@ class StoryHtmlDecoder {
         self.lock.lock()
         siteInfoArrayArray.removeAll()
         self.lock.unlock()
-        let targetURLArray = getLoadTargetURLs()
-        for (index, url) in targetURLArray.enumerated() {
-            if let url = url {
-                NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: generateCacheFileName(url: url, index: index))
+        NovelSpeakerUtility.GetNovelSpeakerRemoteConfig { config in
+            let targetURLArray = self.getLoadTargetURLs(config: config)
+            for (index, url) in targetURLArray.enumerated() {
+                if let url = url {
+                    NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: self.generateCacheFileName(url: url, index: index))
+                }
             }
+            URLCache.shared.removeAllCachedResponses()
+            self.LoadSiteInfoIfNeeded()
         }
-        URLCache.shared.removeAllCachedResponses()
-        LoadSiteInfoIfNeeded()
     }
     
     func SearchSiteInfoArrayFrom(urlString: String) -> [StorySiteInfo] {
@@ -668,25 +684,27 @@ class StoryHtmlDecoder {
     
     func LoadSiteInfoIfNeeded() {
         let now = Date()
-        lock.lock()
-        if IsSiteInfoReady == true && nextExpireDate > now && RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled() == false {
-            let handlerQueued = self.siteInfoLoadDoneHandlerArray
-            self.siteInfoLoadDoneHandlerArray.removeAll()
-            lock.unlock()
-            for handler in handlerQueued {
-                handler(nil)
+        self.getIsSiteInfoReady() { (isSiteInfoReady) in
+            self.lock.lock()
+            if isSiteInfoReady == true && self.nextExpireDate > now && RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled() == false {
+                let handlerQueued = self.siteInfoLoadDoneHandlerArray
+                self.siteInfoLoadDoneHandlerArray.removeAll()
+                self.lock.unlock()
+                for handler in handlerQueued {
+                    handler(nil)
+                }
+                return
             }
-            return
-        }
-        if siteInfoNowLoading {
-            lock.unlock()
-            return
-        }
-        nextExpireDate = now.addingTimeInterval(cacheFileExpireTimeinterval)
-        siteInfoNowLoading = true
-        lock.unlock()
-        DispatchQueue.global(qos: .background).async {
-            self.LoadSiteInfo()
+            if self.siteInfoNowLoading {
+                self.lock.unlock()
+                return
+            }
+            self.nextExpireDate = now.addingTimeInterval(self.cacheFileExpireTimeinterval)
+            self.siteInfoNowLoading = true
+            self.lock.unlock()
+            DispatchQueue.global(qos: .background).async {
+                self.LoadSiteInfo()
+            }
         }
     }
     
@@ -718,7 +736,6 @@ class StoryHtmlDecoder {
             }
         }
 
-        let loadTargetUrls = getLoadTargetURLs()
         func siteInfoFetchAndUpdate(index:Int, targetURLArray:[URL?], cacheFileExpireTimeinterval:Double) {
             if index >= targetURLArray.count {
                 // INFO: LoadSiteInfo() の終了処理をここでやっています
@@ -811,7 +828,10 @@ class StoryHtmlDecoder {
         }else{
             cacheFileExpireTimeinterval = self.cacheFileExpireTimeinterval
         }
-        siteInfoFetchAndUpdate(index: 0, targetURLArray: loadTargetUrls, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
+        NovelSpeakerUtility.GetNovelSpeakerRemoteConfig() { remoteConfig in
+            let loadTargetUrls = self.getLoadTargetURLs(config: remoteConfig)
+            siteInfoFetchAndUpdate(index: 0, targetURLArray: loadTargetUrls, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
+        }
     }
 }
 

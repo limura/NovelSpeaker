@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "61BE6F1A-0CC7-469D-BA37-94437CB41E48",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:novelspeaker.xcodeproj",
+      "identifier" : "21F054C81917E0F200CC6BA9",
+      "name" : "NovelSpeaker"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:novelspeaker.xcodeproj",
+        "identifier" : "21F054E91917E0F200CC6BA9",
+        "name" : "NovelSpeakerTests"
+      }
+    }
+  ],
+  "version" : 1
+}
