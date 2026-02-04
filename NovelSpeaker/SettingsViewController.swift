@@ -11,6 +11,7 @@ import MessageUI
 import Eureka
 import RealmSwift
 import UniformTypeIdentifiers
+import AVFAudio
 
 class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate, AppInformationAliveDelegate, UIDocumentBrowserViewControllerDelegate, UIDocumentPickerDelegate {
     var m_NarouContentCacheData:NarouContentCacheData? = nil
@@ -1555,6 +1556,68 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     return self.m_RubySwitchToggleHitCount < 10 && (NovelSpeakerUtility.isDebugMenuAlwaysEnabled == false)
                 })
             }
+        #if false
+            section <<< ButtonRow() {row in
+                row.title = "簡易発話を開始する(本番とは微妙に条件が変わります)"
+                row.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ cell, row in
+                StorySpeaker.shared.audioSessionInit(isActive: true)
+                StorySpeaker.shared.AnnounceSpeech(text: "メロスは激怒した。必ず、かの 邪智暴虐の王を除かなければならぬと決意した。メロスには政治がわからぬ。メロスは、村の牧人である。")
+            })
+
+            var modeMap:[String:AVAudioSession.Mode] = [
+                "default": AVAudioSession.Mode.default,
+                "gameChat": AVAudioSession.Mode.gameChat,
+                "videoChat": AVAudioSession.Mode.videoChat,
+                "measurement": AVAudioSession.Mode.measurement,
+                "moviePlayback": AVAudioSession.Mode.moviePlayback,
+                "voiceChat": AVAudioSession.Mode.voiceChat,
+                "spokenAudio": AVAudioSession.Mode.spokenAudio,
+                "videoRecording": AVAudioSession.Mode.videoRecording,
+                "voicePrompt": AVAudioSession.Mode.voicePrompt,
+            ]
+            if #available(iOS 26.0, *) {
+                modeMap["shortFormVideo"] = AVAudioSession.Mode.shortFormVideo
+            }
+            section
+            <<< AlertRow<String>("AudioSessionModeSelectRow") { row in
+                row.cellStyle = .subtitle
+                row.title = "Mode (初期値: default))"
+                row.selectorTitle = "Mode"
+                row.options = modeMap.keys.sorted()
+                let currentMode = StorySpeaker.GetAudioSessionModeSetting()
+                let currentModeKey = modeMap.filter({$0.value == currentMode}).first?.key ?? "default"
+                row.value = currentModeKey
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                guard let mode = modeMap[row.value ?? "default"] else { return }
+                StorySpeaker.SetAudioSessionModeSetting(mode: mode)
+            })
+            let categoryMap:[String:AVAudioSession.Category] = [
+                "ambient": AVAudioSession.Category.ambient,
+                "soloAmbient": AVAudioSession.Category.soloAmbient,
+                "playback": AVAudioSession.Category.playback,
+                "record": AVAudioSession.Category.record,
+                "playAndRecord": AVAudioSession.Category.playAndRecord,
+                "multiRoute": AVAudioSession.Category.multiRoute,
+            ]
+            section
+            <<< AlertRow<String>("AudioSessionCategorySelectRow") { row in
+                row.cellStyle = .subtitle
+                row.title = "Category(初期値: playback))"
+                row.selectorTitle = "Category"
+                row.options = categoryMap.keys.sorted()
+                let currentCategory = StorySpeaker.GetAudioSessionCategorySetting()
+                let currentCategoryKey = categoryMap.filter({$0.value == currentCategory}).first?.key ?? "playback"
+                row.value = currentCategoryKey
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                guard let category = categoryMap[row.value ?? ""] else {
+                    return
+                }
+                StorySpeaker.SetAudioSessionCategorySetting(category: category)
+            })
+        #endif
             section
             <<< AlertRow<String>("ViewTypeSelectRow") { row in
                 row.cellStyle = .subtitle
