@@ -450,7 +450,7 @@ class StoryHtmlDecoder {
     var nextExpireDate:Date = Date(timeIntervalSince1970: 0)
     var siteInfoNowLoading:Bool = false
     
-    static let AutopagerizeSiteInfoJSONURL = "http://wedata.net/databases/AutoPagerize/items.json"
+    static let AutopagerizeSiteInfoJSONURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=tsv" // "http://wedata.net/databases/AutoPagerize/items.json"
     static let NovelSpeakerSiteInfoJSONURL = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
     static let NovelSpeakerSiteInfoTSVURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=tsv"
 
