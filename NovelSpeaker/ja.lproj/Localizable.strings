@@ -202,6 +202,7 @@
 "SettingTableViewController_IsNotClearToAboutBlankOnDownloadBrowserUrl" = "ダウンロード終了後に about:blank に移動させない";
 "SettingTableViewController_IsDeleteBlockOnBookshelfTreeView" = "本棚画面でスワイプや「編集」から小説を削除できないようにする(これがONの場合でも、削除したい場合は小説の複数選択画面から行うことができます)";
 "SettingTableViewController_overrideTabBarTraitsRow" = "タブの表示を画面下部にする(非推奨です。また、アプリ再起動後に適用されます)";
+"SettingTableViewController_IsCarPlayModeToVoicePrompt" = "CarPlay接続時に音声モードを変える(音声モードを変更することで音声がクリアになるかもしれません。ただし、音声モード変更時は一部の機能が制限されます)";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";

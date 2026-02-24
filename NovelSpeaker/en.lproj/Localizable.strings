@@ -259,6 +259,8 @@
 "SettingTableViewController_IsNotClearToAboutBlankOnDownloadBrowserUrl" = "Don't move to about:blank after download finished";
 "SettingTableViewController_IsDeleteBlockOnBookshelfTreeView" = "Prevent novels from being deleted by swiping or clicking \"Edit\" on the bookshelf screen (Even if this is ON, if you want to delete a novel, you can do so from the multiple novel selection screen)";
 "SettingTableViewController_overrideTabBarTraitsRow" = "Display tabs at the bottom of the screen (not recommended. Also, this will be applied after restarting the app";
+"SettingTableViewController_IsCarPlayModeToVoicePrompt" = "Change the audio mode when connected to CarPlay (Changing the audio mode may improve audio clarity. However, some functions will be limited when changing the audio mode.)";
+
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "Define";

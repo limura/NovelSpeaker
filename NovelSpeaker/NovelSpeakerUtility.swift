@@ -3630,4 +3630,17 @@ class NovelSpeakerUtility: NSObject {
         defaults.synchronize()
     }
     */
+    
+    static let IsCarPlayModeToVoicePromptKey = "IsCarPlayModeToVoicePromptKey"
+    static func IsCarPlayModeToVoicePrompt() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [IsCarPlayModeToVoicePromptKey: false])
+        return defaults.bool(forKey: IsCarPlayModeToVoicePromptKey)
+    }
+    static func SetIsCarPlayModeToVoicePrompt(IsCarPlayModeToVoicePrompt:Bool){
+        let defaults = UserDefaults.standard
+        defaults.setValue(IsCarPlayModeToVoicePrompt, forKey: IsCarPlayModeToVoicePromptKey)
+        defaults.synchronize()
+    }
+
 }

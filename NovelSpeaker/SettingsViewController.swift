@@ -1261,6 +1261,16 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 })
             }
 
+            section
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_IsCarPlayModeToVoicePrompt", comment: "CarPlay接続時に発話モードを変える(発話モード変更時は一部の機能が制限されます)")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onChange({ row in
+                if let value = row.value {
+                    NovelSpeakerUtility.SetIsCarPlayModeToVoicePrompt(IsCarPlayModeToVoicePrompt: value)
+                }
+            })
+
             #if false
             /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
             section

@@ -440,6 +440,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.dummySoundLooper.startPlay()
         }
     }
+    
+    func isCarPlayConnected() -> Bool {
+        return AVAudioSession.sharedInstance().currentRoute.outputs.contains(where: { $0.portType == .carAudio })
+    }
+    
     @objc func didChangeAudioSessionRoute(notification:Notification) {
         func isJointHeadphone(outputs:[AVAudioSessionPortDescription]) -> Bool {
             for desc in outputs {
@@ -454,7 +459,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         guard let previousDesc = notification.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription else {
             return
         }
-        if isJointHeadphone(outputs: AVAudioSession.sharedInstance().currentRoute.outputs) {
+        let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
+        if isJointHeadphone(outputs: outputs) {
             if !isJointHeadphone(outputs: previousDesc.outputs) {
                 // ヘッドフォンが刺さった
             }
@@ -476,6 +482,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 }
             }
         }
+        // CarPlayになっていたりした場合には mode を切り替えようとさせます
+        audioSessionUpdate()
     }
     
     func RemoveUpdateReadDateWithoutNotifiningToken(token: NotificationToken) {
@@ -542,7 +550,71 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }
         }
     }
+
+    static let AudioSessionCategorySettingKey = "AudioSessionCategorySettingKey"
+    @objc static func GetAudioSessionCategorySetting() -> AVAudioSession.Category {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [AudioSessionCategorySettingKey: AVAudioSession.Category.playback.rawValue])
+        switch defaults.string(forKey: AudioSessionCategorySettingKey) {
+        case AVAudioSession.Category.ambient.rawValue : return .ambient
+        case AVAudioSession.Category.soloAmbient.rawValue : return .soloAmbient
+        case AVAudioSession.Category.playback.rawValue : return .playback
+        case AVAudioSession.Category.record.rawValue : return .record
+        case AVAudioSession.Category.playAndRecord.rawValue : return .playAndRecord
+        case AVAudioSession.Category.multiRoute.rawValue : return .multiRoute
+        default: return .playback
+        }
+    }
+    static func SetAudioSessionCategorySetting(category:AVAudioSession.Category) {
+        let defaults = UserDefaults.standard
+        defaults.set(category.rawValue, forKey: AudioSessionCategorySettingKey)
+    }
+    static let AudioSessionModeSettingKey = "AudioSessionModeSettingKey"
+    @objc static func GetAudioSessionModeSetting() -> AVAudioSession.Mode {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [AudioSessionModeSettingKey: AVAudioSession.Mode.default.rawValue])
+        if #available(iOS 26.0, *) {
+            switch defaults.string(forKey: AudioSessionModeSettingKey) {
+            case AVAudioSession.Mode.default.rawValue : return .default
+            case AVAudioSession.Mode.gameChat.rawValue : return .gameChat
+            case AVAudioSession.Mode.videoChat.rawValue : return .videoChat
+            case AVAudioSession.Mode.measurement.rawValue : return .measurement
+            case AVAudioSession.Mode.moviePlayback.rawValue : return .moviePlayback
+            case AVAudioSession.Mode.voiceChat.rawValue : return .voiceChat
+            case AVAudioSession.Mode.spokenAudio.rawValue : return .spokenAudio
+            case AVAudioSession.Mode.videoRecording.rawValue : return .videoRecording
+            case AVAudioSession.Mode.voicePrompt.rawValue : return .voicePrompt
+            case AVAudioSession.Mode.shortFormVideo.rawValue : return .shortFormVideo
+            default: return .default
+            }
+        } else {
+            switch defaults.string(forKey: AudioSessionModeSettingKey) {
+            case AVAudioSession.Mode.default.rawValue : return .default
+            case AVAudioSession.Mode.gameChat.rawValue : return .gameChat
+            case AVAudioSession.Mode.videoChat.rawValue : return .videoChat
+            case AVAudioSession.Mode.measurement.rawValue : return .measurement
+            case AVAudioSession.Mode.moviePlayback.rawValue : return .moviePlayback
+            case AVAudioSession.Mode.voiceChat.rawValue : return .voiceChat
+            case AVAudioSession.Mode.spokenAudio.rawValue : return .spokenAudio
+            case AVAudioSession.Mode.videoRecording.rawValue : return .videoRecording
+            case AVAudioSession.Mode.voicePrompt.rawValue : return .voicePrompt
+            default: return .default
+            }
+        }
+    }
+    static func SetAudioSessionModeSetting(mode:AVAudioSession.Mode) {
+        let defaults = UserDefaults.standard
+        defaults.set(mode.rawValue, forKey: AudioSessionModeSettingKey)
+    }
     
+    static var currentMode = AVAudioSession.Mode.spokenAudio // 設定されない値を初期値とします
+    static var currentActive = true
+    // AVAudioSession.routeChangeNotification を受けたなどの時に、
+    // CarPlay であったのなら Mode を変更したりする
+    func audioSessionUpdate() {
+        audioSessionInit(isActive: StorySpeaker.currentActive)
+    }
+
     func audioSessionInit(isActive:Bool) {
         var option:UInt = 0
         RealmUtil.RealmBlock { (realm) -> Void in
@@ -557,13 +629,25 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions(rawValue: option))
+            //try session.setCategory(StorySpeaker.GetAudioSessionCategorySetting(), options: AVAudioSession.CategoryOptions(rawValue: option))
         }catch{
             print("AVAudioSession setCategory(playback) failed.")
         }
-        do {
-            try session.setMode(AVAudioSession.Mode.default)
-        }catch{
-            print("AVAudioSession setMode(default) failed.")
+
+        let mode:AVAudioSession.Mode
+        if NovelSpeakerUtility.IsCarPlayModeToVoicePrompt() && self.isCarPlayConnected() {
+            mode = .voicePrompt
+        }else{
+            mode = .default
+        }
+        if mode != StorySpeaker.currentMode {
+            do {
+                try session.setMode(StorySpeaker.currentMode)
+                StorySpeaker.currentMode = mode
+                //try session.setMode(StorySpeaker.GetAudioSessionModeSetting())
+            }catch{
+                print("AVAudioSession setMode(default) failed.")
+            }
         }
         do {
             let options:AVAudioSession.SetActiveOptions
@@ -573,6 +657,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 options = [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation]
             }
             try session.setActive(isActive, options: options)
+            StorySpeaker.currentActive = isActive
         }catch{
             print("AVAudioSession setActive(\(isActive ? "true" : "false")) failed.")
         }
@@ -604,13 +689,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStartSpeechEvent(storyID: self.storyID)
         }
-        let audioSession = AVAudioSession.sharedInstance()
         DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                try audioSession.setActive(true, options: [])
-            }catch{
-                print("audioSession.setActive(true) failed")
-            }
+            self.audioSessionInit(isActive: true)
         }
         #if !os(watchOS)
         if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
@@ -639,6 +719,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         DispatchQueue.global(qos: .userInteractive).async {
             do {
                 try audioSession.setActive(false, options: [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation])
+                StorySpeaker.currentActive = false
             }catch(let err){
                 print("audioSession.setActive(false) failed: \(err.localizedDescription)")
                 // このエラーが発生した後、読み上げが失敗し続けてしまう場合があります。
