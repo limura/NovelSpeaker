@@ -975,13 +975,33 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.4
 
-- Fixed an issue where calling NovelSpeaker from the share function on Safari etc. did not work properly.
+- Added \"Show tabs at the bottom of the screen\" option to the \"Settings Tab\"
+- Added \"This Chapter Title\" to the \"Edit Novel\" screen, allowing you to change the displayed chapter title.
+- Added a \"Trash Can Emoji\" to the bookmarks displayed on the home page of the \"Web Import\" tab, allowing you to delete the bookmark by clicking it.
+- When checking for updates to novels registered in your bookshelf, if there are missing chapters (pages), an attempt will be made to re-fetch those chapters (pages).
+- Added an ON/OFF setting to the \"Change audio mode when connected to CarPlay\" to the Settings tab.
+- Disabled the use of AutoPagerize's SiteInfo on wedata.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.4
+
+Changes in interface/internal operation
+
+- Added \"Show tabs at the bottom of the screen\" option to the \"Settings Tab\"
+- Added \"This Chapter Title\" to the \"Edit Novel\" screen, allowing you to change the displayed chapter title.
+- Added a \"Trash Can Emoji\" to the bookmarks displayed on the home page of the \"Web Import\" tab, allowing you to delete the bookmark by clicking it.
+- When checking for updates to novels registered in your bookshelf, if there are missing chapters (pages), an attempt will be made to re-fetch those chapters (pages).
+- Added an ON/OFF setting to the \"Change audio mode when connected to CarPlay\" to the Settings tab.
+
+Fixing the problem
+
+- Disabled the use of AutoPagerize's SiteInfo on wedata.
+
+
 Version 2.10.3
 
 Fixing the problem

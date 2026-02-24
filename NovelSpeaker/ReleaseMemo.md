@@ -4077,3 +4077,61 @@ Version 2.10.3
 Fixing the problem
 
 - Fixed an issue where calling NovelSpeaker from the share function on Safari etc. did not work properly.
+
+
+Version 2.10.4
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」->「タブの表示を画面下部にする〜」を追加します
+- 「小説の編集」画面に「この章のタイトル」を追加して、表示されている章のタイトルを変更できるようにします
+-「Web取込タブ」のホームに表示されるブックマークについて、「ゴミ箱の絵文字」を表示してそれを押すとそのブックマークを削除できるようにします
+- 本棚に登録されている小説の更新確認時に、歯抜けになっている章(ページ)がある場合にはその章(ページ)を再取得しようと試みるようになります
+- 設定タブに「CarPlay接続時に音声モードを変える」のON/OFF設定を追加します
+
+問題の修正
+
+- wedata様 上にある AutoPagerize様 の SiteInfo を使わないようにします
+
+
+それぞれ説明していきます。
+
+- 「設定タブ」->「タブの表示を画面下部にする〜」を追加します
+  iPad OS 18以降ではタブの表示部が上部になります。それを以前のような下部に移動するための設定です。
+  ただこれ、非推奨になります。また、再起動後でしか有効になりません。
+  この設定項目は iPad を使っていてかつ iPad OS 18 以降を実行中にのみ現れます。
+- 「小説の編集」画面に「この章のタイトル」を追加して、表示されている章のタイトルを変更できるようにします
+  「小説の本文」ページで検索して章のリストを出した時などに表示される章のタイトルを編集できるようにします。
+  ついでに、この検索の検索対象にその章のタイトルも追加します。
+-「Web取込タブ」のホームに表示されるブックマークについて、「ゴミ箱の絵文字」を表示してそれを押すとそのブックマークを削除できるようにします
+  今まではブックマークを削除するためには一旦そのブックマークを開いた状態でブックマークボタンを押す必要がありましたが、どこかにリダイレクトされてしまう所をブックマークしてしまうとURLが違ってしまって削除できなくなるという問題があったので、別UIで削除できるようなものを追加しました。
+- 本棚に登録されている小説の更新確認時に、歯抜けになっている章(ページ)がある場合にはその章(ページ)を再取得しようと試みるようになります
+  なんらかの問題で歯抜けになってしまっている小説の更新確認時にはそれらの歯抜けのページを取り出そうと努力するようにします。
+- 設定タブに「CarPlay接続時に音声モードを変える」のON/OFF設定を追加します
+  CarPlay接続時の発話品質が向上する「かもしれない」オプションになります。ただ、開発者の手元にCarPlay機器がないため、テストが十分にされていないというかほぼテストされていない状態です。おそらく常に ON にしておいても問題がないとは思うのですが、強制してしまうのもなぁということでオプションにしています。
+  なお、この設定は将来的には削除されて常に ON と同様の動作になることが期待されているため、iCloud 同期はされない設定になります。
+  
+問題の修正
+
+- wedata様 上にある AutoPagerize様 の SiteInfo を使わないようにします
+  おそらくリリース時には「設定タブ」→「アプリ内エラーのお知らせ」で SiteInfo が読み込めないというエラーが出るなどして小説の取り込みができなくなっていると思われます。この修正はそれを回避するための修正になります。
+  原因としては、小説の取り込み時に利用させていただいていた wedata様 上の AutoPagerize様 の SiteInfo なのですが、wedata様 がサービスを停止しているようで、SiteInfo が読み込めなくなっているというものです。なので、これを使わない形で逃げるという対処になります。
+  問題としては、今まで AutoPagerize様 のデータを利用させていただいて取得できていたWebサイト様ではWebページの本文がうまく取り込めなかったり、次のページが検出できなくなったりするはずです。
+  それについては何らかの方法でこちらまでお知らせいただけますと、ことせかい用 に用意しています SiteInfo側 に定義を追加する形で対処はできるかと思われますので、適宜報告していただけますと助かります。ただ、ことせかい用 の SiteInfo は現在は編集権限を持っているのが私一人だけなので、大量のリクエストがある場合などに定義の追加が遅れるか無視される可能性があることは覚悟しておいてください。
+
+以上よろしくお願いいたします。
+
+
+Version 2.10.4
+
+Changes in interface/internal operation
+
+- Added "Show tabs at the bottom of the screen" option to the "Settings Tab"
+- Added "This Chapter Title" to the "Edit Novel" screen, allowing you to change the displayed chapter title.
+- Added a "Trash Can Emoji" to the bookmarks displayed on the home page of the "Web Import" tab, allowing you to delete the bookmark by clicking it.
+- When checking for updates to novels registered in your bookshelf, if there are missing chapters (pages), an attempt will be made to re-fetch those chapters (pages).
+- Added an ON/OFF setting to the "Change audio mode when connected to CarPlay" to the Settings tab.
+
+Fixing the problem
+
+- Disabled the use of AutoPagerize's SiteInfo on wedata.

@@ -963,13 +963,34 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.4
 
-- Safari等からのシェア機能からの ことせかい 呼び出しが正しく動作しなくなっていた問題を修正
+- 「設定タブ」->「タブの表示を画面下部にする〜」を追加します
+- 「小説の編集」画面に「この章のタイトル」を追加して、表示されている章のタイトルを変更できるようにします
+-「Web取込タブ」のホームに表示されるブックマークについて、「ゴミ箱の絵文字」を表示してそれを押すとそのブックマークを削除できるようにします
+- 本棚に登録されている小説の更新確認時に、歯抜けになっている章(ページ)がある場合にはその章(ページ)を再取得しようと試みるようになります
+- 設定タブに「CarPlay接続時に音声モードを変える」のON/OFF設定を追加します
+- wedata様 上にある AutoPagerize様 の SiteInfo を使わないようにします
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.4
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」->「タブの表示を画面下部にする〜」を追加します
+- 「小説の編集」画面に「この章のタイトル」を追加して、表示されている章のタイトルを変更できるようにします
+-「Web取込タブ」のホームに表示されるブックマークについて、「ゴミ箱の絵文字」を表示してそれを押すとそのブックマークを削除できるようにします
+- 本棚に登録されている小説の更新確認時に、歯抜けになっている章(ページ)がある場合にはその章(ページ)を再取得しようと試みるようになります
+- 設定タブに「CarPlay接続時に音声モードを変える」のON/OFF設定を追加します
+
+問題の修正
+
+- wedata様 上にある AutoPagerize様 の SiteInfo を使わないようにします
+
+
+
 Version 2.10.3
 
 問題の修正
