@@ -19,17 +19,17 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     var addressBarBackgroundColorValid = #colorLiteral(red: 0.8865675194, green: 0.8865675194, blue: 0.8865675194, alpha: 1)
     var addressBarBackgroundColorInvalid = #colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 1)
 
-    @IBOutlet weak var bookmarkUIBarButtonItem: UIBarButtonItem!
     @IBOutlet weak var toolBar: UIToolbar!
-    @IBOutlet weak var backButton: UIBarButtonItem!
-    @IBOutlet weak var forwardButton: UIBarButtonItem!
-    @IBOutlet weak var refreshButton: UIBarButtonItem!
-    @IBOutlet weak var importButton: UIBarButtonItem!
-    @IBOutlet weak var homeButton: UIBarButtonItem!
-    @IBOutlet weak var bookmarkButton: UIBarButtonItem!
+    @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var forwardButton: UIButton!
+    @IBOutlet weak var refreshButton: UIButton!
+    @IBOutlet weak var importButton: UIButton!
+    @IBOutlet weak var homeButton: UIButton!
+    @IBOutlet weak var bookmarkButton: UIButton!
     @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var addressBarUITextField: UITextField!
-    @IBOutlet weak var safariButton: UIBarButtonItem!
+    @IBOutlet weak var safariButton: UIButton!
+    @IBOutlet weak var controlStackView: UIStackView!
     
     let getCookiesStringHandler = "getCookiesStringHandler"
     let deleteBookmarkHandler = "deleteBookmarkHandler"
@@ -104,6 +104,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         wkWebView.translatesAutoresizingMaskIntoConstraints = false
 
         self.view.addSubview(wkWebView)
+        self.view.bringSubviewToFront(self.controlStackView)
         let topConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .top, relatedBy: .equal, toItem: self.addressBarUITextField, attribute: .bottom, multiplier: 1.0, constant: 10.0)
         let bottomConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .bottom, relatedBy: .equal, toItem: self.progressView, attribute: .top, multiplier: 1.0, constant: 0)
         let trailingConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .trailing, relatedBy: .equal, toItem: self.view, attribute: .trailingMargin, multiplier: 1.0, constant: 0.0)
@@ -188,9 +189,13 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     
     func updateBookmarkButtonState(url:URL) {
         if isBookmarked(targetUrl: url) {
-            self.bookmarkUIBarButtonItem.image = #imageLiteral(resourceName: "bookmark-true.png")
+            var config = UIButton.Configuration.plain()
+            config.image = UIImage(systemName: "bookmark.fill")
+            self.bookmarkButton.configuration = config
         }else{
-            self.bookmarkUIBarButtonItem.image = #imageLiteral(resourceName: "bookmark-false.png")
+            var config = UIButton.Configuration.plain()
+            config.image = UIImage(systemName: "bookmark")
+            self.bookmarkButton.configuration = config
         }
     }
     
