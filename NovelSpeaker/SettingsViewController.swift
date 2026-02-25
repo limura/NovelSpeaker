@@ -1266,6 +1266,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_IsCarPlayModeToVoicePrompt", comment: "CarPlay接続時に発話モードを変える(発話モード変更時は一部の機能が制限されます)")
                 $0.cell.textLabel?.numberOfLines = 0
+                $0.value = NovelSpeakerUtility.IsCarPlayModeToVoicePrompt()
             }.onChange({ row in
                 if let value = row.value {
                     NovelSpeakerUtility.SetIsCarPlayModeToVoicePrompt(IsCarPlayModeToVoicePrompt: value)
