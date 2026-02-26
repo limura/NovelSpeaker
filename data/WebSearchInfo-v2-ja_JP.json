@@ -168,14 +168,11 @@
         }
     },
     {
-	"webSiteURL": "https://pokemon.sorakaze.info/",
+	"webSiteURL": "https://pokesq.com/",
         "title": "ポケモン小説スクエア",
         "HTTPMethod": "GET",
-        "url": "https://pokemon.sorakaze.info/novels?",
+        "url": "https://pokesq.com/novels?",
         "values": [
-            {"queryType": "hidden", "queryName": "type", "value": "0"},
-            {"queryType": "hidden", "queryName": "state", "value": "0"},
-            {"queryType": "hidden", "queryName": "grotesque", "value": "0"},
             {"queryType": "hidden", "queryName": "event", "value": "0"},
             {"queryType": "text", "displayText": "検索ワード(25文字以内)", "queryName": "keyword"},
             {"queryType": "radio", "displayText": "カテゴリ", "queryName": "category", "defaultValue": "1",
@@ -219,10 +216,10 @@
 	    }
         ],
         "result": {
-            "block": "//section/div[@class='novel-list']/div[@class='item']",
+            "block": "//section/div[@class='cs-card']",
             "nextLink": "//li[@class='next']/a[@rel='next' and contains(@href,'/novels?')]",
-            "title": "//div[@class='subject']/a",
-            "url": "//div[@class='subject']/a/@href"
+            "title": "//div[@class='cs-card__header__title']/a",
+            "url": "//div[@class='cs-card__header__title']/a/@href"
         }
     },
     {
@@ -303,12 +300,12 @@
 	"webSiteURL": "https://syosetu.org/",
         "title": "ハーメルン",
         "HTTPMethod": "GET",
-        "isNeedHeadless": false,
+        "isNeedHeadless": true,
         "url": "https://syosetu.org/search/?",
         "values": [
             {"queryType": "text", "displayText": "検索文字列", "queryName": "word"},
             {"queryType": "hidden", "queryName": "mode", "value": "search"}
-	],
+	    ],
         "result": {
             "block": "//div[contains(@class,'autopagerize_page_element')]/div[@class='section3']",
             "nextLink": "//div[contains(@class,'autopagerize_page_element')]/div[@class='paging']//a[@rel='next']/@href",
@@ -548,52 +545,15 @@
         "title": "アルファポリス",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
-        "url": "https://www.alphapolis.co.jp/novel/index?is_inside=1&free_words_kind=1&ng_free_words_kind=1&last_update_kind=5&first_publish_kind=5&",
+        "url": "https://www.alphapolis.co.jp/search?category=novel&",
         "values": [
-            {"queryType": "text", "displayText": "フリーワード", "queryName": "free_words"},
-            {"queryType": "text", "displayText": "除外ワード", "queryName": "ng_free_words"},
-            {"queryType": "radio", "displayText": "長さ", "queryName": "volumes", "radio":
-                {
-                    "ショートショート": "1",
-                    "短編": "2",
-                    "長編": "3"
-                }
-            },
-            {"queryType": "radio", "displayText": "進行状況", "queryName": "complete", "radio":
-                {
-                    "連載中": "2",
-                    "完結": "1"
-                }
-            },
-            {"queryType": "hidden", "displayText": "Ｒ指定", "queryName": "ratings", "value": "3",
-                "memo": {
-                    "queryType が radio であればこんな感じのデータを入れれば良い事になってます。": "けれど、ことせかい は一応9歳以上対象なので、Web検索で除外できるのならその時点で除外しておきます。",
-                    "R15･R18を除く": "-1,-2",
-                    "R18を除く": "-2",
-                    "R15": "1",
-                    "R18": "2",
-                    "R15･R18": "1,2"
-                }
-            },
-            {"queryType": "hidden", "queryName": "limit", "value": "40"},
-            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "sort", "defaultValue": "24hpt", "radio":
-                {
-                    "24h. ポイント順": "24hpt",
-                    "週間人気順": "weekly",
-                    "月間人気順": "monthly",
-                    "年間人気順": "yearly",
-                    "累計ポイント順": "total",
-                    "お気に入りの多い順": "favorite",
-                    "新着順": "recent",
-                    "最近更新された順": "episode_recent"
-                }
-            }
+            {"queryType": "text", "displayText": "フリーワード(空文字列だと失敗します)", "queryName": "query"}
         ],
         "result": {
-            "block": "//div[@id='main']/div[contains(@class,'novels')]//div[@class='content-main']",
-            "nextLink": "//div[contains(@class,'paginator')]/span[preceding-sibling::span[@class='current']]/a[contains(@href,'/novel/index?')]/@href",
-            "title": "//div[contains(@class,'content-title')]/h2[@class='title']",
-            "url": "//div[contains(@class,'content-title')]/h2[@class='title']/a[contains(@href,'/novel/')]/@href"
+            "block": "//div[@id='main']//div[contains(@class,'contents')]/div[contains(@class,'section') and contains(@class,'novels')]/div[@class='content-main']",
+            "nextLink": "//div[@id='main']//div[contains(@class,'paginator')]/span/a[contains(@href,'/search') and @rel='last']/@href",
+            "title": "//h2[@class='title']",
+            "url": "//h2[@class='title']/a[contains(@href,'/novel/')]/@href"
         }
     },
     {
@@ -786,13 +746,7 @@
         "isNeedHeadless": false,
         "url": "https://novelba.com/search?",
         "values": [
-            {"queryType": "text", "displayText": "キーワード", "queryName": "searchWord"},
-            {"queryType": "hidden", "queryName": "isMajorType", "value": "0"},
-            {"queryType": "hidden", "queryName": "isIndiesType", "value": "1"},
-            {"queryType": "onOff", "displayText": "作品名を検索対象に含まない", "queryName": "isWorkName", "value": "0"},
-            {"queryType": "onOff", "displayText": "作者名を検索対象に含まない", "queryName": "isAuthorName", "value": "0"},
-            {"queryType": "onOff", "displayText": "キーワード名を検索対象に含まない", "queryName": "isKeywords", "value": "0"},
-            {"queryType": "onOff", "displayText": "あらすじを検索対象に含まない", "queryName": "isOutline", "value": "0"},
+            {"queryType": "text", "displayText": "キーワード", "queryName": "keyword"},
             {"queryType": "radio", "displayText": "ジャンル", "queryName": "genreId", "defaultValue": "", "radio":
                 {
                     "01: すべて": "",
@@ -819,31 +773,32 @@
             {"queryType": "radio", "displayText": "話数", "queryName": "episodeCountCohort", "defaultValue": "", "radio":
                 {
                     "1: すべて": "",
-                    "2: 1話": "0",
-                    "3: 2話〜10話": "1",
-                    "4: 11話〜100話": "2",
-                    "5: 101話以上": "3"
+                    "2: 1話": "1",
+                    "3: 2話〜10話": "2",
+                    "4: 11話〜100話": "3",
+                    "5: 101話以上": "4"
                 }
             },
-            {"queryType": "radio", "displayText": "種別", "queryName": "serializeStatus", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "種別", "queryName": "serialFilter", "defaultValue": "", "radio":
                 {
                     "1: すべて": "",
-                    "2: 連載中": "serializing",
-                    "3: 完結済": "completed"
+                    "2: 連載中": "serialize",
+                    "3: 完結済": "complete"
                 }
             },
-            {"queryType": "radio", "displayText": "並び順", "queryName": "showOrder", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "並び順", "queryName": "sort", "defaultValue": "", "radio":
                 {
                     "1: おすすめ順": "",
-                    "2: 更新日が新しい順": "updates",
-                    "3: 話数が多い順": "episodeCount"
+                    "2: 更新日が新しい順": "newDesc",
+                    "3: 話数が多い順": "episodeCountDesc",
+                    "4: いいねが多い順": "likeCountDesc"
                 }
             }
         ],
         "result": {
             "block": "//section[@class='search_section']/ul[@class='result_list']/li[child::a[contains(@href,'/works/')]]",
-            "nextLink": "//ul[@class='pager']/li[preceding-sibling::li[child::a[@class='picked']]]/a/@href",
-            "title": "//a/div[@class='info_list']/p[@class='title']",
+            "nextLink": "//ul[@class='pager']/li[last()]/a[contains(@href,'page=')]/@href",
+            "title": "//h2[@class='title']",
             "url": "//a/@href"
         }
     },
@@ -1237,90 +1192,6 @@
         }
     },
     {
-	"webSiteURL": "https://www.no-ichigo.jp/",
-	"isDisabled": false,
-        "title": "野いちご",
-        "HTTPMethod": "GET",
-        "isNeedHeadless": false,
-        "url": "https://www.no-ichigo.jp/search/book?",
-        "values": [
-            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
-            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
-            {"queryType": "multiSelect", "displayText": "検索対象", "queryName": "", "separator": "&",
-                "multiSelect": {
-                    "タイトル": "search_targets[]=1",
-                    "キーワード": "search_targets[]=2",
-                    "作家名": "search_targets[]=4",
-                    "表紙コメント": "search_targets[]=8",
-                    "あらすじ": "search_targets[]=16"
-                }, "multiSelectDefaultTargets": ["タイトル", "キーワード", "作家名"]
-            },
-            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0",
-                "radio": {
-                    "01: 指定なし": "0",
-                    "02: 恋愛(すべて)": "100",
-                    "03: 恋愛(純愛)": "101",
-                    "04: 恋愛(ラブコメ)": "102",
-                    "05: 恋愛(オフィスラブ)": "103",
-                    "06: 恋愛(学園)": "104",
-                    "07: 恋愛(実話)": "105",
-                    "08: 恋愛(その他)": "199",
-                    "09: 青春・友情": "200",
-                    "10: ノンフィクション・実話": "300",
-                    "11: ミステリー・サスペンス": "400",
-                    "12: ホラー・オカルト": "600",
-                    "13: ファンタジー・ＳＦ・冒険": "700",
-                    "14: 歴史・時代": "1400",
-                    "15: コメディ": "900",
-                    "16: 絵本・童話": "1000",
-                    "17: 実用・エッセイ": "1200",
-                    "18: 詩・短歌・俳句・川柳": "1300",
-                    "19: その他": "9900"
-		}
-	    },
-            {"queryType": "radio", "displayText": "気持ち", "queryName": "feeling", "defaultValue": "0",
-                "radio": {
-                    "01: 指定なし": "0",
-                    "02: 泣ける": "1",
-                    "03: 切ない": "2",
-                    "04: 感動!": "3",
-                    "05: ドキドキ": "4",
-                    "06: 胸キュン": "5",
-                    "07: おもしろい": "6",
-                    "08: ワクワクする": "7",
-                    "09: 怖い": "8",
-                    "10: ほのぼの": "9",
-                    "11: スカッとする": "10",
-                    "12: 元気が出る": "11",
-                    "13: 夢いっぱい": "12",
-                    "14: 不思議な気分": "13",
-                    "15: ためになる": "14",
-                    "16: ビックリ": "15"
-		}
-	    },
-            {"queryType": "radio", "displayText": "完結", "queryName": "finished", "defaultValue": "0",
-                "radio": {
-                    "1: 全て": "0",
-                    "2: 完結": "2",
-                    "3: 更新中": "1"
-		}
-	    },
-            {"queryType": "multiSelect", "displayText": "作品の長さ", "queryName": "", "separator": "&",
-                "multiSelect": {
-		    "1: 長編": "length[]=4",
-		    "2: 中編": "length[]=2",
-		    "3: 短編": "length[]=1"
-		}
-	    }
-        ],
-        "result": {
-            "block": "//main/section/div[@class='bookList']/div[@class='clm']",
-            "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a[contains(@href,'/search/book/')]",
-            "title": "//div[@class='title']/a",
-            "url": "//div[@class='title']/a/@href"
-        }
-    },
-    {
 	"webSiteURL": "https://novema.jp/",
 	"isDisabled": false,
         "title": "ノベマ！",
@@ -1493,12 +1364,11 @@
         }
     },
     {
-		"isDisabled": true,
+		"isDisabled": false,
 		"allowDataVersion": 2,
 		"webSiteURL": "https://tales.note.com/",
 		"announce": "検索結果の最初に表示されるもの(恐らく最大50件)しかリストされず、それ以降のものは検出できません。完全な検索を行いたい場合は、「このサイトを Web取込 タブで開く」からWeb取込タブに移行して検索を行ってください。",
-		"memo": "multiSelect が ifNoSelectionThenEmptyQuery がサポートされている allowDataVersion: 2 でないと動かないので multiSelect を排除したものを同じ名前で登録しています。multiSelect が無効になっているものは一つしたにあり、isDisabled: false になっています。",
-        "title": "TALES_testing",
+        "title": "TALES",
         "HTTPMethod": "GET",
         "isNeedHeadless": true,
 		"waitSecondInHeadless": 1.0,
@@ -1519,7 +1389,7 @@
 					"性描写あり": "sexual"
 				}
 			},
-			{"queryType": "multiSelect", "displayText": "カテゴリー", "queryName": "genreNames",  "ifNoSelectionThenEmptyQuery": true,"separator": ",",
+			{"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "genreNames",  "ifNoSelectionThenEmptyQuery": true,"separator": ",",
                 "multiSelect": {
 					"異世界ファンタジー": "isekai",
 					"現代ファンタジー": "fantasy",
@@ -1533,70 +1403,12 @@
 					"歴史・時代": "historical",
 					"創作論・評論": "critique"
 				}
-			},
-            {"queryType": "radio", "displayText": "スキ数", "queryName": "", "defaultValue": "",
-                "radio": {
-                    "0: 指定なし": "",
-					"1: 〜9": "likeCount=lessThan10",
-					"2: 10〜": "likeCount=over10",
-					"3: 100〜": "likeCount=over100",
-					"4: 1,000〜": "likeCount=over1000",
-					"5: 10,000〜": "likeCount=over10000"
-				}
-			},
-            {"queryType": "radio", "displayText": "文字数", "queryName": "", "defaultValue": "",
-                "radio": {
-                    "0: 指定なし": "",
-					"1: 短編(2万文字未満)": "characterCount=lessThan20000",
-					"2: 中編(2万文字〜10万文字)": "characterCount=over20000",
-					"3: 長編(10万文字〜50万文字)": "characterCount=over100000",
-					"4: 大長編(50万文字〜)": "characterCount=over500000"
-				}
 			}
         ],
         "result": {
-            "block": "//div[@data-sentry-element='Element' and @data-sentry-component='ImpTracker']",
+            "block": "//main/section//div[child::a]",
             "nextLink": "",
-            "title": "//h3",
-            "url": "//a[@title]/@href"
-        }
-    },
-    {
-		"isDisabled": false,
-		"webSiteURL": "https://tales.note.com/",
-		"announce": "検索結果の最初に表示されるもの(恐らく最大50件)しかリストされず、それ以降のものは検出できません。完全な検索を行いたい場合は、「このサイトを Web取込 タブで開く」からWeb取込タブに移行して検索を行ってください。",
-		"memo": "multiSelect が ifNoSelectionThenEmptyQuery がサポートされている allowDataVersion: 2 でないと動かないので multiSelect を排除したものを同じ名前で登録しています。multiSelect が有効になっているものは一つ上にあり、isDisabled: true になっています。",
-        "title": "TALES",
-        "HTTPMethod": "GET",
-        "isNeedHeadless": true,
-		"waitSecondInHeadless": 1.0,
-        "url": "https://tales.note.com/search/works?",
-        "values": [
-            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "q"},
-            {"queryType": "radio", "displayText": "スキ数", "queryName": "", "defaultValue": "",
-                "radio": {
-                    "0: 指定なし": "",
-					"1: 〜9": "likeCount=lessThan10",
-					"2: 10〜": "likeCount=over10",
-					"3: 100〜": "likeCount=over100",
-					"4: 1,000〜": "likeCount=over1000",
-					"5: 10,000〜": "likeCount=over10000"
-				}
-			},
-            {"queryType": "radio", "displayText": "文字数", "queryName": "", "defaultValue": "",
-                "radio": {
-                    "0: 指定なし": "",
-					"1: 短編(2万文字未満)": "characterCount=lessThan20000",
-					"2: 中編(2万文字〜10万文字)": "characterCount=over20000",
-					"3: 長編(10万文字〜50万文字)": "characterCount=over100000",
-					"4: 大長編(50万文字〜)": "characterCount=over500000"
-				}
-			}
-        ],
-        "result": {
-            "block": "//div[@data-sentry-element='Element' and @data-sentry-component='ImpTracker']",
-            "nextLink": "",
-            "title": "//h3",
+            "title": "//p",
             "url": "//a[@title]/@href"
         }
     },

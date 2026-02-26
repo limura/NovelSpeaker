@@ -168,14 +168,11 @@
         }
     },
     {
-        "webSiteURL": "https://pokemon.sorakaze.info/",
+        "webSiteURL": "https://pokesq.com/",
         "title": "Pokemon novel square",
         "HTTPMethod": "GET",
-        "url": "https://pokemon.sorakaze.info/novels?",
+        "url": "https://pokesq.com/novels?",
         "values": [
-            {"queryType": "hidden", "queryName": "type", "value": "0"},
-            {"queryType": "hidden", "queryName": "state", "value": "0"},
-            {"queryType": "hidden", "queryName": "grotesque", "value": "0"},
             {"queryType": "hidden", "queryName": "event", "value": "0"},
             {"queryType": "text", "displayText": "Search word (up to 25 characters)", "queryName": "keyword"},
             {"queryType": "radio", "displayText": "Category", "queryName": "category", "defaultValue": "1",
@@ -202,7 +199,7 @@
                     "short story": "2"
         		}
     	    },
-            {"queryType": "radio", "displayText": "status", "queryName": "state", "defaultValue": "0",
+            {"queryType": "radio", "displayText": "Status", "queryName": "state", "defaultValue": "0",
                 "radio": {
                     "Not specified": "0",
                     "unfinished": "1",
@@ -210,7 +207,7 @@
                     "Recently Posted": "3"
 	        	}
 	        },
-            {"queryType": "radio", "displayText": "残酷描写", "queryName": "grotesque", "defaultValue": "0",
+            {"queryType": "radio", "displayText": "Grim depiction", "queryName": "grotesque", "defaultValue": "0",
                 "radio": {
                     "Not specified": "0",
                     "no cruel depiction": "1",
@@ -219,10 +216,10 @@
 	        }
         ],
         "result": {
-            "block": "//section/div[@class='novel-list']/div[@class='item']",
+            "block": "//section/div[@class='cs-card']",
             "nextLink": "//li[@class='next']/a[@rel='next' and contains(@href,'/novels?')]",
-            "title": "//div[@class='subject']/a",
-            "url": "//div[@class='subject']/a/@href"
+            "title": "//div[@class='cs-card__header__title']/a",
+            "url": "//div[@class='cs-card__header__title']/a/@href"
         }
     },
 
@@ -303,7 +300,7 @@
         "webSiteURL": "https://syosetu.org/",
         "title": "Hameln",
         "HTTPMethod": "GET",
-        "isNeedHeadless": false,
+        "isNeedHeadless": true,
         "url": "https://syosetu.org/search/?",
         "values": [
             {"queryType": "text", "displayText": "Search string", "queryName": "word"},
@@ -547,52 +544,15 @@
         "title": "Alphapolis",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
-        "url": "https://www.alphapolis.co.jp/novel/index?is_inside=1&free_words_kind=1&ng_free_words_kind=1&last_update_kind=5&first_publish_kind=5&",
+        "url": "https://www.alphapolis.co.jp/search?category=novel&",
         "values": [
-            {"queryType": "text", "displayText": "Free word", "queryName": "free_words"},
-            {"queryType": "text", "displayText": "NG word", "queryName": "ng_free_words"},
-            {"queryType": "radio", "displayText": "Length", "queryName": "volumes", "radio":
-                {
-                    "Short short": "1",
-                    "Short story": "2",
-                    "Long novel": "3"
-                }
-            },
-            {"queryType": "radio", "displayText": "Progress", "queryName": "complete", "radio":
-                {
-                    "Serialized": "2",
-                    "Complete": "1"
-                }
-            },
-            {"queryType": "hidden", "displayText": "R-rated", "queryName": "ratings", "value": "3",
-                "memo": {
-                    "queryType が radio であればこんな感じのデータを入れれば良い事になってます。": "けれど、ことせかい は一応9歳以上対象なので、Web検索で除外できるのならその時点で除外しておきます。",
-                    "R15･R18を除く": "-1,-2",
-                    "R18を除く": "-2",
-                    "R15": "1",
-                    "R18": "2",
-                    "R15･R18": "1,2"
-                }
-            },
-            {"queryType": "hidden", "queryName": "limit", "value": "40"},
-            {"queryType": "radio", "displayText": "Sorting search results", "queryName": "sort", "defaultValue": "24hpt", "radio":
-                {
-                    "24 hours / point order": "24hpt",
-                    "Weekly popularity": "weekly",
-                    "Monthly popularity order": "monthly",
-                    "By yearly popularity": "yearly",
-                    "Cumulative point order": "total",
-                    "Most favorites": "favorite",
-                    "New arrival order": "recent",
-                    "Recently updated order": "episode_recent"
-                }
-            }
+            {"queryType": "text", "displayText": "Free word", "queryName": "query"}
         ],
         "result": {
-            "block": "//div[@id='main']/div[contains(@class,'novels')]//div[@class='content-main']",
-            "nextLink": "//div[contains(@class,'paginator')]/span[preceding-sibling::span[@class='current']]/a[contains(@href,'/novel/index?')]/@href",
-            "title": "//div[contains(@class,'content-title')]/h2[@class='title']",
-            "url": "//div[contains(@class,'content-title')]/h2[@class='title']/a[contains(@href,'/novel/')]/@href"
+            "block": "//div[@id='main']//div[contains(@class,'contents')]/div[contains(@class,'section') and contains(@class,'novels')]/div[@class='content-main']",
+            "nextLink": "//div[@id='main']//div[contains(@class,'paginator')]/span/a[contains(@href,'/search') and @rel='last']/@href",
+            "title": "//h2[@class='title']",
+            "url": "//h2[@class='title']/a[contains(@href,'/novel/')]/@href"
         }
     },
     {
@@ -785,13 +745,7 @@
         "isNeedHeadless": false,
         "url": "https://novelba.com/search?",
         "values": [
-            {"queryType": "text", "displayText": "Keyword", "queryName": "searchWord"},
-            {"queryType": "hidden", "queryName": "isMajorType", "value": "0"},
-            {"queryType": "hidden", "queryName": "isIndiesType", "value": "1"},
-            {"queryType": "onOff", "displayText": "Do not include the work name in the search target", "queryName": "isWorkName", "value": "0"},
-            {"queryType": "onOff", "displayText": "The author name is not included in the search target", "queryName": "isAuthorName", "value": "0"},
-            {"queryType": "onOff", "displayText": "Do not include keyword names in the search target", "queryName": "isKeywords", "value": "0"},
-            {"queryType": "onOff", "displayText": "Synopsis is not included in the search target", "queryName": "isOutline", "value": "0"},
+            {"queryType": "text", "displayText": "Keyword", "queryName": "keyword"},
             {"queryType": "radio", "displayText": "Genre", "queryName": "genreId", "defaultValue": "", "radio":
                 {
                     "01: All": "",
@@ -818,31 +772,32 @@
             {"queryType": "radio", "displayText": "Number of stories", "queryName": "episodeCountCohort", "defaultValue": "", "radio":
                 {
                     "1: All": "",
-                    "2: Single story": "0",
-                    "3: More than 2 chapters and less than 10 chapters": "1",
-                    "4: More than 11 chapters and less than 100 chapters": "2",
-                    "5: Over 101 chapters": "3"
+                    "2: Single story": "1",
+                    "3: More than 2 chapters and less than 10 chapters": "2",
+                    "4: More than 11 chapters and less than 100 chapters": "3",
+                    "5: Over 101 chapters": "4"
                 }
             },
-            {"queryType": "radio", "displayText": "Type", "queryName": "serializeStatus", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "Type", "queryName": "serialFilter", "defaultValue": "", "radio":
                 {
                     "1: All": "",
-                    "2: Serialized": "serializing",
-                    "3: Completed": "completed"
+                    "2: Serialized": "serialize",
+                    "3: Completed": "complete"
                 }
             },
-            {"queryType": "radio", "displayText": "Sort order", "queryName": "showOrder", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "Sort order", "queryName": "sort", "defaultValue": "", "radio":
                 {
                     "1: Recommended order": "",
-                    "2: Newest update date": "updates",
-                    "3: In descending order of the number of stories": "episodeCount"
+                    "2: Newest update date": "newDesc",
+                    "3: In descending order of the number of stories": "episodeCountDesc",
+                    "4: Most likes": "likeCountDesc"
                 }
             }
         ],
         "result": {
             "block": "//section[@class='search_section']/ul[@class='result_list']/li[child::a[contains(@href,'/works/')]]",
-            "nextLink": "//ul[@class='pager']/li[preceding-sibling::li[child::a[@class='picked']]]/a/@href",
-            "title": "//a/div[@class='info_list']/p[@class='title']",
+            "nextLink": "//ul[@class='pager']/li[last()]/a[contains(@href,'page=')]/@href",
+            "title": "//h2[@class='title']",
             "url": "//a/@href"
         }
     },
@@ -1293,90 +1248,6 @@
             "nextLink": "//div[contains(@class,'Pager')]/div[contains(@class,'next')]/a[contains(@class,'Link') and contains(@href,'/search') and contains(@href,'&page=')]/@href",
             "title": "//h2[contains(@class,'Heading')]",
             "url": "//a[contains(@class,'Link') and contains(@href,'/works/')]/@href"
-        }
-    },
-    {
-        "webSiteURL": "https://www.no-ichigo.jp/",
-        "isDisabled": false,
-        "title": "Wild Strawberries",
-        "HTTPMethod": "GET",
-        "isNeedHeadless": false,
-        "url": "https://www.no-ichigo.jp/search/book?",
-        "values": [
-            {"queryType": "text", "displayText": "Search word", "queryName": "word"},
-            {"queryType": "text", "displayText": "Exclusion word", "queryName": "exclude_word"},
-            {"queryType": "multiSelect", "displayText": "Search target", "queryName": "", "separator": "&",
-                "multiSelect": {
-                    "title": "search_targets[]=1",
-                    "keyword": "search_targets[]=2",
-                    "author name": "search_targets[]=4",
-                    "Cover comment": "search_targets[]=8",
-                    "Synopsis": "search_targets[]=16"
-                }, "multiSelectDefaultTargets": ["title", "keyword", "author name"]
-            },
-            {"queryType": "radio", "displayText": "genre", "queryName": "genre", "defaultValue": "0",
-                "radio": {
-                    "01: unspecified": "0",
-                    "02: Love (All)": "100",
-                    "03: Love (pure love)": "101",
-                    "04: Love (Love comedy)": "102",
-                    "05: Love (office love)": "103",
-                    "06: Love (Campus)": "104",
-                    "07: Love (true story)": "105",
-                    "08: Love (others)": "199",
-                    "09: youth/friendship": "200",
-                    "10: non-fiction/true story": "300",
-                    "11: mystery/suspense": "400",
-                    "12: Horror/Occult": "600",
-                    "13: Fantasy/SF/Adventure": "700",
-                    "14: History/era": "1400",
-                    "15: comedy": "900",
-                    "16: picture books/fairy tales": "1000",
-                    "17: Practical/Essay": "1200",
-                    "18: Poetry/Tanka/Haiku/Senryu": "1300",
-                    "19: others": "9900"
-		        }
-	    },
-            {"queryType": "radio", "displayText": "feeling", "queryName": "feeling", "defaultValue": "0",
-                "radio": {
-                    "01: unspecified": "0",
-                    "02: cry": "1",
-                    "03: painful": "2",
-                    "04: Impressed!": "3",
-                    "05: Throb": "4",
-                    "06: chest tight": "5",
-                    "07: funny": "6",
-                    "08: Excited": "7",
-                    "09: scared": "8",
-                    "10: Heartwarming": "9",
-                    "11: feel refreshed": "10",
-                    "12: cheer up": "11",
-                    "13: full of dreams": "12",
-                    "14: strange feeling": "13",
-                    "15: beneficial": "14",
-                    "16: surprised": "15"
-		        }
-	    },
-            {"queryType": "radio", "displayText": "Completion state", "queryName": "finished", "defaultValue": "0",
-                "radio": {
-                    "1: All": "0",
-                    "2: Completed": "2",
-                    "3: Updating": "1"
-		}
-	    },
-            {"queryType": "multiSelect", "displayText": "length of work", "queryName": "", "separator": "&",
-                "multiSelect": {
-		    "1: novel": "length[]=4",
-		    "2: novella": "length[]=2",
-		    "3: short story": "length[]=1"
-            }
-	    }
-        ],
-        "result": {
-            "block": "//main/section/div[@class='bookList']/div[@class='clm']",
-            "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a[contains(@href,'/search/book/')]",
-            "title": "//div[@class='title']/a",
-            "url": "//div[@class='title']/a/@href"
         }
     },
     {
