@@ -11,7 +11,7 @@ import RealmSwift
 import IceCream
 import Eureka
 
-class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate /*, UIEditMenuInteractionDelegate */ {
+class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, UIGestureRecognizerDelegate /*, UIEditMenuInteractionDelegate */ {
     
     public var storyID : String? = nil
     public var isNeedResumeSpeech : Bool = false
@@ -39,8 +39,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var readingChapterStoryUpdateDate:Date = Date()
     var storyTextAttribute:[NSAttributedString.Key: Any] = [:]
     var displayTextCache:String = ""
-    var leftSwipeRecgnizer:UISwipeGestureRecognizer = UISwipeGestureRecognizer()
-    var rightSwipeRecgnizer:UISwipeGestureRecognizer = UISwipeGestureRecognizer()
+    var panRecgnizer:UIPanGestureRecognizer = UIPanGestureRecognizer()
     
     var searchView:SearchFloatingView? = nil
     var searchTextCache = ""
@@ -144,6 +143,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
     }
     
+    // ジェスチャー周りで動いていいか確認してくる時に呼ばれる。
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer === self.panRecgnizer {
+            let location = gestureRecognizer.location(in: view)
+            return location.x > 30   // 左端30pt以内ならNavigationに任せる
+        }
+        return true
+    }
+    
     func StopObservers() {
         if let token = self.novelObserverToken {
             StorySpeaker.shared.RemoveUpdateReadDateWithoutNotifiningToken(token: token)
@@ -181,10 +189,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
         }
         
-        self.leftSwipeRecgnizer = UISwipeGestureRecognizer(target: self, action: #selector(leftSwipe(_:)))
-        self.leftSwipeRecgnizer.direction = .left
-        self.rightSwipeRecgnizer = UISwipeGestureRecognizer(target: self, action: #selector(rightSwipe(_:)))
-        self.rightSwipeRecgnizer.direction = .right
+        self.panRecgnizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        self.panRecgnizer.delegate = self
+        self.panRecgnizer.maximumNumberOfTouches = 1
         
         previousChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
         nextChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
@@ -199,12 +206,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func assignSwipeRecognizer() {
-        self.textView.addGestureRecognizer(self.leftSwipeRecgnizer)
-        self.textView.addGestureRecognizer(self.rightSwipeRecgnizer)
+        self.textView.addGestureRecognizer(self.panRecgnizer)
     }
     func removeSwipeRecognizer() {
-        self.textView.removeGestureRecognizer(self.leftSwipeRecgnizer)
-        self.textView.removeGestureRecognizer(self.rightSwipeRecgnizer)
+        self.textView.removeGestureRecognizer(self.panRecgnizer)
     }
     
     func setCustomUIMenu() {
@@ -1023,6 +1028,23 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.LoadPreviousChapter(realm: realm)
+        }
+    }
+    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: view)
+
+        if gesture.state == .ended {
+            if translation.x > 80 {
+                disableCurrentReadingStoryChangeFloatingButton()
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.storySpeaker.LoadPreviousChapter(realm: realm)
+                }
+            } else if translation.x < -80 {
+                disableCurrentReadingStoryChangeFloatingButton()
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.storySpeaker.LoadNextChapter(realm: realm)
+                }
+            }
         }
     }
     
