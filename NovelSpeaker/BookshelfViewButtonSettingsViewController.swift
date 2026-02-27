@@ -52,27 +52,21 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_DownloadStatus", comment: "ダウンロード状態の確認")
                         $0.value = setting.isOn
-                        if #available(iOS 13.0, *) {
-                            $0.cell.imageView?.image = UIImage(systemName: "waveform.badge.magnifyingglass")
-                        }
+                        $0.cell.imageView?.image = UIImage(systemName: "waveform.badge.magnifyingglass")
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .reload:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_Reload", comment: "小説の更新確認")
                         $0.value = setting.isOn
-                        if #available(iOS 13.0, *) {
-                            $0.cell.imageView?.image = UIImage(systemName: "arrow.clockwise")
-                        }
+                        $0.cell.imageView?.image = UIImage(systemName: "arrow.clockwise")
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .switchFolder:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_SwitchFolder", comment: "フォルダ開閉")
                         $0.value = setting.isOn
-                        if #available(iOS 13.0, *) {
-                            $0.cell.imageView?.image = UIImage(systemName: "rectangle.expand.vertical")
-                        }
+                        $0.cell.imageView?.image = UIImage(systemName: "rectangle.expand.vertical")
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .search:
@@ -80,9 +74,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_Search", comment: "小説検索")
                         $0.cell.textLabel?.numberOfLines = 0
                         $0.value = setting.isOn
-                        if #available(iOS 13.0, *) {
-                            $0.cell.imageView?.image = UIImage(systemName: "magnifyingglass")
-                        }
+                        $0.cell.imageView?.image = UIImage(systemName: "magnifyingglass")
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .edit:
@@ -96,6 +88,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_Order", comment: "小説の並び替え(順番)")
                         $0.value = setting.isOn
                         $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.imageView?.image = UIImage(systemName: "arrow.up.arrow.down")
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .iCloudPull:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -103,9 +96,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         $0.value = setting.isOn
                         $0.cell.textLabel?.numberOfLines = 0
                         $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                        if #available(iOS 13.0, *), let image = UIImage(systemName: "icloud.and.arrow.down") {
-                            $0.cell.imageView?.image = image
-                        }
+                        $0.cell.imageView?.image = UIImage(systemName: "icloud.and.arrow.down")
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .iCloudPush:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -113,9 +104,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         $0.value = setting.isOn
                         $0.cell.textLabel?.numberOfLines = 0
                         $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                        if #available(iOS 13.0, *), let image = UIImage(systemName: "icloud.and.arrow.up") {
-                            $0.cell.imageView?.image = image
-                        }
+                        $0.cell.imageView?.image = UIImage(systemName: "icloud.and.arrow.up")
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .stopDownload:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -123,9 +112,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         $0.value = setting.isOn
                         $0.cell.textLabel?.numberOfLines = 0
                         $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                        if #available(iOS 13.0, *), let image = UIImage(systemName: "pause.circle") {
-                            $0.cell.imageView?.image = image
-                        }
+                        $0.cell.imageView?.image = UIImage(systemName: "pause.circle")
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .multiSelect:
                     section <<< SwitchRow(setting.type.rawValue) {

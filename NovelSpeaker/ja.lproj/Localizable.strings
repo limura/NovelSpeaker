@@ -966,6 +966,11 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
+"BookShelfTableViewController_AccessibilitySearchFormat" = "%1$@ を検索中";
+"BookShelfTreeViewController_refreshButton_AccessibilityLabel" = "小説の更新確認";
+"BookShelfTreeViewController_EditToggleButton_Done" = "完了";
+"BookShelfTreeViewController_EditToggleButton_Edit" = "編集";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.4
 
 - 「設定タブ」->「タブの表示を画面下部にする〜」を追加します

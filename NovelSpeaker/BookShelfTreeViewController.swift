@@ -92,16 +92,17 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     var showCheckboxes: Bool = false  // チェックボックスの表示/非表示を制御
     var searchText:String? = nil
     var searchButton:UIBarButtonItem = UIBarButtonItem()
-    var switchFolderButton:UIBarButtonItem = UIBarButtonItem()
-    var iCloudPullButton:UIBarButtonItem = UIBarButtonItem()
-    var iCloudPushButton:UIBarButtonItem = UIBarButtonItem()
-    var stopDownloadButton:UIBarButtonItem = UIBarButtonItem()
+    var switchFolderButton:UIButton = UIButton()
+    var iCloudPullButton:UIButton = UIButton()
+    var iCloudPushButton:UIButton = UIButton()
+    var stopDownloadButton:UIButton = UIButton()
     var resumeSpeechFloatingButton:FloatingButton? = nil
-    var toggleCheckboxButton:UIBarButtonItem = UIBarButtonItem()
+    var toggleCheckboxButton:UIButton = UIButton()
     var nextViewStoryID: String?
     var isNextViewNeedResumeSpeech:Bool = false
     var isNextViewNeedUpdateReadDate:Bool = true
     var multiSelectFloatingViewController:FloatingWindowViewController!
+    var editToggleButton: UIButton = UIButton()
     
     var novelArrayNotificationToken : NotificationToken? = nil
     var globalStateNotificationToken: NotificationToken? = nil
@@ -129,10 +130,17 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         
         // 編集ボタン等を配置
         self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .plain, target: self, action: #selector(searchButtonClicked))
-        self.switchFolderButton = UIBarButtonItem.init(image: UIImage(systemName: "rectangle.expand.vertical"), style: .plain, target: self, action: #selector(switchFolderButtonClicked))
-        self.switchFolderButton.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle", comment: "フォルダ開閉")
+        self.switchFolderButton = self.createBarButtonItem(image: UIImage(systemName: "rectangle.expand.vertical"), action: #selector(switchFolderButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle", comment: "フォルダ開閉"))
+        self.editToggleButton =  {
+            let button = UIButton(type: .system)
+            button.addTarget(self.editButtonItem.target,
+                             action: self.editButtonItem.action!,
+                             for: .touchUpInside)
+            return button
+        }()
 
         self.assinButtons()
+        self.updateEditButtonTitle()
 
         if NiftyUtility.IsVersionUped() {
             showVersionUpNotice()
@@ -242,6 +250,10 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             }
         }
     }
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        updateEditButtonTitle()
+    }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -255,6 +267,24 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             }
         }
         return num
+    }
+    
+    private func updateEditButtonTitle() {
+        let title = isEditing ? NSLocalizedString("BookShelfTreeViewController_EditToggleButton_Done", comment: "完了") : NSLocalizedString("BookShelfTreeViewController_EditToggleButton_Edit", comment: "編集")
+        editToggleButton.setTitle(title, for: .normal)
+    }
+
+    func createBarButtonItem(image: UIImage?, action: Selector, accessibilityLabel: String) -> UIButton {
+        let button = UIButton(type: .system)
+        button.setImage(image, for: .normal)
+        button.addTarget(self, action: action, for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.accessibilityLabel = accessibilityLabel
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 28),
+            button.heightAnchor.constraint(equalToConstant: 28)
+        ])
+        return button
     }
     
     func getNode(indexPath: IndexPath) -> (BookShelfRATreeViewCellData, Int)? {
@@ -588,11 +618,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             //multiSelectFloatingViewController.showFloatingWindow(in: NiftyUtility.toplevelViewController ?? self.parent ?? self, yPositionFactor: 0.1)
             //initMultiSelectFloatingWindow()
             updateMultiSelectHeaderVisibility(isHeaderVisible: true)
-            self.toggleCheckboxButton.image = UIImage(systemName: "checkmark.square.fill")
+            self.toggleCheckboxButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .normal)
         }else{
             //multiSelectFloatingViewController.closeFloatingWindow()
             updateMultiSelectHeaderVisibility(isHeaderVisible: false)
-            self.toggleCheckboxButton.image = UIImage(systemName: "checkmark.square")
+            self.toggleCheckboxButton.setImage(UIImage(systemName: "checkmark.square"), for: .normal)
         }
         updateToggleStateForVisibleCells()
     }
@@ -1734,12 +1764,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     
     func setExpandIcon() {
         DispatchQueue.main.async {
-            self.switchFolderButton.image = UIImage(systemName: "rectangle.compress.vertical")
+            self.switchFolderButton.setImage(UIImage(systemName: "rectangle.compress.vertical"), for: .normal)
         }
     }
     func setCollapseIcon() {
         DispatchQueue.main.async {
-            self.switchFolderButton.image = UIImage(systemName: "rectangle.expand.vertical")
+            self.switchFolderButton.setImage(UIImage(systemName: "rectangle.expand.vertical"), for: .normal)
         }
     }
     
@@ -1986,81 +2016,125 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             guard let settingArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetBookshelfViewButtonSetting() else { return BookshelfViewButtonSetting.defaultSetting }
             return settingArray
         }
-        var barButtonItemArray:[UIBarButtonItem] = []
+        var barButtonItemArray:[UIButton] = []
         for buttonSetting in buttonSettingArray {
             if buttonSetting.isOn == false { continue }
             switch buttonSetting.type {
             case .downloadStatus:
-                barButtonItemArray.append(UIBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), style: .plain, target: self, action: #selector(downloadStatusButtonTapped)))
+                let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(downloadStatusButtonTapped), accessibilityLabel: "ダウンロード状態の表示")
+                barButtonItemArray.append(button)
                 break
             case .edit:
-                barButtonItemArray.append(self.editButtonItem)
+                barButtonItemArray.append(self.editToggleButton)
             case .switchFolder:
                 barButtonItemArray.append(self.switchFolderButton)
             case .order:
-                barButtonItemArray.append(UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(sortTypeSelectButtonClicked)))
+                let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.up.arrow.down"), action: #selector(sortTypeSelectButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"))
+                barButtonItemArray.append(button)
             case .reload:
-                barButtonItemArray.append(UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.refresh, target: self, action: #selector(refreshButtonClicked)))
+                let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), action: #selector(refreshButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_refreshButton_AccessibilityLabel", comment: "小説の更新確認"))
+                barButtonItemArray.append(button)
             case .search:
                 break
             case .iCloudPull:
-                let button:UIBarButtonItem
-                if #available(iOS 13.0, *), let image = UIImage(systemName: "icloud.and.arrow.down") {
-                    button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(iCloudPullButtonClicked))
-                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始")
-                }else{
-                    button = UIBarButtonItem(title: NSLocalizedString("BookShelfRATreeViewController_iCloudPullButtonTitle", comment: "iCloudから取得"), style: .plain, target: self, action: #selector(iCloudPullButtonClicked))
-                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始")
-                }
+                let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.down"), action: #selector(iCloudPullButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始"))
                 button.isEnabled = RealmUtil.IsUseCloudRealm()
                 self.iCloudPullButton = button
                 barButtonItemArray.append(button)
             case .iCloudPush:
-                let button:UIBarButtonItem
-                if #available(iOS 13.0, *), let image = UIImage(systemName: "icloud.and.arrow.up") {
-                    button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(iCloudPushButtonClicked))
-                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始")
-                }else{
-                    button = UIBarButtonItem(title: NSLocalizedString("BookShelfRATreeViewController_iCloudPushButtonTitle", comment: "iCloudへ送信"), style: .plain, target: self, action: #selector(iCloudPushButtonClicked))
-                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始")
-                }
+                let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.up"), action: #selector(iCloudPushButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始"))
                 button.isEnabled = RealmUtil.IsUseCloudRealm()
                 self.iCloudPushButton = button
                 barButtonItemArray.append(button)
             case .stopDownload:
-                let button:UIBarButtonItem
-                if #available(iOS 13.0, *), let image = UIImage(systemName: "pause.circle") {
-                    button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(stopDownloadButtonClicked))
-                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止")
-                }else{
-                    button = UIBarButtonItem(title: NSLocalizedString("BookShelfRATreeViewController_stopDownloadButtonTitle", comment: "停止"), style: .plain, target: self, action: #selector(stopDownloadButtonClicked))
-                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止")
-                }
+                let button = self.createBarButtonItem(image: UIImage(systemName: "pause.circle"), action: #selector(stopDownloadButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止"))
                 self.stopDownloadButton = button
                 barButtonItemArray.append(button)
             case .multiSelect:
-                let button = UIBarButtonItem(image: UIImage(systemName: "checkmark.square"), style: .plain, target: self, action: #selector(toggleCheckboxesButtonTapped))
-                button.accessibilityLabel = NSLocalizedString("BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel", comment: "選択")
+                let button = self.createBarButtonItem(image: UIImage(systemName: "checkmark.square"), action: #selector(toggleCheckboxesButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel", comment: "選択"))
                 self.toggleCheckboxButton = button
                 barButtonItemArray.append(button)
                 break
             }
         }
-        if #available(iOS 26.0, *) {
-            // そのままだと画像のボタンと文字のボタンで別グループとされてしまうのですが
-            // 全てを一つのグループにするのはそれはそれで大変そうなので全てを別のグループとするために .fixedSpace(0) を間に入れます
-            var spacedBarButtonItemArray:[UIBarButtonItem] = []
-            let spacer:UIBarButtonItem = .fixedSpace(0)
-            for (index, item) in barButtonItemArray.reversed().enumerated() {
-                spacedBarButtonItemArray.append(item)
-                if index < barButtonItemArray.count - 1 {
-                    spacedBarButtonItemArray.append(spacer)
+        let maxButtons: Int = {
+            let screenWidth = UIScreen.main.bounds.width
+            let containerMaxWidth = screenWidth * 0.70
+
+            let buttonWidth: CGFloat = 28
+            let spacing: CGFloat = 4
+
+            let totalUnitWidth = buttonWidth + spacing
+
+            return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
+        }()
+
+        let allButtons = barButtonItemArray
+        guard let lastButton = allButtons.last else { return }
+
+        var visibleButtons: [UIButton] = []
+        var overflowButtons: [UIButton] = []
+
+        if allButtons.count <= maxButtons {
+            visibleButtons = allButtons
+        } else {
+            // lastButton を除いた残り
+            let others = Array(allButtons.dropLast())
+
+            // 表示可能数から lastButton と overflow 分を引く
+            let capacityForOthers = maxButtons - 2
+
+            if capacityForOthers > 0 {
+                // 後ろから優先して残す
+                let kept = others.suffix(capacityForOthers)
+                overflowButtons = Array(others.prefix(others.count - kept.count))
+                visibleButtons = Array(kept) + [lastButton]
+            } else {
+                overflowButtons = others
+                visibleButtons = [lastButton]
+            }
+        }
+        if !overflowButtons.isEmpty {
+            let actions = overflowButtons.map { button in
+                UIAction(title: button.accessibilityLabel ?? "",
+                         image: button.image(for: .normal)) { _ in
+                    button.sendActions(for: .touchUpInside)
                 }
             }
-            self.navigationItem.rightBarButtonItems = spacedBarButtonItemArray
-        } else {
-            self.navigationItem.rightBarButtonItems = barButtonItemArray.reversed()
+
+            let menu = UIMenu(children: actions)
+
+            let moreButton = UIButton(type: .system)
+            moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+            moreButton.menu = menu
+            moreButton.showsMenuAsPrimaryAction = true
+
+            visibleButtons.insert(moreButton, at: 0)
         }
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.alignment = .center
+        stack.spacing = 4
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        for button in visibleButtons {
+            stack.addArrangedSubview(button)
+        }
+        
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        let maxWidth = UIScreen.main.bounds.width * 0.76
+        container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
+        container.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            stack.topAnchor.constraint(equalTo: container.topAnchor),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+
+        let barItem = UIBarButtonItem(customView: container)
+        navigationItem.rightBarButtonItem = barItem
     }
     
     func assignLeftBarButtons() {
@@ -2283,8 +2357,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             self.searchText = newFilterString
             if newFilterString == "" {
                 self.searchButton.title = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索")
+                self.searchButton.accessibilityLabel = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索")
             }else{
                 self.searchButton.title = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索") + "(" + newFilterString + ")"
+                let format = NSLocalizedString("BookShelfTableViewController_AccessibilitySearchFormat", comment: "%1$@ を検索中")
+                let message = String(format: format, newFilterString)
+                self.searchButton.accessibilityLabel = message
             }
             DispatchQueue.global(qos: .userInteractive).async {
                 self.reloadAllData(doScroll: true)
