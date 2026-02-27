@@ -704,6 +704,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         self.chapterPositionLabel.backgroundColor = backgroundColor
         self.chapterPositionLabel.textColor = foregroundColor
         self.tabBarController?.tabBar.barTintColor = backgroundColor
+        self.tabBarController?.tabBar.backgroundColor = backgroundColor
         self.navigationController?.navigationBar.barTintColor = backgroundColor
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
         // ステータスバーの色を指定する
