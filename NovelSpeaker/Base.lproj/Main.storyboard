@@ -332,7 +332,7 @@
                                             <constraint firstAttribute="width" priority="750" constant="46" id="Tev-Wn-DbS"/>
                                         </constraints>
                                         <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain" image="arrow.trianglehead.clockwise.rotate.90" catalog="system"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="arrow.clockwise" catalog="system"/>
                                         <connections>
                                             <action selector="reloadButtonClicked:" destination="Ntb-XE-J32" eventType="touchUpInside" id="58Q-Ot-5g3"/>
                                         </connections>
@@ -1808,15 +1808,15 @@ THE SOFTWARE.
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="uw4-9z-dhB"/>
-        <segue reference="wOu-8d-Sto"/>
+        <segue reference="IyG-FH-EcD"/>
+        <segue reference="zcY-Ej-AY3"/>
         <segue reference="DiM-k6-LVA"/>
     </inferredMetricsTieBreakers>
     <resources>
+        <image name="arrow.clockwise" catalog="system" width="110" height="128"/>
         <image name="arrow.down" catalog="system" width="118" height="128"/>
         <image name="arrow.left" catalog="system" width="128" height="95"/>
         <image name="arrow.right" catalog="system" width="128" height="95"/>
-        <image name="arrow.trianglehead.clockwise.rotate.90" catalog="system" width="128" height="119"/>
         <image name="arrow.up" catalog="system" width="118" height="128"/>
         <image name="arrowtriangle.left.fill" catalog="system" width="128" height="113"/>
         <image name="arrowtriangle.right.fill" catalog="system" width="128" height="113"/>
