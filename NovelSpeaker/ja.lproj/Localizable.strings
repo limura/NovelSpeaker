@@ -349,6 +349,8 @@
 "SpeechViewController_KeyboardShortcut_StartStopSpeech_Title" = "発話の開始/停止";
 "SpeechViewController_LoadingFailed_GlobalStateIsNull" = "本文の読み込みに失敗しました。全体設定を読み込めませんでした。";
 "SpeechViewController_LoadingFailed_GlobalStateIsNull" = "本文の読み込みに失敗しました。小説のページを読み込めませんでした。";
+"SpeechViewController_SearchButton_AccessibilityLabel" = "検索";
+"SpeechViewController_RefreshButton_AccessibilityLabel" = "この小説の更新確認を行う";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
