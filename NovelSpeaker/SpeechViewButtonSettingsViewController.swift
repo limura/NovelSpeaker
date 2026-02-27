@@ -34,9 +34,15 @@ class SpeechViewButtonSettingsViewController: FormViewController {
         var newSetting:[SpeechViewButtonSetting] = []
         for row in self.form.allRows {
             guard let tag = row.tag, let type = SpeechViewButtonTypes.init(rawValue: tag) else { continue }
-            if let _ = row as? LabelRow, type == .detail {
-                newSetting.append(SpeechViewButtonSetting(type: type, isOn: true))
-                continue
+            if let _ = row as? LabelRow {
+                if type == .detail {
+                    newSetting.append(SpeechViewButtonSetting(type: type, isOn: true))
+                    continue
+                }
+                if type == .speechStop {
+                    newSetting.append(SpeechViewButtonSetting(type: type, isOn: true))
+                    continue
+                }
             }
             guard let switchRow = row as? SwitchRow, let value = switchRow.value else { continue }
             let rowSetting = SpeechViewButtonSetting(type: type, isOn: value)
@@ -52,18 +58,24 @@ class SpeechViewButtonSettingsViewController: FormViewController {
         self.form +++ MultivaluedSection(multivaluedOptions: .Reorder) { section in
             for setting in settingArray {
                 switch setting.type {
+                case .speechStop:
+                    section <<< LabelRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("SpeechViewButtonType_SpeechStop", comment: "発話の開始・停止")
+                        $0.cell.imageView?.image = UIImage(systemName: "play.fill")
+                        $0.cell.textLabel?.numberOfLines = 0
+                    }
                 case .openCurrentWebPage:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_OpenCurrentWebPage", comment: "現在のページをWeb取込タブで開く")
                         $0.value = setting.isOn
-                        $0.cell.imageView?.image = UIImage(named: "earth")?.withRenderingMode(.alwaysTemplate)
+                        $0.cell.imageView?.image = UIImage(systemName: "globe.americas.fill")?.withRenderingMode(.alwaysTemplate)
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .openWebPage:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_OpenWebPage", comment: "Web取込タブで開く")
                         $0.value = setting.isOn
-                        $0.cell.imageView?.image = UIImage(named: "earth")?.withRenderingMode(.alwaysTemplate)
+                        $0.cell.imageView?.image = UIImage(systemName: "globe.badge.chevron.backward")?.withRenderingMode(.alwaysTemplate)
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .reload:
@@ -107,17 +119,20 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Edit", comment: "小説を編集する")
                         $0.cell.textLabel?.numberOfLines = 0
                         $0.value = setting.isOn
+                        $0.cell.imageView?.image = UIImage(systemName: "pencil")
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .backup:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Backup", comment: "小説をバックアップする")
                         $0.cell.textLabel?.numberOfLines = 0
                         $0.value = setting.isOn
+                        $0.cell.imageView?.image = UIImage(systemName: "tray.and.arrow.up")
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .detail:
                     section <<< LabelRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Detail", comment: "小説の詳細を表示する")
                         $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.imageView?.image = UIImage(systemName: "book.pages")
                     }
                 case .skipBackward:
                     section <<< SwitchRow(setting.type.rawValue) {

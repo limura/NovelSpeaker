@@ -880,6 +880,7 @@
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_PlaceHolder" = "Type <Enter> to represent a line break";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_EnterButton" = "Add";
 
+"SpeechViewButtonType_SpeechStop" = "Start/Stop Speech";
 "SpeechViewButtonType_OpenCurrentWebPage" = "Open current page with Web import tab";
 "SpeechViewButtonType_OpenWebPage" = "Open in Web import tab";
 "SpeechViewButtonType_Reload" = "Check for updates to the novel";

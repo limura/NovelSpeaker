@@ -2386,6 +2386,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
 }
 
 enum SpeechViewButtonTypes:String, Codable {
+    case speechStop = "speechStop"
     case openCurrentWebPage = "openCurrentWebPage"
     case openWebPage = "openWebPage"
     case reload = "reload"
@@ -2405,6 +2406,7 @@ struct SpeechViewButtonSetting: Codable {
     var isOn:Bool
     
     static let defaultSetting:[SpeechViewButtonSetting] = [
+        SpeechViewButtonSetting(type: .speechStop, isOn: true),
         SpeechViewButtonSetting(type: .showTableOfContents, isOn: false),
         SpeechViewButtonSetting(type: .skipBackward, isOn: false),
         SpeechViewButtonSetting(type: .skipForward, isOn: false),

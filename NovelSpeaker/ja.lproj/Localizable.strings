@@ -870,6 +870,7 @@
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_PlaceHolder" = "改行を表現するには <改行> と入力します";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_EnterButton" = "追加";
 
+"SpeechViewButtonType_SpeechStop" = "発話の開始・停止";
 "SpeechViewButtonType_OpenCurrentWebPage" = "現在のページをWeb取込タブで開く";
 "SpeechViewButtonType_OpenWebPage" = "Web取込タブで開く";
 "SpeechViewButtonType_Reload" = "その小説の更新確認を行う";
