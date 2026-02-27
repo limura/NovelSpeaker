@@ -806,19 +806,19 @@ body.NovelSpeakerBody {
             if buttonSetting.isOn == false { continue }
             switch buttonSetting.type {
             case .openCurrentWebPage:
-                let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(openCurrentWebPageButtonClicked(_:)))
+                let webPageButton = UIBarButtonItem(image: UIImage(systemName: "globe.americas.fill"), style: .plain, target: self, action: #selector(openCurrentWebPageButtonClicked(_:)))
                 webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_CurrentWebPageButton_VoiceOverTitle", comment: "現在のページをWeb取込タブで開く")
                 if novelType == .URL {
                     barButtonArray.append(webPageButton)
                 }
             case .openWebPage:
-                let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:)))
+                let webPageButton = UIBarButtonItem(image: UIImage(systemName: "globe.badge.chevron.backward"), style: .plain, target: self, action: #selector(safariButtonClicked(_:)))
                 webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
                 if novelType == .URL {
                     barButtonArray.append(webPageButton)
                 }
             case .reload:
-                if novelType == .URL {
+                if novelType == .URL || (novelType == .UserCreated && NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novelID)) {
                     barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(urlRefreshButtonClicked(_:))))
                 }
             case .share:
@@ -829,52 +829,54 @@ body.NovelSpeakerBody {
                 }
             case .search:
                 barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:))))
+                /* // ページ内検索機能はWebView側と連携しないと駄目なので後回しにします。色々大変そうです
+            case .searchByText:
+                let button = UIBarButtonItem(image: UIImage(systemName: "doc.text.magnifyingglass"), style: .plain, target: self, action: #selector(searchByTextButtonClicked(_:)))
+                button.accessibilityLabel = NSLocalizedString("SpeechViewController_SearchByTextButton_AccessibilityLabel", comment: "ページ内を検索")
+                barButtonArray.append(button)
+                 */
             case .edit:
-                barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Edit", comment: "編集"), style: .plain, target: self, action: #selector(editButtonClicked(_:))))
+                let button = UIBarButtonItem(image: UIImage(systemName: "pencil"), style: .plain, target: self, action: #selector(editButtonClicked(_:)))
+                button.accessibilityLabel = NSLocalizedString("SpeechViewController_Edit", comment: "編集")
+                barButtonArray.append(button)
             case .detail:
-                barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Detail", comment: "詳細"), style: .plain, target: self, action: #selector(detailButtonClicked(_:))))
+                let button = UIBarButtonItem(image: UIImage(systemName: "book.pages"), style: .plain, target: self, action: #selector(detailButtonClicked(_:)))
+                button.accessibilityLabel = NSLocalizedString("SpeechViewController_Detail", comment: "詳細")
+                barButtonArray.append(button)
             case .backup:
-                barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_BackupButton", comment: "バックアップ"), style: .plain, target: self, action: #selector(backupButtonClicked(_:))))
+                let button = UIBarButtonItem(image: UIImage(systemName: "tray.and.arrow.up"), style: .plain, target: self, action: #selector(backupButtonClicked(_:)))
+                button.accessibilityLabel = NSLocalizedString("SpeechViewController_BackupButton", comment: "バックアップ")
+                barButtonArray.append(button)
                 break
             case .skipBackward:
                 let skipBackwardButtonItem:UIBarButtonItem
-                if #available(iOS 13.0, *) {
-                    skipBackwardButtonItem = UIBarButtonItem(image: UIImage(systemName: "gobackward.30"), style: .plain, target: self, action: #selector(skipBackwardButtonClicked(_:)))
-                    skipBackwardButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し")
-                } else {
-                    skipBackwardButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し"), style: .plain, target: self, action: #selector(skipBackwardButtonClicked(_:)))
-                }
+                skipBackwardButtonItem = UIBarButtonItem(image: UIImage(systemName: "gobackward.30"), style: .plain, target: self, action: #selector(skipBackwardButtonClicked(_:)))
+                skipBackwardButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し")
                 skipBackwardButtonItem.isEnabled = false
                 self.skipBackwardButtonItem = skipBackwardButtonItem
                 barButtonArray.append(skipBackwardButtonItem)
             case .skipForward:
                 let skipForwardButtonItem:UIBarButtonItem
-                if #available(iOS 13.0, *) {
-                    skipForwardButtonItem = UIBarButtonItem(image: UIImage(systemName: "goforward.30"), style: .plain, target: self, action: #selector(skipForwardButtonClicked(_:)))
-                    skipForwardButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ")
-                } else {
-                    skipForwardButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ"), style: .plain, target: self, action: #selector(skipForwardButtonClicked(_:)))
-                }
+                skipForwardButtonItem = UIBarButtonItem(image: UIImage(systemName: "goforward.30"), style: .plain, target: self, action: #selector(skipForwardButtonClicked(_:)))
+                skipForwardButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ")
                 skipForwardButtonItem.isEnabled = false
                 self.skipForwardButtonItem = skipForwardButtonItem
                 barButtonArray.append(skipForwardButtonItem)
             case .showTableOfContents:
                 let showTableOfContentsButtonItem:UIBarButtonItem
-                if #available(iOS 13.0, *) {
-                    showTableOfContentsButtonItem = UIBarButtonItem(image: UIImage(systemName: "list.bullet"), style: .plain, target: self, action: #selector(showTableOfContentsButtonClicked(_:)))
-                    showTableOfContentsButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
-                } else {
-                    showTableOfContentsButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次"), style: .plain, target: self, action: #selector(showTableOfContentsButtonClicked(_:)))
-                }
+                showTableOfContentsButtonItem = UIBarButtonItem(image: UIImage(systemName: "list.bullet"), style: .plain, target: self, action: #selector(showTableOfContentsButtonClicked(_:)))
+                showTableOfContentsButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
                 self.showTableOfContentsButtonItem = showTableOfContentsButtonItem
                 barButtonArray.append(showTableOfContentsButtonItem)
+            case .speechStop:
+                let startStopButtonItem = UIBarButtonItem(image: UIImage(systemName: "play.fill"), style: .plain, target: self, action: #selector(startStopButtonClicked(_:)))
+                startStopButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
+                self.startStopButtonItem = startStopButtonItem
+                barButtonArray.append(startStopButtonItem)
             default:
                 break
             }
         }
-        let startStopButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"), style: .plain, target: self, action: #selector(startStopButtonClicked(_:)))
-        self.startStopButtonItem = startStopButtonItem
-        barButtonArray.append(startStopButtonItem)
         barButtonArray.reverse()
 
         DispatchQueue.main.async {
