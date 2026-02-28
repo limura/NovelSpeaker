@@ -18,7 +18,6 @@ target 'NovelSpeaker' do
   # Pods for NovelSpeaker
   pod 'SZTextView'
   pod 'Eureka'
-  pod "MSColorPicker"
 
   source 'https://github.com/CocoaPods/Specs.git'
   pod 'FTLinearActivityIndicator'
