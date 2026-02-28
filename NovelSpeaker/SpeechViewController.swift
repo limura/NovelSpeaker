@@ -896,6 +896,17 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
         // ステータスバーの色を指定する
         self.navigationController?.navigationBar.barStyle = barStyle
+        // navigation bar の appearance を変更する
+        let appearance = UINavigationBarAppearance()
+        // 1. 背景を不透明（Opaque）に設定し、背景色を指定
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = backgroundColor
+        // 2. タイトルの色を設定
+        appearance.titleTextAttributes = [.foregroundColor: foregroundColor]
+        // 3. 全ての状態（通常時・スクロール時）に同じ外観を適用する
+        self.navigationController?.navigationBar.standardAppearance = appearance
+        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        self.navigationController?.navigationBar.compactAppearance = appearance
     }
     
     func applyTheme() {
