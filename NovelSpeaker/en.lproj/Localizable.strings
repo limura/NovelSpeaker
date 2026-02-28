@@ -383,8 +383,10 @@
 "SpeechViewController_KeyboardShortcut_StartStopSpeech_Title" = "Speech start/stop";
 "SpeechViewController_LoadingFailed_GlobalStateIsNull" = "Failed to load text. Failed to load global settings.";
 "SpeechViewController_LoadingFailed_GlobalStateIsNull" = "Failed to load text. Could not load novel page.";
-"SpeechViewController_SearchButton_AccessibilityLabel" = "Search";
-"SpeechViewController_RefreshButton_AccessibilityLabel" = "Check for updates to this novel";
+"SpeechViewController_SearchButton_AccessibilityLabel" = "Search";
+"SpeechViewController_RefreshButton_AccessibilityLabel" = "Check for updates to this novel";
+"SpeechViewController_moreButton_AccessibilityLabel" = "Show hidden menu items";
+
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";

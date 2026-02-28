@@ -393,7 +393,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }()
         // VoiceOver 環境下 であれば重なってしまってもよしとする
         if UIAccessibility.isVoiceOverRunning {
-            maxButtons = 999
+            // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
+            //maxButtons = 999
         }
 
         let allButtons = barButtonArray
@@ -435,6 +436,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
             moreButton.menu = menu
             moreButton.showsMenuAsPrimaryAction = true
+            moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
 
             visibleButtons.insert(moreButton, at: 0)
         }
