@@ -2406,7 +2406,6 @@ struct SpeechViewButtonSetting: Codable {
     var isOn:Bool
     
     static let defaultSetting:[SpeechViewButtonSetting] = [
-        SpeechViewButtonSetting(type: .speechStop, isOn: true),
         SpeechViewButtonSetting(type: .showTableOfContents, isOn: false),
         SpeechViewButtonSetting(type: .skipBackward, isOn: false),
         SpeechViewButtonSetting(type: .skipForward, isOn: false),
@@ -2419,6 +2418,7 @@ struct SpeechViewButtonSetting: Codable {
         SpeechViewButtonSetting(type: .backup, isOn: false),
         SpeechViewButtonSetting(type: .detail, isOn: true),
         SpeechViewButtonSetting(type: .edit, isOn: true),
+        SpeechViewButtonSetting(type: .speechStop, isOn: true), // ← ⚠️注意: これは一番最後であることを期待されています
     ]
     // 与えられた配列を、defaultSetting に存在するtypeの物を全て含んだ状態にして返します。
     // つまり、壊れていて空の配列になっていれば defaultSetting そのものになるし、
@@ -2444,9 +2444,25 @@ struct SpeechViewButtonSetting: Codable {
         }
         return result
     }
+    // speechStopボタンが無ければ列の「最後に」追加します
+    static func InjectSpeechStopButtonIfNeeded(settingArray:[SpeechViewButtonSetting]) -> [SpeechViewButtonSetting] {
+        var result: [SpeechViewButtonSetting] = []
+        var speechStopButtonExists:Bool = false
+        for setting in settingArray {
+            if setting.type == .speechStop {
+                speechStopButtonExists = true
+            }
+            result.append(setting)
+        }
+        if !speechStopButtonExists {
+            let newSetting = SpeechViewButtonSetting(type: .speechStop, isOn: true)
+            result.append(newSetting)
+        }
+        return result
+    }
     static func DataToSettingArray(data:Data) -> [SpeechViewButtonSetting] {
         guard let result = try? JSONDecoder().decode([SpeechViewButtonSetting].self, from: data) else { return defaultSetting }
-        return ValidateAndFixSettingArray(settingArray: result)
+        return InjectSpeechStopButtonIfNeeded(settingArray: ValidateAndFixSettingArray(settingArray: result))
     }
     static func SettingArrayToData(settingArray:[SpeechViewButtonSetting]) -> Data? {
         return try? JSONEncoder().encode(settingArray)
