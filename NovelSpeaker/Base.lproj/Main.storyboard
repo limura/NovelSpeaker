@@ -368,7 +368,7 @@
                             <constraint firstItem="7Se-Bl-rd5" firstAttribute="trailing" secondItem="b2P-LC-lhM" secondAttribute="trailing" id="wQK-bS-Qsi"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Web取込" image="earth.png" id="DHc-nq-yTa"/>
+                    <tabBarItem key="tabBarItem" title="Web取込" image="globe.europe.africa.fill" catalog="system" id="DHc-nq-yTa"/>
                     <connections>
                         <outlet property="addressBarUITextField" destination="LSE-Fd-akM" id="n5w-lt-aJL"/>
                         <outlet property="backButton" destination="7Rg-jR-Szr" id="Cea-LL-26b"/>
@@ -1367,7 +1367,7 @@ THE SOFTWARE.
         <scene sceneID="jLN-GL-WMq">
             <objects>
                 <navigationController definesPresentationContext="YES" id="SVO-uL-7kp" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="設定" image="gear.png" id="RLW-4z-oWd"/>
+                    <tabBarItem key="tabBarItem" title="設定" image="gearshape" catalog="system" id="RLW-4z-oWd"/>
                     <navigationItem key="navigationItem" id="n1k-4X-225"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="mIp-pB-YHg">
                         <rect key="frame" x="0.0" y="20" width="320" height="54"/>
@@ -1822,8 +1822,7 @@ THE SOFTWARE.
         <image name="arrowtriangle.right.fill" catalog="system" width="128" height="113"/>
         <image name="bookmark" catalog="system" width="110" height="128"/>
         <image name="booksearch.png" width="9.8742856979370117" height="9.8742856979370117"/>
-        <image name="earth.png" width="36" height="36"/>
-        <image name="gear.png" width="15" height="15"/>
+        <image name="gearshape" catalog="system" width="128" height="123"/>
         <image name="globe.europe.africa.fill" catalog="system" width="128" height="123"/>
         <image name="house.fill" catalog="system" width="128" height="104"/>
         <image name="soundbook.png" width="9.8742856979370117" height="9.8742856979370117"/>
