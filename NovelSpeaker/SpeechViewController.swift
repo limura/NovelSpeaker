@@ -75,6 +75,20 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
             }
             self.observeStory(storyID: storyID)
+            
+            // VoiceOver の ON/OFF を受け取って右上のボタン配置をゴニョる
+            NotificationCenter.default.addObserver(
+                forName: UIAccessibility.voiceOverStatusDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { _ in
+                self.forceUpdateUpperButtons()
+                if UIAccessibility.isVoiceOverRunning {
+                    //print("VoiceOverがONになりました")
+                } else {
+                    //print("VoiceOverがOFFになりました")
+                }
+            }
         }else{
             textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
         }
@@ -112,14 +126,18 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         self.clearSearchView()
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
+    func forceUpdateUpperButtons() {
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
                 self.assignUpperButtons(novelID: novel.novelID, novelType: novel.type, aliveButtonSettings: buttonSettings)
             }
         }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        forceUpdateUpperButtons()
     }
     
     deinit {
@@ -362,7 +380,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
         }
 
-        let maxButtons: Int = {
+        var maxButtons: Int = {
             let screenWidth = UIScreen.main.bounds.width
             let containerMaxWidth = screenWidth * 0.76
 
@@ -373,6 +391,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
 
             return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
         }()
+        // VoiceOver 環境下 であれば重なってしまってもよしとする
+        if UIAccessibility.isVoiceOverRunning {
+            maxButtons = 999
+        }
 
         let allButtons = barButtonArray
         guard let lastButton = allButtons.last else { return }

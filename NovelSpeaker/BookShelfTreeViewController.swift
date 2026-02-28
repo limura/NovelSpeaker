@@ -193,6 +193,15 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         RealmObserverHandler.shared.AddDelegate(delegate: self)
         registObserver()
         registNotificationCenter()
+
+        // VoiceOver の ON/OFF を受け取って右上・左上のボタン配置をゴニョる
+        NotificationCenter.default.addObserver(
+            forName: UIAccessibility.voiceOverStatusDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            self.assinButtons()
+        }
     }
     
     deinit {
@@ -225,6 +234,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         if self.showCheckboxes {
             self.toggleCheckboxes()
         }
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.assinButtons()
     }
 
     override func didReceiveMemoryWarning() {
@@ -2057,7 +2071,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 break
             }
         }
-        let maxButtons: Int = {
+        var maxButtons: Int = {
             let screenWidth = UIScreen.main.bounds.width
             let containerMaxWidth = screenWidth * 0.70
 
@@ -2068,7 +2082,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
 
             return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
         }()
-
+        // VoiceOver 環境下 であれば重なってしまってもよしとする
+        if UIAccessibility.isVoiceOverRunning {
+            maxButtons = 999
+        }
+        
         let allButtons = barButtonItemArray
         guard let lastButton = allButtons.last else { return }
 
