@@ -10,7 +10,7 @@ import UIKit
 import Eureka
 import RealmSwift
 
-class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPresentationControllerDelegate, MSColorSelectionViewControllerDelegate, RealmObserverResetDelegate {
+class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPresentationControllerDelegate, RealmObserverResetDelegate, UIColorPickerViewControllerDelegate {
     var tmpColorSetting:UIColor = UIColor.white
     
     var globalStateColorNotificationToken:NotificationToken? = nil
@@ -121,31 +121,24 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
         }
     }
     
+    func colorPickerViewControllerDidSelectColor(_ viewController: UIColorPickerViewController) {
+        let selectedColor = viewController.selectedColor
+        setColorPickerColor(color: selectedColor)
+    }
     func selectColor(target:ColorPickerTarget, row:ButtonRow) {
         self.colorPickerTarget = target
-        let colorSelectionViewController = MSColorSelectionViewController()
-        let navController = UINavigationController(rootViewController: colorSelectionViewController)
-        navController.modalPresentationStyle = .popover
-        navController.popoverPresentationController?.delegate = self
-        navController.popoverPresentationController?.sourceView = row.cell.contentView
-        navController.popoverPresentationController?.sourceRect = row.cell.contentView.bounds
-        navController.preferredContentSize = colorSelectionViewController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-        colorSelectionViewController.delegate = self
-        colorSelectionViewController.color = self.getForegroundColor()
+        let selectedColor:UIColor
         switch target {
         case .background:
-            colorSelectionViewController.color = self.getBackgroundColor()
+            selectedColor = self.getBackgroundColor()
         case .foreground:
-            colorSelectionViewController.color = self.getForegroundColor()
+            selectedColor = self.getForegroundColor()
         }
-        self.tmpColorSetting = colorSelectionViewController.color
-        let cancelButtonItem = UIBarButtonItem(title: NSLocalizedString("Cancel_button", comment: "キャンセル"), style: .done, target: self, action: #selector(self.cancelAndDismissViewController(sendor:)))
-        colorSelectionViewController.navigationItem.leftBarButtonItem = cancelButtonItem
-        if self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClass.compact {
-            let commitButtonItem = UIBarButtonItem(title: NSLocalizedString("NovelDisplayColorSettingViewController_ColorPickerDoneTitle", comment: "この色で設定"), style: .done, target: self, action: #selector(self.dismissViewController(sendor:)))
-            colorSelectionViewController.navigationItem.rightBarButtonItem = commitButtonItem
-        }
-        self.present(navController, animated: true, completion: nil)
+
+        let colorPicker = UIColorPickerViewController()
+        colorPicker.delegate = self
+        colorPicker.selectedColor = selectedColor
+        present(colorPicker, animated: true)
     }
 
     func createForms() {
@@ -212,10 +205,6 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
             self.saveColor(foregroundColor: getForegroundColor(), backgroundColor: color)
             self.refreshColorFromSetting()
         }
-    }
-    
-    @objc func colorViewController(_ colorViewCntroller: MSColorSelectionViewController, didChange color: UIColor) {
-        setColorPickerColor(color: color)
     }
     
     @objc func prepareForPopoverPresentation(_ popoverPresentationController: UIPopoverPresentationController) {
