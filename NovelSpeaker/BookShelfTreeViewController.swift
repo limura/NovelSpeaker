@@ -91,7 +91,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     var displayDataArray : [BookShelfRATreeViewCellData] = [];
     var showCheckboxes: Bool = false  // チェックボックスの表示/非表示を制御
     var searchText:String? = nil
-    var searchButton:UIBarButtonItem = UIBarButtonItem()
+    var searchButton:MaxWidthButton = MaxWidthButton()
     var switchFolderButton:UIButton = UIButton()
     var iCloudPullButton:UIButton = UIButton()
     var iCloudPushButton:UIButton = UIButton()
@@ -129,7 +129,13 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         self.title = NSLocalizedString("BookShelfRATreeViewController_Title", comment: "本棚")
         
         // 編集ボタン等を配置
-        self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .plain, target: self, action: #selector(searchButtonClicked))
+        self.searchButton = MaxWidthButton(type: .system)
+        self.searchButton.addTarget(self, action: #selector(searchButtonClicked), for: .touchUpInside)
+        self.searchButton.setTitle(NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), for: .normal)
+        self.searchButton.titleLabel?.lineBreakMode = .byTruncatingTail
+        self.searchButton.titleLabel?.adjustsFontSizeToFitWidth = false
+        self.searchButton.translatesAutoresizingMaskIntoConstraints = false
+        //self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .plain, target: self, action: #selector(searchButtonClicked))
         self.switchFolderButton = self.createBarButtonItem(image: UIImage(systemName: "rectangle.expand.vertical"), action: #selector(switchFolderButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle", comment: "フォルダ開閉"))
         self.editToggleButton =  {
             let button = UIButton(type: .system)
@@ -238,6 +244,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        self.updateLeftBarButtonWidth()
         self.assinButtons()
     }
 
@@ -294,9 +301,13 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         button.addTarget(self, action: action, for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.accessibilityLabel = accessibilityLabel
+        let widthConstraint = button.widthAnchor.constraint(equalToConstant: 28)
+        widthConstraint.priority = UILayoutPriority(999) // 1000未満にする
+        let heightConstraint = button.heightAnchor.constraint(equalToConstant: 28)
+        heightConstraint.priority = UILayoutPriority(999)
         NSLayoutConstraint.activate([
-            button.widthAnchor.constraint(equalToConstant: 28),
-            button.heightAnchor.constraint(equalToConstant: 28)
+            widthConstraint,
+            heightConstraint
         ])
         return button
     }
@@ -2026,139 +2037,168 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     }
     
     func assignRightBarButtons() {
-        let buttonSettingArray = RealmUtil.RealmBlock { (realm) -> [BookshelfViewButtonSetting] in
-            guard let settingArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetBookshelfViewButtonSetting() else { return BookshelfViewButtonSetting.defaultSetting }
-            return settingArray
-        }
-        var barButtonItemArray:[UIButton] = []
-        for buttonSetting in buttonSettingArray {
-            if buttonSetting.isOn == false { continue }
-            switch buttonSetting.type {
-            case .downloadStatus:
-                let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(downloadStatusButtonTapped), accessibilityLabel: "ダウンロード状態の表示")
-                barButtonItemArray.append(button)
-                break
-            case .edit:
-                barButtonItemArray.append(self.editToggleButton)
-            case .switchFolder:
-                barButtonItemArray.append(self.switchFolderButton)
-            case .order:
-                let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.up.arrow.down"), action: #selector(sortTypeSelectButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"))
-                barButtonItemArray.append(button)
-            case .reload:
-                let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), action: #selector(refreshButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_refreshButton_AccessibilityLabel", comment: "小説の更新確認"))
-                barButtonItemArray.append(button)
-            case .search:
-                break
-            case .iCloudPull:
-                let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.down"), action: #selector(iCloudPullButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始"))
-                button.isEnabled = RealmUtil.IsUseCloudRealm()
-                self.iCloudPullButton = button
-                barButtonItemArray.append(button)
-            case .iCloudPush:
-                let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.up"), action: #selector(iCloudPushButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始"))
-                button.isEnabled = RealmUtil.IsUseCloudRealm()
-                self.iCloudPushButton = button
-                barButtonItemArray.append(button)
-            case .stopDownload:
-                let button = self.createBarButtonItem(image: UIImage(systemName: "pause.circle"), action: #selector(stopDownloadButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止"))
-                self.stopDownloadButton = button
-                barButtonItemArray.append(button)
-            case .multiSelect:
-                let button = self.createBarButtonItem(image: UIImage(systemName: "checkmark.square"), action: #selector(toggleCheckboxesButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel", comment: "選択"))
-                self.toggleCheckboxButton = button
-                barButtonItemArray.append(button)
-                break
+        DispatchQueue.main.async {
+            let buttonSettingArray = RealmUtil.RealmBlock { (realm) -> [BookshelfViewButtonSetting] in
+                guard let settingArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetBookshelfViewButtonSetting() else { return BookshelfViewButtonSetting.defaultSetting }
+                return settingArray
             }
-        }
-        var maxButtons: Int = {
-            let screenWidth = UIScreen.main.bounds.width
-            let containerMaxWidth = screenWidth * 0.70
-
-            let buttonWidth: CGFloat = 28
-            let spacing: CGFloat = 4
-
-            let totalUnitWidth = buttonWidth + spacing
-
-            return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
-        }()
-        // VoiceOver 環境下 であれば重なってしまってもよしとする
-        if UIAccessibility.isVoiceOverRunning {
-            // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
-            //maxButtons = 999
-        }
-        
-        let allButtons = barButtonItemArray
-        guard let lastButton = allButtons.last else { return }
-
-        var visibleButtons: [UIButton] = []
-        var overflowButtons: [UIButton] = []
-
-        if allButtons.count <= maxButtons {
-            visibleButtons = allButtons
-        } else {
-            // lastButton を除いた残り
-            let others = Array(allButtons.dropLast())
-
-            // 表示可能数から lastButton と overflow 分を引く
-            let capacityForOthers = maxButtons - 2
-
-            if capacityForOthers > 0 {
-                // 後ろから優先して残す
-                let kept = others.suffix(capacityForOthers)
-                overflowButtons = Array(others.prefix(others.count - kept.count))
-                visibleButtons = Array(kept) + [lastButton]
-            } else {
-                overflowButtons = others
-                visibleButtons = [lastButton]
-            }
-        }
-        if !overflowButtons.isEmpty {
-            let actions = overflowButtons.map { button in
-                UIAction(title: button.accessibilityLabel ?? "",
-                         image: button.image(for: .normal)) { _ in
-                    button.sendActions(for: .touchUpInside)
+            var barButtonItemArray:[UIButton] = []
+            for buttonSetting in buttonSettingArray {
+                if buttonSetting.isOn == false { continue }
+                switch buttonSetting.type {
+                case .downloadStatus:
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(self.downloadStatusButtonTapped), accessibilityLabel: "ダウンロード状態の表示")
+                    barButtonItemArray.append(button)
+                    break
+                case .edit:
+                    barButtonItemArray.append(self.editToggleButton)
+                case .switchFolder:
+                    barButtonItemArray.append(self.switchFolderButton)
+                case .order:
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.up.arrow.down"), action: #selector(self.sortTypeSelectButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"))
+                    barButtonItemArray.append(button)
+                case .reload:
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), action: #selector(self.refreshButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_refreshButton_AccessibilityLabel", comment: "小説の更新確認"))
+                    barButtonItemArray.append(button)
+                case .search:
+                    break
+                case .iCloudPull:
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.down"), action: #selector(self.iCloudPullButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始"))
+                    button.isEnabled = RealmUtil.IsUseCloudRealm()
+                    self.iCloudPullButton = button
+                    barButtonItemArray.append(button)
+                case .iCloudPush:
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.up"), action: #selector(self.iCloudPushButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始"))
+                    button.isEnabled = RealmUtil.IsUseCloudRealm()
+                    self.iCloudPushButton = button
+                    barButtonItemArray.append(button)
+                case .stopDownload:
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "pause.circle"), action: #selector(self.stopDownloadButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止"))
+                    self.stopDownloadButton = button
+                    barButtonItemArray.append(button)
+                case .multiSelect:
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "checkmark.square"), action: #selector(self.toggleCheckboxesButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel", comment: "選択"))
+                    self.toggleCheckboxButton = button
+                    barButtonItemArray.append(button)
+                    break
                 }
             }
+            var maxButtons: Int = {
+                let screenWidth = UIScreen.main.bounds.width
+                let containerMaxWidth = screenWidth * 0.50 // 検索があるのでそっちに半分譲ります
 
-            let menu = UIMenu(children: actions)
+                let buttonWidth: CGFloat = 28
+                let spacing: CGFloat = 4
 
-            let moreButton = UIButton(type: .system)
-            moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-            moreButton.menu = menu
-            moreButton.showsMenuAsPrimaryAction = true
-            moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
+                let totalUnitWidth = buttonWidth + spacing
 
-            visibleButtons.insert(moreButton, at: 0)
+                return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
+            }()
+            // VoiceOver 環境下 であれば重なってしまってもよしとする
+            if UIAccessibility.isVoiceOverRunning {
+                // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
+                //maxButtons = 999
+            }
+            
+            let allButtons = barButtonItemArray
+            guard let lastButton = allButtons.last else { return }
+
+            var visibleButtons: [UIButton] = []
+            var overflowButtons: [UIButton] = []
+
+            if allButtons.count <= maxButtons {
+                visibleButtons = allButtons
+            } else {
+                // lastButton を除いた残り
+                let others = Array(allButtons.dropLast())
+
+                // 表示可能数から lastButton と overflow 分を引く
+                let capacityForOthers = maxButtons - 2
+
+                if capacityForOthers > 0 {
+                    // 後ろから優先して残す
+                    let kept = others.suffix(capacityForOthers)
+                    overflowButtons = Array(others.prefix(others.count - kept.count))
+                    visibleButtons = Array(kept) + [lastButton]
+                } else {
+                    overflowButtons = others
+                    visibleButtons = [lastButton]
+                }
+            }
+            if !overflowButtons.isEmpty {
+                let actions = overflowButtons.map { button in
+                    UIAction(title: button.accessibilityLabel ?? "",
+                             image: button.image(for: .normal)) { _ in
+                        button.sendActions(for: .touchUpInside)
+                    }
+                }
+
+                let menu = UIMenu(children: actions)
+
+                let moreButton = UIButton(type: .system)
+                moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+                moreButton.menu = menu
+                moreButton.showsMenuAsPrimaryAction = true
+                moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
+
+                visibleButtons.insert(moreButton, at: 0)
+            }
+            let stack = UIStackView()
+            stack.axis = .horizontal
+            stack.alignment = .center
+            stack.spacing = 4
+            stack.translatesAutoresizingMaskIntoConstraints = false
+            stack.setContentCompressionResistancePriority(.required, for: .horizontal)
+            for button in visibleButtons {
+                stack.addArrangedSubview(button)
+            }
+            
+            let container = UIView()
+            container.translatesAutoresizingMaskIntoConstraints = false
+                let isPad = self.traitCollection.userInterfaceIdiom == .pad
+            let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
+            let maxWidth = UIScreen.main.bounds.width * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
+            //container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
+            let widthConstraint = container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth)
+            widthConstraint.priority = UILayoutPriority(999)
+            widthConstraint.isActive = true
+            container.addSubview(stack)
+            let barItem = UIBarButtonItem(customView: container)
+            NSLayoutConstraint.activate([
+                stack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                stack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                stack.topAnchor.constraint(equalTo: container.topAnchor),
+                stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+            ])
+            self.navigationItem.rightBarButtonItem = barItem
         }
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.alignment = .center
-        stack.spacing = 4
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        for button in visibleButtons {
-            stack.addArrangedSubview(button)
-        }
-        
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        let maxWidth = UIScreen.main.bounds.width * 0.76
-        container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
-        container.addSubview(stack)
-
-        NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: container.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
-        ])
-
-        let barItem = UIBarButtonItem(customView: container)
-        navigationItem.rightBarButtonItem = barItem
     }
     
     func assignLeftBarButtons() {
-        self.navigationItem.leftBarButtonItems = [self.searchButton]
+        DispatchQueue.main.async {
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: self.searchButton)
+            //self.navigationItem.leftBarButtonItems = [self.searchButton]
+        }
+    }
+    func updateLeftBarButtonWidth() {
+        guard let navBar = navigationController?.navigationBar else { return }
+        let isPad = traitCollection.userInterfaceIdiom == .pad
+        let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
+        searchButton.maxWidth = navBar.bounds.width * ((isPad && (isUpperTabBarDisabled != true)) ? 0.20 : 0.4)
+        searchButton.invalidateIntrinsicContentSize()
+        return
+        guard let navBar = navigationController?.navigationBar else { return }
+
+        let maxWidth = navBar.bounds.width * 0.4
+        let fittingSize = searchButton.sizeThatFits(
+            CGSize(width: CGFloat.greatestFiniteMagnitude, height: 44)
+        )
+
+        let newWidth = min(fittingSize.width, maxWidth)
+
+        if abs(searchButton.frame.width - newWidth) > 0.5 {
+            searchButton.frame.size.width = newWidth
+        }
     }
     
     func assinButtons() {
@@ -2376,10 +2416,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             }
             self.searchText = newFilterString
             if newFilterString == "" {
-                self.searchButton.title = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索")
-                self.searchButton.accessibilityLabel = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索")
+                self.searchButton.setTitle(NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), for: .normal)
+                //self.searchButton.title = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索")
+                //self.searchButton.accessibilityLabel = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索")
             }else{
-                self.searchButton.title = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索") + "(" + newFilterString + ")"
+                self.searchButton.setTitle(NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索") + "(" + newFilterString + ")", for: .normal)
+                //self.searchButton.title = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索") + "(" + newFilterString + ")"
                 let format = NSLocalizedString("BookShelfTableViewController_AccessibilitySearchFormat", comment: "%1$@ を検索中")
                 let message = String(format: format, newFilterString)
                 self.searchButton.accessibilityLabel = message

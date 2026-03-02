@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
+		21038DD42F55CE7C0072B3B9 /* MaxWidthButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */; };
+		21038DD52F55CE7C0072B3B9 /* MaxWidthButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */; };
 		2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDE824B985A100E275D1 /* StoryFetcher.swift */; };
 		2104EDEF24B9E33F00E275D1 /* StoryFetcherTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */; };
 		210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B81A0DF55600E9171F /* arrow_down@3x.png */; };
@@ -315,6 +317,7 @@
 /* Begin PBXFileReference section */
 		076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; sourceTree = "<group>"; };
 		0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; sourceTree = "<group>"; };
+		21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaxWidthButton.swift; sourceTree = "<group>"; };
 		2104EDE824B985A100E275D1 /* StoryFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryFetcher.swift; sourceTree = "<group>"; };
 		2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryFetcherTest.swift; sourceTree = "<group>"; };
 		210958B81A0DF55600E9171F /* arrow_down@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@3x.png"; sourceTree = "<group>"; };
@@ -884,6 +887,7 @@
 				216631E62682D26800F80C1D /* UITabBarControllerExtension.swift */,
 				21D9C1662652602900CC5AE9 /* WebSpeechViewTool.swift */,
 				216631E82688772600F80C1D /* ScrollPullAndFireHandler.swift */,
+				21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1618,6 +1622,7 @@
 				2124B39023BBF392002EBC31 /* NovelSpeakerNotificationTool.swift in Sources */,
 				21A4C75624F6776500038883 /* NovelDownloadQueue.swift in Sources */,
 				2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */,
+				21038DD42F55CE7C0072B3B9 /* MaxWidthButton.swift in Sources */,
 				2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */,
 				21CE8EA6241677ED00C9DB7F /* ScrollableVStack.swift in Sources */,
 				2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */,
@@ -1653,6 +1658,7 @@
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
 				21D7B10F256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
 				2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */,
+				21038DD52F55CE7C0072B3B9 /* MaxWidthButton.swift in Sources */,
 				212E41352CFC3C9500E7901C /* TraitOverrideTabBarController.swift in Sources */,
 				21CCE43A2C26D73800D62564 /* BookShelfTreeViewController.swift in Sources */,
 				216631EB268E9C9300F80C1D /* MenuButtonHandler.swift in Sources */,

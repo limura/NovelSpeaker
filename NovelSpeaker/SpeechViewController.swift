@@ -257,253 +257,220 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func assignUpperButtons(novelID: String, novelType:NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
-        var barButtonArray:[UIButton] = []
+        DispatchQueue.main.async {
+            var barButtonArray:[UIButton] = []
+            
+            func createBarButtonItem(image: UIImage?, action: Selector, accessibilityLabel: String) -> UIButton {
+                let button = UIButton(type: .system)
+                button.setImage(image, for: .normal)
+                button.addTarget(self, action: action, for: .touchUpInside)
+                button.translatesAutoresizingMaskIntoConstraints = false
+                button.accessibilityLabel = accessibilityLabel
+                let widthConstraint = button.widthAnchor.constraint(equalToConstant: 28)
+                widthConstraint.priority = UILayoutPriority(999) // 1000未満にする
+                let heightConstraint = button.heightAnchor.constraint(equalToConstant: 28)
+                heightConstraint.priority = UILayoutPriority(999)
+                NSLayoutConstraint.activate([
+                    widthConstraint,
+                    heightConstraint
+                ])
+                return button
+            }
+
+            for buttonSetting in aliveButtonSettings {
+                if buttonSetting.isOn == false { continue }
+                switch buttonSetting.type {
+                case .openCurrentWebPage:
+                    if novelType == .URL {
+                        let button = createBarButtonItem(
+                            image: UIImage(systemName: "globe.americas.fill"),
+                            action: #selector(self.openCurrentWebPageButtonClicked(_:)),
+                            accessibilityLabel: NSLocalizedString("SpeechViewController_CurrentWebPageButton_VoiceOverTitle", comment: "現在のページをWeb取込タブで開く")
+                        )
+                        barButtonArray.append(button)
+                    }
+                case .openWebPage:
+                    if novelType == .URL {
+                        let button = createBarButtonItem(
+                            image: UIImage(systemName: "globe.badge.chevron.backward"),
+                            action: #selector(self.safariButtonClicked(_:)),
+                            accessibilityLabel: NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
+                        )
+                        barButtonArray.append(button)
+                    }
+                case .reload:
+                    if novelType == .URL || (novelType == .UserCreated && NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novelID)) {
+                        let button = createBarButtonItem(
+                            image: UIImage(systemName: "arrow.clockwise"),
+                            action: #selector(self.urlRefreshButtonClicked(_:)),
+                            accessibilityLabel: NSLocalizedString("SpeechViewController_RefreshButton_AccessibilityLabel", comment: "この小説の更新確認を行う")
+                        )
+                        barButtonArray.append(button)
+                    }
+                case .share:
+                    if novelType == .URL {
+                        let button = createBarButtonItem(
+                            image: UIImage(systemName: "square.and.arrow.up"),
+                            action: #selector(self.shareButtonClicked(_:)),
+                            accessibilityLabel: NSLocalizedString("SpeechViewButtonType_Share", comment: "小説のURLをシェアする")
+                        )
+                        barButtonArray.append(button)
+                    }
+                case .search:
+                    //barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:))))
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "magnifyingglass"),
+                        action: #selector(self.searchButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_SearchButton_AccessibilityLabel", comment: "検索")
+                    )
+                    barButtonArray.append(button)
+
+                case .searchByText:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "doc.text.magnifyingglass"),
+                        action: #selector(self.searchByTextButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_SearchByTextButton_AccessibilityLabel", comment: "ページ内を検索")
+                    )
+                    barButtonArray.append(button)
+                case .edit:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "pencil"),
+                        action: #selector(self.editButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_Edit", comment: "編集")
+                    )
+                    barButtonArray.append(button)
+                case .detail:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "book.pages"),
+                        action: #selector(self.detailButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_Detail", comment: "詳細")
+                    )
+                    barButtonArray.append(button)
+                case .backup:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "tray.and.arrow.up"),
+                        action: #selector(self.backupButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_BackupButton", comment: "バックアップ")
+                    )
+                    barButtonArray.append(button)
+                case .skipBackward:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "gobackward.30"),
+                        action: #selector(self.skipBackwardButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し")
+                    )
+                    self.skipBackwardButtonItem = button
+                    barButtonArray.append(button)
+                case .skipForward:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "goforward.30"),
+                        action: #selector(self.skipForwardButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ")
+                    )
+                    self.skipForwardButtonItem = button
+                    barButtonArray.append(button)
+                case .showTableOfContents:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "list.bullet"),
+                        action: #selector(self.showTableOfContentsButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
+                    )
+                    barButtonArray.append(button)
+                case .speechStop:
+                    let button = createBarButtonItem(image: UIImage(systemName: "play.fill"), action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
+                    self.startStopButton = button
+                    barButtonArray.append(button)
+                default:
+                    break
+                }
+            }
+
+            var maxButtons: Int = {
+                let screenWidth = UIScreen.main.bounds.width
+                let isPad = self.traitCollection.userInterfaceIdiom == .pad
+                let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
+                let containerMaxWidth = screenWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
+
+                let buttonWidth: CGFloat = 28
+                let spacing: CGFloat = 4
+
+                let totalUnitWidth = buttonWidth + spacing
+
+                return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
+            }()
+            // VoiceOver 環境下 であれば重なってしまってもよしとする
+            if UIAccessibility.isVoiceOverRunning {
+                // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
+                //maxButtons = 999
+            }
+
+            let allButtons = barButtonArray
+            guard let lastButton = allButtons.last else { return }
+
+            var visibleButtons: [UIButton] = []
+            var overflowButtons: [UIButton] = []
+
+            if allButtons.count <= maxButtons {
+                visibleButtons = allButtons
+            } else {
+                // lastButton を除いた残り
+                let others = Array(allButtons.dropLast())
+
+                // 表示可能数から lastButton と overflow 分を引く
+                let capacityForOthers = maxButtons - 2
+
+                if capacityForOthers > 0 {
+                    // 後ろから優先して残す
+                    let kept = others.suffix(capacityForOthers)
+                    overflowButtons = Array(others.prefix(others.count - kept.count))
+                    visibleButtons = Array(kept) + [lastButton]
+                } else {
+                    overflowButtons = others
+                    visibleButtons = [lastButton]
+                }
+            }
+            if !overflowButtons.isEmpty {
+                let actions = overflowButtons.map { button in
+                    UIAction(title: button.accessibilityLabel ?? "",
+                             image: button.image(for: .normal)) { _ in
+                        button.sendActions(for: .touchUpInside)
+                    }
+                }
+
+                let menu = UIMenu(children: actions)
+
+                let moreButton = UIButton(type: .system)
+                moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+                moreButton.menu = menu
+                moreButton.showsMenuAsPrimaryAction = true
+                moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
+
+                visibleButtons.insert(moreButton, at: 0)
+            }
+            let stack = UIStackView()
+            stack.axis = .horizontal
+            stack.alignment = .center
+            stack.spacing = 4
+            stack.translatesAutoresizingMaskIntoConstraints = false
+            for button in visibleButtons {
+                stack.addArrangedSubview(button)
+            }
+            
+            let container = UIView()
+            container.translatesAutoresizingMaskIntoConstraints = false
+            let maxWidth = UIScreen.main.bounds.width * 0.76
+            container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
+            container.addSubview(stack)
+            let barItem = UIBarButtonItem(customView: container)
         
-        func createBarButtonItem(image: UIImage?, action: Selector, accessibilityLabel: String) -> UIButton {
-            let button = UIButton(type: .system)
-            button.setImage(image, for: .normal)
-            button.addTarget(self, action: action, for: .touchUpInside)
-            button.translatesAutoresizingMaskIntoConstraints = false
-            button.accessibilityLabel = accessibilityLabel
             NSLayoutConstraint.activate([
-                button.widthAnchor.constraint(equalToConstant: 28),
-                button.heightAnchor.constraint(equalToConstant: 28)
+                stack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                stack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                stack.topAnchor.constraint(equalTo: container.topAnchor),
+                stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
             ])
-            return button
+            self.navigationItem.rightBarButtonItem = barItem
         }
-
-        for buttonSetting in aliveButtonSettings {
-            if buttonSetting.isOn == false { continue }
-            switch buttonSetting.type {
-            case .openCurrentWebPage:
-                if novelType == .URL {
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "globe.americas.fill"),
-                        action: #selector(openCurrentWebPageButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_CurrentWebPageButton_VoiceOverTitle", comment: "現在のページをWeb取込タブで開く")
-                    )
-                    barButtonArray.append(button)
-                }
-            case .openWebPage:
-                if novelType == .URL {
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "globe.badge.chevron.backward"),
-                        action: #selector(safariButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
-                    )
-                    barButtonArray.append(button)
-                }
-            case .reload:
-                if novelType == .URL || (novelType == .UserCreated && NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novelID)) {
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "arrow.clockwise"),
-                        action: #selector(urlRefreshButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_RefreshButton_AccessibilityLabel", comment: "この小説の更新確認を行う")
-                    )
-                    barButtonArray.append(button)
-                }
-            case .share:
-                if novelType == .URL {
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "square.and.arrow.up"),
-                        action: #selector(shareButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewButtonType_Share", comment: "小説のURLをシェアする")
-                    )
-                    barButtonArray.append(button)
-                }
-            case .search:
-                //barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:))))
-                let button = createBarButtonItem(
-                    image: UIImage(systemName: "magnifyingglass"),
-                    action: #selector(searchButtonClicked(_:)),
-                    accessibilityLabel: NSLocalizedString("SpeechViewController_SearchButton_AccessibilityLabel", comment: "検索")
-                )
-                barButtonArray.append(button)
-
-            case .searchByText:
-                let button = createBarButtonItem(
-                    image: UIImage(systemName: "doc.text.magnifyingglass"),
-                    action: #selector(searchByTextButtonClicked(_:)),
-                    accessibilityLabel: NSLocalizedString("SpeechViewController_SearchByTextButton_AccessibilityLabel", comment: "ページ内を検索")
-                )
-                barButtonArray.append(button)
-            case .edit:
-                let button = createBarButtonItem(
-                    image: UIImage(systemName: "pencil"),
-                    action: #selector(editButtonClicked(_:)),
-                    accessibilityLabel: NSLocalizedString("SpeechViewController_Edit", comment: "編集")
-                )
-                barButtonArray.append(button)
-            case .detail:
-                let button = createBarButtonItem(
-                    image: UIImage(systemName: "book.pages"),
-                    action: #selector(detailButtonClicked(_:)),
-                    accessibilityLabel: NSLocalizedString("SpeechViewController_Detail", comment: "詳細")
-                )
-                barButtonArray.append(button)
-            case .backup:
-                let button = createBarButtonItem(
-                    image: UIImage(systemName: "tray.and.arrow.up"),
-                    action: #selector(backupButtonClicked(_:)),
-                    accessibilityLabel: NSLocalizedString("SpeechViewController_BackupButton", comment: "バックアップ")
-                )
-                barButtonArray.append(button)
-            case .skipBackward:
-                let button = createBarButtonItem(
-                    image: UIImage(systemName: "gobackward.30"),
-                    action: #selector(skipBackwardButtonClicked(_:)),
-                    accessibilityLabel: NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し")
-                )
-                self.skipBackwardButtonItem = button
-                barButtonArray.append(button)
-            case .skipForward:
-                let button = createBarButtonItem(
-                    image: UIImage(systemName: "goforward.30"),
-                    action: #selector(skipForwardButtonClicked(_:)),
-                    accessibilityLabel: NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ")
-                )
-                self.skipForwardButtonItem = button
-                barButtonArray.append(button)
-            case .showTableOfContents:
-                let button = createBarButtonItem(
-                    image: UIImage(systemName: "list.bullet"),
-                    action: #selector(showTableOfContentsButtonClicked(_:)),
-                    accessibilityLabel: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
-                )
-                barButtonArray.append(button)
-            case .speechStop:
-                let button = createBarButtonItem(image: UIImage(systemName: "play.fill"), action: #selector(startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
-                self.startStopButton = button
-                barButtonArray.append(button)
-            default:
-                break
-            }
-        }
-
-        var maxButtons: Int = {
-            let screenWidth = UIScreen.main.bounds.width
-            let containerMaxWidth = screenWidth * 0.76
-
-            let buttonWidth: CGFloat = 28
-            let spacing: CGFloat = 4
-
-            let totalUnitWidth = buttonWidth + spacing
-
-            return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
-        }()
-        // VoiceOver 環境下 であれば重なってしまってもよしとする
-        if UIAccessibility.isVoiceOverRunning {
-            // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
-            //maxButtons = 999
-        }
-
-        let allButtons = barButtonArray
-        guard let lastButton = allButtons.last else { return }
-
-        var visibleButtons: [UIButton] = []
-        var overflowButtons: [UIButton] = []
-
-        if allButtons.count <= maxButtons {
-            visibleButtons = allButtons
-        } else {
-            // lastButton を除いた残り
-            let others = Array(allButtons.dropLast())
-
-            // 表示可能数から lastButton と overflow 分を引く
-            let capacityForOthers = maxButtons - 2
-
-            if capacityForOthers > 0 {
-                // 後ろから優先して残す
-                let kept = others.suffix(capacityForOthers)
-                overflowButtons = Array(others.prefix(others.count - kept.count))
-                visibleButtons = Array(kept) + [lastButton]
-            } else {
-                overflowButtons = others
-                visibleButtons = [lastButton]
-            }
-        }
-        if !overflowButtons.isEmpty {
-            let actions = overflowButtons.map { button in
-                UIAction(title: button.accessibilityLabel ?? "",
-                         image: button.image(for: .normal)) { _ in
-                    button.sendActions(for: .touchUpInside)
-                }
-            }
-
-            let menu = UIMenu(children: actions)
-
-            let moreButton = UIButton(type: .system)
-            moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-            moreButton.menu = menu
-            moreButton.showsMenuAsPrimaryAction = true
-            moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
-
-            visibleButtons.insert(moreButton, at: 0)
-        }
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.alignment = .center
-        stack.spacing = 4
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        for button in visibleButtons {
-            stack.addArrangedSubview(button)
-        }
-        
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        let maxWidth = UIScreen.main.bounds.width * 0.76
-        container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
-        container.addSubview(stack)
-
-        NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: container.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
-        ])
-
-        let barItem = UIBarButtonItem(customView: container)
-        navigationItem.rightBarButtonItem = barItem
-
-        
-    /*
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.alignment = .center
-        stack.spacing = 4
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        stack.setContentHuggingPriority(.defaultLow, for: .horizontal)
-
-        for (index, button) in barButtonArray.enumerated() {
-            if index == barButtonArray.count - 1 {
-                // 一番右のボタンは守る
-                button.setContentCompressionResistancePriority(.required, for: .horizontal)
-            } else {
-                // 左側は潰れてもよい
-                button.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-            }
-        }
-        for button in barButtonArray {
-            stack.addArrangedSubview(button)
-        }
-
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        let maxWidth = UIScreen.main.bounds.width * 0.76
-        container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
-        container.addSubview(stack)
-
-        NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: container.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
-        ])
-
-        let barItem = UIBarButtonItem(customView: container)
-        navigationItem.rightBarButtonItem = barItem
-     */
     }
     
     func loadNovel(novelID: String, novelTitle: String, novelType:NovelType, aliveButtonSettings: [SpeechViewButtonSetting]) {
