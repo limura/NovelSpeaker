@@ -260,6 +260,7 @@
 "SettingTableViewController_IsDeleteBlockOnBookshelfTreeView" = "Prevent novels from being deleted by swiping or clicking \"Edit\" on the bookshelf screen (Even if this is ON, if you want to delete a novel, you can do so from the multiple novel selection screen)";
 "SettingTableViewController_overrideTabBarTraitsRow" = "Display tabs at the bottom of the screen (not recommended. Also, this will be applied after restarting the app";
 "SettingTableViewController_IsCarPlayModeToVoicePrompt" = "Change the audio mode when connected to CarPlay (Changing the audio mode may improve audio clarity. However, some functions will be limited when changing the audio mode.)";
+"SettingsViewController_BarButtonSpacing" = "Spacing between buttons at the top right of the screen";
 
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
@@ -985,18 +986,33 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "Done";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "Edit";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.4
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.5
 
-- Added \"Show tabs at the bottom of the screen\" option to the \"Settings Tab\"
-- Added \"This Chapter Title\" to the \"Edit Novel\" screen, allowing you to change the displayed chapter title.
-- Added a \"Trash Can Emoji\" to the bookmarks displayed on the home page of the \"Web Import\" tab, allowing you to delete the bookmark by clicking it.
-- When checking for updates to novels registered in your bookshelf, if there are missing chapters (pages), an attempt will be made to re-fetch those chapters (pages).
-- Added an ON/OFF setting to the \"Change audio mode when connected to CarPlay\" to the Settings tab.
-- Disabled the use of AutoPagerize's SiteInfo on wedata.
+- Added \"Start/Stop Speech\" to \"Settings for the buttons displayed in the upper right corner of the novel text screen\" in the \"Settings Tab.\"
+- Assigned icons to buttons in the top right of the novel main screen that previously contained text.
+- Narrowed the width of the buttons in the top right of the bookshelf screen and converted them to icons (the edit button was not iconized).
+- Changed the color picker used for \"Specify Text Color Directly\" and \"Specify Background Color Directly\" in \"Settings Tab\" → \"Novel Main Screen Settings\" → \"Color Settings\" to the Apple standard color picker.
+- Fixed an issue where the background color specified in \"Color Settings\" in \"Settings Tab\" → \"Novel Main Screen Settings\" was not working properly.
+- Fixed an issue where swiping left and right on the novel main screen would not transition to the previous or next page even when \"Enable page turning by swiping left and right on the novel main screen\" was enabled in the \"Settings Tab.\"
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.5
+
+Changes in interface/internal operation
+
+- Added \"Start/Stop Speech\" to \"Settings for the buttons displayed in the upper right corner of the novel text screen\" in the \"Settings Tab.\"
+- Assigned icons to buttons in the top right of the novel main screen that previously contained text.
+- Narrowed the width of the buttons in the top right of the bookshelf screen and converted them to icons (the edit button was not iconized).
+- Changed the color picker used for \"Specify Text Color Directly\" and \"Specify Background Color Directly\" in \"Settings Tab\" → \"Novel Main Screen Settings\" → \"Color Settings\" to the Apple standard color picker.
+
+Fixing the problem
+
+- Fixed an issue where the background color specified in \"Color Settings\" in \"Settings Tab\" → \"Novel Main Screen Settings\" was not working properly.
+- Fixed an issue where swiping left and right on the novel main screen would not transition to the previous or next page even when \"Enable page turning by swiping left and right on the novel main screen\" was enabled in the \"Settings Tab.\"
+
+
 Version 2.10.4
 
 Changes in interface/internal operation

@@ -3643,4 +3643,16 @@ class NovelSpeakerUtility: NSObject {
         defaults.synchronize()
     }
 
+    static let BarButtonItemSpacingKey = "BarButtonItemSpacingKey"
+    static func GetBarButtonItemSpacing() -> Float {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [BarButtonItemSpacingKey: 8])
+        return defaults.float(forKey: BarButtonItemSpacingKey)
+    }
+    static func SetBarButtonItemSpacing(BarButtonItemSpacing:Float){
+        let defaults = UserDefaults.standard
+        defaults.setValue(BarButtonItemSpacing, forKey: BarButtonItemSpacingKey)
+        defaults.synchronize()
+    }
+
 }

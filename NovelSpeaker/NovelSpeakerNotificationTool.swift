@@ -23,6 +23,8 @@ extension Notification.Name {
         static let RealmSettingChanged = Notification.Name("NovelSpeaker_Notification_RealmSettingChanged")
         // SpeechViewController を popViewController してほしい時に呼ぶ
         static let ForcePopViewControllerForSpeechView = Notification.Name("NovelSpeaker_Notification_ForcePopViewControllerForSpeechView")
+        // BarButtonSpacing が変わったときに呼ぶ
+        static let BarButtonSpacingChanged = Notification.Name("NovelSpeaker_Notification_BarButtonSpacingChanged")
     }
 }
 extension Notification {
@@ -91,6 +93,12 @@ class NovelSpeakerNotificationTool {
     static func AnnounceForcePopViewControllerForSpeechView() {
         let notificationCenter = NotificationCenter.default
         let notification = Notification(name: Notification.Name.NovelSpeaker.ForcePopViewControllerForSpeechView)
+        notificationCenter.post(notification)
+    }
+    
+    static func AnnounceBarButtonSpacingChanged() {
+        let notificationCenter = NotificationCenter.default
+        let notification = Notification(name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged)
         notificationCenter.post(notification)
     }
 }

@@ -385,6 +385,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
             }
 
+            let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
             var maxButtons: Int = {
                 let screenWidth = UIScreen.main.bounds.width
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
@@ -392,7 +393,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 let containerMaxWidth = screenWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
 
                 let buttonWidth: CGFloat = 28
-                let spacing: CGFloat = 4
 
                 let totalUnitWidth = buttonWidth + spacing
 
@@ -450,7 +450,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             let stack = UIStackView()
             stack.axis = .horizontal
             stack.alignment = .center
-            stack.spacing = 4
+            stack.spacing = spacing
             stack.translatesAutoresizingMaskIntoConstraints = false
             for button in visibleButtons {
                 stack.addArrangedSubview(button)
@@ -620,6 +620,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
             }
+        }
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { (notification) in
+            self.forceUpdateUpperButtons()
         }
     }
     func unregistNotificationCenter() {

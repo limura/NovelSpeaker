@@ -203,6 +203,7 @@
 "SettingTableViewController_IsDeleteBlockOnBookshelfTreeView" = "本棚画面でスワイプや「編集」から小説を削除できないようにする(これがONの場合でも、削除したい場合は小説の複数選択画面から行うことができます)";
 "SettingTableViewController_overrideTabBarTraitsRow" = "タブの表示を画面下部にする(非推奨です。また、アプリ再起動後に適用されます)";
 "SettingTableViewController_IsCarPlayModeToVoicePrompt" = "CarPlay接続時に音声モードを変える(音声モードを変更することで音声がクリアになるかもしれません。ただし、音声モード変更時は一部の機能が制限されます)";
+"SettingsViewController_BarButtonSpacing" = "画面右上のボタン群の間隔";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";
@@ -972,18 +973,33 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "完了";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "編集";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.4
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.5
 
-- 「設定タブ」->「タブの表示を画面下部にする〜」を追加します
-- 「小説の編集」画面に「この章のタイトル」を追加して、表示されている章のタイトルを変更できるようにします
--「Web取込タブ」のホームに表示されるブックマークについて、「ゴミ箱の絵文字」を表示してそれを押すとそのブックマークを削除できるようにします
-- 本棚に登録されている小説の更新確認時に、歯抜けになっている章(ページ)がある場合にはその章(ページ)を再取得しようと試みるようになります
-- 設定タブに「CarPlay接続時に音声モードを変える」のON/OFF設定を追加します
-- wedata様 上にある AutoPagerize様 の SiteInfo を使わないようにします
+- 「設定タブ」→「小説本文画面の右上に表示されるボタン群の編集」に「発話開始・停止」を追加します
+- 小説本文画面右上のボタンの中で文字列だったものに対してアイコンを指定します
+- 本棚画面の右上のボタン群についても幅を狭めてアイコン化します(編集ボタンはアイコン化していません)
+- 「設定タブ」→「小説本文表示画面の設定」→「色設定」の「字の色を直接指定」と「背景色を直接指定」で利用されるカラーピッカーをApple標準のものに変更
+- 「設定タブ」→「小説本文表示画面の設定」の「色設定」で指定した背景色うまく効いていない問題を修正
+- 「設定タブ」→「小説本文画面での左右スワイプでページめくりができるようにする」がONになっていても左右スワイプで前後のページに遷移しない場合があった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.5
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」→「小説本文画面の右上に表示されるボタン群の編集」に「発話開始・停止」を追加します
+- 小説本文画面右上のボタンの中で文字列だったものに対してアイコンを指定します
+- 本棚画面の右上のボタン群についても幅を狭めてアイコン化します(編集ボタンはアイコン化していません)
+- 「設定タブ」→「小説本文表示画面の設定」→「色設定」の「字の色を直接指定」と「背景色を直接指定」で利用されるカラーピッカーをApple標準のものに変更
+
+問題の修正
+
+- 「設定タブ」→「小説本文表示画面の設定」の「色設定」で指定した背景色うまく効いていない問題を修正
+- 「設定タブ」→「小説本文画面での左右スワイプでページめくりができるようにする」がONになっていても左右スワイプで前後のページに遷移しない場合があった問題を修正
+
+
 Version 2.10.4
 
 インタフェース・内部動作の変更

@@ -1901,6 +1901,10 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 self.registObserver()
             }
         }
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { (notification) in
+            self.updateLeftBarButtonWidth()
+            self.assinButtons()
+        }
     }
     
     func unregistNotificationCenter() {
@@ -2083,12 +2087,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     break
                 }
             }
+            let spacing:CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
             var maxButtons: Int = {
                 let screenWidth = UIScreen.main.bounds.width
                 let containerMaxWidth = screenWidth * 0.50 // 検索があるのでそっちに半分譲ります
 
                 let buttonWidth: CGFloat = 28
-                let spacing: CGFloat = 4
 
                 let totalUnitWidth = buttonWidth + spacing
 
@@ -2146,7 +2150,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             let stack = UIStackView()
             stack.axis = .horizontal
             stack.alignment = .center
-            stack.spacing = 4
+            stack.spacing = spacing
             stack.translatesAutoresizingMaskIntoConstraints = false
             stack.setContentCompressionResistancePriority(.required, for: .horizontal)
             for button in visibleButtons {

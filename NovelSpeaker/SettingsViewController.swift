@@ -1170,6 +1170,30 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            section
+            <<< SliderRow() {
+                $0.value = NovelSpeakerUtility.GetBarButtonItemSpacing()
+                $0.cell.slider.minimumValue = 0
+                $0.cell.slider.maximumValue = 32
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.shouldHideValue = false
+                $0.displayValueFor = { (value:Float?) -> String? in
+                    guard let value = value else { return "" }
+                    return String(format: "%.0f", value)
+                }
+                $0.steps = 16
+                $0.title = NSLocalizedString("SettingsViewController_BarButtonSpacing", comment: "画面右上のボタン群の間隔")
+            }.onChange({ (row) in
+                if let value = row.value {
+                    let prev = NovelSpeakerUtility.GetBarButtonItemSpacing()
+                    let epsilon: Float = 0.00001
+                    if abs(prev - value) < epsilon {
+                        return
+                    }
+                    NovelSpeakerUtility.SetBarButtonItemSpacing(BarButtonItemSpacing: value)
+                    NovelSpeakerNotificationTool.AnnounceBarButtonSpacingChanged()
+                }
+            })
             #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow("isEnableSwipeOnStoryView") { row in
