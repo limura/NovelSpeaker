@@ -76,10 +76,12 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         setCustomUIMenu()
         WebSpeechViewController.instance = self
         RealmObserverHandler.shared.AddDelegate(delegate: self)
+        registNotificationCenter()
     }
     
     deinit {
         StopObservers()
+        self.unregistNotificationCenter()
         WebSpeechViewController.instance = nil
         RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
@@ -95,6 +97,11 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.displayTopAndDownComponents(animated: false)
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.forceUpdateUpperButtons()
+    }
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "WebViewToEditUserTextSegue" {
             if let nextViewController = segue.destination as? EditBookViewController {
@@ -106,6 +113,23 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }
     }
     
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { (notification) in
+            self.forceUpdateUpperButtons()
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
+    }
+    func forceUpdateUpperButtons() {
+        DispatchQueue.main.async {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                let storyID = StorySpeaker.shared.storyID
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
+                self.assignUpperButtons(novelID: novel.novelID, novelType: novel.type, aliveButtonSettings: buttonSettings)
+            }
+        }
+    }
     // background から redume した時に何故かWebViewの中身が空(真っ白)になる事があるぽいのでそれに対抗するために redume した時に呼ばれて再描画？する関数を用意しておきます。(´・ω・`)
     @objc func RedisplayWebView() {
         // MEMO: getCurrentDisplayLocation() でスクロールする起点を取得して、
@@ -930,6 +954,7 @@ body.NovelSpeakerBody {
                 }
             }
 
+            let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
             var maxButtons: Int = {
                 let screenWidth = UIScreen.main.bounds.width
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
@@ -937,7 +962,6 @@ body.NovelSpeakerBody {
                 let containerMaxWidth = screenWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
 
                 let buttonWidth: CGFloat = 28
-                let spacing: CGFloat = 4
 
                 let totalUnitWidth = buttonWidth + spacing
 
@@ -995,7 +1019,7 @@ body.NovelSpeakerBody {
             let stack = UIStackView()
             stack.axis = .horizontal
             stack.alignment = .center
-            stack.spacing = 4
+            stack.spacing = spacing
             stack.translatesAutoresizingMaskIntoConstraints = false
             for button in visibleButtons {
                 stack.addArrangedSubview(button)
