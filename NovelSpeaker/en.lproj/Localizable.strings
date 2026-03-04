@@ -991,6 +991,7 @@
 - Added \"Start/Stop Speech\" to \"Settings for the buttons displayed in the upper right corner of the novel text screen\" in the \"Settings Tab.\"
 - Assigned icons to buttons in the top right of the novel main screen that previously contained text.
 - Narrowed the width of the buttons in the top right of the bookshelf screen and converted them to icons (the edit button was not iconized).
+- You can now change the gap between the novel text screen and the buttons on the top right of the bookshelf screen in the settings.
 - Changed the color picker used for \"Specify Text Color Directly\" and \"Specify Background Color Directly\" in \"Settings Tab\" → \"Novel Main Screen Settings\" → \"Color Settings\" to the Apple standard color picker.
 - Fixed an issue where the background color specified in \"Color Settings\" in \"Settings Tab\" → \"Novel Main Screen Settings\" was not working properly.
 - Fixed an issue where swiping left and right on the novel main screen would not transition to the previous or next page even when \"Enable page turning by swiping left and right on the novel main screen\" was enabled in the \"Settings Tab.\"
@@ -1005,6 +1006,7 @@ Changes in interface/internal operation
 - Added \"Start/Stop Speech\" to \"Settings for the buttons displayed in the upper right corner of the novel text screen\" in the \"Settings Tab.\"
 - Assigned icons to buttons in the top right of the novel main screen that previously contained text.
 - Narrowed the width of the buttons in the top right of the bookshelf screen and converted them to icons (the edit button was not iconized).
+- You can now change the gap between the novel text screen and the buttons on the top right of the bookshelf screen in the settings.
 - Changed the color picker used for \"Specify Text Color Directly\" and \"Specify Background Color Directly\" in \"Settings Tab\" → \"Novel Main Screen Settings\" → \"Color Settings\" to the Apple standard color picker.
 
 Fixing the problem
