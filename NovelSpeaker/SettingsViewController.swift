@@ -1171,7 +1171,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.textLabel?.textColor = nil
             })
             section
-            <<< SliderRow() {
+            <<< SliderRow("BarButtonSpacingSliderRow") {
                 $0.value = NovelSpeakerUtility.GetBarButtonItemSpacing()
                 $0.cell.slider.minimumValue = 0
                 $0.cell.slider.maximumValue = 32
@@ -1193,7 +1193,27 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NovelSpeakerUtility.SetBarButtonItemSpacing(BarButtonItemSpacing: value)
                     NovelSpeakerNotificationTool.AnnounceBarButtonSpacingChanged()
                 }
-            })
+            }).cellUpdate { cell, row in
+                cell.slider.translatesAutoresizingMaskIntoConstraints = false
+                cell.valueLabel.translatesAutoresizingMaskIntoConstraints = false
+
+                // 既に制約が追加されているか identifier でチェック
+                let sliderConstraintID = "BarButtonSpacingSliderMinWidth"
+                if !cell.slider.constraints.contains(where: { $0.identifier == sliderConstraintID }) {
+                    let c = cell.slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 64)
+                    c.identifier = sliderConstraintID // IDを振る
+                    c.priority = .required
+                    c.isActive = true
+                }
+
+                let valueConstraintID = "BarButtonSpacingValueMinWidth"
+                if !cell.valueLabel.constraints.contains(where: { $0.identifier == valueConstraintID }) {
+                    let c = cell.valueLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 32)
+                    c.identifier = valueConstraintID
+                    c.priority = .required
+                    c.isActive = true
+                }
+            }
             #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow("isEnableSwipeOnStoryView") { row in
