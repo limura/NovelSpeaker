@@ -459,6 +459,35 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
 
                 visibleButtons.insert(moreButton, at: 0)
             }
+            
+            func isSameAction(lhs: UIButton, rhs: UIButton) -> Bool {
+                let event = UIControl.Event.touchUpInside // 判定したいイベントを指定
+                
+                let lhsTargets = lhs.allTargets
+                let rhsTargets = rhs.allTargets
+                
+                // ターゲットの数が違う場合は不一致
+                guard lhsTargets == rhsTargets else { return false }
+                
+                // 各ターゲットに対するアクション名を比較
+                for target in lhsTargets {
+                    let lhsActions = lhs.actions(forTarget: target, forControlEvent: event)
+                    let rhsActions = rhs.actions(forTarget: target, forControlEvent: event)
+                    if lhsActions != rhsActions { return false }
+                }
+                
+                return true
+            }
+            // 同じアクションのボタンが入っているならこれ以上することはないはず
+            if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
+                let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
+                let buttons = visibleButtons
+                let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
+                if isIdentical {
+                    return
+                }
+            }
+
             let stack = UIStackView()
             stack.axis = .horizontal
             stack.alignment = .center
