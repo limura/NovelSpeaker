@@ -396,7 +396,7 @@
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="74" width="320" height="411"/>
-                                <mutableString key="text">
+                                <string key="text">
 
 ------ NovelSpeaker アイコン ------
 
@@ -1318,7 +1318,7 @@ THE SOFTWARE.
    See the License for the specific language governing permissions and
    limitations under the License.
 
-</mutableString>
+</string>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -1429,7 +1429,7 @@ THE SOFTWARE.
         <!--本棚-->
         <scene sceneID="fHI-C2-mKL">
             <objects>
-                <navigationController definesPresentationContext="YES" id="v42-xJ-9mb" sceneMemberID="viewController">
+                <navigationController definesPresentationContext="YES" id="v42-xJ-9mb" customClass="BarStyleOverrideNavigationController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="本棚" image="soundbook.png" id="48f-BN-UmV"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="kzS-si-TDC">
                         <rect key="frame" x="0.0" y="20" width="320" height="54"/>
@@ -1784,8 +1784,8 @@ THE SOFTWARE.
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="IyG-FH-EcD"/>
-        <segue reference="zcY-Ej-AY3"/>
+        <segue reference="FvL-jm-emj"/>
+        <segue reference="wOu-8d-Sto"/>
         <segue reference="DiM-k6-LVA"/>
     </inferredMetricsTieBreakers>
     <resources>

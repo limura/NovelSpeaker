@@ -17,4 +17,14 @@ class TraitOverrideTabBarController: UITabBarController {
             // Fallback on earlier versions
         }
     }
+    
+    // 表示中のコンテンツ（NavigationControllerなど）にステータスバーのスタイル決定を任せる
+    override var childForStatusBarStyle: UIViewController? {
+        return selectedViewController
+    }
+
+    // ステータスバーを隠すかどうかの判定も任せる（念のため）
+    override var childForStatusBarHidden: UIViewController? {
+        return selectedViewController
+    }
 }

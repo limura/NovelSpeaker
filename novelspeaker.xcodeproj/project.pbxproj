@@ -125,6 +125,7 @@
 		217DCC5325121FA400952A17 /* RealmObserverHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217DCC5125119B9A00952A17 /* RealmObserverHandler.swift */; };
 		217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217E683A1998F6A000C656AA /* MediaPlayer.framework */; };
 		21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */; };
+		2184D23E2F5D5382006CBF59 /* BarStyleOverrideNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2184D23D2F5D536F006CBF59 /* BarStyleOverrideNavigationController.swift */; };
 		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
 		218E81E92518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 218E81E82518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift */; };
 		218E81FC251997E30041A1B5 /* RemoteDataURLSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 218E81FB251997E30041A1B5 /* RemoteDataURLSettingViewController.swift */; };
@@ -436,6 +437,7 @@
 		217E683A1998F6A000C656AA /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeaker.entitlements; sourceTree = "<group>"; };
 		21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDisplayColorSettingViewController.swift; sourceTree = "<group>"; };
+		2184D23D2F5D536F006CBF59 /* BarStyleOverrideNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarStyleOverrideNavigationController.swift; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		218E81E82518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoSplitStringSettingViewController.swift; sourceTree = "<group>"; };
 		218E81FB251997E30041A1B5 /* RemoteDataURLSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteDataURLSettingViewController.swift; sourceTree = "<group>"; };
@@ -725,6 +727,7 @@
 		21724EE51972C7B400DF6DC4 /* CustomViews */ = {
 			isa = PBXGroup;
 			children = (
+				2184D23D2F5D536F006CBF59 /* BarStyleOverrideNavigationController.swift */,
 				212E41342CFC3C7600E7901C /* TraitOverrideTabBarController.swift */,
 				21B4B1122CAEA10B00CEED5A /* DynamicHorizontalStackView.swift */,
 				2166693B257548DB00B5B735 /* PickerViewDialog.swift */,
@@ -1667,6 +1670,7 @@
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
+				2184D23E2F5D5382006CBF59 /* BarStyleOverrideNavigationController.swift in Sources */,
 				21A291F822A3F9DA000AA58C /* NovelDetailViewController.swift in Sources */,
 				214E60D725493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */,
 				2163599D22B1428400264A89 /* AssignNovelFolderViewController.swift in Sources */,

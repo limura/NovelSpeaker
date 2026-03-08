@@ -861,6 +861,17 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
     }
     
+    override var childForStatusBarStyle: UIViewController? {
+        return nil
+    }
+    // スタイルを保持する変数（初期値はデフォルト）
+    var currentStatusBarStyle: UIStatusBarStyle = .default
+
+    // システムがステータスバーの色を尋ねてきたときにこの変数を返す
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return currentStatusBarStyle
+    }
+    
     func applyThemeColor(backgroundColor:UIColor, foregroundColor:UIColor, indicatorStyle:UIScrollView.IndicatorStyle, barStyle:UIBarStyle) {
         
         self.view.backgroundColor = backgroundColor;
@@ -878,6 +889,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
         // ステータスバーの色を指定する
         self.navigationController?.navigationBar.barStyle = barStyle
+        if barStyle == .black {
+            currentStatusBarStyle = .lightContent
+        } else {
+            currentStatusBarStyle = .default
+        }
         // navigation bar の appearance を変更する
         let appearance = UINavigationBarAppearance()
         // 1. 背景を不透明（Opaque）に設定し、背景色を指定
@@ -889,6 +905,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
         self.navigationController?.navigationBar.compactAppearance = appearance
+        
+        // 【重要】ステータスバーの外観更新を明示的に要求する
+        self.setNeedsStatusBarAppearanceUpdate()
     }
     
     func applyTheme() {
