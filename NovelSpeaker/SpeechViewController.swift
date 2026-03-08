@@ -976,7 +976,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     func clearSearchView(){
         if let searchView = self.searchView {
             self.searchView = nil
-            searchView.removeFromSuperview()
+            DispatchQueue.main.async {
+                searchView.removeFromSuperview()
+            }
         }
     }
     
