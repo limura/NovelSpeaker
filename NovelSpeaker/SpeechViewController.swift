@@ -359,6 +359,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         action: #selector(self.skipBackwardButtonClicked(_:)),
                         accessibilityLabel: NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し")
                     )
+                    if self.storySpeaker.isPlayng != true {
+                        button.isEnabled = false
+                    }
                     self.skipBackwardButtonItem = button
                     barButtonArray.append(button)
                 case .skipForward:
@@ -367,6 +370,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         action: #selector(self.skipForwardButtonClicked(_:)),
                         accessibilityLabel: NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ")
                     )
+                    if self.storySpeaker.isPlayng != true {
+                        button.isEnabled = false
+                    }
                     self.skipForwardButtonItem = button
                     barButtonArray.append(button)
                 case .showTableOfContents:

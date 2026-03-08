@@ -636,9 +636,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         //multiSelectFloatingViewController.addTextField(placeholder: "ここに入力してください", identity: "textField")
         self.countAndUpdateMultiSelectFloatingViewControllerSelectCount()
     }
-
-    func toggleCheckboxes() {
-        showCheckboxes.toggle()
+    
+    func updateChecboxButtonImage() {
         if showCheckboxes {
             //multiSelectFloatingViewController.showFloatingWindow(in: NiftyUtility.toplevelViewController ?? self.parent ?? self, yPositionFactor: 0.1)
             //initMultiSelectFloatingWindow()
@@ -649,6 +648,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             updateMultiSelectHeaderVisibility(isHeaderVisible: false)
             self.toggleCheckboxButton.setImage(UIImage(systemName: "checkmark.square"), for: .normal)
         }
+    }
+
+    func toggleCheckboxes() {
+        showCheckboxes.toggle()
+        updateChecboxButtonImage()
         updateToggleStateForVisibleCells()
     }
     
@@ -2083,6 +2087,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 case .multiSelect:
                     let button = self.createBarButtonItem(image: UIImage(systemName: "checkmark.square"), action: #selector(self.toggleCheckboxesButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel", comment: "選択"))
                     self.toggleCheckboxButton = button
+                    self.updateChecboxButtonImage()
                     barButtonItemArray.append(button)
                     break
                 }
