@@ -377,7 +377,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     )
                     barButtonArray.append(button)
                 case .speechStop:
-                    let button = createBarButtonItem(image: UIImage(systemName: "play.fill"), action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
+                    let image:UIImage?
+                    if self.storySpeaker.isPlayng {
+                        image = UIImage(systemName: "pause.fill")
+                    }else{
+                        image = UIImage(systemName: "play.fill")
+                    }
+                    let button = createBarButtonItem(image: image, action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
                     self.startStopButton = button
                     barButtonArray.append(button)
                 default:
