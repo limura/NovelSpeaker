@@ -2187,6 +2187,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     }
                 }
             }
+            print("assignRightBarButtons update: \(self.currentWindowWidth) -> \(nowWidth) \(visibleButtons.count)")
             self.currentWindowWidth = nowWidth
             
             let stack = UIStackView()
@@ -2222,6 +2223,10 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     
     func assignLeftBarButtons() {
         DispatchQueue.main.async {
+            let ep: CGFloat = 0.000001
+            if let searchButton = self.navigationItem.leftBarButtonItem?.customView as? MaxWidthButton, abs(searchButton.maxWidth - self.searchButton.maxWidth) < ep {
+                return
+            }
             self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: self.searchButton)
             //self.navigationItem.leftBarButtonItems = [self.searchButton]
         }
@@ -2236,6 +2241,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         if abs(currentleftBarButtonWidth - searchButton.maxWidth) < epsilon {
             return
         }
+        print("updateLeftBarButtonWidth: \(currentleftBarButtonWidth) -> \(searchButton.maxWidth)")
         currentleftBarButtonWidth = searchButton.maxWidth
         searchButton.invalidateIntrinsicContentSize()
     }
