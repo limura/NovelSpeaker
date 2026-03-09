@@ -2096,7 +2096,10 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             let spacing:CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
             let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
             var maxButtons: Int = {
-                let containerMaxWidth = nowWidth * 0.50 // 検索があるのでそっちに半分譲ります
+                let isPad = self.traitCollection.userInterfaceIdiom == .pad
+                // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
+                let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
+                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.50)
 
                 let buttonWidth: CGFloat = 28
 
@@ -2222,25 +2225,18 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             //self.navigationItem.leftBarButtonItems = [self.searchButton]
         }
     }
+    var currentleftBarButtonWidth:CGFloat = 0.0
     func updateLeftBarButtonWidth() {
         guard let navBar = navigationController?.navigationBar else { return }
         let isPad = traitCollection.userInterfaceIdiom == .pad
         let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
         searchButton.maxWidth = navBar.bounds.width * ((isPad && (isUpperTabBarDisabled != true)) ? 0.20 : 0.4)
-        searchButton.invalidateIntrinsicContentSize()
-        return
-        guard let navBar = navigationController?.navigationBar else { return }
-
-        let maxWidth = navBar.bounds.width * 0.4
-        let fittingSize = searchButton.sizeThatFits(
-            CGSize(width: CGFloat.greatestFiniteMagnitude, height: 44)
-        )
-
-        let newWidth = min(fittingSize.width, maxWidth)
-
-        if abs(searchButton.frame.width - newWidth) > 0.5 {
-            searchButton.frame.size.width = newWidth
+        let epsilon: CGFloat = 0.000001
+        if abs(currentleftBarButtonWidth - searchButton.maxWidth) < epsilon {
+            return
         }
+        currentleftBarButtonWidth = searchButton.maxWidth
+        searchButton.invalidateIntrinsicContentSize()
     }
     
     func assinButtons() {
