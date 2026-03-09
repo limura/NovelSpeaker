@@ -256,6 +256,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         menuController.menuItems = []
     }
     
+    var currentWindowWidth:CGFloat = 0.0
     func assignUpperButtons(novelID: String, novelType:NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
         DispatchQueue.main.async {
             var barButtonArray:[UIButton] = []
@@ -398,11 +399,12 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
 
             let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
+            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
             var maxButtons: Int = {
-                let screenWidth = UIScreen.main.bounds.width
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
-                let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
-                let containerMaxWidth = screenWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
+                // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
+                let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
+                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
 
                 let buttonWidth: CGFloat = 28
 
@@ -478,15 +480,18 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 
                 return true
             }
-            // 同じアクションのボタンが入っているならこれ以上することはないはず
-            if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
-                let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
-                let buttons = visibleButtons
-                let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
-                if isIdentical {
-                    return
+            // 幅が前回と同じで同じアクションのボタンが入っているならこれ以上することはないはず
+            if self.currentWindowWidth == nowWidth {
+                if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
+                    let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
+                    let buttons = visibleButtons
+                    let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
+                    if isIdentical {
+                        return
+                    }
                 }
             }
+            self.currentWindowWidth = nowWidth
 
             let stack = UIStackView()
             stack.axis = .horizontal

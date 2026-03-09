@@ -2044,6 +2044,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         registNovelTagObserver()
     }
     
+    var currentWindowWidth:CGFloat = 0.0
     func assignRightBarButtons() {
         DispatchQueue.main.async {
             let buttonSettingArray = RealmUtil.RealmBlock { (realm) -> [BookshelfViewButtonSetting] in
@@ -2093,9 +2094,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 }
             }
             let spacing:CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
+            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
             var maxButtons: Int = {
-                let screenWidth = UIScreen.main.bounds.width
-                let containerMaxWidth = screenWidth * 0.50 // 検索があるのでそっちに半分譲ります
+                let containerMaxWidth = nowWidth * 0.50 // 検索があるのでそっちに半分譲ります
 
                 let buttonWidth: CGFloat = 28
 
@@ -2171,15 +2172,18 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 
                 return true
             }
-            // 同じアクションのボタンが入っているならこれ以上することはないはず
-            if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
-                let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
-                let buttons = visibleButtons
-                let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
-                if isIdentical {
-                    return
+            // 幅が前回と同じで同じアクションのボタンが入っているならこれ以上することはないはず
+            if self.currentWindowWidth == nowWidth {
+                if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
+                    let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
+                    let buttons = visibleButtons
+                    let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
+                    if isIdentical {
+                        return
+                    }
                 }
             }
+            self.currentWindowWidth = nowWidth
             
             let stack = UIStackView()
             stack.axis = .horizontal
