@@ -481,7 +481,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 return true
             }
             // 幅が前回と同じで同じアクションのボタンが入っているならこれ以上することはないはず
-            if self.currentWindowWidth == nowWidth {
+            let epsilon: CGFloat = 0.000001
+            if abs(self.currentWindowWidth - nowWidth) < epsilon {
                 if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
                     let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
                     let buttons = visibleButtons
