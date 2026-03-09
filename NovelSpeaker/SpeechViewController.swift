@@ -404,7 +404,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
                 // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
                 let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
-                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
+                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.70)
 
                 let buttonWidth: CGFloat = 28
 
