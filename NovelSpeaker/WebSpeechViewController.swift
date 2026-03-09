@@ -60,6 +60,9 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var currentViewTypeCache:RealmDisplaySetting.ViewType? = nil
 
     @objc static weak var instance:WebSpeechViewController? = nil
+    
+    var searchView:SearchFloatingView? = nil
+    var searchTextCache = ""
 
     let myScriptNamespace = "NovelSpeaker_\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
     
@@ -87,14 +90,21 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         StorySpeaker.shared.AddDelegate(delegate: self)
         self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         applyTheme()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.resumeTheme()
         StorySpeaker.shared.RemoveDelegate(delegate: self)
         self.displayTopAndDownComponents(animated: false)
+    }
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.clearSearchView()
     }
 
     override func viewDidLayoutSubviews() {
@@ -549,6 +559,17 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }
     }
     
+    override var childForStatusBarStyle: UIViewController? {
+        return nil
+    }
+    // スタイルを保持する変数（初期値はデフォルト）
+    var currentStatusBarStyle: UIStatusBarStyle = .default
+
+    // システムがステータスバーの色を尋ねてきたときにこの変数を返す
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return currentStatusBarStyle
+    }
+
     func applyThemeColor(backgroundColor:UIColor, foregroundColor:UIColor, indicatorStyle:UIScrollView.IndicatorStyle, barStyle:UIBarStyle) {
         
         self.view.backgroundColor = backgroundColor;
@@ -566,14 +587,37 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.chapterPositionLabel.backgroundColor = backgroundColor
         self.chapterPositionLabel.textColor = foregroundColor
         self.tabBarController?.tabBar.barTintColor = backgroundColor
+        self.tabBarController?.tabBar.backgroundColor = backgroundColor
         self.navigationController?.navigationBar.barTintColor = backgroundColor
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
+        // ステータスバーの色を指定する
+        self.navigationController?.navigationBar.barStyle = barStyle
+        if barStyle == .black {
+            currentStatusBarStyle = .lightContent
+        } else {
+            currentStatusBarStyle = .default
+        }
         // ステータスバーの色を指定する
         self.navigationController?.navigationBar.barStyle = barStyle
         // WebView にはCSSで注入する
         applyFgBgColorToWebView(foregroundColor: foregroundColor, backgroundColor: backgroundColor)
         // 引っ張って次ページへ移動の奴にも色を設定する
         self.scrollPullAndFireHandler?.setColor(foreground: foregroundColor, background: backgroundColor)
+
+        // navigation bar の appearance を変更する
+        let appearance = UINavigationBarAppearance()
+        // 1. 背景を不透明（Opaque）に設定し、背景色を指定
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = backgroundColor
+        // 2. タイトルの色を設定
+        appearance.titleTextAttributes = [.foregroundColor: foregroundColor]
+        // 3. 全ての状態（通常時・スクロール時）に同じ外観を適用する
+        self.navigationController?.navigationBar.standardAppearance = appearance
+        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        self.navigationController?.navigationBar.compactAppearance = appearance
+        
+        // 【重要】ステータスバーの外観更新を明示的に要求する
+        self.setNeedsStatusBarAppearanceUpdate()
     }
     
     func getForegroundBackgroundColor() -> (UIColor, UIColor) {
@@ -632,6 +676,20 @@ body.NovelSpeakerBody {
                 indicatorStyle = UIScrollView.IndicatorStyle.white
                 barStyle = UIBarStyle.black
             }
+        }
+
+        applyThemeColor(backgroundColor: backgroundColor, foregroundColor: foregroundColor, indicatorStyle: indicatorStyle, barStyle: barStyle)
+    }
+    
+    func resumeTheme() {
+        var backgroundColor = UIColor.white
+        var foregroundColor = UIColor.black
+        let indicatorStyle = UIScrollView.IndicatorStyle.default
+        let barStyle = UIBarStyle.default
+        
+        if #available(iOS 13.0, *) {
+            backgroundColor = UIColor.systemBackground
+            foregroundColor = UIColor.label
         }
 
         applyThemeColor(backgroundColor: backgroundColor, foregroundColor: foregroundColor, indicatorStyle: indicatorStyle, barStyle: barStyle)
@@ -823,6 +881,7 @@ body.NovelSpeakerBody {
     var shareButtonItem:UIBarButtonItem? = nil
     var skipBackwardButtonItem:UIButton? = nil
     var skipForwardButtonItem:UIButton? = nil
+    var currentWindowWidth:CGFloat = 0.0
     func assignUpperButtons(novelID: String, novelType: NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
         DispatchQueue.main.async {
             var barButtonArray:[UIButton] = []
@@ -891,12 +950,11 @@ body.NovelSpeakerBody {
                         accessibilityLabel: NSLocalizedString("SpeechViewController_SearchButton_AccessibilityLabel", comment: "検索")
                     )
                     barButtonArray.append(button)
-
                     /*
                 case .searchByText:
                     let button = createBarButtonItem(
                         image: UIImage(systemName: "doc.text.magnifyingglass"),
-                        action: #selector(searchByTextButtonClicked(_:)),
+                        action: #selector(self.searchByTextButtonClicked(_:)),
                         accessibilityLabel: NSLocalizedString("SpeechViewController_SearchByTextButton_AccessibilityLabel", comment: "ページ内を検索")
                     )
                     barButtonArray.append(button)
@@ -955,11 +1013,11 @@ body.NovelSpeakerBody {
             }
 
             let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
+            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
             var maxButtons: Int = {
-                let screenWidth = UIScreen.main.bounds.width
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
-                let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
-                let containerMaxWidth = screenWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
+                let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
+                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
 
                 let buttonWidth: CGFloat = 28
 
@@ -1016,6 +1074,39 @@ body.NovelSpeakerBody {
 
                 visibleButtons.insert(moreButton, at: 0)
             }
+
+            func isSameAction(lhs: UIButton, rhs: UIButton) -> Bool {
+                let event = UIControl.Event.touchUpInside // 判定したいイベントを指定
+                
+                let lhsTargets = lhs.allTargets
+                let rhsTargets = rhs.allTargets
+                
+                // ターゲットの数が違う場合は不一致
+                guard lhsTargets == rhsTargets else { return false }
+                
+                // 各ターゲットに対するアクション名を比較
+                for target in lhsTargets {
+                    let lhsActions = lhs.actions(forTarget: target, forControlEvent: event)
+                    let rhsActions = rhs.actions(forTarget: target, forControlEvent: event)
+                    if lhsActions != rhsActions { return false }
+                }
+                
+                return true
+            }
+            // 幅が前回と同じで同じアクションのボタンが入っているならこれ以上することはないはず
+            let epsilon: CGFloat = 0.000001
+            if abs(self.currentWindowWidth - nowWidth) < epsilon {
+                if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
+                    let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
+                    let buttons = visibleButtons
+                    let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
+                    if isIdentical {
+                        return
+                    }
+                }
+            }
+            self.currentWindowWidth = nowWidth
+
             let stack = UIStackView()
             stack.axis = .horizontal
             stack.alignment = .center
@@ -1116,6 +1207,102 @@ body.NovelSpeakerBody {
         }
     }
 
+    func clearSearchView(){
+        if let searchView = self.searchView {
+            self.searchView = nil
+            DispatchQueue.main.async {
+                searchView.removeFromSuperview()
+            }
+        }
+    }
+    
+    func searchResultAnnounceIfVoiceOverEnabled(foundString:String){
+        guard UIAccessibility.isVoiceOverRunning == true else { return }
+        let announceString = String(format: NSLocalizedString("SpeechViewController_SearchByText_Found_Announce_to_VoiceOverUser_Formated", comment: "%@"), foundString)
+        StorySpeaker.shared.AnnounceSpeech(text: announceString)
+    }
+    
+    func prevSearchByText(searchString:String){
+        let searchStringCount = searchString.unicodeScalars.count
+        self.webSpeechTool.getSelectedLocation { location in
+            let targetText:String
+            if let targetLocation = location, targetLocation > 0 {
+                targetText = self.webViewDisplayWholeText?.NiftySubstring(from: 0, to: targetLocation - 1) ?? ""
+            }else{
+                targetText = ""
+            }
+            guard let nextRange = targetText.range(of: searchString, options: .backwards) else {
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SpeechViewController_SearchByText_NotFound", comment: "ページ内に検索文字列を発見できませんでした。"))
+                }
+                return
+            }
+            let targetLocation = max((targetText.distance(from: targetText.startIndex, to: nextRange.lowerBound) as Int), 0)
+            self.webSpeechTool.highlightSpeechLocation(location: targetLocation, length: searchStringCount) {
+                self.webSpeechTool.scrollToIndex(location: targetLocation, length: 1, scrollRatio: 0.3)
+            }
+
+            if let foundString = self.webViewDisplayWholeText?.NiftySubstring(from: targetLocation, to: targetLocation + min(searchStringCount + 20, 30)) {
+                self.searchResultAnnounceIfVoiceOverEnabled(foundString: foundString)
+            }
+        }
+    }
+    func nextSearchByText(searchString:String){
+        print("nextSearchByText in.")
+        let searchStringCount = searchString.unicodeScalars.count
+        guard let currentText = self.webViewDisplayWholeText else { return }
+        print("currentText.count: \(currentText.count)")
+        self.webSpeechTool.getSelectedLocation { location in
+            print("self.webSpeechTool.getSelectedLocation: \(location)")
+            let targetText:String, currentLocation:Int
+            if location != nil && currentText.unicodeScalars.count > location ?? 0 {
+                currentLocation = location!
+                targetText = currentText.NiftySubstring(from: currentLocation, to: currentText.unicodeScalars.count)
+            }else{
+                currentLocation = 0
+                targetText = currentText
+            }
+            guard let nextRange = targetText.range(of: searchString) else {
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SpeechViewController_SearchByText_NotFound", comment: "ページ内に検索文字列を発見できませんでした。"))
+                }
+                return
+            }
+            print("nextRange: \(nextRange)")
+            let targetLocation = (targetText.distance(from: targetText.startIndex, to: nextRange.lowerBound) as Int) + currentLocation
+            print("targetLocation: \(targetLocation)")
+            self.webSpeechTool.highlightSpeechLocation(location: targetLocation, length: searchStringCount) {
+                self.webSpeechTool.scrollToIndex(location: targetLocation, length: 1, scrollRatio: 0.3)
+            }
+
+            if let foundString = self.webViewDisplayWholeText?.NiftySubstring(from: targetLocation, to: targetLocation + min(searchStringCount + 20, 30)) {
+                self.searchResultAnnounceIfVoiceOverEnabled(foundString: foundString)
+            }
+        }
+    }
+    
+    @objc func searchByTextButtonClicked(_ sender: UIBarButtonItem) {
+        if self.searchView != nil {
+            clearSearchView()
+            return
+        }
+        if StorySpeaker.shared.isPlayng {
+            RealmUtil.RealmBlock { realm in
+                StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession:true)
+            }
+        }
+        guard let topLevelViewController = self.parent?.parent else { return }
+        self.searchView = SearchFloatingView.generate(parentView: topLevelViewController.view, firstText: searchTextCache, leftButtonClickHandler: { searchString in
+            guard let searchString = searchString else { return }
+            self.prevSearchByText(searchString: searchString)
+        }, rightButtonClickHandler: { searchString in
+            guard let searchString = searchString else { return }
+            self.nextSearchByText(searchString: searchString)
+        }, isDeletedHandler: {
+            self.searchView = nil
+        })
+    }
+
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
         let storyID = StorySpeaker.shared.storyID
         NovelSpeakerUtility.ShareStory(viewController: self, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), barButton: self.shareButtonItem)
@@ -1154,6 +1341,7 @@ body.NovelSpeakerBody {
                     }
                     func runNextSpeech(nextFolder:RealmNovelTag?){
                         StorySpeaker.shared.targetFolderNameForGoToNextSelectedFolderdNovel = nextFolder?.name
+                        self.clearSearchView()
                         RealmUtil.RealmBlock { realm in
                             StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(Speakボタンを押した 又は 本棚画面で「▶︎ 再生:〜」を選択した 又は 次のフォルダの小説に移行した).\(#function)", isNeedRepeatSpeech: true)
                             self.checkDummySpeechFinished()
@@ -1220,6 +1408,7 @@ body.NovelSpeakerBody {
             RealmUtil.RealmBlock { (realm) -> Void in
                 StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: false) {
                     StorySpeaker.shared.SkipBackward(realm: realm, length: 30) {
+                        self.clearSearchView()
                         RealmUtil.RealmBlock { realm in
                             StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)", isNeedRepeatSpeech: true)
                         }
@@ -1234,6 +1423,7 @@ body.NovelSpeakerBody {
             RealmUtil.RealmBlock { (realm) -> Void in
                 StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: false) {
                     StorySpeaker.shared.SkipForward(realm: realm, length: 30) {
+                        self.clearSearchView()
                         StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)", isNeedRepeatSpeech: true)
                     }
                 }
@@ -1355,6 +1545,7 @@ body.NovelSpeakerBody {
     //MARK: StorySpeakerDeletgate handler
     func storySpeakerStartSpeechEvent(storyID:String) {
         DispatchQueue.main.async {
+            self.clearSearchView()
             self.startStopButton?.setImage(UIImage(systemName: "pause.fill"), for: .normal)
             self.startStopButton?.accessibilityLabel = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
             self.skipBackwardButtonItem?.isEnabled = true
