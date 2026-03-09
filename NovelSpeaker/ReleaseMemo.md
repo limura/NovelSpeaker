@@ -4135,3 +4135,83 @@ Changes in interface/internal operation
 Fixing the problem
 
 - Disabled the use of AutoPagerize's SiteInfo on wedata.
+
+
+Version 2.10.5
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」→「小説本文画面の右上に表示されるボタン群の編集」に「発話開始・停止」を追加します
+- 小説本文画面右上のボタンの中で文字列だったものに対してアイコンを指定します
+- 本棚画面の右上のボタン群についても幅を狭めてアイコン化します(編集ボタンはアイコン化していません)
+- 小説本文画面と本棚画面の右上のボタン群の隙間を設定で変更できるようにします
+- 「設定タブ」→「小説本文表示画面の設定」→「色設定」の「字の色を直接指定」と「背景色を直接指定」で利用されるカラーピッカーをApple標準のものに変更
+
+問題の修正
+
+- 「設定タブ」→「小説本文表示画面の設定」の「色設定」で指定した背景色うまく効いていない問題を修正
+- 「設定タブ」→「小説本文画面での左右スワイプでページめくりができるようにする」がONになっていても左右スワイプで前後のページに遷移しない場合があった問題を修正
+
+それぞれ説明していきます。
+
+- 「設定タブ」→「小説本文画面の右上に表示されるボタン群の編集」に「発話開始・停止」を追加します
+- 小説本文画面右上のボタンの中で文字列だったものに対してアイコンを指定します
+- 小説本文画面と本棚画面の右上のボタン群の隙間を設定で変更できるようにします
+- 本棚画面の右上のボタン群についても幅を狭めてアイコン化します(編集ボタンはアイコン化していません)
+これらの変更で、「本棚画面」や「小説本文画面」の右上に出てくるボタン群の横幅が広がりすぎていて表示できるボタンの数がほとんどなくなっていた問題を"なんとかできた"気がします。
+具体的には、右上に表示するものを標準とされていそうな UIBarButtonItem から、UIStackView+UIButton に変えて、システムから見ると一つの UIBarButtonItem の中に UIStackView を使って複数の UIButton が入っている、という状態にしています。
+隙間については狭めれば狭めるだけボタンが入りやすくはなりますが、隣のボタンを押し間違える可能性が増えるのでユーザ様側でご自身に最適な隙間を指定する形にしています。
+
+- 「設定タブ」→「小説本文表示画面の設定」→「色設定」の「字の色を直接指定」と「背景色を直接指定」で利用されるカラーピッカーをApple標準のものに変更
+
+今まで使っていたもの(MSColorPicker)はダークモードに対応していないようだったので、Apple標準のカラーピッカーを利用するように書き換えています。
+昔はなかったんですよ UIColorPickerViewController なんてものは。
+
+- 「設定タブ」→「小説本文表示画面の設定」の「色設定」で指定した背景色うまく効いていない問題を修正
+
+こちらはそのままです。上側のものは何かおかしな色変化をしていたり、下側のものはダークモードだと視認性が悪くなっていたりしました。
+
+- 「設定タブ」→「小説本文画面での左右スワイプでページめくりができるようにする」がONになっていても左右スワイプで前後のページに遷移しない場合があった問題を修正
+
+こちらもそのままです。UISwipeGestureRecognizer では受け取れなくなっていたので UIPanGestureRecognizer で受け取るように書き換えています。
+
+以上よろしくお願いいたします。
+
+
+Version 2.10.5
+
+Changes in interface/internal operation
+
+- Added "Start/Stop Speech" to "Settings for the buttons displayed in the upper right corner of the novel text screen" in the "Settings Tab."
+- Assigned icons to buttons in the top right of the novel main screen that previously contained text.
+- Narrowed the width of the buttons in the top right of the bookshelf screen and converted them to icons (the edit button was not iconized).
+- You can now change the gap between the novel text screen and the buttons on the top right of the bookshelf screen in the settings.
+- Changed the color picker used for "Specify Text Color Directly" and "Specify Background Color Directly" in "Settings Tab" → "Novel Main Screen Settings" → "Color Settings" to the Apple standard color picker.
+
+Fixing the problem
+
+- Fixed an issue where the background color specified in "Color Settings" in "Settings Tab" → "Novel Main Screen Settings" was not working properly.
+- Fixed an issue where swiping left and right on the novel main screen would not transition to the previous or next page even when "Enable page turning by swiping left and right on the novel main screen" was enabled in the "Settings Tab."
+
+Version 2.10.6
+
+問題の修正
+- Dynamic Typeなどで表示される文字が大きくなっている場合に一部のスライダが操作不能になってしまう問題を修正
+- 発話中や複数選択中にレイアウト変更した場合にいくつかアイコンが期待していない状態になっていた問題を修正
+- ダークモード時に「設定タブ」→「小説本文表示画面の設定」→「色設定」で「白地に黒で固定」にしたり、それぞれをその逆にした時に、画面上部の時刻や電池残量といった表示が見えなくなる(黒地に黒で描かれたりする)問題に対処
+- 画面右上のボタン群周りの表示時にレイアウト変更を検知して配置し直していたものが誤動作でCPUを食いまくってしまう場合があったのを修正
+
+今回は問題の修正のみです。
+電池を消費しまくる問題があったのを直しています。モバイル通信周りや消費電力周りは気をつけているつもりだったのですが、気が抜けていました。すみません。
+
+簡単になりますが以上になります。
+
+
+Version 2.10.6
+
+Fixing the problem
+
+- Fixed an issue where some sliders would become inoperable when the text displayed using Dynamic Type or other features was enlarged.
+- Fixed an issue where some icons would appear in unexpected positions when changing the layout during speech or multiple selection.
+- Fixed an issue where, in Dark Mode, the time and battery level indicators at the top of the screen would become invisible (drawn black on black) when the "Settings" tab → "Novel Text Display Settings" → "Color Settings" was set to "Fixed Black on White" or vice versa.
+- Fixed an issue where the buttons in the upper right corner of the screen would malfunction and consume excessive CPU power when detecting layout changes and rearranging them.

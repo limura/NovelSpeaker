@@ -986,19 +986,28 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "Done";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "Edit";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.5
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.6
 
-- Added \"Start/Stop Speech\" to \"Settings for the buttons displayed in the upper right corner of the novel text screen\" in the \"Settings Tab.\"
-- Assigned icons to buttons in the top right of the novel main screen that previously contained text.
-- Narrowed the width of the buttons in the top right of the bookshelf screen and converted them to icons (the edit button was not iconized).
-- You can now change the gap between the novel text screen and the buttons on the top right of the bookshelf screen in the settings.
-- Changed the color picker used for \"Specify Text Color Directly\" and \"Specify Background Color Directly\" in \"Settings Tab\" → \"Novel Main Screen Settings\" → \"Color Settings\" to the Apple standard color picker.
-- Fixed an issue where the background color specified in \"Color Settings\" in \"Settings Tab\" → \"Novel Main Screen Settings\" was not working properly.
-- Fixed an issue where swiping left and right on the novel main screen would not transition to the previous or next page even when \"Enable page turning by swiping left and right on the novel main screen\" was enabled in the \"Settings Tab.\"
+Fixing the problem
+
+- Fixed an issue where some sliders would become inoperable when the text displayed using Dynamic Type or other features was enlarged.
+- Fixed an issue where some icons would appear in unexpected positions when changing the layout during speech or multiple selection.
+- Fixed an issue where, in Dark Mode, the time and battery level indicators at the top of the screen would become invisible (drawn black on black) when the \"Settings\" tab → \"Novel Text Display Settings\" → \"Color Settings\" was set to \"Fixed Black on White\" or vice versa.
+- Fixed an issue where the buttons in the upper right corner of the screen would malfunction and consume excessive CPU power when detecting layout changes and rearranging them.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.6
+
+Fixing the problem
+
+- Fixed an issue where some sliders would become inoperable when the text displayed using Dynamic Type or other features was enlarged.
+- Fixed an issue where some icons would appear in unexpected positions when changing the layout during speech or multiple selection.
+- Fixed an issue where, in Dark Mode, the time and battery level indicators at the top of the screen would become invisible (drawn black on black) when the \"Settings\" tab → \"Novel Text Display Settings\" → \"Color Settings\" was set to \"Fixed Black on White\" or vice versa.
+- Fixed an issue where the buttons in the upper right corner of the screen would malfunction and consume excessive CPU power when detecting layout changes and rearranging them.
+
+
 Version 2.10.5
 
 Changes in interface/internal operation
