@@ -48,6 +48,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     var currentReadStoryIDChangeAlertFloatingButton:FloatingButton? = nil
     
+    var isUpperRightButtonsChanged:Bool = true
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -259,6 +261,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var currentWindowWidth:CGFloat = 0.0
     func assignUpperButtons(novelID: String, novelType:NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
         DispatchQueue.main.async {
+            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
+            if abs(self.currentWindowWidth - nowWidth) < 0.0001 && self.isUpperRightButtonsChanged == false {
+                return
+            }
             var barButtonArray:[UIButton] = []
             
             func createBarButtonItem(image: UIImage?, action: Selector, accessibilityLabel: String) -> UIButton {
@@ -402,7 +408,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
 
             let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
-            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
             var maxButtons: Int = {
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
                 // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
@@ -496,6 +501,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
             }
             self.currentWindowWidth = nowWidth
+            self.isUpperRightButtonsChanged = false
 
             let stack = UIStackView()
             stack.axis = .horizontal
@@ -673,6 +679,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { (notification) in
             self.forceUpdateUpperButtons()
+        }
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { (notification) in
+            self.isUpperRightButtonsChanged = true
         }
     }
     func unregistNotificationCenter() {

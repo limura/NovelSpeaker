@@ -42,6 +42,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             globalState.SetBookshelfViewButtonSettingWith(realm: realm, newValue: newSetting)
         }
+        NovelSpeakerNotificationTool.AnnounceSpeechViewRightTopButtonTitleChanged()
     }
     
     func CreateRows(settingArray:[BookshelfViewButtonSetting]) {

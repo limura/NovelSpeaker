@@ -66,6 +66,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
 
     let myScriptNamespace = "NovelSpeaker_\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
     
+    var isUpperRightButtonsChanged:Bool = true
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -126,6 +128,9 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     func registNotificationCenter() {
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { (notification) in
             self.forceUpdateUpperButtons()
+        }
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { (notification) in
+            self.isUpperRightButtonsChanged = true
         }
     }
     func unregistNotificationCenter() {
@@ -884,6 +889,10 @@ body.NovelSpeakerBody {
     var currentWindowWidth:CGFloat = 0.0
     func assignUpperButtons(novelID: String, novelType: NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
         DispatchQueue.main.async {
+            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
+            if abs(self.currentWindowWidth - nowWidth) < 0.0001 && self.isUpperRightButtonsChanged == false {
+                return
+            }
             var barButtonArray:[UIButton] = []
             
             func createBarButtonItem(image: UIImage?, action: Selector, accessibilityLabel: String) -> UIButton {
@@ -1013,7 +1022,6 @@ body.NovelSpeakerBody {
             }
 
             let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
-            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
             var maxButtons: Int = {
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
                 let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
@@ -1106,6 +1114,7 @@ body.NovelSpeakerBody {
                 }
             }
             self.currentWindowWidth = nowWidth
+            self.isUpperRightButtonsChanged = false
 
             let stack = UIStackView()
             stack.axis = .horizontal

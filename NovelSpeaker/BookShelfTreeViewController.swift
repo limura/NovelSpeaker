@@ -109,6 +109,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     var novelTagNotificationToken : NotificationToken? = nil
     
     let multiSelectMenuView = DynamicHorizontalStackView()
+    
+    var isUpperRightButtonsChanged:Bool = true
 
     static var instance:BookShelfTreeViewController? = nil
     override func viewDidLoad() {
@@ -1909,6 +1911,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             self.updateLeftBarButtonWidth()
             self.assinButtons()
         }
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BookshelfRightTopButtonTitleChanged, queue: .main) { (notification) in
+            self.isUpperRightButtonsChanged = true
+        }
     }
     
     func unregistNotificationCenter() {
@@ -2047,6 +2052,11 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     var currentWindowWidth:CGFloat = 0.0
     func assignRightBarButtons() {
         DispatchQueue.main.async {
+            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
+            if abs(self.currentWindowWidth - nowWidth) < 0.0001 && self.isUpperRightButtonsChanged == false {
+                // 横幅もボタンも変わってなければすることはないはず
+                return
+            }
             let buttonSettingArray = RealmUtil.RealmBlock { (realm) -> [BookshelfViewButtonSetting] in
                 guard let settingArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetBookshelfViewButtonSetting() else { return BookshelfViewButtonSetting.defaultSetting }
                 return settingArray
@@ -2094,7 +2104,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 }
             }
             let spacing:CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
-            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
             var maxButtons: Int = {
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
                 // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
@@ -2189,7 +2198,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             }
             print("assignRightBarButtons update: \(self.currentWindowWidth) -> \(nowWidth) \(visibleButtons.count)")
             self.currentWindowWidth = nowWidth
-            
+            self.isUpperRightButtonsChanged = false
+
             let stack = UIStackView()
             stack.axis = .horizontal
             stack.alignment = .center
