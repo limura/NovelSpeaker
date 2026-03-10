@@ -385,12 +385,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     barButtonArray.append(button)
                 case .speechStop:
                     let image:UIImage?
+                    let accessibilityLabel:String
                     if self.storySpeaker.isPlayng {
                         image = UIImage(systemName: "pause.fill")
+                        accessibilityLabel = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
                     }else{
                         image = UIImage(systemName: "play.fill")
+                        accessibilityLabel = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
                     }
-                    let button = createBarButtonItem(image: image, action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
+                    let button = createBarButtonItem(image: image, action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: accessibilityLabel)
                     self.startStopButton = button
                     barButtonArray.append(button)
                 default:
@@ -1307,6 +1310,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     // MARK: StorySpeakerDelegate
     func storySpeakerStartSpeechEvent(storyID:String){
+        // 何故か self.startStopButton?.setImage(UIImage(systemName: "pause.fill"), for: .normal) が効かないのでボタン群を全部作り直します
+        self.currentWindowWidth = 0.0
+        forceUpdateUpperButtons()
+        return
         DispatchQueue.main.async {
             self.clearSearchView()
             self.startStopButton?.setImage(UIImage(systemName: "pause.fill"), for: .normal)
@@ -1317,6 +1324,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
     }
     func storySpeakerStopSpeechEvent(storyID:String){
+        // 何故か self.startStopButton?.setImage(UIImage(systemName: "pause.fill"), for: .normal) が効かないのでボタン群を全部作り直します
+        self.currentWindowWidth = 0.0
+        forceUpdateUpperButtons()
+        return
         DispatchQueue.main.async {
             self.startStopButton?.setImage(UIImage(systemName: "play.fill"), for: .normal)
             self.startStopButton?.accessibilityLabel = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
