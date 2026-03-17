@@ -586,7 +586,7 @@ li {
             // それに伴って CFError を受け取らずに単に SecTrustEvaluateWithError が true を返すかどうかだけで判定するようにします。
             DispatchQueue.global(qos: .utility).async {
                 if SecTrustEvaluateWithError(serverTrust, nil) == false {
-                    MainActor.assumeIsolated {
+                    DispatchQueue.main.async {
                         completionHandler(.rejectProtectionSpace, nil)
                     }
                     return
