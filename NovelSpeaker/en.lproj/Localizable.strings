@@ -986,18 +986,20 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "Done";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "Edit";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.6
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.7
 
-Fixing the problem
-
-- Fixed an issue where some sliders would become inoperable when the text displayed using Dynamic Type or other features was enlarged.
-- Fixed an issue where some icons would appear in unexpected positions when changing the layout during speech or multiple selection.
-- Fixed an issue where, in Dark Mode, the time and battery level indicators at the top of the screen would become invisible (drawn black on black) when the \"Settings\" tab → \"Novel Text Display Settings\" → \"Color Settings\" was set to \"Fixed Black on White\" or vice versa.
-- Fixed an issue where the buttons in the upper right corner of the screen would malfunction and consume excessive CPU power when detecting layout changes and rearranging them.
+- Fixed an issue where the \"Web Import\" tab might crash if there was a problem verifying the SSL certificate.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.7
+
+Fixing the problem
+
+- Fixed an issue where the \"Web Import\" tab might crash if there was a problem verifying the SSL certificate.
+
+
 Version 2.10.6
 
 Fixing the problem

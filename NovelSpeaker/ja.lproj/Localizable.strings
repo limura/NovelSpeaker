@@ -973,16 +973,20 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "完了";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "編集";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.6
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.7
 
-- Dynamic Typeなどで表示される文字が大きくなっている場合に一部のスライダが操作不能になってしまう問題を修正
-- 発話中や複数選択中にレイアウト変更した場合にいくつかアイコンが期待していない状態になっていた問題を修正
-- ダークモード時に「設定タブ」→「小説本文表示画面の設定」→「色設定」で「白地に黒で固定」にしたり、それぞれをその逆にした時に、画面上部の時刻や電池残量といった表示が見えなくなる(黒地に黒で描かれたりする)問題に対処
-- 画面右上のボタン群周りの表示時にレイアウト変更を検知して配置し直していたものが誤動作でCPUを食いまくってしまう場合があったのを修正
+- 「Web取込」タブにおいてSSL証明書の検証で問題があった時に強制終了する場合がある問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.10.7
+
+問題の修正
+
+- 「Web取込」タブにおいてSSL証明書の検証で問題があった時に強制終了する場合がある問題を修正
+
+
 Version 2.10.6
 
 問題の修正

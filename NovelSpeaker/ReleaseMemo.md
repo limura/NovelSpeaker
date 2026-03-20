@@ -4215,3 +4215,22 @@ Fixing the problem
 - Fixed an issue where some icons would appear in unexpected positions when changing the layout during speech or multiple selection.
 - Fixed an issue where, in Dark Mode, the time and battery level indicators at the top of the screen would become invisible (drawn black on black) when the "Settings" tab → "Novel Text Display Settings" → "Color Settings" was set to "Fixed Black on White" or vice versa.
 - Fixed an issue where the buttons in the upper right corner of the screen would malfunction and consume excessive CPU power when detecting layout changes and rearranging them.
+
+Version 2.10.7
+
+問題の修正
+
+- 「Web取込」タブにおいてSSL証明書の検証で問題があった時に強制終了する場合がある問題を修正
+
+今回も問題の修正のみです。
+
+今回の問題は、「Web取込」タブでWebページを開こうとして、そのWebページ上のコンテンツ(HTMLや画像、JavaScriptといったファイル)を取得しようとしたときには HTTPS で接続している場合にそのSSL証明書が正しいかどうかの検証が走るのですが、その検証部分に問題があり、強制終了する場合があったというものです。
+
+簡単になりますが以上になります。
+
+
+Version 2.10.7
+
+Fixing the problem
+
+- Fixed an issue where the "Web Import" tab might crash if there was a problem verifying the SSL certificate.
