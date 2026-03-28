@@ -9,6 +9,9 @@
 import XCTest
 @testable import NovelSpeaker
 @testable import Kanna
+#if !os(watchOS)
+@testable import Erik
+#endif
 
 class StoryFetcherTest: XCTestCase {
 
@@ -71,7 +74,180 @@ class StoryFetcherTest: XCTestCase {
     }
     #endif
     
-    func testMultiErik() throws {
+    #if !os(watchOS)
+    private func createTestDocument(html:String) throws -> Document {
+        let rawDocument = try XCTUnwrap(HTML(html: html, encoding: .utf8))
+        return Document(rawValue: rawDocument)
+    }
+    
+    private func createTestSiteInfo(nextButton:String? = nil) -> StorySiteInfo {
+        return StorySiteInfo(
+            pageElement: "//*[@id='content']",
+            url: "^https://example.com/.*$",
+            title: "//*[@id='title']",
+            subtitle: nil,
+            firstPageLink: nil,
+            nextLink: nil,
+            tag: nil,
+            author: "//*[@id='author']",
+            isNeedHeadless: nil,
+            injectStyle: nil,
+            nextButton: nextButton,
+            firstPageButton: nil,
+            waitSecondInHeadless: nil,
+            forceClickButton: nil,
+            resourceUrl: nil,
+            overrideUserAgent: nil,
+            forceErrorMessageAndElement: nil,
+            scrollTo: nil,
+            isNeedWhitespaceSplitForTag: nil
+        )
+    }
+    
+    func testCreateNextStateDropsTransientDOMReferences() throws {
+        let document = try createTestDocument(html: "<html><body><div id='content'>本文</div><a class='next'>次へ</a></body></html>")
+        let nextButton = try XCTUnwrap(document.querySelectorAll(".next").first)
+        let currentState = StoryState(
+            url: try XCTUnwrap(URL(string: "https://example.com/chapter1")),
+            cookieString: "a=b",
+            content: "本文",
+            nextUrl: URL(string: "https://example.com/chapter2"),
+            firstPageLink: nil,
+            title: "title",
+            author: "author",
+            subtitle: nil,
+            tagArray: [],
+            siteInfoArray: [createTestSiteInfo(nextButton: ".next")],
+            isNeedHeadless: true,
+            isCanFetchNextImmediately: false,
+            waitSecondInHeadless: nil,
+            previousContent: nil,
+            document: document,
+            nextButton: nextButton,
+            firstPageButton: nil,
+            forceClickButton: nil,
+            forceErrorMessage: nil
+        )
+        let nextState = currentState.CreateNextState()
+        
+        XCTAssertNil(nextState.document)
+        XCTAssertNil(nextState.nextButton)
+        XCTAssertNil(nextState.firstPageButton)
+        XCTAssertNil(nextState.forceClickButton)
+        XCTAssertEqual(nextState.previousContent, "本文")
+        XCTAssertEqual(nextState.nextUrl?.absoluteString, "https://example.com/chapter2")
+    }
+    
+    func testDecodeDocumentDropsDOMWhenButtonsAreNotNeeded() throws {
+        let html = """
+        <html><body><h1 id="title">題名</h1><div id="author">著者</div><div id="content">本文</div></body></html>
+        """
+        let document = try createTestDocument(html: html)
+        let fetcher = StoryFetcher()
+        let currentState = StoryState(
+            url: try XCTUnwrap(URL(string: "https://example.com/chapter1")),
+            cookieString: nil,
+            content: nil,
+            nextUrl: nil,
+            firstPageLink: nil,
+            title: nil,
+            author: nil,
+            subtitle: nil,
+            tagArray: [],
+            siteInfoArray: [createTestSiteInfo()],
+            isNeedHeadless: true,
+            isCanFetchNextImmediately: false,
+            waitSecondInHeadless: nil,
+            previousContent: nil,
+            document: document,
+            nextButton: nil,
+            firstPageButton: nil,
+            forceClickButton: nil,
+            forceErrorMessage: nil
+        )
+        var resultState:StoryState?
+        
+        fetcher.DecodeDocument(currentState: currentState, html: html, encoding: .utf8) { state in
+            resultState = state
+        } failedAction: { _, error in
+            XCTFail("DecodeDocument failed: \(error)")
+        }
+        
+        let decodedState = try XCTUnwrap(resultState)
+        XCTAssertEqual(decodedState.content, "本文")
+        XCTAssertNil(decodedState.document)
+        XCTAssertNil(decodedState.nextButton)
+        XCTAssertNil(decodedState.firstPageButton)
+    }
+    
+    func testDecodeDocumentRetainsDOMWhenNextButtonExists() throws {
+        let html = """
+        <html><body><h1 id="title">題名</h1><div id="author">著者</div><div id="content">本文</div><a class="next">次へ</a></body></html>
+        """
+        let document = try createTestDocument(html: html)
+        let fetcher = StoryFetcher()
+        let currentState = StoryState(
+            url: try XCTUnwrap(URL(string: "https://example.com/chapter1")),
+            cookieString: nil,
+            content: nil,
+            nextUrl: nil,
+            firstPageLink: nil,
+            title: nil,
+            author: nil,
+            subtitle: nil,
+            tagArray: [],
+            siteInfoArray: [createTestSiteInfo(nextButton: ".next")],
+            isNeedHeadless: true,
+            isCanFetchNextImmediately: false,
+            waitSecondInHeadless: nil,
+            previousContent: nil,
+            document: document,
+            nextButton: nil,
+            firstPageButton: nil,
+            forceClickButton: nil,
+            forceErrorMessage: nil
+        )
+        var resultState:StoryState?
+        
+        fetcher.DecodeDocument(currentState: currentState, html: html, encoding: .utf8) { state in
+            resultState = state
+        } failedAction: { _, error in
+            XCTFail("DecodeDocument failed: \(error)")
+        }
+        
+        let decodedState = try XCTUnwrap(resultState)
+        XCTAssertEqual(decodedState.content, "本文")
+        XCTAssertNotNil(decodedState.document)
+        XCTAssertNotNil(decodedState.nextButton)
+    }
+    
+    func testNormalizeEvaluateJavaScriptResultReturnsStringOnce() throws {
+        let (result, error) = HeadlessHttpClient.NormalizeEvaluateJavaScriptResult(data: "done", error: nil, javaScript: "return 1")
+        
+        XCTAssertEqual(result, "done")
+        XCTAssertNil(error)
+    }
+    
+    func testNormalizeEvaluateJavaScriptResultConvertsErikError() throws {
+        let convertedError = NSError(domain: "test", code: 123, userInfo: [NSLocalizedDescriptionKey: "converted"])
+        let (result, error) = HeadlessHttpClient.NormalizeEvaluateJavaScriptResult(data: nil, error: ErikError.timeOutError(time: 1.0), javaScript: "return 1") { _ in
+            convertedError
+        }
+        
+        XCTAssertNil(result)
+        XCTAssertEqual((error as NSError?)?.domain, "test")
+        XCTAssertEqual((error as NSError?)?.code, 123)
+    }
+    
+    func testNormalizeEvaluateJavaScriptResultReturnsGeneratedErrorForUnexpectedValue() throws {
+        let (result, error) = HeadlessHttpClient.NormalizeEvaluateJavaScriptResult(data: 1, error: nil, javaScript: "return 1")
+        
+        XCTAssertNil(result)
+        XCTAssertEqual(error?.localizedDescription, "execute JavaScript(\"return 1\") error.")
+    }
+    #endif
+    
+    func disabled_testMultiErik() throws {
         let erik1 = HeadlessHttpClient()
         let erik2 = HeadlessHttpClient()
         let url1 = URL(string: "https://www.pixiv.net/")

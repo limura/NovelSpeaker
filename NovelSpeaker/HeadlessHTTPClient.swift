@@ -56,6 +56,23 @@ class HeadlessHttpClient {
         }
     }
     
+    static func GenerateJavaScriptNSError(javaScript:String) -> NSError {
+        return NSError(domain: "com.limuraproducts.headlesshttpclient", code: 0, userInfo: [NSLocalizedDescriptionKey: "execute JavaScript(\"\(javaScript)\") error."])
+    }
+    
+    static func NormalizeEvaluateJavaScriptResult(data:Any?, error:Error?, javaScript:String, erikErrorConverter:((ErikError)->NSError)? = nil) -> (String?, Error?) {
+        if let error = error {
+            if let error = error as? ErikError, let erikErrorConverter = erikErrorConverter {
+                return (nil, erikErrorConverter(error))
+            }
+            return (nil, error)
+        }
+        if let resultString = data as? String {
+            return (resultString, nil)
+        }
+        return (nil, GenerateJavaScriptNSError(javaScript: javaScript))
+    }
+    
     func ReloadWebView(config:WKWebViewConfiguration){
         dispatch_sync_on_main_thread {
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
@@ -163,16 +180,10 @@ class HeadlessHttpClient {
     }
     public func ExecuteJavaScript(javaScript:String, resultHandler:((String?, Error?)->Void)?){
         self.erik.evaluate(javaScript: javaScript) { (data, error) in
-            if let error = error {
-                if let error = error as? ErikError {
-                    resultHandler?(nil, self.ErikErrorToNSError(error: error))
-                }else{
-                    resultHandler?(nil, error)
-                }
-            }else if let resultString = data as? String {
-                resultHandler?(resultString, nil)
+            let (resultString, resultError) = HeadlessHttpClient.NormalizeEvaluateJavaScriptResult(data: data, error: error, javaScript: javaScript) { erikError in
+                self.ErikErrorToNSError(error: erikError)
             }
-            resultHandler?(nil, self.GenerateNSError(msg: "execute JavaScript(\"\(javaScript)\") error."))
+            resultHandler?(resultString, resultError)
         }
     }
     

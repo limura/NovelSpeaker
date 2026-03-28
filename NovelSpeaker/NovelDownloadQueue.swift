@@ -526,7 +526,7 @@ class NovelDownloadQueue : NSObject {
     @objc static let shared = NovelDownloadQueue()
     private let queueHolder = DownloadQueueHolder()
     #if !os(watchOS)
-    var maxSimultaneousDownloadCount = 5
+    var maxSimultaneousDownloadCount = 2
     #else
     var maxSimultaneousDownloadCount = 1
     #endif
@@ -887,7 +887,7 @@ class NovelDownloadQueue : NSObject {
             Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false){ (timer) in
                 NovelDownloader.FlushAllWritePool()
                 // 並列を戻します。
-                self.maxSimultaneousDownloadCount = 5
+                self.maxSimultaneousDownloadCount = 2
                 let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
                 self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
                 self.downloadEndedNovelIDSet.removeAll()
