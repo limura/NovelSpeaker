@@ -28,6 +28,38 @@ class DownloadTest: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
+    func testNovelDownloadThrottlePolicyNominalKeepsConfiguredSpeed() throws {
+        let settings = NovelDownloadThrottleSettings(isDynamicThrottleEnabled: true, baseMaxSimultaneousDownloadCount: 5, minimumQueueDelayTime: 1.05)
+        let parameters = NovelDownloadThrottlePolicy.parameters(thermalState: .nominal, isLowPowerModeEnabled: false, settings: settings)
+        
+        XCTAssertEqual(parameters.maxSimultaneousDownloadCount, 5)
+        XCTAssertEqual(parameters.queueDelayTime, 1.05, accuracy: 0.001)
+    }
+    
+    func testNovelDownloadThrottlePolicySeriousThrottlesAggressively() throws {
+        let settings = NovelDownloadThrottleSettings(isDynamicThrottleEnabled: true, baseMaxSimultaneousDownloadCount: 5, minimumQueueDelayTime: 1.05)
+        let parameters = NovelDownloadThrottlePolicy.parameters(thermalState: .serious, isLowPowerModeEnabled: false, settings: settings)
+        
+        XCTAssertEqual(parameters.maxSimultaneousDownloadCount, 1)
+        XCTAssertEqual(parameters.queueDelayTime, 2.10, accuracy: 0.001)
+    }
+    
+    func testNovelDownloadThrottlePolicyLowPowerModeReducesParallelism() throws {
+        let settings = NovelDownloadThrottleSettings(isDynamicThrottleEnabled: true, baseMaxSimultaneousDownloadCount: 5, minimumQueueDelayTime: 1.05)
+        let parameters = NovelDownloadThrottlePolicy.parameters(thermalState: .nominal, isLowPowerModeEnabled: true, settings: settings)
+        
+        XCTAssertEqual(parameters.maxSimultaneousDownloadCount, 4)
+        XCTAssertEqual(parameters.queueDelayTime, 1.40, accuracy: 0.001)
+    }
+    
+    func testNovelDownloadThrottlePolicyCanBeDisabled() throws {
+        let settings = NovelDownloadThrottleSettings(isDynamicThrottleEnabled: false, baseMaxSimultaneousDownloadCount: 5, minimumQueueDelayTime: 1.05)
+        let parameters = NovelDownloadThrottlePolicy.parameters(thermalState: .critical, isLowPowerModeEnabled: true, settings: settings)
+        
+        XCTAssertEqual(parameters.maxSimultaneousDownloadCount, 5)
+        XCTAssertEqual(parameters.queueDelayTime, 1.05, accuracy: 0.001)
+    }
+    
     func StoryStateChecker(state:StoryState, url:URL? = nil, cookieString:String? = nil, content:String? = nil, contentFirstLine:String? = nil, nextUrl:URL? = nil, firstPageLink:URL? = nil, title:String? = nil, author:String? = nil, subtitle:String? = nil, tagArray:[String]? = nil, isNeedHeadless:Bool? = nil, isCanFetchNextImmediately:Bool? = nil, waitSecondInHeadless:Double? = nil, checkDocument:Bool = false, checkNextButton:Bool = false, checkFirstPageButton:Bool = false) {
         if let url = url {
             XCTAssertEqual(state.url.absoluteString, url.absoluteString, "urlが違う\n\(state.description)")
@@ -187,4 +219,3 @@ class DownloadTest: XCTestCase {
         self.wait(for: [expectation], timeout: 10.0)
     }
 }
-

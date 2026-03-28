@@ -193,6 +193,8 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isEnableSwipeOnStoryView = obj.isEnableSwipeOnStoryView
             newObj.isDisableNarouRuby = obj.isDisableNarouRuby
             newObj.isNeedDisableIdleTimerWhenSpeechTime = obj.isNeedDisableIdleTimerWhenSpeechTime
+            newObj.isDynamicNovelDownloadThrottleEnabled = obj.isDynamicNovelDownloadThrottleEnabled
+            newObj.baseMaxConcurrentNovelDownloadCount = obj.baseMaxConcurrentNovelDownloadCount
             newObj.novelLikeOrder.removeAll()
             newObj.novelLikeOrder.append(objectsIn: obj.novelLikeOrder)
             newObj.menuItemsNotRemoved.removeAll()

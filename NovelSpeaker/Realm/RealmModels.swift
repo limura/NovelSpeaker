@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 15
+    static let currentSchemaVersion : UInt64 = 16
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -100,6 +100,12 @@ import AVFoundation
             newObject?["likeButtonDialogType"] = LikeButtonDialogType.noDialog.rawValue
         }
     }
+    static func Migrate_15_To_16(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
+            newObject?["isDynamicNovelDownloadThrottleEnabled"] = true
+            newObject?["baseMaxConcurrentNovelDownloadCount"] = 5
+        }
+    }
 
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
@@ -134,6 +140,9 @@ import AVFoundation
         }
         if oldSchemaVersion <= 12 {
             Migrate_12_To_13(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion <= 15 {
+            Migrate_15_To_16(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -2877,6 +2886,8 @@ enum LikeButtonDialogType: Int {
     @objc dynamic var isNeedDisableIdleTimerWhenSpeechTime = false
     @objc dynamic var likeButtonDialogType: Int = LikeButtonDialogType.noDialog.rawValue
     @objc dynamic var isDeleteBlockOnBookshelfTreeView = false
+    @objc dynamic var isDynamicNovelDownloadThrottleEnabled = true
+    @objc dynamic var baseMaxConcurrentNovelDownloadCount = 5
     let novelLikeOrder = List<String>()
     let menuItemsNotRemoved = List<String>()
     let preferredSiteInfoURLList = List<String>()

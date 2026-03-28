@@ -1602,6 +1602,51 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
+            <<< SwitchRow("IsDynamicNovelDownloadThrottleEnabled") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsDynamicNovelDownloadThrottleEnabled", comment: "端末が熱い場合などにダウンロードの並列数を減らす")
+                row.cell.textLabel?.numberOfLines = 0
+                RealmUtil.RealmBlock { realm in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isDynamicNovelDownloadThrottleEnabled
+                }
+            }.onChange({ row in
+                guard let value = row.value else { return }
+                RealmUtil.RealmBlock { realm in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { _ in
+                        globalState.isDynamicNovelDownloadThrottleEnabled = value
+                    }
+                }
+                NovelDownloadQueue.shared.ReloadThrottleSettings()
+            })
+            section
+            <<< SliderRow("BaseMaxConcurrentNovelDownloadCount") { row in
+                row.title = NSLocalizedString("SettingTableViewController_BaseMaxConcurrentNovelDownloadCount", comment: "最大の並列数(標準値は5)")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.slider.minimumValue = 1
+                row.cell.slider.maximumValue = 10
+                row.shouldHideValue = false
+                row.displayValueFor = { (value:Float?) -> String? in
+                    guard let value = value else { return "" }
+                    return String(format: "%.0f", value)
+                }
+                row.steps = 9
+                RealmUtil.RealmBlock { realm in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = Float(globalState.baseMaxConcurrentNovelDownloadCount)
+                }
+            }.onChange({ row in
+                guard let value = row.value else { return }
+                let intValue = min(10, max(1, Int(round(value))))
+                RealmUtil.RealmBlock { realm in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { _ in
+                        globalState.baseMaxConcurrentNovelDownloadCount = intValue
+                    }
+                }
+                NovelDownloadQueue.shared.ReloadThrottleSettings()
+            })
             form +++ section
 
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、

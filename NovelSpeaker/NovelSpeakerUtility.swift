@@ -1561,6 +1561,12 @@ class NovelSpeakerUtility: NSObject {
                 if let isNeedDisableIdleTimerWhenSpeechTime = dic.object(forKey: "isNeedDisableIdleTimerWhenSpeechTime") as? NSNumber {
                     globalState.isNeedDisableIdleTimerWhenSpeechTime = isNeedDisableIdleTimerWhenSpeechTime.boolValue
                 }
+                if let isDynamicNovelDownloadThrottleEnabled = dic.object(forKey: "isDynamicNovelDownloadThrottleEnabled") as? NSNumber {
+                    globalState.isDynamicNovelDownloadThrottleEnabled = isDynamicNovelDownloadThrottleEnabled.boolValue
+                }
+                if let baseMaxConcurrentNovelDownloadCount = dic.object(forKey: "baseMaxConcurrentNovelDownloadCount") as? NSNumber {
+                    globalState.baseMaxConcurrentNovelDownloadCount = min(10, max(1, baseMaxConcurrentNovelDownloadCount.intValue))
+                }
                 if let isDeleteBlockOnBookshelfTreeView = dic.object(forKey: "isDeleteBlockOnBookshelfTreeView") as? NSNumber {
                     globalState.isDeleteBlockOnBookshelfTreeView = isDeleteBlockOnBookshelfTreeView.boolValue
                 }
@@ -1602,6 +1608,7 @@ class NovelSpeakerUtility: NSObject {
                 realm.add(globalState, update: .modified)
             }
         }
+        NovelDownloadQueue.shared.ReloadThrottleSettings()
     }
     
     static func RestoreNovel_V_2_0_0(bookshelf:NSArray, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
@@ -2229,6 +2236,8 @@ class NovelSpeakerUtility: NSObject {
                 "isEnableSwipeOnStoryView": globalState.isEnableSwipeOnStoryView,
                 "isDisableNarouRuby": globalState.isDisableNarouRuby,
                 "isNeedDisableIdleTimerWhenSpeechTime": globalState.isNeedDisableIdleTimerWhenSpeechTime,
+                "isDynamicNovelDownloadThrottleEnabled": globalState.isDynamicNovelDownloadThrottleEnabled,
+                "baseMaxConcurrentNovelDownloadCount": globalState.baseMaxConcurrentNovelDownloadCount,
                 "supportRotationMask": NovelSpeakerUtility.supportRotationMask.rawValue,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
                 "menuItemsNotRemoved": Array(globalState.menuItemsNotRemoved),

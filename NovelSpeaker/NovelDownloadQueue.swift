@@ -186,12 +186,10 @@ class DownloadQueueHolder: NSObject {
     }
 }
 
-// 読み込みを何秒に一回にするのかの値[秒]
-fileprivate var queueDelayTime = 1.05
 // 一定時間に一回しか動かさないようにする。
-fileprivate func delayQueue(queuedDate: Date, block:@escaping ()->Void) {
+fileprivate func delayQueue(queuedDate: Date, delayTime: TimeInterval, block:@escaping ()->Void) {
     let now = Date()
-    let diffTime = queuedDate.timeIntervalSince1970 - now.timeIntervalSince1970 + queueDelayTime
+    let diffTime = queuedDate.timeIntervalSince1970 - now.timeIntervalSince1970 + delayTime
     if diffTime < 0 {
         DispatchQueue.global(qos: .utility).async {
             block()
@@ -200,6 +198,61 @@ fileprivate func delayQueue(queuedDate: Date, block:@escaping ()->Void) {
         DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + diffTime) {
             block()
         }
+    }
+}
+
+struct NovelDownloadThrottleParameters: Equatable {
+    let maxSimultaneousDownloadCount:Int
+    let queueDelayTime:TimeInterval
+}
+
+struct NovelDownloadThrottleStatus: Equatable {
+    let thermalStateRawValue:Int
+    let isLowPowerModeEnabled:Bool
+    let parameters:NovelDownloadThrottleParameters
+    let isOverrideActive:Bool
+}
+
+struct NovelDownloadThrottleSettings {
+    var isDynamicThrottleEnabled = true
+    var baseMaxSimultaneousDownloadCount = 5
+    let minimumThrottledSimultaneousDownloadCount = 1
+    var minimumQueueDelayTime:TimeInterval = 1.05
+    let seriousQueueDelayTime:TimeInterval = 2.10
+    let criticalQueueDelayTime:TimeInterval = 4.20
+}
+
+enum NovelDownloadThrottlePolicy {
+    static func parameters(thermalState: ProcessInfo.ThermalState, isLowPowerModeEnabled: Bool, settings: NovelDownloadThrottleSettings) -> NovelDownloadThrottleParameters {
+        let baseParallelCount = max(1, settings.baseMaxSimultaneousDownloadCount)
+        let minimumParallelCount = min(baseParallelCount, max(1, settings.minimumThrottledSimultaneousDownloadCount))
+        guard settings.isDynamicThrottleEnabled else {
+            return NovelDownloadThrottleParameters(maxSimultaneousDownloadCount: baseParallelCount, queueDelayTime: settings.minimumQueueDelayTime)
+        }
+        
+        var parallelCount = baseParallelCount
+        var delayTime = settings.minimumQueueDelayTime
+        switch thermalState {
+        case .nominal:
+            break
+        case .fair:
+            parallelCount = max(minimumParallelCount, min(baseParallelCount, max(3, baseParallelCount - 1)))
+            delayTime = max(delayTime, 1.20)
+        case .serious:
+            parallelCount = max(1, min(minimumParallelCount, 2))
+            delayTime = max(delayTime, settings.seriousQueueDelayTime)
+        case .critical:
+            parallelCount = 1
+            delayTime = max(delayTime, settings.criticalQueueDelayTime)
+        @unknown default:
+            parallelCount = max(1, min(minimumParallelCount, 2))
+            delayTime = max(delayTime, settings.seriousQueueDelayTime)
+        }
+        if isLowPowerModeEnabled {
+            parallelCount = max(1, parallelCount - 1)
+            delayTime = max(delayTime, settings.minimumQueueDelayTime + 0.35)
+        }
+        return NovelDownloadThrottleParameters(maxSimultaneousDownloadCount: parallelCount, queueDelayTime: delayTime)
     }
 }
 
@@ -509,7 +562,8 @@ class NovelDownloader : NSObject {
                 }else{
                     dummyDate = queuedDate
                 }
-                delayQueue(queuedDate: dummyDate, block: {
+                let queueDelayTime = NovelDownloadQueue.shared.currentQueueDelayTime
+                delayQueue(queuedDate: dummyDate, delayTime: queueDelayTime, block: {
                     startDownload(novelID: novelID, fetcher: fetcher, currentState: state.CreateNextState(), chapterNumber: nextChapterNumber, downloadCount: downloadCount + 1, successAction: successAction, failedAction: failedAction)
                 })
             }
@@ -525,11 +579,10 @@ class NovelDownloader : NSObject {
 class NovelDownloadQueue : NSObject {
     @objc static let shared = NovelDownloadQueue()
     private let queueHolder = DownloadQueueHolder()
-    #if !os(watchOS)
-    var maxSimultaneousDownloadCount = 2
-    #else
-    var maxSimultaneousDownloadCount = 1
-    #endif
+    var throttleSettings = NovelDownloadThrottleSettings()
+    private(set) var currentThrottleParameters = NovelDownloadThrottleParameters(maxSimultaneousDownloadCount: 5, queueDelayTime: 1.05)
+    private var throttleOverride:NovelDownloadThrottleParameters? = nil
+    private var lastLoggedThrottleStatus:NovelDownloadThrottleStatus? = nil
     let lock = NSLock()
     var downloadSuccessNovelIDSet = Set<String>()
     var downloadEndedNovelIDSet = Set<String>()
@@ -545,7 +598,20 @@ class NovelDownloadQueue : NSObject {
 
     private override init() {
         super.init()
+        ReloadThrottleSettings()
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.GlobalStateChanged, queue: .main) { _ in
+            self.ReloadThrottleSettings()
+        }
         startQueueWatcher()
+    }
+    
+    func ReloadThrottleSettings() {
+        RealmUtil.RealmBlock { realm in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+            self.throttleSettings.isDynamicThrottleEnabled = globalState.isDynamicNovelDownloadThrottleEnabled
+            self.throttleSettings.baseMaxSimultaneousDownloadCount = min(10, max(1, globalState.baseMaxConcurrentNovelDownloadCount))
+        }
+        self.currentThrottleParameters = NovelDownloadThrottlePolicy.parameters(thermalState: ProcessInfo.processInfo.thermalState, isLowPowerModeEnabled: ProcessInfo.processInfo.isLowPowerModeEnabled, settings: throttleSettings)
     }
     
     func updateNetworkActivityIndicatorStatus(){
@@ -609,8 +675,59 @@ class NovelDownloadQueue : NSObject {
         }
     }
     
+    func recalculateThrottleParameters() {
+        let thermalState = ProcessInfo.processInfo.thermalState
+        let isLowPowerModeEnabled = ProcessInfo.processInfo.isLowPowerModeEnabled
+        if let throttleOverride = throttleOverride {
+            currentThrottleParameters = throttleOverride
+            logThrottleStatusIfNeeded(thermalState: thermalState, isLowPowerModeEnabled: isLowPowerModeEnabled, parameters: throttleOverride, isOverrideActive: true)
+            return
+        }
+        currentThrottleParameters = NovelDownloadThrottlePolicy.parameters(thermalState: thermalState, isLowPowerModeEnabled: isLowPowerModeEnabled, settings: throttleSettings)
+        logThrottleStatusIfNeeded(thermalState: thermalState, isLowPowerModeEnabled: isLowPowerModeEnabled, parameters: currentThrottleParameters, isOverrideActive: false)
+    }
+    
+    private func logThrottleStatusIfNeeded(thermalState: ProcessInfo.ThermalState, isLowPowerModeEnabled: Bool, parameters: NovelDownloadThrottleParameters, isOverrideActive: Bool) {
+        let status = NovelDownloadThrottleStatus(thermalStateRawValue: thermalState.rawValue, isLowPowerModeEnabled: isLowPowerModeEnabled, parameters: parameters, isOverrideActive: isOverrideActive)
+        guard lastLoggedThrottleStatus != status else { return }
+        lastLoggedThrottleStatus = status
+        AppInformationLogger.AddLog(message: "NovelDownloadQueue throttle changed", appendix: [
+            "thermalState": thermalStateDescription(thermalState),
+            "isLowPowerModeEnabled": isLowPowerModeEnabled ? "true" : "false",
+            "parallelCount": "\(parameters.maxSimultaneousDownloadCount)",
+            "queueDelayTime": String(format: "%.2f", parameters.queueDelayTime),
+            "isOverrideActive": isOverrideActive ? "true" : "false",
+        ], isForDebug: true)
+    }
+    
+    private func thermalStateDescription(_ thermalState: ProcessInfo.ThermalState) -> String {
+        switch thermalState {
+        case .nominal:
+            return "nominal"
+        case .fair:
+            return "fair"
+        case .serious:
+            return "serious"
+        case .critical:
+            return "critical"
+        @unknown default:
+            return "unknown(\(thermalState.rawValue))"
+        }
+    }
+    
+    var currentQueueDelayTime:TimeInterval {
+        recalculateThrottleParameters()
+        return currentThrottleParameters.queueDelayTime
+    }
+    
+    var currentMaxSimultaneousDownloadCount:Int {
+        recalculateThrottleParameters()
+        return currentThrottleParameters.maxSimultaneousDownloadCount
+    }
+    
     func dispatch() {
-        while self.isDownloadStop == false && self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
+        let maxSimultaneousDownloadCount = self.currentMaxSimultaneousDownloadCount
+        while self.isDownloadStop == false && self.queueHolder.GetCurrentDownloadingNovelIDArray().count < maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
             StoryHtmlDecoder.shared.WaitLoadSiteInfoReady { errorString in
                 // TODO: SiteInfo の load に失敗した時用の処理が書かれていない
                 if let errorString = errorString {
@@ -635,7 +752,8 @@ class NovelDownloadQueue : NSObject {
                     self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
                     self.updateNetworkActivityIndicatorStatus()
                     NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-                    delayQueue(queuedDate: queuedDate, block: {
+                    let queueDelayTime = self.currentQueueDelayTime
+                    delayQueue(queuedDate: queuedDate, delayTime: queueDelayTime, block: {
                         self.semaphore.signal()
                     })
                 }, failedAction: { (novelID, downloadCount, errorMessage) in
@@ -646,7 +764,8 @@ class NovelDownloadQueue : NSObject {
                     self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
                     self.updateNetworkActivityIndicatorStatus()
                     NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-                    delayQueue(queuedDate: queuedDate, block: {
+                    let queueDelayTime = self.currentQueueDelayTime
+                    delayQueue(queuedDate: queuedDate, delayTime: queueDelayTime, block: {
                         self.semaphore.signal()
                     })
                 })
@@ -877,7 +996,8 @@ class NovelDownloadQueue : NSObject {
         let deadlineTimeInterval = timeoutTimeInterval - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
 
         // バックグラウンドで動く時は並列で動作しないようにします。
-        self.maxSimultaneousDownloadCount = 1
+        let previousThrottleOverride = self.throttleOverride
+        self.throttleOverride = NovelDownloadThrottleParameters(maxSimultaneousDownloadCount: 1, queueDelayTime: max(self.throttleSettings.minimumQueueDelayTime, 1.05))
         // この処理は結構重いのでタイマの基準時間はこれよりも先にとっておきます
         self.addQueueArray(novelIDArray: targetNovelIDList)
         
@@ -887,7 +1007,7 @@ class NovelDownloadQueue : NSObject {
             Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false){ (timer) in
                 NovelDownloader.FlushAllWritePool()
                 // 並列を戻します。
-                self.maxSimultaneousDownloadCount = 2
+                self.throttleOverride = previousThrottleOverride
                 let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
                 self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
                 self.downloadEndedNovelIDSet.removeAll()
