@@ -854,7 +854,7 @@ class StoryFetcher {
     
     func DecodeDocument(currentState:StoryState, html:String?, encoding:String.Encoding, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
         // TODO: この辺りに取得したHTMLをlogに吐くような奴を作っておくと良さげ？
-        print("DecodeDocument: html:\n-----\n\(html ?? "nil")\n-----")
+        //print("DecodeDocument: html:\n-----\n\(html ?? "nil")\n-----")
         guard let html = html, let htmlDocument = try? HTML(html: html, encoding: encoding) else {
             failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_Parse", comment: "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)"))
             return
@@ -924,7 +924,7 @@ class StoryFetcher {
                 isForDebug: true
             )
             #endif
-            print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), nextButton: \(nextButton != nil ? "has" : "nil"), firstPageButton: \(firstPageButton != nil ? "has" : "nil"), (forceClickButton: \(forceClickButton != nil ? "has" : "nil"), && siteInfo.isNeedHeadless: \(siteInfo.isNeedHeadless), && forceErrorElementIsAlive_ErrorMessage: \(forceErrorElementIsAlive_ErrorMessage ?? "nil")), siteInfo.description: \(siteInfo.description), siteInfo.pageElement: \"\(siteInfo.pageElement)\", siteInfo.nextLink: \(siteInfo.nextLink ?? "-")")
+            //print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), nextButton: \(nextButton != nil ? "has" : "nil"), firstPageButton: \(firstPageButton != nil ? "has" : "nil"), (forceClickButton: \(forceClickButton != nil ? "has" : "nil"), && siteInfo.isNeedHeadless: \(siteInfo.isNeedHeadless), && forceErrorElementIsAlive_ErrorMessage: \(forceErrorElementIsAlive_ErrorMessage ?? "nil")), siteInfo.description: \(siteInfo.description), siteInfo.pageElement: \"\(siteInfo.pageElement)\", siteInfo.nextLink: \(siteInfo.nextLink ?? "-")")
             //print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), hitSiteInfo: \(siteInfo)")
             #if !os(watchOS)
             successAction?(
