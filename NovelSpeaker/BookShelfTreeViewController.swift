@@ -334,13 +334,13 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     func getIndexPath(node:BookShelfRATreeViewCellData) -> IndexPath? {
         var num = 0
         for folderNode in displayDataArray {
-            if folderNode == node {
+            if folderNode === node {
                 return IndexPath(row: num, section: 0)
             }
             num += 1
             if folderNode.isExpanded, let childrens = folderNode.childrens {
                 for novelNode in childrens {
-                    if novelNode == node {
+                    if novelNode === node {
                         return IndexPath(row: num, section: 0)
                     }
                     num += 1
@@ -1654,6 +1654,19 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
         toggleFolderExpandState(node: node, completion: completion)
     }
+    func expandFolderByReload(node:BookShelfRATreeViewCellData, completion:(()->Void)? = nil) {
+        if node.isExpanded == true {
+            completion?()
+            return
+        }
+        node.isExpanded = true
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.tableView.layoutIfNeeded()
+            self.checkAndUpdateSwitchFolderButtonImage()
+            completion?()
+        }
+    }
     func collapseFolder(node:BookShelfRATreeViewCellData, completion:(()->Void)? = nil) {
         if node.isExpanded == false {
             completion?()
@@ -1743,7 +1756,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 if let childrens = cellItem.childrens {
                     for cellItemChild in childrens {
                         if cellItemChild.novelID == novelID {
-                            self.expandFolder(node: cellItem) {
+                            self.expandFolderByReload(node: cellItem) {
                                 if let indexPath = self.getIndexPath(node: cellItemChild) {
                                     DispatchQueue.main.async {
                                         UIView.animate(withDuration: 0.0) {
@@ -1815,6 +1828,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     func reloadAllData(doScroll: Bool, completion:(()->Void)? = nil) {
         let (hasFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
         var selectedNovelCount = 0
+        var afterArray = displayDataArray
         do {
             // before から after に selectionState をコピーします。
             func transferSelectionStates(before: [BookShelfRATreeViewCellData], after: inout [BookShelfRATreeViewCellData]) -> Int {
@@ -1836,7 +1850,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             }
             
             let beforeArray = self.displayDataArray
-            var afterArray = displayDataArray
+            afterArray = displayDataArray
             for n in 0..<beforeArray.count {
                 if n >= afterArray.count { break }
                 let before = beforeArray[n]
@@ -1859,7 +1873,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             if let selectedIndexPath = self.tableView.indexPathsForSelectedRows?.first, let (cellData, _) = self.getNode(indexPath: selectedIndexPath), let novelID = cellData.novelID {
                 selectedNovelID = novelID
             }
-            self.displayDataArray = displayDataArray
+            self.displayDataArray = afterArray
             self.updateMultiSelectViewSelectCount(selectCount: selectedNovelCount)
             UIView.animate(withDuration: 0.0) {
                 self.tableView.reloadData()
