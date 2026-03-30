@@ -30,9 +30,7 @@ class HeadlessHttpClient {
         ReloadWebView(config: wkConfig)
     }
     deinit {
-        dispatch_sync_on_main_thread {
-            self.webView.removeFromSuperview()
-        }
+        releaseCurrentWebView()
     }
     
     func GenerateNSError(msg: String) -> NSError {
@@ -73,7 +71,20 @@ class HeadlessHttpClient {
         return (nil, GenerateJavaScriptNSError(javaScript: javaScript))
     }
     
+    private func releaseCurrentWebView() {
+        dispatch_sync_on_main_thread {
+            self.webView?.stopLoading()
+            self.webView?.navigationDelegate = nil
+            self.webView?.uiDelegate = nil
+            self.webView?.removeFromSuperview()
+            self.erik = nil
+            self.webView = nil
+        }
+    }
+    
     func ReloadWebView(config:WKWebViewConfiguration){
+        releaseCurrentWebView()
+        self.config = config
         dispatch_sync_on_main_thread {
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
             self.webView = WKWebView(frame: frame, configuration: config)
@@ -158,17 +169,23 @@ class HeadlessHttpClient {
     }
     
     public func GetCurrentContent(completionHandler:((Document?, Error?)->Void)?) {
-        self.erik.currentContent(completionHandler: { (doc, err) in
-            if let err = err as? ErikError {
-                completionHandler?(doc, self.ErikErrorToNSError(error: err))
-                return
-            }
-            completionHandler?(doc, err)
-        })
+        DispatchQueue.main.async {
+            self.erik.currentContent(completionHandler: { (doc, err) in
+                if let err = err as? ErikError {
+                    completionHandler?(doc, self.ErikErrorToNSError(error: err))
+                    return
+                }
+                completionHandler?(doc, err)
+            })
+        }
     }
     
     public func GetCurrentURL() -> URL? {
-        return self.erik.url
+        var result:URL? = nil
+        dispatch_sync_on_main_thread {
+            result = self.erik.url
+        }
+        return result
     }
     
     public func GetCurrentCookieString(resultHandler:((String?, Error?)->Void)?) {
@@ -179,11 +196,13 @@ class HeadlessHttpClient {
         ExecuteJavaScript(javaScript: "window.scroll(0, document.documentElement.scrollHeight)", resultHandler: resultHandler)
     }
     public func ExecuteJavaScript(javaScript:String, resultHandler:((String?, Error?)->Void)?){
-        self.erik.evaluate(javaScript: javaScript) { (data, error) in
-            let (resultString, resultError) = HeadlessHttpClient.NormalizeEvaluateJavaScriptResult(data: data, error: error, javaScript: javaScript) { erikError in
-                self.ErikErrorToNSError(error: erikError)
+        DispatchQueue.main.async {
+            self.erik.evaluate(javaScript: javaScript) { (data, error) in
+                let (resultString, resultError) = HeadlessHttpClient.NormalizeEvaluateJavaScriptResult(data: data, error: error, javaScript: javaScript) { erikError in
+                    self.ErikErrorToNSError(error: erikError)
+                }
+                resultHandler?(resultString, resultError)
             }
-            resultHandler?(resultString, resultError)
         }
     }
     

@@ -514,7 +514,7 @@ class NovelDownloader : NSObject {
                 // まだ保存されていない章であれば追加するために writePool に入れておきます。
                 // 既に同じ chapterNumber の Story が存在する場合は追加せず読み飛ばします。
                 if let content = state.content {
-                    print("NDMCT: FetchNext chapter=\(chapterNumber) hasContent=\(content.count) exists=\(RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber) != nil)")
+                    //print("NDMCT: FetchNext chapter=\(chapterNumber) hasContent=\(content.count) exists=\(RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber) != nil)")
                     if content.count <= 0 {
                         // 登録できそうな章ではあったけれど内容が無い場合は登録しません。
                         // その場合は nextChapterNumber が増えることもありません。
@@ -542,17 +542,17 @@ class NovelDownloader : NSObject {
                     nextChapterNumber += 1
                 }
                 if !state.IsNextAlive {
-                    print("NovelDownloader.startDownload() IsNextAlive is false quit. \(state.url.absoluteString)")
+                    //print("NovelDownloader.startDownload() IsNextAlive is false quit. \(state.url.absoluteString)")
                     successAction(novelID, downloadCount)
                     return
                 }
                 if let nextUrl = state.nextUrl, nextUrl == state.url {
-                    print("NovelDownloader.startDownload() IsNextAlive is true, but nextUrl is same current URL. then quit: \(state.url.absoluteString)")
+                    //print("NovelDownloader.startDownload() IsNextAlive is true, but nextUrl is same current URL. then quit: \(state.url.absoluteString)")
                     successAction(novelID, downloadCount)
                     return
                 }
                 if let firstPageLink = state.firstPageLink, firstPageLink == state.url {
-                    print("NovelDownloader.startDownload() IsNextAlive is true, but firstPageLink is same current URL. then quit: \(state.url.absoluteString)")
+                    //print("NovelDownloader.startDownload() IsNextAlive is true, but firstPageLink is same current URL. then quit: \(state.url.absoluteString)")
                     successAction(novelID, downloadCount)
                     return
                 }
@@ -593,8 +593,6 @@ class NovelDownloadQueue : NSObject {
     let DownloadCountKey = "NovelDownloadQueue_DownloadCount"
     let AlreadyBackgroundFetchedNovelIDListKey = "NovelDownloadQueue_AlreadyBackgroundFetchedNovelIDList"
     let backgroundFetchDeadlineTimeInSec:Double = 23.0
-    let fetcherPoolLock = NSLock()
-    var fetcherPool:[UUID:(Bool, StoryFetcher)] = [:]
 
     private override init() {
         super.init()
@@ -630,48 +628,6 @@ class NovelDownloadQueue : NSObject {
     var currentDownloadingNovelCount:Int {
         get {
             return self.queueHolder.GetCurrentDownloadingNovelIDArray().count
-        }
-    }
-    
-    func GetFreeFetcher() -> (UUID, StoryFetcher) {
-        let uuid = UUID()
-        fetcherPoolLock.lock()
-        defer { fetcherPoolLock.unlock() }
-        if let result = fetcherPool.reduce(nil, { (result, tuple) -> (UUID, StoryFetcher)? in
-            let (uuid, (isActive, fetcher)) = tuple
-            if let result = result { return result }
-            if !isActive { return (uuid, fetcher) }
-            return nil
-        }) {
-            let (uuid, fetcher) = result
-            fetcherPool[uuid] = (true, fetcher)
-            return result
-        }
-        let fetcher = StoryFetcher()
-        fetcherPool[uuid] = (true, fetcher)
-        return (uuid, fetcher)
-    }
-    func FreeFetcher(uuid:UUID) {
-        fetcherPoolLock.lock()
-        defer { fetcherPoolLock.unlock() }
-        if let (_, fetcher) = fetcherPool[uuid] {
-            if !NovelSpeakerUtility.IsNotClearToAboutBlankOnDownloadBrowserUrl() {
-                fetcher.LoadAboutPage()
-            }
-            fetcherPool[uuid] = (false, fetcher)
-        }
-    }
-    func ClearUnusedFetcher() {
-        fetcherPoolLock.lock()
-        defer { fetcherPoolLock.unlock() }
-        var removeList:[UUID] = []
-        for key in fetcherPool {
-            if key.value.0 == false {
-                removeList.append(key.key)
-            }
-        }
-        for uuid in removeList {
-            fetcherPool.removeValue(forKey: uuid)
         }
     }
     
@@ -740,10 +696,9 @@ class NovelDownloadQueue : NSObject {
                 let queuedDate = Date()
                 print("startDownload: \(nextTargetNovelID)")
                 NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-                let (fetcherUUID, fetcher) = self.GetFreeFetcher()
+                let fetcher = StoryFetcher()
                 NovelDownloader.startDownload(novelID: nextTargetNovelID, fetcher: fetcher, successAction: { (novelID, downloadCount) in
                     self.queueHolder.downloadDone(novelID: nextTargetNovelID)
-                    self.FreeFetcher(uuid: fetcherUUID)
                     self.lock.lock()
                     defer { self.lock.unlock() }
                     if downloadCount > 0 {
@@ -758,7 +713,6 @@ class NovelDownloadQueue : NSObject {
                     })
                 }, failedAction: { (novelID, downloadCount, errorMessage) in
                     self.queueHolder.downloadDone(novelID: nextTargetNovelID)
-                    self.FreeFetcher(uuid: fetcherUUID)
                     self.lock.lock()
                     defer { self.lock.unlock() }
                     self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
