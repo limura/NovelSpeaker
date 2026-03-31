@@ -1193,10 +1193,12 @@ class StoryFetcher {
 
     static func CreateFirstStoryStateWithoutCheckLoadSiteInfo(url:URL, cookieString:String?, previousContent:String?) -> StoryState {
         let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
+        /*
         print("\(url.absoluteString)\nsiteInfo.count: \(siteInfoArray.count) (最初のだけ表示します)")
         if let siteInfo = siteInfoArray.first {
             print("--\n\(siteInfo.description)")
         }
+        */
         return CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: previousContent)
     }
     
