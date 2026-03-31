@@ -577,7 +577,10 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             additionalHint = ""
         }
         let picker = MFMailComposeViewController()
-        picker.mailComposeDelegate = self;
+        picker.mailComposeDelegate = self
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            picker.modalPresentationStyle = .automatic
+        }
         picker.setSubject(NSLocalizedString("BugReportViewController_SendNewFeatureMailSubject", comment:"ことせかい 新機能等の提案"))
         picker.setToRecipients(["limuraproducts@gmail.com"])
         let messageBody =
@@ -627,7 +630,10 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         }
         
         let picker = MFMailComposeViewController()
-        picker.mailComposeDelegate = self;
+        picker.mailComposeDelegate = self
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            picker.modalPresentationStyle = .automatic
+        }
         picker.setSubject(NSLocalizedString("BugReportViewController_SendBugReportMailSubject", comment:"ことせかい 不都合報告"))
         picker.setToRecipients(["limuraproducts@gmail.com"])
         let messageBody =
