@@ -988,13 +988,39 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "Done";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "Edit";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.10.7
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.0
 
-- Fixed an issue where the \"Web Import\" tab might crash if there was a problem verifying the SSL certificate.
+- Added an ON/OFF setting (default is ON) for \"Reduce the number of parallel downloads when the device is hot\" to the \"Settings tab,\" and a setting for \"Maximum number of simultaneous downloads (limited per site, default value is 5)\" when this is ON.
+- The waiting time before loading the next page during downloads will now vary depending on the device's temperature and battery level.
+- Partially changed the behavior when checking for updates.
+- Block access to PrivacyTracking-related domains from WKWebView.
+- Reduced the size of the dialog box when composing an email from \"Settings tab\" -> \"Contact Developer\" on iPad.
+- Fixed an issue where the application might crash when importing novels.
+- Fixed an issue where the application might crash when the \"Bookshelf screen\" was set to an order where folders could be opened and closed.
+- Fixed an issue where some buttons could not be selected in a dialog box that expanded beyond the screen width on Mac Catalyst.
+- Fixed an issue where line breaks were not displayed in complaint reports and other emails on Mac Catalyst.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.11.0
+
+Changes in interface/internal operation
+
+- Added an ON/OFF setting (default is ON) for \"Reduce the number of parallel downloads when the device is hot\" to the \"Settings tab,\" and a setting for \"Maximum number of simultaneous downloads (limited per site, default value is 5)\" when this is ON.
+- The waiting time before loading the next page during downloads will now vary depending on the device's temperature and battery level.
+- Partially changed the behavior when checking for updates.
+- Block access to PrivacyTracking-related domains from WKWebView.
+- Reduced the size of the dialog box when composing an email from \"Settings tab\" -> \"Contact Developer\" on iPad.
+
+Fixing the problem
+
+- Fixed an issue where the application might crash when importing novels.
+- Fixed an issue where the application might crash when the \"Bookshelf screen\" was set to an order where folders could be opened and closed.
+- Fixed an issue where some buttons could not be selected in a dialog box that expanded beyond the screen width on Mac Catalyst.
+- Fixed an issue where line breaks were not displayed in complaint reports and other emails on Mac Catalyst.
+
+
 Version 2.10.7
 
 Fixing the problem

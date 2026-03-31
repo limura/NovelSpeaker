@@ -4234,3 +4234,76 @@ Version 2.10.7
 Fixing the problem
 
 - Fixed an issue where the "Web Import" tab might crash if there was a problem verifying the SSL certificate.
+
+
+Version 2.11.0
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」に「端末が熱い場合などにダウンロードの並列数を減らす」のON/OFF設定(defaultはON)と、それがONの時に「最大同時ダウンロード数(サイトごとの制限あり、標準値は5)」の値設定項目を追加
+- 端末の熱や電池残量により、ダウンロード時の次のページを読み込む前の待ち時間を可変するようにします
+- 更新確認時の挙動を一部変更
+- WKWebView からの PrivacyTracking 関連のドメインへのアクセスを遮断するように
+- iPad で「設定タブ」→「開発者に問い合わせる」からメールを作成した時のダイアログを小さくします
+
+問題の修正
+
+- 小説の取り込み時に強制終了する場合がある問題の一部を修正
+- 「本棚画面」にて、フォルダ開閉ができるような「順番」の時に強制終了してしまう可能性があった問題を修正
+- mac Catalyst でダイアログが画面幅以上に広がって選択できないボタンがある問題を修正
+- mac Catalyst だと不都合報告メールなどが改行されない問題があったので修正
+
+以下でざっと説明します。
+
+
+- 「設定タブ」に「端末が熱い場合などにダウンロードの並列数を減らす」のON/OFF設定(defaultはON)と、それがONの時に「最大同時ダウンロード数(サイトごとの制限あり、標準値は5)」の値設定項目を追加
+
+複数のWebサイトにわたる沢山の本が本棚に登録されている状態で「本棚画面」の右上で「小説の更新確認」を行うと、最大5つのWebサイト様に向けて同時に更新確認を行っていましたが、内蔵ブラウザでの更新確認を行うWebサイトが多くなることでかなりの負荷がかかり、端末が熱くなってくるようになったため、今回のバージョンからは端末が熱くなった時は並列度を下げて更新確認を行うことを基本としました。つまり、端末が熱い場合などにダウンロードの並列数を減らす」の初期値は ON になります。なお、「最大同時ダウンロード数(サイトごとの制限あり、標準値は5)」は最大10まで指定できるようにはしていますが、Webサイト様毎には1つまでしか並列動作はしませんので10個以上のWebサイト様を本棚に登録している方で、かつ、端末を強烈に冷やす手段を持っている方以外はあまり意味がない値になります。後は強烈な性能の mac で動かしていて更新確認が軽く感じられるような CPU で動いている、といった場合には10にしてもいいかもしれませんが、試していないので私には良くわかりません。
+
+- 端末の熱や電池残量により、ダウンロード時の次のページを読み込む前の待ち時間を可変するようにします
+  こちらはON/OFFではなく、強制的に更新確認時の動作を遅くすることにしています。電池が少なくなっている場合は充電してから、熱くなりすぎている場合は冷やしてください。
+
+- 更新確認時の挙動を一部変更
+  内蔵ブラウザ(WKWebView)を使っての更新確認時は、今までは内蔵ブラウザのインスタンスを使い回していましたが、今回からは一つの小説毎に作り直すようになります。というのは、どうやらWKWebViewを使い回していると段々とメモリ消費量が増え続けるようなので、一旦作り直して解消させる方向で動作させてみているという形になります。
+  毎回 WKWebView の作り直しで計算コストは上がりそうなのですが、こちらで試してみた範囲ではメモリの増加量の方が見過ごせないかなと思うくらいには計算コストはそこまででもなさそうでした。
+  もし問題があるという方というか古い端末の方なのかなと思いますが、問題だというのであれば教えてください。今の所の考えでは対処はできなさそうですが、声が多ければ考え直すかもしれません。
+
+- WKWebView からの PrivacyTracking 関連のドメインへのアクセスを遮断するように
+  内蔵ブラウザでの更新確認時にPrivacyTracking関連の警告が出ていたのでアクセスを遮断する形で対処しています。おそらくこれらのドメインには小説の本文(取り込み対象)はないと思われますので動作としては問題にはならないのではないかなと思っています。
+
+- iPad で「設定タブ」→「開発者に問い合わせる」からメールを作成した時のダイアログを小さくします
+  縦画面で「開発者に問い合わせる」からメールを作成するとキャンセルできなくなっていた(横画面にしないと画面横の隙間ができず、ダイアログを消せない)という問題があったのでダイアログを小さくする形で回避しています。
+
+問題の修正
+
+- 小説の取り込み時に強制終了する場合がある問題の一部を修正
+  内蔵ブラウザを使った小説の取り込み時に、JavaScript周りでおかしな動作をした場合、それに対処できずに強制終了するというパスがあったのを潰しています。これで更新確認時に強制終了する問題が少しは減るといいなぁと思っています。おそらくまだまだありそうな気はするので、これで全てが直ったとは思ません。
+
+- 「本棚画面」にて、フォルダ開閉ができるような「順番」の時に強制終了してしまう可能性があった問題を修正
+  フォルダ開閉できる「順番」の時に他の画面から「本棚タブ」に戻ったタイミングで強制終了する場合があったという問題を修正しています。
+
+- mac Catalyst でダイアログが画面幅以上に広がって選択できないボタンがある問題を修正
+- mac Catalyst だと不都合報告メールなどが改行されない問題があったので修正
+
+  これらは mac Catalyst での謎の挙動の一部を直しているというものです。
+  ただ、mac Catalyst については真面目にデバッグしておりませんためあまり期待はしないでください。
+
+以上よろしくお願いいたします。
+
+
+Version 2.11.0
+
+Changes in interface/internal operation
+
+- Added an ON/OFF setting (default is ON) for "Reduce the number of parallel downloads when the device is hot" to the "Settings tab," and a setting for "Maximum number of simultaneous downloads (limited per site, default value is 5)" when this is ON.
+- The waiting time before loading the next page during downloads will now vary depending on the device's temperature and battery level.
+- Partially changed the behavior when checking for updates.
+- Block access to PrivacyTracking-related domains from WKWebView.
+- Reduced the size of the dialog box when composing an email from "Settings tab" → "Contact Developer" on iPad.
+
+Fixing the problem
+
+- Fixed an issue where the application might crash when importing novels.
+- Fixed an issue where the application might crash when the "Bookshelf screen" was set to an order where folders could be opened and closed.
+- Fixed an issue where some buttons could not be selected in a dialog box that expanded beyond the screen width on Mac Catalyst.
+- Fixed an issue where line breaks were not displayed in complaint reports and other emails on Mac Catalyst.
