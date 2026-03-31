@@ -554,14 +554,14 @@
 "BugReportViewController_NO" = "いいえ";
 "BugReportViewController_YES" = "はい";
 "BugReportViewController_SendBugReportMailSubject" = "ことせかい 不都合報告";
-"BugReportViewController_SendBugReportMailInformation" = "\n\n===============\nここより下の行は編集しないでください。\nなお、問題の発生している場面のスクリーンショットなどを添付して頂けると、より対応しやすくなるかと思われます。";
+"BugReportViewController_SendBugReportMailInformation" = "\r\n\r\n===============\r\nここより下の行は編集しないでください。\r\nなお、問題の発生している場面のスクリーンショットなどを添付して頂けると、より対応しやすくなるかと思われます。";
 "BugReportViewController_SendBugReport_IsNeedResponse" = "返信";
 "BugReportViewController_SendBugReport_Description" = "不都合の概要";
 "BugReportViewController_SendBugReport_Procedure" = "不都合の再現方法";
 "BugReportViewController_ErrorDialog" = "問題のある入力項目があります";
 "BugReportViewController_InformationForIsNeedResponse" = "返信が許可されている場合には開発者から送信元のメールアドレスへ返信を行う場合があります。返信は遅くなる場合があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合もあります。";
 "BugReportViewController_HiddenImportantInformationSectionHeader" = "お知らせ";
-"BugReportViewController_SendNewFeatureMailInformation" = "\n\n===============\nここより下の行は編集しないでください。\n";
+"BugReportViewController_SendNewFeatureMailInformation" = "\r\n\r\n===============\r\nここより下の行は編集しないでください。\r\n";
 "BugReportViewController_SendNewFeatureMailSubject" = "ことせかい 新機能等のご提案・その他のお問い合わせ";
 "BugReportViewController_NoDescriptionOfTheNewFeature" = "お問い合わせ内容が空になっています";
 "BugReportViewController_SendNewFeatureButtonTitle" = "ご提案mailを作成する";

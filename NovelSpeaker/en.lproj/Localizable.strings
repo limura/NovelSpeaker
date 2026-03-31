@@ -565,14 +565,14 @@
 "BugReportViewController_NO" = "No";
 "BugReportViewController_YES" = "Yes";
 "BugReportViewController_SendBugReportMailSubject" = "NovelSpeaker problem report";
-"BugReportViewController_SendBugReportMailInformation" = "\n\n===============\nPlease do not edit the line below this.\nIf you attach a screenshot etc. of the scene where the problem occurs, it seems that it will be easier to correspond.";
+"BugReportViewController_SendBugReportMailInformation" = "\r\n\r\n===============\r\nPlease do not edit the line below this.\r\nIf you attach a screenshot etc. of the scene where the problem occurs, it seems that it will be easier to correspond.";
 "BugReportViewController_SendBugReport_IsNeedResponse" = "Response";
 "BugReportViewController_SendBugReport_Description" = "Description";
 "BugReportViewController_SendBugReport_Procedure" = "Procedure";
 "BugReportViewController_ErrorDialog" = "Error";
 "BugReportViewController_InformationForIsNeedResponse" = "In case reply is permitted, the developer may reply to the sender's mail address from the developer. Reply may be delayed. Also, please note that if you do not receive mail from @gmail.com, you will not receive a reply.";
 "BugReportViewController_HiddenImportantInformationSectionHeader" = "Information";
-"BugReportViewController_SendNewFeatureMailInformation" = "\n\n===============\nPlease do not edit the line below this.\n";
+"BugReportViewController_SendNewFeatureMailInformation" = "\r\n\r\n===============\r\nPlease do not edit the line below this.\r\n";
 "BugReportViewController_SendNewFeatureMailSubject" = "NovelSpeaker Proposal of new function";
 "BugReportViewController_NoDescriptionOfTheNewFeature" = "The content of your proposal is empty";
 "BugReportViewController_SendNewFeatureButtonTitle" = "Create a proposal mail";

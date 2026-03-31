@@ -58,6 +58,22 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         row.onChange(onChange)
         return row
     }
+
+    private func htmlEscaped(_ text: String) -> String {
+        return text
+            .replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+            .replacingOccurrences(of: "\"", with: "&quot;")
+            .replacingOccurrences(of: "'", with: "&#39;")
+    }
+
+    private func htmlBody(fromPlainText text: String) -> String {
+        return htmlEscaped(text)
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+            .replacingOccurrences(of: "\n", with: "<br>")
+    }
     
     /// 最新のプライバシーポリシーを読んだことがあるか否かを判定して、読んだことがなければ表示して同意を求めます
     func CheckAndDisplayPrivacyPolicy(){
@@ -427,7 +443,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 }
                 if BugReportViewController.value.DescriptionOfTheProblem == "" {
                     if warningMessage.count > 0 {
-                        warningMessage += "\n"
+                        warningMessage += "\r\n"
                     }
                     warningMessage += NSLocalizedString("BugReportViewController_NoDescriptonOfTheProblem", comment: "問題の説明欄が空欄になっています。")
                 }
@@ -477,7 +493,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                         var text = ""
                         str.enumerateLines(invoking: { (line, inOut) in
                             if line.count > 0 && line[line.startIndex] != "#" {
-                                text += line + "\n"
+                                text += line + "\r\n"
                             }
                         })
                         if text == "" {
@@ -556,7 +572,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         }
         let additionalHint:String
         if let hint = self.additionalHintString {
-            additionalHint = "\n\(hint)"
+            additionalHint = "\r\n\(hint)"
         }else{
             additionalHint = ""
         }
@@ -564,20 +580,20 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         picker.mailComposeDelegate = self;
         picker.setSubject(NSLocalizedString("BugReportViewController_SendNewFeatureMailSubject", comment:"ことせかい 新機能等の提案"))
         picker.setToRecipients(["limuraproducts@gmail.com"])
-        picker.setMessageBody(
+        let messageBody =
             description
             + NSLocalizedString("BugReportViewController_SendNewFeatureMailInformation", comment: "\n\n===============\nここより下の行は編集しないでください。\n\n")
             + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信") + ": " + needResponse
-            + "\niOS version: " + UIDevice.current.systemVersion
-            + "\nmodel: " + UIDevice.modelName
-            + "\nApp version:" + appVersionString
-            + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
-            + "\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
-            + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
-            + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
-            + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
+            + "\r\niOS version: " + UIDevice.current.systemVersion
+            + "\r\nmodel: " + UIDevice.modelName
+            + "\r\nApp version:" + appVersionString
+            + "\r\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
+            + "\r\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
+            + "\r\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
+            + "\r\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
+            + "\r\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
             + additionalHint
-        , isHTML: false)
+        picker.setMessageBody(htmlBody(fromPlainText: messageBody), isHTML: true)
         present(picker, animated: true, completion: nil)
         return true;
 
@@ -593,8 +609,8 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             appVersionString = String.init(format: "%@(%@)", shortVersion, bundleVersion)
         }
         let novelData = targetNovelSet.map { (content) -> String in
-            return content.title + "\n" + content.novelID
-        }.joined(separator: "\n---\n")
+            return content.title + "\r\n" + content.novelID
+        }.joined(separator: "\r\n---\r\n")
         let (isBackgroundFetchEnabled, preferredSiteInfoURLList, novelSpeakerSiteInfoURL, autopagerizeSiteInfoURL) = RealmUtil.RealmBlock { (realm) -> (Bool, [String], String, String) in
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                 var p:[String] = []
@@ -605,7 +621,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         }
         let additionalHint:String
         if let hint = self.additionalHintString {
-            additionalHint = "\n\(hint)"
+            additionalHint = "\r\n\(hint)"
         }else{
             additionalHint = ""
         }
@@ -614,24 +630,24 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         picker.mailComposeDelegate = self;
         picker.setSubject(NSLocalizedString("BugReportViewController_SendBugReportMailSubject", comment:"ことせかい 不都合報告"))
         picker.setToRecipients(["limuraproducts@gmail.com"])
-        picker.setMessageBody(
+        let messageBody =
             NSLocalizedString("BugReportViewController_SendBugReportMailInformation", comment: "\n\n===============\nここより下の行は編集しないでください。\nなお、問題の発生している場面のスクリーンショットなどを添付して頂けると、より対応しやすくなるかと思われます。")
-            + "\n"
-            + "\n" + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信を希望する") + ": " + needResponse
-            + "\niOS version: " + ProcessInfo.processInfo.operatingSystemVersionString
-            + "\nmodel: " + UIDevice.modelName
-            + "\nApp version:" + appVersionString
-            + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
-            + "\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
-            + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
-            + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
-            + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
+            + "\r\n"
+            + "\r\n" + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信を希望する") + ": " + needResponse
+            + "\r\niOS version: " + ProcessInfo.processInfo.operatingSystemVersionString
+            + "\r\nmodel: " + UIDevice.modelName
+            + "\r\nApp version:" + appVersionString
+            + "\r\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
+            + "\r\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
+            + "\r\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
+            + "\r\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
+            + "\r\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
             + additionalHint
-            + "\n" + NSLocalizedString("BugReportViewController_TimeOfOccurrence", comment: "問題発生日時") + ": " + date.description(with: Locale.init(identifier: "ja_JP"))
-            + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Description", comment: "不都合の概要") + ":\n" + description
-            + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Procedure", comment: "不都合の再現方法") + ":\n" + procedure
-            + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_TargetNovelNameList", comment: "問題の起こった小説:") + "\n\n" + novelData
-            , isHTML: false)
+            + "\r\n" + NSLocalizedString("BugReportViewController_TimeOfOccurrence", comment: "問題発生日時") + ": " + date.description(with: Locale.init(identifier: "ja_JP"))
+            + "\r\n-----\r\n" + NSLocalizedString("BugReportViewController_SendBugReport_Description", comment: "不都合の概要") + ":\r\n" + description
+            + "\r\n-----\r\n" + NSLocalizedString("BugReportViewController_SendBugReport_Procedure", comment: "不都合の再現方法") + ":\r\n" + procedure
+            + "\r\n-----\r\n" + NSLocalizedString("BugReportViewController_SendBugReport_TargetNovelNameList", comment: "問題の起こった小説:") + "\r\n\r\n" + novelData
+        picker.setMessageBody(htmlBody(fromPlainText: messageBody), isHTML: true)
         if let log = log {
             if let data = log.data(using: .utf8) {
                 picker.addAttachmentData(data, mimeType: "text/plain", fileName: "operation_log.txt")
