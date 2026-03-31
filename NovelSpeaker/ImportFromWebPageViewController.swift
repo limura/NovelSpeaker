@@ -244,6 +244,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         configuration.processPool = self.sharedWKProcessPool
         configuration.allowsInlineMediaPlayback = true
         configuration.allowsAirPlayForMediaPlayback = true
+        NovelSpeakerUtility.ApplyPrivacyTrackingBlockRuleIfNeeded(to: configuration)
         if #available(iOS 9.0, *) {
             configuration.allowsAirPlayForMediaPlayback = true
             configuration.allowsPictureInPictureMediaPlayback = true

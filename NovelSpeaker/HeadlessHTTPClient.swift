@@ -26,6 +26,7 @@ class HeadlessHttpClient {
         }else{
             wkConfig = WKWebViewConfiguration()
         }
+        NovelSpeakerUtility.ApplyPrivacyTrackingBlockRuleIfNeeded(to: wkConfig)
         self.config = wkConfig
         ReloadWebView(config: wkConfig)
     }

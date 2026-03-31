@@ -7,6 +7,9 @@
 //
 
 import UIKit
+#if !os(watchOS)
+import WebKit
+#endif
 import SSZipArchive
 import RealmSwift
 import AVFoundation
@@ -3559,6 +3562,40 @@ class NovelSpeakerUtility: NSObject {
         var latestVersion:String?
         var novelSpeakerSiteInfoTSVURL:String?
         var autopagerizeSiteInfoURL:String?
+        var privacyTrackingBlockTargetHostArray:[String]?
+    }
+    private static let novelSpeakerRemoteConfigCacheFileName = "NovelSpeakerRemoteConfigCache"
+    private static func CreateDefaultNovelSpeakerRemoteConfig() -> NovelSpeakerRemoteConfig {
+        return NovelSpeakerRemoteConfig(
+            appStoreWebPageXpath: AppStoreWebPageXpath(),
+            privacyTrackingBlockTargetHostArray: []
+        )
+    }
+    private static func OverrideDefaultSettingForNovelSpeakerRemoteConfig(_ config:NovelSpeakerRemoteConfig) -> NovelSpeakerRemoteConfig {
+        let defaultSetting = CreateDefaultNovelSpeakerRemoteConfig()
+        var remoteConfig = config
+        if remoteConfig.appStoreWebPageXpath == nil {
+            remoteConfig.appStoreWebPageXpath = defaultSetting.appStoreWebPageXpath
+        }else{
+            remoteConfig.appStoreWebPageXpath!.latestDate = remoteConfig.appStoreWebPageXpath!.latestDate ?? defaultSetting.appStoreWebPageXpath?.latestDate
+            remoteConfig.appStoreWebPageXpath!.latestShortVersion = remoteConfig.appStoreWebPageXpath!.latestShortVersion ?? defaultSetting.appStoreWebPageXpath?.latestShortVersion
+        }
+        if remoteConfig.privacyTrackingBlockTargetHostArray == nil {
+            remoteConfig.privacyTrackingBlockTargetHostArray = defaultSetting.privacyTrackingBlockTargetHostArray
+        }
+        return remoteConfig
+    }
+    private static func GetNovelSpeakerRemoteConfigFromCache() -> NovelSpeakerRemoteConfig {
+        let defaultSetting = CreateDefaultNovelSpeakerRemoteConfig()
+        guard let url = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/NovelSpeakerRemoteConfig.json") else {
+            return defaultSetting
+        }
+        let decoder = JSONDecoder()
+        guard let cachedData = NiftyUtility.GetCachedHttpGetCachedData(url: url, cacheFileName: novelSpeakerRemoteConfigCacheFileName, expireTimeinterval: nil),
+              let cacheRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: cachedData) else {
+            return defaultSetting
+        }
+        return OverrideDefaultSettingForNovelSpeakerRemoteConfig(cacheRemoteConfig)
     }
     static func GetNovelSpeakerRemoteConfigAsync() async -> NovelSpeakerRemoteConfig {
         return await withCheckedContinuation { continuation in
@@ -3568,51 +3605,186 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     static func GetNovelSpeakerRemoteConfig(completion: @escaping (NovelSpeakerRemoteConfig)->Void) {
-        let defaultSetting = NovelSpeakerRemoteConfig(
-            appStoreWebPageXpath: AppStoreWebPageXpath()
-        )
+        let defaultSetting = CreateDefaultNovelSpeakerRemoteConfig()
         guard let url = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/NovelSpeakerRemoteConfig.json") else {
             completion(defaultSetting)
             return
         }
-        // nil なら defaultSetting で上書きします
-        func overrideDefaultSetting(config:NovelSpeakerRemoteConfig) -> NovelSpeakerRemoteConfig {
-            var remoteConfig = config
-            if remoteConfig.appStoreWebPageXpath == nil {
-                remoteConfig.appStoreWebPageXpath = defaultSetting.appStoreWebPageXpath
-            }else{
-                remoteConfig.appStoreWebPageXpath!.latestDate = remoteConfig.appStoreWebPageXpath!.latestDate ?? defaultSetting.appStoreWebPageXpath?.latestDate
-                remoteConfig.appStoreWebPageXpath!.latestShortVersion = remoteConfig.appStoreWebPageXpath!.latestShortVersion ?? defaultSetting.appStoreWebPageXpath?.latestShortVersion
-            }
-            return remoteConfig
-        }
-        let remoteConfigCacheFileName = "NovelSpeakerRemoteConfigCache"
         let expireTimeInterval:TimeInterval = 60*60*6
-        NiftyUtility.FileCachedHttpGet(url: url, cacheFileName: remoteConfigCacheFileName, expireTimeinterval: expireTimeInterval) { data in
+        NiftyUtility.FileCachedHttpGet(url: url, cacheFileName: novelSpeakerRemoteConfigCacheFileName, expireTimeinterval: expireTimeInterval) { data in
             let decoder = JSONDecoder()
             var remoteConfig:NovelSpeakerRemoteConfig
             if let httpRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: data) {
                 remoteConfig = httpRemoteConfig
             } else {
-                guard let cachedData = NiftyUtility.GetCachedHttpGetCachedData(url: url, cacheFileName: remoteConfigCacheFileName, expireTimeinterval: nil), let cacheRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: cachedData) else {
+                guard let cachedData = NiftyUtility.GetCachedHttpGetCachedData(url: url, cacheFileName: novelSpeakerRemoteConfigCacheFileName, expireTimeinterval: nil), let cacheRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: cachedData) else {
                     completion(defaultSetting)
                     return false
                 }
-                completion(cacheRemoteConfig)
+                completion(OverrideDefaultSettingForNovelSpeakerRemoteConfig(cacheRemoteConfig))
                 return false // デコードできなかったので false を返してキャッシュの上書きは許さないことにします
             }
             
-            completion(overrideDefaultSetting(config: remoteConfig))
+            completion(OverrideDefaultSettingForNovelSpeakerRemoteConfig(remoteConfig))
             return true
         } failedAction: { err in
             let decoder = JSONDecoder()
-            guard let cachedData = NiftyUtility.GetCachedHttpGetCachedData(url: url, cacheFileName: remoteConfigCacheFileName, expireTimeinterval: nil), let cacheRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: cachedData) else {
+            guard let cachedData = NiftyUtility.GetCachedHttpGetCachedData(url: url, cacheFileName: novelSpeakerRemoteConfigCacheFileName, expireTimeinterval: nil), let cacheRemoteConfig = try? decoder.decode(NovelSpeakerRemoteConfig.self, from: cachedData) else {
                 completion(defaultSetting)
                 return
             }
-            completion(overrideDefaultSetting(config: cacheRemoteConfig))
+            completion(OverrideDefaultSettingForNovelSpeakerRemoteConfig(cacheRemoteConfig))
         }
     }
+#if !os(watchOS)
+    private static let privacyTrackingBlockRuleListIdentifier = "NovelSpeakerPrivacyTrackingBlockRules"
+    private static var cachedPrivacyTrackingBlockRuleList:WKContentRuleList? = nil
+    private static var cachedPrivacyTrackingBlockTargetHostArray:[String]? = nil
+    private static var isPrivacyTrackingBlockRuleListPreloadStarted = false
+    private static var isPrivacyTrackingBlockRuleListRefreshRunning = false
+    private static var privacyTrackingBlockRuleListRefreshTimer:Timer? = nil
+    private static func NormalizePrivacyTrackingBlockTargetHostArray(_ targetHostArray:[String]) -> [String] {
+        let allowedCharacterSet = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789-.")
+        return Array(Set(targetHostArray.map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        }.filter {
+            guard !$0.isEmpty else { return false }
+            let normalizedHost:String
+            if $0.hasPrefix("*.") {
+                normalizedHost = String($0.dropFirst(2))
+            }else{
+                normalizedHost = $0
+            }
+            return !normalizedHost.isEmpty
+                && !normalizedHost.hasPrefix(".")
+                && !normalizedHost.hasSuffix(".")
+                && normalizedHost.rangeOfCharacter(from: allowedCharacterSet.inverted) == nil
+        })).sorted()
+    }
+
+    private static func GeneratePrivacyTrackingBlockRuleListJSON(targetHostArray:[String]) -> String {
+        let normalizedHostArray = NormalizePrivacyTrackingBlockTargetHostArray(targetHostArray)
+        let ruleArray:[[String:Any]] = normalizedHostArray.compactMap { host in
+            let targetHost:String
+            let isWildcard:Bool
+            if host.hasPrefix("*.") {
+                targetHost = String(host.dropFirst(2))
+                isWildcard = true
+            }else{
+                targetHost = host
+                isWildcard = false
+            }
+            let escapedHost = NSRegularExpression.escapedPattern(for: targetHost)
+            let urlFilter:String
+            if isWildcard {
+                urlFilter = "^https?://([^/]+\\.)?\(escapedHost)/"
+            }else{
+                urlFilter = "^https?://\(escapedHost)/"
+            }
+            return [
+                "trigger": [
+                    "url-filter": urlFilter,
+                ],
+                "action": [
+                    "type": "block",
+                ],
+            ]
+        }
+        guard let ruleArrayData = try? JSONSerialization.data(withJSONObject: ruleArray, options: []),
+              let ruleArrayJSON = String(data: ruleArrayData, encoding: .utf8) else {
+            return "[]"
+        }
+        return ruleArrayJSON
+    }
+    private static func LoadPrivacyTrackingBlockRuleList(targetHostArray:[String], completion:@escaping (WKContentRuleList?)->Void) {
+        let normalizedHostArray = NormalizePrivacyTrackingBlockTargetHostArray(targetHostArray)
+        if normalizedHostArray.isEmpty {
+            print("PrivacyBlockTrace: compile skipped hosts=[]")
+            completion(nil)
+            return
+        }
+        if cachedPrivacyTrackingBlockTargetHostArray == normalizedHostArray, let ruleList = cachedPrivacyTrackingBlockRuleList {
+            print("PrivacyBlockTrace: compile cache_hit hosts=\(normalizedHostArray.joined(separator: ","))")
+            completion(ruleList)
+            return
+        }
+        let ruleListJSON = GeneratePrivacyTrackingBlockRuleListJSON(targetHostArray: normalizedHostArray)
+        DispatchQueue.main.async {
+            WKContentRuleListStore.default().compileContentRuleList(forIdentifier: privacyTrackingBlockRuleListIdentifier, encodedContentRuleList: ruleListJSON) { ruleList, error in
+                if let error = error {
+                    print("PrivacyBlockTrace: compile failed hosts=\(normalizedHostArray.joined(separator: ",")) error=\(error.localizedDescription)")
+                    AppInformationLogger.AddLog(message: "Failed to compile privacy tracking block rule list", appendix: ["error": error.localizedDescription], isForDebug: true)
+                    completion(nil)
+                    return
+                }
+                cachedPrivacyTrackingBlockTargetHostArray = normalizedHostArray
+                cachedPrivacyTrackingBlockRuleList = ruleList
+                print("PrivacyBlockTrace: compile success hosts=\(normalizedHostArray.joined(separator: ","))")
+                completion(ruleList)
+            }
+        }
+    }
+    static func RefreshPrivacyTrackingBlockRuleListIfNeeded(completion:(()->Void)? = nil) {
+        if isPrivacyTrackingBlockRuleListRefreshRunning {
+            completion?()
+            return
+        }
+        isPrivacyTrackingBlockRuleListRefreshRunning = true
+        GetNovelSpeakerRemoteConfig { remoteConfig in
+            let targetHostArray = remoteConfig.privacyTrackingBlockTargetHostArray ?? []
+            LoadPrivacyTrackingBlockRuleList(targetHostArray: targetHostArray) { _ in
+                isPrivacyTrackingBlockRuleListRefreshRunning = false
+                completion?()
+            }
+        }
+    }
+    static func PreloadPrivacyTrackingBlockRuleListIfNeeded() {
+        if isPrivacyTrackingBlockRuleListPreloadStarted {
+            return
+        }
+        isPrivacyTrackingBlockRuleListPreloadStarted = true
+        let initialHostArray = GetNovelSpeakerRemoteConfigFromCache().privacyTrackingBlockTargetHostArray ?? []
+        LoadPrivacyTrackingBlockRuleList(targetHostArray: initialHostArray) { _ in
+            // キャッシュファイルからの設定(またはdefault value)で
+            // cachedPrivacyTrackingBlockTargetHostArray と cachedPrivacyTrackingBlockRuleList が更新れた
+            // ので、次はちゃんとキャッシュを更新するために GetNovelSpeakerRemoteConfig でもう一回 privacyTrackingBlockTargetHostArray を読み込みます
+            GetNovelSpeakerRemoteConfig { remoteConfig in
+                let targetHostArray = remoteConfig.privacyTrackingBlockTargetHostArray ?? []
+                let normalizedInitialHostArray = NormalizePrivacyTrackingBlockTargetHostArray(initialHostArray)
+                let normalizedTargetHostArray = NormalizePrivacyTrackingBlockTargetHostArray(targetHostArray)
+                if normalizedInitialHostArray == normalizedTargetHostArray {
+                    return
+                }
+                LoadPrivacyTrackingBlockRuleList(targetHostArray: targetHostArray) { _ in
+                    // nothing to do.
+                }
+            }
+        }
+    }
+    static func StartPrivacyTrackingBlockRuleListRefreshTimerIfNeeded() {
+        NiftyUtility.DispatchSyncMainQueue {
+            if privacyTrackingBlockRuleListRefreshTimer != nil {
+                return
+            }
+            let timer = Timer.scheduledTimer(withTimeInterval: 60*60*6, repeats: true) { _ in
+                RefreshPrivacyTrackingBlockRuleListIfNeeded()
+            }
+            RunLoop.main.add(timer, forMode: .common)
+            privacyTrackingBlockRuleListRefreshTimer = timer
+        }
+    }
+    static func ApplyPrivacyTrackingBlockRuleIfNeeded(to configuration:WKWebViewConfiguration) {
+        guard let ruleList = cachedPrivacyTrackingBlockRuleList else {
+            print("PrivacyBlockTrace: apply skipped reason=no_cached_rule")
+            return
+        }
+        let hosts = cachedPrivacyTrackingBlockTargetHostArray?.joined(separator: ",") ?? ""
+        NiftyUtility.DispatchSyncMainQueue {
+            configuration.userContentController.add(ruleList)
+        }
+        print("PrivacyBlockTrace: apply success hosts=\(hosts)")
+    }
+#endif
 
     /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     static let isDisableWillSpeakRangeKey = "isDisableWillSpeakRange"

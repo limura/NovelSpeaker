@@ -17,6 +17,7 @@ final class AppLaunchCoordinator: NSObject {
         }
 
         NovelSpeakerUtility.StartAllLongLivedOperationIDWatcher()
+        NovelSpeakerUtility.PreloadPrivacyTrackingBlockRuleListIfNeeded()
         return true
     }
 
@@ -39,6 +40,7 @@ final class AppLaunchCoordinator: NSObject {
         NovelSpeakerUtility.CleanBackupFolder()
         ImportFromWebPageViewController.ClearDownloadTemporaryDirectory()
         NovelSpeakerUtility.SetInitialAvailableMemory()
+        NovelSpeakerUtility.StartPrivacyTrackingBlockRuleListRefreshTimerIfNeeded()
     }
 
     private static func configurePreferredFontsForTextStyle() {

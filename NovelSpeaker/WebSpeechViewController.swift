@@ -362,6 +362,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         config.userContentController.addUserScript(userScriptAtDocumentStart)
         config.userContentController.addUserScript(userScriptAtDocumentEnd)
         config.userContentController.add(handler, name: "logging")
+        NovelSpeakerUtility.ApplyPrivacyTrackingBlockRuleIfNeeded(to: config)
         return CustomWKWebView(frame: CGRect(x: 0, y: 0, width: 1024, height: 1024), configuration: config)
     }
 
