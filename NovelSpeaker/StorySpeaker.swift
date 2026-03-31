@@ -584,7 +584,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             case AVAudioSession.Mode.spokenAudio.rawValue : return .spokenAudio
             case AVAudioSession.Mode.videoRecording.rawValue : return .videoRecording
             case AVAudioSession.Mode.voicePrompt.rawValue : return .voicePrompt
+            #if !os(watchOS)
             case AVAudioSession.Mode.shortFormVideo.rawValue : return .shortFormVideo
+            #endif
             default: return .default
             }
         } else {
