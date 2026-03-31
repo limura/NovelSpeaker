@@ -43,6 +43,21 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     var additionalHintString:String? = nil
     
     static var value = BugReportViewInputData();
+
+    private func createStringSelectorRow(tag: String? = nil, title: String, selectorTitle: String, options: [String], value: String, onChange: @escaping (RowOf<String>) -> Void) -> BaseRow {
+        #if targetEnvironment(macCatalyst)
+        let row = PushRow<String>(tag)
+        ConfigureCatalystSingleSelectionPushRow(row)
+        #else
+        let row = AlertRow<String>(tag)
+        #endif
+        row.title = title
+        row.selectorTitle = selectorTitle
+        row.options = options
+        row.value = value
+        row.onChange(onChange)
+        return row
+    }
     
     /// 最新のプライバシーポリシーを読んだことがあるか否かを判定して、読んだことがなければ表示して同意を求めます
     func CheckAndDisplayPrivacyPolicy(){
@@ -144,15 +159,15 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 section.tag = "Section_Type"
                 section.hidden = isUserSupportDisabled ? true : false
             })
-            <<< AlertRow<String>() {
-                $0.title = NSLocalizedString("BugReportViewController_TypeSelectTitle", comment: "お問い合わせの種類")
-                $0.selectorTitle = NSLocalizedString("BugReportViewController_TypeSelectTitle", comment: "お問い合わせの種類")
-                $0.options = [
+            <<< createStringSelectorRow(
+                title: NSLocalizedString("BugReportViewController_TypeSelectTitle", comment: "お問い合わせの種類"),
+                selectorTitle: NSLocalizedString("BugReportViewController_TypeSelectTitle", comment: "お問い合わせの種類"),
+                options: [
                     NSLocalizedString("BugReportViewController_TypeSelect_NewFeature", comment: "新機能等のご提案"),
                     NSLocalizedString("BugReportViewController_TypeSelect_BugReport", comment: "不都合報告")
-                ]
-                $0.value = NSLocalizedString("BugReportViewController_TypeSelect_BugReport", comment: "不都合報告")
-                }.onChange({ (row) in
+                ],
+                value: NSLocalizedString("BugReportViewController_TypeSelect_BugReport", comment: "不都合報告")
+            ) { row in
                     if let value = row.value {
                         if value == NSLocalizedString("BugReportViewController_TypeSelect_BugReport", comment: "不都合報告") {
                             let bugReportSection = self.form.sectionBy(tag: "Section_BugReport")
@@ -170,7 +185,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                             newFeatureSection?.evaluateHidden()
                         }
                     }
-                })
+                }
             +++ Section(NSLocalizedString("BugReportViewController_NewFeatureSectionHeader", comment: "新機能等のご提案")) {
                 $0.tag = "Section_NewFeature"
                 $0.hidden = true
@@ -197,19 +212,20 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                         BugReportViewController.value.DescriptionOfNewFeature = value
                     }
                 })
-            <<< AlertRow<String>() { row in
-                row.title = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
-                row.selectorTitle = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
-                let never = NSLocalizedString("BugReportViewController_IsNeedResponse_Never", comment: "必要無い")
-                let maybe = NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い")
-                let must = NSLocalizedString("BugReportViewController_IsNeedResponse_Must", comment: "必ず欲しい")
-                row.options = [maybe, must, never]
-                row.value = BugReportViewController.value.IsNeedResponse
-                }.onChange({ (row) in
+            <<< createStringSelectorRow(
+                title: NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事"),
+                selectorTitle: NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事"),
+                options: [
+                    NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い"),
+                    NSLocalizedString("BugReportViewController_IsNeedResponse_Must", comment: "必ず欲しい"),
+                    NSLocalizedString("BugReportViewController_IsNeedResponse_Never", comment: "必要無い")
+                ],
+                value: BugReportViewController.value.IsNeedResponse
+            ) { row in
                     if let value = row.value {
                         BugReportViewController.value.IsNeedResponse = value
                     }
-                })
+                }
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_InformationForIsNeedResponse", comment: "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる可能性があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合があります。")
                 $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption2)
@@ -384,19 +400,20 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                         BugReportViewController.value.IsNeedAppLog = isEnable
                     }
                 })
-            <<< AlertRow<String>() { row in
-                row.title = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
-                row.selectorTitle = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
-                let never = NSLocalizedString("BugReportViewController_IsNeedResponse_Never", comment: "必要無い")
-                let maybe = NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い")
-                let must = NSLocalizedString("BugReportViewController_IsNeedResponse_Must", comment: "必ず欲しい")
-                row.options = [maybe, must, never]
-                row.value = BugReportViewController.value.IsNeedResponse
-            }.onChange({ (row) in
+            <<< createStringSelectorRow(
+                title: NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事"),
+                selectorTitle: NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事"),
+                options: [
+                    NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い"),
+                    NSLocalizedString("BugReportViewController_IsNeedResponse_Must", comment: "必ず欲しい"),
+                    NSLocalizedString("BugReportViewController_IsNeedResponse_Never", comment: "必要無い")
+                ],
+                value: BugReportViewController.value.IsNeedResponse
+            ) { row in
                 if let value = row.value {
                     BugReportViewController.value.IsNeedResponse = value
                 }
-            })
+            }
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_InformationForIsNeedResponse", comment: "返事が許可されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる可能性があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合があります。")
                 $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption2)

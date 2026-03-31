@@ -202,19 +202,24 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
             }
             textCell.textField.clearButtonMode = .always
         })
-        <<< AlertRow<String>("SpeakerAlertRow-\(name)") { (row) -> Void in
-            row.title = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerAlertRowTitle", comment: "話者")
-            row.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
-            row.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
-                return self.hideCache[name] ?? true
-            })
-            row.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
-            RealmUtil.RealmBlock { (realm) -> Void in
-                guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
-                row.options = speakerSettingArray.map({$0.name})
-            }
-            row.value = speechSectionConfig.speakerWith(realm: realm)?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
-        }.onChange({ (row) in
+        #if targetEnvironment(macCatalyst)
+        let speakerRow = PushRow<String>("SpeakerAlertRow-\(name)")
+        ConfigureCatalystSingleSelectionPushRow(speakerRow)
+        #else
+        let speakerRow = AlertRow<String>("SpeakerAlertRow-\(name)")
+        speakerRow.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
+        #endif
+        speakerRow.title = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerAlertRowTitle", comment: "話者")
+        speakerRow.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
+            return self.hideCache[name] ?? true
+        })
+        speakerRow.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
+            speakerRow.options = speakerSettingArray.map({$0.name})
+        }
+        speakerRow.value = speechSectionConfig.speakerWith(realm: realm)?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
+        speakerRow.onChange({ (row) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let targetName = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFromWith(realm: realm, name: name), let speaker = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetName) else {
                     return
@@ -225,7 +230,8 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 self.updateTitleCell(realm: realm, speechSectionConfig: sectionConfig)
             }
         })
-        <<< LabelRow("TargetNovelIDLabelRow-\(name)") {
+        section <<< speakerRow
+        section <<< LabelRow("TargetNovelIDLabelRow-\(name)") {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TargetNovelIDLabelTitle", comment: "適用対象")
             if let idSet = self.targetNovelIDSetMap[name] {
                 $0.value = self.SelectedNovelIDSetToNovelNameString(selectedNovelIDSet: idSet)
@@ -246,7 +252,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
             nextViewController.IsUseAnyNovelID = true // self.targetNovelID == RealmSpeechSectionConfig.anyTarget
             self.navigationController?.pushViewController(nextViewController, animated: true)
         })
-        <<< ButtonRow("SpeechTestButtonRow-\(name)") {
+        section <<< ButtonRow("SpeechTestButtonRow-\(name)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
             $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
                 return self.hideCache[name] ?? true
@@ -259,7 +265,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 self.testSpeech(text: self.testText, speakerSetting: speaker)
             }
         })
-        <<< ButtonRow("RemoveButtonRow-\(name)") {
+        section <<< ButtonRow("RemoveButtonRow-\(name)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_RemoveButtonRow", comment: "この設定を削除")
             $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
                 return self.hideCache[name] ?? true

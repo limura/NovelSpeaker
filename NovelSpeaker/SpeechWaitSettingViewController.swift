@@ -284,13 +284,18 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
                     shouldReturnIsRightButtonClicked: true)
             }
         })
-        <<< AlertRow<String>("SpeechWaitTypeAlertRow") {
-            $0.title = NSLocalizedString("SpeechWaitSettingViewController_SpeechWaitType", comment: "読み上げ時の間の仕組み")
-            $0.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
-            $0.selectorTitle = NSLocalizedString("SpeechWaitSettingViewController_SpeechWaitTypeSelectorTitle", comment: "読み上げ時の間の仕組みを選択してください。\n\n非推奨型にするとより細かい時間単位での制御ができるようになりますが、iOSのアップデート等で利用できなくなる可能性があるため、非推奨となります。")
-            $0.value = isSpeechWaitSettingUseExperimentalWait ? NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型") : NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default", comment: "標準型")
-            $0.options = [NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default", comment: "標準型"), NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型")]
-        }.onChange({ (row) in
+        #if targetEnvironment(macCatalyst)
+        let speechWaitTypeRow = PushRow<String>("SpeechWaitTypeAlertRow")
+        ConfigureCatalystSingleSelectionPushRow(speechWaitTypeRow)
+        #else
+        let speechWaitTypeRow = AlertRow<String>("SpeechWaitTypeAlertRow")
+        speechWaitTypeRow.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
+        #endif
+        speechWaitTypeRow.title = NSLocalizedString("SpeechWaitSettingViewController_SpeechWaitType", comment: "読み上げ時の間の仕組み")
+        speechWaitTypeRow.selectorTitle = NSLocalizedString("SpeechWaitSettingViewController_SpeechWaitTypeSelectorTitle", comment: "読み上げ時の間の仕組みを選択してください。\n\n非推奨型にするとより細かい時間単位での制御ができるようになりますが、iOSのアップデート等で利用できなくなる可能性があるため、非推奨となります。")
+        speechWaitTypeRow.value = isSpeechWaitSettingUseExperimentalWait ? NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型") : NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default", comment: "標準型")
+        speechWaitTypeRow.options = [NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default", comment: "標準型"), NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型")]
+        speechWaitTypeRow.onChange({ (row) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let value = row.value, let globalData = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speechWaitSettingNotificationToken, self.globalStateNotificationToken]) { (realm) in
@@ -298,7 +303,8 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
                 }
             }
         })
-        <<< TextAreaRow(TestTextAreaTag) {
+        form.last! <<< speechWaitTypeRow
+        form.last! <<< TextAreaRow(TestTextAreaTag) {
             $0.placeholder = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
             $0.value = testText
             $0.cell.textView.layer.borderWidth = 0.2

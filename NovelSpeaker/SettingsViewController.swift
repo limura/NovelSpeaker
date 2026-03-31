@@ -896,21 +896,25 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            section
-            <<< AlertRow<String>("RepeatTypeSelectRow") { row in
-                row.title = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
-                row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
-                row.options = NovelSpeakerUtility.GetAllRepeatSpeechType().map({NovelSpeakerUtility.RepeatSpeechTypeToString(type: $0) ?? ""})
-                row.value = NovelSpeakerUtility.RepeatSpeechTypeToString(type: .NoRepeat)
-                row.cell.textLabel?.numberOfLines = 0
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    let type = globalState.repeatSpeechType
-                    if let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: type) {
-                        row.value = typeString
-                    }
+            #if targetEnvironment(macCatalyst)
+            let repeatTypeRow = PushRow<String>("RepeatTypeSelectRow")
+            ConfigureCatalystSingleSelectionPushRow(repeatTypeRow)
+            #else
+            let repeatTypeRow = AlertRow<String>("RepeatTypeSelectRow")
+            #endif
+            repeatTypeRow.title = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
+            repeatTypeRow.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
+            repeatTypeRow.options = NovelSpeakerUtility.GetAllRepeatSpeechType().map({NovelSpeakerUtility.RepeatSpeechTypeToString(type: $0) ?? ""})
+            repeatTypeRow.value = NovelSpeakerUtility.RepeatSpeechTypeToString(type: .NoRepeat)
+            repeatTypeRow.cell.textLabel?.numberOfLines = 0
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                let type = globalState.repeatSpeechType
+                if let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: type) {
+                    repeatTypeRow.value = typeString
                 }
-            }.onChange({ (row) in
+            }
+            repeatTypeRow.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.RepeatSpeechStringToType(typeString: typeString) else { return }
                     if type == .GoToNextSameFolderdNovel || type == .GoToNextSelectedFolderdNovel, let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder), folderArray.count <= 0, let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: globalState.repeatSpeechType) {
@@ -926,29 +930,34 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            section
-            <<< AlertRow<String>("RepeatLoopTypeSelectRow") { row in
-                // iPhone SE (1) だと表示領域が足りないので .subtitle にした方が良さそうだけど、値が左側に表示される事になるので一覧性が落ちるのよね
-                //row.cellStyle = .subtitle
-                row.title = NSLocalizedString("SettingTableViewController_RepeatLoopTypeTitle", comment:"次の小説の選択方式")
-                row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatLoopTypeTitle", comment:"次の小説の選択方式")
-                row.options = NovelSpeakerUtility.GetAllRepeatSpeechLoopType().map({NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: $0) ?? ""})
-                row.value = NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: .normal)
-                row.cell.textLabel?.numberOfLines = 0
-                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                row.hidden = .function(["RepeatTypeSelectRow"], { form -> Bool in
-                    let row: RowOf<String>! = form.rowBy(tag: "RepeatTypeSelectRow")
-                    let repeatSpeechType = NovelSpeakerUtility.RepeatSpeechStringToType(typeString: row.value ?? "") ?? RepeatSpeechType.NoRepeat
-                    return NovelSpeakerUtility.GetAllRepeatSpeechLoopTargetRepeatSpeechType().contains(repeatSpeechType) == false
-                })
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    let type = globalState.repeatSpeechLoopType
-                    if let typeString = NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: type) {
-                        row.value = typeString
-                    }
+            section <<< repeatTypeRow
+            #if targetEnvironment(macCatalyst)
+            let repeatLoopTypeRow = PushRow<String>("RepeatLoopTypeSelectRow")
+            ConfigureCatalystSingleSelectionPushRow(repeatLoopTypeRow)
+            #else
+            let repeatLoopTypeRow = AlertRow<String>("RepeatLoopTypeSelectRow")
+            #endif
+            repeatLoopTypeRow.cellStyle = .subtitle
+            repeatLoopTypeRow.title = NSLocalizedString("SettingTableViewController_RepeatLoopTypeTitle", comment:"次の小説の選択方式")
+            repeatLoopTypeRow.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatLoopTypeTitle", comment:"次の小説の選択方式")
+            repeatLoopTypeRow.options = NovelSpeakerUtility.GetAllRepeatSpeechLoopType().map({NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: $0) ?? ""})
+            repeatLoopTypeRow.value = NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: .normal)
+            repeatLoopTypeRow.cell.textLabel?.numberOfLines = 0
+            repeatLoopTypeRow.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+            repeatLoopTypeRow.hidden = .function(["RepeatTypeSelectRow"], { form -> Bool in
+                let row: RowOf<String>! = form.rowBy(tag: "RepeatTypeSelectRow")
+                let repeatSpeechType = NovelSpeakerUtility.RepeatSpeechStringToType(typeString: row.value ?? "") ?? RepeatSpeechType.NoRepeat
+                return NovelSpeakerUtility.GetAllRepeatSpeechLoopTargetRepeatSpeechType().contains(repeatSpeechType) == false
+            })
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                let type = globalState.repeatSpeechLoopType
+                if let typeString = NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: type) {
+                    repeatLoopTypeRow.value = typeString
                 }
-            }.onChange({ (row) in
+            }
+            repeatLoopTypeRow.onChange({ (row) in
+                // iPhone SE (1) だと表示領域が足りないので .subtitle にした方が良さそうだけど、値が左側に表示される事になるので一覧性が落ちるのよね
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.RepeatSpeechLoopStringToType(typeString: typeString) else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
@@ -956,6 +965,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section <<< repeatLoopTypeRow
             section
             <<< SwitchRow("isAnnounceAtRepatSpeechTimeSwitchRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_isAnnounceAtRepatSpeechTimeTitle", comment: "読み上げ停止後に再開する場合にその旨をアナウンスする")
@@ -1252,18 +1262,22 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             #endif
-            section
-            <<< AlertRow<String>("likeButtonDialogTypeRow") { row in
-                row.title = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
-                row.selectorTitle = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
-                row.options = NovelSpeakerUtility.GetAllLikeButtonDialogType().map({NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: $0)})
-                row.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: .noDialog)
-                row.cell.textLabel?.numberOfLines = 0
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let type = LikeButtonDialogType(rawValue: globalState.likeButtonDialogType) else { return }
-                    row.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: type)
-                }
-            }.onChange({ (row) in
+            #if targetEnvironment(macCatalyst)
+            let likeButtonDialogTypeRow = PushRow<String>("likeButtonDialogTypeRow")
+            ConfigureCatalystSingleSelectionPushRow(likeButtonDialogTypeRow)
+            #else
+            let likeButtonDialogTypeRow = AlertRow<String>("likeButtonDialogTypeRow")
+            #endif
+            likeButtonDialogTypeRow.title = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
+            likeButtonDialogTypeRow.selectorTitle = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
+            likeButtonDialogTypeRow.options = NovelSpeakerUtility.GetAllLikeButtonDialogType().map({NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: $0)})
+            likeButtonDialogTypeRow.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: .noDialog)
+            likeButtonDialogTypeRow.cell.textLabel?.numberOfLines = 0
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let type = LikeButtonDialogType(rawValue: globalState.likeButtonDialogType) else { return }
+                likeButtonDialogTypeRow.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: type)
+            }
+            likeButtonDialogTypeRow.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.LikeButtonDialogTypeStringToType(typeString: typeString) else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
@@ -1271,6 +1285,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section <<< likeButtonDialogTypeRow
             // ipad only feature.
             if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
                 section
@@ -1679,20 +1694,25 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             if #available(iOS 26.0, *) {
                 modeMap["shortFormVideo"] = AVAudioSession.Mode.shortFormVideo
             }
-            section
-            <<< AlertRow<String>("AudioSessionModeSelectRow") { row in
-                row.cellStyle = .subtitle
-                row.title = "Mode (初期値: default))"
-                row.selectorTitle = "Mode"
-                row.options = modeMap.keys.sorted()
-                let currentMode = StorySpeaker.GetAudioSessionModeSetting()
-                let currentModeKey = modeMap.filter({$0.value == currentMode}).first?.key ?? "default"
-                row.value = currentModeKey
-                row.cell.textLabel?.numberOfLines = 0
-            }.onChange({ (row) in
+            #if targetEnvironment(macCatalyst)
+            let audioSessionModeRow = PushRow<String>("AudioSessionModeSelectRow")
+            ConfigureCatalystSingleSelectionPushRow(audioSessionModeRow)
+            #else
+            let audioSessionModeRow = AlertRow<String>("AudioSessionModeSelectRow")
+            #endif
+            audioSessionModeRow.cellStyle = .subtitle
+            audioSessionModeRow.title = "Mode (初期値: default))"
+            audioSessionModeRow.selectorTitle = "Mode"
+            audioSessionModeRow.options = modeMap.keys.sorted()
+            let currentMode = StorySpeaker.GetAudioSessionModeSetting()
+            let currentModeKey = modeMap.filter({$0.value == currentMode}).first?.key ?? "default"
+            audioSessionModeRow.value = currentModeKey
+            audioSessionModeRow.cell.textLabel?.numberOfLines = 0
+            audioSessionModeRow.onChange({ (row) in
                 guard let mode = modeMap[row.value ?? "default"] else { return }
                 StorySpeaker.SetAudioSessionModeSetting(mode: mode)
             })
+            section <<< audioSessionModeRow
             let categoryMap:[String:AVAudioSession.Category] = [
                 "ambient": AVAudioSession.Category.ambient,
                 "soloAmbient": AVAudioSession.Category.soloAmbient,
@@ -1701,42 +1721,51 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 "playAndRecord": AVAudioSession.Category.playAndRecord,
                 "multiRoute": AVAudioSession.Category.multiRoute,
             ]
-            section
-            <<< AlertRow<String>("AudioSessionCategorySelectRow") { row in
-                row.cellStyle = .subtitle
-                row.title = "Category(初期値: playback))"
-                row.selectorTitle = "Category"
-                row.options = categoryMap.keys.sorted()
-                let currentCategory = StorySpeaker.GetAudioSessionCategorySetting()
-                let currentCategoryKey = categoryMap.filter({$0.value == currentCategory}).first?.key ?? "playback"
-                row.value = currentCategoryKey
-                row.cell.textLabel?.numberOfLines = 0
-            }.onChange({ (row) in
+            #if targetEnvironment(macCatalyst)
+            let audioSessionCategoryRow = PushRow<String>("AudioSessionCategorySelectRow")
+            ConfigureCatalystSingleSelectionPushRow(audioSessionCategoryRow)
+            #else
+            let audioSessionCategoryRow = AlertRow<String>("AudioSessionCategorySelectRow")
+            #endif
+            audioSessionCategoryRow.cellStyle = .subtitle
+            audioSessionCategoryRow.title = "Category(初期値: playback))"
+            audioSessionCategoryRow.selectorTitle = "Category"
+            audioSessionCategoryRow.options = categoryMap.keys.sorted()
+            let currentCategory = StorySpeaker.GetAudioSessionCategorySetting()
+            let currentCategoryKey = categoryMap.filter({$0.value == currentCategory}).first?.key ?? "playback"
+            audioSessionCategoryRow.value = currentCategoryKey
+            audioSessionCategoryRow.cell.textLabel?.numberOfLines = 0
+            audioSessionCategoryRow.onChange({ (row) in
                 guard let category = categoryMap[row.value ?? ""] else {
                     return
                 }
                 StorySpeaker.SetAudioSessionCategorySetting(category: category)
             })
+            section <<< audioSessionCategoryRow
         #endif
-            section
-            <<< AlertRow<String>("ViewTypeSelectRow") { row in
-                row.cellStyle = .subtitle
-                row.title = "小説本文画面の表示方式(実験的機能につき、この機能へのお問い合わせには返信致しません)"
-                row.selectorTitle = "小説本文画面の表示方式"
-                row.options = [
-                    RealmDisplaySetting.ViewType.normal.rawValue
-                    , RealmDisplaySetting.ViewType.webViewHorizontal.rawValue
-                    , RealmDisplaySetting.ViewType.webViewVertical.rawValue
-                    , RealmDisplaySetting.ViewType.webViewVertical2Column.rawValue
-                    , RealmDisplaySetting.ViewType.webViewOriginal.rawValue
-                ]
-                row.value = RealmDisplaySetting.ViewType.normal.rawValue
-                row.cell.textLabel?.numberOfLines = 0
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
-                    row.value = displaySetting.viewType.rawValue
-                }
-            }.onChange({ (row) in
+            #if targetEnvironment(macCatalyst)
+            let viewTypeRow = PushRow<String>("ViewTypeSelectRow")
+            ConfigureCatalystSingleSelectionPushRow(viewTypeRow)
+            #else
+            let viewTypeRow = AlertRow<String>("ViewTypeSelectRow")
+            #endif
+            viewTypeRow.cellStyle = .subtitle
+            viewTypeRow.title = "小説本文画面の表示方式(実験的機能につき、この機能へのお問い合わせには返信致しません)"
+            viewTypeRow.selectorTitle = "小説本文画面の表示方式"
+            viewTypeRow.options = [
+                RealmDisplaySetting.ViewType.normal.rawValue
+                , RealmDisplaySetting.ViewType.webViewHorizontal.rawValue
+                , RealmDisplaySetting.ViewType.webViewVertical.rawValue
+                , RealmDisplaySetting.ViewType.webViewVertical2Column.rawValue
+                , RealmDisplaySetting.ViewType.webViewOriginal.rawValue
+            ]
+            viewTypeRow.value = RealmDisplaySetting.ViewType.normal.rawValue
+            viewTypeRow.cell.textLabel?.numberOfLines = 0
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
+                viewTypeRow.value = displaySetting.viewType.rawValue
+            }
+            viewTypeRow.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
@@ -1745,6 +1774,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section <<< viewTypeRow
             section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")

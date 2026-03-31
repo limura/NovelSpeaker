@@ -147,21 +147,27 @@ class RadioQuery: SearchQuery, Decodable {
     }
 
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
-        return AlertRow<String>() {
-            $0.title = displayText
-            $0.selectorTitle = displayText
-            $0.options = ([String](self.radioList.keys)).sorted()
-            $0.value = nil
-            if let defaultValue = defaultValue, let key = self.radioList.filter({$0.value == defaultValue}).first?.key {
-                $0.value = key
-                self.enableTarget = key
-            }else{
-                $0.options?.append(NSLocalizedString("NovelSearchViewController_RadioSelectTarget_None", comment: "選択しない"))
-            }
-            $0.cell.textLabel?.numberOfLines = 0
-        }.onChange { (row) in
+        #if targetEnvironment(macCatalyst)
+        let row = PushRow<String>()
+        ConfigureCatalystSingleSelectionPushRow(row)
+        #else
+        let row = AlertRow<String>()
+        #endif
+        row.title = displayText
+        row.selectorTitle = displayText
+        row.options = ([String](self.radioList.keys)).sorted()
+        row.value = nil
+        if let defaultValue = defaultValue, let key = self.radioList.filter({$0.value == defaultValue}).first?.key {
+            row.value = key
+            self.enableTarget = key
+        }else{
+            row.options?.append(NSLocalizedString("NovelSearchViewController_RadioSelectTarget_None", comment: "選択しない"))
+        }
+        row.cell.textLabel?.numberOfLines = 0
+        row.onChange { (row) in
             self.enableTarget = row.value
         }
+        return row
     }
     func CreateQuery(joinner:String) -> String {
         if let urlReplaceTarget = self.urlReplaceTarget, urlReplaceTarget.count > 0 { return "" }
@@ -910,14 +916,19 @@ class NovelSearchViewController: FormViewController,ParentViewController {
                 $0.cell.textLabel?.numberOfLines = 0
             }
             +++ Section()
-            <<< AlertRow<String>() {
-                $0.title = NSLocalizedString("NovelSearchViewController_SearchWebSiteTitle", comment: "検索先のWebサイト")
-                $0.selectorTitle = $0.title
-                let titleArray = ([String](self.searchInfoArray.map({$0.title}))).sorted()
-                $0.options = titleArray
-                $0.value = self.currentSelectedSite?.title
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onChange { (row) in
+            #if targetEnvironment(macCatalyst)
+            let searchWebSiteRow = PushRow<String>()
+            ConfigureCatalystSingleSelectionPushRow(searchWebSiteRow)
+            #else
+            let searchWebSiteRow = AlertRow<String>()
+            #endif
+            searchWebSiteRow.title = NSLocalizedString("NovelSearchViewController_SearchWebSiteTitle", comment: "検索先のWebサイト")
+            searchWebSiteRow.selectorTitle = searchWebSiteRow.title
+            let titleArray = ([String](self.searchInfoArray.map({$0.title}))).sorted()
+            searchWebSiteRow.options = titleArray
+            searchWebSiteRow.value = self.currentSelectedSite?.title
+            searchWebSiteRow.cell.textLabel?.numberOfLines = 0
+            searchWebSiteRow.onChange { (row) in
                 guard let selectedTitle = row.value else { return }
                 guard let selectedSite = self.searchInfoArray.filter({$0.title == selectedTitle}).first else { return }
                 if let currentSelectedSiteTitle = self.currentSelectedSite?.title, currentSelectedSiteTitle == selectedTitle { return }
@@ -931,6 +942,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
                     self.reloadCells()
                 }
             }
+            self.form.last! <<< searchWebSiteRow
             if let currentSite = self.currentSelectedSite {
                 self.form +++ currentSite.GenerateSection(parentViewController: self)
             }

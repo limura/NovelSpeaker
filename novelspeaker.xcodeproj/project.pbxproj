@@ -163,6 +163,7 @@
 		21A38BC125CEF40A008DA66B /* NovelSpeaker-WhiteIconOnly.png in Resources */ = {isa = PBXBuildFile; fileRef = 21A38BBB25CEF40A008DA66B /* NovelSpeaker-WhiteIconOnly.png */; };
 		21A4C75624F6776500038883 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
 		21A55E292F179C00004FAAB5 /* NovelDownloaderMissingChapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A55E282F179C00004FAAB5 /* NovelDownloaderMissingChapterTests.swift */; };
+		21A97B462F7BBFC800DF9236 /* EurekaSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A97B452F7BBFC800DF9236 /* EurekaSupport.swift */; };
 		21AA7FCF25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
@@ -492,6 +493,7 @@
 		21A4F71E19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F74119B1B758007CCD32 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		21A55E282F179C00004FAAB5 /* NovelDownloaderMissingChapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDownloaderMissingChapterTests.swift; sourceTree = "<group>"; };
+		21A97B452F7BBFC800DF9236 /* EurekaSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurekaSupport.swift; sourceTree = "<group>"; };
 		21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelFolderManageTableViewController.swift; sourceTree = "<group>"; };
 		21AED5D419B335CF00CE846D /* ReleaseMemo.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReleaseMemo.md; sourceTree = "<group>"; };
 		21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummySoundLooper.swift; sourceTree = "<group>"; };
@@ -889,6 +891,7 @@
 				21D9C1662652602900CC5AE9 /* WebSpeechViewTool.swift */,
 				216631E82688772600F80C1D /* ScrollPullAndFireHandler.swift */,
 				21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */,
+				21A97B452F7BBFC800DF9236 /* EurekaSupport.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1721,6 +1724,7 @@
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
 				216631E72682D26800F80C1D /* UITabBarControllerExtension.swift in Sources */,
 				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,
+				21A97B462F7BBFC800DF9236 /* EurekaSupport.swift in Sources */,
 				21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */,
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
 				21E26FEB260E066F009018B6 /* SafeModeViewController.swift in Sources */,

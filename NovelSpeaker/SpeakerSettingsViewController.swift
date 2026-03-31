@@ -288,23 +288,28 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 }
             }
         })
-        <<< AlertRow<String>("LanguageAlertRow-\(targetID)") {
-            $0.title = NSLocalizedString("SpeakSettingsViewController_LangageTitle", comment: "言語")
-            $0.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
-            $0.selectorTitle = NSLocalizedString("SpeakSettingsViewController_LanguageDialogTitle", comment: "言語を選択してください")
-            let languageCodeArray = Array(Set(AVSpeechSynthesisVoice.speechVoices().map({ $0.language }))).sorted()
-            $0.options = languageCodeArray
-            if languageCodeArray.contains(currentSetting.locale) {
-                $0.value = currentSetting.locale
-            }else if languageCodeArray.contains("ja-JP") {
-                $0.value = "ja-JP"
-            }else{
-                $0.value = languageCodeArray.first ?? ""
-            }
-            $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-                return self.hideCache[targetID] ?? false
-            })
-        }.onChange({ (row) in
+        #if targetEnvironment(macCatalyst)
+        let languageRow = PushRow<String>("LanguageAlertRow-\(targetID)")
+        ConfigureCatalystSingleSelectionPushRow(languageRow)
+        #else
+        let languageRow = AlertRow<String>("LanguageAlertRow-\(targetID)")
+        languageRow.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
+        #endif
+        languageRow.title = NSLocalizedString("SpeakSettingsViewController_LangageTitle", comment: "言語")
+        languageRow.selectorTitle = NSLocalizedString("SpeakSettingsViewController_LanguageDialogTitle", comment: "言語を選択してください")
+        let languageCodeArray = Array(Set(AVSpeechSynthesisVoice.speechVoices().map({ $0.language }))).sorted()
+        languageRow.options = languageCodeArray
+        if languageCodeArray.contains(currentSetting.locale) {
+            languageRow.value = currentSetting.locale
+        }else if languageCodeArray.contains("ja-JP") {
+            languageRow.value = "ja-JP"
+        }else{
+            languageRow.value = languageCodeArray.first ?? ""
+        }
+        languageRow.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
+            return self.hideCache[targetID] ?? false
+        })
+        languageRow.onChange({ (row) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let locale = row.value else {
                     return
@@ -323,30 +328,41 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                     }
                     setting.locale = locale
                 }
-                if let voiceIdentifierRow = self.form.rowBy(tag: "VoiceIdentifierAlertRow-\(targetID)") as? AlertRow<String> {
+                #if targetEnvironment(macCatalyst)
+                let voiceIdentifierRow = self.form.rowBy(tag: "VoiceIdentifierAlertRow-\(targetID)") as? PushRow<String>
+                #else
+                let voiceIdentifierRow = self.form.rowBy(tag: "VoiceIdentifierAlertRow-\(targetID)") as? AlertRow<String>
+                #endif
+                if let voiceIdentifierRow = voiceIdentifierRow {
                     voiceIdentifierRow.options = voiceNames
                     voiceIdentifierRow.value = voiceName
                     voiceIdentifierRow.updateCell()
                 }
             }
         })
-        <<< AlertRow<String>("VoiceIdentifierAlertRow-\(targetID)") {
-            $0.title = NSLocalizedString("SpeakSettingsViewController_VoiceIdentifierTitle", comment: "話者")
-            $0.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
-            $0.selectorTitle = NSLocalizedString("SpeakSettingsViewController_VoiceIdentifierDialogTitle", comment: "話者を選択してください")
-            let voiceNameArray = AVSpeechSynthesisVoice.speechVoices().filter({ $0.language == currentSetting.locale }).map({$0.name}).sorted()
-            $0.options = voiceNameArray
-            let voice = AVSpeechSynthesisVoice(identifier: currentSetting.voiceIdentifier)
-            let voiceName = voice?.name ?? ""
-            if voiceNameArray.contains(voiceName) {
-                $0.value = voiceName
-            }else{
-                $0.value = voiceNameArray.first ?? ""
-            }
-            $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-                return self.hideCache[targetID] ?? false
-            })
-        }.onChange({ (row) in
+        section <<< languageRow
+        #if targetEnvironment(macCatalyst)
+        let voiceIdentifierRow = PushRow<String>("VoiceIdentifierAlertRow-\(targetID)")
+        ConfigureCatalystSingleSelectionPushRow(voiceIdentifierRow)
+        #else
+        let voiceIdentifierRow = AlertRow<String>("VoiceIdentifierAlertRow-\(targetID)")
+        voiceIdentifierRow.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
+        #endif
+        voiceIdentifierRow.title = NSLocalizedString("SpeakSettingsViewController_VoiceIdentifierTitle", comment: "話者")
+        voiceIdentifierRow.selectorTitle = NSLocalizedString("SpeakSettingsViewController_VoiceIdentifierDialogTitle", comment: "話者を選択してください")
+        let voiceNameArray = AVSpeechSynthesisVoice.speechVoices().filter({ $0.language == currentSetting.locale }).map({$0.name}).sorted()
+        voiceIdentifierRow.options = voiceNameArray
+        let voice = AVSpeechSynthesisVoice(identifier: currentSetting.voiceIdentifier)
+        let voiceName = voice?.name ?? ""
+        if voiceNameArray.contains(voiceName) {
+            voiceIdentifierRow.value = voiceName
+        }else{
+            voiceIdentifierRow.value = voiceNameArray.first ?? ""
+        }
+        voiceIdentifierRow.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
+            return self.hideCache[targetID] ?? false
+        })
+        voiceIdentifierRow.onChange({ (row) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let voiceName = row.value else {
                     return
@@ -362,6 +378,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 }
             }
         })
+        section <<< voiceIdentifierRow
         <<< ButtonRow("TestSpeechButtonRow-\(targetID)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
             $0.cell.textLabel?.numberOfLines = 0

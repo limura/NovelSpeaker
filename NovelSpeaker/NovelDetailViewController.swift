@@ -415,16 +415,21 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
             let settingSection = Section(NSLocalizedString("NovelDetailViewController_SettingSectionTitle", comment: "この小説専用の設定"))
             // isNeedSpeechAfterDelete
             if let speaker = novel.defaultSpeakerWith(realm: realm) {
-                settingSection <<< AlertRow<String>("SpeakerAlertRow") { (row) -> Void in
-                    row.title = NSLocalizedString("NovelDetailViewController_SpeakerAlertRowTitle", comment: "標準の話者")
-                    row.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
-                    row.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
-                    RealmUtil.RealmBlock { (realm) -> Void in
-                        guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
-                        row.options = speakerSettingArray.map({$0.name})
-                    }
-                    row.value = speaker.name
-                }.onChange({ (row) in
+                #if targetEnvironment(macCatalyst)
+                let speakerRow = PushRow<String>("SpeakerAlertRow")
+                ConfigureCatalystSingleSelectionPushRow(speakerRow)
+                #else
+                let speakerRow = AlertRow<String>("SpeakerAlertRow")
+                speakerRow.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
+                #endif
+                speakerRow.title = NSLocalizedString("NovelDetailViewController_SpeakerAlertRowTitle", comment: "標準の話者")
+                speakerRow.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
+                    speakerRow.options = speakerSettingArray.map({$0.name})
+                }
+                speakerRow.value = speaker.name
+                speakerRow.onChange({ (row) in
                     RealmUtil.RealmBlock { (realm) -> Void in
                         guard let targetName = row.value, let speaker = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetName), let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else {
                             return
@@ -434,6 +439,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                         }
                     }
                 })
+                settingSection <<< speakerRow
             }
             settingSection <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_SpeechModSettingsButtonTitle", comment:"話者変更設定(会話文等で声質を変えたりする設定)")
