@@ -11,7 +11,14 @@
     "*.doubleclick.net",
     "*.googlesyndication.com",
     "*.criteo.com",
-    "www.googletagmanager.com"
+    "www.googletagmanager.com",
+    "*.google-analytics.com",
+    "*.ingest.sentry.io",
+    "match.adsrvr.org",
+    "analytics.twitter.com",
+    "analytics.tiktok.com",
+    "www.googleadservices.com",
+    "t.co"
   ],
   "latestVersion": "2.10.7"
 }
