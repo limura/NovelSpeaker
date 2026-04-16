@@ -799,6 +799,7 @@
 "BookShelfTreeViewController_MultiSelectFloatingViewController_ClearButtonLabel" = "Clear";
 "BookShelfTreeViewController_MultiSelectFloatingViewController_SelectFunctionButtonLabel" = "Actions ▼";
 "BookShelfTreeViewController_MultiSelectFloatingViewController_BackNormalModeButtonLabel" = "< Back";
+"BookShelfRATreeViewController_SortTypePageCount" = "Page count order";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";

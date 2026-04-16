@@ -788,6 +788,7 @@
 "BookShelfTreeViewController_MultiSelectFloatingViewController_ClearButtonLabel" = "クリア";
 "BookShelfTreeViewController_MultiSelectFloatingViewController_SelectFunctionButtonLabel" = "操作▼";
 "BookShelfTreeViewController_MultiSelectFloatingViewController_BackNormalModeButtonLabel" = "＜ 戻る";
+"BookShelfRATreeViewController_SortTypePageCount" = "ページ数順";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";

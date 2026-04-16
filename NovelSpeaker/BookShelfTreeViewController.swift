@@ -1269,6 +1269,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             return Array(allNovels)
         case .CreatedDate:
             return Array(allNovels.sorted(byKeyPath: "createdDate", ascending: false))
+        case .PageCount:
+            return allNovels.sorted(by: { (a, b) -> Bool in
+                let aId = RealmStoryBulk.StoryIDToChapterNumber(storyID: a.m_lastChapterStoryID)
+                let bId = RealmStoryBulk.StoryIDToChapterNumber(storyID: b.m_lastChapterStoryID)
+                return aId < bId
+            })
         case .Title:
             fallthrough
         case .SelfCreatedFolder:
@@ -1578,7 +1584,25 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             return (false, result)
         }
     }
-    
+
+    // 小説のページ数で並べ替えます
+    func createPageCountBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.LikeLevel)?.sorted(by: {
+                $0.lastChapterNumber ?? 0 > $1.lastChapterNumber ?? 0
+            }) else { return (false,[]) }
+            var result = [] as [BookShelfRATreeViewCellData]
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return (false, result)
+        }
+    }
+
     func getBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
         var sortType:NarouContentSortType = .Title
         RealmUtil.RealmBlock { (realm) -> Void in
@@ -1607,6 +1631,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             return createWebSiteBookShelfRATreeViewCellDataTree()
         case .CreatedDate:
             return createCreatedDateBookShelfRATreeViewCellDataTreeWithoutFolder()
+        case .PageCount:
+            return createPageCountBookShelfRATreeViewCellDataTreeWithoutFolder()
         default:
             break
         }
@@ -2401,6 +2427,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeLikeLevel", comment: "お気に入り順"): NarouContentSortType.LikeLevel
             , NSLocalizedString("BookShelfRATreeViewController_SorteTypeWebSite", comment: "Webサイト順"): NarouContentSortType.WebSite
             , NSLocalizedString("BookShelfRATreeViewController_SorteTypeCreatedDate", comment: "本棚登録順"): NarouContentSortType.CreatedDate
+            , NSLocalizedString("BookShelfRATreeViewController_SortTypePageCount", comment: "ページ数順"): NarouContentSortType.PageCount
         ]
     }
 

@@ -2693,6 +2693,7 @@ extension HTTPCookie {
     case LikeLevel = 8
     case WebSite = 9
     case CreatedDate = 10
+    case PageCount = 11
 }
 
 /// 繰り返し再生の対象タイプ
