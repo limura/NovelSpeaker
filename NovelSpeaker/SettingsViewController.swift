@@ -1661,7 +1661,27 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
                 NovelDownloadQueue.shared.ReloadThrottleSettings()
-            })
+            }).cellUpdate { cell, row in
+                cell.slider.translatesAutoresizingMaskIntoConstraints = false
+                cell.valueLabel.translatesAutoresizingMaskIntoConstraints = false
+
+                // 既に制約が追加されているか identifier でチェック
+                let sliderConstraintID = "BarButtonSpacingSliderMinWidth"
+                if !cell.slider.constraints.contains(where: { $0.identifier == sliderConstraintID }) {
+                    let c = cell.slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 64)
+                    c.identifier = sliderConstraintID // IDを振る
+                    c.priority = .required
+                    c.isActive = true
+                }
+
+                let valueConstraintID = "BarButtonSpacingValueMinWidth"
+                if !cell.valueLabel.constraints.contains(where: { $0.identifier == valueConstraintID }) {
+                    let c = cell.valueLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 32)
+                    c.identifier = valueConstraintID
+                    c.priority = .required
+                    c.isActive = true
+                }
+            }
             form +++ section
 
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、
