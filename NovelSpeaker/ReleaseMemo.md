@@ -4307,3 +4307,38 @@ Fixing the problem
 - Fixed an issue where the application might crash when the "Bookshelf screen" was set to an order where folders could be opened and closed.
 - Fixed an issue where some buttons could not be selected in a dialog box that expanded beyond the screen width on Mac Catalyst.
 - Fixed an issue where line breaks were not displayed in complaint reports and other emails on Mac Catalyst.
+
+
+Version 2.11.1 (2.11.1)
+
+インタフェース・内部動作の変更
+
+- 本棚画面右上の順番(上向きと下向きの矢印のアイコン)に、「ページ数順」を追加
+
+問題の修正
+
+- ボタンを押さないと次のページに行けない場合などに取り込み失敗していた問題を修正
+
+以下に簡単に説明しておきます。
+
+- 本棚画面右上の順番(上向きと下向きの矢印のアイコン)に、「ページ数順」を追加
+
+こちらは、読む量の多い順で小説を読みたいという方がおられましたので用意していて、もう少し良い形での提供を試みようと思っていたものなのですが、この次の問題が大きかったため、早めのリリースをしようということで、この形での提供となっています。そのため、この機能については今後変更される可能性があります。
+
+- ボタンを押さないと次のページに行けない場合などに取り込み失敗していた問題を修正
+
+これは、おそらく Version 2.11.0 の時に入ってしまった問題です。
+動作としては、小説の更新確認時にボタンを押すタイプのWebサイト様(例えばPixiv小説様)などで次のページへの遷移ができないという問題でした。
+
+簡単になりますが以上となります。
+
+
+Version 2.11.1 (2.11.1)
+
+Changes in interface/internal operation
+
+- Added "Page Number Sort" to the sorting options (upward and downward arrow icons) in the upper right corner of the bookshelf screen.
+
+Fixing the problem
+
+- Fixed an issue where importing failed when you couldn't proceed to the next page without pressing a button.
