@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "0E487433-0ABB-4EA0-A2F5-92C18CAAEB84",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:novelspeaker.xcodeproj",
+        "identifier" : "21F054E91917E0F200CC6BA9",
+        "name" : "NovelSpeakerTests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -1716,15 +1716,101 @@ class NiftyUtility: NSObject {
         return result
     }
 
+    static let ConvertRubyTagToVerticalBarRubyText_rubyRegex = try? NSRegularExpression(pattern: "<ruby[^>]*?>(.*?)</ruby>", options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let ConvertRubyTagToVerticalBarRubyText_rtRegex = try? NSRegularExpression(pattern: "<rt[^>]*?>(.*?)</rt>", options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let ConvertRubyTagToVerticalBarRubyText_tagRemoveRegex = try? NSRegularExpression(pattern: "<[^>]+?>", options: [.dotMatchesLineSeparators])
+    static let ConvertRubyTagToVerticalBarRubyText_rtAllRemoveRegex = try? NSRegularExpression(pattern: "<rt[^>]*?>.*?</rt>", options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let ConvertRubyTagToVerticalBarRubyText_rpAllRemoveRegex = try? NSRegularExpression(pattern: "<rp[^>]*?>.*?</rp>", options: [.caseInsensitive, .dotMatchesLineSeparators])
+    // <ruby><rb>赤</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>い</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>リ</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>ボ</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>ン</rb><rp>(</rp><rt>・</rt><rp>)</rp></ruby>
+    // を、
+    // |赤いリボン(・・・・・)
+    // に変えます。
+    static func ConvertRubyTagToVerticalBarRubyText_transformRubyTag(html: String, rubyRegex: NSRegularExpression, rtRegex: NSRegularExpression, tagRemoveRegex: NSRegularExpression, rtAllRemoveRegex: NSRegularExpression, rpAllRemoveRegex: NSRegularExpression) -> String {
+        let nsString = html as NSString
+        var resultString = html
+        let matches = rubyRegex.matches(in: html, options: [], range: NSRange(location: 0, length: nsString.length)).reversed()
+        for match in matches {
+            let innerContent = nsString.substring(with: match.range(at: 1))
+            let nsInner = innerContent as NSString
+            let fullRange = NSRange(location: 0, length: nsInner.length)
+
+            let rtMatches = rtRegex.matches(in: innerContent, options: [], range: fullRange)
+            let allRubyText = rtMatches.map { nsInner.substring(with: $0.range(at: 1)) }.joined()
+
+            var baseWithTags = rtAllRemoveRegex.stringByReplacingMatches(in: innerContent, options: [], range: fullRange, withTemplate: "")
+
+            baseWithTags = rpAllRemoveRegex.stringByReplacingMatches(in: baseWithTags, options: [], range: NSRange(location: 0, length: (baseWithTags as NSString).length), withTemplate: "")
+
+            let cleanBaseText = tagRemoveRegex.stringByReplacingMatches(in: baseWithTags, options: [], range: NSRange(location: 0, length: (baseWithTags as NSString).length), withTemplate: "")
+
+            let replacement = "|\(cleanBaseText)(\(allRubyText))"
+
+            resultString = (resultString as NSString).replacingCharacters(in: match.range(at: 0), with: replacement)
+        }
+        return resultString
+    }
+    // <ruby><rb>赤</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>い</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>リ</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>ボ</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>ン</rb><rp>(</rp><rt>・</rt><rp>)</rp></ruby>
+    // を、
+    // |赤(・)|い(・)|リ(・)|ボ(・)|ン(・))
+    // に変えます。こっちの方が昔の動き方になります
+    static func ConvertRubyTagToVerticalBarRubyText_transformRubyTagSequential(html: String, rubyRegex: NSRegularExpression, rtRegex: NSRegularExpression, rpRemoveRegex: NSRegularExpression, tagRemoveRegex: NSRegularExpression) -> String {
+        let nsString = html as NSString
+        var resultString = html
+        
+        // <ruby>全体を探す
+        let matches = rubyRegex.matches(in: html, options: [], range: NSRange(location: 0, length: nsString.length)).reversed()
+
+        for match in matches {
+            // rubyの中身（1番目のキャプチャグループ）
+            if match.numberOfRanges < 2 { continue }
+            let innerContent = nsString.substring(with: match.range(at: 1))
+            let nsInner = innerContent as NSString
+            let fullRange = NSRange(location: 0, length: nsInner.length)
+            
+            // <rt>を検索
+            let rtMatches = rtRegex.matches(in: innerContent, options: [], range: fullRange)
+            
+            var combinedResult = ""
+            var lastEndIndex = 0
+            
+            for rtMatch in rtMatches {
+                // 安全策：グループ1が存在するかチェック
+                guard rtMatch.numberOfRanges > 1 else { continue }
+
+                let baseRange = NSRange(location: lastEndIndex, length: rtMatch.range.location - lastEndIndex)
+                let rawBase = nsInner.substring(with: baseRange)
+
+                let noRpBase = rpRemoveRegex.stringByReplacingMatches(in: rawBase, options: [], range: NSRange(location: 0, length: (rawBase as NSString).length), withTemplate: "")
+                let cleanBase = tagRemoveRegex.stringByReplacingMatches(in: noRpBase, options: [], range: NSRange(location: 0, length: (noRpBase as NSString).length), withTemplate: "")
+
+                let rubyRange = rtMatch.range(at: 1)
+                let rubyText = (rubyRange.location != NSNotFound) ? nsInner.substring(with: rubyRange) : ""
+                
+                combinedResult += "|\(cleanBase)(\(rubyText))"
+                
+                lastEndIndex = rtMatch.range.location + rtMatch.range.length
+            }
+            let remainingRange = NSRange(location: lastEndIndex, length: nsInner.length - lastEndIndex)
+            if remainingRange.length > 0 {
+                let remainingRaw = nsInner.substring(with: remainingRange)
+                let cleanRemaining = tagRemoveRegex.stringByReplacingMatches(in: remainingRaw, options: [], range: NSRange(location: 0, length: (remainingRaw as NSString).length), withTemplate: "")
+                combinedResult += cleanRemaining
+            }
+            
+            resultString = (resultString as NSString).replacingCharacters(in: match.range(at: 0), with: combinedResult)
+        }
+        
+        return resultString
+    }
+
     /// 怪しく <ruby>xxx<rp>(</rp><rt>yyy</rt><rp>)</rt></ruby> や、<ruby>xxx<rt>yyy</rt></ruby> という文字列を
     /// |xxx(yyy) という文字列に変換します。
     /// つまり、xxx(yyy) となるはずのものを、|xxx(yyy) となるように変換するわけです。
-    static let ConvertRubyTagToVerticalBarRubyText_ConvFromString = "<ruby[^>]*?>\\s*(<rb[^>]*?>)?\\s*([^<]+)\\s*(</rb[^>]*?>)?\\s*(<rp[^>]*?>[^<]*</rp[^>]*?>)?\\s*(<rt[^>]*?>[^<]+</rt[^>]*?>)\\s*(<r[pt][^>]*?>[^<]*</r[pt][^>]*?>)?\\s*</ruby[^>]*?>"
-    static let ConvertRubyTagToVerticalBarRubyText_RegexpConvFrom = try? NSRegularExpression(pattern: ConvertRubyTagToVerticalBarRubyText_ConvFromString, options: [.caseInsensitive, .dotMatchesLineSeparators])
     static func ConvertRubyTagToVerticalBarRubyText(htmlString:String) -> String {
-        let convTo = "|$1$2$3($5)"
-        guard let regexp = ConvertRubyTagToVerticalBarRubyText_RegexpConvFrom else { return htmlString }
-        return regexp.stringByReplacingMatches(in: htmlString, options: [], range: NSMakeRange(0, htmlString.count), withTemplate: convTo)
+        guard let rubyRegex = ConvertRubyTagToVerticalBarRubyText_rubyRegex, let rtRegex = ConvertRubyTagToVerticalBarRubyText_rtRegex, let tagRemoveRegex = ConvertRubyTagToVerticalBarRubyText_tagRemoveRegex, let rtAllRemoveRegex = ConvertRubyTagToVerticalBarRubyText_rtAllRemoveRegex, let rpAllRemoveRegex = ConvertRubyTagToVerticalBarRubyText_rpAllRemoveRegex else { return htmlString }
+        return ConvertRubyTagToVerticalBarRubyText_transformRubyTag(html: htmlString, rubyRegex: rubyRegex, rtRegex: rtRegex, tagRemoveRegex: tagRemoveRegex, rtAllRemoveRegex: rtAllRemoveRegex, rpAllRemoveRegex: rpAllRemoveRegex)
+        // 古い形式にするならこっち
+        //return ConvertRubyTagToVerticalBarRubyText_transformRubyTagSequential(html: htmlString, rubyRegex: rubyRegex, rtRegex: rtRegex, rpRemoveRegex: rpAllRemoveRegex, tagRemoveRegex: tagRemoveRegex)
     }
     
     // HTML から String に変換する時に必要なくなるタグ等を削除します。
