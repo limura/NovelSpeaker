@@ -1808,9 +1808,10 @@ class NiftyUtility: NSObject {
     /// つまり、xxx(yyy) となるはずのものを、|xxx(yyy) となるように変換するわけです。
     static func ConvertRubyTagToVerticalBarRubyText(htmlString:String) -> String {
         guard let rubyRegex = ConvertRubyTagToVerticalBarRubyText_rubyRegex, let rtRegex = ConvertRubyTagToVerticalBarRubyText_rtRegex, let tagRemoveRegex = ConvertRubyTagToVerticalBarRubyText_tagRemoveRegex, let rtAllRemoveRegex = ConvertRubyTagToVerticalBarRubyText_rtAllRemoveRegex, let rpAllRemoveRegex = ConvertRubyTagToVerticalBarRubyText_rpAllRemoveRegex else { return htmlString }
-        return ConvertRubyTagToVerticalBarRubyText_transformRubyTag(html: htmlString, rubyRegex: rubyRegex, rtRegex: rtRegex, tagRemoveRegex: tagRemoveRegex, rtAllRemoveRegex: rtAllRemoveRegex, rpAllRemoveRegex: rpAllRemoveRegex)
+        // 新しい形式にするならこっち
+        //return ConvertRubyTagToVerticalBarRubyText_transformRubyTag(html: htmlString, rubyRegex: rubyRegex, rtRegex: rtRegex, tagRemoveRegex: tagRemoveRegex, rtAllRemoveRegex: rtAllRemoveRegex, rpAllRemoveRegex: rpAllRemoveRegex)
         // 古い形式にするならこっち
-        //return ConvertRubyTagToVerticalBarRubyText_transformRubyTagSequential(html: htmlString, rubyRegex: rubyRegex, rtRegex: rtRegex, rpRemoveRegex: rpAllRemoveRegex, tagRemoveRegex: tagRemoveRegex)
+        return ConvertRubyTagToVerticalBarRubyText_transformRubyTagSequential(html: htmlString, rubyRegex: rubyRegex, rtRegex: rtRegex, rpRemoveRegex: rpAllRemoveRegex, tagRemoveRegex: tagRemoveRegex)
     }
     
     // HTML から String に変換する時に必要なくなるタグ等を削除します。
