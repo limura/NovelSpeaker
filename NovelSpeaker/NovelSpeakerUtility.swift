@@ -2685,7 +2685,8 @@ class NovelSpeakerUtility: NSObject {
         // U+000A~U+000D はそれぞれ \r\v\f\n になる(Swift だと \v, \f は無いみたいなので \u{} で書く
         let targetPattern = "(\r\n|[\r\u{000B}\u{000C}\u{0085}\u{2028}\u{2029}])"
         let convertTo = "\n"
-        return string.replacingOccurrences(of: targetPattern, with: convertTo, options: [.regularExpression], range: string.range(of: string))
+        return string.replacingOccurrences(of: targetPattern, with: convertTo, options: [.regularExpression])
+        //return string.replacingOccurrences(of: targetPattern, with: convertTo, options: [.regularExpression], range: string.range(of: string))
     }
     
     static func RepeatSpeechTypeToString(type:RepeatSpeechType) -> String? {
