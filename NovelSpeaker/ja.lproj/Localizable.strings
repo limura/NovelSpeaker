@@ -976,15 +976,25 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "完了";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "編集";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.1 (2.11.1)
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.2
 
-- 本棚画面右上の順番(上向きと下向きの矢印のアイコン)に、「ページ数順」を追加
- 　しました。
-- ボタンを押さないと次のページに行けない場合などに取り込み失敗していた問題を修正
+- 小説本文の取り込み時に ruby タグの中に rb, rp, rt 以外のHTMLタグが現れるとルビとして認識しない問題を修正
+- 小説の更新確認時に無駄にCPU負荷を上げていた部分を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.11.2 (2.11.2)
+
+インタフェース・内部動作の変更
+
+- 小説本文の取り込み時に ruby タグの中に rb, rp, rt 以外のHTMLタグが現れるとルビとして認識しない問題を修正
+
+問題の修正
+
+- 小説の更新確認時に無駄にCPU負荷を上げていた部分を修正
+
+
 Version 2.11.1 (2.11.1)
 
 インタフェース・内部動作の変更

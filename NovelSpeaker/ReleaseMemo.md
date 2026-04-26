@@ -4342,3 +4342,39 @@ Changes in interface/internal operation
 Fixing the problem
 
 - Fixed an issue where importing failed when you couldn't proceed to the next page without pressing a button.
+
+
+
+Version 2.11.2
+
+インタフェース・内部動作の変更
+
+- 小説本文の取り込み時に ruby タグの中に rb, rp, rt 以外のHTMLタグが現れるとルビとして認識しない問題を修正
+
+問題の修正
+
+- 小説の更新確認時に無駄にCPU負荷を上げていた部分を修正
+
+以下で簡単に解説します
+
+- 小説本文の取り込み時に ruby タグの中に rb, rp, rt 以外のHTMLタグが現れるとルビとして認識しない問題を修正
+
+今までは HTML の rubyタグ の中に rb, rp, rt のタグしか存在しないことを仮定したプログラムになっていたので、そうなっていないHTMLのものではルビの文字列の取り込みがうまくいかずに「元の文字ルビの文字」という感じで元の文字とルビの文字が単に繋がって取り込まれていたのですが、今回の修正で複雑な構造のものにも対応できるようにしたので、「|元の文字(ルビの文字)」という形式で取り込めるようになったと思います。
+具体的には Pixiv小説様 のルビの形式が取り込めるようになったという感じです。
+
+- 小説の更新確認時に無駄にCPU負荷を上げていた部分を修正
+
+これはそのままで、不必要に重い処理を書いていたのを修正したので少しだけ軽くなるはずです。
+また、この修正を行なった部分は場合によってはメモリ消費量が一時的にかなり増えてしまって、場合によっては強制終了を誘発していたのではないかと思うので、そのような原因の強制終了は減るかもしれません。といっても、こちらの手元の実験ではうまくそのメモリ使用量の問題は再現できていませんので、そもそもそういう問題があったのかどうかはよくわかりません。
+
+簡単になりますが以上となります。
+
+Version 2.11.2
+
+Changes in interface/internal operation
+
+- Fixed an issue where HTML tags other than rb, rp, and rt were not recognized as ruby ​​text when importing novel text.
+
+Fixing the problem
+
+- Fixed an issue that unnecessarily increased CPU load when checking for novel updates.

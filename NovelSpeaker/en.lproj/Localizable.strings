@@ -989,14 +989,25 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "Done";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "Edit";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.2
 
-- Added \"Page Number Sort\" to the sorting options (upward and downward arrow icons) in the upper right corner of the bookshelf screen.
-- Fixed an issue where importing failed when you couldn't proceed to the next page without pressing a button.
+- Fixed an issue where HTML tags other than rb, rp, and rt were not recognized as ruby ​​text when importing novel text.
+- Fixed an issue that unnecessarily increased CPU load when checking for novel updates.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.11.2
+
+Changes in interface/internal operation
+
+- Fixed an issue where HTML tags other than rb, rp, and rt were not recognized as ruby ​​text when importing novel text.
+
+Fixing the problem
+
+- Fixed an issue that unnecessarily increased CPU load when checking for novel updates.
+
+
 Version 2.11.1
 
 Changes in interface/internal operation
