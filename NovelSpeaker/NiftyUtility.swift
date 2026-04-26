@@ -2300,6 +2300,32 @@ class DebugLogger: NSObject {
     @objc func GetMemoryLogString() -> String {
         return self.log.joined(separator: "\n\n")
     }
+    
+    @discardableResult
+    static func checkMemoryUsageUpperThreshold(thresholdBytes:mach_vm_size_t = 1024 * 1024 * 1024) -> Bool {
+        var taskInfo = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
+        
+        let kerr: kern_return_t = withUnsafeMutablePointer(to: &taskInfo) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+            }
+        }
+
+        if kerr == KERN_SUCCESS {
+            let usedBytes = taskInfo.resident_size
+            //let oneGB: UInt64 = 1024 * 1024 * 1024
+            
+            if usedBytes > thresholdBytes {
+                let usedMB = usedBytes / 1024 / 1024
+                print("⚠️ Memory Warning: Usage over 1GB (\(usedMB) MB)")
+                return true
+            }
+        } else {
+            print("Error with task_info(): " + String(cString: mach_error_string(kerr), encoding: .ascii)! )
+        }
+        return false
+    }
 }
 
 /*
