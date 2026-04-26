@@ -344,6 +344,7 @@ class StoryBulkWritePool {
 class NovelDownloader : NSObject {
     // 一度にダウンロードされる章の最大数
     static var maxCount = 50000
+    static var isBulkBasedStoredChapterSkipEnabled = true
     // ダウンロードを止めたい時に true を入れます。
     static var isDownloadStop : Bool {
         get {
@@ -407,11 +408,13 @@ class NovelDownloader : NSObject {
         RealmUtil.RealmBlock { (realm) -> Void in
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
                 // novel.m_lastChapterStoryID は無視して StoryBulk 側のデータを使う事にします
-                let (_, lastChapterNumber, overallLastStory) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
+                let storySequenceStatus = RealmStoryBulk.AnalyzeStorySequenceFor(realm: realm, novelID: novel.novelID)
+                let lastChapterNumber = storySequenceStatus.lastChapterNumber
+                let overallLastStory = storySequenceStatus.overallLastStory
                 // 途中で chapterNumber が歯抜けになっている場合には、その一つ前の chapter から読み込みを再開できるようにします。
                 // chapterNumber == 0 の場合のみ(初回キック時のみ)ギャップ検出による再開位置の変更を行います。
                 if chapterNumber == 0,
-                   let continuousLastStory = RealmStoryBulk.FindMissingOrLastPreviousStoryWith(realm: realm, novelID: novel.novelID),
+                   let continuousLastStory = storySequenceStatus.continuousLastStory,
                    let overallLastStory = overallLastStory,
                    continuousLastStory.chapterNumber < lastChapterNumber {
                     // continuousLastStory.chapterNumber + 1 以降のどこかで欠番が発生していると判断できるので、
@@ -471,11 +474,20 @@ class NovelDownloader : NSObject {
         RealmUtil.RealmBlock { realm in
             var nextChapter = chapterNumber
             var updatedState = state
-            while RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapter) != nil,
-                  let nextStory = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapter + 1),
-                  let nextUrl = URL(string: nextStory.url) {
-                nextChapter += 1
-                updatedState = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: updatedState.siteInfoArray, url: nextUrl, cookieString: updatedState.cookieString, previousContent: nil)
+            if isBulkBasedStoredChapterSkipEnabled {
+                if let skipResult = RealmStoryBulk.FindLastCachedStoryChapterWith(realm: realm, novelID: novelID, chapterNumber: nextChapter),
+                   skipResult.chapterNumber > nextChapter,
+                   let nextUrl = skipResult.storyURL {
+                    nextChapter = skipResult.chapterNumber
+                    updatedState = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: updatedState.siteInfoArray, url: nextUrl, cookieString: updatedState.cookieString, previousContent: nil)
+                }
+            }else{
+                while RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapter) != nil,
+                      let nextStory = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapter + 1),
+                      let nextUrl = URL(string: nextStory.url) {
+                    nextChapter += 1
+                    updatedState = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: updatedState.siteInfoArray, url: nextUrl, cookieString: updatedState.cookieString, previousContent: nil)
+                }
             }
             chapterNumber = nextChapter
             state = updatedState

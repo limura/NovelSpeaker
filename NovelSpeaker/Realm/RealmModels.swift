@@ -12,6 +12,82 @@ import CloudKit
 import UIKit
 import AVFoundation
 
+final class MemoryTraceLogger {
+    static let isEnabled = false
+    private static let queue = DispatchQueue(label: "com.limuraproducts.novelspeaker.memorytrace")
+    private static let formatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+    private static let logFileSizeLimit = 8 * 1024 * 1024
+
+    private static func logFileURL() -> URL? {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("NovelSpeakerMemoryTrace.log")
+    }
+
+    private static func ensureLogFileIfNeeded(url: URL) {
+        if FileManager.default.fileExists(atPath: url.path) == false {
+            FileManager.default.createFile(atPath: url.path, contents: nil)
+        }
+        if let attributes = try? FileManager.default.attributesOfItem(atPath: url.path),
+           let fileSize = attributes[.size] as? NSNumber,
+           fileSize.intValue > logFileSizeLimit {
+            try? Data().write(to: url, options: .atomic)
+        }
+    }
+
+    static func Add(_ message: String) {
+        guard isEnabled, let url = logFileURL() else { return }
+        queue.async {
+            ensureLogFileIfNeeded(url: url)
+            let timestamp = formatter.string(from: Date())
+            let line = "\(timestamp) \(message)\n"
+            guard let data = line.data(using: .utf8),
+                  let handle = try? FileHandle(forWritingTo: url) else { return }
+            defer { try? handle.close() }
+            do {
+                try handle.seekToEnd()
+                try handle.write(contentsOf: data)
+            } catch {
+                return
+            }
+        }
+    }
+    
+    // MARK: - 追加メソッド
+
+    /// 1. プログラム内から内容を文字列として読み出す
+    /// queueを使用するため、結果はコールバックで返します
+    static func loadLogString(completion: @escaping (String?) -> Void) {
+        guard let url = logFileURL() else {
+            completion(nil)
+            return
+        }
+        queue.async {
+            let content = try? String(contentsOf: url, encoding: .utf8)
+            DispatchQueue.main.async {
+                completion(content)
+            }
+        }
+    }
+
+    /// 2. ファイルとして取り出す（URLを取得する）
+    /// 書き込みキューの処理を待ってからURLを返すことで、最新の状態を保証します
+    static func getLogFileURL(completion: @escaping (URL?) -> Void) {
+        guard let url = logFileURL() else {
+            completion(nil)
+            return
+        }
+        // 現在キューに溜まっている書き込み処理が終わった後に実行される
+        queue.async {
+            DispatchQueue.main.async {
+                completion(url)
+            }
+        }
+    }
+}
+
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 16
     static let deleteRealmIfMigrationNeeded: Bool = false
@@ -943,7 +1019,9 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     
     static var bulkCount = 100
     static var storyCache:Story? = nil
-    static var bulkCache:RealmStoryBulk? = nil
+    static var isLoadStoryArrayCacheEnabled = false
+    static var bulkStoryArrayCacheID:String? = nil
+    static var bulkStoryArrayCache:[Story]? = nil
     
     // URL をファイル名として使いやすい文字列に変換します。具体的には、
     // 1. "/" を "%2F" に変換する(a)
@@ -1006,18 +1084,23 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     
     static func StoryZipedAssetToStoryArray(zipedData:Data) -> [Story]? {
         guard let data = NiftyUtility.decompress(data: zipedData) else {
+            MemoryTraceLogger.Add("StoryZipedAssetToStoryArray decompress_failed zipBytes=\(zipedData.count)")
             print("LoadStoryArray dataInflate() failed.")
             return nil
         }
+        MemoryTraceLogger.Add("StoryZipedAssetToStoryArray decode_begin zipBytes=\(zipedData.count) rawBytes=\(data.count)")
         guard let storyDict = try? JSONDecoder().decode([Story].self, from: data) else {
+            MemoryTraceLogger.Add("StoryZipedAssetToStoryArray decode_failed zipBytes=\(zipedData.count) rawBytes=\(data.count)")
             print("LoadStoryArray JSONDecoder.decode failed.")
             return nil
         }
+        MemoryTraceLogger.Add("StoryZipedAssetToStoryArray decode_end rawBytes=\(data.count) storyCount=\(storyDict.count)")
         return storyDict
     }
     
     static func StoryCreamAssetToStoryArray(asset:CreamAsset) -> [Story]? {
         guard let zipedData = asset.storedData() else {
+            MemoryTraceLogger.Add("StoryCreamAssetToStoryArray storedData_nil file=\(asset.filePath.lastPathComponent)")
             print("LoadStoryArray storedData() return nil. filePath: \(asset.filePath.absoluteString)")
             return nil
         }
@@ -1025,11 +1108,29 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     }
     
     func LoadStoryArray() -> [Story]? {
+        if RealmStoryBulk.isLoadStoryArrayCacheEnabled,
+           let cachedBulkID = RealmStoryBulk.bulkStoryArrayCacheID,
+           cachedBulkID == self.id,
+           let cachedStoryArray = RealmStoryBulk.bulkStoryArrayCache {
+            MemoryTraceLogger.Add("LoadStoryArray cache_hit bulkID=\(self.id) novelID=\(self.novelID) bulkChapter=\(self.chapterNumber) storyCount=\(cachedStoryArray.count)")
+            return cachedStoryArray
+        }
         guard let asset = self.storyListAsset else {
+            MemoryTraceLogger.Add("LoadStoryArray asset_nil bulkID=\(self.id) novelID=\(self.novelID) bulkChapter=\(self.chapterNumber)")
             print("LoadStoryArray storyListAsset is nil")
             return nil
         }
-        return RealmStoryBulk.StoryCreamAssetToStoryArray(asset: asset)
+        MemoryTraceLogger.Add("LoadStoryArray begin bulkID=\(self.id) novelID=\(self.novelID) bulkChapter=\(self.chapterNumber)")
+        guard let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: asset) else {
+            MemoryTraceLogger.Add("LoadStoryArray decode_failed bulkID=\(self.id) novelID=\(self.novelID) bulkChapter=\(self.chapterNumber)")
+            return nil
+        }
+        if RealmStoryBulk.isLoadStoryArrayCacheEnabled {
+            RealmStoryBulk.bulkStoryArrayCacheID = self.id
+            RealmStoryBulk.bulkStoryArrayCache = storyArray
+        }
+        MemoryTraceLogger.Add("LoadStoryArray end bulkID=\(self.id) novelID=\(self.novelID) bulkChapter=\(self.chapterNumber) storyCount=\(storyArray.count)")
+        return storyArray
     }
     func LoadCreamAssetBinary() -> Data? {
         guard let asset = self.storyListAsset else {
@@ -1211,7 +1312,10 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             let bulk:RealmStoryBulk
             if let originalBulk = bulkOptional {
                 bulk = originalBulk
-                if let cachedBulk = bulkCache, cachedBulk.id == bulk.id { bulkCache = nil }
+                if let cachedBulkID = bulkStoryArrayCacheID, cachedBulkID == bulk.id {
+                    bulkStoryArrayCacheID = nil
+                    bulkStoryArrayCache = nil
+                }
             }else{
                 bulk = RealmStoryBulk()
                 bulk.id = CreateUniqueBulkID(novelID: currentStory.novelID, chapterNumber: currentStory.chapterNumber)
@@ -1258,7 +1362,8 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
         // その古いものが優先されたStoryArrayでBulkを更新する
         let newStoryArray = newStorySet.keys.sorted().compactMap({newStorySet[$0]})
-        RealmStoryBulk.bulkCache = nil
+        RealmStoryBulk.bulkStoryArrayCacheID = nil
+        RealmStoryBulk.bulkStoryArrayCache = nil
         RealmStoryBulk.storyCache = nil
         targetBulk.OverrideStoryListAsset(storyArray: newStoryArray)
         realm.add(targetBulk, update: .modified)
@@ -1329,7 +1434,10 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             let bulk:RealmStoryBulk
             if let originalBulk = bulkOptional {
                 bulk = originalBulk
-                if let cachedBulk = bulkCache, cachedBulk.id == bulk.id { bulkCache = nil }
+                if let cachedBulkID = bulkStoryArrayCacheID, cachedBulkID == bulk.id {
+                    bulkStoryArrayCacheID = nil
+                    bulkStoryArrayCache = nil
+                }
             }else{
                 bulk = RealmStoryBulk()
                 bulk.id = CreateUniqueBulkID(novelID: novelID, chapterNumber: story.chapterNumber)
@@ -1353,7 +1461,10 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             storyCache = story
         }
         if let bulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: story.chapterNumber) {
-            if let cachedBulk = bulkCache, cachedBulk.id == bulk.id { bulkCache = nil }
+            if let cachedBulkID = bulkStoryArrayCacheID, cachedBulkID == bulk.id {
+                bulkStoryArrayCacheID = nil
+                bulkStoryArrayCache = nil
+            }
             var storyArray:[Story]
             if var storyArrayTmp = bulk.LoadStoryArray() {
                 let bulkIndex = (story.chapterNumber - 1) % bulkCount
@@ -1398,8 +1509,9 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         if let lastStory = storyArray.last, let cachedStory = storyCache, cachedStory.chapterNumber == lastStory.chapterNumber && cachedStory.novelID == lastStory.novelID {
             storyCache = nil
         }
-        if let cachedBulk = bulkCache, cachedBulk.id == lastStoryBulk.id {
-            bulkCache = nil
+        if let cachedBulkID = bulkStoryArrayCacheID, cachedBulkID == lastStoryBulk.id {
+            bulkStoryArrayCacheID = nil
+            bulkStoryArrayCache = nil
         }
         
         if storyArray.count <= 1 {
@@ -1417,9 +1529,8 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         if let cachedStory = storyCache, cachedStory.novelID == novelID {
             storyCache = nil
         }
-        if let cachedBulk = bulkCache, cachedBulk.novelID == novelID {
-            bulkCache = nil
-        }
+        bulkStoryArrayCacheID = nil
+        bulkStoryArrayCache = nil
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         realm.delete(storyBulkArray)
     }
@@ -1429,9 +1540,8 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         if let cachedStory = storyCache, cachedStory.novelID == novelID {
             storyCache = nil
         }
-        if let cachedBulk = bulkCache, cachedBulk.novelID == novelID {
-            bulkCache = nil
-        }
+        bulkStoryArrayCacheID = nil
+        bulkStoryArrayCache = nil
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         let chapterNumber = StoryIDToChapterNumber(storyID: storyID)
         let bulkChapterNumber = CalcBulkChapterNumber(chapterNumber: chapterNumber)
@@ -1604,10 +1714,8 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
         //realm.refresh()
         let chapterNumberBulk = CalcBulkChapterNumber(chapterNumber: chapterNumber)
-        if let cachedBulk = bulkCache, cachedBulk.chapterNumber == chapterNumberBulk && cachedBulk.novelID == novelID { return cachedBulk }
         //print("SearchStoryBulkWith(\"\(novelID)\", \"\(chapterNumber)\")")
-        guard let result = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@ AND chapterNumber = %@", novelID, chapterNumberBulk).first else { return nil }
-        return result
+        return realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@ AND chapterNumber = %@", novelID, chapterNumberBulk).first
     }
     
     static func SearchStoryBulkWith(realm:Realm, storyID:String) -> RealmStoryBulk? {
@@ -1631,17 +1739,58 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
         return storyArray.first(where: { $0.chapterNumber == chapterNumber })
     }
+
+    static func FindLastCachedStoryChapterWith(realm:Realm, novelID:String, chapterNumber:Int) -> (chapterNumber:Int, storyURL:URL?)? {
+        guard chapterNumber > 0 else { return nil }
+        MemoryTraceLogger.Add("FindLastCachedStoryChapterWith begin novelID=\(novelID) startChapter=\(chapterNumber)")
+        var currentChapter = chapterNumber
+        guard let firstBulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: currentChapter),
+              let firstStoryArray = firstBulk.LoadStoryArray(),
+              StoryBulkArrayToStory(storyArray: firstStoryArray, chapterNumber: currentChapter) != nil else {
+            MemoryTraceLogger.Add("FindLastCachedStoryChapterWith first_chapter_missing novelID=\(novelID) startChapter=\(chapterNumber)")
+            return nil
+        }
+        var currentBulk = firstBulk
+        var currentStoryArray = firstStoryArray
+        var currentStoryURL:URL? = nil
+
+        while true {
+            let nextChapter = currentChapter + 1
+            let nextBulkChapterNumber = CalcBulkChapterNumber(chapterNumber: nextChapter)
+            if currentBulk.chapterNumber != nextBulkChapterNumber {
+                guard let nextBulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: nextChapter),
+                      let nextStoryArray = nextBulk.LoadStoryArray() else {
+                    break
+                }
+                currentBulk = nextBulk
+                currentStoryArray = nextStoryArray
+            }
+            guard let nextStory = StoryBulkArrayToStory(storyArray: currentStoryArray, chapterNumber: nextChapter),
+                  let nextURL = URL(string: nextStory.url) else {
+                break
+            }
+            currentChapter = nextChapter
+            currentStoryURL = nextURL
+        }
+        let resultURL = currentStoryURL?.absoluteString ?? "nil"
+        MemoryTraceLogger.Add("FindLastCachedStoryChapterWith end novelID=\(novelID) startChapter=\(chapterNumber) endChapter=\(currentChapter) storyURL=\(resultURL)")
+        return (currentChapter, currentStoryURL)
+    }
     
     static func SearchStoryWith(realm:Realm, novelID:String, chapterNumber:Int) -> Story? {
         if let cachedStory = storyCache, cachedStory.novelID == novelID && cachedStory.chapterNumber == chapterNumber {
+            MemoryTraceLogger.Add("SearchStoryWith story_cache_hit novelID=\(novelID) chapter=\(chapterNumber)")
             return cachedStory
         }
+        MemoryTraceLogger.Add("SearchStoryWith begin novelID=\(novelID) chapter=\(chapterNumber)")
         guard let bulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber), let storyArray = bulk.LoadStoryArray() else { return nil }
         //print("bulk.LoadStoryArray(): storyArray.count \(storyArray.count)")
         if let story = StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber) {
             storyCache = story
+            MemoryTraceLogger.Add("SearchStoryWith hit novelID=\(novelID) chapter=\(chapterNumber) bulkID=\(bulk.id)")
             return story
         }
+        MemoryTraceLogger.Add("SearchStoryWith miss novelID=\(novelID) chapter=\(chapterNumber) bulkID=\(bulk.id)")
         return nil
     }
     static func SearchStoryWith(realm:Realm, storyID:String) -> Story? {
@@ -1649,44 +1798,55 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     }
 
     static func FindMissingOrLastPreviousStoryWith(realm:Realm, novelID: String) -> Story? {
-        guard let bulkList = SearchStoryBulkWith(realm: realm, novelID: novelID) else { return nil }
-        var lastStory:Story? = nil
+        return AnalyzeStorySequenceFor(realm: realm, novelID: novelID).continuousLastStory
+    }
+
+    static func AnalyzeStorySequenceFor(realm:Realm, novelID:String) -> (count: Int, lastChapterNumber: Int, overallLastStory: Story?, continuousLastStory: Story?) {
+        guard let bulkList = SearchStoryBulkWith(realm: realm, novelID: novelID) else {
+            return (0, -1, nil, nil)
+        }
+        var count:Int = 0
+        var lastChapterNumber:Int = -1
+        var overallLastStory:Story? = nil
+        var continuousLastStory:Story? = nil
+        var prevChapter:Int? = nil
+        var foundMissingChapter = false
+
         for bulk in bulkList {
-            guard let storyArray = bulk.LoadStoryArray() else {
-                return lastStory
-            }
-            var prevChapter = lastStory?.chapterNumber ?? (storyArray.first?.chapterNumber ?? 1) - 1
-            for story in storyArray {
-                if story.chapterNumber != prevChapter + 1 {
-                    return lastStory
+            var shouldStop = false
+            autoreleasepool {
+                guard let storyArray = bulk.LoadStoryArray() else {
+                    shouldStop = true
+                    return
                 }
-                prevChapter = story.chapterNumber
-                lastStory = story
+                count += storyArray.count
+                if let currentLastStory = storyArray.last {
+                    overallLastStory = currentLastStory
+                    lastChapterNumber = currentLastStory.chapterNumber
+                }
+                for story in storyArray {
+                    if let prevChapter = prevChapter, story.chapterNumber != prevChapter + 1 {
+                        foundMissingChapter = true
+                        shouldStop = true
+                        break
+                    }
+                    prevChapter = story.chapterNumber
+                    if foundMissingChapter == false {
+                        continuousLastStory = story
+                    }
+                }
+            }
+            if shouldStop {
+                break
             }
         }
-        return lastStory
+        return (count, lastChapterNumber, overallLastStory, continuousLastStory)
     }
     
     // 対象の小説について保存されている Story の個数と最後のStoryの chapterNumber のタプルを返します
     static func CountStoryFor(realm:Realm, novelID:String) -> (Int, Int, Story?) {
-        var count:Int = 0
-        var lastStoryChapterNumber:Int = -1
-        var lastStory:Story? = nil
-        let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
-        for storyBulk in storyBulkArray {
-            autoreleasepool {
-                if let storyArray = storyBulk.LoadStoryArray() {
-                    count += storyArray.count
-                    if let currentLastStory = storyArray.last {
-                        lastStory = currentLastStory
-                    }
-                    lastStoryChapterNumber = storyArray.last?.chapterNumber ?? lastStoryChapterNumber
-                }else{
-                    print("WARN: SearchAllStoryFor LoadStoryArray() failed in \(storyBulk.id)")
-                }
-            }
-        }
-        return (count, lastStoryChapterNumber, lastStory)
+        let result = AnalyzeStorySequenceFor(realm: realm, novelID: novelID)
+        return (result.count, result.lastChapterNumber, result.overallLastStory)
     }
     
     static func GetAllChapterNumberFor(realm: Realm, novelID:String) -> [[Int]] {
