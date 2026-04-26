@@ -3699,12 +3699,12 @@ class NovelSpeakerUtility: NSObject {
     private static func LoadPrivacyTrackingBlockRuleList(targetHostArray:[String], completion:@escaping (WKContentRuleList?)->Void) {
         let normalizedHostArray = NormalizePrivacyTrackingBlockTargetHostArray(targetHostArray)
         if normalizedHostArray.isEmpty {
-            print("PrivacyBlockTrace: compile skipped hosts=[]")
+            //print("PrivacyBlockTrace: compile skipped hosts=[]")
             completion(nil)
             return
         }
         if cachedPrivacyTrackingBlockTargetHostArray == normalizedHostArray, let ruleList = cachedPrivacyTrackingBlockRuleList {
-            print("PrivacyBlockTrace: compile cache_hit hosts=\(normalizedHostArray.joined(separator: ","))")
+            //print("PrivacyBlockTrace: compile cache_hit hosts=\(normalizedHostArray.joined(separator: ","))")
             completion(ruleList)
             return
         }
@@ -3719,7 +3719,7 @@ class NovelSpeakerUtility: NSObject {
                 }
                 cachedPrivacyTrackingBlockTargetHostArray = normalizedHostArray
                 cachedPrivacyTrackingBlockRuleList = ruleList
-                print("PrivacyBlockTrace: compile success hosts=\(normalizedHostArray.joined(separator: ","))")
+                //print("PrivacyBlockTrace: compile success hosts=\(normalizedHostArray.joined(separator: ","))")
                 completion(ruleList)
             }
         }
@@ -3782,7 +3782,7 @@ class NovelSpeakerUtility: NSObject {
         NiftyUtility.DispatchSyncMainQueue {
             configuration.userContentController.add(ruleList)
         }
-        print("PrivacyBlockTrace: apply success hosts=\(hosts)")
+        //print("PrivacyBlockTrace: apply success hosts=\(hosts)")
     }
 #endif
 
