@@ -961,9 +961,9 @@ class NovelDownloadQueue : NSObject {
         // 30秒で処理を終わらねばならないのでタイマを使います
         let deadlineTimeInterval = timeoutTimeInterval - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
 
-        // バックグラウンドで動く時は並列で動作しないようにします。
+        // バックグラウンドで動く時は並列で動作せず、たっぷり休養をとりながら動かすことにします
         let previousThrottleOverride = self.throttleOverride
-        self.throttleOverride = NovelDownloadThrottleParameters(maxSimultaneousDownloadCount: 1, queueDelayTime: max(self.throttleSettings.minimumQueueDelayTime, 1.05))
+        self.throttleOverride = NovelDownloadThrottleParameters(maxSimultaneousDownloadCount: 1, queueDelayTime: self.throttleSettings.criticalQueueDelayTime)
         // この処理は結構重いのでタイマの基準時間はこれよりも先にとっておきます
         self.addQueueArray(novelIDArray: targetNovelIDList)
         
