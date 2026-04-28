@@ -1281,12 +1281,21 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         let translation = gesture.translation(in: view)
 
         if gesture.state == .ended {
-            if translation.x > 80 {
+            let velocity = gesture.velocity(in: view) // 速度を取得
+            
+            // 判定の閾値（この数字を調整して好みの感度にできます）
+            let velocityThreshold: CGFloat = 400 // シュッと動かす速さ
+            let translationThreshold: CGFloat = 40 // 動かした距離
+
+            // 右方向へのスワイプ（前へ）：距離が足りているか、または速度が速いか
+            if translation.x > translationThreshold || velocity.x > velocityThreshold {
                 disableCurrentReadingStoryChangeFloatingButton()
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.storySpeaker.LoadPreviousChapter(realm: realm)
                 }
-            } else if translation.x < -80 {
+            }
+            // 左方向へのスワイプ（次へ）：距離が足りているか、または速度が速いか
+            else if translation.x < -translationThreshold || velocity.x < -velocityThreshold {
                 disableCurrentReadingStoryChangeFloatingButton()
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.storySpeaker.LoadNextChapter(realm: realm)
