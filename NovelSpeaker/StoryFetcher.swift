@@ -124,9 +124,17 @@ forceErrorElementIsAlive_ErrorMessage: \(forceErrorMessage ?? "nil")
     }
 }
 
-struct StorySiteInfo {
+struct StorySiteInfo : Identifiable {
+    let id: String
+    
+    enum Language : Int {
+        case Japanse = 0
+        case English = 1
+    }
+    let name: String?
     let title: String?
     let pageElement: String
+    let pageElementDict: [String: ([(lang:Language, title:String)], xpath:String)] // 辞書のkeyはIDとする。IDはSiteInfo側に書いてあるはず
     let subtitle: String?
     let firstPageLink: String?
     //let memo: String?
@@ -146,9 +154,58 @@ struct StorySiteInfo {
     let forceErrorMessageAndElement: String?
     let scrollTo: String?
     let isNeedWhitespaceSplitForTag: Bool
-    
-    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?) {
-        self.pageElement = pageElement
+    var novelImportEnableSettings: [String]
+
+    static func newPageElement2PageElelmentDict(newPageElement:String) -> [String: ([(lang:Language, title:String)], xpath:String)] {
+        if !newPageElement.contains(where: \.isNewline) {
+            return ["1": ([(.Japanse,"本文"), (.English, "main content")], newPageElement)]
+        }
+        var result:[String: ([(lang:Language, title:String)], xpath:String)] = [:]
+        for line in newPageElement.split(whereSeparator: \.isNewline) {
+            // "id:日本語/英語=xpath" という感じで入っているものとして、分割してタブルにする
+            let idAndNext = line.split(separator: ":", maxSplits: 1)
+            guard idAndNext.count == 2 else { continue }
+            let (id, next) = (String(idAndNext[0]), String(idAndNext[1]))
+            let langTitlesAndXPath = next.split(separator: "=", maxSplits: 1)
+            guard langTitlesAndXPath.count == 2 else { continue }
+            let (langTitles, xpath) = (String(langTitlesAndXPath[0]), String(langTitlesAndXPath[1]))
+            // langTitles は残念なことに languages の示す「順番」で入っていると仮定されている
+            let languages = [StorySiteInfo.Language.Japanse, StorySiteInfo.Language.English]
+            var langResult:[(lang:Language, title:String)] = []
+            for (index, value) in langTitles.split(separator: "/").enumerated() {
+                if index > languages.count - 1 {
+                    break
+                }
+                langResult.append((languages[index], String(value)))
+            }
+            result[id] = (langResult, xpath)
+        }
+        return result
+    }
+
+    init(id: String, name: String?, newPageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?, novelImportEnableSettings:[String] = []) {
+
+        func newPageElement2PageElement(newPageElement:String) -> String {
+            if !newPageElement.hasPrefix("\n") {
+                return newPageElement
+            }
+            var pageElementArray:[String] = []
+            for line in newPageElement.split(separator: "\n") {
+                // "=" より前のものは切り捨てると、Xpathが残る
+                let lineSeparated = line.split(separator: "=")
+                if lineSeparated.count < 2 {
+                    pageElementArray.append(String(line))
+                    continue
+                }
+                let xpath = lineSeparated[1]
+                pageElementArray.append(String(xpath))
+            }
+            return pageElementArray.joined(separator: "|")
+        }
+        self.id = id
+        self.name = name
+        self.pageElement = newPageElement2PageElement(newPageElement: newPageElement)
+        self.pageElementDict = StorySiteInfo.newPageElement2PageElelmentDict(newPageElement: newPageElement)
         if let urlString = url, let urlRegex = try? NSRegularExpression(pattern: urlString, options: []) {
             self.url = urlRegex
         }else{
@@ -180,6 +237,7 @@ struct StorySiteInfo {
         }else{
             self.isNeedWhitespaceSplitForTag = false
         }
+        self.novelImportEnableSettings = novelImportEnableSettings
     }
     
     var forceErrorMessage : String? {
@@ -210,8 +268,19 @@ struct StorySiteInfo {
         }
         return false
     }
-    
+    func createPageElementXpath(pageElementDict:[String: ([(lang:Language, title:String)], xpath:String)], novelImportEnableSettings:[String]) -> String {
+        //print("createPageElementXpath: \(novelImportEnableSettings), id: \(self.id), \(pageElementDict), pageElement: \(self.pageElement)")
+        if novelImportEnableSettings.count <= 0 { return self.pageElement }
+        let result = pageElementDict.filter({ (key, value) -> Bool in
+            novelImportEnableSettings.contains(key)
+        }).map { (key: String, value: ([(lang: Language, title: String)], xpath: String)) in
+            value.xpath
+        }
+        //print("result: \(result)")
+        return result.joined(separator: "|")
+    }
     func decodePageElement(xmlDocument:Kanna.XMLDocument) -> String {
+        let pageElement = createPageElementXpath(pageElementDict: self.pageElementDict, novelImportEnableSettings: self.novelImportEnableSettings)
         return NovelSpeakerUtility.NormalizeNewlineString(string: NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: pageElement, injectStyle: injectStyle).trimmingCharacters(in: .whitespacesAndNewlines) )
     }
     func decodeTitle(xmlDocument:Kanna.XMLDocument) -> String? {
@@ -274,6 +343,7 @@ extension StorySiteInfo: CustomStringConvertible {
         var result:String = ""
         result += "url: \"" + (url?.pattern ?? "nil")
         result += "\"\npageElement: \"" + pageElement
+        result += "\"\nnewPageElement: \"" + pageElementDict.map { "\($0.0): \($0.1)" }.joined(separator: ",")
         result += "\"\ntitle: \"" + (title ?? "nil")
         result += "\"\nsubtitle: \"" + (subtitle ?? "nil")
         result += "\"\nnextLink: \"" + (nextLink ?? "nil")
@@ -378,10 +448,13 @@ extension StorySiteInfo : Decodable {
     init(from decoder: Decoder) throws {
         let toplevelValue = try decoder.container(keyedBy: CodingKeys.self)
 
+        id = UUID.init().uuidString
+        name = "-"
         resourceUrl = try? toplevelValue.decode(String.self, forKey: .resource_url)
         let values = try toplevelValue.nestedContainer(keyedBy: NestedKeys.self, forKey: .data)
         title = try? values.decode(String.self, forKey: NestedKeys.title)
         pageElement = try values.decode(String.self, forKey: NestedKeys.pageElement)
+        pageElementDict = StorySiteInfo.newPageElement2PageElelmentDict(newPageElement: pageElement)
         subtitle = try? values.decode(String.self, forKey: NestedKeys.subtitle)
         firstPageLink = try? values.decode(String.self, forKey: NestedKeys.firstPageLink)
         nextLink = try? values.decode(String.self, forKey: NestedKeys.nextLink)
@@ -445,6 +518,7 @@ extension StorySiteInfo : Decodable {
         }else{
             isNeedWhitespaceSplitForTag = false
         }
+        self.novelImportEnableSettings = []
     }
 }
 
@@ -457,16 +531,16 @@ class StoryHtmlDecoder {
     var nextExpireDate:Date = Date(timeIntervalSince1970: 0)
     var siteInfoNowLoading:Bool = false
     
-    static let AutopagerizeSiteInfoJSONURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=tsv" // "http://wedata.net/databases/AutoPagerize/items.json"
+    static let AutopagerizeSiteInfoJSONURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=csv" // "http://wedata.net/databases/AutoPagerize/items.json"
     static let NovelSpeakerSiteInfoJSONURL = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
-    static let NovelSpeakerSiteInfoTSVURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=tsv"
+    static let NovelSpeakerSiteInfoTSVURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=csv"
 
     // シングルトンにしている。
     static let shared = StoryHtmlDecoder()
     private init(){
         fallbackSiteInfoArray = [
             //StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(@itemprop,'articleBody')"),
-            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil, isNeedWhitespaceSplitForTag: nil)
+            StorySiteInfo(id: UUID.init().uuidString, name: "default", newPageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil, isNeedWhitespaceSplitForTag: nil)
         ]
     }
     
@@ -527,7 +601,9 @@ class StoryHtmlDecoder {
             
             // StorySiteInfoの各プロパティにマッピング
             let storySiteInfo = StorySiteInfo(
-                pageElement: pageElement,
+                id: UUID.init().uuidString,
+                name: dict["name"],
+                newPageElement: pageElement,
                 url: dict["url"],
                 title: dict["title"],
                 subtitle: dict["subtitle"],
@@ -556,11 +632,131 @@ class StoryHtmlDecoder {
         }
         return result
     }
+    static func DecodeCSVSiteInfoData(data:Data, urlString:String) -> [StorySiteInfo]? {
+        // CSV には、"" で括って改行がくる場合を想定しないといけないです
+        func parseCSV(data: String) -> [[String]] {
+            var result: [[String]] = []
+            var currentField = ""
+            var currentRow: [String] = []
+            var inQuotes = false
+            
+            let characters = Array(data)
+            var i = 0
+            
+            while i < characters.count {
+                let char = characters[i]
+                
+                if inQuotes {
+                    if char == "\"" {
+                        // エスケープされた引用符("")か、閉じ引用符かチェック
+                        if i + 1 < characters.count && characters[i+1] == "\"" {
+                            currentField.append("\"")
+                            i += 1
+                        } else {
+                            inQuotes = false
+                        }
+                    } else {
+                        currentField.append(char)
+                    }
+                } else {
+                    switch char {
+                    case "\"":
+                        inQuotes = true
+                    case ",":
+                        currentRow.append(currentField)
+                        currentField = ""
+                    case "\n", "\r", "\r\n":
+                        // 改行コード（\r\n または \n）を処理
+                        if char == "\r" && i + 1 < characters.count && characters[i+1] == "\n" {
+                            i += 1
+                        }
+                        currentRow.append(currentField)
+                        result.append(currentRow)
+                        currentRow = []
+                        currentField = ""
+                    default:
+                        currentField.append(char)
+                    }
+                }
+                i += 1
+            }
+            
+            // 最後の行を追加
+            if !currentField.isEmpty || !currentRow.isEmpty {
+                currentRow.append(currentField)
+                result.append(currentRow)
+            }
+            
+            return result
+        }
+        let rows = parseCSV(data: String(decoding: data, as: UTF8.self))
+
+        // 1行目は表題として使用
+        guard let headers = rows.first else { return nil }
+        
+        let novelImportSettings = RealmUtil.RealmBlock { realm in
+            return RealmNovelImportSetting.GetAllObjectsWith(realm: realm)
+        }
+        
+        var result: [StorySiteInfo] = []
+        // 2行目以降はデータとして処理
+        for values in rows.dropFirst() {
+            var dict = [String: String]()
+            for (header, value) in zip(headers, values) {
+                dict[header] = value
+            }
+            guard let newPageElement = dict["newPageElement"] else { continue }
+            let siteInfoId = dict["id"]
+            let importTargets:[String]
+            if let siteInfoId = siteInfoId, let novelImportSetting = novelImportSettings?.first(where: { $0.id == siteInfoId }) {
+                importTargets = Array(novelImportSetting.targets)
+            }else{
+                importTargets = []
+            }
+            
+            // StorySiteInfoの各プロパティにマッピング
+            let storySiteInfo = StorySiteInfo(
+                id: (siteInfoId ?? UUID.init().uuidString) + ":" + urlString,
+                name: dict["name"],
+                newPageElement: newPageElement,
+                url: dict["url"],
+                title: dict["title"],
+                subtitle: dict["subtitle"],
+                firstPageLink: dict["firstPageLink"],
+                nextLink: dict["nextLink"],
+                tag: dict["tag"],
+                author: dict["author"],
+                isNeedHeadless: dict["isNeedHeadless"],
+                injectStyle: dict["injectStyle"],
+                nextButton: dict["nextButton"],
+                firstPageButton: dict["firstPageButton"],
+                waitSecondInHeadless: Double(dict["waitSecondInHeadless"] ?? "0"),
+                forceClickButton: dict["forceClickButton"],
+                resourceUrl: dict["resourceUrl"],
+                overrideUserAgent: dict["overrideUserAgent"],
+                forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
+                scrollTo: dict["scrollTo"],
+                isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"],
+                novelImportEnableSettings: importTargets,
+            )
+            //print("add StorySiteInfo: \(storySiteInfo)")
+            result.append(storySiteInfo)
+        }
+        if result.count <= 0 {
+            //print("result.count <= 0: \(result.count), lines: \(lines)")
+            return nil
+        }
+        return result
+    }
     
-    static func DecodeSiteInfoData(data:Data) -> [StorySiteInfo]? {
+    static func DecodeSiteInfoData(data:Data, urlString:String) -> [StorySiteInfo]? {
         // とりあえずJSONとしてデコードしようとしてみます。
         if let result = try? JSONDecoder().decode([StorySiteInfo].self, from: data), result.count > 0 {
             return result
+        }
+        // 末尾が csv なら CSV とみなします
+        if urlString.lowercased().hasSuffix("csv") {
+            return DecodeCSVSiteInfoData(data: data, urlString:urlString)
         }
         // 駄目ならTSVとしてデコードしようとしてみます。
         return DecodeTSVSiteInfoData(data: data)
@@ -574,7 +770,7 @@ class StoryHtmlDecoder {
         NiftyUtility.httpGet(url: url) {
             content,
             headerCharset in
-            guard DecodeSiteInfoData(data: content) != nil else {
+            guard DecodeSiteInfoData(data: content, urlString: urlString) != nil else {
                 completion(
                     NSLocalizedString(
                         "StoryHtmlDecoder_testSiteInfoURLValid_Error_GetURLFailed",
@@ -761,11 +957,11 @@ class StoryHtmlDecoder {
                     func decodeSiteInfoArrayData(data: Data, cachedData: Data?) -> ([StorySiteInfo]?, Bool) {
                         var isValidData = false
                         var siteInfoArray:[StorySiteInfo]
-                        if let httpSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: data) {
+                        if let httpSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: data, urlString: targetURL.absoluteString) {
                             siteInfoArray = httpSiteInfoArray
                             isValidData = true
                         } else {
-                            guard let cachedData = cachedFileData, let cachedSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: cachedData) else {
+                            guard let cachedData = cachedFileData, let cachedSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: cachedData, urlString: targetURL.absoluteString) else {
                                 let firstLine = String(data: data, encoding: .utf8)?.getFirstLines(lineCount: 3, maxCharacterCount: 100)
                                 AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData", comment: "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSONまたはTSV形式ではないようです。"), appendix: [
                                     "targetURL": targetURL.absoluteString,
@@ -802,7 +998,7 @@ class StoryHtmlDecoder {
                     siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
                     return isValidData
                 }) { (err) in
-                    guard let cachedFileData = cachedFileData, let cachedSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: cachedFileData) else {
+                    guard let cachedFileData = cachedFileData, let cachedSiteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: cachedFileData, urlString: targetURL.absoluteString) else {
                         let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "SiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nもし、「設定タブ」→「内部データ参照用URLの設定」で設定値を書き換えている場合、それらの値が正しいものかどうかを再度確認してください。それでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。")
                         AppInformationLogger.AddLog(message: message, appendix: [
                             "targetURL": targetURL.absoluteString,
@@ -840,6 +1036,18 @@ class StoryHtmlDecoder {
             siteInfoFetchAndUpdate(index: 0, targetURLArray: loadTargetUrls, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
         }
     }
+    
+    // 特定 ID の StorySiteInfo.novelImportEnableSettings を書き換えます
+    func updateNovelImportEnableSettings(id: String, targetKeys: [String]) {
+        for i in self.siteInfoArrayArray.indices {
+            for j in self.siteInfoArrayArray[i].indices {
+                if self.siteInfoArrayArray[i][j].id == id {
+                    self.siteInfoArrayArray[i][j].novelImportEnableSettings = targetKeys
+                    break
+                }
+            }
+        }
+    }
 }
 
 class StoryFetcher {
@@ -873,7 +1081,7 @@ class StoryFetcher {
         }
         //print("-----\nsiteInfoArray.count: \(currentState.siteInfoArray.count)")
         //for (n, siteInfo) in currentState.siteInfoArray.enumerated() {
-        //    print("\(n): \(siteInfo.resourceUrl ?? "nil")")
+        //    print("\(n): \(siteInfo.id), \(siteInfo.pageElementDict.count), \(siteInfo.novelImportEnableSettings), \(siteInfo.url?.pattern ?? "nil"), \(siteInfo.url?.pattern.count ?? -1)")
         //}
         //print("-----")
         

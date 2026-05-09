@@ -89,7 +89,7 @@ final class MemoryTraceLogger {
 }
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 16
+    static let currentSchemaVersion : UInt64 = 17
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -3615,3 +3615,40 @@ extension RealmBookmark: CKRecordRecoverable {
 }
 extension RealmBookmark: CanWriteIsDeleted {
 }
+
+@objc final class RealmNovelImportSetting: Object, ObjectKeyIdentifiable {
+    @objc dynamic var id = "" // primary key. SiteInfo の id または、NovelID をこれに当てます。
+    // SiteInfo の ID は "数字:SiteInfoの取得先URL" という文字列なので、NovelID とは被らないはずです。
+    // また、URLは URL.absoluteString で取り出しているとすれば、日本語などは %xx 形式でエンコードされるはずです
+    @objc dynamic var isDeleted: Bool = false
+    @objc dynamic var createdDate = Date()
+    let targets = List<String>()
+    
+    static func GetNovelImportSetting(realm: Realm, siteInfoId: String) -> RealmNovelImportSetting? {
+        return realm.object(ofType: RealmNovelImportSetting.self, forPrimaryKey: siteInfoId)
+    }
+
+    static func GetAllObjectsWith(realm: Realm) -> Results<RealmNovelImportSetting>? {
+        return realm.objects(RealmNovelImportSetting.self).filter("isDeleted = false")
+    }
+    
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
+    }
+    
+    override class func primaryKey() -> String? {
+        return "id"
+    }
+
+    override static func indexedProperties() -> [String] {
+        return ["id"]
+    }
+}
+extension RealmNovelImportSetting: CKRecordConvertible {
+}
+extension RealmNovelImportSetting: CKRecordRecoverable {
+}
+extension RealmNovelImportSetting: CanWriteIsDeleted {
+}
+
+

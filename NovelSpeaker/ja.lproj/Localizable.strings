@@ -206,6 +206,7 @@
 "SettingTableViewController_overrideTabBarTraitsRow" = "タブの表示を画面下部にする(非推奨です。また、アプリ再起動後に適用されます)";
 "SettingTableViewController_IsCarPlayModeToVoicePrompt" = "CarPlay接続時に音声モードを変える(音声モードを変更することで音声がクリアになるかもしれません。ただし、音声モード変更時は一部の機能が制限されます)";
 "SettingsViewController_BarButtonSpacing" = "画面右上のボタン群の間隔";
+"SettingTableViewController_NovelImportSetting_Title" = "Webサイト毎の取り込み対象を指定する";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";
@@ -957,6 +958,10 @@
 "RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidNovelID" = "不正なNovelIDが指定されています";
 "RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidContent" = "本文の中身がありませんでした";
 "RealmNovel_AddNewNovelWithFirstStoryState_ERROR_NovelAlreadyAlive" = "本棚に同じ小説が登録されています(URLが同じ場合はタイトルが変わっても同じ小説と判定されます)";
+
+"NovelImportSettingTargetSelectionView_info_text" = "何も選択されていない場合はすべてが選択されたものとして動作します";
+"NovelImportSettingSwiftUIView_selected_label" = "%d 選択中";
+"NovelImportSettingSwiftUIView_title" = "Webサイト毎の取込設定";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

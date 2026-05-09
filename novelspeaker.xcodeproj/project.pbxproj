@@ -35,6 +35,7 @@
 		210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
 		21143D8025B2DC390078C2BA /* DownloadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21143D7F25B2DC390078C2BA /* DownloadTest.swift */; };
+		211B3E962FA0CAE300823EE3 /* NovelImportSettingSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 211B3E952FA0CABF00823EE3 /* NovelImportSettingSwiftUIView.swift */; };
 		212137CE24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
 		212137CF24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
 		21220290266B6FAD008EF6AF /* WebSpeechViewTool_Inject.js in Resources */ = {isa = PBXBuildFile; fileRef = 2122028F266B6FAD008EF6AF /* WebSpeechViewTool_Inject.js */; };
@@ -351,6 +352,7 @@
 		21143D7F25B2DC390078C2BA /* DownloadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTest.swift; sourceTree = "<group>"; };
 		2117707C28DD9A4A00305D97 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/MainInterface.strings; sourceTree = "<group>"; };
 		2117707E28DD9A5500305D97 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MainInterface.strings; sourceTree = "<group>"; };
+		211B3E952FA0CABF00823EE3 /* NovelImportSettingSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelImportSettingSwiftUIView.swift; sourceTree = "<group>"; };
 		212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotsFileTool.swift; sourceTree = "<group>"; };
 		2122028F266B6FAD008EF6AF /* WebSpeechViewTool_Inject.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = WebSpeechViewTool_Inject.js; path = Resources/WebSpeechViewTool_Inject.js; sourceTree = "<group>"; };
 		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
@@ -1085,6 +1087,7 @@
 				212F6175258723C200822737 /* NovelLikeOrderSettingViewController.swift */,
 				21E26FEA260E066F009018B6 /* SafeModeViewController.swift */,
 				215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */,
+				211B3E952FA0CABF00823EE3 /* NovelImportSettingSwiftUIView.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1686,6 +1689,7 @@
 				21C8A9662CA825A700F6CD4B /* FloatingWindowViewController.swift in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21C52BDE2626BDD800EE4768 /* EurekaPopupViewController.swift in Sources */,
+				211B3E962FA0CAE300823EE3 /* NovelImportSettingSwiftUIView.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
 				21E6B41E246D55DC00605874 /* HeadlessHTTPClient.swift in Sources */,
 				218E81FC251997E30041A1B5 /* RemoteDataURLSettingViewController.swift in Sources */,

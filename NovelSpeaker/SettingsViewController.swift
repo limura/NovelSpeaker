@@ -12,6 +12,7 @@ import Eureka
 import RealmSwift
 import UniformTypeIdentifiers
 import AVFAudio
+import SwiftUI
 
 class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate, AppInformationAliveDelegate, UIDocumentBrowserViewControllerDelegate, UIDocumentPickerDelegate {
     var m_NarouContentCacheData:NarouContentCacheData? = nil
@@ -1331,6 +1332,28 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NovelSpeakerUtility.SetIsCarPlayModeToVoicePrompt(IsCarPlayModeToVoicePrompt: value)
                 }
             })
+            section
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_NovelImportSetting_Title", comment: "Webサイト毎の取り込み対象を指定する")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (buttonCellOf, button) in
+                let siteInfoArrayArray = StoryHtmlDecoder.shared.siteInfoArrayArray.flatMap { $0 }
+                let siteInfoArray = siteInfoArrayArray.filter{
+                    $0.pageElementDict.count > 1
+                }
+                let uniqueSiteInfoArray = Dictionary(siteInfoArray.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.map { $0 }
+                let swiftUIView = RealmUtil.RealmBlock { realm in
+                    return NovelImportSettingSwiftUIView(sites: uniqueSiteInfoArray).environment(\.realmConfiguration, realm.configuration)
+                }
+                let hostingController = UIHostingController(rootView: swiftUIView)
+                self.navigationController?.pushViewController(hostingController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+
 
             #if false
             /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
