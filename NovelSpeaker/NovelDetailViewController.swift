@@ -459,25 +459,51 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
             }
             if novel.type == .URL {
-                settingSection <<< ButtonRow() {
+                // この小説のURLにマッチする SiteInfo の中に「取り込み対象を選べる(pageElementが複数)」ものがあるか。
+                // 無い場合は選択しても空画面になるだけなので、ボタンを無効化(グレーアウト)する。
+                let novelURLString = novel.url
+                func hasSelectableImportTargets() -> Bool {
+                    return StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: novelURLString).contains { $0.pageElementDict.count > 1 }
+                }
+                let importSettingRow = ButtonRow() {
                     $0.title = NSLocalizedString("NovelDetailViewController_NovelImportSettingButtonTitle", comment: "この小説の取り込み対象を指定する")
                     $0.cell.textLabel?.numberOfLines = 0
+                    $0.disabled = Condition(booleanLiteral: !hasSelectableImportTargets())
                 }.onCellSelection({ (_, _) in
-                    let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: novel.url).filter {
+                    let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: novelURLString).filter {
                         $0.pageElementDict.count > 1
                     }
                     let uniqueSiteInfoArray = Dictionary(siteInfoArray.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.map { $0 }
+                    guard !uniqueSiteInfoArray.isEmpty else { return }
                     let swiftUIView = RealmUtil.RealmBlock { realm in
                         return NovelImportSettingSwiftUIView(sites: uniqueSiteInfoArray, scopeType: .novel, novelID: self.novelID).environment(\.realmConfiguration, realm.configuration)
                     }
                     let hostingController = UIHostingController(rootView: swiftUIView)
                     self.navigationController?.pushViewController(hostingController, animated: true)
-                }).cellUpdate({ (cell, button) in
+                }).cellUpdate({ (cell, row) in
                     cell.textLabel?.textAlignment = .left
-                    cell.accessoryType = .disclosureIndicator
+                    if row.isDisabled {
+                        cell.accessoryType = .none
+                        cell.textLabel?.textColor = .tertiaryLabel
+                    } else {
+                        cell.accessoryType = .disclosureIndicator
+                        cell.textLabel?.textColor = nil
+                    }
                     cell.editingAccessoryType = cell.accessoryType
-                    cell.textLabel?.textColor = nil
                 })
+                settingSection <<< importSettingRow
+                // 詳細画面を開いた時点で SiteInfo がまだ読み込まれていない場合があるので、
+                // 読み込み完了後にボタンの有効/無効を取り直す。
+                if StoryHtmlDecoder.shared.siteInfoArrayArray.isEmpty {
+                    StoryHtmlDecoder.shared.WaitLoadSiteInfoReady { [weak importSettingRow] _ in
+                        DispatchQueue.main.async {
+                            guard let importSettingRow = importSettingRow else { return }
+                            importSettingRow.disabled = Condition(booleanLiteral: !hasSelectableImportTargets())
+                            importSettingRow.evaluateDisabled()
+                            importSettingRow.updateCell()
+                        }
+                    }
+                }
                 settingSection <<< SwitchRow() {
                     $0.title = NSLocalizedString("NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle", comment: "この小説の更新確認を行わない")
                     $0.cell.textLabel?.numberOfLines = 0
