@@ -216,7 +216,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                             if let filterTextField = dialog.view.viewWithTag(100) as? UITextField, let newString = filterTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), RealmUtil.RealmBlock(block: { (realm) -> Bool in
                                 guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novel.novelID) else { return false }
                                 RealmUtil.WriteWith(realm: realm) { (realm) in
-                                    novel.title = newString
+                                    novel.title = NovelSpeakerUtility.NormalizeNFC(newString)
                                     realm.add(novel)
                                 }
                                 return true
@@ -261,7 +261,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                                 if let filterTextField = dialog.view.viewWithTag(100) as? UITextField, let newString = filterTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), RealmUtil.RealmBlock(block: { (realm) -> Bool in
                                     guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novel.novelID) else { return false }
                                     RealmUtil.WriteWith(realm: realm) { (realm) in
-                                        novel.writer = newString
+                                        novel.writer = NovelSpeakerUtility.NormalizeNFC(newString)
                                         realm.add(novel)
                                     }
                                     return true

@@ -2155,7 +2155,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         return RealmUtil.RealmBlock { (realm) -> String in
             let novel = RealmNovel()
             novel.type = .UserCreated
-            novel.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            novel.title = NovelSpeakerUtility.NormalizeNFC(title.trimmingCharacters(in: .whitespacesAndNewlines))
             novel.lastReadDate = Date(timeIntervalSince1970: 1)
             novel.lastDownloadDate = Date()
             var story = Story()
@@ -2175,7 +2175,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         return RealmUtil.RealmBlock { (realm) -> String in
             let novel = RealmNovel()
             novel.type = .UserCreated
-            novel.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            novel.title = NovelSpeakerUtility.NormalizeNFC(title.trimmingCharacters(in: .whitespacesAndNewlines))
             novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: contents.count)
             var chapterNumber = 1
             RealmUtil.WriteWith(realm: realm) { realm in
@@ -2224,9 +2224,9 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             let novel = RealmNovel()
             novel.novelID = novelID
             novel.url = novelID
-            novel.title = (state.title ?? novelID).trimmingCharacters(in: .whitespacesAndNewlines)
+            novel.title = NovelSpeakerUtility.NormalizeNFC((state.title ?? novelID).trimmingCharacters(in: .whitespacesAndNewlines))
             if let writer = state.author {
-                novel.writer = writer
+                novel.writer = NovelSpeakerUtility.NormalizeNFC(writer)
             }
             novel.type = .URL
             novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)

@@ -18,6 +18,54 @@ class NovelSpeakerUtility: NSObject {
     static let privacyPolicyURL = URL(string: "https://limura.github.io/NovelSpeaker/PrivacyPolicy.txt")
     static let privacyPolicyKey = "NovelSpeaker_ReadedPrivacyPolicy"
     static let UserCreatedContentPrefix = "https://novelspeaker.example.com/UserCreatedContent/"
+
+    // MARK: - NFC正規化 (本棚検索の NFD/NFC 不一致対策)
+    static let normalizeNovelTitleWriterToNFCDoneKey = "NovelSpeakerUtility_NormalizeNovelTitleWriterToNFCDone"
+
+    /// 文字列を NFC(precomposed) に正規化する。
+    /// Realm の CONTAINS はバイト単位の比較なので、保存文字列が NFD だと NFC で打った検索語に一致しない。その対策。
+    /// NFKC/NFKD は使わない(「①→1」「㌔→キロ」等、見た目・意味が変わってしまうため)。
+    static func NormalizeNFC(_ string: String) -> String {
+        return string.precomposedStringWithCanonicalMapping
+    }
+
+    /// 既存の RealmNovel の title / writer を NFC に正規化する。
+    /// 変化するレコードだけ書き込む(無駄な iCloud 同期を避けるため必須)。
+    /// title/writer は格納フィールドで主キーは novelID なので、変更しても Story/Bulk の紐付けは壊れない。
+    static func NormalizeExistingNovelTitlesAndWritersToNFC() {
+        RealmUtil.RealmBlock { realm in
+            guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
+            // 注意: Swift の String 比較は正準等価で NFD/NFC を区別しない。
+            // Realm の CONTAINS はバイト比較なので、ここも UTF-8 バイト列で差分を判定する。
+            let targets = novels.filter { novel in
+                !NormalizeNFC(novel.title).utf8.elementsEqual(novel.title.utf8)
+                    || !NormalizeNFC(novel.writer).utf8.elementsEqual(novel.writer.utf8)
+            }
+            guard !targets.isEmpty else { return }
+            RealmUtil.WriteWith(realm: realm) { _ in
+                for novel in targets {
+                    let nfcTitle = NormalizeNFC(novel.title)
+                    if !nfcTitle.utf8.elementsEqual(novel.title.utf8) { novel.title = nfcTitle }
+                    let nfcWriter = NormalizeNFC(novel.writer)
+                    if !nfcWriter.utf8.elementsEqual(novel.writer.utf8) { novel.writer = nfcWriter }
+                }
+            }
+        }
+    }
+
+    /// 起動時に生涯1回だけ、既存 RealmNovel の title/writer を NFC 正規化する。
+    /// UserDefaults のフラグでガード(端末ごと = 各端末が自分のローカル Realm を掃除する。iCloud 非同期で正しい)。
+    /// メインスレッドを避けてバックグラウンドで実行する。
+    static func NormalizeExistingNovelTitlesAndWritersToNFCIfNeeded() {
+        if NiftyUtility.isTesting() { return }
+        let defaults = UserDefaults.standard
+        if defaults.bool(forKey: normalizeNovelTitleWriterToNFCDoneKey) { return }
+        DispatchQueue.global(qos: .utility).async {
+            NormalizeExistingNovelTitlesAndWritersToNFC()
+            defaults.set(true, forKey: normalizeNovelTitleWriterToNFCDoneKey)
+        }
+    }
+
     static func GetReadedPrivacyPolicy() -> String {
         let defaults = UserDefaults.standard
         defaults.register(defaults: [privacyPolicyKey : ""])
@@ -868,10 +916,10 @@ class NovelSpeakerUtility: NSObject {
             realmNovel.url = urlString
             realmNovel.type = .URL
             if let writer = novel.object(forKey: "writer") as? String {
-                realmNovel.writer = writer
+                realmNovel.writer = NormalizeNFC(writer)
             }
             if let title = novel.object(forKey: "title") as? String {
-                realmNovel.title = title
+                realmNovel.title = NormalizeNFC(title)
             }
             realm.add(realmNovel, update: .modified)
             if let keyword = novel.object(forKey: "keyword") as? String {
@@ -972,13 +1020,13 @@ class NovelSpeakerUtility: NSObject {
                 }
             }
             if let title = novel.object(forKey: "title") as? String {
-                realmNovel.title = title
+                realmNovel.title = NormalizeNFC(title)
             }
             if let secret = novel.object(forKey: "secret") as? String, let urlSecret = NiftyUtility.stringDecrypt(string: secret, key: url) {
                 addNewCookie(urlSecret: urlSecret, urlString: novelID, lastUpdateDate: realmNovel.lastDownloadDate)
             }
             if let author = novel.object(forKey: "author") as? String {
-                realmNovel.writer = author
+                realmNovel.writer = NormalizeNFC(author)
             }
             if currentReadingChapterNumber > 0 {
                 realmNovel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: currentReadingChapterNumber)
@@ -1043,7 +1091,7 @@ class NovelSpeakerUtility: NSObject {
                 realmNovel.novelID = novelID
                 realmNovel.type = .UserCreated
             }
-            realmNovel.title = title
+            realmNovel.title = NormalizeNFC(title)
             realm.add(realmNovel, update: .modified)
 
             var no = 0
@@ -1633,10 +1681,10 @@ class NovelSpeakerUtility: NSObject {
                 }
                 novel.type = NovelType(rawValue: type.intValue) ?? NovelType.UserCreated
                 if let writer = novelDic.object(forKey: "writer") as? String {
-                    novel.writer = writer
+                    novel.writer = NormalizeNFC(writer)
                 }
                 if let title = novelDic.object(forKey: "title") as? String {
-                    novel.title = title
+                    novel.title = NormalizeNFC(title)
                 }
                 if let url = novelDic.object(forKey: "url") as? String {
                     novel.url = url
@@ -1765,10 +1813,10 @@ class NovelSpeakerUtility: NSObject {
                 }
                 novel.type = NovelType(rawValue: type.intValue) ?? NovelType.UserCreated
                 if let writer = novelDic.object(forKey: "writer") as? String {
-                    novel.writer = writer
+                    novel.writer = NormalizeNFC(writer)
                 }
                 if let title = novelDic.object(forKey: "title") as? String {
-                    novel.title = title
+                    novel.title = NormalizeNFC(title)
                 }
                 if let url = novelDic.object(forKey: "url") as? String {
                     novel.url = url

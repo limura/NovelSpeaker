@@ -61,6 +61,84 @@ class RealmTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+
+    // MARK: - NFC正規化
+
+    func testNormalizeNFCConvertsNFDToNFC() {
+        let nfc = "\u{3073}"          // び (precomposed / NFC)
+        let nfd = "\u{3072}\u{3099}"  // ひ + 濁点 (decomposed / NFD)
+        // Swift の String 比較は正準等価なので == では区別できない(前提確認)。
+        XCTAssertEqual(nfc, nfd, "Swift String としては正準等価で等しいはず")
+        // しかし UTF-8 バイト列は異なる。これが Realm の CONTAINS(バイト比較)で一致しない原因。
+        XCTAssertNotEqual(Array(nfc.utf8), Array(nfd.utf8), "NFC と NFD は UTF-8 バイト列が異なるはず")
+
+        let normalized = NovelSpeakerUtility.NormalizeNFC(nfd)
+        XCTAssertEqual(Array(normalized.utf8), Array(nfc.utf8), "NormalizeNFC で NFC のバイト列になるはず")
+        // 既に NFC / ASCII のものは不変
+        XCTAssertEqual(Array(NovelSpeakerUtility.NormalizeNFC(nfc).utf8), Array(nfc.utf8))
+        XCTAssertEqual(NovelSpeakerUtility.NormalizeNFC("abc 123"), "abc 123")
+    }
+
+    func testNormalizeExistingNovelTitlesAndWritersToNFC() {
+        let nfdNovelID = "_NFCMigrationTest_NFD"
+        let nfcNovelID = "_NFCMigrationTest_NFC"
+        // 花びら / ピーチ
+        let nfcTitle = "\u{82B1}\u{3073}\u{3089}"            // 花 + び(NFC) + ら
+        let nfdTitle = "\u{82B1}\u{3072}\u{3099}\u{3089}"    // 花 + ひ+濁点(NFD) + ら
+        let nfcWriter = "\u{30D4}\u{30FC}\u{30C1}"           // ピ(NFC) + ー + チ
+        let nfdWriter = "\u{30D2}\u{309A}\u{30FC}\u{30C1}"   // ヒ+半濁点(NFD) + ー + チ
+
+        func cleanup() {
+            RealmUtil.Write { realm in
+                for id in [nfdNovelID, nfcNovelID] {
+                    if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: id) {
+                        novel.delete(realm: realm)
+                    }
+                }
+            }
+        }
+        cleanup()
+        defer { cleanup() }
+
+        // production の正規化を通さず、NFD/NFC をそのまま保存する
+        RealmUtil.Write { realm in
+            let nfdNovel = RealmNovel()
+            nfdNovel.novelID = nfdNovelID
+            nfdNovel.type = .UserCreated
+            nfdNovel.title = nfdTitle
+            nfdNovel.writer = nfdWriter
+            realm.add(nfdNovel, update: .modified)
+            let nfcNovel = RealmNovel()
+            nfcNovel.novelID = nfcNovelID
+            nfcNovel.type = .UserCreated
+            nfcNovel.title = nfcTitle
+            nfcNovel.writer = nfcWriter
+            realm.add(nfcNovel, update: .modified)
+        }
+        // 前提確認: NFD がそのままのバイト列で保存されている
+        RealmUtil.RealmBlock { realm in
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: nfdNovelID) else {
+                XCTFail("NFD test novel not found")
+                return
+            }
+            XCTAssertEqual(Array(novel.title.utf8), Array(nfdTitle.utf8), "前提: NFD title がそのまま保存されている")
+            XCTAssertEqual(Array(novel.writer.utf8), Array(nfdWriter.utf8), "前提: NFD writer がそのまま保存されている")
+        }
+
+        NovelSpeakerUtility.NormalizeExistingNovelTitlesAndWritersToNFC()
+
+        RealmUtil.RealmBlock { realm in
+            guard let nfdNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: nfdNovelID),
+                  let nfcNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: nfcNovelID) else {
+                XCTFail("test novel not found after migration")
+                return
+            }
+            XCTAssertEqual(Array(nfdNovel.title.utf8), Array(nfcTitle.utf8), "NFD title が NFC のバイト列に正規化されているはず")
+            XCTAssertEqual(Array(nfdNovel.writer.utf8), Array(nfcWriter.utf8), "NFD writer が NFC のバイト列に正規化されているはず")
+            XCTAssertEqual(Array(nfcNovel.title.utf8), Array(nfcTitle.utf8), "もともと NFC の title は不変のはず")
+            XCTAssertEqual(Array(nfcNovel.writer.utf8), Array(nfcWriter.utf8), "もともと NFC の writer は不変のはず")
+        }
+    }
     
     func testBase64Test() {
         let okText = "aG9nZQ==" // "hoge"
