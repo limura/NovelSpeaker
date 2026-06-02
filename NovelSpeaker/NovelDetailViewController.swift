@@ -9,6 +9,7 @@
 import UIKit
 import Eureka
 import RealmSwift
+import SwiftUI
 
 class NovelDetailViewController: FormViewController, RealmObserverResetDelegate {
     public var novelID = ""
@@ -458,6 +459,25 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
             }
             if novel.type == .URL {
+                settingSection <<< ButtonRow() {
+                    $0.title = NSLocalizedString("NovelDetailViewController_NovelImportSettingButtonTitle", comment: "この小説の取り込み対象を指定する")
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ (_, _) in
+                    let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: novel.url).filter {
+                        $0.pageElementDict.count > 1
+                    }
+                    let uniqueSiteInfoArray = Dictionary(siteInfoArray.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.map { $0 }
+                    let swiftUIView = RealmUtil.RealmBlock { realm in
+                        return NovelImportSettingSwiftUIView(sites: uniqueSiteInfoArray, scopeType: .novel, novelID: self.novelID).environment(\.realmConfiguration, realm.configuration)
+                    }
+                    let hostingController = UIHostingController(rootView: swiftUIView)
+                    self.navigationController?.pushViewController(hostingController, animated: true)
+                }).cellUpdate({ (cell, button) in
+                    cell.textLabel?.textAlignment = .left
+                    cell.accessoryType = .disclosureIndicator
+                    cell.editingAccessoryType = cell.accessoryType
+                    cell.textLabel?.textColor = nil
+                })
                 settingSection <<< SwitchRow() {
                     $0.title = NSLocalizedString("NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle", comment: "この小説の更新確認を行わない")
                     $0.cell.textLabel?.numberOfLines = 0

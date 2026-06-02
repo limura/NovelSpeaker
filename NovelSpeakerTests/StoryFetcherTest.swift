@@ -14,13 +14,147 @@ import XCTest
 #endif
 
 class StoryFetcherTest: XCTestCase {
+    private let novelImportSettingTestURL = "https://example.com/siteinfo.csv"
+    private let novelImportSettingTestSiteNumber = "999991"
+    private var novelImportSettingTestSiteID:String {
+        return "\(novelImportSettingTestSiteNumber):\(novelImportSettingTestURL)"
+    }
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        UserDefaults.standard.set(false, forKey: RealmUtil.UseCloudRealmKey)
+        AppInformationLogger.ClearLogs()
+        RealmUtil.Write { realm in
+            for setting in realm.objects(RealmNovelImportSetting.self).filter("siteInfoId = %@", novelImportSettingTestSiteID) {
+                setting.delete(realm: realm)
+            }
+        }
     }
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+        StoryHtmlDecoder.shared.ClearSiteInfo()
+        AppInformationLogger.ClearLogs()
+        RealmUtil.Write { realm in
+            for setting in realm.objects(RealmNovelImportSetting.self).filter("siteInfoId = %@", novelImportSettingTestSiteID) {
+                setting.delete(realm: realm)
+            }
+        }
+    }
+
+    private func createCSVSiteInfo(newPageElement:String, name:String = "テストサイト") throws -> StorySiteInfo {
+        func csvEscape(_ value:String) -> String {
+            return "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+        }
+        let headers = [
+            "id",
+            "name",
+            "newPageElement",
+            "url",
+            "title",
+            "subtitle",
+            "firstPageLink",
+            "nextLink",
+            "tag",
+            "author",
+            "isNeedHeadless",
+            "injectStyle",
+            "nextButton",
+            "firstPageButton",
+            "waitSecondInHeadless",
+            "forceClickButton",
+            "resourceUrl",
+            "overrideUserAgent",
+            "forceErrorMessageAndElement",
+            "scrollTo",
+            "isNeedWhitespaceSplitForTag"
+        ]
+        let values = [
+            novelImportSettingTestSiteNumber,
+            name,
+            newPageElement,
+            "^https://example.com/novel/.*$",
+            "//*[@id='title']",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "0",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        ]
+        let csv = headers.joined(separator: ",") + "\n" + values.map(csvEscape).joined(separator: ",")
+        let siteInfoArray = try XCTUnwrap(StoryHtmlDecoder.DecodeCSVSiteInfoData(data: Data(csv.utf8), urlString: novelImportSettingTestURL))
+        return try XCTUnwrap(siteInfoArray.first)
+    }
+
+    private func createSiteImportSetting(targets:[String], seenTargets:[String]) {
+        RealmUtil.Write { realm in
+            if let oldSetting = RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: .site, siteInfoId: novelImportSettingTestSiteID, novelID: nil) {
+                oldSetting.delete(realm: realm)
+            }
+            let setting = RealmNovelImportSetting.Create(scopeType: .site, siteInfoId: novelImportSettingTestSiteID, novelID: nil)
+            setting.targets.append(objectsIn: targets)
+            setting.seenTargets.append(objectsIn: seenTargets)
+            realm.add(setting, update: .modified)
+        }
+    }
+
+    func testNovelImportSettingSiteInfoReloadAddsNewPageElementToTargetsAndLogs() throws {
+        createSiteImportSetting(targets: ["body"], seenTargets: ["body"])
+        let siteInfo = try createCSVSiteInfo(newPageElement: """
+        body:本文/Body=//*[@id='body']
+        afterword:後書き/Afterword=//*[@id='afterword']
+        """)
+        StoryHtmlDecoder.shared.siteInfoArrayArray = [[siteInfo]]
+
+        StoryHtmlDecoder.shared.checkNovelImportSettingChangesForLoadedSiteInfo()
+
+        try RealmUtil.RealmBlock { realm in
+            let setting = try XCTUnwrap(RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: .site, siteInfoId: novelImportSettingTestSiteID, novelID: nil))
+            XCTAssertEqual(Set(setting.targets), ["body", "afterword"])
+            XCTAssertEqual(Set(setting.seenTargets), ["body", "afterword"])
+        }
+        let logs = AppInformationLogger.LoadLogObjectArray(isIncludeDebugLog: false)
+        XCTAssertTrue(logs.contains { log in
+            log.message == NSLocalizedString("StoryFetcher_NovelImportSettingNewElements_Message", comment: "") &&
+            log.appendix[NSLocalizedString("StoryFetcher_NovelImportSettingLog_AddedElements", comment: "")]?.description.contains("後書き") == true
+        })
+    }
+
+    func testResolveNovelImportSettingUsesAllCurrentElementsWhenSelectionBecomesEmpty() throws {
+        createSiteImportSetting(targets: ["body"], seenTargets: ["body", "foreword", "afterword"])
+        let siteInfo = try createCSVSiteInfo(newPageElement: """
+        foreword:前書き/Foreword=//*[@id='foreword']
+        afterword:後書き/Afterword=//*[@id='afterword']
+        """)
+
+        let resolvedTargets = StoryHtmlDecoder.shared.resolveNovelImportEnableSettings(siteInfo: siteInfo, novelID: nil)
+
+        // 取り込み対象は全項目へフォールバックする(動作はそのまま)
+        XCTAssertEqual(Set(try XCTUnwrap(resolvedTargets)), ["foreword", "afterword"])
+        // resolve はページ取得ごとに呼ばれるホットパスなので、ユーザ通知は出さない
+        let logsAfterResolve = AppInformationLogger.LoadLogObjectArray(isIncludeDebugLog: false)
+        XCTAssertFalse(logsAfterResolve.contains { log in
+            log.message == NSLocalizedString("StoryFetcher_NovelImportSettingEmptySelection_Message", comment: "")
+        })
+
+        // emptySelection のユーザ通知は SiteInfo 読み直し時に1回だけ出る
+        StoryHtmlDecoder.shared.siteInfoArrayArray = [[siteInfo]]
+        StoryHtmlDecoder.shared.checkNovelImportSettingChangesForLoadedSiteInfo()
+        let logsAfterCheck = AppInformationLogger.LoadLogObjectArray(isIncludeDebugLog: false)
+        XCTAssertTrue(logsAfterCheck.contains { log in
+            log.message == NSLocalizedString("StoryFetcher_NovelImportSettingEmptySelection_Message", comment: "")
+        })
     }
 
     func testEncoding() throws {
@@ -82,7 +216,9 @@ class StoryFetcherTest: XCTestCase {
     
     private func createTestSiteInfo(nextButton:String? = nil) -> StorySiteInfo {
         return StorySiteInfo(
-            pageElement: "//*[@id='content']",
+            id: UUID().uuidString,
+            name: "test",
+            newPageElement: "//*[@id='content']",
             url: "^https://example.com/.*$",
             title: "//*[@id='title']",
             subtitle: nil,

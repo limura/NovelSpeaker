@@ -16,7 +16,9 @@ final class AppLaunchCoordinator: NSObject {
             fatalError("Realm is not readable at launch")
         }
 
-        NovelSpeakerUtility.StartAllLongLivedOperationIDWatcher()
+        if !NiftyUtility.isTesting() {
+            NovelSpeakerUtility.StartAllLongLivedOperationIDWatcher()
+        }
         NovelSpeakerUtility.PreloadPrivacyTrackingBlockRuleListIfNeeded()
         return true
     }

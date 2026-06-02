@@ -182,7 +182,7 @@
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "アプリ内エラーのお知らせ(デバッグ用も含む)";
 "SettingTableViewController_AppInformation_IncludeForDebug_OutputByJSON" = "アプリ内エラーのお知らせをJSONで取り出す";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "今あるお知らせを全て消す";
-"SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "このお知らせをコピーする";
+"SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "これらのお知らせを全てコピーする";
 "SettingsViewController_DontUsallyUseSection_Title" = "通常は使用する必要の無いもの";
 "SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd" = "手動による SiteInfo の読み込みが終了しました。\n他にエラーメッセージが出ていなければ SiteInfo の読み込みは成功したと思われます。";
 "SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd_Failed" = "手動による SiteInfo の読込中にエラーが発生しています。(恐らくはネットワーク接続に問題があると考えられます。同時に出力されているエラー側に詳細な情報が書かれていると思われますので、それらを確認した上で、適切に対処してください)";
@@ -960,8 +960,19 @@
 "RealmNovel_AddNewNovelWithFirstStoryState_ERROR_NovelAlreadyAlive" = "本棚に同じ小説が登録されています(URLが同じ場合はタイトルが変わっても同じ小説と判定されます)";
 
 "NovelImportSettingTargetSelectionView_info_text" = "何も選択されていない場合はすべてが選択されたものとして動作します";
+"NovelImportSettingTargetSelectionView_new_element_info_text" = "SiteInfo に新しい項目が追加された場合は、確認するまで取り込み対象として扱われます。";
 "NovelImportSettingSwiftUIView_selected_label" = "%d 選択中";
 "NovelImportSettingSwiftUIView_title" = "Webサイト毎の取込設定";
+"NovelImportSettingSwiftUIView_novel_title" = "この小説の取込設定";
+"NovelDetailViewController_NovelImportSettingButtonTitle" = "この小説の取り込み対象を指定する";
+"StoryFetcher_NovelImportSettingNewElements_Message" = "SiteInfo に新しい取り込み項目が追加されていたため、確認されるまではその項目も取り込み対象として扱います。";
+"StoryFetcher_NovelImportSettingEmptySelection_Message" = "取り込み設定の対象項目が SiteInfo 更新により見つからなくなったため、このページでは全ての取り込み項目を使用しました。";
+"StoryFetcher_NovelImportSettingLog_OpenSettingAction" = "取り込み設定を確認する";
+"StoryFetcher_NovelImportSettingLog_TargetSite" = "対象のWebサイト";
+"StoryFetcher_NovelImportSettingLog_TargetNovel" = "対象の小説";
+"StoryFetcher_NovelImportSettingLog_AddedElements" = "追加された項目";
+"StoryFetcher_NovelImportSettingLog_CurrentElements" = "現在利用できる項目";
+"AppInformationLogger_OccurrenceCount_Format" = "%d回発生しています。";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

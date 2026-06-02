@@ -9,52 +9,114 @@
 import SwiftUI
 import RealmSwift
 
+private struct LazyNavigationDestination<Content: View>: View {
+    let content: () -> Content
+
+    var body: some View {
+        content()
+    }
+}
+
 // MARK: - Main View (サイト一覧)
 struct NovelImportSettingSwiftUIView: View {
+    static let settingDidChangeNotification = Notification.Name("NovelImportSettingSwiftUIView.settingDidChangeNotification")
     let sites: [StorySiteInfo]
+    let scopeType: RealmNovelImportSetting.ScopeType
+    let novelID: String?
     @ObservedResults(RealmNovelImportSetting.self) var settings
     @Environment(\.realmConfiguration) var realmConfig
-    
+    @State private var effectiveSelectedCounts:[String:Int] = [:]
+
+    init(sites: [StorySiteInfo], scopeType: RealmNovelImportSetting.ScopeType = .site, novelID: String? = nil) {
+        self.sites = sites
+        self.scopeType = scopeType
+        self.novelID = novelID
+    }
+
     var body: some View {
         List(sites) { site in
-            let setting = settings.first(where: { $0.id == site.id })
-            
-            NavigationLink(destination: NovelImportSettingTargetSelectionView(site: site, setting: setting?.thaw()).environment(\.realmConfiguration, realmConfig)) {
+            let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: scopeType, siteInfoId: site.id, novelID: novelID)
+            let setting = settings.first(where: { $0.id == settingId && !$0.isDeleted })
+
+            NavigationLink(destination: LazyNavigationDestination {
+                NovelImportSettingTargetSelectionView(site: site, scopeType: scopeType, novelID: novelID, setting: setting?.thaw()).environment(\.realmConfiguration, realmConfig)
+            }) {
                 HStack {
                     Text(site.name ?? "?")
                     Spacer()
-                    
-                    if let setting = setting, !setting.targets.isEmpty {
-                        let count = setting.targets.count
+
+                    if let count = effectiveSelectedCounts[settingId] {
                         let format = NSLocalizedString("NovelImportSettingSwiftUIView_selected_label", comment: "%d 選択中")
-                        Text(String(format: format, count))
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                        if count > 0 {
+                            Text(String(format: format, count))
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
                     }
                 }
             }
         }
-        .navigationTitle(NSLocalizedString("NovelImportSettingSwiftUIView_title", comment: "Webサイト毎の取込設定"))
+        .navigationTitle(scopeType == .novel ? NSLocalizedString("NovelImportSettingSwiftUIView_novel_title", comment: "この小説の取込設定") : NSLocalizedString("NovelImportSettingSwiftUIView_title", comment: "Webサイト毎の取込設定"))
+        .onAppear {
+            refreshEffectiveSelectedCounts()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NovelImportSettingSwiftUIView.settingDidChangeNotification)) { _ in
+            refreshEffectiveSelectedCounts()
+        }
+    }
+
+    private func refreshEffectiveSelectedCounts() {
+        effectiveSelectedCounts = RealmUtil.RealmBlock { realm in
+            var result:[String:Int] = [:]
+            for site in sites {
+                let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: scopeType, siteInfoId: site.id, novelID: novelID)
+                guard let setting = realm.object(ofType: RealmNovelImportSetting.self, forPrimaryKey: settingId), !setting.isDeleted else { continue }
+                result[settingId] = effectiveSelectedCount(site: site, setting: setting)
+            }
+            return result
+        }
+    }
+
+    private func effectiveSelectedCount(site: StorySiteInfo, setting: RealmNovelImportSetting) -> Int {
+        let currentKeys = Set(site.pageElementDict.keys)
+        let selectedCurrentKeys = Set(setting.targets).intersection(currentKeys)
+        let newKeys = setting.seenTargets.isEmpty ? Set<String>() : currentKeys.subtracting(Set(setting.seenTargets))
+        return selectedCurrentKeys.union(newKeys).count
     }
 }
 
 struct NovelImportSettingTargetSelectionView: View {
     let site: StorySiteInfo
-    
+    let scopeType: RealmNovelImportSetting.ScopeType
+    let novelID: String?
+
     // 特定の1つのオブジェクトを監視対象として受け取る
     // ObservedObjectにすることで、内部の targets (List) の変更が確実に反映されます
     @ObservedObject var setting: RealmNovelImportSetting
-    
+
     // 設定がない場合（新規用）を考慮してイニシャライザを調整する場合
-    init(site: StorySiteInfo, setting: RealmNovelImportSetting?) {
+    init(site: StorySiteInfo, scopeType: RealmNovelImportSetting.ScopeType = .site, novelID: String? = nil, setting: RealmNovelImportSetting?) {
         self.site = site
-        // nil の場合はダミー（未保存）を一時的に持たせるなどの工夫
-        self.setting = setting ?? RealmNovelImportSetting(value: ["id": site.id])
+        self.scopeType = scopeType
+        self.novelID = novelID
+        if let managedSetting = setting {
+            self.setting = managedSetting
+        } else {
+            let initialSetting = RealmUtil.WriteReturn { realm -> RealmNovelImportSetting in
+                let initialSetting = RealmNovelImportSetting.Create(scopeType: scopeType, siteInfoId: site.id, novelID: novelID)
+                initialSetting.targets.append(objectsIn: site.pageElementDict.keys.sorted())
+                initialSetting.seenTargets.append(objectsIn: site.pageElementDict.keys.sorted())
+                realm.add(initialSetting)
+                return initialSetting
+            }
+            self.setting = initialSetting
+        }
     }
-    
+
     var body: some View {
         VStack {
             Text(NSLocalizedString("NovelImportSettingTargetSelectionView_info_text", comment: "何も選択されていない場合はすべてが選択されたものとして動作します")).font(.footnote)
+            Text(NSLocalizedString("NovelImportSettingTargetSelectionView_new_element_info_text", comment: "SiteInfo に新しい項目が追加された場合は、確認するまで取り込み対象として扱われます。")).font(.footnote)
             List(site.pageElementDict.keys.sorted(), id: \.self) { key in
                 Button(action: {
                     toggleSelection(key)
@@ -63,9 +125,9 @@ struct NovelImportSettingTargetSelectionView: View {
                         Text(getDisplayTitle(for: key))
                             .foregroundColor(.primary)
                         Spacer()
-                        
+
                         // setting は ObservedObject なので、ここの contains 変更で再描画が走る
-                        if setting.targets.contains(key) {
+                        if isSelected(key) {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.accentColor)
                         }
@@ -80,41 +142,114 @@ struct NovelImportSettingTargetSelectionView: View {
                 //.accessibilityValue(setting.targets.contains(key) ? "選択中" : "未選択") // 明示的に状態を読み上げさせる
             }
         }
+        .onAppear {
+            normalizeSelectionIfNeeded()
+        }
         .navigationTitle(site.name ?? "-")
     }
-    
+
     private func toggleSelection(_ key: String) {
         // settingがRealmに管理されているか確認
         if let realm = setting.realm {
             // すでに保存済みのオブジェクトを更新
             try? realm.write {
-                if let index = setting.targets.firstIndex(of: key) {
+                if isSelected(key) {
+                    guard let index = setting.targets.firstIndex(of: key) else {
+                        updateSeenTargets()
+                        return
+                    }
                     setting.targets.remove(at: index)
                 } else {
                     setting.targets.append(key)
                 }
-                StoryHtmlDecoder.shared.updateNovelImportEnableSettings(id: site.id, targetKeys: Array(setting.targets))
+                updateSeenTargets()
+                if setting.targets.isEmpty {
+                    if scopeType == .site {
+                        StoryHtmlDecoder.shared.updateNovelImportEnableSettings(id: site.id, targetKeys: [])
+                    }
+                    setting.delete(realm: realm)
+                }else{
+                    realm.add(setting, update: .modified)
+                    if scopeType == .site {
+                        StoryHtmlDecoder.shared.updateNovelImportEnableSettings(id: site.id, targetKeys: Array(setting.targets))
+                    }
+                }
             }
+            notifySettingDidChange()
         } else {
             // まだRealmに保存されていない(新規)の場合
             guard let realm = try? RealmUtil.GetRealm() else { return }
             try? realm.write {
-                setting.targets.append(key)
-                realm.add(setting)
-                StoryHtmlDecoder.shared.updateNovelImportEnableSettings(id: site.id, targetKeys: [key])
+                if isSelected(key) {
+                    guard let index = setting.targets.firstIndex(of: key) else {
+                        updateSeenTargets()
+                        return
+                    }
+                    setting.targets.remove(at: index)
+                } else {
+                    setting.targets.append(key)
+                }
+                updateSeenTargets()
+                if setting.targets.isEmpty {
+                    if scopeType == .site {
+                        StoryHtmlDecoder.shared.updateNovelImportEnableSettings(id: site.id, targetKeys: [])
+                    }
+                }else{
+                    realm.add(setting)
+                    if scopeType == .site {
+                        StoryHtmlDecoder.shared.updateNovelImportEnableSettings(id: site.id, targetKeys: Array(setting.targets))
+                    }
+                }
             }
+            notifySettingDidChange()
         }
     }
-    
+
+    private func notifySettingDidChange() {
+        NotificationCenter.default.post(name: NovelImportSettingSwiftUIView.settingDidChangeNotification, object: nil)
+    }
+
+    private func updateSeenTargets() {
+        setting.seenTargets.removeAll()
+        setting.seenTargets.append(objectsIn: site.pageElementDict.keys.sorted())
+    }
+
+    private func normalizeSelectionIfNeeded() {
+        guard let realm = setting.realm else { return }
+        let currentKeys = Set(site.pageElementDict.keys)
+        let seenKeys = Set(setting.seenTargets)
+        if seenKeys.isEmpty && !setting.targets.isEmpty {
+            try? realm.write {
+                updateSeenTargets()
+                realm.add(setting, update: .modified)
+            }
+            return
+        }
+        let newKeys = currentKeys.subtracting(seenKeys)
+        guard !newKeys.isEmpty else { return }
+        try? realm.write {
+            for key in newKeys.sorted() {
+                if !setting.targets.contains(key) {
+                    setting.targets.append(key)
+                }
+            }
+            updateSeenTargets()
+            realm.add(setting, update: .modified)
+        }
+    }
+
+    private func isSelected(_ key: String) -> Bool {
+        if setting.targets.contains(key) {
+            return true
+        }
+        if setting.realm != nil && !setting.seenTargets.contains(key) {
+            return true
+        }
+        return false
+    }
+
     // 現在のシステム言語に対応するタイトルの取得ロジック
     private func getDisplayTitle(for key: String) -> String {
-        guard let element = site.pageElementDict[key] else { return key }
-        
-        // アプリの現在の言語（簡易的にLocaleから判定、または環境変数から）
-        // ここでは StorySiteInfo.Language.Japanse をデフォルトと仮定
-        let currentLang: StorySiteInfo.Language = Locale.current.languageCode == "ja" ? .Japanse : .English
-        
-        // 該当する言語のタイトルを探し、なければ最初のものを返す
-        return element.0.first(where: { $0.lang == currentLang })?.title ?? element.0.first?.title ?? key
+        return site.displayTitleForPageElement(key: key)
     }
 }

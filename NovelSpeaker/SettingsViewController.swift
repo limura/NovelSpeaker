@@ -35,6 +35,22 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         addNotificationCenter()
     }
     
+    func handleAppInformationLogAction(action: AppInformationLogAction) {
+        guard action.actionType == "openNovelImportSetting",
+              let siteInfoId = action.payload["siteInfoId"]?.value as? String else { return }
+        let scopeTypeString = action.payload["scopeType"]?.value as? String
+        let novelID = action.payload["novelID"]?.value as? String
+        let scopeType:RealmNovelImportSetting.ScopeType = scopeTypeString == "novel" ? .novel : .site
+        let siteInfoArray = StoryHtmlDecoder.shared.siteInfoArrayArray.flatMap { $0 }.filter { $0.id == siteInfoId }
+        guard let siteInfo = siteInfoArray.first else { return }
+        let swiftUIView = RealmUtil.RealmBlock { realm in
+            let setting = RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: scopeType, siteInfoId: siteInfo.id, novelID: novelID)
+            return NovelImportSettingTargetSelectionView(site: siteInfo, scopeType: scopeType, novelID: novelID, setting: setting?.thaw()).environment(\.realmConfiguration, realm.configuration)
+        }
+        let hostingController = UIHostingController(rootView: swiftUIView)
+        self.navigationController?.pushViewController(hostingController, animated: true)
+    }
+
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         removeNotificationCenter()
@@ -496,22 +512,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.cell.accessoryType = .disclosureIndicator
             }.onCellSelection({ (butonCellof, buttonRow) in
                 DispatchQueue.main.async {
-                    let logText = AppInformationLogger.LoadLogString(isIncludeDebugLog: false)
-                    AppInformationLogger.CheckLogShowed()
-                    NiftyUtility.EasyDialogBuilder(self)
-                    .textView(content: logText, heightMultiplier: 0.6)
-                        .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_CopyLogButtonTitle", comment: "このログをコピーする")) { (dialog) in
-                            let pasteBoard = UIPasteboard.general
-                            pasteBoard.setValue(logText, forPasteboardType: "public.text")
-                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
-                        }
-                        .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す")) { (dialog) in
-                            AppInformationLogger.ClearLogs()
-                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
-                        }
-                        .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
-                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
-                        }.build().show()
+                    let swiftUIView = AppInformationLogListSwiftUIView(isIncludeDebugLog: false) { action in
+                        self.handleAppInformationLogAction(action: action)
+                    }
+                    let hostingController = UIHostingController(rootView: swiftUIView)
+                    self.navigationController?.pushViewController(hostingController, animated: true)
                     buttonRow.value = ""
                     buttonRow.updateCell()
                     self.updateTabBadge()

@@ -492,6 +492,7 @@ class NovelDownloader : NSObject {
             chapterNumber = nextChapter
             state = updatedState
         }
+        fetcher.novelIDForImportSetting = novelID
         fetcher.FetchNext(currentState: state, successAction: { (state) in
             if isDownloadStop {
                 flushWritePool(novelID: novelID)

@@ -89,7 +89,7 @@ final class MemoryTraceLogger {
 }
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 17
+    static let currentSchemaVersion : UInt64 = 18
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -182,6 +182,19 @@ final class MemoryTraceLogger {
             newObject?["baseMaxConcurrentNovelDownloadCount"] = 5
         }
     }
+    static func Migrate_17_To_18(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmNovelImportSetting.className()) { (oldObject, newObject) in
+            guard let oldObject = oldObject, let newObject = newObject, let oldID = oldObject["id"] as? String else { return }
+            if oldID.hasPrefix("site:") || oldID.hasPrefix("novel:") {
+                newObject["siteInfoId"] = oldObject["siteInfoId"] as? String ?? ""
+                return
+            }
+            newObject["id"] = RealmNovelImportSetting.CreateUniqueID(scopeType: .site, siteInfoId: oldID, novelID: nil)
+            newObject["m_scopeType"] = RealmNovelImportSetting.ScopeType.site.rawValue
+            newObject["siteInfoId"] = oldID
+            newObject["novelID"] = ""
+        }
+    }
 
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
@@ -219,6 +232,9 @@ final class MemoryTraceLogger {
         }
         if oldSchemaVersion <= 15 {
             Migrate_15_To_16(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion <= 17 {
+            Migrate_17_To_18(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -389,6 +405,10 @@ final class MemoryTraceLogger {
         container.accountStatus(completionHandler: completionHandler)
     }
     @objc static func CheckCloudAccountStatus(completionHandler: @escaping (Bool, String?) -> Void) {
+        if NiftyUtility.isTesting() {
+            completionHandler(true, nil)
+            return
+        }
         GetCloudAccountStatus { (accountStatus, error) in
             if let error = error {
                 completionHandler(false, error.localizedDescription)
@@ -615,6 +635,7 @@ final class MemoryTraceLogger {
 
     static let UseCloudRealmKey = "RealmUtil_UseCloudRealm"
     @objc static func IsUseCloudRealm() -> Bool {
+        if NiftyUtility.isTesting() { return false }
         let defaults = UserDefaults.standard
         defaults.register(defaults: [UseCloudRealmKey: false])
         return defaults.bool(forKey: UseCloudRealmKey)
@@ -711,6 +732,31 @@ final class MemoryTraceLogger {
         }
     }
 
+    static func WriteWithReturn<Result>(realm:Realm, withoutNotifying:[NotificationToken?] = [], block:((_ realm:Realm)->Result)) -> Result {
+        guard realm.isInWriteTransaction == false else {
+            return block(realm)
+        }
+        let withoutNotifying = withoutNotifying.filter { (token) -> Bool in
+            token != nil
+            } as! [NotificationToken]
+        realm.beginWrite()
+        let result = block(realm)
+        do {
+            if withoutNotifying.count <= 0 {
+                try realm.commitWrite()
+            }else{
+                try realm.commitWrite(withoutNotifying: withoutNotifying)
+            }
+        }catch{
+            print("realm.write failed.")
+        }
+        writeCount += 1
+        if writeCount % writeCountPullInterval == 0 && IsUseCloudRealm() {
+            CloudPull()
+        }
+        return result
+    }
+
     static func Write(block:((_ realm:Realm)->Void)) {
         RealmBlock { (realm) in
             WriteWith(realm: realm, withoutNotifying: [], block: block)
@@ -720,6 +766,18 @@ final class MemoryTraceLogger {
     static func Write(withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
         RealmBlock { (realm) in
             WriteWith(realm: realm, withoutNotifying: withoutNotifying, block: block)
+        }
+    }
+
+    static func WriteReturn<Result>(block:((_ realm:Realm)->Result)) -> Result {
+        return RealmBlock { (realm) in
+            WriteWithReturn(realm: realm, withoutNotifying: [], block: block)
+        }
+    }
+
+    static func WriteReturn<Result>(withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Result)) -> Result {
+        return RealmBlock { (realm) in
+            WriteWithReturn(realm: realm, withoutNotifying: withoutNotifying, block: block)
         }
     }
 
@@ -3617,15 +3675,56 @@ extension RealmBookmark: CanWriteIsDeleted {
 }
 
 @objc final class RealmNovelImportSetting: Object, ObjectKeyIdentifiable {
-    @objc dynamic var id = "" // primary key. SiteInfo の id または、NovelID をこれに当てます。
-    // SiteInfo の ID は "数字:SiteInfoの取得先URL" という文字列なので、NovelID とは被らないはずです。
-    // また、URLは URL.absoluteString で取り出しているとすれば、日本語などは %xx 形式でエンコードされるはずです
+    enum ScopeType: Int {
+        case site = 0
+        case novel = 1
+    }
+
+    @objc dynamic var id = "" // primary key. "site:<siteInfoId>" または "novel:<siteInfoId>:<novelID>"
+    @objc dynamic var m_scopeType = ScopeType.site.rawValue
+    @objc dynamic var siteInfoId = ""
+    @objc dynamic var novelID = ""
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var createdDate = Date()
+    // targets は互換性のため名前を維持しています。意味としては「有効にする pageElementDict の ID」です。
     let targets = List<String>()
+    // ユーザが最後に設定を確認/保存した時点で存在していた pageElementDict の ID です。
+    let seenTargets = List<String>()
+
+    var scopeType: ScopeType {
+        get {
+            return ScopeType(rawValue: m_scopeType) ?? .site
+        }
+        set {
+            m_scopeType = newValue.rawValue
+        }
+    }
+
+    static func CreateUniqueID(scopeType: ScopeType, siteInfoId: String, novelID: String?) -> String {
+        switch scopeType {
+        case .site:
+            return "site:\(siteInfoId)"
+        case .novel:
+            return "novel:\(siteInfoId):\(novelID ?? "")"
+        }
+    }
     
     static func GetNovelImportSetting(realm: Realm, siteInfoId: String) -> RealmNovelImportSetting? {
-        return realm.object(ofType: RealmNovelImportSetting.self, forPrimaryKey: siteInfoId)
+        return GetNovelImportSetting(realm: realm, scopeType: .site, siteInfoId: siteInfoId, novelID: nil)
+    }
+
+    static func GetNovelImportSetting(realm: Realm, scopeType: ScopeType, siteInfoId: String, novelID: String?) -> RealmNovelImportSetting? {
+        let id = CreateUniqueID(scopeType: scopeType, siteInfoId: siteInfoId, novelID: novelID)
+        return realm.object(ofType: RealmNovelImportSetting.self, forPrimaryKey: id)
+    }
+
+    static func Create(scopeType: ScopeType, siteInfoId: String, novelID: String?) -> RealmNovelImportSetting {
+        let setting = RealmNovelImportSetting()
+        setting.scopeType = scopeType
+        setting.siteInfoId = siteInfoId
+        setting.novelID = novelID ?? ""
+        setting.id = CreateUniqueID(scopeType: scopeType, siteInfoId: siteInfoId, novelID: novelID)
+        return setting
     }
 
     static func GetAllObjectsWith(realm: Realm) -> Results<RealmNovelImportSetting>? {
@@ -3650,5 +3749,3 @@ extension RealmNovelImportSetting: CKRecordRecoverable {
 }
 extension RealmNovelImportSetting: CanWriteIsDeleted {
 }
-
-

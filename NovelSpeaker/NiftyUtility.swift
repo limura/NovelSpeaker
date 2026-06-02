@@ -2093,6 +2093,7 @@ class NiftyUtility: NSObject {
     
     #if !os(watchOS)
     @objc static func StartiCloudDataVersionChecker() {
+        if isTesting() { return }
         RealmCloudVersionChecker.RunChecker { (version) in
             DispatchQueue.main.async {
                 print("RealmCloudVersionChecker.RunChecker hit: \(version)")
@@ -2130,7 +2131,9 @@ class NiftyUtility: NSObject {
     
     static func isTesting() -> Bool {
         // https://qiita.com/takecian/items/b106675e0b2ded41db57
-        return NSClassFromString("XCTest") != nil // nil じゃなかったらテスト実行中
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil { return true }
+        if ProcessInfo.processInfo.environment["XCTestSessionIdentifier"] != nil { return true }
+        return NSClassFromString("XCTestCase") != nil // nil じゃなかったらテスト実行中
     }
     
     #if !os(watchOS)

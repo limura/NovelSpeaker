@@ -972,8 +972,19 @@
 "RealmNovel_AddNewNovelWithFirstStoryState_ERROR_NovelAlreadyAlive" = "The same novel is registered on the bookshelf (if the URL is the same, it will be judged as the same novel even if the title changes)";
 
 "NovelImportSettingTargetSelectionView_info_text" = "If nothing is selected, everything will be treated as selected.";
+"NovelImportSettingTargetSelectionView_new_element_info_text" = "If SiteInfo adds new items, they will be included until you review the setting.";
 "NovelImportSettingSwiftUIView_selected_label" = "%d selected";
 "NovelImportSettingSwiftUIView_title" = "Import settings for each website";
+"NovelImportSettingSwiftUIView_novel_title" = "Import settings for this novel";
+"NovelDetailViewController_NovelImportSettingButtonTitle" = "Specify the portions to import for this novel";
+"StoryFetcher_NovelImportSettingNewElements_Message" = "New import items were added to SiteInfo, so they will be included until you review the setting.";
+"StoryFetcher_NovelImportSettingEmptySelection_Message" = "The configured import items were no longer found after a SiteInfo update, so all import items were used for this page.";
+"StoryFetcher_NovelImportSettingLog_OpenSettingAction" = "Review import setting";
+"StoryFetcher_NovelImportSettingLog_TargetSite" = "Website";
+"StoryFetcher_NovelImportSettingLog_TargetNovel" = "Novel";
+"StoryFetcher_NovelImportSettingLog_AddedElements" = "Added items";
+"StoryFetcher_NovelImportSettingLog_CurrentElements" = "Currently available items";
+"AppInformationLogger_OccurrenceCount_Format" = "Occurred %d times.";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

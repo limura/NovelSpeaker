@@ -186,19 +186,22 @@ struct StorySiteInfo : Identifiable {
     init(id: String, name: String?, newPageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?, novelImportEnableSettings:[String] = []) {
 
         func newPageElement2PageElement(newPageElement:String) -> String {
-            if !newPageElement.hasPrefix("\n") {
+            // 複数要素(取り込み対象を選べる)形式は改行区切り。
+            // 判定は dict 側(newPageElement2PageElelmentDict)と揃え、「文中に改行を含むか」で見る。
+            // (行頭の改行有無では判定しない。単一行なら従来通りの pageElement そのもの)
+            if !newPageElement.contains(where: \.isNewline) {
                 return newPageElement
             }
             var pageElementArray:[String] = []
-            for line in newPageElement.split(separator: "\n") {
-                // "=" より前のものは切り捨てると、Xpathが残る
-                let lineSeparated = line.split(separator: "=")
+            for line in newPageElement.split(whereSeparator: \.isNewline) {
+                // "id:タイトル=Xpath" の最初の "=" より後ろが Xpath。
+                // Xpath 自体に "=" を含む場合があるので maxSplits:1 で分割する。
+                let lineSeparated = line.split(separator: "=", maxSplits: 1)
                 if lineSeparated.count < 2 {
                     pageElementArray.append(String(line))
                     continue
                 }
-                let xpath = lineSeparated[1]
-                pageElementArray.append(String(xpath))
+                pageElementArray.append(String(lineSeparated[1]))
             }
             return pageElementArray.joined(separator: "|")
         }
@@ -268,9 +271,9 @@ struct StorySiteInfo : Identifiable {
         }
         return false
     }
-    func createPageElementXpath(pageElementDict:[String: ([(lang:Language, title:String)], xpath:String)], novelImportEnableSettings:[String]) -> String {
+    func createPageElementXpath(pageElementDict:[String: ([(lang:Language, title:String)], xpath:String)], novelImportEnableSettings:[String]?) -> String {
         //print("createPageElementXpath: \(novelImportEnableSettings), id: \(self.id), \(pageElementDict), pageElement: \(self.pageElement)")
-        if novelImportEnableSettings.count <= 0 { return self.pageElement }
+        guard let novelImportEnableSettings = novelImportEnableSettings else { return self.pageElement }
         let result = pageElementDict.filter({ (key, value) -> Bool in
             novelImportEnableSettings.contains(key)
         }).map { (key: String, value: ([(lang: Language, title: String)], xpath: String)) in
@@ -279,8 +282,14 @@ struct StorySiteInfo : Identifiable {
         //print("result: \(result)")
         return result.joined(separator: "|")
     }
-    func decodePageElement(xmlDocument:Kanna.XMLDocument) -> String {
-        let pageElement = createPageElementXpath(pageElementDict: self.pageElementDict, novelImportEnableSettings: self.novelImportEnableSettings)
+    func displayTitleForPageElement(key: String) -> String {
+        guard let element = pageElementDict[key] else { return key }
+        let currentLang: StorySiteInfo.Language = Locale.current.languageCode == "ja" ? .Japanse : .English
+        return element.0.first(where: { $0.lang == currentLang })?.title ?? element.0.first?.title ?? key
+    }
+    func decodePageElement(xmlDocument:Kanna.XMLDocument, enabledTargets:[String]? = nil) -> String {
+        let fallbackTargets = self.novelImportEnableSettings.isEmpty ? nil : self.novelImportEnableSettings
+        let pageElement = createPageElementXpath(pageElementDict: self.pageElementDict, novelImportEnableSettings: enabledTargets ?? fallbackTargets)
         return NovelSpeakerUtility.NormalizeNewlineString(string: NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: pageElement, injectStyle: injectStyle).trimmingCharacters(in: .whitespacesAndNewlines) )
     }
     func decodeTitle(xmlDocument:Kanna.XMLDocument) -> String? {
@@ -341,7 +350,8 @@ struct StorySiteInfo : Identifiable {
 extension StorySiteInfo: CustomStringConvertible {
     var description: String {
         var result:String = ""
-        result += "url: \"" + (url?.pattern ?? "nil")
+        result += "\nid: \"" + id
+        result += "\nurl: \"" + (url?.pattern ?? "nil")
         result += "\"\npageElement: \"" + pageElement
         result += "\"\nnewPageElement: \"" + pageElementDict.map { "\($0.0): \($0.1)" }.joined(separator: ",")
         result += "\"\ntitle: \"" + (title ?? "nil")
@@ -708,15 +718,16 @@ class StoryHtmlDecoder {
             guard let newPageElement = dict["newPageElement"] else { continue }
             let siteInfoId = dict["id"]
             let importTargets:[String]
-            if let siteInfoId = siteInfoId, let novelImportSetting = novelImportSettings?.first(where: { $0.id == siteInfoId }) {
+            let storySiteInfoId = (siteInfoId ?? UUID.init().uuidString) + ":" + urlString
+            let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: .site, siteInfoId: storySiteInfoId, novelID: nil)
+            if let novelImportSetting = novelImportSettings?.first(where: { $0.id == settingId }) {
                 importTargets = Array(novelImportSetting.targets)
             }else{
                 importTargets = []
             }
-            
             // StorySiteInfoの各プロパティにマッピング
             let storySiteInfo = StorySiteInfo(
-                id: (siteInfoId ?? UUID.init().uuidString) + ":" + urlString,
+                id: storySiteInfoId,
                 name: dict["name"],
                 newPageElement: newPageElement,
                 url: dict["url"],
@@ -885,6 +896,69 @@ class StoryHtmlDecoder {
         return result
     }
     
+    func resolveNovelImportEnableSettings(siteInfo: StorySiteInfo, novelID: String?) -> [String]? {
+        guard siteInfo.pageElementDict.count > 1 else { return nil }
+        return RealmUtil.RealmBlock { realm -> [String]? in
+            let setting:RealmNovelImportSetting?
+            if let novelID = novelID, novelID.count > 0, let novelSetting = RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: .novel, siteInfoId: siteInfo.id, novelID: novelID), !novelSetting.isDeleted {
+                setting = novelSetting
+            }else if let siteSetting = RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: .site, siteInfoId: siteInfo.id, novelID: nil), !siteSetting.isDeleted {
+                setting = siteSetting
+            }else{
+                setting = nil
+            }
+            guard let setting = setting else { return nil }
+
+            let currentIds = Set(siteInfo.pageElementDict.keys)
+            let enabledIds = Set(setting.targets).intersection(currentIds)
+            var seenIds = Set(setting.seenTargets)
+            if seenIds.isEmpty && !enabledIds.isEmpty {
+                RealmUtil.WriteWith(realm: realm) { realm in
+                    setting.seenTargets.append(objectsIn: currentIds.sorted())
+                    realm.add(setting, update: .modified)
+                }
+                seenIds = currentIds
+            }
+            let newIds = currentIds.subtracting(seenIds)
+            var resolvedIds = enabledIds.union(newIds)
+
+            // newElements / emptySelection のユーザ通知は SiteInfo 読み直し時に
+            // checkNovelImportSettingChangesForLoadedSiteInfo() が1回だけ出します。
+            // ここ(resolve)はページ取得ごとに呼ばれるホットパスなので、通知は出さず
+            // 取り込み対象の解決(空ならば全項目へのフォールバック)だけを行います。
+            if resolvedIds.isEmpty {
+                resolvedIds = currentIds
+            }
+            return resolvedIds.sorted()
+        }
+    }
+
+    private func addNovelImportSettingLog(message:String, dedupeSuffix:String, scopeType:RealmNovelImportSetting.ScopeType, settingId:String, settingNovelID:String, siteInfo:StorySiteInfo, novelID:String?, appendix:[String:AnyCodable]) {
+        var appendix = appendix
+        RealmUtil.RealmBlock { realm in
+            if let novelID = novelID, novelID.count > 0, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), novel.title.count > 0 {
+                appendix[NSLocalizedString("StoryFetcher_NovelImportSettingLog_TargetNovel", comment: "対象の小説")] = AnyCodable(novel.title)
+            }
+            let action = AppInformationLogAction(
+                title: NSLocalizedString("StoryFetcher_NovelImportSettingLog_OpenSettingAction", comment: "取り込み設定を確認する"),
+                actionType: "openNovelImportSetting",
+                payload: [
+                    "scopeType": AnyCodable(scopeType == .novel ? "novel" : "site"),
+                    "siteInfoId": AnyCodable(siteInfo.id),
+                    "novelID": AnyCodable(novelID ?? settingNovelID)
+                ]
+            )
+            AppInformationLogger.AddLogWithStruct(
+                message: message,
+                appendix: appendix,
+                isForDebug: false,
+                category: "novelImportSetting",
+                dedupeKey: "novelImportSetting.\(dedupeSuffix):\(settingId)",
+                actions: [action]
+            )
+        }
+    }
+
     func LoadSiteInfoIfNeeded() {
         let now = Date()
         self.getIsSiteInfoReady() { (isSiteInfoReady) in
@@ -940,11 +1014,12 @@ class StoryHtmlDecoder {
         }
 
         func siteInfoFetchAndUpdate(index:Int, targetURLArray:[URL?], cacheFileExpireTimeinterval:Double) {
-            if index >= targetURLArray.count {
-                // INFO: LoadSiteInfo() の終了処理をここでやっています
-                announceLoadEnd(errorString: errorMessage)
-                if let errorMessage = errorMessage {
-                    completion?(NovelSpeakerUtility.GenerateNSError(msg: errorMessage))
+                if index >= targetURLArray.count {
+                    // INFO: LoadSiteInfo() の終了処理をここでやっています
+                    checkNovelImportSettingChangesForLoadedSiteInfo()
+                    announceLoadEnd(errorString: errorMessage)
+                    if let errorMessage = errorMessage {
+                        completion?(NovelSpeakerUtility.GenerateNSError(msg: errorMessage))
                 }else{
                     completion?(nil)
                 }
@@ -1036,6 +1111,67 @@ class StoryHtmlDecoder {
             siteInfoFetchAndUpdate(index: 0, targetURLArray: loadTargetUrls, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
         }
     }
+
+    func checkNovelImportSettingChangesForLoadedSiteInfo() {
+        let siteInfoArray = siteInfoArrayArray.flatMap { $0 }
+        let siteInfoById = Dictionary(siteInfoArray.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        guard siteInfoById.count > 0 else { return }
+        RealmUtil.RealmBlock { realm in
+            guard let settings = RealmNovelImportSetting.GetAllObjectsWith(realm: realm) else { return }
+            for setting in settings where !setting.isDeleted {
+                guard let siteInfo = siteInfoById[setting.siteInfoId], siteInfo.pageElementDict.count > 1 else { continue }
+                let currentIds = Set(siteInfo.pageElementDict.keys)
+                let enabledIds = Set(setting.targets).intersection(currentIds)
+                var seenIds = Set(setting.seenTargets)
+                if seenIds.isEmpty && !enabledIds.isEmpty {
+                    RealmUtil.WriteWith(realm: realm) { _ in
+                        setting.seenTargets.append(objectsIn: currentIds.sorted())
+                    }
+                    seenIds = currentIds
+                }
+                let newIds = currentIds.subtracting(seenIds)
+                let resolvedIds = enabledIds.union(newIds)
+                if !newIds.isEmpty {
+                    addNovelImportSettingLog(
+                        message: NSLocalizedString("StoryFetcher_NovelImportSettingNewElements_Message", comment: "SiteInfo に新しい取り込み項目が追加されていたため、確認されるまではその項目も取り込み対象として扱います。"),
+                        dedupeSuffix: "newElements",
+                        scopeType: setting.scopeType,
+                        settingId: setting.id,
+                        settingNovelID: setting.novelID,
+                        siteInfo: siteInfo,
+                        novelID: setting.scopeType == .novel ? setting.novelID : nil,
+                        appendix: [
+                            NSLocalizedString("StoryFetcher_NovelImportSettingLog_TargetSite", comment: "対象のWebサイト"): AnyCodable(siteInfo.name ?? siteInfo.id),
+                            NSLocalizedString("StoryFetcher_NovelImportSettingLog_AddedElements", comment: "追加された項目"): AnyCodable(newIds.sorted().map { siteInfo.displayTitleForPageElement(key: $0) })
+                        ]
+                    )
+                    RealmUtil.WriteWith(realm: realm) { _ in
+                        for key in newIds.sorted() {
+                            if !setting.targets.contains(key) {
+                                setting.targets.append(key)
+                            }
+                        }
+                        setting.seenTargets.removeAll()
+                        setting.seenTargets.append(objectsIn: currentIds.sorted())
+                    }
+                }else if resolvedIds.isEmpty {
+                    addNovelImportSettingLog(
+                        message: NSLocalizedString("StoryFetcher_NovelImportSettingEmptySelection_Message", comment: "取り込み設定の対象項目が SiteInfo 更新により見つからなくなったため、このページでは全ての取り込み項目を使用しました。"),
+                        dedupeSuffix: "emptySelection",
+                        scopeType: setting.scopeType,
+                        settingId: setting.id,
+                        settingNovelID: setting.novelID,
+                        siteInfo: siteInfo,
+                        novelID: setting.scopeType == .novel ? setting.novelID : nil,
+                        appendix: [
+                            NSLocalizedString("StoryFetcher_NovelImportSettingLog_TargetSite", comment: "対象のWebサイト"): AnyCodable(siteInfo.name ?? siteInfo.id),
+                            NSLocalizedString("StoryFetcher_NovelImportSettingLog_CurrentElements", comment: "現在利用できる項目"): AnyCodable(currentIds.sorted().map { siteInfo.displayTitleForPageElement(key: $0) })
+                        ]
+                    )
+                }
+            }
+        }
+    }
     
     // 特定 ID の StorySiteInfo.novelImportEnableSettings を書き換えます
     func updateNovelImportEnableSettings(id: String, targetKeys: [String]) {
@@ -1051,6 +1187,8 @@ class StoryHtmlDecoder {
 }
 
 class StoryFetcher {
+    var novelIDForImportSetting:String? = nil
+
     #if !os(watchOS)
     let httpClient:HeadlessHttpClient
     #endif
@@ -1090,7 +1228,8 @@ class StoryFetcher {
             if let resourceUrl = siteInfo.resourceUrl {
                 tryedResourceUrlArray.append(resourceUrl)
             }
-            let pageElement = siteInfo.decodePageElement(xmlDocument: htmlDocument).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            let enabledTargets = StoryHtmlDecoder.shared.resolveNovelImportEnableSettings(siteInfo: siteInfo, novelID: novelIDForImportSetting)
+            let pageElement = siteInfo.decodePageElement(xmlDocument: htmlDocument, enabledTargets: enabledTargets).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             //print("checking SiteInfo. pageElement.count: \(pageElement.count), siteInfo.pageElement: \(siteInfo.pageElement), siteInfoArray.count: \(currentState.siteInfoArray.count), siteInfo: \(siteInfo.description)")
             let nextUrl = siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url)
             let firstPageLink = siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url)
