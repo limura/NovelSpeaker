@@ -240,7 +240,14 @@ class StoryFetcherTest: XCTestCase {
         )
     }
     
-    func testCreateNextStateDropsTransientDOMReferences() throws {
+    func testCreateNextStateKeepsTransientDOMForButtonNavigation() throws {
+        // CreateNextState() は次ページ取得用の状態を作る。
+        // content は一旦クリアして previousContent に退避するが、
+        // ボタン送り(nextButton 等のクリックで次ページへ進む)サイトのために
+        // document / 各ボタンは引き継ぐ必要がある。
+        // (commit 4494851「ボタンを押さないと次のページに行けない場合などに取り込み失敗」対応。
+        //  URL送りのサイトではデコード時に transientDOMRetainedIfNeeded が既に document を捨てているため、
+        //  ここで引き継ぐ document は実質的に nil になる。)
         let document = try createTestDocument(html: "<html><body><div id='content'>本文</div><a class='next'>次へ</a></body></html>")
         let nextButton = try XCTUnwrap(document.querySelectorAll(".next").first)
         let currentState = StoryState(
@@ -265,13 +272,14 @@ class StoryFetcherTest: XCTestCase {
             forceErrorMessage: nil
         )
         let nextState = currentState.CreateNextState()
-        
-        XCTAssertNil(nextState.document)
-        XCTAssertNil(nextState.nextButton)
-        XCTAssertNil(nextState.firstPageButton)
-        XCTAssertNil(nextState.forceClickButton)
+
+        // content はクリアされ、直前の内容は previousContent に退避される
+        XCTAssertNil(nextState.content)
         XCTAssertEqual(nextState.previousContent, "本文")
         XCTAssertEqual(nextState.nextUrl?.absoluteString, "https://example.com/chapter2")
+        // ボタン送りのために document / nextButton を引き継いでいること
+        XCTAssertNotNil(nextState.document)
+        XCTAssertNotNil(nextState.nextButton)
     }
     
     func testDecodeDocumentDropsDOMWhenButtonsAreNotNeeded() throws {

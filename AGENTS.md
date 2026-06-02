@@ -22,8 +22,13 @@
 - `NovelSpeakerTests/DownloadTest.swift` の pixiv 系テストは pixiv.net への実ネットワークアクセスを伴う統合テストで、
   オフライン/CI 環境では落ちる（コード変更とは無関係なことが多い）。
 
+## 設計メモ
+
+- `StoryState.CreateNextState()` が `document` / 各ボタン(`nextButton` 等)を次状態に引き継ぐのは**意図的**。
+  ボタン送り(ボタンをクリックしないと次ページに行けない)サイトのために必要（commit 4494851）。
+  URL送りのサイトではデコード時に `transientDOMRetainedIfNeeded()` が既に document を捨てているため、
+  引き継いでも実質 nil で、重いDOMは「ボタンが必要なときだけ」保持される。ここを安易に「破棄」に変えないこと。
+
 ## 既知のTODO（別途対応・コミット未追跡メモあり）
 
-- `TODO_CreateNextState_DOM参照破棄.md`: `StoryState.CreateNextState()` が重いDOM参照を次状態に持ち越している
-  （`transientDOMRetainedIfNeeded()` のロジック未適用。`testCreateNextStateDropsTransientDOMReferences` が赤）。
 - `TODO_NFC正規化対応.md`: 本棚検索で濁点/半濁点タイトル(NFD)がヒットしない問題への対応。
