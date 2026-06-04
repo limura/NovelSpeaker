@@ -207,7 +207,295 @@ class StoryFetcherTest: XCTestCase {
         print(result)
     }
     #endif
-    
+
+    // MARK: - スクレイプ検査(checkTargets)パーサ
+    // 設計メモ: DESIGN_スクレイプ検査.md
+
+    func testParseCheckTargetsBasic() throws {
+        let targets = ScrapeCheckTarget.parse("https://example.com/show/456 => content,nextLink,!firstPageLink")
+        XCTAssertEqual(targets.count, 1)
+        let target = try XCTUnwrap(targets.first)
+        XCTAssertEqual(target.url, URL(string: "https://example.com/show/456"))
+        XCTAssertFalse(target.requireAuth)
+        XCTAssertEqual(target.expectations, [
+            ScrapeCheckExpectation(token: .content, mustBeEmpty: false),
+            ScrapeCheckExpectation(token: .nextLink, mustBeEmpty: false),
+            ScrapeCheckExpectation(token: .firstPageLink, mustBeEmpty: true),
+        ])
+    }
+
+    func testParseCheckTargetsMultipleEntriesWithBothSeparators() throws {
+        // エントリ区切りは 改行 と `|` のどちらでも、混在しても良い。
+        let raw = """
+        https://example.com/series/123 => firstPageButton
+        https://example.com/show/1 => content | https://example.com/show/2 => content,nextLink
+        """
+        let targets = ScrapeCheckTarget.parse(raw)
+        XCTAssertEqual(targets.count, 3)
+        XCTAssertEqual(targets[0].url, URL(string: "https://example.com/series/123"))
+        XCTAssertEqual(targets[0].expectations, [ScrapeCheckExpectation(token: .firstPageButton, mustBeEmpty: false)])
+        XCTAssertEqual(targets[1].url, URL(string: "https://example.com/show/1"))
+        XCTAssertEqual(targets[2].url, URL(string: "https://example.com/show/2"))
+        XCTAssertEqual(targets[2].expectations.count, 2)
+    }
+
+    func testParseCheckTargetsAuthTagAndSpacingTolerance() throws {
+        // [auth] 前置タグで要認証マーク。`=>` 前後スペースは任意(無くても可)。
+        let withSpace = try XCTUnwrap(ScrapeCheckTarget.parse("[auth] https://site/secret => content").first)
+        XCTAssertTrue(withSpace.requireAuth)
+        XCTAssertEqual(withSpace.url, URL(string: "https://site/secret"))
+        XCTAssertEqual(withSpace.expectations, [ScrapeCheckExpectation(token: .content, mustBeEmpty: false)])
+
+        let noSpace = try XCTUnwrap(ScrapeCheckTarget.parse("https://site/x=>content,nextLink").first)
+        XCTAssertFalse(noSpace.requireAuth)
+        XCTAssertEqual(noSpace.url, URL(string: "https://site/x"))
+        XCTAssertEqual(noSpace.expectations.count, 2)
+    }
+
+    func testParseCheckTargetsTokenToleranceAndBareURL() throws {
+        // 未知トークンはスキップし、有効なものだけ残す。大文字小文字は無視。
+        let tolerant = try XCTUnwrap(ScrapeCheckTarget.parse("https://site/y => Content, bogus, NEXTLINK").first)
+        XCTAssertEqual(tolerant.expectations, [
+            ScrapeCheckExpectation(token: .content, mustBeEmpty: false),
+            ScrapeCheckExpectation(token: .nextLink, mustBeEmpty: false),
+        ])
+
+        // `=>` の無い(URLのみ)エントリは期待項目なしの対象として保持する。
+        let bare = try XCTUnwrap(ScrapeCheckTarget.parse("https://site/z").first)
+        XCTAssertEqual(bare.url, URL(string: "https://site/z"))
+        XCTAssertTrue(bare.expectations.isEmpty)
+    }
+
+    func testParseCheckTargetsPageElementAlias() throws {
+        // シート列名 pageElement / newPageElement / body は本文(content)のエイリアス。nexturl は nextLink。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://s/x => pageElement,!newPageElement,nexturl,body").first)
+        XCTAssertEqual(target.expectations, [
+            ScrapeCheckExpectation(token: .content, mustBeEmpty: false),
+            ScrapeCheckExpectation(token: .content, mustBeEmpty: true),
+            ScrapeCheckExpectation(token: .nextLink, mustBeEmpty: false),
+            ScrapeCheckExpectation(token: .content, mustBeEmpty: false),
+        ])
+    }
+
+    func testParseCheckTargetsEmptyOrWhitespaceReturnsEmpty() throws {
+        XCTAssertTrue(ScrapeCheckTarget.parse(nil).isEmpty)
+        XCTAssertTrue(ScrapeCheckTarget.parse("").isEmpty)
+        XCTAssertTrue(ScrapeCheckTarget.parse("   \n  |  \n").isEmpty)
+    }
+
+    func testParseCheckTargetsHashComment() throws {
+        let raw = """
+        # この行はまるごとコメント
+        [auth] https://example.com/show/1 => content,author   # pixiv本文: ログイン時は author まで取れる想定
+        https://example.com/series/9 => firstPageLink # シリーズ概要ページ
+        """
+        let targets = ScrapeCheckTarget.parse(raw)
+        // まるごとコメント行は対象にならない → 2件。
+        XCTAssertEqual(targets.count, 2)
+        XCTAssertEqual(targets[0].url, URL(string: "https://example.com/show/1"))
+        XCTAssertTrue(targets[0].requireAuth)
+        XCTAssertEqual(targets[0].expectations, [
+            ScrapeCheckExpectation(token: .content, mustBeEmpty: false),
+            ScrapeCheckExpectation(token: .author, mustBeEmpty: false),
+        ])
+        // 行末コメントを除去しても期待トークンは正しく残る。
+        XCTAssertEqual(targets[1].url, URL(string: "https://example.com/series/9"))
+        XCTAssertEqual(targets[1].expectations, [ScrapeCheckExpectation(token: .firstPageLink, mustBeEmpty: false)])
+    }
+
+    func testParseCheckTargetsHashDoesNotBreakURLFragment() throws {
+        // URL の fragment(#...) は # の直前が空白でないため保持される。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://example.com/p#frag => content").first)
+        XCTAssertEqual(target.url, URL(string: "https://example.com/p#frag"))
+        XCTAssertEqual(target.expectations, [ScrapeCheckExpectation(token: .content, mustBeEmpty: false)])
+    }
+
+    func testParseCheckTargetsInlineCommentBeforePipeOnSameLine() throws {
+        // 同一行で `#` 以降に `|` 区切りの別エントリが続く場合、# 以降は行末までコメント(別エントリも消える)。
+        let targets = ScrapeCheckTarget.parse("https://a/1 => content # メモ | https://b/2 => author")
+        XCTAssertEqual(targets.count, 1)
+        XCTAssertEqual(targets[0].url, URL(string: "https://a/1"))
+    }
+
+    // MARK: - スクレイプ検査(checkTargets)の突合 evaluate(state:)
+
+    #if !os(watchOS)
+    // 検査の突合テスト用に、抽出後を模した StoryState を組み立てる。
+    private func makeInspectionState(url:String = "https://example.com/show/456",
+                                     content:String? = nil,
+                                     nextUrl:String? = nil,
+                                     firstPageLink:String? = nil,
+                                     title:String? = nil,
+                                     author:String? = nil,
+                                     subtitle:String? = nil,
+                                     tagArray:[String] = []) throws -> StoryState {
+        return StoryState(
+            url: try XCTUnwrap(URL(string: url)),
+            cookieString: nil,
+            content: content,
+            nextUrl: nextUrl.flatMap { URL(string: $0) },
+            firstPageLink: firstPageLink.flatMap { URL(string: $0) },
+            title: title,
+            author: author,
+            subtitle: subtitle,
+            tagArray: tagArray,
+            siteInfoArray: [],
+            isNeedHeadless: false,
+            isCanFetchNextImmediately: false,
+            waitSecondInHeadless: nil,
+            previousContent: nil,
+            document: nil,
+            nextButton: nil,
+            firstPageButton: nil,
+            forceClickButton: nil,
+            forceErrorMessage: nil
+        )
+    }
+
+    func testEvaluateAllExpectationsSatisfiedReturnsNoFailures() throws {
+        // 本文ページ: content,nextLink を期待し、firstPageLink は空であるべき(!firstPageLink)。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://example.com/show/456 => content,nextLink,!firstPageLink").first)
+        let state = try makeInspectionState(content: "本文がここにある", nextUrl: "https://example.com/show/457", firstPageLink: nil)
+        XCTAssertEqual(target.evaluate(state: state), [])
+    }
+
+    func testEvaluateReportsMissingExpectation() throws {
+        // content を期待しているのに抽出できていない → 失敗として報告される。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://example.com/show/456 => content,nextLink").first)
+        let state = try makeInspectionState(content: nil, nextUrl: "https://example.com/show/457")
+        let failures = target.evaluate(state: state)
+        XCTAssertEqual(failures.count, 1)
+        XCTAssertTrue(try XCTUnwrap(failures.first).contains("content"))
+    }
+
+    func testEvaluateNegationFailsWhenPresent() throws {
+        // !firstPageLink を期待しているのに firstPageLink が抽出された → 失敗。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://example.com/show/456 => content,!firstPageLink").first)
+        let state = try makeInspectionState(content: "本文", firstPageLink: "https://example.com/series/1")
+        let failures = target.evaluate(state: state)
+        XCTAssertEqual(failures.count, 1)
+        XCTAssertTrue(try XCTUnwrap(failures.first).hasPrefix("!firstPageLink"))
+    }
+
+    func testEvaluateNextLinkTokenMapsToNextUrlField() throws {
+        // nextLink トークンは StoryState.nextUrl の有無に対応する。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://example.com/show/456 => nextLink").first)
+        XCTAssertEqual(try target.evaluate(state: makeInspectionState(nextUrl: "https://example.com/next")), [])
+        XCTAssertEqual(try target.evaluate(state: makeInspectionState(nextUrl: nil)).count, 1)
+    }
+
+    func testEvaluateSeriesPageExpectsOnlyFirstPageLink() throws {
+        // シリーズ概要ページ: firstPageLink だけ期待。content が無くても OK。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://example.com/series/123 => firstPageLink").first)
+        let state = try makeInspectionState(url: "https://example.com/series/123", content: nil, firstPageLink: "https://example.com/show/1")
+        XCTAssertEqual(target.evaluate(state: state), [])
+    }
+
+    // MARK: - ScrapeInspector.judge(着手順3の判定ロジック・純粋関数)
+
+    func testJudgeSuccessNoFailureIsOK() throws {
+        let (status, reasons) = ScrapeInspector.judge(requireAuth: false, failMessage: nil, evaluateFailures: [])
+        XCTAssertEqual(status, .ok)
+        XCTAssertTrue(reasons.isEmpty)
+    }
+
+    func testJudgeSuccessWithFailureIsNG() throws {
+        let (status, reasons) = ScrapeInspector.judge(requireAuth: false, failMessage: nil, evaluateFailures: ["content (抽出できなかった)"])
+        XCTAssertEqual(status, .ng)
+        XCTAssertEqual(reasons, ["content (抽出できなかった)"])
+    }
+
+    func testJudgeAuthSuccessFailureSameHostNoGateIsWarn() throws {
+        // [auth] で期待が外れたが gate も別ホストも無い = 未ログインの確証なし = 故障の可能性 → WARN(要確認)。
+        let (status, reasons) = ScrapeInspector.judge(requireAuth: true, failMessage: nil, evaluateFailures: ["nextLink (抽出できなかった)"], hostChanged: false)
+        XCTAssertEqual(status, .warn)
+        XCTAssertTrue(reasons.contains("nextLink (抽出できなかった)"))
+    }
+
+    func testJudgeAuthSuccessFailureHostChangedIsSkip() throws {
+        // [auth] で別ホストへ飛ばされた(novel18→nl.syosetu.com 等) = 未ログイン確定 → SKIP。
+        let (status, reasons) = ScrapeInspector.judge(requireAuth: true, failMessage: nil, evaluateFailures: ["nextLink (抽出できなかった)"], hostChanged: true)
+        XCTAssertEqual(status, .skip)
+        XCTAssertEqual(reasons.first, "別ホストへリダイレクト(未ログイン/年齢確認の可能性)")
+    }
+
+    func testJudgeAuthSuccessHostChangedEvenWithContentIsSkip() throws {
+        // 別ホストの年齢確認ページは //body で content が取れてしまうが、別ホスト=要求ページではないので SKIP(偽OKにしない)。
+        let (status, _) = ScrapeInspector.judge(requireAuth: true, failMessage: nil, evaluateFailures: [], hostChanged: true)
+        XCTAssertEqual(status, .skip)
+    }
+
+    func testIsHostChangedDetectsNovel18Redirect() throws {
+        let requested = try XCTUnwrap(URL(string: "https://novel18.syosetu.com/n8956gi/1/"))
+        let redirected = try XCTUnwrap(URL(string: "https://nl.syosetu.com/redirect/ageauth/?url=x"))
+        let same = try XCTUnwrap(URL(string: "https://novel18.syosetu.com/n8956gi/1/?foo=bar"))
+        XCTAssertTrue(ScrapeInspector.isHostChanged(requested: requested, final: redirected))
+        XCTAssertFalse(ScrapeInspector.isHostChanged(requested: requested, final: same))
+        XCTAssertFalse(ScrapeInspector.isHostChanged(requested: requested, final: nil))
+    }
+
+    func testParseCheckTargetsCollectsUnknownTokens() throws {
+        // 語彙外トークン(typo)は黙って捨てず unknownTokens に記録する。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://s/x => titel,content,authr").first)
+        XCTAssertEqual(target.expectations, [ScrapeCheckExpectation(token: .content, mustBeEmpty: false)])
+        XCTAssertEqual(target.unknownTokens, ["titel", "authr"])
+    }
+
+    func testJudgeUnknownTokenEscalatesOKtoWarn() throws {
+        // typo があると、たとえ評価が成功(OK相当)でも WARN に格上げして気づけるようにする。
+        let (status, reasons) = ScrapeInspector.judge(requireAuth: false, failMessage: nil, evaluateFailures: [], hostChanged: false, unknownTokens: ["titel"])
+        XCTAssertEqual(status, .warn)
+        XCTAssertTrue(reasons.first?.contains("titel") == true)
+    }
+
+    func testJudgeUnknownTokenKeepsNGButAnnotates() throws {
+        // 既に NG のものは NG のまま、typo 注記を足す。
+        let (status, reasons) = ScrapeInspector.judge(requireAuth: false, failMessage: nil, evaluateFailures: ["content (抽出できなかった)"], hostChanged: false, unknownTokens: ["authr"])
+        XCTAssertEqual(status, .ng)
+        XCTAssertTrue(reasons.contains(where: { $0.contains("authr") }))
+        XCTAssertTrue(reasons.contains("content (抽出できなかった)"))
+    }
+
+    func testJudgeForceErrorWithoutAuthIsNG() throws {
+        // forceError(gate) が出たが [auth] でないなら NG(壊れている)。
+        let (status, reasons) = ScrapeInspector.judge(requireAuth: false, failMessage: "ログインを促す画面が出ています。", evaluateFailures: [])
+        XCTAssertEqual(status, .ng)
+        XCTAssertEqual(reasons, ["ログインを促す画面が出ています。"])
+    }
+
+    func testJudgeForceErrorWithAuthIsSkip() throws {
+        // forceError(gate) で [auth] なら未ログインとみなして SKIP。
+        let (status, _) = ScrapeInspector.judge(requireAuth: true, failMessage: "ログインを促す画面が出ています。", evaluateFailures: [])
+        XCTAssertEqual(status, .skip)
+    }
+
+    func testJudgeRobotsBlockIsRobotsLabelEvenWithAuth() throws {
+        // robots ブロックは [auth] の有無に関わらず別ラベル(ROBOTS)。
+        let (status, _) = ScrapeInspector.judge(requireAuth: true, failMessage: ScrapeInspector.robotsBlockMessage, evaluateFailures: [])
+        XCTAssertEqual(status, .robotsBlocked)
+        let (status2, _) = ScrapeInspector.judge(requireAuth: false, failMessage: ScrapeInspector.robotsBlockMessage, evaluateFailures: [])
+        XCTAssertEqual(status2, .robotsBlocked)
+    }
+
+    func testReportCountsAndOrder() throws {
+        let url = try XCTUnwrap(URL(string: "https://example.com/x"))
+        let results = [
+            ScrapeInspector.Result(siteName: "A", url: url, requireAuth: false, status: .ok, reasons: []),
+            ScrapeInspector.Result(siteName: "B", url: url, requireAuth: false, status: .ng, reasons: ["content (抽出できなかった)"]),
+            ScrapeInspector.Result(siteName: "C", url: url, requireAuth: true, status: .skip, reasons: ["要ログイン/年齢確認の可能性"]),
+        ]
+        let report = ScrapeInspector.report(results: results)
+        XCTAssertTrue(report.contains("NG:1"))
+        XCTAssertTrue(report.contains("SKIP:1"))
+        XCTAssertTrue(report.contains("OK:1"))
+        // 明細は NG が OK より前(重要度順)。
+        let ngIndex = try XCTUnwrap(report.range(of: "[NG]"))
+        let okIndex = try XCTUnwrap(report.range(of: "[OK]"))
+        XCTAssertTrue(ngIndex.lowerBound < okIndex.lowerBound)
+    }
+    #endif
+
+
     #if !os(watchOS)
     private func createTestDocument(html:String) throws -> Document {
         let rawDocument = try XCTUnwrap(HTML(html: html, encoding: .utf8))

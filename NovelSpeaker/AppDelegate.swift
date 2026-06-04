@@ -15,6 +15,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        #if targetEnvironment(macCatalyst)
+        // コマンドライン引数(--scrape-inspect)指定時は、UIも重いpreflight(CloudKit/Realm)も行わず、
+        // SiteInfo検査だけして stdout にレポートを吐いて exit する。
+        // runPreflight() より前に出すのは、検査エンジンが CloudKit を必要とせず、
+        // かつ headless 起動(cron/launchd)では iCloud コンテナ初期化が落ちうるため。
+        if AppLaunchCoordinator.runScrapeInspectionCLIIfRequested() {
+            return true
+        }
+        #endif
+
         guard AppLaunchCoordinator.runPreflight() else {
             return false
         }

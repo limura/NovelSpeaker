@@ -124,6 +124,174 @@ forceErrorElementIsAlive_ErrorMessage: \(forceErrorMessage ?? "nil")
     }
 }
 
+// MARK: - スクレイプ検査(checkTargets)用の型
+// SiteInfo の checkTargets フィールド(新設)をパースして保持するための型群。
+// 「今もそのサイトを正しくスクレイプできるか」を構造的(期待項目が非空か)に検査するために使う。
+// 設計メモ: DESIGN_スクレイプ検査.md
+
+// 検査で突合する期待項目。StoryState のどのフィールドを見るかに対応する。
+enum ScrapeCheckToken : String, CaseIterable {
+    case content          // StoryState.content が非空
+    case title            // StoryState.title が非空
+    case author           // StoryState.author が非空
+    case subtitle         // StoryState.subtitle が非空
+    case tag              // StoryState.tagArray が非空
+    case firstPageLink    // StoryState.firstPageLink != nil
+    case nextLink         // StoryState.nextUrl != nil (トークン名は nextLink だがフィールドは nextUrl)
+    case nextButton       // StoryState.nextButton != nil (headless時のみ)
+    case firstPageButton  // StoryState.firstPageButton != nil (headless時のみ)
+
+    // 大文字小文字を無視して引く。未知トークンは nil(寛容にスキップする)。
+    // エイリアス: SiteInfo シートの列名で書く人が多いので `pageElement`/`newPageElement` を本文(content)として受ける。
+    static func from(_ string:String) -> ScrapeCheckToken? {
+        let key = string.lowercased()
+        switch key {
+        case "pageelement", "newpageelement", "body": return .content
+        case "nexturl": return .nextLink
+        default: break
+        }
+        return ScrapeCheckToken.allCases.first { $0.rawValue.lowercased() == key }
+    }
+}
+
+// 1つの期待項目。`!token` 指定なら mustBeEmpty=true(「空であるべき」)。
+struct ScrapeCheckExpectation : Equatable {
+    let token: ScrapeCheckToken
+    let mustBeEmpty: Bool
+}
+
+// 1つの検査対象(URL + 期待項目群 + 要認証フラグ)。
+// checkTargets セル内の1エントリに相当する。
+struct ScrapeCheckTarget : Equatable {
+    let url: URL
+    let expectations: [ScrapeCheckExpectation]
+    let requireAuth: Bool // [auth] 前置タグ。未ログイン時に NG ではなく SKIP 扱いにするための印。
+    var unknownTokens: [String] = [] // 語彙に無いトークン(typoの可能性)。黙って無視せず警告に使う。
+
+    // 1行から `#` 行コメントを除去する。
+    // URL の fragment(`...#frag`)を壊さないよう、コメント開始の `#` は『行頭 もしくは 空白の直後』に限る。
+    //   "# まるごとコメント"           -> ""
+    //   "URL => tok  # メモ"           -> "URL => tok  "
+    //   "https://x/p#frag => content"  -> そのまま(# の直前が空白でないため非コメント)
+    private static func stripInlineComment(_ line:String) -> String {
+        var prevWasWhitespaceOrStart = true
+        var idx = line.startIndex
+        while idx < line.endIndex {
+            let ch = line[idx]
+            if ch == "#" && prevWasWhitespaceOrStart {
+                return String(line[..<idx])
+            }
+            prevWasWhitespaceOrStart = ch.isWhitespace
+            idx = line.index(after: idx)
+        }
+        return line
+    }
+
+    // checkTargets フィールド文字列をパースして検査対象配列にする。
+    // フォーマット(1セル内):
+    //   - エントリ区切りは 改行 または `|`
+    //   - `#` 以降は行コメント(行頭 or 空白直後の `#` から行末まで)。各行に説明メモを書ける。
+    //   - 各エントリ: `[auth] URL => tok,tok,!tok`
+    //     - 先頭の `[auth]`(または `[login]`) は任意。要認証マーク。
+    //     - URL と トークン群の区切りは `=>`(前後スペースは任意、trimする)。
+    //       `>` はURL中に生で出現しない(%3E になる)ため `=>` は衝突しない。
+    //     - トークンは `,` 区切り。先頭 `!` は「空であるべき」。未知トークンはスキップ。
+    //   - `=>` の無いエントリ(URLのみ)は期待項目なしの対象として保持する。
+    static func parse(_ raw:String?) -> [ScrapeCheckTarget] {
+        guard let raw = raw, raw.contains(where: { !$0.isWhitespace }) else { return [] }
+        // 先に『行単位』で # コメントを除去してから、各行を `|` で分割する。
+        // (# は物理行末までをコメントにする。`|` より先に行コメントを処理しないと、
+        //  同一行で `#` 以降に `|` 区切りの別エントリが続く場合に誤って残ってしまうため。)
+        var entries:[Substring] = []
+        for lineSub in raw.split(omittingEmptySubsequences: false, whereSeparator: { $0.isNewline }) {
+            let line = stripInlineComment(String(lineSub))
+            entries.append(contentsOf: line.split(separator: "|"))
+        }
+        var result:[ScrapeCheckTarget] = []
+        for entryRaw in entries {
+            var entry = entryRaw.trimmingCharacters(in: .whitespaces)
+            if entry.isEmpty { continue }
+            // 先頭の [tag] を読む(複数可)。auth/login を要認証マークとして扱う。
+            var requireAuth = false
+            while entry.hasPrefix("["), let close = entry.firstIndex(of: "]") {
+                let tag = entry[entry.index(after: entry.startIndex)..<close].trimmingCharacters(in: .whitespaces).lowercased()
+                if tag == "auth" || tag == "login" { requireAuth = true }
+                entry = String(entry[entry.index(after: close)...]).trimmingCharacters(in: .whitespaces)
+            }
+            // URL => tokens を最初の `=>` で分割。`=>` が無ければURLのみとみなす。
+            let urlPart:String
+            let tokenPart:String
+            if let range = entry.range(of: "=>") {
+                urlPart = String(entry[..<range.lowerBound]).trimmingCharacters(in: .whitespaces)
+                tokenPart = String(entry[range.upperBound...]).trimmingCharacters(in: .whitespaces)
+            } else {
+                urlPart = entry
+                tokenPart = ""
+            }
+            guard let url = URL(string: urlPart) else { continue }
+            var expectations:[ScrapeCheckExpectation] = []
+            var unknownTokens:[String] = []
+            for tokenRaw in tokenPart.split(separator: ",") {
+                var token = tokenRaw.trimmingCharacters(in: .whitespaces)
+                if token.isEmpty { continue }
+                var mustBeEmpty = false
+                if token.hasPrefix("!") {
+                    mustBeEmpty = true
+                    token = String(token.dropFirst()).trimmingCharacters(in: .whitespaces)
+                }
+                guard let parsed = ScrapeCheckToken.from(token) else {
+                    // 黙ってスキップせず記録する(typo を後で警告するため)。
+                    unknownTokens.append(token)
+                    continue
+                }
+                expectations.append(ScrapeCheckExpectation(token: parsed, mustBeEmpty: mustBeEmpty))
+            }
+            result.append(ScrapeCheckTarget(url: url, expectations: expectations, requireAuth: requireAuth, unknownTokens: unknownTokens))
+        }
+        return result
+    }
+
+    // 期待トークンが抽出後の StoryState 上で「非空/存在」しているかを判定する。
+    private static func isPresent(_ token:ScrapeCheckToken, in state:StoryState) -> Bool {
+        switch token {
+        case .content: return (state.content?.isEmpty == false)
+        case .title: return (state.title?.isEmpty == false)
+        case .author: return (state.author?.isEmpty == false)
+        case .subtitle: return (state.subtitle?.isEmpty == false)
+        case .tag: return !state.tagArray.isEmpty
+        case .firstPageLink: return state.firstPageLink != nil
+        case .nextLink: return state.nextUrl != nil
+        case .nextButton:
+            #if !os(watchOS)
+            return state.nextButton != nil
+            #else
+            return false
+            #endif
+        case .firstPageButton:
+            #if !os(watchOS)
+            return state.firstPageButton != nil
+            #else
+            return false
+            #endif
+        }
+    }
+
+    // 単ページモードで取得した StoryState を期待項目群と突合する。
+    // 戻り値: 満たせなかった期待の説明配列。空なら全て満たした(=OK)。
+    func evaluate(state:StoryState) -> [String] {
+        var failures:[String] = []
+        for expectation in expectations {
+            let present = ScrapeCheckTarget.isPresent(expectation.token, in: state)
+            if expectation.mustBeEmpty {
+                if present { failures.append("!\(expectation.token.rawValue) (空であるべきだが抽出された)") }
+            } else {
+                if !present { failures.append("\(expectation.token.rawValue) (抽出できなかった)") }
+            }
+        }
+        return failures
+    }
+}
+
 struct StorySiteInfo : Identifiable {
     let id: String
     
@@ -155,6 +323,9 @@ struct StorySiteInfo : Identifiable {
     let scrollTo: String?
     let isNeedWhitespaceSplitForTag: Bool
     var novelImportEnableSettings: [String]
+    // スクレイプ検査(checkTargets)用。SiteInfo に新設した checkTargets フィールドをパースして保持する。
+    // 設計メモ: DESIGN_スクレイプ検査.md
+    let checkTargets: [ScrapeCheckTarget]
 
     static func newPageElement2PageElelmentDict(newPageElement:String) -> [String: ([(lang:Language, title:String)], xpath:String)] {
         if !newPageElement.contains(where: \.isNewline) {
@@ -183,7 +354,7 @@ struct StorySiteInfo : Identifiable {
         return result
     }
 
-    init(id: String, name: String?, newPageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?, novelImportEnableSettings:[String] = []) {
+    init(id: String, name: String?, newPageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?, checkTargets:String? = nil, novelImportEnableSettings:[String] = []) {
 
         func newPageElement2PageElement(newPageElement:String) -> String {
             // 複数要素(取り込み対象を選べる)形式は改行区切り。
@@ -221,8 +392,14 @@ struct StorySiteInfo : Identifiable {
         self.tag = tag
         self.author = author
         self.injectStyle = injectStyle
-        self.nextButton = nextButton
-        self.firstPageButton = firstPageButton
+        // 空文字列のセレクタは nil として扱う。
+        // SiteInfo の CSV/TSV では未設定セルが "" になり、そのままだと
+        //   ・querySelectorAll("") が Erik(内部Kanna)経由で libxml2 "XPath error : Invalid expression" を出す
+        //   ・IsNextAlive() の `nextButton != nil` 判定が空""でも真になり「次ページあり」と誤判定する
+        // ため、ここで空→nil に正規化する。
+        func emptyToNil(_ s:String?) -> String? { (s?.isEmpty == false) ? s : nil }
+        self.nextButton = emptyToNil(nextButton)
+        self.firstPageButton = emptyToNil(firstPageButton)
         let falseValues:[String] = ["false", "False", "nil", "0"]
         if let isNeedHeadlessString = isNeedHeadless, isNeedHeadlessString.count > 0 && !falseValues.contains(isNeedHeadlessString) {
             self.isNeedHeadless = true
@@ -230,19 +407,20 @@ struct StorySiteInfo : Identifiable {
             self.isNeedHeadless = false
         }
         self.waitSecondInHeadless = waitSecondInHeadless
-        self.forceClickButton = forceClickButton
+        self.forceClickButton = emptyToNil(forceClickButton)
         self.resourceUrl = resourceUrl
         self.overrideUserAgent = overrideUserAgent
         self.forceErrorMessageAndElement = forceErrorMessageAndElement
-        self.scrollTo = scrollTo
+        self.scrollTo = emptyToNil(scrollTo)
         if let isNeedWhitespaceSplitForTagString = isNeedWhitespaceSplitForTag, isNeedWhitespaceSplitForTagString.count > 0 && !falseValues.contains(isNeedWhitespaceSplitForTagString) {
             self.isNeedWhitespaceSplitForTag = true
         }else{
             self.isNeedWhitespaceSplitForTag = false
         }
         self.novelImportEnableSettings = novelImportEnableSettings
+        self.checkTargets = ScrapeCheckTarget.parse(checkTargets)
     }
-    
+
     var forceErrorMessage : String? {
         get {
             guard let forceErrorMessageAndElement = self.forceErrorMessageAndElement else { return nil }
@@ -453,8 +631,9 @@ extension StorySiteInfo : Decodable {
         case forceErrorMessageAndElement
         case scrollTo
         case isNeedWhitespaceSplitForTag
+        case checkTargets
     }
-    
+
     init(from decoder: Decoder) throws {
         let toplevelValue = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -493,8 +672,9 @@ extension StorySiteInfo : Decodable {
             isNeedHeadless = false
         }
         injectStyle = try? values.decode(String.self, forKey: NestedKeys.injectStyle)
-        nextButton = try? values.decode(String.self, forKey: NestedKeys.nextButton)
-        firstPageButton = try? values.decode(String.self, forKey: NestedKeys.firstPageButton)
+        // 空文字列のセレクタは nil 扱い(memberwise init と揃える。理由はそちらのコメント参照)
+        nextButton = (try? values.decode(String.self, forKey: NestedKeys.nextButton)).flatMap { $0.isEmpty ? nil : $0 }
+        firstPageButton = (try? values.decode(String.self, forKey: NestedKeys.firstPageButton)).flatMap { $0.isEmpty ? nil : $0 }
         #if !os(watchOS)
         if let waitSecondInHeadlessString = try? values.decode(String.self, forKey: NestedKeys.waitSecondInHeadless), let value = Double(string: waitSecondInHeadlessString) {
             waitSecondInHeadless = value
@@ -502,8 +682,8 @@ extension StorySiteInfo : Decodable {
             waitSecondInHeadless = 0
         }
         overrideUserAgent = try? values.decode(String.self, forKey: NestedKeys.overrideUserAgent)
-        forceClickButton = try? values.decode(String.self, forKey: NestedKeys.forceClickButton)
-        scrollTo = try? values.decode(String.self, forKey: NestedKeys.scrollTo)
+        forceClickButton = (try? values.decode(String.self, forKey: NestedKeys.forceClickButton)).flatMap { $0.isEmpty ? nil : $0 }
+        scrollTo = (try? values.decode(String.self, forKey: NestedKeys.scrollTo)).flatMap { $0.isEmpty ? nil : $0 }
         #else
         waitSecondInHeadless = 0
         overrideUserAgent = nil
@@ -529,6 +709,7 @@ extension StorySiteInfo : Decodable {
             isNeedWhitespaceSplitForTag = false
         }
         self.novelImportEnableSettings = []
+        self.checkTargets = ScrapeCheckTarget.parse(try? values.decode(String.self, forKey: NestedKeys.checkTargets))
     }
 }
 
@@ -631,7 +812,8 @@ class StoryHtmlDecoder {
                 overrideUserAgent: dict["overrideUserAgent"],
                 forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
                 scrollTo: dict["scrollTo"],
-                isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"]
+                isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"],
+                checkTargets: dict["checkTargets"]
             )
             //print("add StorySiteInfo: \(storySiteInfo)")
             result.append(storySiteInfo)
@@ -748,6 +930,7 @@ class StoryHtmlDecoder {
                 forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
                 scrollTo: dict["scrollTo"],
                 isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"],
+                checkTargets: dict["checkTargets"],
                 novelImportEnableSettings: importTargets,
             )
             //print("add StorySiteInfo: \(storySiteInfo)")
@@ -1321,9 +1504,18 @@ class StoryFetcher {
     // 具体的には、
     // 本文の読み込みに成功するとその時の StoryState を引数として successAction を呼び出します。
     // successAction が呼び出されたら、
-    func FetchNext(currentState:StoryState, fetchTimeToLive:Int = 5, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?){
-        // 入力に有効な content があるならそこで探索は終わり
-        if let content = currentState.content, content.count > 0 {
+    // inspectionTargetURL: スクレイプ検査(checkTargets)用の単ページモード。
+    //   非nilのとき「初回GET(nextUrl == inspectionTargetURL の経路)と forceClickButton(広告/ダイアログ消し)・scrollTo 等は
+    //   通常通り実行するが、firstPageLink / 2回目以降の nextUrl / nextButton / firstPageButton への『ページ遷移』はしない」。
+    //   遷移する代わりに、その時点で抽出済みの StoryState を successAction で返し、呼び出し側(検査)が期待項目と突合する。
+    //   通常の取り込みは nil のままなので影響しない。設計メモ: DESIGN_スクレイプ検査.md
+    func FetchNext(currentState:StoryState, fetchTimeToLive:Int = 5, inspectionTargetURL:URL? = nil, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?){
+        // 入力に有効な content があるならそこで探索は終わり。
+        // ただし forceErrorMessage(gate/壁ページ検出)が立っている場合は本文が取れていても失敗にする。
+        // (pixiv 未ログイン等、壁ページが og:description 由来の teaser 本文を持つケースでは
+        //  content と forceErrorMessage が同時に立つ。ここで content を優先すると壁を素通りして
+        //  下の forceErrorMessage→failedAction(:1546付近) に到達しないため、gate検出が無効化されてしまう。)
+        if let content = currentState.content, content.count > 0, currentState.forceErrorMessage == nil {
             // previousContent に何か入っているという事は、読み込み
             if let previousContent = currentState.previousContent, content == previousContent {
                 failedAction?(currentState.url, NSLocalizedString("StoryFetcher_FetchNext_ErrorSameContent", comment: "同じ内容が読み込まれているようです。次のページの検出に失敗しているとみなして失敗とします。"))
@@ -1402,21 +1594,27 @@ class StoryFetcher {
         }
         
         // 押さねばならないボタンがあるのなら押す
+        // (検査モードでも実行する。全画面広告/ダイアログを消さないと本文が出ないサイトがあるため。)
         if let element = currentState.forceClickButton {
             print("force click: \(element)")
             buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
                 if let state = state {
                     // TTL を減らして再取得したつもりになって評価しなおします。
-                    self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
+                    self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, inspectionTargetURL: inspectionTargetURL, successAction: successAction, failedAction: failedAction)
                     return
                 }
                 failedAction?(currentState.url, err?.localizedDescription ?? "unknown error: ForceClickButton")
             }
             return
         }
-        
+
         // 次ページへのボタンがあればそれを辿る
         if let element = currentState.nextButton {
+            // 検査モードではボタン送り(ページ遷移)はせず、ボタンが存在する状態のまま検査側へ返す。
+            if inspectionTargetURL != nil {
+                successAction?(currentState)
+                return
+            }
             buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
                 if let state = state {
                     // TTL を減らして再取得したつもりになって評価しなおします。
@@ -1429,6 +1627,11 @@ class StoryFetcher {
         }
         // 本文へのボタンがあればそれを辿る
         if let element = currentState.firstPageButton {
+            // 検査モードではボタン送り(ページ遷移)はせず、ボタンが存在する状態のまま検査側へ返す。
+            if inspectionTargetURL != nil {
+                successAction?(currentState)
+                return
+            }
             buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
                 if let state = state {
                     // TTL を減らして再取得したつもりになって評価しなおします。
@@ -1479,7 +1682,7 @@ class StoryFetcher {
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton, forceErrorMessage: currentState.forceErrorMessage)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
-                        self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
+                        self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, inspectionTargetURL: inspectionTargetURL, successAction: successAction, failedAction: failedAction)
                     }, failedAction: failedAction)
                 }) { (error) in
                     failedAction?(currentState.url, error?.localizedDescription ?? "httpHeadlessRequest return unknown error(nil)")
@@ -1500,19 +1703,32 @@ class StoryFetcher {
                 #endif
                 let (html, guessedEncoding) = NiftyUtility.decodeHTMLStringFrom(data: data, headerEncoding: encoding)
                 self.DecodeDocument(currentState: newState, html: html, encoding: guessedEncoding ?? encoding ?? .utf8, successAction: { (state) in
-                    self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
+                    self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, inspectionTargetURL: inspectionTargetURL, successAction: successAction, failedAction: failedAction)
                 }, failedAction: failedAction)
             }) { (error) in
                 failedAction?(currentState.url, error?.localizedDescription ?? "httpRequest return unknown error(nil)")
             }
         }
-        
+
         if let firstPageLink = currentState.firstPageLink {
+            // 検査モードでは firstPageLink への遷移はしない(検査対象ページから離れてしまうため)。
+            // firstPageLink が抽出できている状態のまま検査側へ返す。
+            // (初回GETは必ず nextUrl 経路なので、firstPageLink は常にデコード後=遷移対象であり、ここで止めて良い。)
+            if inspectionTargetURL != nil {
+                successAction?(currentState)
+                return
+            }
             // firstPageLink があるならそれを辿る
             fetchUrlWithRobotsCheck(url: firstPageLink, currentState: currentState)
             return
         }
         if let nextUrl = currentState.nextUrl {
+            // 検査モードでは「初回GET(nextUrl == 検査対象URL)」だけ実行し、
+            // それ以外の nextUrl(=デコード後に得た次ページリンク)への遷移はしない。
+            if let inspectionTargetURL = inspectionTargetURL, nextUrl != inspectionTargetURL {
+                successAction?(currentState)
+                return
+            }
             // nextUrl があるならそれを辿る
             fetchUrlWithRobotsCheck(url: nextUrl, currentState: currentState)
             return
@@ -1565,6 +1781,22 @@ class StoryFetcher {
         })
     }
     
+    // スクレイプ検査(checkTargets)用：指定URLを「単ページモード」で読み込み、抽出結果の StoryState を返す。
+    // 初回GET・forceClickButton(広告/ダイアログ消し)・scrollTo(遅延ロード誘発)・waitSecond 等は通常の取り込みと同じく実行するが、
+    // firstPageLink / nextLink(次ページ) / nextButton / firstPageButton への『ページ遷移』はせず、
+    // 検査対象ページから抽出できた内容のまま返す(FetchNext の inspectionTargetURL モード)。
+    // successAction で受けた state を ScrapeCheckTarget.evaluate(state:) に渡して期待項目と突合する。
+    // 設計メモ: DESIGN_スクレイプ検査.md
+    func InspectFetchSinglePage(url:URL, cookieString:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: nil, completion: { (state, errorString) in
+            if let errorString = errorString, errorString.count > 0 {
+                failedAction?(url, errorString)
+                return
+            }
+            self.FetchNext(currentState: state, inspectionTargetURL: url, successAction: successAction, failedAction: failedAction)
+        })
+    }
+
     private func FetchFirstContentRecurcive(currentState:StoryState, countToLive:Int = 10, nextFetchTime:Date = Date(timeIntervalSince1970: 0), successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
         print("FetchFirstContentRecurcive in. \(currentState.url.absoluteString)")
         if let content = currentState.content, content.count > 0 {
@@ -1609,3 +1841,177 @@ class StoryFetcher {
         })
     }
 }
+
+#if !os(watchOS)
+// MARK: - スクレイプ検査(checkTargets)ランナー
+// SiteInfo に登録された checkTargets を全件、1日1回程度の頻度で検査して
+// 「ちゃんとスクレイプできているか(期待フィールドが取れているか)」を OK/NG/SKIP/ROBOTS/ERROR で集計する。
+// 共有 headless httpClient(WKWebView 単一インスタンス)を使うため『逐次実行』。設計メモ: DESIGN_スクレイプ検査.md(着手順3)。
+class ScrapeInspector {
+    enum Status : String {
+        case ok = "OK"
+        case ng = "NG"
+        case warn = "WARN"            // [auth]で取れないが未ログインの確証(gate/別ホスト)が無い=故障の可能性。要確認。
+        case skip = "SKIP"
+        case robotsBlocked = "ROBOTS"
+        case error = "ERROR"
+    }
+    struct Result {
+        let siteName: String
+        let url: URL
+        let requireAuth: Bool
+        let status: Status
+        let reasons: [String]
+        var description: String {
+            let head = "[\(status.rawValue)]\(requireAuth ? "[auth]" : "")  \(siteName)  \(url.absoluteString)"
+            if reasons.isEmpty { return head }
+            return head + "\n    - " + reasons.joined(separator: "\n    - ")
+        }
+    }
+
+    // 検査対象(SiteInfo表示名 + ターゲット)の組。
+    private struct WorkItem {
+        let siteName: String
+        let target: ScrapeCheckTarget
+    }
+
+    private let fetcher = StoryFetcher()
+    private var results: [Result] = []
+    private let perTargetTimeout: TimeInterval
+    private let intervalBetweenTargets: TimeInterval
+
+    // perTargetTimeout: 1ターゲットの応答待ち上限(保険)。intervalBetweenTargets: 連続アクセスの間隔。
+    init(perTargetTimeout: TimeInterval = 90, intervalBetweenTargets: TimeInterval = 1.0) {
+        self.perTargetTimeout = perTargetTimeout
+        self.intervalBetweenTargets = intervalBetweenTargets
+    }
+
+    // robots ブロックのローカライズ文言(failedAction の message と一致させて robots を判別する)。
+    static var robotsBlockMessage: String {
+        return NSLocalizedString("StoryFetcher_FetchError_RobotsText", comment: "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。")
+    }
+
+    // 実遷移後URL(headless の現在URL)のホストが要求と変わったか。
+    // 注意: state.url はリダイレクト後も要求URLのまま(ステイル)なので、ホスト比較には httpClient.GetCurrentURL() を使う。
+    // novel18 等は未ログイン時 別ホスト(nl.syosetu.com の年齢確認)へ飛ぶ。これを「未ログイン確定」の信号にする。
+    // www↔m 等の同サイト別サブドメインも host文字列は変わるが、判定は [auth] かつ『取れなかった時』に限るので実害は小さい
+    // (取れていれば OK のまま)。なお登録ドメイン(eTLD+1)比較だと novel18.syosetu.com と nl.syosetu.com が同一になり
+    // novel18 を検出できないため、ホスト完全一致で比較する。
+    static func isHostChanged(requested: URL, final: URL?) -> Bool {
+        guard let finalHost = final?.host, let reqHost = requested.host else { return false }
+        return finalHost != reqHost
+    }
+
+    // 検査1件の判定(純粋関数・テスト可能)。
+    //   failMessage: failedAction のメッセージ(nil なら success)。
+    //   evaluateFailures: success 時の ScrapeCheckTarget.evaluate(state:) の結果(空なら全て満たした)。
+    //   hostChanged: 実遷移後URLのホストが要求と変わったか(別ホストの壁へ飛ばされた=未ログイン確定の信号)。
+    // 思想: 『誤NGより検知漏れ』。未ログインの"確証"(別ホスト/robots)があるものは静かに SKIP、
+    //       gate(forceError) も別ホストも無いのに [auth] で取れないものは『故障の可能性』として WARN で目立たせる。
+    static func judge(requireAuth: Bool, failMessage: String?, evaluateFailures: [String], hostChanged: Bool = false, unknownTokens: [String] = []) -> (status: Status, reasons: [String]) {
+        let base = judgeCore(requireAuth: requireAuth, failMessage: failMessage, evaluateFailures: evaluateFailures, hostChanged: hostChanged)
+        // checkTargets に語彙外トークン(typoの可能性)があれば、黙って無視せず警告する。
+        // 期待として効いていない＝検査が意図より弱い状態なので、OK でも WARN に格上げして気づけるようにする。
+        guard !unknownTokens.isEmpty else { return base }
+        let note = "設定の無効トークン(typo?): " + unknownTokens.joined(separator: ", ")
+        let status: Status = (base.status == .ok) ? .warn : base.status
+        return (status, [note] + base.reasons)
+    }
+
+    private static func judgeCore(requireAuth: Bool, failMessage: String?, evaluateFailures: [String], hostChanged: Bool) -> (status: Status, reasons: [String]) {
+        if let message = failMessage {
+            if message == robotsBlockMessage { return (.robotsBlocked, [message]) }
+            // 別ホストへ飛ばされた [auth] は未ログイン確定として SKIP。
+            if requireAuth && hostChanged { return (.skip, ["別ホストへリダイレクト(未ログイン/年齢確認の可能性)", message]) }
+            // gate(forceError) 等。要認証マークなら未ログイン/年齢未確認の可能性として SKIP。
+            if requireAuth { return (.skip, [message]) }
+            return (.ng, [message])
+        }
+        // 別ホストへ飛ばされた = 要求ページを取得できていない。[auth] なら未ログイン確定 SKIP(content等が取れても信用しない)。
+        if requireAuth && hostChanged { return (.skip, ["別ホストへリダイレクト(未ログイン/年齢確認の可能性)"]) }
+        if evaluateFailures.isEmpty { return (.ok, []) }
+        // gate も別ホストも無いのに [auth] で取れない = 未ログインの確証が無い = スクレイプ故障の可能性。要確認(WARN)。
+        if requireAuth { return (.warn, ["要確認: 未ログインの確証(gate/別ホスト)が無いのに取得できず。ログイン状態かスクレイプ破損を確認"] + evaluateFailures) }
+        return (.ng, evaluateFailures)
+    }
+
+    // SiteInfo をロードしてから全 checkTargets を逐次検査する。
+    // progress: (完了数, 総数, 直近の結果)。completion: 全結果。
+    func InspectAll(progress: ((Int, Int, Result) -> Void)? = nil, completion: @escaping ([Result]) -> Void) {
+        StoryHtmlDecoder.shared.WaitLoadSiteInfoReady { [weak self] _ in
+            guard let self = self else { return }
+            // SiteInfo は複数ソースURLから二重ロードされる(siteInfoArrayArray が同内容を複数持つ)ため、
+            // 同一(サイト名+URL+期待トークン)の重複を除いて、各検査対象を1回だけ実行する。
+            var items: [WorkItem] = []
+            var seen = Set<String>()
+            for siteInfoArray in StoryHtmlDecoder.shared.siteInfoArrayArray {
+                for siteInfo in siteInfoArray {
+                    if siteInfo.checkTargets.isEmpty { continue }
+                    let siteName = siteInfo.name ?? siteInfo.resourceUrl ?? "(no name)"
+                    for target in siteInfo.checkTargets {
+                        let tokenSig = target.expectations.map { "\($0.mustBeEmpty ? "!" : "")\($0.token.rawValue)" }.joined(separator: ",")
+                        let key = "\(siteName)|\(target.requireAuth ? "A" : "-")|\(target.url.absoluteString)|\(tokenSig)"
+                        if seen.contains(key) { continue }
+                        seen.insert(key)
+                        items.append(WorkItem(siteName: siteName, target: target))
+                    }
+                }
+            }
+            DispatchQueue.main.async {
+                self.results = []
+                self.runSequential(items: items, index: 0, progress: progress, completion: completion)
+            }
+        }
+    }
+
+    private func runSequential(items: [WorkItem], index: Int, progress: ((Int, Int, Result) -> Void)?, completion: @escaping ([Result]) -> Void) {
+        if index >= items.count {
+            completion(results)
+            return
+        }
+        let item = items[index]
+        let target = item.target
+        var finished = false
+        func finish(_ status: Status, _ reasons: [String]) {
+            DispatchQueue.main.async {
+                if finished { return }
+                finished = true
+                let result = Result(siteName: item.siteName, url: target.url, requireAuth: target.requireAuth, status: status, reasons: reasons)
+                self.results.append(result)
+                progress?(self.results.count, items.count, result)
+                DispatchQueue.main.asyncAfter(deadline: .now() + self.intervalBetweenTargets) {
+                    self.runSequential(items: items, index: index + 1, progress: progress, completion: completion)
+                }
+            }
+        }
+        // success/failed のどちらも来ない場合に詰まらないようウォッチドッグ。
+        DispatchQueue.main.asyncAfter(deadline: .now() + perTargetTimeout) {
+            finish(.error, ["タイムアウト(\(Int(self.perTargetTimeout))秒以内に応答なし)"])
+        }
+        fetcher.InspectFetchSinglePage(url: target.url, cookieString: "", successAction: { state in
+            // state.url はリダイレクト後もステイルなので、実遷移後URLは httpClient.GetCurrentURL() で取る。
+            let hostChanged = ScrapeInspector.isHostChanged(requested: target.url, final: self.fetcher.httpClient.GetCurrentURL())
+            let (status, reasons) = ScrapeInspector.judge(requireAuth: target.requireAuth, failMessage: nil, evaluateFailures: target.evaluate(state: state), hostChanged: hostChanged, unknownTokens: target.unknownTokens)
+            finish(status, reasons)
+        }, failedAction: { _, message in
+            let hostChanged = ScrapeInspector.isHostChanged(requested: target.url, final: self.fetcher.httpClient.GetCurrentURL())
+            let (status, reasons) = ScrapeInspector.judge(requireAuth: target.requireAuth, failMessage: message, evaluateFailures: [], hostChanged: hostChanged, unknownTokens: target.unknownTokens)
+            finish(status, reasons)
+        })
+    }
+
+    // レポート文字列(サマリ + 明細)。明細は NG→WARN→ROBOTS→ERROR→SKIP→OK の重要度順。
+    static func report(results: [Result]) -> String {
+        let order: [Status] = [.ng, .warn, .robotsBlocked, .error, .skip, .ok]
+        var counts: [Status: Int] = [:]
+        for r in results { counts[r.status, default: 0] += 1 }
+        let summary = order.compactMap { s -> String? in
+            guard let c = counts[s], c > 0 else { return nil }
+            return "\(s.rawValue):\(c)"
+        }.joined(separator: " / ")
+        let sorted = results.sorted { (order.firstIndex(of: $0.status) ?? 0) < (order.firstIndex(of: $1.status) ?? 0) }
+        return "===== スクレイプ検査結果 (\(results.count)件) =====\n" + summary + "\n\n" + sorted.map { $0.description }.joined(separator: "\n")
+    }
+}
+
+#endif

@@ -45,6 +45,38 @@ final class AppLaunchCoordinator: NSObject {
         NovelSpeakerUtility.StartPrivacyTrackingBlockRuleListRefreshTimerIfNeeded()
     }
 
+    #if targetEnvironment(macCatalyst)
+    // 着手順4(改): Catalyst をコマンドラインから「検査だけして終了」させるワンショットモード。
+    // 常駐(Timer/スケジューラ)させず、launchd 等が定期起動 → 検査 → stdout にレポート → exit、という運用を想定。
+    // 起動引数 `--scrape-inspect`、または環境変数 NOVELSPEAKER_SCRAPE_INSPECT=1 で有効。
+    // stdout には他のログも混ざるため、レポートは BEGIN/END マーカーで囲んで FileHandle で直接書き出す。
+    // 終了コード: NG または ERROR が1件でもあれば 1、それ以外(OK/WARN/SKIP/ROBOTSのみ)は 0。
+    private static var cliInspector: ScrapeInspector?
+
+    @discardableResult
+    static func runScrapeInspectionCLIIfRequested() -> Bool {
+        let args = CommandLine.arguments
+        let env = ProcessInfo.processInfo.environment
+        guard args.contains("--scrape-inspect") || env["NOVELSPEAKER_SCRAPE_INSPECT"] == "1" else {
+            return false
+        }
+
+        let inspector = ScrapeInspector()
+        // InspectAll は内部で [weak self] を使うため、完了まで外側で保持する。
+        cliInspector = inspector
+        inspector.InspectAll { results in
+            let report = ScrapeInspector.report(results: results)
+            let hasProblem = results.contains { $0.status == .ng || $0.status == .error }
+            let body = "<<<NOVELSPEAKER_SCRAPE_INSPECT_BEGIN>>>\n"
+                + report
+                + "\n<<<NOVELSPEAKER_SCRAPE_INSPECT_END exit=\(hasProblem ? 1 : 0)>>>\n"
+            FileHandle.standardOutput.write(Data(body.utf8))
+            exit(hasProblem ? 1 : 0)
+        }
+        return true
+    }
+    #endif
+
     private static func configurePreferredFontsForTextStyle() {
         UINavigationBar.appearance().titleTextAttributes = [
             .font: UIFont.preferredFont(forTextStyle: .headline),

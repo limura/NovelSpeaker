@@ -2048,6 +2048,36 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let value = row.value else { return }
                 NovelSpeakerUtility.isDebugMenuAlwaysEnabled = value
             })
+            #if !os(watchOS)
+            // 着手順4: SiteInfo の checkTargets を全件スクレイプ検査して結果を表示する(手動実行)。
+            section
+            <<< ButtonRow() {
+                $0.title = "今すぐ全サイトをスクレイプ検査する"
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ [weak self] _, _ in
+                guard let self = self else { return }
+                let inspector = ScrapeInspector()
+                _ = NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: "スクレイプ検査中…\n(しばらくお待ちください)", completion: { dialog in
+                    inspector.InspectAll(progress: nil, completion: { results in
+                        _ = inspector // InspectAll は内部で [weak self] のため、完了まで inspector を保持する
+                        let report = ScrapeInspector.report(results: results)
+                        DispatchQueue.main.async {
+                            dialog.dismiss(animated: false, completion: {
+                                NiftyUtility.EasyDialogBuilder(self)
+                                    .textView(content: report, heightMultiplier: 0.6)
+                                    .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_CopyLogButtonTitle", comment: "このログをコピーする")) { d in
+                                        UIPasteboard.general.setValue(report, forPasteboardType: "public.text")
+                                        DispatchQueue.main.async { d.dismiss(animated: true, completion: nil) }
+                                    }
+                                    .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { d in
+                                        DispatchQueue.main.async { d.dismiss(animated: true, completion: nil) }
+                                    }.build().show()
+                            })
+                        }
+                    })
+                })
+            })
+            #endif
 
             /*
             section
