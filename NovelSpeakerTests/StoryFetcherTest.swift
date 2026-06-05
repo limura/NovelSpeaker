@@ -157,6 +157,214 @@ class StoryFetcherTest: XCTestCase {
         })
     }
 
+    // MARK: - SiteInfo エディタ用: makeFromCellDict / 原文保持
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+
+    func testMakeFromCellDictMatchesCSVDecoder() throws {
+        // 生セル辞書から作った StorySiteInfo が、同内容を CSV デコードしたものと一致すること
+        // (= エディタの生セル経路と本番のデコード経路で列→プロパティのマッピングが食い違わない)。
+        let newPageElement = "//*[@id='honbun']"
+        let dict: [String:String] = [
+            "id": novelImportSettingTestSiteNumber,
+            "name": "テストサイト",
+            "newPageElement": newPageElement,
+            "url": "^https://example.com/novel/.*$",
+            "title": "//*[@id='title']",
+            "author": "//*[@id='author']",
+            "isNeedHeadless": "true",
+            "waitSecondInHeadless": "1.5",
+            "checkTargets": "https://example.com/novel/1/ => content,nextLink",
+        ]
+        let made = try XCTUnwrap(StorySiteInfo.makeFromCellDict(dict, urlString: novelImportSettingTestURL))
+        let decoded = try createCSVSiteInfo(newPageElement: newPageElement)
+        XCTAssertEqual(made.id, novelImportSettingTestSiteID)
+        XCTAssertEqual(made.id, decoded.id)
+        XCTAssertEqual(made.pageElement, newPageElement)
+        XCTAssertEqual(made.pageElement, decoded.pageElement)
+        XCTAssertEqual(made.title, "//*[@id='title']")
+        XCTAssertEqual(made.author, "//*[@id='author']")
+        XCTAssertTrue(made.isNeedHeadless)
+        XCTAssertEqual(made.waitSecondInHeadless, 1.5)
+        XCTAssertTrue(made.isMatchUrl(urlString: "https://example.com/novel/123/"))
+        XCTAssertEqual(made.checkTargets.count, 1)
+    }
+
+    func testMakeFromCellDictReturnsNilWithoutNewPageElement() throws {
+        // newPageElement 列が無い行はデコード対象外(既存 DecodeCSVSiteInfoData の挙動)。
+        XCTAssertNil(StorySiteInfo.makeFromCellDict(["name":"x"], urlString: novelImportSettingTestURL))
+    }
+
+    func testStorySiteInfoPreservesOriginalNewPageElementAndCheckTargets() throws {
+        // エディタの「既存SiteInfo読込→編集」往復のために、派生前の原文が保持されること。
+        let newPageElement = """
+        body:本文/Body=//*[@id='body']
+        afterword:後書き/Afterword=//*[@id='afterword']
+        """
+        let checkTargets = "[auth] https://example.com/novel/1/ => content,nextLink"
+        let siteInfo = try XCTUnwrap(StorySiteInfo.makeFromCellDict([
+            "id": novelImportSettingTestSiteNumber,
+            "newPageElement": newPageElement,
+            "url": "^https://example.com/.*$",
+            "checkTargets": checkTargets,
+        ], urlString: novelImportSettingTestURL))
+        XCTAssertEqual(siteInfo.originalNewPageElement, newPageElement)
+        XCTAssertEqual(siteInfo.originalCheckTargets, checkTargets)
+        // 派生(pageElement)は複数要素を | で連結したものになり、原文とは別物。
+        XCTAssertEqual(siteInfo.pageElement, "//*[@id='body']|//*[@id='afterword']")
+    }
+
+    func testToCellDictRoundTripsThroughMakeFromCellDict() throws {
+        // toCellDict()(公開SiteInfo→生セル)→ makeFromCellDict(生セル→StorySiteInfo)で主要列・url・原文が保たれること。
+        let cells: [String:String] = [
+            "id": "999991",
+            "name": "テストサイト",
+            "newPageElement": "//*[@id='honbun']",
+            "url": "^https://example.com/n/.*$",
+            "title": "//*[@id='title']",
+            "author": "//*[@id='author']",
+            "isNeedHeadless": "true",
+            "checkTargets": "[auth] https://example.com/n/1/ => content,nextLink",
+        ]
+        let made = try XCTUnwrap(StorySiteInfo.makeFromCellDict(cells, urlString: novelImportSettingTestURL))
+        let back = made.toCellDict()
+        XCTAssertEqual(back["newPageElement"], "//*[@id='honbun']")
+        XCTAssertEqual(back["url"], "^https://example.com/n/.*$")
+        XCTAssertEqual(back["title"], "//*[@id='title']")
+        XCTAssertEqual(back["author"], "//*[@id='author']")
+        XCTAssertEqual(back["isNeedHeadless"], "true")
+        XCTAssertEqual(back["checkTargets"], "[auth] https://example.com/n/1/ => content,nextLink")
+        // 戻した cells から作り直しても等価(url・原文・checkTargets 個数)。
+        let remade = try XCTUnwrap(StorySiteInfo.makeFromCellDict(back, urlString: novelImportSettingTestURL))
+        XCTAssertEqual(remade.url?.pattern, made.url?.pattern)
+        XCTAssertEqual(remade.originalNewPageElement, made.originalNewPageElement)
+        XCTAssertEqual(remade.checkTargets.count, made.checkTargets.count)
+    }
+
+    // MARK: - LocalSiteInfoStore(ローカル最優先SiteInfo・CSVファイル)
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+
+    private func makeTempStore() -> LocalSiteInfoStore {
+        let dir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("SiteInfoStoreTest-\(UUID().uuidString)", isDirectory: true)
+        return LocalSiteInfoStore(fileURL: dir.appendingPathComponent("LocalPreferredSiteInfo.csv"))
+    }
+
+    func testLocalSiteInfoStoreSaveLoadRoundTripPreservesMultilineFields() throws {
+        let store = makeTempStore()
+        // 複数行・カンマ・ダブルクォート・改行を含むフィールドが CSV 往復で保たれること。
+        let newPageElement = "body:本文/Body=//*[@id='body']\nafter:後書き/After=//*[@id='after']"
+        let checkTargets = "[auth] https://example.com/n/1/ => content,nextLink\nhttps://example.com/s/1/ => firstPageLink"
+        store.upsert([
+            "name": "サイト\"A\",カンマ入り",
+            "url": "^https://example.com/n/.*$",
+            "newPageElement": newPageElement,
+            "checkTargets": checkTargets,
+        ])
+        XCTAssertTrue(store.save())
+        let reloaded = LocalSiteInfoStore(fileURL: store.fileURLForTest)
+        XCTAssertEqual(reloaded.rows.count, 1)
+        let row = try XCTUnwrap(reloaded.rows.first)
+        XCTAssertEqual(row["name"], "サイト\"A\",カンマ入り")
+        XCTAssertEqual(row["newPageElement"], newPageElement)
+        XCTAssertEqual(row["checkTargets"], checkTargets)
+    }
+
+    func testLocalSiteInfoStoreUpsertReplacesSameURLAndAppendsOther() throws {
+        let store = makeTempStore()
+        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a"])
+        store.upsert(["url": "^https://b/.*$", "newPageElement": "//b"])
+        XCTAssertEqual(store.rows.count, 2)
+        // 同 url は置換(行数は増えない)。
+        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a2"])
+        XCTAssertEqual(store.rows.count, 2)
+        XCTAssertEqual(store.rows.first(where: { $0["url"] == "^https://a/.*$" })?["newPageElement"], "//a2")
+    }
+
+    func testLocalSiteInfoStoreDeleteRemovesByURL() throws {
+        let store = makeTempStore()
+        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a"])
+        store.upsert(["url": "^https://b/.*$", "newPageElement": "//b"])
+        store.delete(urlPattern: "^https://a/.*$")
+        XCTAssertEqual(store.rows.count, 1)
+        XCTAssertEqual(store.rows.first?["url"], "^https://b/.*$")
+    }
+
+    func testLocalSiteInfoStoreAssignsDeterministicIdOnUpsert() throws {
+        let store = makeTempStore()
+        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a"])
+        let id1 = store.rows.first?["id"]
+        XCTAssertNotNil(id1)
+        XCTAssertFalse(id1!.isEmpty)
+        // 同 url を再 upsert しても id は変わらない(取込設定の紐付けが安定する)。
+        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a2"])
+        XCTAssertEqual(store.rows.first?["id"], id1)
+        // 決定的 id は url から導かれる。
+        XCTAssertEqual(id1, LocalSiteInfoStore.deterministicId(urlPattern: "^https://a/.*$"))
+    }
+
+    func testLocalSiteInfoStoreEntriesDecodeToStorySiteInfo() throws {
+        let store = makeTempStore()
+        store.upsert(["url": "^https://example.com/n/.*$", "newPageElement": "//*[@id='honbun']"])
+        let entries = store.entries()
+        XCTAssertEqual(entries.count, 1)
+        XCTAssertTrue(entries[0].isMatchUrl(urlString: "https://example.com/n/123/"))
+        XCTAssertEqual(entries[0].pageElement, "//*[@id='honbun']")
+    }
+
+    func testEffectiveSiteInfoArrayArrayPutsLocalFirstWhenNonEmpty() throws {
+        let decoder = StoryHtmlDecoder.shared
+        let savedLocal = decoder.localPreferredSiteInfoArray
+        let savedArrayArray = decoder.siteInfoArrayArray
+        defer {
+            decoder.localPreferredSiteInfoArray = savedLocal
+            decoder.siteInfoArrayArray = savedArrayArray
+        }
+        let publicSite = try XCTUnwrap(StorySiteInfo.makeFromCellDict(["url": "^https://pub/.*$", "newPageElement": "//pub"], urlString: novelImportSettingTestURL))
+        decoder.siteInfoArrayArray = [[publicSite]]
+        // 空ローカルなら siteInfoArrayArray のまま。
+        decoder.localPreferredSiteInfoArray = []
+        XCTAssertEqual(decoder.effectiveSiteInfoArrayArray.count, 1)
+        // 非空ローカルは先頭に来る。
+        let localSite = try XCTUnwrap(StorySiteInfo.makeFromCellDict(["url": "^https://local/.*$", "newPageElement": "//local"], urlString: novelImportSettingTestURL))
+        decoder.localPreferredSiteInfoArray = [localSite]
+        let eff = decoder.effectiveSiteInfoArrayArray
+        XCTAssertEqual(eff.count, 2)
+        XCTAssertEqual(eff.first?.first?.url?.pattern, "^https://local/.*$")
+    }
+
+    // MARK: - 特殊フォーマット列の検証(エディタ「テスト」時の構文チェック)
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+
+    func testValidateNewPageElementFormat() throws {
+        // 単一行は xpath そのもの扱い → 警告なし。
+        XCTAssertTrue(StorySiteInfo.validateNewPageElementFormat("//div[@id='x']").isEmpty)
+        // 正しい複数行(ID:タイトル/title=xpath)→ 警告なし。
+        let ok = "1:本文/main=//div[@class='a']\n2:後書き/After=//div[@class='b']"
+        XCTAssertTrue(StorySiteInfo.validateNewPageElementFormat(ok).isEmpty)
+        // ':' が無い行 → 警告。
+        XCTAssertFalse(StorySiteInfo.validateNewPageElementFormat("1:本文=//a\n//bだけの行").isEmpty)
+        // '=' が無い行 → 警告。
+        XCTAssertFalse(StorySiteInfo.validateNewPageElementFormat("1:本文//a\n2:後書き/After=//b").isEmpty)
+    }
+
+    func testValidateForceErrorMessageAndElementFormat() throws {
+        XCTAssertTrue(StorySiteInfo.validateForceErrorMessageAndElementFormat(nil).isEmpty)
+        XCTAssertTrue(StorySiteInfo.validateForceErrorMessageAndElementFormat("ログインが必要です://main").isEmpty)
+        // ':' が無い → 警告。
+        XCTAssertFalse(StorySiteInfo.validateForceErrorMessageAndElementFormat("コロンの無い文字列").isEmpty)
+        // ':' の右(xpath)が空 → 警告。
+        XCTAssertFalse(StorySiteInfo.validateForceErrorMessageAndElementFormat("メッセージ:").isEmpty)
+    }
+
+    func testValidateCheckTargetsFormat() throws {
+        XCTAssertTrue(ScrapeCheckTarget.validateFormat("[auth] https://example.com/n/1/ => content,nextLink").isEmpty)
+        // 行コメントは無視されるので警告なし。
+        XCTAssertTrue(ScrapeCheckTarget.validateFormat("# コメント行\nhttps://example.com/n/1/ => content").isEmpty)
+        // 未知トークン → 警告。
+        XCTAssertFalse(ScrapeCheckTarget.validateFormat("https://example.com/n/1/ => contnet").isEmpty)
+        // URL が空のエントリ(=> の前が空) → 警告。
+        XCTAssertFalse(ScrapeCheckTarget.validateFormat("=> content").isEmpty)
+    }
+
     func testEncoding() throws {
         let str = "<A href=\"001.htm\">１話</A>"
         let sjis = str.data(using: .shiftJIS)

@@ -77,6 +77,7 @@
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
 		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
+		21515170000000000000F002 /* SiteInfoEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21515170000000000000F001 /* SiteInfoEditorViewController.swift */; };
 		214141D01FC0A1C30076DEC2 /* NiftyUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */; };
 		21429D84209F45E3001426F5 /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
 		21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21429D85209F45FD001426F5 /* AudioToolbox.framework */; };
@@ -391,6 +392,7 @@
 		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
 		213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitConfigCacheData.m; sourceTree = "<group>"; };
 		213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		21515170000000000000F001 /* SiteInfoEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteInfoEditorViewController.swift; sourceTree = "<group>"; };
 		214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiftyUtility.swift; sourceTree = "<group>"; };
 		21429D82209F4516001426F5 /* nc48625.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = nc48625.m4a; sourceTree = "<group>"; };
 		21429D85209F45FD001426F5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -1061,6 +1063,7 @@
 				21D9C16426524C2500CC5AE9 /* WebSpeechViewController.swift */,
 				212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */,
 				213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */,
+				21515170000000000000F001 /* SiteInfoEditorViewController.swift */,
 				21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */,
 				21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */,
 				21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */,
@@ -1740,6 +1743,7 @@
 				21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */,
 				219106DF2468371A00BBA5AF /* NovelSearchViewController.swift in Sources */,
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
+				21515170000000000000F002 /* SiteInfoEditorViewController.swift in Sources */,
 				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,
 				21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */,
 				210DD99825840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift in Sources */,

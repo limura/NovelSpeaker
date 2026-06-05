@@ -1585,6 +1585,21 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            #if !os(watchOS)
+            section
+            <<< ButtonRow() {
+                $0.title = "最優先SiteInfoを編集・追加"
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ [weak self] (buttonCellOf, button) in
+                guard let self = self else { return }
+                self.navigationController?.pushViewController(SiteInfoEditorEntryViewController(), animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+            #endif
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoを読み直す")

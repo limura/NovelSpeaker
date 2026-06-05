@@ -251,6 +251,52 @@ struct ScrapeCheckTarget : Equatable {
         return result
     }
 
+    // checkTargets のフォーマット検証。問題があれば人間可読な警告の配列を返す(空ならOK)。
+    // parse は壊れたエントリ(URL不正・未知トークン)を黙って捨てるため、エディタの「テスト」時に気づけるよう明示する。
+    // 分割ロジックは parse と完全に揃える(検査と実装の食い違いを防ぐ)。設計メモ: DESIGN_SiteInfoエディタ.md
+    static func validateFormat(_ raw:String?) -> [String] {
+        guard let raw = raw, raw.contains(where: { !$0.isWhitespace }) else { return [] }
+        var warnings:[String] = []
+        var entries:[Substring] = []
+        for lineSub in raw.split(omittingEmptySubsequences: false, whereSeparator: { $0.isNewline }) {
+            let line = stripInlineComment(String(lineSub))
+            entries.append(contentsOf: line.split(separator: "|"))
+        }
+        for entryRaw in entries {
+            var entry = entryRaw.trimmingCharacters(in: .whitespaces)
+            if entry.isEmpty { continue }
+            while entry.hasPrefix("["), let close = entry.firstIndex(of: "]") {
+                entry = String(entry[entry.index(after: close)...]).trimmingCharacters(in: .whitespaces)
+            }
+            let urlPart:String
+            let tokenPart:String
+            if let range = entry.range(of: "=>") {
+                urlPart = String(entry[..<range.lowerBound]).trimmingCharacters(in: .whitespaces)
+                tokenPart = String(entry[range.upperBound...]).trimmingCharacters(in: .whitespaces)
+            } else {
+                urlPart = entry
+                tokenPart = ""
+            }
+            if urlPart.isEmpty {
+                warnings.append("checkTargets: URL が空のエントリがあります")
+                continue
+            }
+            if URL(string: urlPart) == nil {
+                warnings.append("checkTargets: URL として解釈できません(このエントリは無視されます): \(urlPart)")
+            }
+            for tokenRaw in tokenPart.split(separator: ",") {
+                var token = tokenRaw.trimmingCharacters(in: .whitespaces)
+                if token.isEmpty { continue }
+                if token.hasPrefix("!") { token = String(token.dropFirst()).trimmingCharacters(in: .whitespaces) }
+                if token.isEmpty { continue }
+                if ScrapeCheckToken.from(token) == nil {
+                    warnings.append("checkTargets: 未知のトークン(typo?): \(token)")
+                }
+            }
+        }
+        return warnings
+    }
+
     // 期待トークンが抽出後の StoryState 上で「非空/存在」しているかを判定する。
     private static func isPresent(_ token:ScrapeCheckToken, in state:StoryState) -> Bool {
         switch token {
@@ -326,6 +372,12 @@ struct StorySiteInfo : Identifiable {
     // スクレイプ検査(checkTargets)用。SiteInfo に新設した checkTargets フィールドをパースして保持する。
     // 設計メモ: DESIGN_スクレイプ検査.md
     let checkTargets: [ScrapeCheckTarget]
+    // SiteInfo エディタの読込(逆マッピング)用に、派生前の元文字列を保持する。
+    // pageElement は newPageElement からの派生、checkTargets はパース済み配列しか持たないため、
+    // エディタで「既存SiteInfoを読み込む→編集」する往復で情報が落ちないよう原文を残しておく。
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+    let originalNewPageElement: String
+    let originalCheckTargets: String?
 
     static func newPageElement2PageElelmentDict(newPageElement:String) -> [String: ([(lang:Language, title:String)], xpath:String)] {
         if !newPageElement.contains(where: \.isNewline) {
@@ -419,6 +471,137 @@ struct StorySiteInfo : Identifiable {
         }
         self.novelImportEnableSettings = novelImportEnableSettings
         self.checkTargets = ScrapeCheckTarget.parse(checkTargets)
+        self.originalNewPageElement = newPageElement
+        self.originalCheckTargets = checkTargets
+    }
+
+    // 生セル辞書(列名→値)から StorySiteInfo を生成する共有ファクトリ。
+    // CSV デコーダ(DecodeCSVSiteInfoData)と SiteInfo エディタで「列→プロパティ」のマッピングを
+    // 完全一致させるために切り出した(エディタの生セル編集とデコード経路の解釈差を無くす)。
+    // - urlString は id の源情報(`<sheetId>:<urlString>`)に使う。RealmNovelImportSetting(サイト毎取込設定)の紐付けキー。
+    // - importTargetsForSettingId を渡すと、その settingId→取込対象 解決を使い回す(CSVループで Realm を行毎に引かないため)。
+    //   nil の場合は内部で1回 Realm を引く(エディタの単発生成用)。RealmSwift 型(Results 等)をこの API 表面に出さないため closure で受ける。
+    // - `newPageElement` 列が無い行は nil を返す(= デコード対象外。既存 DecodeCSVSiteInfoData の挙動を踏襲)。
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+    static func makeFromCellDict(_ dict:[String:String], urlString:String, importTargetsForSettingId:((String) -> [String])? = nil) -> StorySiteInfo? {
+        guard let newPageElement = dict["newPageElement"] else { return nil }
+        let siteInfoId = dict["id"]
+        let storySiteInfoId = (siteInfoId ?? UUID.init().uuidString) + ":" + urlString
+        let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: .site, siteInfoId: storySiteInfoId, novelID: nil)
+        let importTargets:[String]
+        if let resolver = importTargetsForSettingId {
+            importTargets = resolver(settingId)
+        } else {
+            importTargets = RealmUtil.RealmBlock { realm in
+                if let setting = RealmNovelImportSetting.GetAllObjectsWith(realm: realm)?.first(where: { $0.id == settingId }) {
+                    return Array(setting.targets)
+                }
+                return []
+            }
+        }
+        return StorySiteInfo(
+            id: storySiteInfoId,
+            name: dict["name"],
+            newPageElement: newPageElement,
+            url: dict["url"],
+            title: dict["title"],
+            subtitle: dict["subtitle"],
+            firstPageLink: dict["firstPageLink"],
+            nextLink: dict["nextLink"],
+            tag: dict["tag"],
+            author: dict["author"],
+            isNeedHeadless: dict["isNeedHeadless"],
+            injectStyle: dict["injectStyle"],
+            nextButton: dict["nextButton"],
+            firstPageButton: dict["firstPageButton"],
+            waitSecondInHeadless: Double(dict["waitSecondInHeadless"] ?? "0"),
+            forceClickButton: dict["forceClickButton"],
+            resourceUrl: dict["resourceUrl"],
+            overrideUserAgent: dict["overrideUserAgent"],
+            forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
+            scrollTo: dict["scrollTo"],
+            isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"],
+            checkTargets: dict["checkTargets"],
+            novelImportEnableSettings: importTargets
+        )
+    }
+
+    // makeFromCellDict の逆。StorySiteInfo を生セル辞書(列名→値)に戻す。
+    // SiteInfo エディタが「公開SiteInfo等を読み込んで編集する」時の逆マッピングに使う(派生前の原文を使うので往復ロスが無い)。
+    // ローカル保存(LocalSiteInfoStore)の直列化には使わない(あちらは生セル行 rows が正本)。
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+    func toCellDict() -> [String:String] {
+        var d: [String:String] = [:]
+        d["id"] = self.id
+        d["name"] = self.name
+        d["newPageElement"] = self.originalNewPageElement
+        d["url"] = self.url?.pattern
+        d["title"] = self.title
+        d["subtitle"] = self.subtitle
+        d["firstPageLink"] = self.firstPageLink
+        d["nextLink"] = self.nextLink
+        d["tag"] = self.tag
+        d["author"] = self.author
+        d["isNeedHeadless"] = self.isNeedHeadless ? "true" : "false"
+        d["injectStyle"] = self.injectStyle
+        d["nextButton"] = self.nextButton
+        d["firstPageButton"] = self.firstPageButton
+        d["waitSecondInHeadless"] = self.waitSecondInHeadless.map { String($0) }
+        d["forceClickButton"] = self.forceClickButton
+        d["resourceUrl"] = self.resourceUrl
+        d["overrideUserAgent"] = self.overrideUserAgent
+        d["forceErrorMessageAndElement"] = self.forceErrorMessageAndElement
+        d["scrollTo"] = self.scrollTo
+        d["isNeedWhitespaceSplitForTag"] = self.isNeedWhitespaceSplitForTag ? "true" : "false"
+        d["checkTargets"] = self.originalCheckTargets
+        return d.compactMapValues { $0 }
+    }
+
+    // newPageElement のフォーマット検証(エディタの「テスト」用)。問題があれば人間可読な警告配列(空ならOK)。
+    // 単一行は本文xpathそのものなので検証しない。複数行は『ID:タイトル/title=xpath』形式
+    // (newPageElement2PageElelmentDict が最初の ':' で id、その後の最初の '=' で xpath を分ける)を要求する。
+    static func validateNewPageElementFormat(_ s: String?) -> [String] {
+        guard let s = s, !s.isEmpty else { return [] }
+        if !s.contains(where: \.isNewline) { return [] }
+        var warnings:[String] = []
+        for (i, lineSub) in s.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline).enumerated() {
+            let line = lineSub.trimmingCharacters(in: .whitespaces)
+            if line.isEmpty { continue }
+            let lineNo = i + 1
+            guard let colon = line.firstIndex(of: ":") else {
+                warnings.append("newPageElement \(lineNo)行目: ':' がありません(複数行では『ID:タイトル/title=xpath』形式が必要)")
+                continue
+            }
+            if line[..<colon].trimmingCharacters(in: .whitespaces).isEmpty {
+                warnings.append("newPageElement \(lineNo)行目: 行頭の ID(':' より前)が空です")
+            }
+            let afterColon = line[line.index(after: colon)...]
+            guard let eq = afterColon.firstIndex(of: "=") else {
+                warnings.append("newPageElement \(lineNo)行目: '=' がありません(『ID:タイトル/title=xpath』形式が必要)")
+                continue
+            }
+            if afterColon[afterColon.index(after: eq)...].trimmingCharacters(in: .whitespaces).isEmpty {
+                warnings.append("newPageElement \(lineNo)行目: '=' の右の xpath が空です")
+            }
+        }
+        return warnings
+    }
+
+    // forceErrorMessageAndElement のフォーマット検証。『メッセージ:xpath』形式(最初の ':' で分割。forceErrorMessage/Element と同じ規則)。
+    static func validateForceErrorMessageAndElementFormat(_ s: String?) -> [String] {
+        guard let s = s, !s.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
+        let components = s.components(separatedBy: ":")
+        if components.count < 2 {
+            return ["forceErrorMessageAndElement: ':' がありません(『メッセージ:xpath』形式が必要。最初の ':' でメッセージと xpath を分けます)"]
+        }
+        var warnings:[String] = []
+        if components[0].trimmingCharacters(in: .whitespaces).isEmpty {
+            warnings.append("forceErrorMessageAndElement: ':' より前のメッセージが空です")
+        }
+        if components[1...].joined(separator: ":").trimmingCharacters(in: .whitespaces).isEmpty {
+            warnings.append("forceErrorMessageAndElement: ':' より後の xpath が空です")
+        }
+        return warnings
     }
 
     var forceErrorMessage : String? {
@@ -709,12 +892,19 @@ extension StorySiteInfo : Decodable {
             isNeedWhitespaceSplitForTag = false
         }
         self.novelImportEnableSettings = []
-        self.checkTargets = ScrapeCheckTarget.parse(try? values.decode(String.self, forKey: NestedKeys.checkTargets))
+        let checkTargetsString = try? values.decode(String.self, forKey: NestedKeys.checkTargets)
+        self.checkTargets = ScrapeCheckTarget.parse(checkTargetsString)
+        // この経路は newPageElement の元文字列を持たない(pageElement のみ)ため、原文は pageElement で代用する。
+        self.originalNewPageElement = pageElement
+        self.originalCheckTargets = checkTargetsString
     }
 }
 
 class StoryHtmlDecoder {
     var siteInfoArrayArray:[[StorySiteInfo]] = []
+    // SiteInfo エディタで保存した「最優先SiteInfo」(ローカルCSV由来)。常に siteInfoArrayArray より優先する。
+    // 空なら何も注入されない(= 自然に「最優先SiteInfo無し」相当)。設計メモ: DESIGN_SiteInfoエディタ.md
+    var localPreferredSiteInfoArray:[StorySiteInfo] = []
     let fallbackSiteInfoArray:[StorySiteInfo]
     let lock = NSLock()
     var siteInfoLoadDoneHandlerArray:[(_ errorString:String?)->Void] = []
@@ -824,64 +1014,68 @@ class StoryHtmlDecoder {
         }
         return result
     }
-    static func DecodeCSVSiteInfoData(data:Data, urlString:String) -> [StorySiteInfo]? {
-        // CSV には、"" で括って改行がくる場合を想定しないといけないです
-        func parseCSV(data: String) -> [[String]] {
-            var result: [[String]] = []
-            var currentField = ""
-            var currentRow: [String] = []
-            var inQuotes = false
-            
-            let characters = Array(data)
-            var i = 0
-            
-            while i < characters.count {
-                let char = characters[i]
-                
-                if inQuotes {
-                    if char == "\"" {
-                        // エスケープされた引用符("")か、閉じ引用符かチェック
-                        if i + 1 < characters.count && characters[i+1] == "\"" {
-                            currentField.append("\"")
-                            i += 1
-                        } else {
-                            inQuotes = false
-                        }
+    // CSV テキストを行×列に分解する。`""` で括って改行/カンマを含むフィールドに対応。
+    // 元は DecodeCSVSiteInfoData 内のネスト関数だったものを、LocalSiteInfoStore(ローカル最優先SiteInfo)と
+    // 共有するために static へ切り出した(挙動は不変)。設計メモ: DESIGN_SiteInfoエディタ.md
+    static func ParseCSVRows(_ csvText: String) -> [[String]] {
+        var result: [[String]] = []
+        var currentField = ""
+        var currentRow: [String] = []
+        var inQuotes = false
+
+        let characters = Array(csvText)
+        var i = 0
+
+        while i < characters.count {
+            let char = characters[i]
+
+            if inQuotes {
+                if char == "\"" {
+                    // エスケープされた引用符("")か、閉じ引用符かチェック
+                    if i + 1 < characters.count && characters[i+1] == "\"" {
+                        currentField.append("\"")
+                        i += 1
                     } else {
-                        currentField.append(char)
+                        inQuotes = false
                     }
                 } else {
-                    switch char {
-                    case "\"":
-                        inQuotes = true
-                    case ",":
-                        currentRow.append(currentField)
-                        currentField = ""
-                    case "\n", "\r", "\r\n":
-                        // 改行コード（\r\n または \n）を処理
-                        if char == "\r" && i + 1 < characters.count && characters[i+1] == "\n" {
-                            i += 1
-                        }
-                        currentRow.append(currentField)
-                        result.append(currentRow)
-                        currentRow = []
-                        currentField = ""
-                    default:
-                        currentField.append(char)
-                    }
+                    currentField.append(char)
                 }
-                i += 1
+            } else {
+                switch char {
+                case "\"":
+                    inQuotes = true
+                case ",":
+                    currentRow.append(currentField)
+                    currentField = ""
+                case "\n", "\r", "\r\n":
+                    // 改行コード（\r\n または \n）を処理
+                    if char == "\r" && i + 1 < characters.count && characters[i+1] == "\n" {
+                        i += 1
+                    }
+                    currentRow.append(currentField)
+                    result.append(currentRow)
+                    currentRow = []
+                    currentField = ""
+                default:
+                    currentField.append(char)
+                }
             }
-            
-            // 最後の行を追加
-            if !currentField.isEmpty || !currentRow.isEmpty {
-                currentRow.append(currentField)
-                result.append(currentRow)
-            }
-            
-            return result
+            i += 1
         }
-        let rows = parseCSV(data: String(decoding: data, as: UTF8.self))
+
+        // 最後の行を追加
+        if !currentField.isEmpty || !currentRow.isEmpty {
+            currentRow.append(currentField)
+            result.append(currentRow)
+        }
+
+        return result
+    }
+
+    static func DecodeCSVSiteInfoData(data:Data, urlString:String) -> [StorySiteInfo]? {
+        // CSV には、"" で括って改行がくる場合を想定しないといけないです
+        let rows = StoryHtmlDecoder.ParseCSVRows(String(decoding: data, as: UTF8.self))
 
         // 1行目は表題として使用
         guard let headers = rows.first else { return nil }
@@ -889,7 +1083,14 @@ class StoryHtmlDecoder {
         let novelImportSettings = RealmUtil.RealmBlock { realm in
             return RealmNovelImportSetting.GetAllObjectsWith(realm: realm)
         }
-        
+        // settingId → 取込対象 を1回引いた結果から解決する(makeFromCellDict に行毎の Realm 再取得をさせない)。
+        let importTargetsForSettingId: (String) -> [String] = { settingId in
+            if let setting = novelImportSettings?.first(where: { $0.id == settingId }) {
+                return Array(setting.targets)
+            }
+            return []
+        }
+
         var result: [StorySiteInfo] = []
         // 2行目以降はデータとして処理
         for values in rows.dropFirst() {
@@ -897,42 +1098,9 @@ class StoryHtmlDecoder {
             for (header, value) in zip(headers, values) {
                 dict[header] = value
             }
-            guard let newPageElement = dict["newPageElement"] else { continue }
-            let siteInfoId = dict["id"]
-            let importTargets:[String]
-            let storySiteInfoId = (siteInfoId ?? UUID.init().uuidString) + ":" + urlString
-            let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: .site, siteInfoId: storySiteInfoId, novelID: nil)
-            if let novelImportSetting = novelImportSettings?.first(where: { $0.id == settingId }) {
-                importTargets = Array(novelImportSetting.targets)
-            }else{
-                importTargets = []
-            }
-            // StorySiteInfoの各プロパティにマッピング
-            let storySiteInfo = StorySiteInfo(
-                id: storySiteInfoId,
-                name: dict["name"],
-                newPageElement: newPageElement,
-                url: dict["url"],
-                title: dict["title"],
-                subtitle: dict["subtitle"],
-                firstPageLink: dict["firstPageLink"],
-                nextLink: dict["nextLink"],
-                tag: dict["tag"],
-                author: dict["author"],
-                isNeedHeadless: dict["isNeedHeadless"],
-                injectStyle: dict["injectStyle"],
-                nextButton: dict["nextButton"],
-                firstPageButton: dict["firstPageButton"],
-                waitSecondInHeadless: Double(dict["waitSecondInHeadless"] ?? "0"),
-                forceClickButton: dict["forceClickButton"],
-                resourceUrl: dict["resourceUrl"],
-                overrideUserAgent: dict["overrideUserAgent"],
-                forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
-                scrollTo: dict["scrollTo"],
-                isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"],
-                checkTargets: dict["checkTargets"],
-                novelImportEnableSettings: importTargets,
-            )
+            // 列→プロパティのマッピングは makeFromCellDict に集約(SiteInfo エディタと共通化)。
+            // novelImportSettings は1回引いた結果を全行で使い回す(per-row の Realm 再取得を避ける)。
+            guard let storySiteInfo = StorySiteInfo.makeFromCellDict(dict, urlString: urlString, importTargetsForSettingId: importTargetsForSettingId) else { continue }
             //print("add StorySiteInfo: \(storySiteInfo)")
             result.append(storySiteInfo)
         }
@@ -1059,18 +1227,63 @@ class StoryHtmlDecoder {
         }
     }
     
+    // ローカル最優先SiteInfo を先頭に置いた合成ビュー(= 優先順位順)。lock は呼び出し側が管理する。
+    // 空の localPreferredSiteInfoArray は何も足さない。設計メモ: DESIGN_SiteInfoエディタ.md
+    var effectiveSiteInfoArrayArray:[[StorySiteInfo]] {
+        return (localPreferredSiteInfoArray.isEmpty ? [] : [localPreferredSiteInfoArray]) + siteInfoArrayArray
+    }
+
+    // ローカルCSV(LocalSiteInfoStore)から最優先SiteInfo を読み直して localPreferredSiteInfoArray を作り直す。
+    // SiteInfo 読込完了時・エディタの保存/削除直後に呼ぶ。
+    func ReloadLocalPreferredSiteInfo() {
+        let entries = LocalSiteInfoStore.shared.entries()
+        self.lock.lock()
+        self.localPreferredSiteInfoArray = entries
+        self.lock.unlock()
+    }
+
+    // 標準データ(公開SiteInfo等)の id に一致するキャッシュ済み SiteInfo を生セル辞書で返す。
+    // SiteInfo エディタの「差分(標準データと違うカラム)」表示の基準として使う。ローカル最優先分は含めない。
+    func standardSiteInfoCellsById(_ id: String) -> [String:String]? {
+        guard !id.isEmpty else { return nil }
+        self.lock.lock()
+        defer { self.lock.unlock() }
+        for array in siteInfoArrayArray {
+            for siteInfo in array where siteInfo.id == id {
+                return siteInfo.toCellDict()
+            }
+        }
+        return nil
+    }
+
+    // 標準データ(公開SiteInfo等)のキャッシュファイル更新時刻のうち最新を「取得分」の目安として返す。
+    // SiteInfo エディタのリストで「標準データ(YYYY年M月D日 取得分)」と表示するため。
+    func standardDataFetchedDate() -> Date? {
+        let urls = getLoadTargetURLs()
+        var newest: Date? = nil
+        for (index, url) in urls.enumerated() {
+            guard let url = url else { continue }
+            let name = generateCacheFileName(url: url, index: index)
+            guard let path = NiftyUtility.GetCacheFilePath(fileName: name),
+                  let attr = try? FileManager.default.attributesOfItem(atPath: path.path),
+                  let date = attr[.modificationDate] as? Date else { continue }
+            if newest == nil || date > newest! { newest = date }
+        }
+        return newest
+    }
+
     func SearchSiteInfoArrayFrom(urlString: String) -> [StorySiteInfo] {
         var result:[StorySiteInfo] = []
         self.lock.lock()
         defer { self.lock.unlock() }
-        for siteInfoArray in siteInfoArrayArray {
+        for siteInfoArray in effectiveSiteInfoArrayArray {
             for siteInfo in siteInfoArray {
                 if siteInfo.isMatchUrl(urlString: urlString) {
                     result.append(siteInfo)
                 }
             }
         }
-        
+
         for siteInfo in fallbackSiteInfoArray {
             if siteInfo.isMatchUrl(urlString: urlString) {
                 result.append(siteInfo)
@@ -1199,6 +1412,8 @@ class StoryHtmlDecoder {
         func siteInfoFetchAndUpdate(index:Int, targetURLArray:[URL?], cacheFileExpireTimeinterval:Double) {
                 if index >= targetURLArray.count {
                     // INFO: LoadSiteInfo() の終了処理をここでやっています
+                    // ローカル最優先SiteInfo(エディタ保存分)もこのタイミングで読み直して反映する。
+                    ReloadLocalPreferredSiteInfo()
                     checkNovelImportSettingChangesForLoadedSiteInfo()
                     announceLoadEnd(errorString: errorMessage)
                     if let errorMessage = errorMessage {
@@ -1296,7 +1511,7 @@ class StoryHtmlDecoder {
     }
 
     func checkNovelImportSettingChangesForLoadedSiteInfo() {
-        let siteInfoArray = siteInfoArrayArray.flatMap { $0 }
+        let siteInfoArray = effectiveSiteInfoArrayArray.flatMap { $0 }
         let siteInfoById = Dictionary(siteInfoArray.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         guard siteInfoById.count > 0 else { return }
         RealmUtil.RealmBlock { realm in
@@ -1797,6 +2012,16 @@ class StoryFetcher {
         })
     }
 
+    // InspectFetchSinglePage のキャッシュ非依存版。
+    // 通常経路(InspectFetchSinglePage)は CreateFirstStoryState → SearchSiteInfoArrayFrom でキャッシュから SiteInfo を探すが、
+    // こちらは外から渡した [StorySiteInfo] で直接 state を作って単ページモード取得する(キャッシュにも本番にも触れない)。
+    // SiteInfo エディタの「この値で今すぐテスト」用。SiteInfo を自前で渡すため WaitLoadSiteInfoReady も不要。
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+    func InspectFetchSinglePageWith(siteInfoArray:[StorySiteInfo], url:URL, cookieString:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        let state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: nil)
+        self.FetchNext(currentState: state, inspectionTargetURL: url, successAction: successAction, failedAction: failedAction)
+    }
+
     private func FetchFirstContentRecurcive(currentState:StoryState, countToLive:Int = 10, nextFetchTime:Date = Date(timeIntervalSince1970: 0), successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
         print("FetchFirstContentRecurcive in. \(currentState.url.absoluteString)")
         if let content = currentState.content, content.count > 0 {
@@ -1944,7 +2169,7 @@ class ScrapeInspector {
             // 同一(サイト名+URL+期待トークン)の重複を除いて、各検査対象を1回だけ実行する。
             var items: [WorkItem] = []
             var seen = Set<String>()
-            for siteInfoArray in StoryHtmlDecoder.shared.siteInfoArrayArray {
+            for siteInfoArray in StoryHtmlDecoder.shared.effectiveSiteInfoArrayArray {
                 for siteInfo in siteInfoArray {
                     if siteInfo.checkTargets.isEmpty { continue }
                     let siteName = siteInfo.name ?? siteInfo.resourceUrl ?? "(no name)"
@@ -1959,12 +2184,32 @@ class ScrapeInspector {
             }
             DispatchQueue.main.async {
                 self.results = []
-                self.runSequential(items: items, index: 0, progress: progress, completion: completion)
+                // 通常の全件検査はキャッシュ由来 SiteInfo で取得する(InspectFetchSinglePage)。
+                self.runSequential(items: items, index: 0, fetch: { target, success, failed in
+                    self.fetcher.InspectFetchSinglePage(url: target.url, cookieString: "", successAction: success, failedAction: failed)
+                }, progress: progress, completion: completion)
             }
         }
     }
 
-    private func runSequential(items: [WorkItem], index: Int, progress: ((Int, Int, Result) -> Void)?, completion: @escaping ([Result]) -> Void) {
+    // SiteInfo エディタ用：与えた1件の StorySiteInfo の checkTargets を、キャッシュではなくその1件で逐次検査する。
+    // 各ターゲットの取得を InspectFetchSinglePageWith([siteInfo]) に差し替えるだけで、判定(judge)以降は全件検査と共通。
+    // checkTargets が空なら items も空になり、即 completion([]) を返す(呼び出し側で「未設定」注記を出す)。
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+    func InspectSingleSiteInfo(siteInfo: StorySiteInfo, progress: ((Int, Int, Result) -> Void)? = nil, completion: @escaping ([Result]) -> Void) {
+        let siteName = siteInfo.name ?? siteInfo.resourceUrl ?? "(no name)"
+        let items = siteInfo.checkTargets.map { WorkItem(siteName: siteName, target: $0) }
+        DispatchQueue.main.async {
+            self.results = []
+            self.runSequential(items: items, index: 0, fetch: { target, success, failed in
+                self.fetcher.InspectFetchSinglePageWith(siteInfoArray: [siteInfo], url: target.url, cookieString: "", successAction: success, failedAction: failed)
+            }, progress: progress, completion: completion)
+        }
+    }
+
+    // items を逐次検査する。各ターゲットの「取得」だけ fetch クロージャに委譲し(キャッシュ版/単一SiteInfo版で差し替える)、
+    // 取得後の judge・集計・インターバル・ウォッチドッグは共通化する。
+    private func runSequential(items: [WorkItem], index: Int, fetch: @escaping (_ target: ScrapeCheckTarget, _ success: @escaping (StoryState) -> Void, _ failed: @escaping (URL, String) -> Void) -> Void, progress: ((Int, Int, Result) -> Void)?, completion: @escaping ([Result]) -> Void) {
         if index >= items.count {
             completion(results)
             return
@@ -1980,7 +2225,7 @@ class ScrapeInspector {
                 self.results.append(result)
                 progress?(self.results.count, items.count, result)
                 DispatchQueue.main.asyncAfter(deadline: .now() + self.intervalBetweenTargets) {
-                    self.runSequential(items: items, index: index + 1, progress: progress, completion: completion)
+                    self.runSequential(items: items, index: index + 1, fetch: fetch, progress: progress, completion: completion)
                 }
             }
         }
@@ -1988,12 +2233,12 @@ class ScrapeInspector {
         DispatchQueue.main.asyncAfter(deadline: .now() + perTargetTimeout) {
             finish(.error, ["タイムアウト(\(Int(self.perTargetTimeout))秒以内に応答なし)"])
         }
-        fetcher.InspectFetchSinglePage(url: target.url, cookieString: "", successAction: { state in
+        fetch(target, { state in
             // state.url はリダイレクト後もステイルなので、実遷移後URLは httpClient.GetCurrentURL() で取る。
             let hostChanged = ScrapeInspector.isHostChanged(requested: target.url, final: self.fetcher.httpClient.GetCurrentURL())
             let (status, reasons) = ScrapeInspector.judge(requireAuth: target.requireAuth, failMessage: nil, evaluateFailures: target.evaluate(state: state), hostChanged: hostChanged, unknownTokens: target.unknownTokens)
             finish(status, reasons)
-        }, failedAction: { _, message in
+        }, { _, message in
             let hostChanged = ScrapeInspector.isHostChanged(requested: target.url, final: self.fetcher.httpClient.GetCurrentURL())
             let (status, reasons) = ScrapeInspector.judge(requireAuth: target.requireAuth, failMessage: message, evaluateFailures: [], hostChanged: hostChanged, unknownTokens: target.unknownTokens)
             finish(status, reasons)
@@ -2015,3 +2260,100 @@ class ScrapeInspector {
 }
 
 #endif
+
+// MARK: - ローカル最優先SiteInfo の永続化(CSVファイル)
+// SiteInfo エディタで保存した SiteInfo をローカルCSVに持ち、StoryHtmlDecoder が「常に最優先ソース」として
+// siteInfoArrayArray の先頭へ注入する。中身が空なら何も注入されない(= 自然に「最優先SiteInfo無し」相当)。
+// Realm/iCloud は使わない(普段は作者しか使わない機能のため。継承シナリオでは保存するだけで最優先が効く)。
+// 正本は生セル行 rows:[[String:String]](設計の「生セルが正本」に一致)。設計メモ: DESIGN_SiteInfoエディタ.md
+class LocalSiteInfoStore {
+    static let shared = LocalSiteInfoStore()
+
+    // id 復元時に付与する固定の源URL。makeFromCellDict は id を `<base>:<sourceURL>` で作るので、
+    // ここを定数にすることで復元のたびに同じ in-memory id になる(rows 側 base id は不変=肥大化しない)。
+    static let sourceURLString = "local://preferred-siteinfo"
+    // CSV のヘッダ列順(makeFromCellDict が読む列)。
+    static let columns = ["id","name","newPageElement","url","title","subtitle","firstPageLink","nextLink","tag","author","isNeedHeadless","injectStyle","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","resourceUrl","overrideUserAgent","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","checkTargets"]
+
+    private let fileURL: URL
+    // テストから保存先ファイルURLを参照するための口(同じファイルを別インスタンスで読み直す検証用)。
+    var fileURLForTest: URL { return fileURL }
+    private(set) var rows: [[String:String]] = []
+
+    // 既定は Application Support(.cachesDirectory はOSにパージされ得るので使わない)。テストは init(fileURL:) で一時ディレクトリへ。
+    init(fileURL: URL? = nil) {
+        if let fileURL = fileURL {
+            self.fileURL = fileURL
+        } else {
+            let dir = (try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)) ?? URL(fileURLWithPath: NSTemporaryDirectory())
+            self.fileURL = dir.appendingPathComponent("LocalPreferredSiteInfo.csv")
+        }
+        load()
+    }
+
+    func load() {
+        guard let text = try? String(contentsOf: fileURL, encoding: .utf8) else { rows = []; return }
+        let parsed = StoryHtmlDecoder.ParseCSVRows(text)
+        guard let headers = parsed.first else { rows = []; return }
+        var result: [[String:String]] = []
+        for values in parsed.dropFirst() {
+            var dict = [String:String]()
+            for (h, v) in zip(headers, values) { dict[h] = v }
+            // url も newPageElement も無い空行はスキップ(末尾の空行など)
+            if (dict["url"]?.isEmpty ?? true) && (dict["newPageElement"]?.isEmpty ?? true) { continue }
+            result.append(dict)
+        }
+        rows = result
+    }
+
+    private func csvEscape(_ value: String) -> String {
+        return "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+    }
+
+    @discardableResult
+    func save() -> Bool {
+        var lines: [String] = []
+        lines.append(LocalSiteInfoStore.columns.map { csvEscape($0) }.joined(separator: ","))
+        for row in rows {
+            lines.append(LocalSiteInfoStore.columns.map { csvEscape(row[$0] ?? "") }.joined(separator: ","))
+        }
+        let text = lines.joined(separator: "\n")
+        do {
+            try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try text.write(to: fileURL, atomically: true, encoding: .utf8)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    // url(マッチ正規表現文字列)をキーに upsert(設計§4 同一性キー=url)。
+    // 新規(id 空)は url から決定的な id を採番して行に保存 → 再保存・再読込で id 不変(取込設定の紐付けが安定)。
+    func upsert(_ cells: [String:String]) {
+        var entry = cells
+        let urlPattern = entry["url"] ?? ""
+        if (entry["id"]?.isEmpty ?? true) {
+            entry["id"] = LocalSiteInfoStore.deterministicId(urlPattern: urlPattern)
+        }
+        if let idx = rows.firstIndex(where: { ($0["url"] ?? "") == urlPattern }) {
+            rows[idx] = entry
+        } else {
+            rows.append(entry)
+        }
+    }
+
+    func delete(urlPattern: String) {
+        rows.removeAll { ($0["url"] ?? "") == urlPattern }
+    }
+
+    // 注入用に [StorySiteInfo] へ復元する。
+    func entries() -> [StorySiteInfo] {
+        return rows.compactMap { StorySiteInfo.makeFromCellDict($0, urlString: LocalSiteInfoStore.sourceURLString) }
+    }
+
+    // url から決定的な base id。String.hashValue は実行毎に変わる(プロセス毎の seed)ため使えない。
+    // url そのものを使えば決定的かつ一意(同一url=同一エントリ)。
+    static func deterministicId(urlPattern: String) -> String {
+        return "localpref:" + urlPattern
+    }
+}
