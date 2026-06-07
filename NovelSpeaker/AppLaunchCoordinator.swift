@@ -97,6 +97,12 @@ final class AppLaunchCoordinator: NSObject {
             return false
         }
 
+        // 検査は「いま本番(公開シート)に入っている checkTargets」を対象にしたい。
+        // 通常の SiteInfo ロードは 24h のファイルキャッシュを使うため、CLI 起動時に古いキャッシュが
+        // あると検査対象が陳腐化する(例: シート反映直後でもキャッシュ時代の数件しか見ない)。
+        // ここでキャッシュ期限を 0 にして、検査前に必ず最新の SiteInfo を取り直させる。
+        StoryHtmlDecoder.shared.cacheFileExpireTimeinterval = 0
+
         let inspector = ScrapeInspector()
         // InspectAll は内部で [weak self] を使うため、完了まで外側で保持する。
         cliInspector = inspector
