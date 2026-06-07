@@ -194,7 +194,7 @@ class DownloadTest: XCTestCase {
         let siteInfo = StorySiteInfo(
             id: UUID().uuidString,
             name: "pixiv-test",
-            newPageElement: "//main",      // 何かしら本文っぽく拾える(=この SiteInfo が match 対象になる)
+            pageElementV2: "//main",      // 何かしら本文っぽく拾える(=この SiteInfo が match 対象になる)
             url: "^https://(www|touch)\\.pixiv\\.net/novel/(show\\.php|series/\\d+)",
             title: nil, subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil,
             isNeedHeadless: "true",        // gate は JS 描画なので headless 必須
@@ -247,7 +247,7 @@ class DownloadTest: XCTestCase {
 
             // Step B: 同じ fetcher/WebView で FetchNext(本番)経路
             let siteInfo = StorySiteInfo(
-                id: UUID().uuidString, name: "pixiv-test", newPageElement: "//main",
+                id: UUID().uuidString, name: "pixiv-test", pageElementV2: "//main",
                 url: "^https://(www|touch)\\.pixiv\\.net/novel/(show\\.php|series/\\d+)",
                 title: nil, subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil,
                 isNeedHeadless: "true", injectStyle: nil, nextButton: nil, firstPageButton: nil,
@@ -357,7 +357,7 @@ class DownloadTest: XCTestCase {
         // 実アプリと同一経路: 注入SiteInfo の decodeForceErrorElement。
         let forceError = "ログインを促す画面が出ています。:" + union
         let siteInfo = StorySiteInfo(
-            id: UUID().uuidString, name: "pixiv-test", newPageElement: "//main",
+            id: UUID().uuidString, name: "pixiv-test", pageElementV2: "//main",
             url: "^https://(www|touch)\\.pixiv\\.net/novel/(show\\.php|series/\\d+)",
             title: nil, subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil,
             isNeedHeadless: "true", injectStyle: nil, nextButton: nil, firstPageButton: nil,
@@ -400,7 +400,7 @@ class DownloadTest: XCTestCase {
 
             // 実アプリ経路: 注入SiteInfo の decodeForceErrorElement。
             let siteInfo = StorySiteInfo(
-                id: UUID().uuidString, name: "pixiv-test", newPageElement: "//main",
+                id: UUID().uuidString, name: "pixiv-test", pageElementV2: "//main",
                 url: "^https://(www|touch)\\.pixiv\\.net/novel/(show\\.php|series/\\d+)",
                 title: nil, subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil,
                 isNeedHeadless: "true", injectStyle: nil, nextButton: nil, firstPageButton: nil,

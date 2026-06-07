@@ -593,7 +593,7 @@ class NovelSpeakerUtility: NSObject {
     }
 
     // 共有等で渡された .csv を「最優先SiteInfo」として取り込む(SiteInfoエディタ Phase4)。
-    // 中身を見て SiteInfo 用CSV(newPageElement 列を持つ)のみ受理。違えば「SiteInfo用CSVではない」を表示する。
+    // 中身を見て SiteInfo 用CSV(pageElementV2 列を持つ)のみ受理。違えば「SiteInfo用CSVではない」を表示する。
     // 設計メモ: DESIGN_SiteInfoエディタ.md
     static func ProcessSiteInfoCSVFile(url:URL) -> Bool {
         let scope = url.startAccessingSecurityScopedResource()
@@ -607,7 +607,7 @@ class NovelSpeakerUtility: NSObject {
             }
         }
         guard let result = LocalSiteInfoStore.shared.importCSVText(text) else {
-            showMessage(NSLocalizedString("SiteInfoEditor_Import_NotSiteInfoCSV", comment: "このCSVファイルは最優先SiteInfo用のデータではないようです(newPageElement 列が見当たりません)。取り込みを中止しました。"))
+            showMessage(NSLocalizedString("SiteInfoEditor_Import_NotSiteInfoCSV", comment: "このCSVファイルは最優先SiteInfo用のデータではないようです(pageElementV2 列が見当たりません)。取り込みを中止しました。"))
             return true
         }
         _ = LocalSiteInfoStore.shared.save()

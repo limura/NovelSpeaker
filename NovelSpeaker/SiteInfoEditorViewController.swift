@@ -13,7 +13,7 @@
 //     編集中の値が「同id の標準データ(キャッシュ)」とカラム単位で違う場合、その項目を目立たせる(編集すべきでない列を触っていないか気づくため)。
 //
 //  方針:
-//   - 正本は「生セル文字列(列→値の辞書) cells」。本文系で編集するのは newPageElement のみ(pageElement は派生)。
+//   - 正本は「生セル文字列(列→値の辞書) cells」。本文系で編集するのは pageElementV2 のみ(pageElement は派生)。
 //   - テスト時は cells → StorySiteInfo.makeFromCellDict → ScrapeInspector.InspectSingleSiteInfo(キャッシュ非依存)。
 //   - 保存は LocalSiteInfoStore(ローカルCSV)へ upsert。常に最優先として適用される(空なら適用なし)。
 //   - ユーザの目に触れる文字列は NSLocalizedString で日英ローカライズする(列名等の識別子はそのまま)。
@@ -276,7 +276,7 @@ class SiteInfoEditorViewController: FormViewController {
 
     // 複数行テキストで編集する列。
     private static let multiLineColumns: [(tag: String, title: String, placeholder: String)] = [
-        ("newPageElement", NSLocalizedString("SiteInfoEditor_Col_newPageElement", comment: "newPageElement (本文のxpath。または複数の取り込み対象を指定するために複数行で『ID:タイトル/title=xpath』の形式)"), "//div[@id='novel_honbun']"),
+        ("pageElementV2", NSLocalizedString("SiteInfoEditor_Col_pageElementV2", comment: "pageElementV2 (本文のxpath。または複数の取り込み対象を指定するために複数行で『ID:タイトル/title=xpath』の形式)"), "//div[@id='novel_honbun']"),
         ("forceErrorMessageAndElement", NSLocalizedString("SiteInfoEditor_Col_forceErrorMessageAndElement", comment: "forceErrorMessageAndElement (gate文言:xpath)"), "ログインが必要です://xpath"),
         ("checkTargets", NSLocalizedString("SiteInfoEditor_Col_checkTargets", comment: "checkTargets (検査対象。1行1エントリ / [auth] URL => content,nextLink)"), "[auth] https://example.com/n/1/ => content,nextLink"),
     ]
@@ -534,9 +534,9 @@ class SiteInfoEditorViewController: FormViewController {
         if (cells["url"]?.isEmpty ?? true) {
             preNotes.append(NSLocalizedString("SiteInfoEditor_Test_URLEmpty", comment: "⚠️ url が空です。isMatchUrl が常に false になり、本番ではこの SiteInfo が選ばれません。"))
         }
-        // 特殊フォーマット列(newPageElement の複数行 / forceErrorMessageAndElement / checkTargets)の構文チェック。
+        // 特殊フォーマット列(pageElementV2 の複数行 / forceErrorMessageAndElement / checkTargets)の構文チェック。
         // パーサが黙って無視してしまう書式ミスをテスト時に気づけるようにする。
-        let formatWarnings = StorySiteInfo.validateNewPageElementFormat(cells["newPageElement"])
+        let formatWarnings = StorySiteInfo.validatePageElementV2Format(cells["pageElementV2"])
             + StorySiteInfo.validateForceErrorMessageAndElementFormat(cells["forceErrorMessageAndElement"])
             + ScrapeCheckTarget.validateFormat(cells["checkTargets"])
         preNotes += formatWarnings.map { "⚠️ " + $0 }
@@ -545,7 +545,7 @@ class SiteInfoEditorViewController: FormViewController {
         // 生セル → StorySiteInfo。urlString は id の源情報(テスト用ダミー。永続化しないため影響なし)。
         guard let siteInfo = StorySiteInfo.makeFromCellDict(cells, urlString: "siteinfo-editor://local") else {
             showReport(title: resultTitle,
-                       body: (preNotes + [NSLocalizedString("SiteInfoEditor_Test_NoNewPageElement", comment: "newPageElement が無いため StorySiteInfo を生成できませんでした。")]).joined(separator: "\n"))
+                       body: (preNotes + [NSLocalizedString("SiteInfoEditor_Test_NoPageElementV2", comment: "pageElementV2 が無いため StorySiteInfo を生成できませんでした。")]).joined(separator: "\n"))
             return
         }
 

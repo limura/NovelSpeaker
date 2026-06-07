@@ -42,14 +42,14 @@ class StoryFetcherTest: XCTestCase {
         }
     }
 
-    private func createCSVSiteInfo(newPageElement:String, name:String = "テストサイト") throws -> StorySiteInfo {
+    private func createCSVSiteInfo(pageElementV2:String, name:String = "テストサイト") throws -> StorySiteInfo {
         func csvEscape(_ value:String) -> String {
             return "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""
         }
         let headers = [
             "id",
             "name",
-            "newPageElement",
+            "pageElementV2",
             "url",
             "title",
             "subtitle",
@@ -72,7 +72,7 @@ class StoryFetcherTest: XCTestCase {
         let values = [
             novelImportSettingTestSiteNumber,
             name,
-            newPageElement,
+            pageElementV2,
             "^https://example.com/novel/.*$",
             "//*[@id='title']",
             "",
@@ -109,9 +109,9 @@ class StoryFetcherTest: XCTestCase {
         }
     }
 
-    func testNovelImportSettingSiteInfoReloadAddsNewPageElementToTargetsAndLogs() throws {
+    func testNovelImportSettingSiteInfoReloadAddsPageElementV2ToTargetsAndLogs() throws {
         createSiteImportSetting(targets: ["body"], seenTargets: ["body"])
-        let siteInfo = try createCSVSiteInfo(newPageElement: """
+        let siteInfo = try createCSVSiteInfo(pageElementV2: """
         body:本文/Body=//*[@id='body']
         afterword:後書き/Afterword=//*[@id='afterword']
         """)
@@ -133,7 +133,7 @@ class StoryFetcherTest: XCTestCase {
 
     func testResolveNovelImportSettingUsesAllCurrentElementsWhenSelectionBecomesEmpty() throws {
         createSiteImportSetting(targets: ["body"], seenTargets: ["body", "foreword", "afterword"])
-        let siteInfo = try createCSVSiteInfo(newPageElement: """
+        let siteInfo = try createCSVSiteInfo(pageElementV2: """
         foreword:前書き/Foreword=//*[@id='foreword']
         afterword:後書き/Afterword=//*[@id='afterword']
         """)
@@ -163,11 +163,11 @@ class StoryFetcherTest: XCTestCase {
     func testMakeFromCellDictMatchesCSVDecoder() throws {
         // 生セル辞書から作った StorySiteInfo が、同内容を CSV デコードしたものと一致すること
         // (= エディタの生セル経路と本番のデコード経路で列→プロパティのマッピングが食い違わない)。
-        let newPageElement = "//*[@id='honbun']"
+        let pageElementV2 = "//*[@id='honbun']"
         let dict: [String:String] = [
             "id": novelImportSettingTestSiteNumber,
             "name": "テストサイト",
-            "newPageElement": newPageElement,
+            "pageElementV2": pageElementV2,
             "url": "^https://example.com/novel/.*$",
             "title": "//*[@id='title']",
             "author": "//*[@id='author']",
@@ -176,10 +176,10 @@ class StoryFetcherTest: XCTestCase {
             "checkTargets": "https://example.com/novel/1/ => content,nextLink",
         ]
         let made = try XCTUnwrap(StorySiteInfo.makeFromCellDict(dict, urlString: novelImportSettingTestURL))
-        let decoded = try createCSVSiteInfo(newPageElement: newPageElement)
+        let decoded = try createCSVSiteInfo(pageElementV2: pageElementV2)
         XCTAssertEqual(made.id, novelImportSettingTestSiteID)
         XCTAssertEqual(made.id, decoded.id)
-        XCTAssertEqual(made.pageElement, newPageElement)
+        XCTAssertEqual(made.pageElement, pageElementV2)
         XCTAssertEqual(made.pageElement, decoded.pageElement)
         XCTAssertEqual(made.title, "//*[@id='title']")
         XCTAssertEqual(made.author, "//*[@id='author']")
@@ -189,25 +189,25 @@ class StoryFetcherTest: XCTestCase {
         XCTAssertEqual(made.checkTargets.count, 1)
     }
 
-    func testMakeFromCellDictReturnsNilWithoutNewPageElement() throws {
-        // newPageElement 列が無い行はデコード対象外(既存 DecodeCSVSiteInfoData の挙動)。
+    func testMakeFromCellDictReturnsNilWithoutPageElementV2() throws {
+        // pageElementV2 列が無い行はデコード対象外(既存 DecodeCSVSiteInfoData の挙動)。
         XCTAssertNil(StorySiteInfo.makeFromCellDict(["name":"x"], urlString: novelImportSettingTestURL))
     }
 
-    func testStorySiteInfoPreservesOriginalNewPageElementAndCheckTargets() throws {
+    func testStorySiteInfoPreservesOriginalPageElementV2AndCheckTargets() throws {
         // エディタの「既存SiteInfo読込→編集」往復のために、派生前の原文が保持されること。
-        let newPageElement = """
+        let pageElementV2 = """
         body:本文/Body=//*[@id='body']
         afterword:後書き/Afterword=//*[@id='afterword']
         """
         let checkTargets = "[auth] https://example.com/novel/1/ => content,nextLink"
         let siteInfo = try XCTUnwrap(StorySiteInfo.makeFromCellDict([
             "id": novelImportSettingTestSiteNumber,
-            "newPageElement": newPageElement,
+            "pageElementV2": pageElementV2,
             "url": "^https://example.com/.*$",
             "checkTargets": checkTargets,
         ], urlString: novelImportSettingTestURL))
-        XCTAssertEqual(siteInfo.originalNewPageElement, newPageElement)
+        XCTAssertEqual(siteInfo.originalPageElementV2, pageElementV2)
         XCTAssertEqual(siteInfo.originalCheckTargets, checkTargets)
         // 派生(pageElement)は複数要素を | で連結したものになり、原文とは別物。
         XCTAssertEqual(siteInfo.pageElement, "//*[@id='body']|//*[@id='afterword']")
@@ -218,7 +218,7 @@ class StoryFetcherTest: XCTestCase {
         let cells: [String:String] = [
             "id": "999991",
             "name": "テストサイト",
-            "newPageElement": "//*[@id='honbun']",
+            "pageElementV2": "//*[@id='honbun']",
             "url": "^https://example.com/n/.*$",
             "title": "//*[@id='title']",
             "author": "//*[@id='author']",
@@ -227,7 +227,7 @@ class StoryFetcherTest: XCTestCase {
         ]
         let made = try XCTUnwrap(StorySiteInfo.makeFromCellDict(cells, urlString: novelImportSettingTestURL))
         let back = made.toCellDict()
-        XCTAssertEqual(back["newPageElement"], "//*[@id='honbun']")
+        XCTAssertEqual(back["pageElementV2"], "//*[@id='honbun']")
         XCTAssertEqual(back["url"], "^https://example.com/n/.*$")
         XCTAssertEqual(back["title"], "//*[@id='title']")
         XCTAssertEqual(back["author"], "//*[@id='author']")
@@ -236,7 +236,7 @@ class StoryFetcherTest: XCTestCase {
         // 戻した cells から作り直しても等価(url・原文・checkTargets 個数)。
         let remade = try XCTUnwrap(StorySiteInfo.makeFromCellDict(back, urlString: novelImportSettingTestURL))
         XCTAssertEqual(remade.url?.pattern, made.url?.pattern)
-        XCTAssertEqual(remade.originalNewPageElement, made.originalNewPageElement)
+        XCTAssertEqual(remade.originalPageElementV2, made.originalPageElementV2)
         XCTAssertEqual(remade.checkTargets.count, made.checkTargets.count)
     }
 
@@ -251,12 +251,12 @@ class StoryFetcherTest: XCTestCase {
     func testLocalSiteInfoStoreSaveLoadRoundTripPreservesMultilineFields() throws {
         let store = makeTempStore()
         // 複数行・カンマ・ダブルクォート・改行を含むフィールドが CSV 往復で保たれること。
-        let newPageElement = "body:本文/Body=//*[@id='body']\nafter:後書き/After=//*[@id='after']"
+        let pageElementV2 = "body:本文/Body=//*[@id='body']\nafter:後書き/After=//*[@id='after']"
         let checkTargets = "[auth] https://example.com/n/1/ => content,nextLink\nhttps://example.com/s/1/ => firstPageLink"
         store.upsert([
             "name": "サイト\"A\",カンマ入り",
             "url": "^https://example.com/n/.*$",
-            "newPageElement": newPageElement,
+            "pageElementV2": pageElementV2,
             "checkTargets": checkTargets,
         ])
         XCTAssertTrue(store.save())
@@ -264,25 +264,25 @@ class StoryFetcherTest: XCTestCase {
         XCTAssertEqual(reloaded.rows.count, 1)
         let row = try XCTUnwrap(reloaded.rows.first)
         XCTAssertEqual(row["name"], "サイト\"A\",カンマ入り")
-        XCTAssertEqual(row["newPageElement"], newPageElement)
+        XCTAssertEqual(row["pageElementV2"], pageElementV2)
         XCTAssertEqual(row["checkTargets"], checkTargets)
     }
 
     func testLocalSiteInfoStoreUpsertReplacesSameURLAndAppendsOther() throws {
         let store = makeTempStore()
-        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a"])
-        store.upsert(["url": "^https://b/.*$", "newPageElement": "//b"])
+        store.upsert(["url": "^https://a/.*$", "pageElementV2": "//a"])
+        store.upsert(["url": "^https://b/.*$", "pageElementV2": "//b"])
         XCTAssertEqual(store.rows.count, 2)
         // 同 url は置換(行数は増えない)。
-        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a2"])
+        store.upsert(["url": "^https://a/.*$", "pageElementV2": "//a2"])
         XCTAssertEqual(store.rows.count, 2)
-        XCTAssertEqual(store.rows.first(where: { $0["url"] == "^https://a/.*$" })?["newPageElement"], "//a2")
+        XCTAssertEqual(store.rows.first(where: { $0["url"] == "^https://a/.*$" })?["pageElementV2"], "//a2")
     }
 
     func testLocalSiteInfoStoreDeleteRemovesByURL() throws {
         let store = makeTempStore()
-        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a"])
-        store.upsert(["url": "^https://b/.*$", "newPageElement": "//b"])
+        store.upsert(["url": "^https://a/.*$", "pageElementV2": "//a"])
+        store.upsert(["url": "^https://b/.*$", "pageElementV2": "//b"])
         store.delete(urlPattern: "^https://a/.*$")
         XCTAssertEqual(store.rows.count, 1)
         XCTAssertEqual(store.rows.first?["url"], "^https://b/.*$")
@@ -290,12 +290,12 @@ class StoryFetcherTest: XCTestCase {
 
     func testLocalSiteInfoStoreAssignsDeterministicIdOnUpsert() throws {
         let store = makeTempStore()
-        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a"])
+        store.upsert(["url": "^https://a/.*$", "pageElementV2": "//a"])
         let id1 = store.rows.first?["id"]
         XCTAssertNotNil(id1)
         XCTAssertFalse(id1!.isEmpty)
         // 同 url を再 upsert しても id は変わらない(取込設定の紐付けが安定する)。
-        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a2"])
+        store.upsert(["url": "^https://a/.*$", "pageElementV2": "//a2"])
         XCTAssertEqual(store.rows.first?["id"], id1)
         // 決定的 id は url から導かれる。
         XCTAssertEqual(id1, LocalSiteInfoStore.deterministicId(urlPattern: "^https://a/.*$"))
@@ -303,7 +303,7 @@ class StoryFetcherTest: XCTestCase {
 
     func testLocalSiteInfoStoreEntriesDecodeToStorySiteInfo() throws {
         let store = makeTempStore()
-        store.upsert(["url": "^https://example.com/n/.*$", "newPageElement": "//*[@id='honbun']"])
+        store.upsert(["url": "^https://example.com/n/.*$", "pageElementV2": "//*[@id='honbun']"])
         let entries = store.entries()
         XCTAssertEqual(entries.count, 1)
         XCTAssertTrue(entries[0].isMatchUrl(urlString: "https://example.com/n/123/"))
@@ -318,13 +318,13 @@ class StoryFetcherTest: XCTestCase {
             decoder.localPreferredSiteInfoArray = savedLocal
             decoder.siteInfoArrayArray = savedArrayArray
         }
-        let publicSite = try XCTUnwrap(StorySiteInfo.makeFromCellDict(["url": "^https://pub/.*$", "newPageElement": "//pub"], urlString: novelImportSettingTestURL))
+        let publicSite = try XCTUnwrap(StorySiteInfo.makeFromCellDict(["url": "^https://pub/.*$", "pageElementV2": "//pub"], urlString: novelImportSettingTestURL))
         decoder.siteInfoArrayArray = [[publicSite]]
         // 空ローカルなら siteInfoArrayArray のまま。
         decoder.localPreferredSiteInfoArray = []
         XCTAssertEqual(decoder.effectiveSiteInfoArrayArray.count, 1)
         // 非空ローカルは先頭に来る。
-        let localSite = try XCTUnwrap(StorySiteInfo.makeFromCellDict(["url": "^https://local/.*$", "newPageElement": "//local"], urlString: novelImportSettingTestURL))
+        let localSite = try XCTUnwrap(StorySiteInfo.makeFromCellDict(["url": "^https://local/.*$", "pageElementV2": "//local"], urlString: novelImportSettingTestURL))
         decoder.localPreferredSiteInfoArray = [localSite]
         let eff = decoder.effectiveSiteInfoArrayArray
         XCTAssertEqual(eff.count, 2)
@@ -336,8 +336,8 @@ class StoryFetcherTest: XCTestCase {
 
     func testLocalSiteInfoStoreCSVExportImportRoundTrip() throws {
         let src = makeTempStore()
-        src.upsert(["url": "^https://a/.*$", "newPageElement": "//a\n2:後/After=//x", "checkTargets": "[auth] https://a/1/ => content,nextLink", "name": "サイトA,カンマ"])
-        src.upsert(["url": "^https://b/.*$", "newPageElement": "//b", "title": "//h1"])
+        src.upsert(["url": "^https://a/.*$", "pageElementV2": "//a\n2:後/After=//x", "checkTargets": "[auth] https://a/1/ => content,nextLink", "name": "サイトA,カンマ"])
+        src.upsert(["url": "^https://b/.*$", "pageElementV2": "//b", "title": "//h1"])
         let csv = src.csvString()
         // 別 store に import すると rows が一致(往復で複数行/カンマ/checkTargets が保たれる)。
         let dst = makeTempStore()
@@ -346,23 +346,23 @@ class StoryFetcherTest: XCTestCase {
         XCTAssertEqual(result.updated, 0)
         XCTAssertEqual(dst.rows.count, 2)
         let a = try XCTUnwrap(dst.rows.first(where: { $0["url"] == "^https://a/.*$" }))
-        XCTAssertEqual(a["newPageElement"], "//a\n2:後/After=//x")
+        XCTAssertEqual(a["pageElementV2"], "//a\n2:後/After=//x")
         XCTAssertEqual(a["checkTargets"], "[auth] https://a/1/ => content,nextLink")
         XCTAssertEqual(a["name"], "サイトA,カンマ")
     }
 
     func testImportCSVTextRejectsNonSiteInfoCSV() throws {
         let store = makeTempStore()
-        // newPageElement 列が無いCSVは SiteInfo 用ではないと判定して nil。
+        // pageElementV2 列が無いCSVは SiteInfo 用ではないと判定して nil。
         XCTAssertNil(store.importCSVText("foo,bar\n1,2"))
         XCTAssertNil(store.importCSVText(""))
     }
 
     func testImportCSVTextCountsAddedAndUpdated() throws {
         let store = makeTempStore()
-        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a"])
+        store.upsert(["url": "^https://a/.*$", "pageElementV2": "//a"])
         // 同 url=更新、別 url=追加。
-        let header = "\"url\",\"newPageElement\""
+        let header = "\"url\",\"pageElementV2\""
         let csv = header + "\n\"^https://a/.*$\",\"//a2\"\n\"^https://c/.*$\",\"//c\""
         let result = try XCTUnwrap(store.importCSVText(csv))
         XCTAssertEqual(result.updated, 1)
@@ -373,7 +373,7 @@ class StoryFetcherTest: XCTestCase {
     func testSpreadsheetTSVRow() throws {
         let cells: [String:String] = [
             "id": "x1", "name": "サイト", "url": "^https://a/.*$",
-            "newPageElement": "1:本文/main=//div\n2:後/After=//x", // 改行含む→クォート
+            "pageElementV2": "1:本文/main=//div\n2:後/After=//x", // 改行含む→クォート
             "title": "//h1",
             "checkTargets": "a\tb", // タブ含む→クォート
             "pageElement": "これは含まれない", "memo": "これも含まれない", "exampleUrl": "これも",
@@ -399,7 +399,7 @@ class StoryFetcherTest: XCTestCase {
         XCTAssertEqual(LocalSiteInfoStore.sheetIdValue(from: "5:https://docs.google.com/spreadsheets/d/x/pub?gid=0&single=true&output=csv"), "5")
         XCTAssertEqual(LocalSiteInfoStore.sheetIdValue(from: "5"), "5")
         XCTAssertEqual(LocalSiteInfoStore.sheetIdValue(from: ""), "")
-        let tsv = LocalSiteInfoStore.spreadsheetTSVRow(["id": "5:https://example.com/sheet.csv", "url": "^https://a/.*$", "newPageElement": "//a"])
+        let tsv = LocalSiteInfoStore.spreadsheetTSVRow(["id": "5:https://example.com/sheet.csv", "url": "^https://a/.*$", "pageElementV2": "//a"])
         // TSV の最初のフィールド(id列)が "5" であること。
         XCTAssertEqual(tsv.components(separatedBy: "\t").first, "5")
     }
@@ -407,16 +407,16 @@ class StoryFetcherTest: XCTestCase {
     // MARK: - 特殊フォーマット列の検証(エディタ「テスト」時の構文チェック)
     // 設計メモ: DESIGN_SiteInfoエディタ.md
 
-    func testValidateNewPageElementFormat() throws {
+    func testValidatePageElementV2Format() throws {
         // 単一行は xpath そのもの扱い → 警告なし。
-        XCTAssertTrue(StorySiteInfo.validateNewPageElementFormat("//div[@id='x']").isEmpty)
+        XCTAssertTrue(StorySiteInfo.validatePageElementV2Format("//div[@id='x']").isEmpty)
         // 正しい複数行(ID:タイトル/title=xpath)→ 警告なし。
         let ok = "1:本文/main=//div[@class='a']\n2:後書き/After=//div[@class='b']"
-        XCTAssertTrue(StorySiteInfo.validateNewPageElementFormat(ok).isEmpty)
+        XCTAssertTrue(StorySiteInfo.validatePageElementV2Format(ok).isEmpty)
         // ':' が無い行 → 警告。
-        XCTAssertFalse(StorySiteInfo.validateNewPageElementFormat("1:本文=//a\n//bだけの行").isEmpty)
+        XCTAssertFalse(StorySiteInfo.validatePageElementV2Format("1:本文=//a\n//bだけの行").isEmpty)
         // '=' が無い行 → 警告。
-        XCTAssertFalse(StorySiteInfo.validateNewPageElementFormat("1:本文//a\n2:後書き/After=//b").isEmpty)
+        XCTAssertFalse(StorySiteInfo.validatePageElementV2Format("1:本文//a\n2:後書き/After=//b").isEmpty)
     }
 
     func testValidateForceErrorMessageAndElementFormat() throws {
@@ -548,8 +548,8 @@ class StoryFetcherTest: XCTestCase {
     }
 
     func testParseCheckTargetsPageElementAlias() throws {
-        // シート列名 pageElement / newPageElement / body は本文(content)のエイリアス。nexturl は nextLink。
-        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://s/x => pageElement,!newPageElement,nexturl,body").first)
+        // シート列名 pageElement / pageElementV2 / body は本文(content)のエイリアス。nexturl は nextLink。
+        let target = try XCTUnwrap(ScrapeCheckTarget.parse("https://s/x => pageElement,!pageElementV2,nexturl,body").first)
         XCTAssertEqual(target.expectations, [
             ScrapeCheckExpectation(token: .content, mustBeEmpty: false),
             ScrapeCheckExpectation(token: .content, mustBeEmpty: true),
@@ -787,7 +787,7 @@ class StoryFetcherTest: XCTestCase {
         return StorySiteInfo(
             id: UUID().uuidString,
             name: "test",
-            newPageElement: "//*[@id='content']",
+            pageElementV2: "//*[@id='content']",
             url: "^https://example.com/.*$",
             title: "//*[@id='title']",
             subtitle: nil,

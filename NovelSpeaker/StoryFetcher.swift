@@ -142,11 +142,11 @@ enum ScrapeCheckToken : String, CaseIterable {
     case firstPageButton  // StoryState.firstPageButton != nil (headless時のみ)
 
     // 大文字小文字を無視して引く。未知トークンは nil(寛容にスキップする)。
-    // エイリアス: SiteInfo シートの列名で書く人が多いので `pageElement`/`newPageElement` を本文(content)として受ける。
+    // エイリアス: SiteInfo シートの列名で書く人が多いので `pageElement`/`newPageElement`/`pageElementV2` を本文(content)として受ける。
     static func from(_ string:String) -> ScrapeCheckToken? {
         let key = string.lowercased()
         switch key {
-        case "pageelement", "newpageelement", "body": return .content
+        case "pageelement", "newpageelement", "pageelementv2", "body": return .content
         case "nexturl": return .nextLink
         default: break
         }
@@ -373,18 +373,18 @@ struct StorySiteInfo : Identifiable {
     // 設計メモ: DESIGN_スクレイプ検査.md
     let checkTargets: [ScrapeCheckTarget]
     // SiteInfo エディタの読込(逆マッピング)用に、派生前の元文字列を保持する。
-    // pageElement は newPageElement からの派生、checkTargets はパース済み配列しか持たないため、
+    // pageElement は pageElementV2 からの派生、checkTargets はパース済み配列しか持たないため、
     // エディタで「既存SiteInfoを読み込む→編集」する往復で情報が落ちないよう原文を残しておく。
     // 設計メモ: DESIGN_SiteInfoエディタ.md
-    let originalNewPageElement: String
+    let originalPageElementV2: String
     let originalCheckTargets: String?
 
-    static func newPageElement2PageElelmentDict(newPageElement:String) -> [String: ([(lang:Language, title:String)], xpath:String)] {
-        if !newPageElement.contains(where: \.isNewline) {
-            return ["1": ([(.Japanse,"本文"), (.English, "main content")], newPageElement)]
+    static func pageElementV2ToPageElementDict(pageElementV2:String) -> [String: ([(lang:Language, title:String)], xpath:String)] {
+        if !pageElementV2.contains(where: \.isNewline) {
+            return ["1": ([(.Japanse,"本文"), (.English, "main content")], pageElementV2)]
         }
         var result:[String: ([(lang:Language, title:String)], xpath:String)] = [:]
-        for line in newPageElement.split(whereSeparator: \.isNewline) {
+        for line in pageElementV2.split(whereSeparator: \.isNewline) {
             // "id:日本語/英語=xpath" という感じで入っているものとして、分割してタブルにする
             let idAndNext = line.split(separator: ":", maxSplits: 1)
             guard idAndNext.count == 2 else { continue }
@@ -406,17 +406,17 @@ struct StorySiteInfo : Identifiable {
         return result
     }
 
-    init(id: String, name: String?, newPageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?, checkTargets:String? = nil, novelImportEnableSettings:[String] = []) {
+    init(id: String, name: String?, pageElementV2:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?, checkTargets:String? = nil, novelImportEnableSettings:[String] = []) {
 
-        func newPageElement2PageElement(newPageElement:String) -> String {
+        func pageElementV2ToPageElement(pageElementV2:String) -> String {
             // 複数要素(取り込み対象を選べる)形式は改行区切り。
-            // 判定は dict 側(newPageElement2PageElelmentDict)と揃え、「文中に改行を含むか」で見る。
+            // 判定は dict 側(pageElementV2ToPageElementDict)と揃え、「文中に改行を含むか」で見る。
             // (行頭の改行有無では判定しない。単一行なら従来通りの pageElement そのもの)
-            if !newPageElement.contains(where: \.isNewline) {
-                return newPageElement
+            if !pageElementV2.contains(where: \.isNewline) {
+                return pageElementV2
             }
             var pageElementArray:[String] = []
-            for line in newPageElement.split(whereSeparator: \.isNewline) {
+            for line in pageElementV2.split(whereSeparator: \.isNewline) {
                 // "id:タイトル=Xpath" の最初の "=" より後ろが Xpath。
                 // Xpath 自体に "=" を含む場合があるので maxSplits:1 で分割する。
                 let lineSeparated = line.split(separator: "=", maxSplits: 1)
@@ -430,8 +430,8 @@ struct StorySiteInfo : Identifiable {
         }
         self.id = id
         self.name = name
-        self.pageElement = newPageElement2PageElement(newPageElement: newPageElement)
-        self.pageElementDict = StorySiteInfo.newPageElement2PageElelmentDict(newPageElement: newPageElement)
+        self.pageElement = pageElementV2ToPageElement(pageElementV2: pageElementV2)
+        self.pageElementDict = StorySiteInfo.pageElementV2ToPageElementDict(pageElementV2: pageElementV2)
         if let urlString = url, let urlRegex = try? NSRegularExpression(pattern: urlString, options: []) {
             self.url = urlRegex
         }else{
@@ -471,7 +471,7 @@ struct StorySiteInfo : Identifiable {
         }
         self.novelImportEnableSettings = novelImportEnableSettings
         self.checkTargets = ScrapeCheckTarget.parse(checkTargets)
-        self.originalNewPageElement = newPageElement
+        self.originalPageElementV2 = pageElementV2
         self.originalCheckTargets = checkTargets
     }
 
@@ -481,10 +481,10 @@ struct StorySiteInfo : Identifiable {
     // - urlString は id の源情報(`<sheetId>:<urlString>`)に使う。RealmNovelImportSetting(サイト毎取込設定)の紐付けキー。
     // - importTargetsForSettingId を渡すと、その settingId→取込対象 解決を使い回す(CSVループで Realm を行毎に引かないため)。
     //   nil の場合は内部で1回 Realm を引く(エディタの単発生成用)。RealmSwift 型(Results 等)をこの API 表面に出さないため closure で受ける。
-    // - `newPageElement` 列が無い行は nil を返す(= デコード対象外。既存 DecodeCSVSiteInfoData の挙動を踏襲)。
+    // - `pageElementV2` 列が無い行は nil を返す(= デコード対象外。既存 DecodeCSVSiteInfoData の挙動を踏襲)。
     // 設計メモ: DESIGN_SiteInfoエディタ.md
     static func makeFromCellDict(_ dict:[String:String], urlString:String, importTargetsForSettingId:((String) -> [String])? = nil) -> StorySiteInfo? {
-        guard let newPageElement = dict["newPageElement"] else { return nil }
+        guard let pageElementV2 = dict["pageElementV2"] else { return nil }
         let siteInfoId = dict["id"]
         let storySiteInfoId = (siteInfoId ?? UUID.init().uuidString) + ":" + urlString
         let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: .site, siteInfoId: storySiteInfoId, novelID: nil)
@@ -502,7 +502,7 @@ struct StorySiteInfo : Identifiable {
         return StorySiteInfo(
             id: storySiteInfoId,
             name: dict["name"],
-            newPageElement: newPageElement,
+            pageElementV2: pageElementV2,
             url: dict["url"],
             title: dict["title"],
             subtitle: dict["subtitle"],
@@ -534,7 +534,7 @@ struct StorySiteInfo : Identifiable {
         var d: [String:String] = [:]
         d["id"] = self.id
         d["name"] = self.name
-        d["newPageElement"] = self.originalNewPageElement
+        d["pageElementV2"] = self.originalPageElementV2
         d["url"] = self.url?.pattern
         d["title"] = self.title
         d["subtitle"] = self.subtitle
@@ -557,10 +557,10 @@ struct StorySiteInfo : Identifiable {
         return d.compactMapValues { $0 }
     }
 
-    // newPageElement のフォーマット検証(エディタの「テスト」用)。問題があれば人間可読な警告配列(空ならOK)。
+    // pageElementV2 のフォーマット検証(エディタの「テスト」用)。問題があれば人間可読な警告配列(空ならOK)。
     // 単一行は本文xpathそのものなので検証しない。複数行は『ID:タイトル/title=xpath』形式
-    // (newPageElement2PageElelmentDict が最初の ':' で id、その後の最初の '=' で xpath を分ける)を要求する。
-    static func validateNewPageElementFormat(_ s: String?) -> [String] {
+    // (pageElementV2ToPageElementDict が最初の ':' で id、その後の最初の '=' で xpath を分ける)を要求する。
+    static func validatePageElementV2Format(_ s: String?) -> [String] {
         guard let s = s, !s.isEmpty else { return [] }
         if !s.contains(where: \.isNewline) { return [] }
         var warnings:[String] = []
@@ -569,19 +569,19 @@ struct StorySiteInfo : Identifiable {
             if line.isEmpty { continue }
             let lineNo = i + 1
             guard let colon = line.firstIndex(of: ":") else {
-                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_NoColon", comment: "newPageElement %d行目: ':' がありません(複数行では『ID:タイトル/title=xpath』形式が必要)"), lineNo))
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_NoColon", comment: "pageElementV2 %d行目: ':' がありません(複数行では『ID:タイトル/title=xpath』形式が必要)"), lineNo))
                 continue
             }
             if line[..<colon].trimmingCharacters(in: .whitespaces).isEmpty {
-                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_EmptyID", comment: "newPageElement %d行目: 行頭の ID(':' より前)が空です"), lineNo))
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_EmptyID", comment: "pageElementV2 %d行目: 行頭の ID(':' より前)が空です"), lineNo))
             }
             let afterColon = line[line.index(after: colon)...]
             guard let eq = afterColon.firstIndex(of: "=") else {
-                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_NoEqual", comment: "newPageElement %d行目: '=' がありません(『ID:タイトル/title=xpath』形式が必要)"), lineNo))
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_NoEqual", comment: "pageElementV2 %d行目: '=' がありません(『ID:タイトル/title=xpath』形式が必要)"), lineNo))
                 continue
             }
             if afterColon[afterColon.index(after: eq)...].trimmingCharacters(in: .whitespaces).isEmpty {
-                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_EmptyXpath", comment: "newPageElement %d行目: '=' の右の xpath が空です"), lineNo))
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_EmptyXpath", comment: "pageElementV2 %d行目: '=' の右の xpath が空です"), lineNo))
             }
         }
         return warnings
@@ -714,7 +714,7 @@ extension StorySiteInfo: CustomStringConvertible {
         result += "\nid: \"" + id
         result += "\nurl: \"" + (url?.pattern ?? "nil")
         result += "\"\npageElement: \"" + pageElement
-        result += "\"\nnewPageElement: \"" + pageElementDict.map { "\($0.0): \($0.1)" }.joined(separator: ",")
+        result += "\"\npageElementV2: \"" + pageElementDict.map { "\($0.0): \($0.1)" }.joined(separator: ",")
         result += "\"\ntitle: \"" + (title ?? "nil")
         result += "\"\nsubtitle: \"" + (subtitle ?? "nil")
         result += "\"\nnextLink: \"" + (nextLink ?? "nil")
@@ -826,7 +826,7 @@ extension StorySiteInfo : Decodable {
         let values = try toplevelValue.nestedContainer(keyedBy: NestedKeys.self, forKey: .data)
         title = try? values.decode(String.self, forKey: NestedKeys.title)
         pageElement = try values.decode(String.self, forKey: NestedKeys.pageElement)
-        pageElementDict = StorySiteInfo.newPageElement2PageElelmentDict(newPageElement: pageElement)
+        pageElementDict = StorySiteInfo.pageElementV2ToPageElementDict(pageElementV2: pageElement)
         subtitle = try? values.decode(String.self, forKey: NestedKeys.subtitle)
         firstPageLink = try? values.decode(String.self, forKey: NestedKeys.firstPageLink)
         nextLink = try? values.decode(String.self, forKey: NestedKeys.nextLink)
@@ -894,8 +894,8 @@ extension StorySiteInfo : Decodable {
         self.novelImportEnableSettings = []
         let checkTargetsString = try? values.decode(String.self, forKey: NestedKeys.checkTargets)
         self.checkTargets = ScrapeCheckTarget.parse(checkTargetsString)
-        // この経路は newPageElement の元文字列を持たない(pageElement のみ)ため、原文は pageElement で代用する。
-        self.originalNewPageElement = pageElement
+        // この経路は pageElementV2 の元文字列を持たない(pageElement のみ)ため、原文は pageElement で代用する。
+        self.originalPageElementV2 = pageElement
         self.originalCheckTargets = checkTargetsString
     }
 }
@@ -921,7 +921,7 @@ class StoryHtmlDecoder {
     private init(){
         fallbackSiteInfoArray = [
             //StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(@itemprop,'articleBody')"),
-            StorySiteInfo(id: UUID.init().uuidString, name: "default", newPageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil, isNeedWhitespaceSplitForTag: nil)
+            StorySiteInfo(id: UUID.init().uuidString, name: "default", pageElementV2: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil, isNeedWhitespaceSplitForTag: nil)
         ]
     }
     
@@ -984,7 +984,7 @@ class StoryHtmlDecoder {
             let storySiteInfo = StorySiteInfo(
                 id: UUID.init().uuidString,
                 name: dict["name"],
-                newPageElement: pageElement,
+                pageElementV2: pageElement,
                 url: dict["url"],
                 title: dict["title"],
                 subtitle: dict["subtitle"],
@@ -2273,7 +2273,7 @@ class LocalSiteInfoStore {
     // ここを定数にすることで復元のたびに同じ in-memory id になる(rows 側 base id は不変=肥大化しない)。
     static let sourceURLString = "local://preferred-siteinfo"
     // CSV のヘッダ列順(makeFromCellDict が読む列)。
-    static let columns = ["id","name","newPageElement","url","title","subtitle","firstPageLink","nextLink","tag","author","isNeedHeadless","injectStyle","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","resourceUrl","overrideUserAgent","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","checkTargets"]
+    static let columns = ["id","name","pageElementV2","url","title","subtitle","firstPageLink","nextLink","tag","author","isNeedHeadless","injectStyle","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","resourceUrl","overrideUserAgent","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","checkTargets"]
 
     private let fileURL: URL
     // テストから保存先ファイルURLを参照するための口(同じファイルを別インスタンスで読み直す検証用)。
@@ -2299,8 +2299,8 @@ class LocalSiteInfoStore {
         for values in parsed.dropFirst() {
             var dict = [String:String]()
             for (h, v) in zip(headers, values) { dict[h] = v }
-            // url も newPageElement も無い空行はスキップ(末尾の空行など)
-            if (dict["url"]?.isEmpty ?? true) && (dict["newPageElement"]?.isEmpty ?? true) { continue }
+            // url も pageElementV2 も無い空行はスキップ(末尾の空行など)
+            if (dict["url"]?.isEmpty ?? true) && (dict["pageElementV2"]?.isEmpty ?? true) { continue }
             result.append(dict)
         }
         rows = result
@@ -2333,14 +2333,14 @@ class LocalSiteInfoStore {
     }
 
     // CSV テキストを取り込んで rows へ upsert(Import)。
-    // SiteInfo 用CSVの判定: ヘッダに newPageElement か url が無ければ別物とみなし nil を返す(取り込まない)。
+    // SiteInfo 用CSVの判定: ヘッダに pageElementV2 か url が無ければ別物とみなし nil を返す(取り込まない)。
     // 戻り値: (追加件数, 更新件数)。url が空の行はスキップ。呼び出し側で save()+ReloadLocalPreferredSiteInfo() する。
     @discardableResult
     func importCSVText(_ text: String) -> (added: Int, updated: Int)? {
         let parsed = StoryHtmlDecoder.ParseCSVRows(text)
         guard let headers = parsed.first else { return nil }
-        // SiteInfo 用CSVの判定: 固有の列 newPageElement を持つことを必須にする(汎用CSVの誤判定を避ける)。
-        guard headers.contains("newPageElement") else { return nil }
+        // SiteInfo 用CSVの判定: 固有の列 pageElementV2 を持つことを必須にする(汎用CSVの誤判定を避ける)。
+        guard headers.contains("pageElementV2") else { return nil }
         var added = 0
         var updated = 0
         for values in parsed.dropFirst() {
@@ -2392,7 +2392,7 @@ class LocalSiteInfoStore {
     // 作者はシート側でアプリ非管理列を先頭に寄せ、この順のアプリ管理列ブロックをその後ろに置き、id 列から貼り付ける運用。
     // → pageElement(数式)は触られず再計算され、memo 等の消失も起きない。最終的なシート列順に合わせてここを調整する。
     // 設計メモ: DESIGN_SiteInfoエディタ.md
-    static let spreadsheetColumnOrder = ["id","name","url","newPageElement","nextLink","title","subtitle","tag","author","firstPageLink","isNeedHeadless","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","injectStyle","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","overrideUserAgent","checkTargets"]
+    static let spreadsheetColumnOrder = ["id","name","url","pageElementV2","nextLink","title","subtitle","tag","author","firstPageLink","isNeedHeadless","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","injectStyle","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","overrideUserAgent","checkTargets"]
 
     // アプリ内 id(`<シートid>:<取得元URL>`)から元のシート id を取り出す(最初の `:` より前)。
     // 例: `5:https://docs.google.com/...csv` → `5`。スプレッドシートへ貼り戻す時に二重 suffix で id が伸び続けるのを防ぐ。
