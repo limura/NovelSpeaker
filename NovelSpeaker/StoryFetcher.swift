@@ -278,11 +278,11 @@ struct ScrapeCheckTarget : Equatable {
                 tokenPart = ""
             }
             if urlPart.isEmpty {
-                warnings.append("checkTargets: URL が空のエントリがあります")
+                warnings.append(NSLocalizedString("SiteInfoEditor_Validate_CheckTargets_EmptyURL", comment: "checkTargets: URL が空のエントリがあります"))
                 continue
             }
             if URL(string: urlPart) == nil {
-                warnings.append("checkTargets: URL として解釈できません(このエントリは無視されます): \(urlPart)")
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_CheckTargets_InvalidURL", comment: "checkTargets: URL として解釈できません(このエントリは無視されます): %@"), urlPart))
             }
             for tokenRaw in tokenPart.split(separator: ",") {
                 var token = tokenRaw.trimmingCharacters(in: .whitespaces)
@@ -290,7 +290,7 @@ struct ScrapeCheckTarget : Equatable {
                 if token.hasPrefix("!") { token = String(token.dropFirst()).trimmingCharacters(in: .whitespaces) }
                 if token.isEmpty { continue }
                 if ScrapeCheckToken.from(token) == nil {
-                    warnings.append("checkTargets: 未知のトークン(typo?): \(token)")
+                    warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_CheckTargets_UnknownToken", comment: "checkTargets: 未知のトークン(typo?): %@"), token))
                 }
             }
         }
@@ -569,19 +569,19 @@ struct StorySiteInfo : Identifiable {
             if line.isEmpty { continue }
             let lineNo = i + 1
             guard let colon = line.firstIndex(of: ":") else {
-                warnings.append("newPageElement \(lineNo)行目: ':' がありません(複数行では『ID:タイトル/title=xpath』形式が必要)")
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_NoColon", comment: "newPageElement %d行目: ':' がありません(複数行では『ID:タイトル/title=xpath』形式が必要)"), lineNo))
                 continue
             }
             if line[..<colon].trimmingCharacters(in: .whitespaces).isEmpty {
-                warnings.append("newPageElement \(lineNo)行目: 行頭の ID(':' より前)が空です")
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_EmptyID", comment: "newPageElement %d行目: 行頭の ID(':' より前)が空です"), lineNo))
             }
             let afterColon = line[line.index(after: colon)...]
             guard let eq = afterColon.firstIndex(of: "=") else {
-                warnings.append("newPageElement \(lineNo)行目: '=' がありません(『ID:タイトル/title=xpath』形式が必要)")
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_NoEqual", comment: "newPageElement %d行目: '=' がありません(『ID:タイトル/title=xpath』形式が必要)"), lineNo))
                 continue
             }
             if afterColon[afterColon.index(after: eq)...].trimmingCharacters(in: .whitespaces).isEmpty {
-                warnings.append("newPageElement \(lineNo)行目: '=' の右の xpath が空です")
+                warnings.append(String(format: NSLocalizedString("SiteInfoEditor_Validate_NPE_EmptyXpath", comment: "newPageElement %d行目: '=' の右の xpath が空です"), lineNo))
             }
         }
         return warnings
@@ -592,14 +592,14 @@ struct StorySiteInfo : Identifiable {
         guard let s = s, !s.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
         let components = s.components(separatedBy: ":")
         if components.count < 2 {
-            return ["forceErrorMessageAndElement: ':' がありません(『メッセージ:xpath』形式が必要。最初の ':' でメッセージと xpath を分けます)"]
+            return [NSLocalizedString("SiteInfoEditor_Validate_ForceError_NoColon", comment: "forceErrorMessageAndElement: ':' がありません(『メッセージ:xpath』形式が必要。最初の ':' でメッセージと xpath を分けます)")]
         }
         var warnings:[String] = []
         if components[0].trimmingCharacters(in: .whitespaces).isEmpty {
-            warnings.append("forceErrorMessageAndElement: ':' より前のメッセージが空です")
+            warnings.append(NSLocalizedString("SiteInfoEditor_Validate_ForceError_EmptyMessage", comment: "forceErrorMessageAndElement: ':' より前のメッセージが空です"))
         }
         if components[1...].joined(separator: ":").trimmingCharacters(in: .whitespaces).isEmpty {
-            warnings.append("forceErrorMessageAndElement: ':' より後の xpath が空です")
+            warnings.append(NSLocalizedString("SiteInfoEditor_Validate_ForceError_EmptyXpath", comment: "forceErrorMessageAndElement: ':' より後の xpath が空です"))
         }
         return warnings
     }
@@ -2310,14 +2310,19 @@ class LocalSiteInfoStore {
         return "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 
-    @discardableResult
-    func save() -> Bool {
+    // 現在の rows を CSV 文字列に直列化する(Export とファイル保存で共有)。
+    func csvString() -> String {
         var lines: [String] = []
         lines.append(LocalSiteInfoStore.columns.map { csvEscape($0) }.joined(separator: ","))
         for row in rows {
             lines.append(LocalSiteInfoStore.columns.map { csvEscape(row[$0] ?? "") }.joined(separator: ","))
         }
-        let text = lines.joined(separator: "\n")
+        return lines.joined(separator: "\n")
+    }
+
+    @discardableResult
+    func save() -> Bool {
+        let text = csvString()
         do {
             try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try text.write(to: fileURL, atomically: true, encoding: .utf8)
@@ -2325,6 +2330,32 @@ class LocalSiteInfoStore {
         } catch {
             return false
         }
+    }
+
+    // CSV テキストを取り込んで rows へ upsert(Import)。
+    // SiteInfo 用CSVの判定: ヘッダに newPageElement か url が無ければ別物とみなし nil を返す(取り込まない)。
+    // 戻り値: (追加件数, 更新件数)。url が空の行はスキップ。呼び出し側で save()+ReloadLocalPreferredSiteInfo() する。
+    @discardableResult
+    func importCSVText(_ text: String) -> (added: Int, updated: Int)? {
+        let parsed = StoryHtmlDecoder.ParseCSVRows(text)
+        guard let headers = parsed.first else { return nil }
+        // SiteInfo 用CSVの判定: 固有の列 newPageElement を持つことを必須にする(汎用CSVの誤判定を避ける)。
+        guard headers.contains("newPageElement") else { return nil }
+        var added = 0
+        var updated = 0
+        for values in parsed.dropFirst() {
+            var dict = [String:String]()
+            for (h, v) in zip(headers, values) { dict[h] = v }
+            let urlPattern = dict["url"] ?? ""
+            if urlPattern.isEmpty { continue }
+            // makeFromCellDict が読む列だけに絞る(pageElement 等の余計な列は持ち込まない)。
+            var cells = [String:String]()
+            for col in LocalSiteInfoStore.columns where dict[col] != nil { cells[col] = dict[col] }
+            let exists = rows.contains { ($0["url"] ?? "") == urlPattern }
+            upsert(cells)
+            if exists { updated += 1 } else { added += 1 }
+        }
+        return (added, updated)
     }
 
     // url(マッチ正規表現文字列)をキーに upsert(設計§4 同一性キー=url)。
@@ -2355,5 +2386,33 @@ class LocalSiteInfoStore {
     // url そのものを使えば決定的かつ一意(同一url=同一エントリ)。
     static func deterministicId(urlPattern: String) -> String {
         return "localpref:" + urlPattern
+    }
+
+    // スプレッドシート貼付け用 TSV の列順。**アプリが管理する列だけ**(pageElement/memo/exampleUrl 等は含めない)。
+    // 作者はシート側でアプリ非管理列を先頭に寄せ、この順のアプリ管理列ブロックをその後ろに置き、id 列から貼り付ける運用。
+    // → pageElement(数式)は触られず再計算され、memo 等の消失も起きない。最終的なシート列順に合わせてここを調整する。
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+    static let spreadsheetColumnOrder = ["id","name","url","newPageElement","nextLink","title","subtitle","tag","author","firstPageLink","isNeedHeadless","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","injectStyle","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","overrideUserAgent","checkTargets"]
+
+    // アプリ内 id(`<シートid>:<取得元URL>`)から元のシート id を取り出す(最初の `:` より前)。
+    // 例: `5:https://docs.google.com/...csv` → `5`。スプレッドシートへ貼り戻す時に二重 suffix で id が伸び続けるのを防ぐ。
+    static func sheetIdValue(from id: String) -> String {
+        return String(id.prefix(while: { $0 != ":" }))
+    }
+
+    // 1サイト分の生セルを、スプレッドシート貼付け用の1行 TSV にする。
+    // 区切りはタブ。タブ/改行/`"` を含むフィールドのみ `"…"` で括り内部の `"` は `""` にエスケープ(Sheets は CSV と同じ規則で1セル扱いにする)。
+    // id 列はシート元の値(suffix除去)にする。
+    static func spreadsheetTSVRow(_ cells: [String:String]) -> String {
+        func tsvEscape(_ value: String) -> String {
+            if value.contains("\t") || value.contains("\n") || value.contains("\r") || value.contains("\"") {
+                return "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+            }
+            return value
+        }
+        return spreadsheetColumnOrder.map { col -> String in
+            let raw = (col == "id") ? sheetIdValue(from: cells["id"] ?? "") : (cells[col] ?? "")
+            return tsvEscape(raw)
+        }.joined(separator: "\t")
     }
 }

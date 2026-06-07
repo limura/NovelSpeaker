@@ -992,6 +992,67 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "完了";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "編集";
 
+/* SiteInfo エディタ(最優先SiteInfo) */
+"SiteInfoEditor_Title" = "最優先SiteInfoの編集・追加";
+"SiteInfoEditor_New" = "新規作成";
+"SiteInfoEditor_SearchPlaceholder" = "サイト名・url で絞り込み";
+"SiteInfoEditor_ActionSection" = "操作";
+"SiteInfoEditor_LocalHeaderDescEmpty" = "この端末で編集され、最優先で適用されるSiteInfo。まだありません。右上の＋で新規作成、または下の標準データから選んで編集できます。";
+"SiteInfoEditor_LocalHeaderDesc" = "この端末で編集され、最優先で適用されます。削除は右上の「編集」ボタンから。";
+"SiteInfoEditor_LocalSectionTitle" = "最優先SiteInfo";
+"SiteInfoEditor_StandardSectionTitleWithDate" = "標準データ(%@ 取得分)";
+"SiteInfoEditor_StandardSectionTitle" = "標準データ";
+"SiteInfoEditor_StandardHeaderDesc" = "アプリに読み込まれている標準のSiteInfo。選ぶと内容を引き継いで編集し、最優先SiteInfoとして保存できます。";
+"SiteInfoEditor_Export" = "CSVで書き出して共有(Export)";
+"SiteInfoEditor_NoName" = "(名称未設定)";
+"SiteInfoEditor_NoURL" = "(url未設定)";
+"SiteInfoEditor_ExportEmpty" = "書き出せる最優先SiteInfoがありません。先に編集・保存してください。";
+"SiteInfoEditor_ExportFileName" = "ことせかい_最優先SiteInfo.csv";
+"SiteInfoEditor_ExportCreateFailed" = "CSVファイルの作成に失敗しました。";
+"SiteInfoEditor_Test" = "テスト";
+"SiteInfoEditor_Save" = "保存";
+"SiteInfoEditor_TestNow" = "この値で今すぐテスト";
+"SiteInfoEditor_CopyForSpreadsheet" = "スプレッドシート用にコピー";
+"SiteInfoEditor_DebugEnableSpreadsheetCopy" = "SiteInfoエディタに「スプレッドシート用にコピー」を表示する";
+"SiteInfoEditor_FieldsSection" = "SiteInfo の項目";
+"SiteInfoEditor_Col_name" = "name (サイト名)";
+"SiteInfoEditor_Col_url" = "url (マッチ正規表現)";
+"SiteInfoEditor_Col_waitSecondInHeadless" = "waitSecondInHeadless (秒)";
+"SiteInfoEditor_Col_newPageElement" = "newPageElement (本文のxpath。または複数の取り込み対象を指定するために複数行で『ID:タイトル/title=xpath』の形式)";
+"SiteInfoEditor_Col_forceErrorMessageAndElement" = "forceErrorMessageAndElement (gate文言:xpath)";
+"SiteInfoEditor_Col_checkTargets" = "checkTargets (検査対象。1行1エントリ / [auth] URL => content,nextLink)";
+"SiteInfoEditor_DiffMarker" = "⚠️ %@（標準データと差分あり）";
+"SiteInfoEditor_CannotSave" = "保存できません";
+"SiteInfoEditor_SaveURLEmpty" = "url(マッチ正規表現)が空です。保存するには url を入力してください。";
+"SiteInfoEditor_SaveURLRegexError" = "url 正規表現がコンパイルできません:\n%@";
+"SiteInfoEditor_Saved" = "保存しました";
+"SiteInfoEditor_SaveFailed" = "保存に失敗しました";
+"SiteInfoEditor_SavedMessage" = "この SiteInfo を最優先として保存しました。以降のダウンロード/テストでこの内容が優先されます。\n元に戻す(=最優先をやめる)には一覧へ戻り「編集」ボタンからこの行を削除してください。";
+"SiteInfoEditor_SaveWriteFailed" = "ファイルへの書き込みに失敗しました。";
+"SiteInfoEditor_Copied" = "コピーしました";
+"SiteInfoEditor_CopiedMessage" = "スプレッドシートの id 列のセルから貼り付けてください。pageElement(数式列)は触られず再計算されます。";
+"SiteInfoEditor_Test_URLRegexError" = "⚠️ url 正規表現がコンパイルできません(このままだと検査が走りません): %@";
+"SiteInfoEditor_Test_URLEmpty" = "⚠️ url が空です。isMatchUrl が常に false になり、本番ではこの SiteInfo が選ばれません。";
+"SiteInfoEditor_TestResultTitle" = "テスト結果";
+"SiteInfoEditor_Test_NoNewPageElement" = "newPageElement が無いため StorySiteInfo を生成できませんでした。";
+"SiteInfoEditor_Test_NoCheckTargets_1" = "checkTargets が未設定です。テスト対象URLがないため検査を実行できません。";
+"SiteInfoEditor_Test_NoCheckTargets_2" = "例) checkTargets 欄に下記のように記入してください:";
+"SiteInfoEditor_Test_NoCheckTargets_3" = "  [auth] 付きで未ログイン時 SKIP 扱いにできます。";
+"SiteInfoEditor_Testing" = "テスト中…\n(しばらくお待ちください)";
+"SiteInfoEditor_SettingsButton" = "最優先SiteInfoを編集・追加";
+"SiteInfoEditor_Import_NotSiteInfoCSV" = "このCSVファイルは最優先SiteInfo用のデータではないようです(newPageElement 列が見当たりません)。取り込みを中止しました。";
+"SiteInfoEditor_Import_Done" = "最優先SiteInfo を取り込みました。\n追加: %d件 / 更新: %d件";
+"SiteInfoEditor_Validate_CheckTargets_EmptyURL" = "checkTargets: URL が空のエントリがあります";
+"SiteInfoEditor_Validate_CheckTargets_InvalidURL" = "checkTargets: URL として解釈できません(このエントリは無視されます): %@";
+"SiteInfoEditor_Validate_CheckTargets_UnknownToken" = "checkTargets: 未知のトークン(typo?): %@";
+"SiteInfoEditor_Validate_NPE_NoColon" = "newPageElement %d行目: ':' がありません(複数行では『ID:タイトル/title=xpath』形式が必要)";
+"SiteInfoEditor_Validate_NPE_EmptyID" = "newPageElement %d行目: 行頭の ID(':' より前)が空です";
+"SiteInfoEditor_Validate_NPE_NoEqual" = "newPageElement %d行目: '=' がありません(『ID:タイトル/title=xpath』形式が必要)";
+"SiteInfoEditor_Validate_NPE_EmptyXpath" = "newPageElement %d行目: '=' の右の xpath が空です";
+"SiteInfoEditor_Validate_ForceError_NoColon" = "forceErrorMessageAndElement: ':' がありません(『メッセージ:xpath』形式が必要。最初の ':' でメッセージと xpath を分けます)";
+"SiteInfoEditor_Validate_ForceError_EmptyMessage" = "forceErrorMessageAndElement: ':' より前のメッセージが空です";
+"SiteInfoEditor_Validate_ForceError_EmptyXpath" = "forceErrorMessageAndElement: ':' より後の xpath が空です";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.2
 
 - 小説本文の取り込み時に ruby タグの中に rb, rp, rt 以外のHTMLタグが現れるとルビとして認識しない問題を修正

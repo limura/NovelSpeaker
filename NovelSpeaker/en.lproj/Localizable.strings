@@ -1004,6 +1004,67 @@
 "BookShelfTreeViewController_EditToggleButton_Done" = "Done";
 "BookShelfTreeViewController_EditToggleButton_Edit" = "Edit";
 
+/* SiteInfo editor (priority SiteInfo) */
+"SiteInfoEditor_Title" = "Edit / Add Priority SiteInfo";
+"SiteInfoEditor_New" = "New";
+"SiteInfoEditor_SearchPlaceholder" = "Filter by site name or url";
+"SiteInfoEditor_ActionSection" = "Actions";
+"SiteInfoEditor_LocalHeaderDescEmpty" = "SiteInfo edited on this device and applied with top priority. None yet. Tap + at the top right to create one, or pick from the standard data below to edit.";
+"SiteInfoEditor_LocalHeaderDesc" = "Edited on this device and applied with top priority. Use the \"Edit\" button at the top right to delete.";
+"SiteInfoEditor_LocalSectionTitle" = "Priority SiteInfo";
+"SiteInfoEditor_StandardSectionTitleWithDate" = "Standard data (fetched %@)";
+"SiteInfoEditor_StandardSectionTitle" = "Standard data";
+"SiteInfoEditor_StandardHeaderDesc" = "The standard SiteInfo loaded in the app. Select one to edit a copy and save it as a priority SiteInfo.";
+"SiteInfoEditor_Export" = "Export as CSV (share)";
+"SiteInfoEditor_NoName" = "(no name)";
+"SiteInfoEditor_NoURL" = "(no url)";
+"SiteInfoEditor_ExportEmpty" = "There is no priority SiteInfo to export. Please edit and save one first.";
+"SiteInfoEditor_ExportFileName" = "NovelSpeaker_priority_SiteInfo.csv";
+"SiteInfoEditor_ExportCreateFailed" = "Failed to create the CSV file.";
+"SiteInfoEditor_Test" = "Test";
+"SiteInfoEditor_Save" = "Save";
+"SiteInfoEditor_TestNow" = "Test with these values now";
+"SiteInfoEditor_CopyForSpreadsheet" = "Copy for spreadsheet";
+"SiteInfoEditor_DebugEnableSpreadsheetCopy" = "Show \"Copy for spreadsheet\" in the SiteInfo editor";
+"SiteInfoEditor_FieldsSection" = "SiteInfo fields";
+"SiteInfoEditor_Col_name" = "name (site name)";
+"SiteInfoEditor_Col_url" = "url (match regex)";
+"SiteInfoEditor_Col_waitSecondInHeadless" = "waitSecondInHeadless (sec)";
+"SiteInfoEditor_Col_newPageElement" = "newPageElement (xpath of the body text; or, to specify multiple import targets, multiple lines in the form 'ID:title/title=xpath')";
+"SiteInfoEditor_Col_forceErrorMessageAndElement" = "forceErrorMessageAndElement (gate message:xpath)";
+"SiteInfoEditor_Col_checkTargets" = "checkTargets (inspection targets; one entry per line / [auth] URL => content,nextLink)";
+"SiteInfoEditor_DiffMarker" = "⚠️ %@ (differs from standard data)";
+"SiteInfoEditor_CannotSave" = "Cannot save";
+"SiteInfoEditor_SaveURLEmpty" = "The url (match regex) is empty. Please enter a url to save.";
+"SiteInfoEditor_SaveURLRegexError" = "The url regular expression does not compile:\n%@";
+"SiteInfoEditor_Saved" = "Saved";
+"SiteInfoEditor_SaveFailed" = "Failed to save";
+"SiteInfoEditor_SavedMessage" = "Saved this SiteInfo as a priority SiteInfo. It will take precedence in later downloads and tests.\nTo undo (stop using it as priority), go back to the list and delete this row with the \"Edit\" button.";
+"SiteInfoEditor_SaveWriteFailed" = "Failed to write the file.";
+"SiteInfoEditor_Copied" = "Copied";
+"SiteInfoEditor_CopiedMessage" = "Paste starting from the id column cell in your spreadsheet. The pageElement (formula) column is left untouched and recalculated.";
+"SiteInfoEditor_Test_URLRegexError" = "⚠️ The url regular expression does not compile (the test will not run): %@";
+"SiteInfoEditor_Test_URLEmpty" = "⚠️ The url is empty. isMatchUrl will always be false, so this SiteInfo will not be selected in production.";
+"SiteInfoEditor_TestResultTitle" = "Test result";
+"SiteInfoEditor_Test_NoNewPageElement" = "Could not create a StorySiteInfo because newPageElement is missing.";
+"SiteInfoEditor_Test_NoCheckTargets_1" = "checkTargets is not set. There is no target URL, so the test cannot run.";
+"SiteInfoEditor_Test_NoCheckTargets_2" = "Example) Enter something like the following in the checkTargets field:";
+"SiteInfoEditor_Test_NoCheckTargets_3" = "  Prefix with [auth] to treat it as SKIP when not logged in.";
+"SiteInfoEditor_Testing" = "Testing…\n(Please wait a moment)";
+"SiteInfoEditor_SettingsButton" = "Edit / add priority SiteInfo";
+"SiteInfoEditor_Import_NotSiteInfoCSV" = "This CSV file does not appear to be priority SiteInfo data (no newPageElement column was found). Import was canceled.";
+"SiteInfoEditor_Import_Done" = "Imported priority SiteInfo.\nAdded: %d / Updated: %d";
+"SiteInfoEditor_Validate_CheckTargets_EmptyURL" = "checkTargets: there is an entry with an empty URL";
+"SiteInfoEditor_Validate_CheckTargets_InvalidURL" = "checkTargets: cannot be parsed as a URL (this entry is ignored): %@";
+"SiteInfoEditor_Validate_CheckTargets_UnknownToken" = "checkTargets: unknown token (typo?): %@";
+"SiteInfoEditor_Validate_NPE_NoColon" = "newPageElement line %d: missing ':' (multi-line requires the 'ID:title/title=xpath' format)";
+"SiteInfoEditor_Validate_NPE_EmptyID" = "newPageElement line %d: the ID at the start of the line (before ':') is empty";
+"SiteInfoEditor_Validate_NPE_NoEqual" = "newPageElement line %d: missing '=' (the 'ID:title/title=xpath' format is required)";
+"SiteInfoEditor_Validate_NPE_EmptyXpath" = "newPageElement line %d: the xpath after '=' is empty";
+"SiteInfoEditor_Validate_ForceError_NoColon" = "forceErrorMessageAndElement: missing ':' (the 'message:xpath' format is required; the first ':' separates message and xpath)";
+"SiteInfoEditor_Validate_ForceError_EmptyMessage" = "forceErrorMessageAndElement: the message before ':' is empty";
+"SiteInfoEditor_Validate_ForceError_EmptyXpath" = "forceErrorMessageAndElement: the xpath after ':' is empty";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.2
 
 - Fixed an issue where HTML tags other than rb, rp, and rt were not recognized as ruby ​​text when importing novel text.

@@ -586,7 +586,34 @@ class NovelSpeakerUtility: NSObject {
         if url.pathExtension == "html" {
             return ProcessHtmlFile(url:url)
         }
+        if url.pathExtension == "csv" {
+            return ProcessSiteInfoCSVFile(url:url)
+        }
         return ProcessTextFile(url:url)
+    }
+
+    // 共有等で渡された .csv を「最優先SiteInfo」として取り込む(SiteInfoエディタ Phase4)。
+    // 中身を見て SiteInfo 用CSV(newPageElement 列を持つ)のみ受理。違えば「SiteInfo用CSVではない」を表示する。
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+    static func ProcessSiteInfoCSVFile(url:URL) -> Bool {
+        let scope = url.startAccessingSecurityScopedResource()
+        defer { if scope { url.stopAccessingSecurityScopedResource() } }
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else { return false }
+        func showMessage(_ message:String) {
+            DispatchQueue.main.async {
+                if let vc = NiftyUtility.GetRegisterdToplevelViewController() {
+                    NiftyUtility.EasyDialogOneButton(viewController: vc, title: nil, message: message, buttonTitle: nil, buttonAction: nil)
+                }
+            }
+        }
+        guard let result = LocalSiteInfoStore.shared.importCSVText(text) else {
+            showMessage(NSLocalizedString("SiteInfoEditor_Import_NotSiteInfoCSV", comment: "このCSVファイルは最優先SiteInfo用のデータではないようです(newPageElement 列が見当たりません)。取り込みを中止しました。"))
+            return true
+        }
+        _ = LocalSiteInfoStore.shared.save()
+        StoryHtmlDecoder.shared.ReloadLocalPreferredSiteInfo()
+        showMessage(String(format: NSLocalizedString("SiteInfoEditor_Import_Done", comment: "最優先SiteInfo を取り込みました。\n追加: %d件 / 更新: %d件"), result.added, result.updated))
+        return true
     }
     #endif
     
@@ -3882,6 +3909,20 @@ class NovelSpeakerUtility: NSObject {
     static func SetBarButtonItemSpacing(BarButtonItemSpacing:Float){
         let defaults = UserDefaults.standard
         defaults.setValue(BarButtonItemSpacing, forKey: BarButtonItemSpacingKey)
+        defaults.synchronize()
+    }
+
+    // SiteInfo エディタの「スプレッドシート用にコピー」ボタンを表示するか。
+    // 通常は作者しか使わないので既定 OFF。設定タブのデバッグメニューで ON にした時だけ表示する。
+    static let IsSiteInfoEditorSpreadsheetCopyEnabledKey = "IsSiteInfoEditorSpreadsheetCopyEnabledKey"
+    static func GetIsSiteInfoEditorSpreadsheetCopyEnabled() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [IsSiteInfoEditorSpreadsheetCopyEnabledKey: false])
+        return defaults.bool(forKey: IsSiteInfoEditorSpreadsheetCopyEnabledKey)
+    }
+    static func SetIsSiteInfoEditorSpreadsheetCopyEnabled(isEnabled:Bool){
+        let defaults = UserDefaults.standard
+        defaults.setValue(isEnabled, forKey: IsSiteInfoEditorSpreadsheetCopyEnabledKey)
         defaults.synchronize()
     }
 

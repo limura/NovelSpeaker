@@ -1588,7 +1588,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             #if !os(watchOS)
             section
             <<< ButtonRow() {
-                $0.title = "最優先SiteInfoを編集・追加"
+                $0.title = NSLocalizedString("SiteInfoEditor_SettingsButton", comment: "最優先SiteInfoを編集・追加")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ [weak self] (buttonCellOf, button) in
                 guard let self = self else { return }
@@ -2091,6 +2091,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         }
                     })
                 })
+            })
+            section
+            <<< SwitchRow("IsSiteInfoEditorSpreadsheetCopyEnabled") { row in
+                row.title = NSLocalizedString("SiteInfoEditor_DebugEnableSpreadsheetCopy", comment: "SiteInfoエディタに「スプレッドシート用にコピー」を表示する")
+                row.value = NovelSpeakerUtility.GetIsSiteInfoEditorSpreadsheetCopyEnabled()
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ row in
+                guard let value = row.value else { return }
+                NovelSpeakerUtility.SetIsSiteInfoEditorSpreadsheetCopyEnabled(isEnabled: value)
             })
             #endif
 

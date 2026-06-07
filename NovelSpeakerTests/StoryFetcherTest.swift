@@ -331,6 +331,79 @@ class StoryFetcherTest: XCTestCase {
         XCTAssertEqual(eff.first?.first?.url?.pattern, "^https://local/.*$")
     }
 
+    // MARK: - CSV Export/Import + スプレッドシート用 TSV (Phase4)
+    // 設計メモ: DESIGN_SiteInfoエディタ.md
+
+    func testLocalSiteInfoStoreCSVExportImportRoundTrip() throws {
+        let src = makeTempStore()
+        src.upsert(["url": "^https://a/.*$", "newPageElement": "//a\n2:後/After=//x", "checkTargets": "[auth] https://a/1/ => content,nextLink", "name": "サイトA,カンマ"])
+        src.upsert(["url": "^https://b/.*$", "newPageElement": "//b", "title": "//h1"])
+        let csv = src.csvString()
+        // 別 store に import すると rows が一致(往復で複数行/カンマ/checkTargets が保たれる)。
+        let dst = makeTempStore()
+        let result = try XCTUnwrap(dst.importCSVText(csv))
+        XCTAssertEqual(result.added, 2)
+        XCTAssertEqual(result.updated, 0)
+        XCTAssertEqual(dst.rows.count, 2)
+        let a = try XCTUnwrap(dst.rows.first(where: { $0["url"] == "^https://a/.*$" }))
+        XCTAssertEqual(a["newPageElement"], "//a\n2:後/After=//x")
+        XCTAssertEqual(a["checkTargets"], "[auth] https://a/1/ => content,nextLink")
+        XCTAssertEqual(a["name"], "サイトA,カンマ")
+    }
+
+    func testImportCSVTextRejectsNonSiteInfoCSV() throws {
+        let store = makeTempStore()
+        // newPageElement 列が無いCSVは SiteInfo 用ではないと判定して nil。
+        XCTAssertNil(store.importCSVText("foo,bar\n1,2"))
+        XCTAssertNil(store.importCSVText(""))
+    }
+
+    func testImportCSVTextCountsAddedAndUpdated() throws {
+        let store = makeTempStore()
+        store.upsert(["url": "^https://a/.*$", "newPageElement": "//a"])
+        // 同 url=更新、別 url=追加。
+        let header = "\"url\",\"newPageElement\""
+        let csv = header + "\n\"^https://a/.*$\",\"//a2\"\n\"^https://c/.*$\",\"//c\""
+        let result = try XCTUnwrap(store.importCSVText(csv))
+        XCTAssertEqual(result.updated, 1)
+        XCTAssertEqual(result.added, 1)
+        XCTAssertEqual(store.rows.count, 2)
+    }
+
+    func testSpreadsheetTSVRow() throws {
+        let cells: [String:String] = [
+            "id": "x1", "name": "サイト", "url": "^https://a/.*$",
+            "newPageElement": "1:本文/main=//div\n2:後/After=//x", // 改行含む→クォート
+            "title": "//h1",
+            "checkTargets": "a\tb", // タブ含む→クォート
+            "pageElement": "これは含まれない", "memo": "これも含まれない", "exampleUrl": "これも",
+        ]
+        let tsv = LocalSiteInfoStore.spreadsheetTSVRow(cells)
+        // 列順の先頭は id。
+        XCTAssertEqual(LocalSiteInfoStore.spreadsheetColumnOrder.first, "id")
+        // pageElement/memo/exampleUrl は列順に含まれない。
+        XCTAssertFalse(LocalSiteInfoStore.spreadsheetColumnOrder.contains("pageElement"))
+        XCTAssertFalse(LocalSiteInfoStore.spreadsheetColumnOrder.contains("memo"))
+        XCTAssertFalse(LocalSiteInfoStore.spreadsheetColumnOrder.contains("exampleUrl"))
+        XCTAssertFalse(tsv.contains("含まれない"))
+        // 改行/タブを含むフィールドはクォートされる。
+        XCTAssertTrue(tsv.contains("\"1:本文/main=//div\n2:後/After=//x\""))
+        XCTAssertTrue(tsv.contains("\"a\tb\""))
+        // 単純な値(title)は素のまま(クォート無し)。
+        XCTAssertTrue(tsv.contains("//h1"))
+        XCTAssertFalse(tsv.contains("\"//h1\""))
+    }
+
+    func testSpreadsheetTSVRowStripsSourceURLSuffixFromId() throws {
+        // アプリ内 id `5:https://docs.google.com/...csv` はシート貼付け時に `5` へ戻す(二重 suffix 防止)。
+        XCTAssertEqual(LocalSiteInfoStore.sheetIdValue(from: "5:https://docs.google.com/spreadsheets/d/x/pub?gid=0&single=true&output=csv"), "5")
+        XCTAssertEqual(LocalSiteInfoStore.sheetIdValue(from: "5"), "5")
+        XCTAssertEqual(LocalSiteInfoStore.sheetIdValue(from: ""), "")
+        let tsv = LocalSiteInfoStore.spreadsheetTSVRow(["id": "5:https://example.com/sheet.csv", "url": "^https://a/.*$", "newPageElement": "//a"])
+        // TSV の最初のフィールド(id列)が "5" であること。
+        XCTAssertEqual(tsv.components(separatedBy: "\t").first, "5")
+    }
+
     // MARK: - 特殊フォーマット列の検証(エディタ「テスト」時の構文チェック)
     // 設計メモ: DESIGN_SiteInfoエディタ.md
 
