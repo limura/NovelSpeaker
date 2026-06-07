@@ -697,7 +697,7 @@ class StoryFetcherTest: XCTestCase {
         // [auth] で別ホストへ飛ばされた(novel18→nl.syosetu.com 等) = 未ログイン確定 → SKIP。
         let (status, reasons) = ScrapeInspector.judge(requireAuth: true, failMessage: nil, evaluateFailures: ["nextLink (抽出できなかった)"], hostChanged: true)
         XCTAssertEqual(status, .skip)
-        XCTAssertEqual(reasons.first, "別ホストへリダイレクト(未ログイン/年齢確認の可能性)")
+        XCTAssertEqual(reasons.first, ScrapeInspector.reasonHostRedirect)
     }
 
     func testJudgeAuthSuccessHostChangedEvenWithContentIsSkip() throws {

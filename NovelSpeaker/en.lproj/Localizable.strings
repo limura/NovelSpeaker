@@ -2285,3 +2285,14 @@ Correction of the problem
 First release.
 ";
 "UpdateLogViewController_Title" = "Update log";
+
+// ScrapeInspector report / judge reasons / settings UI
+"ScrapeInspector_ReportHeader" = "===== Scrape Inspection Results (%d) =====";
+"ScrapeInspector_Reason_HostRedirect" = "Redirected to a different host (possibly not logged in / age verification)";
+"ScrapeInspector_Reason_AuthNoEvidence" = "Needs checking: could not fetch even though there is no proof of being logged out (no gate / host change). Check the login state or whether scraping is broken.";
+"ScrapeInspector_Reason_UnknownTokens" = "Invalid token(s) in settings (typo?): %@";
+"ScrapeInspector_Reason_Timeout" = "Timeout (no response within %d seconds)";
+"ScrapeInspector_Reason_NotExtracted" = "%@ (could not be extracted)";
+"ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (should be empty but was extracted)";
+"SettingsTableViewController_ScrapeInspectButtonTitle" = "Inspect scraping for all sites now";
+"SettingsTableViewController_ScrapeInspectProgressMessage" = "Inspecting scraping…\n(Please wait a moment)";

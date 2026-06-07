@@ -329,9 +329,9 @@ struct ScrapeCheckTarget : Equatable {
         for expectation in expectations {
             let present = ScrapeCheckTarget.isPresent(expectation.token, in: state)
             if expectation.mustBeEmpty {
-                if present { failures.append("!\(expectation.token.rawValue) (空であるべきだが抽出された)") }
+                if present { failures.append(String(format: NSLocalizedString("ScrapeInspector_Reason_MustBeEmptyButPresent", comment: "!%@ (空であるべきだが抽出された)"), expectation.token.rawValue)) }
             } else {
-                if !present { failures.append("\(expectation.token.rawValue) (抽出できなかった)") }
+                if !present { failures.append(String(format: NSLocalizedString("ScrapeInspector_Reason_NotExtracted", comment: "%@ (抽出できなかった)"), expectation.token.rawValue)) }
             }
         }
         return failures
@@ -2116,6 +2116,20 @@ class ScrapeInspector {
         return NSLocalizedString("StoryFetcher_FetchError_RobotsText", comment: "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。")
     }
 
+    // 判定理由のローカライズ文言。本体(judge)とテストで同じ文字列を共有するため、ここに集約する。
+    static var reasonHostRedirect: String {
+        return NSLocalizedString("ScrapeInspector_Reason_HostRedirect", comment: "別ホストへリダイレクト(未ログイン/年齢確認の可能性)")
+    }
+    static var reasonAuthNoEvidence: String {
+        return NSLocalizedString("ScrapeInspector_Reason_AuthNoEvidence", comment: "要確認: 未ログインの確証(gate/別ホスト)が無いのに取得できず。ログイン状態かスクレイプ破損を確認")
+    }
+    static func reasonUnknownTokens(_ tokens: [String]) -> String {
+        return String(format: NSLocalizedString("ScrapeInspector_Reason_UnknownTokens", comment: "設定の無効トークン(typo?): %@"), tokens.joined(separator: ", "))
+    }
+    static func reasonTimeout(seconds: Int) -> String {
+        return String(format: NSLocalizedString("ScrapeInspector_Reason_Timeout", comment: "タイムアウト(%d秒以内に応答なし)"), seconds)
+    }
+
     // 実遷移後URL(headless の現在URL)のホストが要求と変わったか。
     // 注意: state.url はリダイレクト後も要求URLのまま(ステイル)なので、ホスト比較には httpClient.GetCurrentURL() を使う。
     // novel18 等は未ログイン時 別ホスト(nl.syosetu.com の年齢確認)へ飛ぶ。これを「未ログイン確定」の信号にする。
@@ -2138,7 +2152,7 @@ class ScrapeInspector {
         // checkTargets に語彙外トークン(typoの可能性)があれば、黙って無視せず警告する。
         // 期待として効いていない＝検査が意図より弱い状態なので、OK でも WARN に格上げして気づけるようにする。
         guard !unknownTokens.isEmpty else { return base }
-        let note = "設定の無効トークン(typo?): " + unknownTokens.joined(separator: ", ")
+        let note = reasonUnknownTokens(unknownTokens)
         let status: Status = (base.status == .ok) ? .warn : base.status
         return (status, [note] + base.reasons)
     }
@@ -2147,16 +2161,16 @@ class ScrapeInspector {
         if let message = failMessage {
             if message == robotsBlockMessage { return (.robotsBlocked, [message]) }
             // 別ホストへ飛ばされた [auth] は未ログイン確定として SKIP。
-            if requireAuth && hostChanged { return (.skip, ["別ホストへリダイレクト(未ログイン/年齢確認の可能性)", message]) }
+            if requireAuth && hostChanged { return (.skip, [reasonHostRedirect, message]) }
             // gate(forceError) 等。要認証マークなら未ログイン/年齢未確認の可能性として SKIP。
             if requireAuth { return (.skip, [message]) }
             return (.ng, [message])
         }
         // 別ホストへ飛ばされた = 要求ページを取得できていない。[auth] なら未ログイン確定 SKIP(content等が取れても信用しない)。
-        if requireAuth && hostChanged { return (.skip, ["別ホストへリダイレクト(未ログイン/年齢確認の可能性)"]) }
+        if requireAuth && hostChanged { return (.skip, [reasonHostRedirect]) }
         if evaluateFailures.isEmpty { return (.ok, []) }
         // gate も別ホストも無いのに [auth] で取れない = 未ログインの確証が無い = スクレイプ故障の可能性。要確認(WARN)。
-        if requireAuth { return (.warn, ["要確認: 未ログインの確証(gate/別ホスト)が無いのに取得できず。ログイン状態かスクレイプ破損を確認"] + evaluateFailures) }
+        if requireAuth { return (.warn, [reasonAuthNoEvidence] + evaluateFailures) }
         return (.ng, evaluateFailures)
     }
 
@@ -2231,7 +2245,7 @@ class ScrapeInspector {
         }
         // success/failed のどちらも来ない場合に詰まらないようウォッチドッグ。
         DispatchQueue.main.asyncAfter(deadline: .now() + perTargetTimeout) {
-            finish(.error, ["タイムアウト(\(Int(self.perTargetTimeout))秒以内に応答なし)"])
+            finish(.error, [ScrapeInspector.reasonTimeout(seconds: Int(self.perTargetTimeout))])
         }
         fetch(target, { state in
             // state.url はリダイレクト後もステイルなので、実遷移後URLは httpClient.GetCurrentURL() で取る。
@@ -2255,7 +2269,8 @@ class ScrapeInspector {
             return "\(s.rawValue):\(c)"
         }.joined(separator: " / ")
         let sorted = results.sorted { (order.firstIndex(of: $0.status) ?? 0) < (order.firstIndex(of: $1.status) ?? 0) }
-        return "===== スクレイプ検査結果 (\(results.count)件) =====\n" + summary + "\n\n" + sorted.map { $0.description }.joined(separator: "\n")
+        let header = String(format: NSLocalizedString("ScrapeInspector_ReportHeader", comment: "===== スクレイプ検査結果 (%d件) ====="), results.count)
+        return header + "\n" + summary + "\n\n" + sorted.map { $0.description }.joined(separator: "\n")
     }
 }
 

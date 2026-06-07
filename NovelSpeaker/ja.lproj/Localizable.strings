@@ -2334,3 +2334,14 @@ Version 2.6.3
 最初のリリースです
 ";
 "UpdateLogViewController_Title" = "更新履歴";
+
+// スクレイプ検査(ScrapeInspector)の検査レポート・判定理由・設定UI
+"ScrapeInspector_ReportHeader" = "===== スクレイプ検査結果 (%d件) =====";
+"ScrapeInspector_Reason_HostRedirect" = "別ホストへリダイレクト(未ログイン/年齢確認の可能性)";
+"ScrapeInspector_Reason_AuthNoEvidence" = "要確認: 未ログインの確証(gate/別ホスト)が無いのに取得できず。ログイン状態かスクレイプ破損を確認";
+"ScrapeInspector_Reason_UnknownTokens" = "設定の無効トークン(typo?): %@";
+"ScrapeInspector_Reason_Timeout" = "タイムアウト(%d秒以内に応答なし)";
+"ScrapeInspector_Reason_NotExtracted" = "%@ (抽出できなかった)";
+"ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (空であるべきだが抽出された)";
+"SettingsTableViewController_ScrapeInspectButtonTitle" = "今すぐ全サイトをスクレイプ検査する";
+"SettingsTableViewController_ScrapeInspectProgressMessage" = "スクレイプ検査中…\n(しばらくお待ちください)";

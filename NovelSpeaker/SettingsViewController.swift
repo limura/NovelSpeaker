@@ -2067,12 +2067,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             // 着手順4: SiteInfo の checkTargets を全件スクレイプ検査して結果を表示する(手動実行)。
             section
             <<< ButtonRow() {
-                $0.title = "今すぐ全サイトをスクレイプ検査する"
+                $0.title = NSLocalizedString("SettingsTableViewController_ScrapeInspectButtonTitle", comment: "今すぐ全サイトをスクレイプ検査する")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ [weak self] _, _ in
                 guard let self = self else { return }
                 let inspector = ScrapeInspector()
-                _ = NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: "スクレイプ検査中…\n(しばらくお待ちください)", completion: { dialog in
+                _ = NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsTableViewController_ScrapeInspectProgressMessage", comment: "スクレイプ検査中…\n(しばらくお待ちください)"), completion: { dialog in
                     inspector.InspectAll(progress: nil, completion: { results in
                         _ = inspector // InspectAll は内部で [weak self] のため、完了まで inspector を保持する
                         let report = ScrapeInspector.report(results: results)
