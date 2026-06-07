@@ -247,10 +247,17 @@ class SiteInfoEditorViewController: FormViewController {
     private var cells: [String: String]
     // 同id の標準データ(キャッシュ)。差分(標準と違うカラム)を目立たせる基準。無ければ nil。
     private var baselineCells: [String: String]?
+    // 「テスト用URL」: ここに入っていれば、テスト時はこの1ページだけを取得して取得値を表示する(サイト負荷を抑える+繰り返しやすい)。
+    // 既定は checkTargets の先頭URL。空なら従来どおり checkTargets 全件を判定する。
+    private var testURLString: String = ""
+    // 値確認テスト用の StoryFetcher(WKWebView 単一インスタンス)。繰り返し叩くので毎回作らず使い回す。
+    private lazy var inspectionFetcher = StoryFetcher()
 
     init(initialCells: [String: String]) {
         self.cells = initialCells
         super.init(style: .grouped)
+        // checkTargets の先頭URLをテスト用URLの初期値にする。
+        self.testURLString = ScrapeCheckTarget.parse(initialCells["checkTargets"]).first?.url.absoluteString ?? ""
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
@@ -321,6 +328,17 @@ class SiteInfoEditorViewController: FormViewController {
     private func buildForm() {
         let actionSection = Section(NSLocalizedString("SiteInfoEditor_ActionSection", comment: "操作"))
         form +++ actionSection
+        // テスト用URL: ここに1つ入れておくと、テスト時はこの1ページだけ取得して取得値を表示する(空なら checkTargets 全件判定)。
+        actionSection <<< TextRow("testURL") {
+            $0.title = NSLocalizedString("SiteInfoEditor_TestURL", comment: "テスト用URL")
+            $0.placeholder = NSLocalizedString("SiteInfoEditor_TestURL_Placeholder", comment: "1ページだけ取得して取得値を確認(空なら checkTargets 全件)")
+            $0.cell.textField.autocorrectionType = .no
+            $0.cell.textField.autocapitalizationType = .none
+            $0.cell.textLabel?.numberOfLines = 0
+            $0.value = testURLString
+        }.onChange({ [weak self] row in
+            self?.testURLString = row.value ?? ""
+        })
         actionSection <<< ButtonRow() {
             $0.title = NSLocalizedString("SiteInfoEditor_TestNow", comment: "この値で今すぐテスト")
             $0.cell.textLabel?.numberOfLines = 0
@@ -549,6 +567,18 @@ class SiteInfoEditorViewController: FormViewController {
             return
         }
 
+        // テスト用URLが入っていれば、その1ページだけ取得して「取得できた値/できなかった項目」を表示する(サイト負荷を抑える・繰り返しやすい)。
+        let trimmedTestURL = testURLString.trimmingCharacters(in: .whitespaces)
+        if !trimmedTestURL.isEmpty {
+            guard let url = URL(string: trimmedTestURL) else {
+                showReport(title: resultTitle, body: (preNotes + [String(format: NSLocalizedString("SiteInfoEditor_ValueTest_BadURL", comment: "⚠️ テスト用URLが不正です: %@"), trimmedTestURL)]).joined(separator: "\n"))
+                return
+            }
+            runSingleURLValueInspection(siteInfo: siteInfo, url: url, preNotes: preNotes, resultTitle: resultTitle)
+            return
+        }
+
+        // テスト用URLが空 → 従来どおり checkTargets 全件を判定する(監視用途)。
         if siteInfo.checkTargets.isEmpty {
             let body = (preNotes + [
                 NSLocalizedString("SiteInfoEditor_Test_NoCheckTargets_1", comment: "checkTargets が未設定です。テスト対象URLがないため検査を実行できません。"),
@@ -573,6 +603,99 @@ class SiteInfoEditorViewController: FormViewController {
                 }
             })
         })
+    }
+
+    // テスト用URLを1ページだけ取得し、取得できた値(本文など長いものは省略)と取得できなかった項目を表示する。
+    private func runSingleURLValueInspection(siteInfo: StorySiteInfo, url: URL, preNotes: [String], resultTitle: String) {
+        _ = NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SiteInfoEditor_Testing", comment: "テスト中…\n(しばらくお待ちください)"), completion: { dialog in
+            self.inspectionFetcher.InspectFetchSinglePageWith(siteInfoArray: [siteInfo], url: url, cookieString: "", successAction: { state in
+                let body = self.buildValueReport(url: url, state: state, siteInfo: siteInfo, preNotes: preNotes)
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        self.showReport(title: resultTitle, body: body)
+                    })
+                }
+            }, failedAction: { _, message in
+                var parts = preNotes
+                parts.append(String(format: NSLocalizedString("SiteInfoEditor_ValueTest_URL", comment: "URL: %@"), url.absoluteString))
+                parts.append(String(format: NSLocalizedString("SiteInfoEditor_ValueTest_Failed", comment: "取得に失敗しました: %@"), message))
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        self.showReport(title: resultTitle, body: parts.joined(separator: "\n\n"))
+                    })
+                }
+            })
+        })
+    }
+
+    // 取得結果(StoryState)を「取得できた値 / 取得できなかった項目」に整形する。
+    private func buildValueReport(url: URL, state: StoryState, siteInfo: StorySiteInfo, preNotes: [String]) -> String {
+        var sections: [String] = []
+        if !preNotes.isEmpty { sections.append(preNotes.joined(separator: "\n")) }
+        sections.append(String(format: NSLocalizedString("SiteInfoEditor_ValueTest_URL", comment: "URL: %@"), url.absoluteString))
+
+        var got: [String] = []
+        var empty: [String] = []
+        func addText(_ label: String, _ value: String?) {
+            if let v = value, !v.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                let indented = summarizeValue(v).split(separator: "\n", omittingEmptySubsequences: false).map { "    " + $0 }.joined(separator: "\n")
+                got.append("● \(label):\n\(indented)")
+            } else {
+                empty.append(label)
+            }
+        }
+        func addPresence(_ label: String, _ present: Bool) {
+            if present {
+                got.append("● \(label): " + NSLocalizedString("SiteInfoEditor_ValueTest_ElementPresent", comment: "(要素あり)"))
+            } else {
+                empty.append(label)
+            }
+        }
+        addText(NSLocalizedString("SiteInfoEditor_ValueTest_Field_content", comment: "content (本文)"), state.content)
+        addText("title", state.title)
+        addText("subtitle", state.subtitle)
+        addText("author", state.author)
+        addText("tag", state.tagArray.isEmpty ? nil : state.tagArray.joined(separator: ", "))
+        addText("firstPageLink", state.firstPageLink?.absoluteString)
+        addText("nextLink", state.nextUrl?.absoluteString)
+        addPresence("nextButton", state.nextButton != nil)
+        addPresence("firstPageButton", state.firstPageButton != nil)
+
+        if got.isEmpty {
+            sections.append(NSLocalizedString("SiteInfoEditor_ValueTest_GotNone", comment: "取得できた項目: なし"))
+        } else {
+            sections.append(NSLocalizedString("SiteInfoEditor_ValueTest_GotHeader", comment: "取得できた項目:") + "\n" + got.joined(separator: "\n"))
+        }
+        if !empty.isEmpty {
+            sections.append(NSLocalizedString("SiteInfoEditor_ValueTest_EmptyHeader", comment: "取得できなかった項目:") + " " + empty.joined(separator: ", "))
+        }
+        // テスト用URLが checkTargets のどれかと一致していれば、その期待(OK/NG)も併記する。
+        if let matched = siteInfo.checkTargets.first(where: { $0.url.absoluteString == url.absoluteString }) {
+            let failures = matched.evaluate(state: state)
+            if failures.isEmpty {
+                sections.append(NSLocalizedString("SiteInfoEditor_ValueTest_JudgeOK", comment: "checkTargets判定: 期待をすべて満たしました"))
+            } else {
+                sections.append(String(format: NSLocalizedString("SiteInfoEditor_ValueTest_JudgeNG", comment: "checkTargets判定(未達): %@"), failures.joined(separator: ", ")))
+            }
+        }
+        return sections.joined(separator: "\n\n")
+    }
+
+    // 長い値は先頭3行＋末尾3行に省略(全文字数/行数を併記)。1行で長い場合は先頭/末尾150文字に省略。
+    private func summarizeValue(_ value: String) -> String {
+        let v = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lines = v.components(separatedBy: "\n")
+        if lines.count > 7 {
+            let head = lines.prefix(3).joined(separator: "\n")
+            let tail = lines.suffix(3).joined(separator: "\n")
+            return head + "\n" + String(format: NSLocalizedString("SiteInfoEditor_ValueTest_Elided", comment: "…(中略 全%1$d文字 / %2$d行)…"), v.count, lines.count) + "\n" + tail
+        }
+        if v.count > 300 {
+            let head = String(v.prefix(150))
+            let tail = String(v.suffix(150))
+            return head + "\n" + String(format: NSLocalizedString("SiteInfoEditor_ValueTest_ElidedChars", comment: "…(中略 全%d文字)…"), v.count) + "\n" + tail
+        }
+        return v
     }
 
     private func showReport(title: String, body: String) {
