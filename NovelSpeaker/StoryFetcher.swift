@@ -483,10 +483,13 @@ struct StorySiteInfo : Identifiable {
     //   nil の場合は内部で1回 Realm を引く(エディタの単発生成用)。RealmSwift 型(Results 等)をこの API 表面に出さないため closure で受ける。
     // - `pageElementV2` 列が無い行は nil を返す(= デコード対象外。既存 DecodeCSVSiteInfoData の挙動を踏襲)。
     // 設計メモ: DESIGN_SiteInfoエディタ.md
-    static func makeFromCellDict(_ dict:[String:String], urlString:String, importTargetsForSettingId:((String) -> [String])? = nil) -> StorySiteInfo? {
+    // useStoredId=true のとき、dict["id"] をそのまま id に使う(urlString の suffix を付けない)。
+    //   ローカル最優先SiteInfo(LocalSiteInfoStore.entries)で使う。これにより「シート版を編集して保存した最優先SiteInfo」の id が
+    //   元のシート版 id と一致し、取込対象設定(RealmNovelImportSetting・id 紐付け)や id 重複除去で同一サイトとして扱える。
+    static func makeFromCellDict(_ dict:[String:String], urlString:String, importTargetsForSettingId:((String) -> [String])? = nil, useStoredId:Bool = false) -> StorySiteInfo? {
         guard let pageElementV2 = dict["pageElementV2"] else { return nil }
         let siteInfoId = dict["id"]
-        let storySiteInfoId = (siteInfoId ?? UUID.init().uuidString) + ":" + urlString
+        let storySiteInfoId = useStoredId ? (siteInfoId ?? UUID.init().uuidString) : ((siteInfoId ?? UUID.init().uuidString) + ":" + urlString)
         let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: .site, siteInfoId: storySiteInfoId, novelID: nil)
         let importTargets:[String]
         if let resolver = importTargetsForSettingId {
@@ -1572,6 +1575,7 @@ class StoryHtmlDecoder {
     }
     
     // 特定 ID の StorySiteInfo.novelImportEnableSettings を書き換えます
+    // (最優先SiteInfo(ローカル保存分)も対象にする。これを忘れるとローカル編集サイトの取込対象選択が即時反映されない)
     func updateNovelImportEnableSettings(id: String, targetKeys: [String]) {
         for i in self.siteInfoArrayArray.indices {
             for j in self.siteInfoArrayArray[i].indices {
@@ -1579,6 +1583,11 @@ class StoryHtmlDecoder {
                     self.siteInfoArrayArray[i][j].novelImportEnableSettings = targetKeys
                     break
                 }
+            }
+        }
+        for i in self.localPreferredSiteInfoArray.indices {
+            if self.localPreferredSiteInfoArray[i].id == id {
+                self.localPreferredSiteInfoArray[i].novelImportEnableSettings = targetKeys
             }
         }
     }
@@ -2393,8 +2402,10 @@ class LocalSiteInfoStore {
     }
 
     // 注入用に [StorySiteInfo] へ復元する。
+    // id は行に保存された値をそのまま使う(useStoredId)。これにより、シート版を編集して保存した最優先SiteInfo の id が
+    // 元のシート版 id と一致し、取込対象設定(RealmNovelImportSetting)や id 重複除去で同一サイトとして扱える。
     func entries() -> [StorySiteInfo] {
-        return rows.compactMap { StorySiteInfo.makeFromCellDict($0, urlString: LocalSiteInfoStore.sourceURLString) }
+        return rows.compactMap { StorySiteInfo.makeFromCellDict($0, urlString: LocalSiteInfoStore.sourceURLString, useStoredId: true) }
     }
 
     // url から決定的な base id。String.hashValue は実行毎に変わる(プロセス毎の seed)ため使えない。

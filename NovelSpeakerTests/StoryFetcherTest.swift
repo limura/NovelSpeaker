@@ -310,6 +310,16 @@ class StoryFetcherTest: XCTestCase {
         XCTAssertEqual(entries[0].pageElement, "//*[@id='honbun']")
     }
 
+    func testLocalSiteInfoStoreEntriesKeepStoredIdVerbatim() throws {
+        // シート版を編集して保存した最優先SiteInfo は、元のシート版と同じ id(suffix を足さない)で復元される。
+        // これにより「取り込み対象を指定する」一覧で同一サイトとして扱える(id 重複除去 + 取込設定の共有)。
+        let store = makeTempStore()
+        let sheetId = "\(novelImportSettingTestSiteNumber):\(novelImportSettingTestURL)" // 例: 999991:https://example.com/siteinfo.csv
+        store.upsert(["id": sheetId, "url": "^https://example.com/n/.*$", "pageElementV2": "//a"])
+        let entries = store.entries()
+        XCTAssertEqual(entries.first?.id, sheetId) // 再 suffix されていない
+    }
+
     func testEffectiveSiteInfoArrayArrayPutsLocalFirstWhenNonEmpty() throws {
         let decoder = StoryHtmlDecoder.shared
         let savedLocal = decoder.localPreferredSiteInfoArray

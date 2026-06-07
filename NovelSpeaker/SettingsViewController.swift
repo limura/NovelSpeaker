@@ -41,7 +41,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         let scopeTypeString = action.payload["scopeType"]?.value as? String
         let novelID = action.payload["novelID"]?.value as? String
         let scopeType:RealmNovelImportSetting.ScopeType = scopeTypeString == "novel" ? .novel : .site
-        let siteInfoArray = StoryHtmlDecoder.shared.siteInfoArrayArray.flatMap { $0 }.filter { $0.id == siteInfoId }
+        // 最優先SiteInfo(ローカル保存分)も対象にするため effective を使う(先頭=最優先で同id ならローカルが先に当たる)。
+        let siteInfoArray = StoryHtmlDecoder.shared.effectiveSiteInfoArrayArray.flatMap { $0 }.filter { $0.id == siteInfoId }
         guard let siteInfo = siteInfoArray.first else { return }
         let swiftUIView = RealmUtil.RealmBlock { realm in
             let setting = RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: scopeType, siteInfoId: siteInfo.id, novelID: novelID)
@@ -1342,7 +1343,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_NovelImportSetting_Title", comment: "Webサイト毎の取り込み対象を指定する")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellOf, button) in
-                let siteInfoArrayArray = StoryHtmlDecoder.shared.siteInfoArrayArray.flatMap { $0 }
+                // 最優先SiteInfo(ローカル保存分)も含めるため effectiveSiteInfoArrayArray を使う(先頭=最優先)。
+                // 重複除去は id で行い uniquingKeysWith は先頭優先なので、同 id のローカル版がシート版より優先される。
+                let siteInfoArrayArray = StoryHtmlDecoder.shared.effectiveSiteInfoArrayArray.flatMap { $0 }
                 let siteInfoArray = siteInfoArrayArray.filter{
                     $0.pageElementDict.count > 1
                 }
