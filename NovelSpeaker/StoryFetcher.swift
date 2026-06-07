@@ -2121,7 +2121,7 @@ class ScrapeInspector {
         return NSLocalizedString("ScrapeInspector_Reason_HostRedirect", comment: "別ホストへリダイレクト(未ログイン/年齢確認の可能性)")
     }
     static var reasonAuthNoEvidence: String {
-        return NSLocalizedString("ScrapeInspector_Reason_AuthNoEvidence", comment: "要確認: 未ログインの確証(gate/別ホスト)が無いのに取得できず。ログイン状態かスクレイプ破損を確認")
+        return NSLocalizedString("ScrapeInspector_Reason_AuthNoEvidence", comment: "要確認: 未ログインの確証(gate/別ホスト)が無いのに取得できず。ログイン状態か取り込み設定の破損を確認")
     }
     static func reasonUnknownTokens(_ tokens: [String]) -> String {
         return String(format: NSLocalizedString("ScrapeInspector_Reason_UnknownTokens", comment: "設定の無効トークン(typo?): %@"), tokens.joined(separator: ", "))
@@ -2269,7 +2269,7 @@ class ScrapeInspector {
             return "\(s.rawValue):\(c)"
         }.joined(separator: " / ")
         let sorted = results.sorted { (order.firstIndex(of: $0.status) ?? 0) < (order.firstIndex(of: $1.status) ?? 0) }
-        let header = String(format: NSLocalizedString("ScrapeInspector_ReportHeader", comment: "===== スクレイプ検査結果 (%d件) ====="), results.count)
+        let header = String(format: NSLocalizedString("ScrapeInspector_ReportHeader", comment: "===== 検査結果 (%d件) ====="), results.count)
         return header + "\n" + summary + "\n\n" + sorted.map { $0.description }.joined(separator: "\n")
     }
 }

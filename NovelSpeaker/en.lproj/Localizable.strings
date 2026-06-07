@@ -77,7 +77,6 @@
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "Added a standard pronounciation dictionary.";
 "SettingTableViewController_NoContentHave" = "There are no novels in the bookshelf";
 "SettingTableViewController_ShareNcodeListURLScheme" = "Bookshelf backup URL generated.";
-"SettingTableViewController_ShareNcodeListURLSchemeMessage" = "Bookshelf backup URL generated. In case of reinstallation, this URL restores the novels that you have download in your bookshelf.";
 "SettingTableViewController_ConfirmAddDefaultSpeechModSetting" = "Confirm";
 "SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "Proceed to overwrite the pronounciation corrections to deafult?";
 "SettingTableViewController_GoToReleaseLog" = "Update log";
@@ -300,8 +299,6 @@
 "NovelSpeakerBackup_RemovingStoryFiles" = "Step 3/3\r\nIn post-processing";
 "NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage" = "\nDue to the large number of files in the backup file being expanded, the progress (% display) may point to an incorrect value.";
     
-"EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
-"EditUserBookViewController_NewChapterCreated" = "New chapter added.";
 "EditUserBookViewController_ConfirmDeleteThisChapter" = "Delete this chapter. Will that be all right?";
 
 "EditBookViewController_TitleText" = "Name";
@@ -425,11 +422,6 @@
 "NarouSearchResultDetailViewController_GoToMypage" = "The writer's page";
 "NarouSearchResultDetailViewController_GoToMyPageMessage" = "Proceed to the writer's page?";
 
-"EditUserBookViewController_PleaseInputTitle" = "Please Input Title";
-"EditUserBookViewController_PleaseInputBookBody" = "Please Input content text";
-"EditUserBookViewController_CanNotDeleteChapter" = "Failed deleting Chapter(s).";
-"EditUserBookViewController_ChapterDeleted" = "Chapter(s) deleted.";
-"EditUserBookViewController_NewChapterCreated" = "New chapter created.";
 "EditUserBookViewContoller_InputTextHeare" = "Input text here";
 "EditUserBookViewController_AddNewStoryFailed" = "Chapter add failed.";
 "NarouSearchViewController_DoneKeyboardBarItem" = "Done";
@@ -450,7 +442,6 @@
 "NovelDetailViewController_Tags" = "Tags";
 "NovelDetailViewController_CurrentPage" = "URL of the page currently open";
 "NovelDetailViewController_ActionSectionTitle" = "Manipulation on this novel";
-"NovelDetailViewController_ActionSection_OpenCurrentPageOnWebImportTab" = "Open the currently open page in the Web import tab";
 "NovelDetailViewController_ActionSection_CheckUpdate" = "Check for updates to this novel";
 "NovelDetailViewController_ActionSection_CheckUpdateDone_Message" = "Update check started";
 "NovelDetailViewController_ActionSection_CopyNovelTitleButton" = "Copy the novel name";
@@ -986,7 +977,7 @@
 "StoryFetcher_NovelImportSettingLog_CurrentElements" = "Currently available items";
 "AppInformationLogger_OccurrenceCount_Format" = "Occurred %d times.";
 
-"BookShelfTableViewController_SortTypeNcode" = "Ncode";
+"BookShelfTableViewController_SortTypeNcode" = "ID";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";
 "BookShelfTableViewController_SortTypeUpdateDate" = "Last download date";
@@ -1064,6 +1055,17 @@
 "SiteInfoEditor_Validate_ForceError_NoColon" = "forceErrorMessageAndElement: missing ':' (the 'message:xpath' format is required; the first ':' separates message and xpath)";
 "SiteInfoEditor_Validate_ForceError_EmptyMessage" = "forceErrorMessageAndElement: the message before ':' is empty";
 "SiteInfoEditor_Validate_ForceError_EmptyXpath" = "forceErrorMessageAndElement: the xpath after ':' is empty";
+
+// ScrapeInspector report / judge reasons / settings UI
+"ScrapeInspector_ReportHeader" = "===== Inspection Results (%d) =====";
+"ScrapeInspector_Reason_HostRedirect" = "Redirected to a different host (possibly not logged in / age verification)";
+"ScrapeInspector_Reason_AuthNoEvidence" = "Needs checking: could not fetch even though there is no proof of being logged out (no gate / host change). Check the login state or whether the import settings are broken.";
+"ScrapeInspector_Reason_UnknownTokens" = "Invalid token(s) in settings (typo?): %@";
+"ScrapeInspector_Reason_Timeout" = "Timeout (no response within %d seconds)";
+"ScrapeInspector_Reason_NotExtracted" = "%@ (could not be extracted)";
+"ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (should be empty but was extracted)";
+"SettingsTableViewController_ScrapeInspectButtonTitle" = "Inspect all sites now";
+"SettingsTableViewController_ScrapeInspectProgressMessage" = "Inspecting…\n(Please wait a moment)";
 
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.2
 
@@ -2286,13 +2288,3 @@ First release.
 ";
 "UpdateLogViewController_Title" = "Update log";
 
-// ScrapeInspector report / judge reasons / settings UI
-"ScrapeInspector_ReportHeader" = "===== Scrape Inspection Results (%d) =====";
-"ScrapeInspector_Reason_HostRedirect" = "Redirected to a different host (possibly not logged in / age verification)";
-"ScrapeInspector_Reason_AuthNoEvidence" = "Needs checking: could not fetch even though there is no proof of being logged out (no gate / host change). Check the login state or whether scraping is broken.";
-"ScrapeInspector_Reason_UnknownTokens" = "Invalid token(s) in settings (typo?): %@";
-"ScrapeInspector_Reason_Timeout" = "Timeout (no response within %d seconds)";
-"ScrapeInspector_Reason_NotExtracted" = "%@ (could not be extracted)";
-"ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (should be empty but was extracted)";
-"SettingsTableViewController_ScrapeInspectButtonTitle" = "Inspect scraping for all sites now";
-"SettingsTableViewController_ScrapeInspectProgressMessage" = "Inspecting scraping…\n(Please wait a moment)";

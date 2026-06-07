@@ -396,7 +396,6 @@
 "NovelDetailViewController_NovelLoadFailed" = "小説情報の取得に失敗しました。";
 "NovelDetailViewController_Title" = "小説名";
 "NovelDetailViewController_Writer" = "著者";
-"NovelDetailViewController_Writer" ="著者";
 "NovelDetailViewController_URL" = "URL";
 "NovelDetailViewController_SpeakerAlertRowTitle" = "標準の話者";
 "NovelDetailViewController_DetailSectionTitle" = "概要";
@@ -444,11 +443,6 @@
 "NovelKeywordTagSelectorViewController_AddTagTitlePlaceHolder" = "空文字列は指定できません";
 "NovelKeywordTagSelectorViewController_SearchButtonTitle" = "検索";
 
-"EditUserBookViewController_PleaseInputTitle" = "タイトルを入力してください";
-"EditUserBookViewController_PleaseInputBookBody" = "本文を入力してください";
-"EditUserBookViewController_CanNotDeleteChapter" = "章の削除に失敗しました";
-"EditUserBookViewController_ChapterDeleted" = "最後の章を削除しました";
-"EditUserBookViewController_NewChapterCreated" = "章を追加しました";
 "EditUserBookViewContoller_InputTextHeare" = "ここに本文を書き込んでください";
 "EditUserBookViewController_AddNewStoryFailed" = "新しい章の追加に失敗しました";
 "EditUserBookViewController_ConfirmDeleteThisChapter" = "この章を削除します。よろしいですか？";
@@ -840,8 +834,6 @@
 "NovelSearchViewController_GenerateQueryURLFailedMessage" = "検索用URLの生成に失敗しています。入力が必要な項目が入力されていない可能性があります。";
 "NovelSearchViewController_GenerateQueryURLFailedTitle" = "エラー";
 
-"BookShelfTableViewController_SortTypeNcode" = "ID順";
-
 "NovelDisplayColorSettingViewController_SampleText" = "メロスは激怒した。必ず、かの邪智暴虐の王を除かなければならぬと決意した。メロスには政治がわからぬ。メロスは、村の牧人である。笛を吹き、羊と遊んで暮して来た。けれども邪悪に対しては、人一倍に敏感であった。\nきょう未明メロスは村を出発し、野を越え山越え、十里はなれた此のシラクスの市にやって来た。メロスには父も、母も無い。女房も無い。十六の、内気な妹と二人暮しだ。";
 "NovelDisplayColorSettingViewController_ColorSettingButton_Default" = "標準(ダークモード等に追従します)";
 "NovelDisplayColorSettingViewController_ColorSettingButton_White" = "白地に黒で固定";
@@ -974,7 +966,7 @@
 "StoryFetcher_NovelImportSettingLog_CurrentElements" = "現在利用できる項目";
 "AppInformationLogger_OccurrenceCount_Format" = "%d回発生しています。";
 
-"BookShelfTableViewController_SortTypeNcode" = "Ncode順";
+"BookShelfTableViewController_SortTypeNcode" = "ID順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
 "BookShelfTableViewController_SortTypeNovelName" = "小説名順";
 "BookShelfTableViewController_SortTypeUpdateDate" = "最終ダウンロード日時順";
@@ -1052,6 +1044,17 @@
 "SiteInfoEditor_Validate_ForceError_NoColon" = "forceErrorMessageAndElement: ':' がありません(『メッセージ:xpath』形式が必要。最初の ':' でメッセージと xpath を分けます)";
 "SiteInfoEditor_Validate_ForceError_EmptyMessage" = "forceErrorMessageAndElement: ':' より前のメッセージが空です";
 "SiteInfoEditor_Validate_ForceError_EmptyXpath" = "forceErrorMessageAndElement: ':' より後の xpath が空です";
+
+// スクレイプ検査(ScrapeInspector)の検査レポート・判定理由・設定UI
+"ScrapeInspector_ReportHeader" = "===== 検査結果 (%d件) =====";
+"ScrapeInspector_Reason_HostRedirect" = "別ホストへリダイレクト(未ログイン/年齢確認の可能性)";
+"ScrapeInspector_Reason_AuthNoEvidence" = "要確認: 未ログインの確証(gate/別ホスト)が無いのに取得できず。ログイン状態か取り込み設定の破損を確認";
+"ScrapeInspector_Reason_UnknownTokens" = "設定の無効トークン(typo?): %@";
+"ScrapeInspector_Reason_Timeout" = "タイムアウト(%d秒以内に応答なし)";
+"ScrapeInspector_Reason_NotExtracted" = "%@ (抽出できなかった)";
+"ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (空であるべきだが抽出された)";
+"SettingsTableViewController_ScrapeInspectButtonTitle" = "今すぐ全サイトを検査する";
+"SettingsTableViewController_ScrapeInspectProgressMessage" = "検査中…\n(しばらくお待ちください)";
 
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.2
 
@@ -2334,14 +2337,3 @@ Version 2.6.3
 最初のリリースです
 ";
 "UpdateLogViewController_Title" = "更新履歴";
-
-// スクレイプ検査(ScrapeInspector)の検査レポート・判定理由・設定UI
-"ScrapeInspector_ReportHeader" = "===== スクレイプ検査結果 (%d件) =====";
-"ScrapeInspector_Reason_HostRedirect" = "別ホストへリダイレクト(未ログイン/年齢確認の可能性)";
-"ScrapeInspector_Reason_AuthNoEvidence" = "要確認: 未ログインの確証(gate/別ホスト)が無いのに取得できず。ログイン状態かスクレイプ破損を確認";
-"ScrapeInspector_Reason_UnknownTokens" = "設定の無効トークン(typo?): %@";
-"ScrapeInspector_Reason_Timeout" = "タイムアウト(%d秒以内に応答なし)";
-"ScrapeInspector_Reason_NotExtracted" = "%@ (抽出できなかった)";
-"ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (空であるべきだが抽出された)";
-"SettingsTableViewController_ScrapeInspectButtonTitle" = "今すぐ全サイトをスクレイプ検査する";
-"SettingsTableViewController_ScrapeInspectProgressMessage" = "スクレイプ検査中…\n(しばらくお待ちください)";
