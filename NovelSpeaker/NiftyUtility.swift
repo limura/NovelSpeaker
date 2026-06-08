@@ -768,10 +768,11 @@ class NiftyUtility: NSObject {
 
     // ready 監視に使うセレクタ群(本文系=textContent非空を要求 / リンク・forceError=ノード存在 / ボタン=CSS存在)。
     private struct ReadySelectors {
-        let contentXPaths: [String]   // pageElement(本文)。textContent 非空でOK
-        let nodeXPaths: [String]      // nextLink / firstPageLink / forceError。ノード存在でOK
-        let cssSelectors: [String]    // nextButton / firstPageButton / forceClickButton。querySelector 存在でOK
-        var isEmpty: Bool { contentXPaths.isEmpty && nodeXPaths.isEmpty && cssSelectors.isEmpty }
+        let contentXPaths: [String]      // pageElement(本文)。textContent 非空でOK
+        let nodeXPaths: [String]         // nextLink / firstPageLink / forceError。ノード存在でOK
+        let readyCssSelectors: [String]  // nextButton / firstPageButton。querySelector 存在で ready
+        let clickCssSelectors: [String]  // forceClickButton。ready ではなく「見つけ次第クリックして消す」対象
+        var isEmpty: Bool { contentXPaths.isEmpty && nodeXPaths.isEmpty && readyCssSelectors.isEmpty && clickCssSelectors.isEmpty }
     }
     // この URL にマッチする SiteInfo のうち1つでも allowSmartWait=true なら smart-wait を有効にする。
     // 既定(フラグ無し)は false = 従来の固定待ち。レート制限回避目的の waitSecondInHeadless を壊さないための opt-in。
@@ -780,8 +781,9 @@ class NiftyUtility: NSObject {
     }
 
     // URL にマッチする SiteInfo 群から ready セレクタを動的に集める。fallback(//body)は常にテキストを持つので除外。
+    // forceClickButton は「ready」ではなく「クリックして消す障害物」として clickCssSelectors に分ける(③)。
     private static func resolveReadySelectors(url: URL) -> ReadySelectors {
-        var content: [String] = []; var node: [String] = []; var css: [String] = []
+        var content: [String] = []; var node: [String] = []; var readyCss: [String] = []; var clickCss: [String] = []
         let matched = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
         for si in matched {
             for v in si.pageElementDict.values where !v.xpath.isEmpty && v.xpath != "//body" {
@@ -792,59 +794,102 @@ class NiftyUtility: NSObject {
             if let fe = si.forceErrorMessageAndElement, let colon = fe.firstIndex(of: ":") {
                 let xp = String(fe[fe.index(after: colon)...]); if !xp.isEmpty { node.append(xp) }
             }
-            if let v = si.nextButton, !v.isEmpty { css.append(v) }
-            if let v = si.firstPageButton, !v.isEmpty { css.append(v) }
-            if let v = si.forceClickButton, !v.isEmpty { css.append(v) }
+            if let v = si.nextButton, !v.isEmpty { readyCss.append(v) }
+            if let v = si.firstPageButton, !v.isEmpty { readyCss.append(v) }
+            if let v = si.forceClickButton, !v.isEmpty { clickCss.append(v) }
         }
-        return ReadySelectors(contentXPaths: Array(Set(content)), nodeXPaths: Array(Set(node)), cssSelectors: Array(Set(css)))
+        return ReadySelectors(contentXPaths: Array(Set(content)), nodeXPaths: Array(Set(node)), readyCssSelectors: Array(Set(readyCss)), clickCssSelectors: Array(Set(clickCss)))
     }
 
     private static func jsStringArrayLiteral(_ arr: [String]) -> String {
         let items = arr.map { "\"" + $0.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"") + "\"" }
         return "[" + items.joined(separator: ",") + "]"
     }
-    // ready 監視 JS を組み立てる。MutationObserver で ready を検知し window.__nsReady に {ms, which} を書く。
-    private static func buildReadyWatcherJS(selectors: ReadySelectors) -> String {
+    // ready 監視 JS を組み立てる(②③)。MutationObserver で:
+    //  ・forceClickButton(CLICK)を見つけ次第クリック(各要素1回)。消すたびに deadline を capMs 延長(連続ダイアログ対応)。
+    //  ・ready(本文/各リンク/ready系ボタン/forceError)が出たら postMessage(ready)。
+    //  ・deadline 超過で postMessage(timeout)。
+    // どちらか1回だけ post。再注入(クリック後など)に備え、貼り直し時は既存 observer/timer を畳んでから始める。
+    private static func buildReadyWatcherJS(selectors: ReadySelectors, capMs: Int) -> String {
         return "(function(){"
-            + "if(window.__nsReadyInstalled)return;window.__nsReadyInstalled=true;window.__nsReady=null;"
+            + "if(window.__nsObs){try{window.__nsObs.disconnect();}catch(e){}}"
+            + "if(window.__nsTimer){try{clearInterval(window.__nsTimer);}catch(e){}}"
             + "var CONTENT=\(jsStringArrayLiteral(selectors.contentXPaths));"
             + "var NODE=\(jsStringArrayLiteral(selectors.nodeXPaths));"
-            + "var CSS=\(jsStringArrayLiteral(selectors.cssSelectors));"
-            + "var t0=Date.now();"
+            + "var RCSS=\(jsStringArrayLiteral(selectors.readyCssSelectors));"
+            + "var CLICK=\(jsStringArrayLiteral(selectors.clickCssSelectors));"
+            + "var t0=Date.now();var capMs=\(capMs);var deadline=t0+capMs;var done=false;"
+            + "function post(w){if(done)return;done=true;try{window.webkit.messageHandlers.\(HeadlessReadyMessageHandler.name).postMessage({ms:Date.now()-t0,which:w});}catch(e){}if(window.__nsObs){try{window.__nsObs.disconnect();}catch(e){}}if(window.__nsTimer){try{clearInterval(window.__nsTimer);}catch(e){}}}"
             + "function xp(s){try{return document.evaluate(s,document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue;}catch(e){return null;}}"
+            + "function dismiss(){for(var i=0;i<CLICK.length;i++){try{var es=document.querySelectorAll(CLICK[i]);for(var j=0;j<es.length;j++){var el=es[j];if(!el.__nsClicked){el.__nsClicked=true;try{el.click();}catch(e){}deadline=Date.now()+capMs;}}}catch(e){}}}"
             + "function chk(){"
             + "for(var i=0;i<CONTENT.length;i++){var n=xp(CONTENT[i]);if(n&&(n.textContent||'').replace(/\\s+/g,'').length>0)return 'content';}"
             + "for(var i=0;i<NODE.length;i++){if(xp(NODE[i]))return 'node';}"
-            + "for(var i=0;i<CSS.length;i++){try{if(document.querySelector(CSS[i]))return 'css';}catch(e){}}"
+            + "for(var i=0;i<RCSS.length;i++){try{if(document.querySelector(RCSS[i]))return 'css';}catch(e){}}"
             + "return null;}"
-            + "function fire(w){if(window.__nsReady)return;window.__nsReady=JSON.stringify({ms:Date.now()-t0,which:w});if(window.__nsObs)window.__nsObs.disconnect();}"
-            + "var w=chk();if(w){fire(w);return;}"
-            + "window.__nsObs=new MutationObserver(function(){var w=chk();if(w)fire(w);});"
+            + "function tick(){if(done)return;dismiss();var w=chk();if(w){post(w);return;}if(Date.now()>=deadline){post('timeout');}}"
+            + "tick();if(done)return;"
+            + "window.__nsObs=new MutationObserver(tick);"
             + "window.__nsObs.observe(document.documentElement||document,{childList:true,subtree:true,characterData:true});"
+            + "window.__nsTimer=setInterval(tick,100);"
             + "})()"
     }
-    // 監視を仕込み、window.__nsReady が立つ(または cap 経過)まで短間隔で回収する。
-    // フラグの読み取りを「cap 判定より先」に行うので、cap=0(waitSecondInHeadless 未指定)でも
-    // ナビ完了時点で既に ready な要素は1回で拾える(= 従来の即時取得と同等か、わずかに良い)。
+    // 監視を仕込み、JS からの postMessage(ready/timeout)を待つ(②)。JS が deadline を持つので、ネイティブ側は
+    // 「JS が一切返してこない場合」の保険として cap+余裕のハード上限だけ持つ。startedAt は計測用。
     private static func smartWaitForReady(client: HeadlessHttpClient, selectors: ReadySelectors, cap: TimeInterval, startedAt: Date, completion: @escaping (TimeInterval, Bool, String) -> Void) {
-        client.webView.evaluateJavaScript(buildReadyWatcherJS(selectors: selectors)) { _, _ in
-            func poll() {
-                client.webView.evaluateJavaScript("window.__nsReady") { result, _ in
-                    if let s = result as? String, !s.isEmpty {
-                        var which = ""; var ms = Int(Date().timeIntervalSince(startedAt) * 1000)
-                        if let d = s.data(using: .utf8), let o = (try? JSONSerialization.jsonObject(with: d)) as? [String: Any] {
-                            which = (o["which"] as? String) ?? ""
-                            if let m = o["ms"] as? Int { ms = m } else if let m = o["ms"] as? Double { ms = Int(m) }
-                        }
-                        completion(TimeInterval(ms) / 1000.0, true, which)
-                    } else if Date().timeIntervalSince(startedAt) >= cap {
-                        completion(Date().timeIntervalSince(startedAt), false, "timeout")
-                    } else {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { poll() }
-                    }
+        let capMs = Int(max(cap, 0) * 1000)
+        client.webView.evaluateJavaScript(buildReadyWatcherJS(selectors: selectors, capMs: capMs)) { _, _ in
+            client.awaitReadySignal(hardTimeout: max(cap, 0) + 15) { body in
+                if let body = body {
+                    let which = (body["which"] as? String) ?? ""
+                    let ms: Int = (body["ms"] as? Int) ?? Int((body["ms"] as? Double) ?? Date().timeIntervalSince(startedAt) * 1000)
+                    completion(TimeInterval(ms) / 1000.0, which != "timeout", which)
+                } else {
+                    completion(Date().timeIntervalSince(startedAt), false, "hardTimeout")
                 }
             }
-            poll()
+        }
+    }
+
+    // forceClickButton を見つけ次第クリックして消すだけの常駐 watcher(③ の dismiss-only)。
+    // allowSmartWait でないサイトでも、固定待ちの間に全画面広告/ダイアログを潰すために使う。各要素1回・postMessage しない。
+    private static func buildDismissOnlyJS(clickSelectors: [String]) -> String {
+        return "(function(){"
+            + "if(window.__nsDismissObs){try{window.__nsDismissObs.disconnect();}catch(e){}}"
+            + "var CLICK=\(jsStringArrayLiteral(clickSelectors));"
+            + "function dismiss(){for(var i=0;i<CLICK.length;i++){try{var es=document.querySelectorAll(CLICK[i]);for(var j=0;j<es.length;j++){var el=es[j];if(!el.__nsClicked){el.__nsClicked=true;try{el.click();}catch(e){}}}}catch(e){}}}"
+            + "dismiss();"
+            + "window.__nsDismissObs=new MutationObserver(dismiss);"
+            + "window.__nsDismissObs.observe(document.documentElement||document,{childList:true,subtree:true});"
+            + "})()"
+    }
+
+    // headless 取得(初回ロード/ボタンクリック後)の「待ち」を一手に引き受け、待ち後に GetCurrentContent して onContent を呼ぶ。
+    //  ・allowSmartWait=true かつ ready セレクタあり → ready 要素で即進む smart-wait(forceClick も自己クリック・連続対応:②③)。
+    //  ・それ以外で forceClickButton あり → dismiss-only watcher を仕込み、固定待ちの間に障害物だけ消す(③)。
+    //  ・それ以外 → 従来の固定待ち。
+    static func headlessWaitThenContent(client: HeadlessHttpClient, url: URL, withWaitSecond: TimeInterval?, onContent: @escaping (Document?, Error?) -> Void) {
+        let selectors = resolveReadySelectors(url: url)
+        if resolveAllowSmartWait(url: url) && !selectors.isEmpty {
+            let startedAt = Date()
+            let cap: TimeInterval = withWaitSecond ?? 0
+            smartWaitForReady(client: client, selectors: selectors, cap: cap, startedAt: startedAt) { elapsed, found, which in
+                if ProcessInfo.processInfo.environment["NOVELSPEAKER_SMARTWAIT_LOG"] == "1" {
+                    FileHandle.standardError.write(Data("NOVELSPEAKER_SMARTWAIT url=\(url.absoluteString) elapsedMs=\(Int(elapsed * 1000)) found=\(found) which=\(which) cap=\(cap) sel=c\(selectors.contentXPaths.count)/n\(selectors.nodeXPaths.count)/rcss\(selectors.readyCssSelectors.count)/click\(selectors.clickCssSelectors.count)\n".utf8))
+                }
+                client.GetCurrentContent(completionHandler: onContent)
+            }
+            return
+        }
+        if !selectors.clickCssSelectors.isEmpty {
+            client.webView.evaluateJavaScript(buildDismissOnlyJS(clickSelectors: selectors.clickCssSelectors)) { _, _ in }
+        }
+        if let withWaitSecond = withWaitSecond, withWaitSecond > 0.0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + withWaitSecond) {
+                client.GetCurrentContent(completionHandler: onContent)
+            }
+        } else {
+            client.GetCurrentContent(completionHandler: onContent)
         }
     }
 
@@ -868,36 +913,10 @@ class NiftyUtility: NSObject {
             }
             client.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (doc) in
                 func waitProcess() {
-                    // allowSmartWait=true のサイトのみ smart-wait(opt-in)。
-                    // ready 要素(本文/各リンク/各ボタン/forceError の OR)が出たら即進む高速パス。
-                    // 検知できなければ cap(= withWaitSecond = そのサイトの waitSecondInHeadless)まで待ってフォールバック。
-                    // cap は従来の固定待ちと同じ値なので、従来より遅くなることは無い。
-                    let selectors = resolveAllowSmartWait(url: url) ? resolveReadySelectors(url: url) : ReadySelectors(contentXPaths: [], nodeXPaths: [], cssSelectors: [])
-                    if !selectors.isEmpty {
-                        let startedAt = Date()
-                        let cap: TimeInterval = withWaitSecond ?? 0
-                        smartWaitForReady(client: client, selectors: selectors, cap: cap, startedAt: startedAt) { elapsed, found, which in
-                            if ProcessInfo.processInfo.environment["NOVELSPEAKER_SMARTWAIT_LOG"] == "1" {
-                                FileHandle.standardError.write(Data("NOVELSPEAKER_SMARTWAIT url=\(url.absoluteString) elapsedMs=\(Int(elapsed * 1000)) found=\(found) which=\(which) cap=\(cap) sel=c\(selectors.contentXPaths.count)/n\(selectors.nodeXPaths.count)/css\(selectors.cssSelectors.count)\n".utf8))
-                            }
-                            client.GetCurrentContent { (document, err) in
-                                if let document = document { successAction?(document) } else { failedAction?(err) }
-                            }
-                        }
-                        return
-                    }
-                    if let withWaitSecond = withWaitSecond, withWaitSecond > 0.0 {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + withWaitSecond) {
-                            client.GetCurrentContent { (document, err) in
-                                if let document = document {
-                                    successAction?(document)
-                                }else{
-                                    failedAction?(err)
-                                }
-                            }
-                        }
-                    }else{
-                        successAction?(doc)
+                    // 待ち(allowSmartWait なら ready で即進む smart-wait / forceClick は自己クリック / それ以外は固定待ち)を
+                    // 共通ヘルパに委譲する。クリック後の再取得(StoryFetcher.buttonClick)とロジックを共有する。
+                    headlessWaitThenContent(client: client, url: url, withWaitSecond: withWaitSecond) { document, err in
+                        if let document = document { successAction?(document) } else { failedAction?(err) }
                     }
                 }
                 if let injectJavaScript = injectJavaScript {

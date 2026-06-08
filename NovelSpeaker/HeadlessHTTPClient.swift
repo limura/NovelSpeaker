@@ -11,12 +11,25 @@ import WebKit
 import Erik
 import Kanna
 
+// smart-wait の ready 通知(JS→ネイティブ)を受ける専用ハンドラ。
+// HeadlessHttpClient 自体を NSObject 化せずに済むよう、ハンドラを別オブジェクトにして closure で受け渡す。
+// onMessage は1リクエストごとに張り替え、発火/タイムアウト後に nil へ戻す(client を巻き込んだ循環参照を避ける)。
+class HeadlessReadyMessageHandler: NSObject, WKScriptMessageHandler {
+    static let name = "novelSpeakerReady"
+    var onMessage: (([String: Any]) -> Void)?
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == HeadlessReadyMessageHandler.name else { return }
+        if let body = message.body as? [String: Any] { onMessage?(body) }
+    }
+}
+
 class HeadlessHttpClient {
     var webView : WKWebView!
     var erik:Erik!
     var config:WKWebViewConfiguration
     var pageLoadTimeout:TimeInterval = 60*5 // TODO: 後で「正しい値(要定義)」を設定できるようにしたい。StoryFetcher 側にも同じ値が設定されている箇所がある
-    
+    let readyHandler = HeadlessReadyMessageHandler()
+
     //static let shared = HeadlessHttpClient()
 
     init(config:WKWebViewConfiguration? = nil) {
@@ -86,6 +99,9 @@ class HeadlessHttpClient {
     func ReloadWebView(config:WKWebViewConfiguration){
         releaseCurrentWebView()
         self.config = config
+        // smart-wait の ready 通知用ハンドラを登録(冪等: 二重 add は例外になるため一旦 remove)。
+        config.userContentController.removeScriptMessageHandler(forName: HeadlessReadyMessageHandler.name)
+        config.userContentController.add(readyHandler, name: HeadlessReadyMessageHandler.name)
         dispatch_sync_on_main_thread {
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
             self.webView = WKWebView(frame: frame, configuration: config)
@@ -206,7 +222,26 @@ class HeadlessHttpClient {
             }
         }
     }
-    
+
+    // smart-wait: 注入した watcher JS からの ready 通知(postMessage)を1回だけ待つ。
+    // 通常は JS が ready/timeout のどちらかを必ず post してくるので body 付きで完了する。
+    // timeout は「JS が一切 post してこなかった場合」の保険(ハード上限)。発火後は onMessage を必ず nil に戻す。
+    func awaitReadySignal(hardTimeout: TimeInterval, completion: @escaping ([String: Any]?) -> Void) {
+        DispatchQueue.main.async {
+            var finished = false
+            func finish(_ body: [String: Any]?) {
+                if finished { return }
+                finished = true
+                self.readyHandler.onMessage = nil
+                completion(body)
+            }
+            self.readyHandler.onMessage = { body in
+                DispatchQueue.main.async { finish(body) }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + hardTimeout) { finish(nil) }
+        }
+    }
+
     public func LoadAboutPage() {
         DispatchQueue.main.async {
             self.erik.visit(urlString: "about:blank", completionHandler: nil)

@@ -1797,15 +1797,10 @@ class StoryFetcher {
                     return
                 }
                 self.httpClient.GetCurrentCookieString { (cookieString, err) in
-                    let delayTime:TimeInterval
-                    // waitSecondInHeadless が指定されていたらその秒だけ待ちます
-                    if let waitSecondInHeadless = currentState.waitSecondInHeadless {
-                        delayTime = waitSecondInHeadless
-                    }else{
-                        delayTime = -1.0
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + delayTime) {
-                        self.httpClient.GetCurrentContent { (document, error) in
+                    // クリック後の待ちも共通ヘルパに委譲(①)。allowSmartWait なら ready 要素で即進み、
+                    // forceClick は自己クリックで消す。それ以外は従来どおり waitSecondInHeadless の固定待ち。
+                    let clickUrl = self.httpClient.GetCurrentURL() ?? currentState.url
+                    NiftyUtility.headlessWaitThenContent(client: self.httpClient, url: clickUrl, withWaitSecond: currentState.waitSecondInHeadless) { (document, error) in
                             if let err = error {
                                 completionHandler?(nil, err)
                                 return
@@ -1830,12 +1825,11 @@ class StoryFetcher {
                             }) { (_, err) in
                                 completionHandler?(nil, NovelSpeakerUtility.GenerateNSError(msg: err))
                             }
-                        }
                     }
                 }
             }
         }
-        
+
         // 失敗だと判定される文字列が設定されていたら失敗とする
         if let errorMessage = currentState.forceErrorMessage {
             AppInformationLogger.AddLog(message: errorMessage, isForDebug: false)
