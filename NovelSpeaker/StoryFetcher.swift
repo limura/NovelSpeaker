@@ -358,6 +358,10 @@ struct StorySiteInfo : Identifiable {
     //let exampleUrl: String?
     let author: String?
     let isNeedHeadless: Bool
+    // headless 取得時、固定の waitSecondInHeadless を「ready要素が出たら即進む smart-wait」に切り替えてよいか。
+    // 既定 false(=従来どおり必ず waitSecondInHeadless 待つ。レート制限回避目的の wait を壊さないための安全側)。
+    // true のサイトだけ新アプリが描画待ちを短縮する。旧アプリはこの列を知らず常に固定待ち=後方互換。
+    let allowSmartWait: Bool
     let injectStyle:String?
     let nextButton: String?
     let firstPageButton: String?
@@ -406,7 +410,7 @@ struct StorySiteInfo : Identifiable {
         return result
     }
 
-    init(id: String, name: String?, pageElementV2:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?, checkTargets:String? = nil, novelImportEnableSettings:[String] = []) {
+    init(id: String, name: String?, pageElementV2:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?, checkTargets:String? = nil, allowSmartWait:String? = nil, novelImportEnableSettings:[String] = []) {
 
         func pageElementV2ToPageElement(pageElementV2:String) -> String {
             // 複数要素(取り込み対象を選べる)形式は改行区切り。
@@ -457,6 +461,11 @@ struct StorySiteInfo : Identifiable {
             self.isNeedHeadless = true
         }else{
             self.isNeedHeadless = false
+        }
+        if let allowSmartWaitString = allowSmartWait, allowSmartWaitString.count > 0 && !falseValues.contains(allowSmartWaitString) {
+            self.allowSmartWait = true
+        }else{
+            self.allowSmartWait = false
         }
         self.waitSecondInHeadless = waitSecondInHeadless
         self.forceClickButton = emptyToNil(forceClickButton)
@@ -525,6 +534,7 @@ struct StorySiteInfo : Identifiable {
             scrollTo: dict["scrollTo"],
             isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"],
             checkTargets: dict["checkTargets"],
+            allowSmartWait: dict["allowSmartWait"],
             novelImportEnableSettings: importTargets
         )
     }
@@ -546,6 +556,7 @@ struct StorySiteInfo : Identifiable {
         d["tag"] = self.tag
         d["author"] = self.author
         d["isNeedHeadless"] = self.isNeedHeadless ? "true" : "false"
+        d["allowSmartWait"] = self.allowSmartWait ? "true" : "false"
         d["injectStyle"] = self.injectStyle
         d["nextButton"] = self.nextButton
         d["firstPageButton"] = self.firstPageButton
@@ -725,6 +736,7 @@ extension StorySiteInfo: CustomStringConvertible {
         result += "\"\nauthor: \"" + (author ?? "nil")
         result += "\"\ntag: \"" + (tag ?? "nil")
         result += "\"\nisNeedHeadless: " + (isNeedHeadless ? "true" : "false")
+        result += "\nallowSmartWait: " + (allowSmartWait ? "true" : "false")
         result += "\ninjectStyle: \"" + (injectStyle ?? "nil")
         result += "\"\nnextButton: \"" + (nextButton ?? "nil")
         result += "\"\nfirstPageButton: \"" + (firstPageButton ?? "nil")
@@ -761,6 +773,7 @@ extension StorySiteInfo: CustomStringConvertible {
             result["tag"] = AnyCodable(tag)
         }
         result["isNeedHeadless"] = AnyCodable(isNeedHeadless ? "true" : "false")
+        result["allowSmartWait"] = AnyCodable(allowSmartWait ? "true" : "false")
         if let injectStyle = injectStyle {
             result["injectStyle"] = AnyCodable(injectStyle)
         }
@@ -808,6 +821,7 @@ extension StorySiteInfo : Decodable {
         case url
         case author
         case isNeedHeadless
+        case allowSmartWait
         case injectStyle
         case nextButton
         case firstPageButton
@@ -856,6 +870,17 @@ extension StorySiteInfo : Decodable {
             }
         }else{
             isNeedHeadless = false
+        }
+        let allowSmartWaitString = try? values.decode(String.self, forKey: NestedKeys.allowSmartWait)
+        if let allowSmartWaitString = allowSmartWaitString, allowSmartWaitString.count > 0 {
+            switch allowSmartWaitString.lowercased() {
+            case "false", "nil", "0":
+                allowSmartWait = false
+            default:
+                allowSmartWait = true
+            }
+        }else{
+            allowSmartWait = false
         }
         injectStyle = try? values.decode(String.self, forKey: NestedKeys.injectStyle)
         // 空文字列のセレクタは nil 扱い(memberwise init と揃える。理由はそちらのコメント参照)
@@ -1006,7 +1031,8 @@ class StoryHtmlDecoder {
                 forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
                 scrollTo: dict["scrollTo"],
                 isNeedWhitespaceSplitForTag: dict["isNeedWhitespaceSplitForTag"],
-                checkTargets: dict["checkTargets"]
+                checkTargets: dict["checkTargets"],
+                allowSmartWait: dict["allowSmartWait"]
             )
             //print("add StorySiteInfo: \(storySiteInfo)")
             result.append(storySiteInfo)
@@ -2297,7 +2323,7 @@ class LocalSiteInfoStore {
     // ここを定数にすることで復元のたびに同じ in-memory id になる(rows 側 base id は不変=肥大化しない)。
     static let sourceURLString = "local://preferred-siteinfo"
     // CSV のヘッダ列順(makeFromCellDict が読む列)。
-    static let columns = ["id","name","pageElementV2","url","title","subtitle","firstPageLink","nextLink","tag","author","isNeedHeadless","injectStyle","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","resourceUrl","overrideUserAgent","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","checkTargets"]
+    static let columns = ["id","name","pageElementV2","url","title","subtitle","firstPageLink","nextLink","tag","author","isNeedHeadless","injectStyle","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","resourceUrl","overrideUserAgent","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","checkTargets","allowSmartWait"]
 
     private let fileURL: URL
     // テストから保存先ファイルURLを参照するための口(同じファイルを別インスタンスで読み直す検証用)。
@@ -2418,7 +2444,7 @@ class LocalSiteInfoStore {
     // 作者はシート側でアプリ非管理列を先頭に寄せ、この順のアプリ管理列ブロックをその後ろに置き、id 列から貼り付ける運用。
     // → pageElement(数式)は触られず再計算され、memo 等の消失も起きない。最終的なシート列順に合わせてここを調整する。
     // 設計メモ: DESIGN_SiteInfoエディタ.md
-    static let spreadsheetColumnOrder = ["id","name","url","pageElementV2","nextLink","title","subtitle","tag","author","firstPageLink","isNeedHeadless","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","injectStyle","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","overrideUserAgent","checkTargets"]
+    static let spreadsheetColumnOrder = ["id","name","url","pageElementV2","nextLink","title","subtitle","tag","author","firstPageLink","isNeedHeadless","nextButton","firstPageButton","waitSecondInHeadless","forceClickButton","injectStyle","forceErrorMessageAndElement","scrollTo","isNeedWhitespaceSplitForTag","overrideUserAgent","checkTargets","allowSmartWait"]
 
     // アプリ内 id(`<シートid>:<取得元URL>`)から元のシート id を取り出す(最初の `:` より前)。
     // 例: `5:https://docs.google.com/...csv` → `5`。スプレッドシートへ貼り戻す時に二重 suffix で id が伸び続けるのを防ぐ。

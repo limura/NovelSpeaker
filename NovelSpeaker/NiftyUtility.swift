@@ -750,6 +750,104 @@ class NiftyUtility: NSObject {
             client.LoadAboutPage()
         }
     }
+
+    // MARK: - headless「ready」判定(MutationObserver による高速パス)
+    // 固定 waitSecondInHeadless は「速いページでも待つ / 遅いページには足りずフレーク」のトレードオフになる。
+    // そこで「ready 要素が出たら即進む(高速)/ 検知できなければ waitSecondInHeadless だけ待ってフォールバック(=従来と同等)」
+    // にする。cap は各サイトの waitSecondInHeadless そのものなので、従来より遅くなることは無い(検知できた分だけ速くなる)。
+    // ready 条件は DecodeDocument の『このSiteInfoがマッチした』判定(StoryFetcher.swift:1658)に揃える:
+    //   本文(pageElement) OR nextLink OR firstPageLink OR nextButton OR firstPageButton OR forceClickButton OR forceError要素
+    // のいずれか。監視は JS の MutationObserver が行い、結果(出現までの ms と種別)を window.__nsReady に書き、
+    // ネイティブは短間隔でそれを回収する。
+    // 注意: watcher は WKWebView の「ライブDOM」を document.evaluate で見るが、抽出に使う Kanna は Erik の
+    //   GetCurrentContent(やや早いスナップショット)を見るため、両者が食い違う selector のサイトでは watcher が
+    //   検知できず cap までフォールバックする(その場合も従来同等に Kanna が抽出する)。
+    // selector が一つも解決できない(SiteInfo無し等)URL は従来の固定待ちのまま。
+    // 計測ログ(NOVELSPEAKER_SMARTWAIT)は環境変数 NOVELSPEAKER_SMARTWAIT_LOG=1 のときだけ stderr に出す。
+    // 設計メモ: DESIGN_取得状態機械とheadlessReady判定.md
+
+    // ready 監視に使うセレクタ群(本文系=textContent非空を要求 / リンク・forceError=ノード存在 / ボタン=CSS存在)。
+    private struct ReadySelectors {
+        let contentXPaths: [String]   // pageElement(本文)。textContent 非空でOK
+        let nodeXPaths: [String]      // nextLink / firstPageLink / forceError。ノード存在でOK
+        let cssSelectors: [String]    // nextButton / firstPageButton / forceClickButton。querySelector 存在でOK
+        var isEmpty: Bool { contentXPaths.isEmpty && nodeXPaths.isEmpty && cssSelectors.isEmpty }
+    }
+    // この URL にマッチする SiteInfo のうち1つでも allowSmartWait=true なら smart-wait を有効にする。
+    // 既定(フラグ無し)は false = 従来の固定待ち。レート制限回避目的の waitSecondInHeadless を壊さないための opt-in。
+    private static func resolveAllowSmartWait(url: URL) -> Bool {
+        return StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString).contains { $0.allowSmartWait }
+    }
+
+    // URL にマッチする SiteInfo 群から ready セレクタを動的に集める。fallback(//body)は常にテキストを持つので除外。
+    private static func resolveReadySelectors(url: URL) -> ReadySelectors {
+        var content: [String] = []; var node: [String] = []; var css: [String] = []
+        let matched = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
+        for si in matched {
+            for v in si.pageElementDict.values where !v.xpath.isEmpty && v.xpath != "//body" {
+                content.append(v.xpath)
+            }
+            if let v = si.nextLink, !v.isEmpty { node.append(v) }
+            if let v = si.firstPageLink, !v.isEmpty { node.append(v) }
+            if let fe = si.forceErrorMessageAndElement, let colon = fe.firstIndex(of: ":") {
+                let xp = String(fe[fe.index(after: colon)...]); if !xp.isEmpty { node.append(xp) }
+            }
+            if let v = si.nextButton, !v.isEmpty { css.append(v) }
+            if let v = si.firstPageButton, !v.isEmpty { css.append(v) }
+            if let v = si.forceClickButton, !v.isEmpty { css.append(v) }
+        }
+        return ReadySelectors(contentXPaths: Array(Set(content)), nodeXPaths: Array(Set(node)), cssSelectors: Array(Set(css)))
+    }
+
+    private static func jsStringArrayLiteral(_ arr: [String]) -> String {
+        let items = arr.map { "\"" + $0.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"") + "\"" }
+        return "[" + items.joined(separator: ",") + "]"
+    }
+    // ready 監視 JS を組み立てる。MutationObserver で ready を検知し window.__nsReady に {ms, which} を書く。
+    private static func buildReadyWatcherJS(selectors: ReadySelectors) -> String {
+        return "(function(){"
+            + "if(window.__nsReadyInstalled)return;window.__nsReadyInstalled=true;window.__nsReady=null;"
+            + "var CONTENT=\(jsStringArrayLiteral(selectors.contentXPaths));"
+            + "var NODE=\(jsStringArrayLiteral(selectors.nodeXPaths));"
+            + "var CSS=\(jsStringArrayLiteral(selectors.cssSelectors));"
+            + "var t0=Date.now();"
+            + "function xp(s){try{return document.evaluate(s,document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue;}catch(e){return null;}}"
+            + "function chk(){"
+            + "for(var i=0;i<CONTENT.length;i++){var n=xp(CONTENT[i]);if(n&&(n.textContent||'').replace(/\\s+/g,'').length>0)return 'content';}"
+            + "for(var i=0;i<NODE.length;i++){if(xp(NODE[i]))return 'node';}"
+            + "for(var i=0;i<CSS.length;i++){try{if(document.querySelector(CSS[i]))return 'css';}catch(e){}}"
+            + "return null;}"
+            + "function fire(w){if(window.__nsReady)return;window.__nsReady=JSON.stringify({ms:Date.now()-t0,which:w});if(window.__nsObs)window.__nsObs.disconnect();}"
+            + "var w=chk();if(w){fire(w);return;}"
+            + "window.__nsObs=new MutationObserver(function(){var w=chk();if(w)fire(w);});"
+            + "window.__nsObs.observe(document.documentElement||document,{childList:true,subtree:true,characterData:true});"
+            + "})()"
+    }
+    // 監視を仕込み、window.__nsReady が立つ(または cap 経過)まで短間隔で回収する。
+    // フラグの読み取りを「cap 判定より先」に行うので、cap=0(waitSecondInHeadless 未指定)でも
+    // ナビ完了時点で既に ready な要素は1回で拾える(= 従来の即時取得と同等か、わずかに良い)。
+    private static func smartWaitForReady(client: HeadlessHttpClient, selectors: ReadySelectors, cap: TimeInterval, startedAt: Date, completion: @escaping (TimeInterval, Bool, String) -> Void) {
+        client.webView.evaluateJavaScript(buildReadyWatcherJS(selectors: selectors)) { _, _ in
+            func poll() {
+                client.webView.evaluateJavaScript("window.__nsReady") { result, _ in
+                    if let s = result as? String, !s.isEmpty {
+                        var which = ""; var ms = Int(Date().timeIntervalSince(startedAt) * 1000)
+                        if let d = s.data(using: .utf8), let o = (try? JSONSerialization.jsonObject(with: d)) as? [String: Any] {
+                            which = (o["which"] as? String) ?? ""
+                            if let m = o["ms"] as? Int { ms = m } else if let m = o["ms"] as? Double { ms = Int(m) }
+                        }
+                        completion(TimeInterval(ms) / 1000.0, true, which)
+                    } else if Date().timeIntervalSince(startedAt) >= cap {
+                        completion(Date().timeIntervalSince(startedAt), false, "timeout")
+                    } else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { poll() }
+                    }
+                }
+            }
+            poll()
+        }
+    }
+
     static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, withWaitSecond:TimeInterval? = nil, injectJavaScript:String? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
         // TODO: おおよそ関係の無い所で Realm を触る必要があってうぅむ。
         let allowsCellularAccess:Bool = RealmUtil.RealmBlock { (realm) -> Bool in
@@ -770,6 +868,24 @@ class NiftyUtility: NSObject {
             }
             client.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (doc) in
                 func waitProcess() {
+                    // allowSmartWait=true のサイトのみ smart-wait(opt-in)。
+                    // ready 要素(本文/各リンク/各ボタン/forceError の OR)が出たら即進む高速パス。
+                    // 検知できなければ cap(= withWaitSecond = そのサイトの waitSecondInHeadless)まで待ってフォールバック。
+                    // cap は従来の固定待ちと同じ値なので、従来より遅くなることは無い。
+                    let selectors = resolveAllowSmartWait(url: url) ? resolveReadySelectors(url: url) : ReadySelectors(contentXPaths: [], nodeXPaths: [], cssSelectors: [])
+                    if !selectors.isEmpty {
+                        let startedAt = Date()
+                        let cap: TimeInterval = withWaitSecond ?? 0
+                        smartWaitForReady(client: client, selectors: selectors, cap: cap, startedAt: startedAt) { elapsed, found, which in
+                            if ProcessInfo.processInfo.environment["NOVELSPEAKER_SMARTWAIT_LOG"] == "1" {
+                                FileHandle.standardError.write(Data("NOVELSPEAKER_SMARTWAIT url=\(url.absoluteString) elapsedMs=\(Int(elapsed * 1000)) found=\(found) which=\(which) cap=\(cap) sel=c\(selectors.contentXPaths.count)/n\(selectors.nodeXPaths.count)/css\(selectors.cssSelectors.count)\n".utf8))
+                            }
+                            client.GetCurrentContent { (document, err) in
+                                if let document = document { successAction?(document) } else { failedAction?(err) }
+                            }
+                        }
+                        return
+                    }
                     if let withWaitSecond = withWaitSecond, withWaitSecond > 0.0 {
                         DispatchQueue.main.asyncAfter(deadline: .now() + withWaitSecond) {
                             client.GetCurrentContent { (document, err) in

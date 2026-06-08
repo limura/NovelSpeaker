@@ -292,6 +292,7 @@ class SiteInfoEditorViewController: FormViewController {
     private static let boolColumns: [(tag: String, title: String)] = [
         ("isNeedHeadless", "isNeedHeadless"),
         ("isNeedWhitespaceSplitForTag", "isNeedWhitespaceSplitForTag"),
+        ("allowSmartWait", "allowSmartWait"),
     ]
 
     private static let falseValues: Set<String> = ["false", "False", "nil", "0", ""]
