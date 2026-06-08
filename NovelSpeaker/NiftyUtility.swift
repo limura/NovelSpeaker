@@ -827,25 +827,46 @@ class NiftyUtility: NSObject {
             + "for(var i=0;i<NODE.length;i++){if(xp(NODE[i]))return 'node';}"
             + "for(var i=0;i<RCSS.length;i++){try{if(document.querySelector(RCSS[i]))return 'css';}catch(e){}}"
             + "return null;}"
-            + "function tick(){if(done)return;dismiss();var w=chk();if(w){post(w);return;}if(Date.now()>=deadline){post('timeout');}}"
-            + "tick();if(done)return;"
-            + "window.__nsObs=new MutationObserver(tick);"
-            + "window.__nsObs.observe(document.documentElement||document,{childList:true,subtree:true,characterData:true});"
-            + "window.__nsTimer=setInterval(tick,100);"
+            // tick が万一 throw しても deadline 判定(timeout post)には必ず到達させる。
+            + "function tick(){if(done)return;try{dismiss();var w=chk();if(w){post(w);return;}}catch(e){}if(Date.now()>=deadline){post('timeout');}}"
+            + "tick();"
+            // 同期で post 済み(done)でも、監視中でも、設置は成功なので 'ok' を返す。例外時のみ evaluateJavaScript が error を返す。
+            + "if(!done){window.__nsObs=new MutationObserver(tick);window.__nsObs.observe(document.documentElement||document,{childList:true,subtree:true,characterData:true});window.__nsTimer=setInterval(tick,100);}"
+            + "return 'ok';"
             + "})()"
     }
     // 監視を仕込み、JS からの postMessage(ready/timeout)を待つ(②)。JS が deadline を持つので、ネイティブ側は
     // 「JS が一切返してこない場合」の保険として cap+余裕のハード上限だけ持つ。startedAt は計測用。
     private static func smartWaitForReady(client: HeadlessHttpClient, selectors: ReadySelectors, cap: TimeInterval, startedAt: Date, completion: @escaping (TimeInterval, Bool, String) -> Void) {
-        let capMs = Int(max(cap, 0) * 1000)
-        client.webView.evaluateJavaScript(buildReadyWatcherJS(selectors: selectors, capMs: capMs)) { _, _ in
-            client.awaitReadySignal(hardTimeout: max(cap, 0) + 15) { body in
-                if let body = body {
-                    let which = (body["which"] as? String) ?? ""
-                    let ms: Int = (body["ms"] as? Int) ?? Int((body["ms"] as? Double) ?? Date().timeIntervalSince(startedAt) * 1000)
-                    completion(TimeInterval(ms) / 1000.0, which != "timeout", which)
-                } else {
-                    completion(Date().timeIntervalSince(startedAt), false, "hardTimeout")
+        let capSec = max(cap, 0)
+        let capMs = Int(capSec * 1000)
+        // ハード上限 = cap + 余裕。JS が deadline(=cap)で必ず timeout を post するので、これが効くのは
+        // 「JSコンテキスト消失」等の保険のみ。forceClick(連続ダイアログで deadline が伸びうる)は余裕を多めに。
+        let hardBuffer: TimeInterval = selectors.clickCssSelectors.isEmpty ? 5 : 30
+        var settled = false
+        func settle(_ ms: Int, _ found: Bool, _ which: String) {
+            DispatchQueue.main.async {
+                if settled { return }
+                settled = true
+                client.readyHandler.onMessage = nil
+                completion(TimeInterval(ms) / 1000.0, found, which)
+            }
+        }
+        // 受信ハンドラは watcher 注入より「先に」張る(同期 post の取りこぼし防止)。
+        client.readyHandler.onMessage = { body in
+            let which = (body["which"] as? String) ?? ""
+            let ms = (body["ms"] as? Int) ?? Int((body["ms"] as? Double) ?? capSec * 1000)
+            settle(ms, which != "timeout", which)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + capSec + hardBuffer) {
+            settle(Int((capSec + hardBuffer) * 1000), false, "hardTimeout")
+        }
+        client.webView.evaluateJavaScript(buildReadyWatcherJS(selectors: selectors, capMs: capMs)) { result, error in
+            if error != nil || (result as? String) != "ok" {
+                // watcher の設置に失敗(content script 異常等)= postMessage は来ない。
+                // ハード上限(+余裕)を待たず、通常の固定待ち(cap)してフォールバックする。
+                DispatchQueue.main.asyncAfter(deadline: .now() + capSec) {
+                    settle(capMs, false, "installError")
                 }
             }
         }

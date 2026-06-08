@@ -223,24 +223,6 @@ class HeadlessHttpClient {
         }
     }
 
-    // smart-wait: 注入した watcher JS からの ready 通知(postMessage)を1回だけ待つ。
-    // 通常は JS が ready/timeout のどちらかを必ず post してくるので body 付きで完了する。
-    // timeout は「JS が一切 post してこなかった場合」の保険(ハード上限)。発火後は onMessage を必ず nil に戻す。
-    func awaitReadySignal(hardTimeout: TimeInterval, completion: @escaping ([String: Any]?) -> Void) {
-        DispatchQueue.main.async {
-            var finished = false
-            func finish(_ body: [String: Any]?) {
-                if finished { return }
-                finished = true
-                self.readyHandler.onMessage = nil
-                completion(body)
-            }
-            self.readyHandler.onMessage = { body in
-                DispatchQueue.main.async { finish(body) }
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + hardTimeout) { finish(nil) }
-        }
-    }
 
     public func LoadAboutPage() {
         DispatchQueue.main.async {
