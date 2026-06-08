@@ -1072,14 +1072,31 @@
 "SettingsTableViewController_ScrapeInspectButtonTitle" = "今すぐ全サイトを検査する";
 "SettingsTableViewController_ScrapeInspectProgressMessage" = "検査中…\n(しばらくお待ちください)";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.0
 
-- 小説本文の取り込み時に ruby タグの中に rb, rp, rt 以外のHTMLタグが現れるとルビとして認識しない問題を修正
-- 小説の更新確認時に無駄にCPU負荷を上げていた部分を修正
+- 「設定タブ」→「Webサイト毎の取り込み対象を指定する」(取り込み時の本文部分とみなす箇所を選択できる機能)を追加
+- 「設定タブ」→「アプリ内エラーのお知らせ」の仕組みを少し変更
+- 「設定タブ」→「最優先SiteInfoを編集・追加」を追加
+- 小説の本文取得時の挙動を一部変更
+- 「本棚画面」の左上の「検索」で検索できなくなっている小説があった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.12.0
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」→「Webサイト毎の取り込み対象を指定する」(取り込み時の本文部分とみなす箇所を選択できる機能)を追加
+- 「設定タブ」→「アプリ内エラーのお知らせ」の仕組みを少し変更
+- 「設定タブ」→「最優先SiteInfoを編集・追加」を追加
+- 小説の本文取得時の挙動を一部変更
+
+問題の修正
+
+- 「本棚画面」の左上の「検索」で検索できなくなっている小説があった問題を修正
+
+
 Version 2.11.2 (2.11.2)
 
 インタフェース・内部動作の変更

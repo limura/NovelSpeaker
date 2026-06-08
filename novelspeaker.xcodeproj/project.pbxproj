@@ -77,7 +77,6 @@
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
 		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
-		21515170000000000000F002 /* SiteInfoEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21515170000000000000F001 /* SiteInfoEditorViewController.swift */; };
 		214141D01FC0A1C30076DEC2 /* NiftyUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */; };
 		21429D84209F45E3001426F5 /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
 		21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21429D85209F45FD001426F5 /* AudioToolbox.framework */; };
@@ -86,6 +85,7 @@
 		214D96E925D007DB0004F8D9 /* NovelSpeakerIcon-color-1024x1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 214D96E825D007DB0004F8D9 /* NovelSpeakerIcon-color-1024x1024.png */; };
 		214E60D725493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */; };
 		214E60D825493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */; };
+		21515170000000000000F002 /* SiteInfoEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21515170000000000000F001 /* SiteInfoEditorViewController.swift */; };
 		215A668F2AA4C2DF00207383 /* SpeechModCheckViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
@@ -392,12 +392,12 @@
 		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
 		213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitConfigCacheData.m; sourceTree = "<group>"; };
 		213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
-		21515170000000000000F001 /* SiteInfoEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteInfoEditorViewController.swift; sourceTree = "<group>"; };
 		214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiftyUtility.swift; sourceTree = "<group>"; };
 		21429D82209F4516001426F5 /* nc48625.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = nc48625.m4a; sourceTree = "<group>"; };
 		21429D85209F45FD001426F5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		214D96E825D007DB0004F8D9 /* NovelSpeakerIcon-color-1024x1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "NovelSpeakerIcon-color-1024x1024.png"; path = "images/NovelSpeakerIcon-color-1024x1024.png"; sourceTree = "<group>"; };
 		214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPCookieSyncTool.swift; sourceTree = "<group>"; };
+		21515170000000000000F001 /* SiteInfoEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteInfoEditorViewController.swift; sourceTree = "<group>"; };
 		215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModCheckViewController.swift; sourceTree = "<group>"; };
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -2112,7 +2112,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.11.2;
+				CURRENT_PROJECT_VERSION = 2.12.0;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2122,7 +2122,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 IIMURA Takuji. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 2.11.2;
+				MARKETING_VERSION = 2.12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.ShareExtension;
@@ -2151,7 +2151,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2.11.2;
+				CURRENT_PROJECT_VERSION = 2.12.0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2161,7 +2161,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 IIMURA Takuji. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 2.11.2;
+				MARKETING_VERSION = 2.12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.ShareExtension;
@@ -2286,7 +2286,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.11.2;
+				CURRENT_PROJECT_VERSION = 2.12.0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2300,7 +2300,7 @@
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.11.2;
+				MARKETING_VERSION = 2.12.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -Xfrontend -warn-long-expression-type-checking=100 -Xfrontend -warn-long-function-bodies=100";
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2324,7 +2324,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.11.2;
+				CURRENT_PROJECT_VERSION = 2.12.0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2338,7 +2338,7 @@
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.11.2;
+				MARKETING_VERSION = 2.12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

@@ -4378,3 +4378,64 @@ Changes in interface/internal operation
 Fixing the problem
 
 - Fixed an issue that unnecessarily increased CPU load when checking for novel updates.
+
+
+
+# Version 2.12.0
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」→「Webサイト毎の取り込み対象を指定する」(取り込み時の本文部分とみなす箇所を選択できる機能)を追加
+- 「設定タブ」→「アプリ内エラーのお知らせ」の仕組みを少し変更
+- 「設定タブ」→「最優先SiteInfoを編集・追加」を追加
+- 小説の本文取得時の挙動を一部変更
+
+問題の修正
+
+- 「本棚画面」の左上の「検索」で検索できなくなっている小説があった問題を修正
+
+以下に詳しく述べます
+
+- 「設定タブ」→「Webサイト毎の取り込み対象を指定する」(取り込み時の本文部分とみなす箇所を選択できる機能)を追加
+
+こちらの機能は小説の本文として取り込む対象を「Webサイト様、または小説」毎に選択できるようにする機能になります。
+小説毎の設定については、小説の詳細ページから「この小説の取込対象を指定する」から選択してください。
+なお、この機能は小説の取込設定(SiteInfo)で複数の選択対象が設定されているWebサイト様限定の機能になります。
+この文章を書いている段階では、小説家になろう様、pixiv小説様、ハーメルン様の3つWebサイト様についての設定が入っている状態です。
+また、この機能が導入されたことにより、標準設定では全ての対象を取り込むようになります。一部のWebサイト様では取り込み対象が広がっているかと思われます。必要に応じて取込設定を変更してください。
+
+- 「設定タブ」→「アプリ内エラーのお知らせ」の仕組みを少し変更
+
+今まではテキストが表示されるダイアログが開くだけでしたが、これからは場合によってはボタンなどが表示されるページに変わります。
+一つ前で紹介しましたWebサイト様毎の取込設定が追加されるなどした時には小説の取込設定としてはその新しく追加された項目が選択状態になるのですが、これをアプリ内エラーのお知らせで確認した時に、その取込設定のページが開けるようなボタンが追加で表示できるようにした、というものです。
+
+- 「設定タブ」→「最優先SiteInfoを編集・追加」を追加
+
+こちらはSiteInfoの仕組みがわかっている人(おそらくこれを書いている私だけかな……)向けの設定項目になります。
+SiteInfoの編集をした後に ことせかい の取り込みの仕組みそのものを使っての動作チェックなどができるようになっています。
+SiteInfoの書き方がわかる方などはご利用ください。
+
+- 小説の本文取得時の挙動を一部変更
+
+小説の本文取得時に、一部のWebサイト様での取り込み時の待ち時間が減るような仕組みを入れました。
+
+- 「本棚画面」の左上の「検索」で検索できなくなっている小説があった問題を修正
+
+この問題は、NFD形式(ひらがな や カタカナ の濁点や半濁点のついたものについて、単一の文字としてではなく濁点や半濁点のついていない文字と濁点や半濁点のみの2文字の合字とする方式)で取り込まれてしまった小説名(や著者名)となっている小説のデータがあった場合、それが検索できないという問題でした。
+Version 2.12.0 の初回起動時に内部データの更新をしてNFD形式のタイトルや著者名についてNFC正規化を施すなどをすることで、問題の解消を狙います。
+
+以上となります。
+
+
+# Version 2.12.0
+
+Changes in interface/internal operation
+
+- Added "Specify the portion of each website to be included." (a function that allows you to select the portion to be considered as the main text during import) to the "Settings tab".
+- Slightly modified the mechanism of "Notification of in-app error" in the "Settings tab".
+- Added "Edit / add priority SiteInfo" to the "Settings tab".
+- Partially changed the behavior when retrieving the main text of novels.
+
+Fixing the problem
+
+- Fixed an issue where some novels could not be searched using the "Search" button in the upper left corner of the "Bookshelf screen".

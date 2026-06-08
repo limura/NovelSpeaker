@@ -1083,14 +1083,32 @@
 "SettingsTableViewController_ScrapeInspectButtonTitle" = "Inspect all sites now";
 "SettingsTableViewController_ScrapeInspectProgressMessage" = "Inspecting…\n(Please wait a moment)";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.11.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.0
 
-- Fixed an issue where HTML tags other than rb, rp, and rt were not recognized as ruby ​​text when importing novel text.
-- Fixed an issue that unnecessarily increased CPU load when checking for novel updates.
+- Added \"Specify the portion of each website to be included.\" (a function that allows you to select the portion to be considered as the main text during import) to the \"Settings tab\".
+- Slightly modified the mechanism of \"Notification of in-app error\" in the \"Settings tab\".
+- Added \"Edit / add priority SiteInfo\" to the \"Settings tab\".
+- Partially changed the behavior when retrieving the main text of novels.
+- Fixed an issue where some novels could not be searched using the \"Search\" button in the upper left corner of the \"Bookshelf screen\".
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.12.0
+
+Changes in interface/internal operation
+
+- Added \"Specify the portion of each website to be included.\" (a function that allows you to select the portion to be considered as the main text during import) to the \"Settings tab\".
+- Slightly modified the mechanism of \"Notification of in-app error\" in the \"Settings tab\".
+- Added \"Edit / add priority SiteInfo\" to the \"Settings tab\".
+- Partially changed the behavior when retrieving the main text of novels.
+
+Fixing the problem
+
+- Fixed an issue where some novels could not be searched using the \"Search\" button in the upper left corner of the \"Bookshelf screen\".
+
+
+
 Version 2.11.2
 
 Changes in interface/internal operation
