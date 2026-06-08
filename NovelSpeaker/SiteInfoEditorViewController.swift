@@ -254,6 +254,13 @@ class SiteInfoEditorEntryViewController: UITableViewController, UISearchResultsU
         localRows.remove(at: indexPath.row)
         localRowsAll.removeAll { ($0["url"] ?? "") == urlPattern }
         tableView.deleteRows(at: [indexPath], with: .automatic)
+        // 最優先SiteInfoが全て無くなったら編集状態は不要なので自動解除する。
+        // (空だと削除コントロールも出ず、編集中のままだと標準データの行を選べないことに気づきにくいため)
+        if localRows.isEmpty && isEditing {
+            DispatchQueue.main.async {
+                self.setEditing(false, animated: true)
+            }
+        }
     }
 }
 
