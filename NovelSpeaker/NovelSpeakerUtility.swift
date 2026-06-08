@@ -1503,6 +1503,32 @@ class NovelSpeakerUtility: NSObject {
             }
         }
     }
+    static func RestoreNovelImportSetting_V_2_0_0(novelImportSettingArray:NSArray, progressUpdate:@escaping(String)->Void) {
+        RealmUtil.Write { (realm) in
+            for dic in novelImportSettingArray {
+                guard let dic = dic as? NSDictionary,
+                    let scopeTypeRaw = (dic.object(forKey: "scopeType") as? NSNumber)?.intValue,
+                    let scopeType = RealmNovelImportSetting.ScopeType(rawValue: scopeTypeRaw),
+                    let siteInfoId = dic.object(forKey: "siteInfoId") as? String, !siteInfoId.isEmpty else { continue }
+                let novelID = dic.object(forKey: "novelID") as? String ?? ""
+                // novel スコープなのに novelID が無いものは識別子が作れないので捨てる。
+                if scopeType == .novel && novelID.isEmpty { continue }
+                let effectiveNovelID:String? = scopeType == .novel ? novelID : nil
+                let setting = RealmNovelImportSetting.Create(scopeType: scopeType, siteInfoId: siteInfoId, novelID: effectiveNovelID)
+                if let createdDateString = dic.object(forKey: "createdDate") as? String,
+                    let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
+                    setting.createdDate = createdDate
+                }
+                if let targets = dic.object(forKey: "targets") as? NSArray {
+                    for t in targets { if let t = t as? String { setting.targets.append(t) } }
+                }
+                if let seenTargets = dic.object(forKey: "seenTargets") as? NSArray {
+                    for t in seenTargets { if let t = t as? String { setting.seenTargets.append(t) } }
+                }
+                realm.add(setting, update: .modified)
+            }
+        }
+    }
 
     static func RestoreGlobalState_V_2_0_0(dic:NSDictionary, progressUpdate:@escaping(String)->Void) {
         RealmUtil.RealmBlock { (realm) -> Void in
@@ -1938,6 +1964,9 @@ class NovelSpeakerUtility: NSObject {
         if let bookmarks = toplevelDictionary.object(forKey: "bookmark") as? NSArray {
             RestoreBookmark_V_2_0_0(bookmarkArray: bookmarks, progressUpdate: progressUpdate)
         }
+        if let novel_import_setting = toplevelDictionary.object(forKey: "novel_import_setting") as? NSArray {
+            RestoreNovelImportSetting_V_2_0_0(novelImportSettingArray: novel_import_setting, progressUpdate: progressUpdate)
+        }
         // misc_settings には defaultDisplaySettingID,defaultSpeakerID が入っているので
         // 先に取り出しておかないと良くないことがおきます(´・ω・`)
         if let globalStateDic = toplevelDictionary.object(forKey: "misc_settings") as? NSDictionary {
@@ -1971,6 +2000,9 @@ class NovelSpeakerUtility: NSObject {
         }
         if let bookmarks = toplevelDictionary.object(forKey: "bookmark") as? NSArray {
             RestoreBookmark_V_2_0_0(bookmarkArray: bookmarks, progressUpdate: progressUpdate)
+        }
+        if let novel_import_setting = toplevelDictionary.object(forKey: "novel_import_setting") as? NSArray {
+            RestoreNovelImportSetting_V_2_0_0(novelImportSettingArray: novel_import_setting, progressUpdate: progressUpdate)
         }
         // misc_settings には defaultDisplaySettingID,defaultSpeakerID が入っているので
         // 先に取り出しておかないと良くないことがおきます(´・ω・`)
@@ -2375,7 +2407,27 @@ class NovelSpeakerUtility: NSObject {
             return result
         }
     }
-    
+    // 取り込み対象選択(「Webサイト毎の取り込み対象を指定する」/「この小説の取り込み対象を指定する」)の設定。
+    // id は scopeType/siteInfoId/novelID から復元時に再生成するので持ち出さない。
+    // (往復の単体テストから呼べるよう internal にしている。他の Create...Dictionary 系は fileprivate)
+    static func CreateBackupDataDictionary_NovelImportSetting() -> [[String:Any]] {
+        return RealmUtil.RealmBlock { (realm) -> [[String:Any]] in
+            var result:[[String:Any]] = []
+            guard let targetArray = RealmNovelImportSetting.GetAllObjectsWith(realm: realm) else { return result }
+            for setting in targetArray {
+                result.append([
+                    "scopeType": setting.scopeType.rawValue,
+                    "siteInfoId": setting.siteInfoId,
+                    "novelID": setting.novelID,
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate),
+                    "targets": Array(setting.targets),
+                    "seenTargets": Array(setting.seenTargets),
+                ])
+            }
+            return result
+        }
+    }
+
     static func CreateBackupData(withAllStoryContent:Bool, progress:((_ description:String)->Void)?) -> URL? {
         if withAllStoryContent {
             let result = RealmUtil.RealmBlock { (realm) -> URL? in
@@ -2442,6 +2494,7 @@ class NovelSpeakerUtility: NSObject {
                 "display_setting": CreateBackupDataDictionary_DisplaySetting(),
                 "novel_tag": CreateBackupDataDictionary_NovelTag(),
                 "bookmark": CreateBackupDataDictionary_Bookmark(),
+                "novel_import_setting": CreateBackupDataDictionary_NovelImportSetting(),
             ]
         }
         

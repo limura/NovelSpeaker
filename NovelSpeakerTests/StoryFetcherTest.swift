@@ -157,6 +157,75 @@ class StoryFetcherTest: XCTestCase {
         })
     }
 
+    // 取り込み対象選択(RealmNovelImportSetting)がバックアップ→復元で往復することを確認する。
+    // export(CreateBackupDataDictionary_NovelImportSetting)→ JSONSerialization で実ファイルと同じ経路を通す
+    // → realm から消す(機種変・初期状態を模す)→ restore(RestoreNovelImportSetting_V_2_0_0)で復元。
+    func testNovelImportSettingBackupRestoreRoundTrip() throws {
+        let novelID = "\(novelImportSettingTestSiteNumber):https://example.com/novel/1/"
+        // site スコープと novel スコープの2件を作る(siteInfoId は共通=setUp/tearDown が掃除してくれる)。
+        RealmUtil.Write { realm in
+            let site = RealmNovelImportSetting.Create(scopeType: .site, siteInfoId: novelImportSettingTestSiteID, novelID: nil)
+            site.targets.append(objectsIn: ["body"])
+            site.seenTargets.append(objectsIn: ["body", "afterword"])
+            realm.add(site, update: .modified)
+            let novel = RealmNovelImportSetting.Create(scopeType: .novel, siteInfoId: novelImportSettingTestSiteID, novelID: novelID)
+            novel.targets.append(objectsIn: ["foreword", "body"])
+            novel.seenTargets.append(objectsIn: ["foreword", "body"])
+            realm.add(novel, update: .modified)
+        }
+
+        // export → 実バックアップと同じく JSONSerialization を通す(Int→NSNumber 等の bridging も検証する)。
+        let exported = NovelSpeakerUtility.CreateBackupDataDictionary_NovelImportSetting()
+            .filter { ($0["siteInfoId"] as? String) == novelImportSettingTestSiteID } // 他テスト残骸を除外
+        XCTAssertEqual(exported.count, 2)
+        let jsonData = try JSONSerialization.data(withJSONObject: ["novel_import_setting": exported], options: [])
+
+        // 復元前に realm から消す(初期状態を模す)。
+        RealmUtil.Write { realm in
+            for setting in realm.objects(RealmNovelImportSetting.self).filter("siteInfoId = %@", novelImportSettingTestSiteID) {
+                setting.delete(realm: realm)
+            }
+        }
+        try RealmUtil.RealmBlock { realm in
+            XCTAssertNil(RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: .site, siteInfoId: novelImportSettingTestSiteID, novelID: nil))
+        }
+
+        // restore。
+        let toplevel = try XCTUnwrap(try JSONSerialization.jsonObject(with: jsonData) as? NSDictionary)
+        let array = try XCTUnwrap(toplevel.object(forKey: "novel_import_setting") as? NSArray)
+        NovelSpeakerUtility.RestoreNovelImportSetting_V_2_0_0(novelImportSettingArray: array, progressUpdate: { _ in })
+
+        try RealmUtil.RealmBlock { realm in
+            let site = try XCTUnwrap(RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: .site, siteInfoId: novelImportSettingTestSiteID, novelID: nil))
+            XCTAssertEqual(site.scopeType, .site)
+            XCTAssertEqual(Array(site.targets), ["body"])
+            XCTAssertEqual(Set(site.seenTargets), ["body", "afterword"])
+            XCTAssertEqual(site.id, "site:\(novelImportSettingTestSiteID)") // id は復元時に再生成される
+
+            let novel = try XCTUnwrap(RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: .novel, siteInfoId: novelImportSettingTestSiteID, novelID: novelID))
+            XCTAssertEqual(novel.scopeType, .novel)
+            XCTAssertEqual(novel.novelID, novelID)
+            XCTAssertEqual(Set(novel.targets), ["foreword", "body"])
+        }
+    }
+
+    // 壊れた行(siteInfoId 空 / novel スコープなのに novelID 空)は復元時に捨てられることを確認する。
+    func testNovelImportSettingRestoreSkipsBrokenRows() throws {
+        let brokenArray:NSArray = [
+            // siteInfoId が空 → 識別子が作れないので捨てる
+            ["scopeType": RealmNovelImportSetting.ScopeType.site.rawValue, "siteInfoId": "", "novelID": "", "targets": ["body"], "seenTargets": ["body"]],
+            // novel スコープなのに novelID が空 → 捨てる
+            ["scopeType": RealmNovelImportSetting.ScopeType.novel.rawValue, "siteInfoId": novelImportSettingTestSiteID, "novelID": "", "targets": ["body"], "seenTargets": ["body"]],
+        ]
+        NovelSpeakerUtility.RestoreNovelImportSetting_V_2_0_0(novelImportSettingArray: brokenArray, progressUpdate: { _ in })
+
+        try RealmUtil.RealmBlock { realm in
+            // siteInfoId が空のものも、novelID が空の novel スコープのものも、1件も増えていない。
+            XCTAssertEqual(realm.objects(RealmNovelImportSetting.self).filter("siteInfoId = %@", novelImportSettingTestSiteID).count, 0)
+            XCTAssertEqual(realm.objects(RealmNovelImportSetting.self).filter("siteInfoId = %@", "").count, 0)
+        }
+    }
+
     // MARK: - SiteInfo エディタ用: makeFromCellDict / 原文保持
     // 設計メモ: DESIGN_SiteInfoエディタ.md
 
