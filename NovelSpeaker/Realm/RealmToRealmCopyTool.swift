@@ -263,6 +263,28 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
+    static func CopyNovelImportSetting(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmNovelImportSetting.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_NovelImportSetting", comment: "取り込み設定を移行中") + " (\(index)/\(maxCount))")
+            to.beginWrite()
+            let newObj = RealmNovelImportSetting()
+            newObj.id = obj.id
+            newObj.m_scopeType = obj.m_scopeType
+            newObj.siteInfoId = obj.siteInfoId
+            newObj.novelID = obj.novelID
+            newObj.isDeleted = obj.isDeleted
+            newObj.createdDate = obj.createdDate
+            newObj.targets.removeAll()
+            newObj.targets.append(objectsIn: obj.targets)
+            newObj.seenTargets.removeAll()
+            newObj.seenTargets.append(objectsIn: obj.seenTargets)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
+        }
+    }
+
     static func DoCopy(from:Realm, to:Realm, progress:(String)->Void) throws {
         try CopySpeechModSetting(from: from, to: to, progress: progress)
         try CopySpeechWaitConfig(from: from, to: to, progress: progress)
@@ -272,6 +294,7 @@ class RealmToRealmCopyTool: NSObject {
         try CopyDisplaySetting(from: from, to: to, progress: progress)
         try CopyNovelTag(from: from, to: to, progress: progress)
         try CopyBookmark(from: from, to: to, progress: progress)
+        try CopyNovelImportSetting(from: from, to: to, progress: progress)
         try CopyNovels(from: from, to: to, progress: progress)
         try CopyStorys(from: from, to: to, progress: progress)
     }

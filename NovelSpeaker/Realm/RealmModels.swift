@@ -383,6 +383,7 @@ final class MemoryTraceLogger {
             SyncObject(realmConfiguration: realmConfiguration, type: RealmDisplaySetting.self),
             SyncObject(realmConfiguration: realmConfiguration, type: RealmNovelTag.self),
             SyncObject(realmConfiguration: realmConfiguration, type: RealmBookmark.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmNovelImportSetting.self),
             ], databaseScope: .private, container: container)
     }
 
@@ -455,6 +456,7 @@ final class MemoryTraceLogger {
             RealmDisplaySetting.self,
             RealmNovelTag.self,
             RealmBookmark.self,
+            RealmNovelImportSetting.self,
         ]
         var count = 0
         realm.refresh()
