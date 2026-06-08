@@ -353,6 +353,10 @@ class SiteInfoEditorViewController: FormViewController {
             $0.placeholder = NSLocalizedString("SiteInfoEditor_TestURL_Placeholder", comment: "1ページだけ取得して取得値を確認(空なら checkTargets 全件)")
             $0.cell.textField.autocorrectionType = .no
             $0.cell.textField.autocapitalizationType = .none
+            // XPath/URL で ' や - がスマート変換されると壊れるので無効化(Mac Catalyst のスマート引用符対策)。
+            $0.cell.textField.smartQuotesType = .no
+            $0.cell.textField.smartDashesType = .no
+            $0.cell.textField.smartInsertDeleteType = .no
             $0.cell.textLabel?.numberOfLines = 0
             $0.value = testURLString
         }.onChange({ [weak self] row in
@@ -388,6 +392,10 @@ class SiteInfoEditorViewController: FormViewController {
                 $0.title = col.title
                 $0.cell.textField.autocorrectionType = .no
                 $0.cell.textField.autocapitalizationType = .none
+                // XPath/URL/正規表現で ' や - がスマート変換されると壊れるので無効化(Mac Catalyst のスマート引用符対策)。
+                $0.cell.textField.smartQuotesType = .no
+                $0.cell.textField.smartDashesType = .no
+                $0.cell.textField.smartInsertDeleteType = .no
                 $0.value = cells[col.tag]
             }.onChange({ [weak self] row in
                 self?.cells[col.tag] = row.value
@@ -412,6 +420,10 @@ class SiteInfoEditorViewController: FormViewController {
                 $0.textAreaHeight = .dynamic(initialTextViewHeight: 90)
                 $0.cell.textView.autocorrectionType = .no
                 $0.cell.textView.autocapitalizationType = .none
+                // XPath/正規表現で ' や - がスマート変換されると壊れるので無効化(Mac Catalyst のスマート引用符対策)。
+                $0.cell.textView.smartQuotesType = .no
+                $0.cell.textView.smartDashesType = .no
+                $0.cell.textView.smartInsertDeleteType = .no
                 $0.value = cells[col.tag]
             }.onChange({ [weak self] row in
                 self?.cells[col.tag] = row.value
