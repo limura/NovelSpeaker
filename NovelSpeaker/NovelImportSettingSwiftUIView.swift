@@ -102,7 +102,21 @@ struct NovelImportSettingTargetSelectionView: View {
         if let managedSetting = setting {
             self.setting = managedSetting
         } else {
+            // 親(body)は isDeleted=false のものだけを探して、無ければ setting=nil で渡してくる。
+            // しかし同じ主キーのレコードが Realm に残っていることがある:
+            //   ・ソフト削除済み(isDeleted=true。CloudKit トゥームストーンとして主キーを占有し続ける)
+            //   ・SwiftUI の init が複数回走り、@ObservedResults 反映前に再生成された分
+            //   ・CloudKit 同期で降ってきた同一主キー
+            // ここで素の realm.add()(insert)すると主キー重複でクラッシュする。
+            // かといって update:.modified は既存の選択(targets)を初期値で上書きして壊すので使わない。
+            // 「あれば再利用、無ければ作る」(get-or-create)にする。
+            let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: scopeType, siteInfoId: site.id, novelID: novelID)
             let initialSetting = RealmUtil.WriteReturn { realm -> RealmNovelImportSetting in
+                if let existing = realm.object(ofType: RealmNovelImportSetting.self, forPrimaryKey: settingId) {
+                    // 親が「無い扱い」で来た経路なので、ソフト削除されていたら復活させる(選択内容は壊さない)。
+                    if existing.isDeleted { existing.isDeleted = false }
+                    return existing
+                }
                 let initialSetting = RealmNovelImportSetting.Create(scopeType: scopeType, siteInfoId: site.id, novelID: novelID)
                 initialSetting.targets.append(objectsIn: site.pageElementDict.keys.sorted())
                 initialSetting.seenTargets.append(objectsIn: site.pageElementDict.keys.sorted())
@@ -195,7 +209,10 @@ struct NovelImportSettingTargetSelectionView: View {
                         StoryHtmlDecoder.shared.updateNovelImportEnableSettings(id: site.id, targetKeys: [])
                     }
                 }else{
-                    realm.add(setting)
+                    // 未管理(setting.realm==nil)の新規を保存する経路。素の add(insert) だと
+                    // 同一主キーのレコード(ソフト削除済み/同期分)が居るとクラッシュするため upsert にする。
+                    // setting はこのPKに対するユーザ自身の編集対象なので .modified で上書きして問題ない。
+                    realm.add(setting, update: .modified)
                     if scopeType == .site {
                         StoryHtmlDecoder.shared.updateNovelImportEnableSettings(id: site.id, targetKeys: Array(setting.targets))
                     }
