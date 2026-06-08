@@ -35,10 +35,12 @@ class SiteInfoEditorEntryViewController: UITableViewController, UISearchResultsU
     private var standardDateText: String? = nil
     private let searchController = UISearchController(searchResultsController: nil)
     private let cellID = "SiteInfoEntryCell"
-    // section 0=操作(Export 等。ナビバーが狭い iOS26 対策で画面内に置く)/ 1=最優先SiteInfo / 2=標準データ
-    private let actionSection = 0
-    private let localSection = 1
-    private let standardSection = 2
+    // section 0=注意書き / 1=操作(Export 等。ナビバーが狭い iOS26 対策で画面内に置く)/ 2=最優先SiteInfo / 3=標準データ
+    private let warningSection = 0
+    private let actionSection = 1
+    private let localSection = 2
+    private let standardSection = 3
+    private let warningCellID = "SiteInfoWarningCell"
 
     init() { super.init(style: .insetGrouped) } // grouped でセクションの区切りを目立たせる
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -47,6 +49,7 @@ class SiteInfoEditorEntryViewController: UITableViewController, UISearchResultsU
         super.viewDidLoad()
         self.title = NSLocalizedString("SiteInfoEditor_Title", comment: "最優先SiteInfoの編集・追加")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: warningCellID)
         // セクション見出しに説明文(複数行)を入れるので、見出しを内容に合わせて自動高さにする。
         tableView.estimatedSectionHeaderHeight = 44
         tableView.sectionHeaderHeight = UITableView.automaticDimension
@@ -128,10 +131,11 @@ class SiteInfoEditorEntryViewController: UITableViewController, UISearchResultsU
 
     // MARK: テーブル
 
-    override func numberOfSections(in tableView: UITableView) -> Int { return 3 }
+    override func numberOfSections(in tableView: UITableView) -> Int { return 4 }
 
     // 説明文は「リスト末尾だと最優先SiteInfoが増えた時に画面外へ追い出される」ため、見出し(タイトル直下)に入れる。
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == warningSection { return nil }
         if section == actionSection { return NSLocalizedString("SiteInfoEditor_ActionSection", comment: "操作") }
         if section == localSection {
             let desc = localRows.isEmpty
@@ -150,11 +154,24 @@ class SiteInfoEditorEntryViewController: UITableViewController, UISearchResultsU
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == warningSection { return 1 }
         if section == actionSection { return 1 }
         return section == localSection ? localRows.count : standardCells.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.section == warningSection {
+            // 一番上の目立つ位置に「下手に書き換えると動かなくなる」注意書きを出す(誤編集してサポートに来るのを防ぐ目的)。
+            let warningCell = tableView.dequeueReusableCell(withIdentifier: warningCellID, for: indexPath)
+            var config = warningCell.defaultContentConfiguration()
+            config.text = NSLocalizedString("SiteInfoEditor_TopWarning", comment: "注意: ここにある設定は下手に書き換えると ことせかい が正常に動作しなくなる可能性があります。書き換えを行う場合は内容を理解した上で行ってください。\n問題が起こった場合は「最優先SiteInfo」に追加された行を「編集」ボタンから全て削除することで標準の動作に戻せます。")
+            config.textProperties.color = .systemOrange
+            config.textProperties.numberOfLines = 0
+            warningCell.contentConfiguration = config
+            warningCell.selectionStyle = .none
+            warningCell.accessibilityLabel = config.text
+            return warningCell
+        }
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
         if indexPath.section == actionSection {
             var config = cell.defaultContentConfiguration()
@@ -181,6 +198,7 @@ class SiteInfoEditorEntryViewController: UITableViewController, UISearchResultsU
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        if indexPath.section == warningSection { return }
         if indexPath.section == actionSection {
             exportCSV(from: tableView.cellForRow(at: indexPath))
             return

@@ -986,6 +986,7 @@
 
 /* SiteInfo エディタ(最優先SiteInfo) */
 "SiteInfoEditor_Title" = "最優先SiteInfoの編集・追加";
+"SiteInfoEditor_TopWarning" = "注意: ここにある設定は下手に書き換えると ことせかい が正常に動作しなくなる可能性があります。書き換えを行う場合は内容を理解した上で行ってください。\n問題が起こった場合は「最優先SiteInfo」に追加された行を「編集」ボタンから全て削除することで標準の動作に戻せます。";
 "SiteInfoEditor_New" = "新規作成";
 "SiteInfoEditor_SearchPlaceholder" = "サイト名・url で絞り込み";
 "SiteInfoEditor_ActionSection" = "操作";

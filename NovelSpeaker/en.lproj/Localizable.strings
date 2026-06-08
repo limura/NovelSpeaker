@@ -997,6 +997,7 @@
 
 /* SiteInfo editor (priority SiteInfo) */
 "SiteInfoEditor_Title" = "Edit / Add Priority SiteInfo";
+"SiteInfoEditor_TopWarning" = "Caution: Editing these settings carelessly may cause NovelSpeaker to stop working correctly. Only change them if you understand what they do.\nIf something goes wrong, you can restore the standard behavior by deleting all rows added under \"Priority SiteInfo\" using the \"Edit\" button.";
 "SiteInfoEditor_New" = "New";
 "SiteInfoEditor_SearchPlaceholder" = "Filter by site name or url";
 "SiteInfoEditor_ActionSection" = "Actions";
