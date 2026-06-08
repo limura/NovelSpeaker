@@ -92,6 +92,15 @@ final class AppLaunchCoordinator: NSObject {
             return true
         }
 
+        // モードD(キャッシュ整理): SiteInfo のキャッシュ(ファイルキャッシュ + URLCacheのHTTP応答)を
+        //   アプリ内の正規ルート(StoryHtmlDecoder.ClearSiteInfo)でクリアする。シェルから cache ファイルを直接
+        //   rm すると URLCache が中途半端になりがちなので、こちらで安全に消す。
+        //   NovelSpeaker --clear-siteinfo-cache
+        if args.contains("--clear-siteinfo-cache") {
+            runClearSiteInfoCache()
+            return true
+        }
+
         // モードB(既存): 登録済み checkTargets を全件検査。
         guard args.contains("--scrape-inspect") || env["NOVELSPEAKER_SCRAPE_INSPECT"] == "1" else {
             return false
@@ -116,6 +125,17 @@ final class AppLaunchCoordinator: NSObject {
             exit(hasProblem ? 1 : 0)
         }
         return true
+    }
+
+    // --clear-siteinfo-cache の本体。アプリ内の正規ルート(StoryHtmlDecoder.ClearSiteInfo)で
+    // SiteInfo のファイルキャッシュと URLCache のHTTP応答キャッシュをまとめてクリアする。
+    // 削除は内部で非同期(GetNovelSpeakerRemoteConfig コールバック)に行われるので、少し待ってから exit する。
+    private static func runClearSiteInfoCache() {
+        StoryHtmlDecoder.shared.ClearSiteInfo()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            FileHandle.standardOutput.write(Data("NOVELSPEAKER_SITEINFO_CACHE_CLEARED\n".utf8))
+            exit(0)
+        }
     }
 
     // --scrape-inspect-url の本体。SiteInfo をロードしてから URL を逐次取得し、結果を JSON 行で出力する。
