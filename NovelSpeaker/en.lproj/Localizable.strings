@@ -275,8 +275,6 @@
 "RemoteDataURLSettingViewController_Information" = "Note: If you rewrite the settings here poorly, NovelSpeaker may not work properly. Make sure you understand the contents before rewriting.\nThe standard settings are all \"empty (nothing is written)\", so if a problem occurs, you can return to the standard settings by deleting the contents of all items.";
 "RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSection_Title" = "SiteInfo for NovelSpeaker";
 "RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSampleButton" = "Open the URL of the standard setting data";
-"RemoteDataURLSettingViewController_FallbackSiteInfoSection_Title" = "fallback SiteInfo";
-"RemoteDataURLSettingViewController_FallbackSiteInfoSampleButton" = "Open the URL of the standard setting data";
 "RemoteDataURLSettingViewController_SpeechModSection_Title" = "Standard replacement settings";
 "RemoteDataURLSettingViewController_SpeechModSampleButton" = "Open the URL of the standard setting data";
 "RemoteDataURLSettingViewController_RegexpSpeechModSection_Title" = "Standard replacement settings (regular expression)";

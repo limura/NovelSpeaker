@@ -272,8 +272,6 @@
 "RemoteDataURLSettingViewController_Information" = "注意: ここにある設定は下手に書き換えると ことせかい が正常に動作しなくなる可能性があります。書き換えを行う場合は内容を理解した上で行ってください。\nなお、標準設定は全て「空(なにも書かれていない)」状態ですので問題が起こった場合には全ての項目の内容を消すことで標準設定に戻すことができます。";
 "RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSection_Title" = "ことせかい用SiteInfo";
 "RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSampleButton" = "標準設定データのURLを開く";
-"RemoteDataURLSettingViewController_FallbackSiteInfoSection_Title" = "次点のSiteInfo";
-"RemoteDataURLSettingViewController_FallbackSiteInfoSampleButton" = "標準設定データのURLを開く";
 "RemoteDataURLSettingViewController_SpeechModSection_Title" = "標準の読み替え設定";
 "RemoteDataURLSettingViewController_SpeechModSampleButton" = "標準設定データのURLを開く";
 "RemoteDataURLSettingViewController_RegexpSpeechModSection_Title" = "標準の読み替え設定(正規表現のもの)";

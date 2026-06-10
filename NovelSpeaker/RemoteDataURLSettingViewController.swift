@@ -66,7 +66,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
     }
     
     func registerObserver() {
-        let targets:[String] = ["autopagerizeSiteInfoURL", "novelSpeakerSiteInfoURL", "defaultSpeechModURL", "searchInfoURL", "preferredSiteInfoURLList"]
+        let targets:[String] = ["novelSpeakerSiteInfoURL", "defaultSpeechModURL", "searchInfoURL", "preferredSiteInfoURLList"]
         
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm) {
@@ -155,31 +155,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             $0.title = NSLocalizedString("RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSampleButton", comment: "標準設定データのURLを開く")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ (cellOf, row) in
-            if let url = URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoTSVURL) {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            }
-        })
-        +++ Section(NSLocalizedString("RemoteDataURLSettingViewController_FallbackSiteInfoSection_Title", comment: "次点のSiteInfo"))
-        <<< TextRow() {
-            $0.title = ""
-            $0.cell.textLabel?.numberOfLines = 0
-            $0.cell.textField.borderStyle = .roundedRect
-            $0.cell.textField.placeholder = NSLocalizedString("RemoteDataURLSettingViewController_URLTextFieldPlaceholder", comment: "URLを入力してください")
-            $0.value = globalState?.autopagerizeSiteInfoURL ?? ""
-        }.onChange({ (row) in
-            let value = row.value ?? ""
-            RealmUtil.RealmBlock { (realm) -> Void in
-                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
-                    globalState.autopagerizeSiteInfoURL = value
-                }
-            }
-        })
-        <<< ButtonRow() {
-            $0.title = NSLocalizedString("RemoteDataURLSettingViewController_FallbackSiteInfoSampleButton", comment: "標準設定データのURLを開く")
-            $0.cell.textLabel?.numberOfLines = 0
-        }.onCellSelection({ (cellOf, row) in
-            if let url = URL(string: StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL) {
+            if let url = URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoCSVURL) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
         })

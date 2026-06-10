@@ -940,9 +940,8 @@ class StoryHtmlDecoder {
     var nextExpireDate:Date = Date(timeIntervalSince1970: 0)
     var siteInfoNowLoading:Bool = false
     
-    static let AutopagerizeSiteInfoJSONURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=csv" // "http://wedata.net/databases/AutoPagerize/items.json"
     static let NovelSpeakerSiteInfoJSONURL = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
-    static let NovelSpeakerSiteInfoTSVURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=csv"
+    static let NovelSpeakerSiteInfoCSVURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=csv"
 
     // シングルトンにしている。
     static let shared = StoryHtmlDecoder()
@@ -1178,12 +1177,10 @@ class StoryHtmlDecoder {
     
     func generateCacheFileName(url:URL, index:Int) -> String {
         switch(url.absoluteString) {
-        case StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL:
-            return "AutopagerizeSiteInfoCache"
         case StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL:
             return "NovelSpeakerSiteInfoCache"
-        case StoryHtmlDecoder.NovelSpeakerSiteInfoTSVURL:
-            return "novelSpeakerSiteInfoTSVCache"
+        case StoryHtmlDecoder.NovelSpeakerSiteInfoCSVURL:
+            return "novelSpeakerSiteInfoCSVCache"
         default:
             break
         }
@@ -1192,17 +1189,11 @@ class StoryHtmlDecoder {
     
     func getLoadTargetURLs(config: NovelSpeakerUtility.NovelSpeakerRemoteConfig? = nil) -> [URL?] {
         var loadTargetUrls:[URL?] = []
-        let novelSpeakerSiteInfoTSVURL:String
-        let autopagerizeSiteInfoJSONURL:String
-        if let tsvURL = config?.novelSpeakerSiteInfoTSVURL {
-            novelSpeakerSiteInfoTSVURL = tsvURL
+        let novelSpeakerSiteInfoCSVURL:String
+        if let csvURL = config?.novelSpeakerSiteInfoCSVURL {
+            novelSpeakerSiteInfoCSVURL = csvURL
         }else{
-            novelSpeakerSiteInfoTSVURL = StoryHtmlDecoder.NovelSpeakerSiteInfoTSVURL
-        }
-        if let siteInfoURL = config?.autopagerizeSiteInfoURL {
-            autopagerizeSiteInfoJSONURL = siteInfoURL
-        }else{
-            autopagerizeSiteInfoJSONURL = StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL
+            novelSpeakerSiteInfoCSVURL = StoryHtmlDecoder.NovelSpeakerSiteInfoCSVURL
         }
         RealmUtil.RealmBlock { realm in
             // 優先度の高いSiteInfoArrayを先に登録します。
@@ -1217,24 +1208,11 @@ class StoryHtmlDecoder {
                 if let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
                     loadTargetUrls.append(novelSpeakerURL)
                 }else{
-                    loadTargetUrls.append(URL(string: novelSpeakerSiteInfoTSVURL))
+                    loadTargetUrls.append(URL(string: novelSpeakerSiteInfoCSVURL))
                     if globalState.novelSpeakerSiteInfoURL != "" {
                         AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_NovelSPeakerSiteInfoURL", comment: "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.novelSpeakerSiteInfoURL], isForDebug: false)
                     }
                 }
-                // Autopagerize の SiteInfo を読み込むと読み込むだけで 2MBytes 以上使ってしまうので
-                // watchOS では Autopagerize の SiteInfo については読み込まないようにします
-                // WARN: TODO: つまり、ことせかい用の SiteInfo が巨大になった場合同様に問題が発生しえます
-                #if !os(watchOS)
-                if let autopagerizeURL = URL(string: globalState.autopagerizeSiteInfoURL) {
-                    loadTargetUrls.append(autopagerizeURL)
-                }else{
-                    loadTargetUrls.append(URL(string: autopagerizeSiteInfoJSONURL))
-                    if globalState.autopagerizeSiteInfoURL != "" {
-                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "次点のSiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.autopagerizeSiteInfoURL], isForDebug: false)
-                    }
-                }
-                #endif
             }
         }
         return loadTargetUrls

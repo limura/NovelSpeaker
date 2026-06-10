@@ -3689,8 +3689,7 @@ class NovelSpeakerUtility: NSObject {
     struct NovelSpeakerRemoteConfig : Decodable {
         var appStoreWebPageXpath:AppStoreWebPageXpath?
         var latestVersion:String?
-        var novelSpeakerSiteInfoTSVURL:String?
-        var autopagerizeSiteInfoURL:String?
+        var novelSpeakerSiteInfoCSVURL:String?
         var privacyTrackingBlockTargetHostArray:[String]?
     }
     private static let novelSpeakerRemoteConfigCacheFileName = "NovelSpeakerRemoteConfigCache"
