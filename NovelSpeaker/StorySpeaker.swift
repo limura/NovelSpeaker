@@ -1285,6 +1285,24 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
         return .success
     }
+    // シーク(changePlaybackPosition 等)の連打/連続ドラッグ対策。
+    // 連打のたびに synth を止めて即 speak し直すと、premium/enhanced 音声が起動しきる前に次の操作が来て
+    // 「発話中(isSpeaking=true)の synth に再度 speak」が起き、AVAudioBuffer が壊れて(mDataByteSize 0)
+    // synth が永久固着する(発話バグの根本原因)。そこで再生再開を1回にまとめる(デバウンス):
+    // 直前の予約をキャンセルし、操作が落ち着いて一定時間経ってから一度だけ StartSpeech する。
+    private var seekRestartWorkItem: DispatchWorkItem?
+    func scheduleSpeechRestartAfterSeek(callerInfo: String) {
+        seekRestartWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: callerInfo, isNeedRepeatSpeech: self.isNeedRepeatSpeech)
+            }
+        }
+        seekRestartWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: work)
+    }
+
     @objc func changePlaybackPositionEvent(event:MPChangePlaybackPositionCommandEvent?) -> MPRemoteCommandHandlerStatus {
         return RealmUtil.RealmBlock { (realm) -> MPRemoteCommandHandlerStatus in
             guard let event = event, let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else {
@@ -1308,11 +1326,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     self.setReadLocationWith(realm: realm, location: newLocation)
                 }
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "コントロールセンターからの操作(PlaybackPosition).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
-                }
-            })
+            // 連打/連続ドラッグで「発話中の synth に再度 speak」→ AVAudioBuffer 破壊→固着 を防ぐため、
+            // 即時再生せず操作が落ち着いてから一度だけ再生する(デバウンス)。
+            scheduleSpeechRestartAfterSeek(callerInfo: "コントロールセンターからの操作(PlaybackPosition).\(#function)")
             return .success
         }
     }
