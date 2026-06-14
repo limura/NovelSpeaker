@@ -1088,6 +1088,8 @@
 - Added \"Edit / add priority SiteInfo\" to the \"Settings tab\".
 - Partially changed the behavior when retrieving the main text of novels.
 - Fixed an issue where some novels could not be searched using the \"Search\" button in the upper left corner of the \"Bookshelf screen\".
+- Fixed an issue where the app could stop reading aloud until it was restarted, which could occur when the playback position was changed repeatedly (for example, from Control Center) during playback.
+- Fixed an issue where importing from some websites took a long time and sometimes failed.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -1104,6 +1106,8 @@ Changes in interface/internal operation
 Fixing the problem
 
 - Fixed an issue where some novels could not be searched using the \"Search\" button in the upper left corner of the \"Bookshelf screen\".
+- Fixed an issue where the app could stop reading aloud until it was restarted, which could occur when the playback position was changed repeatedly (for example, from Control Center) during playback.
+- Fixed an issue where importing from some websites took a long time and sometimes failed.
 
 
 

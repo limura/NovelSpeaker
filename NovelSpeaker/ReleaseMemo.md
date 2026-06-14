@@ -4393,6 +4393,8 @@ Fixing the problem
 問題の修正
 
 - 「本棚画面」の左上の「検索」で検索できなくなっている小説があった問題を修正
+- 発話中にコントロールセンターなどから再生位置を変えるような指示を与え続けた場合などでアプリを再起動するまで発話できなくなる場合がある問題を修正
+- 一部のWebサイトからの取り込み時に時間がかかった上に取り込みが失敗する場合があった問題を修正
 
 以下に詳しく述べます
 
@@ -4424,6 +4426,16 @@ SiteInfoの書き方がわかる方などはご利用ください。
 この問題は、NFD形式(ひらがな や カタカナ の濁点や半濁点のついたものについて、単一の文字としてではなく濁点や半濁点のついていない文字と濁点や半濁点のみの2文字の合字とする方式)で取り込まれてしまった小説名(や著者名)となっている小説のデータがあった場合、それが検索できないという問題でした。
 Version 2.12.0 の初回起動時に内部データの更新をしてNFD形式のタイトルや著者名についてNFC正規化を施すなどをすることで、問題の解消を狙います。
 
+- 発話中にコントロールセンターなどから再生位置を変えるような指示を与え続けた場合などでアプリを再起動するまで発話できなくなる場合がある問題を修正
+
+上記の手順を行っていると、時々発話ができなくなることがある問題(発話が完了する前に別の発話が発生する場合に発生する問題)について、それが起こらないようにしたというものです。
+なお、この問題はかなーり前から報告は受けていたのですが再現手順が確立していなかったために対処できていなかった問題な気がしているのですが、違う問題かもしれません。
+「アプリを再起動させるまで発話できなくなる」系の問題が引き続きでる場合は「問題を再現する詳細な手順」を添えてお問い合わせいただけますと助かります。
+
+- 一部のWebサイトからの取り込み時に時間がかかった上に取り込みが失敗する場合があった問題を修正
+
+内蔵ブラウザを使ってのアクセスを試みているWebサイト様で、一部の広告などの読み込みが終わらないことが原因で、ページの読み込みがタイムアウトまで完了しないと判定されてしまうことで(本文などは表示されているのに)取り込むことができない場合があった問題について対処しています。
+
 以上となります。
 
 
@@ -4439,3 +4451,5 @@ Changes in interface/internal operation
 Fixing the problem
 
 - Fixed an issue where some novels could not be searched using the "Search" button in the upper left corner of the "Bookshelf screen".
+- Fixed an issue where the app could stop reading aloud until it was restarted, which could occur when the playback position was changed repeatedly (for example, from Control Center) during playback.
+- Fixed an issue where importing from some websites took a long time and sometimes failed.
