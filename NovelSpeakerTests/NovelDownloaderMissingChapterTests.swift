@@ -48,6 +48,16 @@ final class NovelDownloaderMissingChapterTests: XCTestCase {
         NovelDownloadQueue.shared.isDownloadStop = false
         // 書き込みバッファもクリアしておく
         NovelDownloader.FlushAllWritePool()
+
+        // この fixture(limura.github.io/NovelSpeaker/topics)は SiteInfo に専用エントリがあり、
+        // それが無いと本文(pageElement)も nextLink も抽出できず、ダウンロードが空振りする。
+        // SiteInfo のロードは非同期なので、待たずに走らせるとクリーン環境(キャッシュ無し)では必ず空になる。
+        // 実SiteInfoのロード完了を待ってからテストする(配布される topics 文書の SiteInfo が今も機能していることの確認も兼ねる)。
+        let siteInfoReadyExp = expectation(description: "SiteInfo ready")
+        StoryHtmlDecoder.shared.WaitLoadSiteInfoReady { _ in
+            siteInfoReadyExp.fulfill()
+        }
+        wait(for: [siteInfoReadyExp], timeout: 30.0)
     }
 
     override func tearDownWithError() throws {
