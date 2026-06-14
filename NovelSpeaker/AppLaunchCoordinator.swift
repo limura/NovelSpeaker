@@ -79,16 +79,20 @@ final class AppLaunchCoordinator: NSObject {
         }
 
         // モードC(選択子オーサリング用): URLを強制headlessで描画し、描画後(ハイドレート済み)DOMを出力する。
-        //   NovelSpeaker --dump-rendered-html <URL> [--wait <秒>] [--ua <UserAgent>]
+        //   NovelSpeaker --dump-rendered-html <URL> [--wait <秒>] [--timeout <秒>] [--ua <UserAgent>]
         //   SiteInfo には依存しない(matchするしないに関わらず必ず headless で取得)。
         //   出力: `NOVELSPEAKER_DUMP_HTML_BEGIN <url>` の次行から outerHTML、末尾に `NOVELSPEAKER_DUMP_HTML_END`。
+        //   --timeout は Erik のロード(=メイン文書ナビ完了 didFinish)待ちのタイムアウト秒。既定10秒。
+        //   計測用に stderr へ `NOVELSPEAKER_DUMP_TIMING ...`(ナビ開始→完了/失敗までの実時間)を出す。
         if let flagIndex = args.firstIndex(of: "--dump-rendered-html") {
             let positional = Array(args[(flagIndex + 1)...]).first(where: { !$0.hasPrefix("-") })
             var waitSec: Double = 6
             if let wi = args.firstIndex(of: "--wait"), wi + 1 < args.count, let w = Double(args[wi + 1]) { waitSec = w }
+            var timeoutSec: Double = 10
+            if let ti = args.firstIndex(of: "--timeout"), ti + 1 < args.count, let t = Double(args[ti + 1]) { timeoutSec = t }
             var userAgent: String? = env["NOVELSPEAKER_DUMP_UA"]
             if let ui = args.firstIndex(of: "--ua"), ui + 1 < args.count { userAgent = args[ui + 1] }
-            runDumpRenderedHTML(urlString: positional, waitSec: waitSec, userAgent: userAgent)
+            runDumpRenderedHTML(urlString: positional, waitSec: waitSec, timeoutSec: timeoutSec, userAgent: userAgent)
             return true
         }
 
@@ -242,7 +246,7 @@ final class AppLaunchCoordinator: NSObject {
 
     // --dump-rendered-html の本体。SiteInfo に依存せず、URL を強制 headless で描画して outerHTML を出力する。
     // 選択子(pageElementV2)を作るために「ハイドレート済みDOM」を確認する用途。JS描画を待つため waitSec 秒待ってから取得する。
-    private static func runDumpRenderedHTML(urlString: String?, waitSec: Double, userAgent: String?) {
+    private static func runDumpRenderedHTML(urlString: String?, waitSec: Double, timeoutSec: Double, userAgent: String?) {
         guard let urlString = urlString, let url = URL(string: urlString) else {
             FileHandle.standardOutput.write(Data("NOVELSPEAKER_DUMP_HTML_ERROR invalid URL\n".utf8))
             exit(1)
@@ -251,6 +255,13 @@ final class AppLaunchCoordinator: NSObject {
         cliHeadlessClient = client
         if let userAgent = userAgent, !userAgent.isEmpty {
             client.overrideUserAgent(userAgentString: userAgent)
+        }
+        // 計測用: ナビ開始時刻。Erik ロード(=メイン文書 didFinish 待ち)の完了/失敗までの実時間を測る。
+        let navStart = Date()
+        func emitTiming(_ phase: String, extra: String = "") {
+            let elapsed = Date().timeIntervalSince(navStart)
+            let line = String(format: "NOVELSPEAKER_DUMP_TIMING url=%@ phase=%@ elapsed=%.3f timeout=%.1f%@\n", urlString, phase, elapsed, timeoutSec, extra.isEmpty ? "" : " " + extra)
+            FileHandle.standardError.write(Data(line.utf8))
         }
         var finished = false
         func emit(html: String?, error: String?) {
@@ -267,23 +278,29 @@ final class AppLaunchCoordinator: NSObject {
                 }
             }
         }
-        // success/error のどちらも来ない場合に詰まらないようウォッチドッグ(描画待ち + 余裕)。
-        DispatchQueue.main.asyncAfter(deadline: .now() + waitSec + 90) {
-            emit(html: nil, error: "timeout")
+        // success/error のどちらも来ない場合に詰まらないようウォッチドッグ(ロード待ち + 描画待ち + 余裕)。
+        // timeoutSec を伸ばした計測でもウォッチドッグが先に発火しないよう timeoutSec を加味する。
+        DispatchQueue.main.asyncAfter(deadline: .now() + waitSec + timeoutSec + 30) {
+            emitTiming("watchdog")
+            emit(html: nil, error: "watchdog timeout")
         }
-        client.HttpRequest(url: url, cookieString: "", successResultHandler: { _ in
+        client.HttpRequest(url: url, timeoutInterval: timeoutSec, cookieString: "", successResultHandler: { _ in
+            emitTiming("loadFinished")
             // ページロード完了後、JSのハイドレーション/後読みを待ってから DOM を取り出す。
             // Erik の evaluate ラッパーは巨大文字列の取り出しに失敗するため WKWebView へ直接評価する。
             DispatchQueue.main.asyncAfter(deadline: .now() + waitSec) {
                 client.webView.evaluateJavaScript("document.documentElement.outerHTML") { result, error in
                     if let html = result as? String {
+                        emitTiming("dom", extra: String(format: "htmlBytes=%d", html.utf8.count))
                         emit(html: html, error: nil)
                     } else {
+                        emitTiming("dom", extra: "htmlBytes=0")
                         emit(html: nil, error: error?.localizedDescription ?? "outerHTML did not return a string")
                     }
                 }
             }
         }, errorResultHandler: { error in
+            emitTiming("loadError", extra: "err=\(error.localizedDescription)")
             emit(html: nil, error: error.localizedDescription)
         })
     }

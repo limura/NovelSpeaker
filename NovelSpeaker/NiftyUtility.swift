@@ -932,7 +932,14 @@ class NiftyUtility: NSObject {
                 client = HeadlessHttpClient()
                 headlessHttpClientObj = client
             }
-            client.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (doc) in
+            // erik.load(=load イベント/didFinish 待ち=Erik のビジーウェイト)ではなく、DOMContentLoaded 到達で進む。
+            // 広告等のサブリソースが終わらず load イベントが来ないページでも、本文DOMが揃えば取得できる(ハング/CPU張り付き回避)。
+            // 本文出現の本待ちは後続 headlessWaitThenContent の smart-wait(MutationObserver)が担当する。
+            client.LoadUntilDOMContentLoaded(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess) { (err) in
+                if let err = err {
+                    failedAction?(err)
+                    return
+                }
                 func waitProcess() {
                     // 待ち(allowSmartWait なら ready で即進む smart-wait / forceClick は自己クリック / それ以外は固定待ち)を
                     // 共通ヘルパに委譲する。クリック後の再取得(StoryFetcher.buttonClick)とロジックを共有する。
@@ -949,8 +956,6 @@ class NiftyUtility: NSObject {
                 }else{
                     waitProcess()
                 }
-            }) { (err) in
-                failedAction?(err)
             }
         }
     }

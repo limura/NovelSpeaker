@@ -185,6 +185,78 @@ class HeadlessHttpClient {
         }
     }
     
+    // erik.load(= WKWebView の load イベント=didFinish 待ち)を通さずにページを読み込む。
+    // load イベントはメイン文書中の広告/トラッカー等のサブリソースが全部終わるまで発火しないため、
+    // それが終わらないページでは Erik の完了待ち(LayoutEngine の while ビジーウェイト)が永遠に終わらず、
+    // 本文DOMが揃っているのに取得がハングして noContent になる(2026-06 調査・DESIGN_取得状態機械とheadlessReady判定.md)。
+    // 本文は DOMContentLoaded の時点で揃うので、load イベントではなく DOMContentLoaded(readyState != 'loading')
+    // 到達を完了条件にする。直接 webView.load するため Erik の navigate フラグは立たず、後続の GetCurrentContent
+    // (erik.currentContent)も待たずに即返る(= Erik のビジーウェイト経路を一切通らない)。
+    public func LoadUntilDOMContentLoaded(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, completion:@escaping (Error?)->Void) {
+        DispatchQueue.main.async {
+            let requestID = "HeadlessLoadDCL" + url.absoluteString
+            ActivityIndicatorManager.enable(id: requestID)
+            let request = self.generateUrlRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess)
+            var finished = false
+            func finish(_ error: Error?) {
+                if finished { return }
+                finished = true
+                ActivityIndicatorManager.disable(id: requestID)
+                completion(error)
+            }
+            // ナビが始まらない/失敗する(=DOMContentLoaded に永遠に達しない)場合の保険。
+            // 従来 erik.load が使っていた pageLoadTimeout と同じ上限なので、待ちの上限は従来より悪化しない。
+            // (ネットワーク失敗時は従来 didFailProvisional で早く失敗していたが、本経路は delegate を持たないため
+            //  この上限まで待つ。直すなら custom navigationDelegate が要る=別課題。)
+            let hardCap = timeoutInterval + 2.5
+            DispatchQueue.main.asyncAfter(deadline: .now() + hardCap) {
+                finish(self.GenerateNSError(msg: NSLocalizedString("HeadlessHttpClient_ErikError_noContent", comment: "ErikError.noContent: 何も読み込めませんでした。なお、ネットワーク接続に問題がある場合などでもこのエラーが発生する場合があります。")))
+            }
+            // DOMContentLoaded(readyState が 'interactive' か 'complete')到達まで軽くポーリングする。
+            // load イベント(全サブリソース完了)は待たない=ハング回避。0.15秒間隔の非同期チェックで CPU はほぼ消費しない
+            // (本文出現の本待ちは後続 headlessWaitThenContent の MutationObserver smart-wait が担当)。
+            //
+            // ★重要: webView は取得をまたいで使い回されるため、load 直後はまだ「前のページ」または "about:blank" が
+            //   残っており、その readyState は既に 'complete'。それを見て早すぎる確定をすると空ドキュメントを掴んで
+            //   noContent になる(2026-06 検証で確認)。そこで「ロード前に現ドキュメントへマーカー window.__nsNavMark を
+            //   打ち、ナビで文書が置換されてマーカーが消えた後の readyState」を見ることで、確実に『新しくコミットされた
+            //   目的ページ』だけを掴む。リダイレクトや同一URL再読込でも新文書になるので確実に判定できる。
+            func startPolling() {
+                func waitDOMContentLoaded() {
+                    if finished { return }
+                    // 新文書なら __nsNavMark は無い。about:blank は除外。それ以外で readyState が loading を抜けたら確定。
+                    let js = "(window.__nsNavMark===true)?'old':((location.href==='about:blank')?'blank':document.readyState)"
+                    self.webView.evaluateJavaScript(js) { result, _ in
+                        if finished { return }
+                        if let s = result as? String, (s == "interactive" || s == "complete") {
+                            finish(nil)
+                            return
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { waitDOMContentLoaded() }
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { waitDOMContentLoaded() }
+            }
+            // 現ドキュメントにマーカーを打ってから load する(打ち終えてから load を呼ぶことで取りこぼしを防ぐ)。
+            self.webView.evaluateJavaScript("window.__nsNavMark=true;true") { _, _ in
+                let stripFragment: (String) -> String = { $0.replacingOccurrences(of: "#.*$", with: "", options: .regularExpression, range: nil) }
+                if url.absoluteString.contains("#"), let currentUrl = self.webView.url,
+                   stripFragment(url.absoluteString) == stripFragment(currentUrl.absoluteString) {
+                    // 同一ページ内アンカー(# のみ変更)は WKWebView がナビゲーション(=新文書)を起こさず
+                    // __nsNavMark が消えないため、既存 HttpRequest と同様に about:blank を挟んで強制的に新文書にする。
+                    self.webView.load(URLRequest(url: URL(string: "about:blank")!))
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        self.webView.load(request)
+                        startPolling()
+                    }
+                } else {
+                    self.webView.load(request)
+                    startPolling()
+                }
+            }
+        }
+    }
+
     public func GetCurrentContent(completionHandler:((Document?, Error?)->Void)?) {
         DispatchQueue.main.async {
             self.erik.currentContent(completionHandler: { (doc, err) in
