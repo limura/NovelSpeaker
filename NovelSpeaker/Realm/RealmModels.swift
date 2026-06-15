@@ -1790,13 +1790,15 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     
     static func StoryBulkArrayToStory(storyArray:[Story], chapterNumber: Int) -> Story? {
         let bulkIndex = (chapterNumber - 1) % bulkCount
-        if bulkIndex < 0 || storyArray.count <= bulkIndex {
-            return nil
+        if bulkIndex >= 0, bulkIndex < storyArray.count {
+            let storyAtIndex = storyArray[bulkIndex]
+            if storyAtIndex.chapterNumber == chapterNumber {
+                return storyAtIndex
+            }
         }
-        let storyAtIndex = storyArray[bulkIndex]
-        if storyAtIndex.chapterNumber == chapterNumber {
-            return storyAtIndex
-        }
+        // 歯抜け(ギャップ)のある bulk では index がズレる/範囲外になるため走査でフォールバックする。
+        // (範囲外で即 nil を返すと、配列内に該当章があっても見つけられず、歯抜け補完DLで
+        //  キャッシュ済み章のスキップが不発になり既存章を無駄に再フェッチしてしまう問題があった。)
         return storyArray.first(where: { $0.chapterNumber == chapterNumber })
     }
 
