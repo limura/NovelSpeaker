@@ -303,4 +303,18 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             return false
         }
     }
+
+    // 下層の AVSpeechSynthesizer が実際にまだ動いている(発話中 or 一時停止中)かどうか。
+    // Stop() は speechQueue を即 removeAll するため、上の isSpeaking/isPaused は
+    // stopSpeaking(.immediate) のキャンセルが完了する前でも false を返してしまう。
+    // 「停止しきっていない synth に再度 speak して AVAudioBuffer を壊し永久固着させる」
+    // バグ(synth wedge)を避けるため、ここでは speakerCache 内の synth の実状態を直接見る。
+    var isAnySynthesizerActive:Bool {
+        get {
+            for (_, speaker) in speakerCache {
+                if speaker.isSpeaking() || speaker.isPaused() { return true }
+            }
+            return false
+        }
+    }
 }

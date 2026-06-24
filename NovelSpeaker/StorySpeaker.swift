@@ -43,9 +43,13 @@ class AnnounceSpeaker : SpeakRangeDelegate {
     }
     
     func StartAnnounce(text:String, completion: (()->Void)?) {
-        if text.count <= 0 {
-            handler?()
+        // 発音すべき文字が無い(空、または改行・空白のみ)テキストを AVSpeechSynthesizer に
+        // 渡すと、端末によってはコールバックを一切返さず synth が固着し、この後ろの
+        // completion 連鎖(章送り後の次章再生開始など)がストールする。
+        // その場合は喋らせず、即 completion を呼んで連鎖を継続させる。
+        if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             self.handler = nil
+            completion?()
             return
         }
         self.handler = completion

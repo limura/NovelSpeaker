@@ -22,6 +22,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var currentBlockSpeechOffset = 0
     // 現在の先頭からの読み上げ中の位置(willSpeakRange で知らされる location と同じ値)
     var currentSpeakingLocation = 0
+    // willSpeakRange が呼ばれた回数。synth wedge 検出で「発話が実際に進んだか」の判定に使う。
+    var willSpeakRangeCallCount = 0
     
     // StopSpeech() で実際に読み上げが止まった時のハンドラ
     let stopSpeechHandlerLockObject = NSObject()
@@ -60,6 +62,11 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var isPausedBySynthesizerState:Bool {
         get { return speaker.isPaused }
     }
+    var isAnySynthesizerActive:Bool {
+        get { return speaker.isAnySynthesizerActive }
+    }
+    // 停止しきっていない synth に speak し直すのを避けるため、idle になるのを待ってから開始する予約。
+    private var startWhenIdleWorkItem:DispatchWorkItem? = nil
 
     func GetSpeechTextWith(range:NSRange) -> String {
         let startOffset = DisplayLocationToSpeechLocation(location: range.location)
@@ -159,8 +166,83 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         let location = block.ComputeDisplayLocationFrom(speechLocation: currentBlockSpeechOffset) + currentDisplayStringOffset
         self.delegate?.willSpeakRange(range: NSMakeRange(location, 1))
         let speechText = block.GenerateSpeechTextFrom(displayLocation: currentBlockDisplayOffset)
+        // 発音すべき文字を含まない(改行・空白のみの)発話を AVSpeechSynthesizer に渡すと、
+        // 端末によってはコールバック(didStart/willSpeakRange/didFinish)を一切返さず synth が
+        // 永久固着し、以後その声(使い回しの synth オブジェクト)での発話が全て無音になる。
+        // これが「改行が沢山ある部分で発話できなくなる」バグの真因。
+        // そのような block は synth に渡さず、即「発話完了」扱いにして次の block へ進める。
+        // (deep recursion を避けるため main queue に逃がす。block.delay があれば尊重する)
+        if speechText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let skipDelay = max(0, block.delay)
+            DispatchQueue.main.asyncAfter(deadline: .now() + skipDelay) { [weak self] in
+                guard let self = self else { return }
+                self.finishSpeak(isCancel: false, speechString: speechText)
+            }
+            return
+        }
         speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
         //print("Speech: \(speechText)")
+        scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText)
+    }
+
+    // ログ用に改行・タブ等を見えるエスケープにし、長すぎる場合は切り詰める。
+    static func escapeForLog(_ text:String) -> String {
+        let escaped = text
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\r", with: "\\r")
+            .replacingOccurrences(of: "\t", with: "\\t")
+        if escaped.count > 40 {
+            return String(escaped.prefix(40)) + "…"
+        }
+        return escaped
+    }
+
+    // synth wedge 検出(保険):
+    // enqueueSpeechBlock で speak を投げたのに、一定時間経っても willSpeakRange が一度も来ず、
+    // ブロックも進んでおらず、下層 synth も idle(発話中でも一時停止中でもない)なら、
+    // speak が無音で飲まれて固着しているとみなし、ログに残した上で自己回復を試みる。
+    // (本文の固着の主因(空白のみ発話)は enqueueSpeechBlock 側で予防済みだが、
+    //  別要因で固着した場合でもアプリ再起動なしに復帰できるようにするための保険)
+    private func scheduleWedgeWatch(blockIndex:Int, willSpeakRangeCountAtSpeak:Int, speechTextCount:Int, speechText:String) {
+        if speechTextCount <= 0 { return } // 空発話はすぐ終わるので対象外
+        // premium/enhanced 音声の起動レイテンシを考慮して長めに待つ。
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
+            guard let self = self else { return }
+            let progressed = self.willSpeakRangeCallCount != willSpeakRangeCountAtSpeak
+            let blockMoved = self.currentSpeechBlockIndex != blockIndex
+            let synthActive = self.isAnySynthesizerActive
+            if self.m_IsSpeaking == true && progressed == false && blockMoved == false && synthActive == false {
+                let message = "synth wedge疑い: speakしたが2.5秒間発話が始まらずsynthもidle blockIndex=\(blockIndex) len=\(speechTextCount) text=\"\(Self.escapeForLog(speechText))\""
+                NSLog("NovelSpeaker.SynthWedge: ⚠️ \(message)")
+                AppInformationLogger.AddLog(message: message, appendix: [
+                    "blockIndex": "\(blockIndex)",
+                    "speechTextCount": "\(speechTextCount)",
+                    "willSpeakRangeCallCount": "\(self.willSpeakRangeCallCount)",
+                    "isSpeakingBySynthesizerState": "\(self.isSpeakingBySynthesizerState)",
+                    "isPausedBySynthesizerState": "\(self.isPausedBySynthesizerState)",
+                ], isForDebug: true)
+                self.recoverFromWedge(blockIndex: blockIndex)
+            }
+        }
+    }
+
+    // 固着の自己回復: synth を作り直し、固着した block から再生し直す。
+    // 原因が何であれアプリ再起動なしで復帰させるための保険。暴走防止に回数上限を設ける。
+    private var wedgeRecoveryCount = 0
+    private func recoverFromWedge(blockIndex:Int) {
+        if wedgeRecoveryCount >= 3 {
+            NSLog("NovelSpeaker.SynthWedge: 回復試行が上限に達したため断念 blockIndex=\(blockIndex)")
+            return
+        }
+        wedgeRecoveryCount += 1
+        NSLog("NovelSpeaker.SynthWedge: 回復試行(\(wedgeRecoveryCount)): synth を作り直して blockIndex=\(blockIndex) から再生し直す")
+        // 固着した MultiVoiceSpeaker のキューを片付け、AVSpeechSynthesizer を作り直す。
+        speaker.Stop()
+        speaker.reloadSynthesizer()
+        // 同じ block から発話し直す
+        m_IsSpeaking = true
+        enqueueSpeechBlock()
     }
     
     func setSpeechBlockArray(blockArray:[CombinedSpeechBlock]) {
@@ -210,13 +292,49 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     
     func StartSpeech() {
         if m_IsSpeaking == true { return }
+        // 直前の停止(stopSpeaking(.immediate))が下層 synth 上でまだ完了していない状態で
+        // ここで enqueue すると「発話中の synth に再度 speak」になり、AVAudioBuffer が壊れて
+        // (mDataByteSize 0)synth が固着する恐れがある(コントロールセンターのシーク連打で
+        // 起きていた wedge と同種)。synth が完全に idle になるのを待ってから開始する。
+        if isAnySynthesizerActive {
+            scheduleStartAfterSynthesizerIdle(retryCount: 0)
+            return
+        }
+        startWhenIdleWorkItem?.cancel()
+        startWhenIdleWorkItem = nil
         m_IsSpeaking = true
         enqueueSpeechBlock()
     }
-    
+
+    // synth が idle になるまで短い間隔でポーリングし、idle になってから一度だけ開始する。
+    // 最大でも 40 * 0.025 = 1.0秒 待ったら(stopSpeaking のキャンセルには十分な時間)開始を試みる。
+    private func scheduleStartAfterSynthesizerIdle(retryCount:Int) {
+        startWhenIdleWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            // 待っている間に別経路で開始済み/再度停止された場合は何もしない
+            if self.m_IsSpeaking == true { return }
+            if self.isAnySynthesizerActive && retryCount < 40 {
+                self.scheduleStartAfterSynthesizerIdle(retryCount: retryCount + 1)
+                return
+            }
+            self.startWhenIdleWorkItem = nil
+            if retryCount >= 40 {
+                NSLog("NovelSpeaker.SynthWedge: ⚠️ idle 待ちタイムアウト(約1秒)synthActive=\(self.isAnySynthesizerActive) のまま開始する")
+            }
+            self.m_IsSpeaking = true
+            self.enqueueSpeechBlock()
+        }
+        startWhenIdleWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.025, execute: work)
+    }
+
     func StopSpeech(stopSpeechHandler:(()->Void)? = nil) {
         objc_sync_enter(self.stopSpeechHandlerLockObject)
         defer { objc_sync_exit(self.stopSpeechHandlerLockObject) }
+        // idle 待ちの開始予約が残っていれば取り消す(停止が優先)。
+        startWhenIdleWorkItem?.cancel()
+        startWhenIdleWorkItem = nil
         m_IsSpeaking = false
         self.stopSpeechHandler = stopSpeechHandler
         speaker.Stop()
@@ -275,6 +393,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func willSpeakRange(range: NSRange) {
+        willSpeakRangeCallCount += 1
+        // 実発話が進んだので、固着回復カウンタをリセットする。
+        wedgeRecoveryCount = 0
         guard let delegate = delegate, speechBlockArray.count > currentSpeechBlockIndex else { return }
         let block = speechBlockArray[currentSpeechBlockIndex]
         let location = block.ComputeDisplayLocationFrom(speechLocation: range.location + currentBlockSpeechOffset) + currentDisplayStringOffset
