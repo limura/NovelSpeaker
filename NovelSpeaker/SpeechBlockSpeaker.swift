@@ -228,11 +228,28 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
 
     // 固着の自己回復: synth を作り直し、固着した block から再生し直す。
-    // 原因が何であれアプリ再起動なしで復帰させるための保険。暴走防止に回数上限を設ける。
+    // 原因が何であれアプリ再起動なしで復帰させるための保険。
+    // wedgeRecoveryCount は「連続して回復に失敗した回数」。回復が成功して発話が1つでも
+    // 進めば finishSpeak / willSpeakRange で 0 にリセットされるので、実際の運用では
+    // 「回復は実質無制限・でも同じ箇所で延々失敗する時だけ打ち切り」になる。
+    // (打ち切り時も読み上げを止めず、その block を飛ばして次へ進めて全体を継続させる)
+    private let maxConsecutiveWedgeRecovery = 5
     private var wedgeRecoveryCount = 0
     private func recoverFromWedge(blockIndex:Int) {
-        if wedgeRecoveryCount >= 3 {
-            NSLog("NovelSpeaker.SynthWedge: 回復試行が上限に達したため断念 blockIndex=\(blockIndex)")
+        if wedgeRecoveryCount >= maxConsecutiveWedgeRecovery {
+            // 同じ箇所で連続して回復に失敗した。これ以上 reload ループ(電池/CPU浪費)を
+            // 続けず、この block は飛ばして次へ進める(読み上げ全体は止めない)。
+            NSLog("NovelSpeaker.SynthWedge: 連続\(wedgeRecoveryCount)回回復失敗。blockIndex=\(blockIndex) を飛ばして次へ進む")
+            wedgeRecoveryCount = 0
+            speaker.Stop()
+            speaker.reloadSynthesizer()
+            if setNextSpeechBlock() != true {
+                m_IsSpeaking = false
+                self.delegate?.finishSpeak(isCancel: true, speechString: "")
+                return
+            }
+            m_IsSpeaking = true
+            enqueueSpeechBlock()
             return
         }
         wedgeRecoveryCount += 1
@@ -413,6 +430,11 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             self.stopSpeechHandler = nil
             return
         }
+        // ここに来た = synth が utterance を完了して次へ進む = 実際に発話が進んだという事。
+        // 固着回復の「連続失敗」カウンタをリセットする。
+        // (willSpeakRange が飛ばない極短ブロック("。"等)でも確実にリセットするため、
+        //  willSpeakRange 側のリセットだけに頼らずここでもリセットする)
+        wedgeRecoveryCount = 0
         /* // 一応読み上げ途中で Cancel が発生する問題は回避できた(一度にSpeak()にわたす文字列の長さを短くする事で回避できるぽい)
          // ので、この再開するあたりの処理は封印しておきます。
          // 実際、再開させるようにしても、発話が停止してから2,3拍おいた後に少し戻って発話する感じになるのであまりうれしくないです
