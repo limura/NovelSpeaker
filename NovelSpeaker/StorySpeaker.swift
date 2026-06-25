@@ -670,7 +670,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
         if mode != StorySpeaker.currentMode {
             do {
-                try session.setMode(StorySpeaker.currentMode)
+                // setMode には「設定したい新しい mode」を渡す必要がある。
+                // 以前は誤って直前の値 currentMode を渡しており、実際に設定される mode が常に
+                // 1手前にずれていた(例: CarPlay 接続時に .voicePrompt ではなく直前の .default が
+                // 設定されてしまい、CarPlay 用 voicePrompt 指定が効かない・切断後に固着する等)ため修正。
+                try session.setMode(mode)
                 StorySpeaker.currentMode = mode
                 //try session.setMode(StorySpeaker.GetAudioSessionModeSetting())
             }catch{
