@@ -24,6 +24,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var currentSpeakingLocation = 0
     // willSpeakRange が呼ばれた回数。synth wedge 検出で「発話が実際に進んだか」の判定に使う。
     var willSpeakRangeCallCount = 0
+    // speak() ごとに増える世代番号。停止/次 speak で進行中の wedge watcher を失効させ、
+    // 「停止→同じブロックで再生し直し」をまたいだ誤回復を防ぐ。
+    private var speakGeneration = 0
     
     // StopSpeech() で実際に読み上げが止まった時のハンドラ
     let stopSpeechHandlerLockObject = NSObject()
@@ -180,9 +183,11 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             }
             return
         }
+        speakGeneration += 1
+        let generation = speakGeneration
         speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
         //print("Speech: \(speechText)")
-        scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText)
+        scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText, generation: generation)
     }
 
     // ログ用に改行・タブ等を見えるエスケープにし、長すぎる場合は切り詰める。
@@ -204,16 +209,26 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // speak が無音で飲まれて固着しているとみなし、ログに残した上で自己回復を試みる。
     // (本文の固着の主因(空白のみ発話)は enqueueSpeechBlock 側で予防済みだが、
     //  別要因で固着した場合でもアプリ再起動なしに復帰できるようにするための保険)
-    private func scheduleWedgeWatch(blockIndex:Int, willSpeakRangeCountAtSpeak:Int, speechTextCount:Int, speechText:String) {
+    // wedge とみなすまでの待ち時間。
+    // 短すぎると「正当だがまだ立ち上がり中(synth が idle のまま)の発話」を固着と誤検出して
+    // しまうため、speak()→isSpeaking=true の立ち上がり時間の最悪値を超える必要がある。
+    // 実機計測では立ち上がりは iPhone 6s Plus でも最大 ~0.5秒(音声生成自体の遅さは
+    // isSpeaking=true 中なので synthActive 判定で守られ、ここでは無視できる)。
+    // その約3倍のマージンとして 1.5秒 とする。
+    private let wedgeDetectTimeout:TimeInterval = 1.5
+    private func scheduleWedgeWatch(blockIndex:Int, willSpeakRangeCountAtSpeak:Int, speechTextCount:Int, speechText:String, generation:Int) {
         if speechTextCount <= 0 { return } // 空発話はすぐ終わるので対象外
         // premium/enhanced 音声の起動レイテンシを考慮して長めに待つ。
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + wedgeDetectTimeout) { [weak self] in
             guard let self = self else { return }
+            // 停止/次の speak で世代が変わっていたら、この watcher はもう現役ではないので何もしない
+            //(「停止→同じブロックで再生し直し」をまたいだ誤回復を防ぐ)。
+            if self.speakGeneration != generation { return }
             let progressed = self.willSpeakRangeCallCount != willSpeakRangeCountAtSpeak
             let blockMoved = self.currentSpeechBlockIndex != blockIndex
             let synthActive = self.isAnySynthesizerActive
             if self.m_IsSpeaking == true && progressed == false && blockMoved == false && synthActive == false {
-                let message = "synth wedge疑い: speakしたが2.5秒間発話が始まらずsynthもidle blockIndex=\(blockIndex) len=\(speechTextCount) text=\"\(Self.escapeForLog(speechText))\""
+                let message = "synth wedge疑い: speakしたが\(self.wedgeDetectTimeout)秒間発話が始まらずsynthもidle blockIndex=\(blockIndex) len=\(speechTextCount) text=\"\(Self.escapeForLog(speechText))\""
                 NSLog("NovelSpeaker.SynthWedge: ⚠️ \(message)")
                 AppInformationLogger.AddLog(message: message, appendix: [
                     "blockIndex": "\(blockIndex)",
@@ -352,6 +367,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // idle 待ちの開始予約が残っていれば取り消す(停止が優先)。
         startWhenIdleWorkItem?.cancel()
         startWhenIdleWorkItem = nil
+        // 世代を進めて、進行中の wedge watcher を失効させる
+        //(停止区間をまたいだ誤回復を防ぐ)。
+        speakGeneration += 1
         m_IsSpeaking = false
         self.stopSpeechHandler = stopSpeechHandler
         speaker.Stop()
