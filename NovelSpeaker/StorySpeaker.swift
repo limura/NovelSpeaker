@@ -103,6 +103,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
 
     private override init() {
         super.init()
+        // Speaker(発話の最下層)に、発話直前のオーディオセッション準備役として自分を登録する。
+        // これにより Speaker は StorySpeaker を直接参照せず、依存を逆転させている。
+        Speaker.audioSessionCoordinator = self
         #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
         UpdateMoreSplitMinimumLetterCount()
         #endif
@@ -615,6 +618,25 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     static var currentMode = AVAudioSession.Mode.spokenAudio // 設定されない値を初期値とします
     static var currentActive = true
+    // オーディオセッションを deactivate する度に増える世代。
+    // この世代をまたいで生き残った AVSpeechSynthesizer は内部オーディオエンジンが切れて
+    // 固着(synth wedge)しうるので、speak 直前に作り直す判定に使う(Speaker.Speech)。
+    // Speaker へは SpeakerAudioSessionCoordinator 経由で渡す(下部 extension)。
+    static var audioSessionDeactivateGeneration = 0
+    // speak 直前に「セッションが落ちていたら同期的に立て直す」ための軽量アクティブ化。
+    // 通常の audioSessionInit は category/mode 設定や Realm 参照を伴い、StartSpeech から
+    // 非同期で呼ばれるため「resume 直後の最初の speak がセッション復帰前に刺さって固着する」隙がある。
+    // それを埋めるため、ここでは setActive(true) のみを同期実行する(落ちている時だけ働く)。
+    static func ensureAudioSessionActiveForSpeechSynchronously() {
+        if currentActive { return }
+        let session = AVAudioSession.sharedInstance()
+        do {
+            try session.setActive(true, options: [])
+            currentActive = true
+        } catch {
+            NSLog("NovelSpeaker: ensureAudioSessionActiveForSpeechSynchronously setActive(true) failed: \(error.localizedDescription)")
+        }
+    }
     // AVAudioSession.routeChangeNotification を受けたなどの時に、
     // CarPlay であったのなら Mode を変更したりする
     func audioSessionUpdate() {
@@ -662,8 +684,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }else{
                 options = [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation]
             }
+            let wasActive = StorySpeaker.currentActive
             try session.setActive(isActive, options: options)
             StorySpeaker.currentActive = isActive
+            if isActive == false && wasActive == true {
+                // deactivate したので世代を進める(またいだ synth は次の speak 直前に作り直される)。
+                StorySpeaker.audioSessionDeactivateGeneration += 1
+            }
         }catch{
             print("AVAudioSession setActive(\(isActive ? "true" : "false")) failed.")
         }
@@ -726,8 +753,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             do {
                 try audioSession.setActive(false, options: [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation])
                 StorySpeaker.currentActive = false
+                // deactivate したので世代を進める。これをまたいだ synth は次の speak 直前に作り直される。
+                StorySpeaker.audioSessionDeactivateGeneration += 1
             }catch(let err){
                 print("audioSession.setActive(false) failed: \(err.localizedDescription)")
+                // deactivate に失敗した場合も synth は固着しうる(下で reloadSynthesizer している)ので、
+                // 他の synth も次の speak 直前に作り直されるよう世代を進めておく。
+                StorySpeaker.audioSessionDeactivateGeneration += 1
                 // このエラーが発生した後、読み上げが失敗し続けてしまう場合があります。
                 // そのような場合、AVSpeechSynthesizer を作り直さないと問題は解消しないようです。
                 // ただ、このエラーは上記の問題を踏まなかった場合でも発生する場合があります(というか、上記の問題以外の問題で発生する場合の方が多いようです)。
@@ -1648,4 +1680,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     #endif
+}
+
+// Speaker(発話の最下層)に、上位の具象クラス名を出さずにオーディオセッション準備を委譲させるための実装。
+// 「deactivate された状態/それをまたいだ synth への speak」による固着(synth wedge)を予防する。
+extension StorySpeaker: SpeakerAudioSessionCoordinator {
+    func prepareAudioSessionForSpeechSynchronously() {
+        StorySpeaker.ensureAudioSessionActiveForSpeechSynchronously()
+    }
+    var audioSessionGeneration: Int {
+        return StorySpeaker.audioSessionDeactivateGeneration
+    }
 }

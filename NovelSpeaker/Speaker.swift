@@ -14,6 +14,18 @@ protocol SpeakRangeDelegate {
     func finishSpeak(isCancel:Bool, speechString:String)
 }
 
+// Speaker が「発話直前にオーディオセッションを整える」ために使う最小の抽象。
+// 具体的なセッション管理(アクティブ化や deactivate のライフサイクル)は上位レイヤが実装し、
+// Speaker 自身は上位の具象クラス(StorySpeaker 等)に依存しないようにするためのもの。
+// 未登録(coordinator=nil)なら Speaker は何もしないので、単体・他プラットフォームでもそのまま動く。
+protocol SpeakerAudioSessionCoordinator: AnyObject {
+    // speak 直前に呼ばれる。セッションが落ちていたら同期的に立て直す等の準備を行う。
+    func prepareAudioSessionForSpeechSynchronously()
+    // オーディオセッションを deactivate する度に増える世代番号。
+    // synth がこの世代をまたいでいたら内部オーディオエンジンが切れて固着しうるので、作り直す判定に使う。
+    var audioSessionGeneration: Int { get }
+}
+
 #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
 class Speaker {
     var speaker_Original:Speaker_Original? = nil
@@ -230,13 +242,19 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     var m_Delay:TimeInterval = 0.0
     var m_Delegate:SpeakRangeDelegate? = nil
     var isSpeechKicked:Bool = false
-    
+    // 発話直前にオーディオセッションを整えるための上位レイヤ(任意)。
+    // 未登録(nil)なら何もしないので、Speaker 自体は上位の具象クラスに依存せず単体で動く。
+    static weak var audioSessionCoordinator: SpeakerAudioSessionCoordinator?
+    // この synth が作られた時点のオーディオセッション世代。coordinator の世代と食い違っていれば、
+    // この synth は deactivate をまたいで生き残っており内部エンジンが切れて固着しうるので作り直す。
+    private var bornAudioSessionGeneration:Int = Speaker.audioSessionCoordinator?.audioSessionGeneration ?? 0
+
     override init() {
         super.init()
         synthesizer.delegate = self
         SetNotificationHandler()
     }
-    
+
     deinit {
         RemoveNotificationHandler()
         synthesizer.delegate = nil
@@ -247,6 +265,20 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
             return
         }
         isSpeechKicked = true
+        // アプリ全体の不変条件:「オーディオセッションが deactivate された状態/それをまたいだ synth への
+        // speak」が固着(synth wedge)の根本原因。全 speak はこの Speech() を通るので、ここで是正する。
+        // 具体的なセッション操作は上位レイヤ(coordinator)に委譲し、Speaker は上位の具象クラスに依存しない。
+        // coordinator 未登録なら何もしない(従来どおりの素の挙動・他プラットフォームでもそのまま動く)。
+        if let coordinator = Speaker.audioSessionCoordinator {
+            // (1) セッションが落ちていたら同期的に立て直す。
+            coordinator.prepareAudioSessionForSpeechSynchronously()
+            // (2) deactivate をまたいで生き残った synth は作り直す(世代が変わらない通常時は何もしない)。
+            if bornAudioSessionGeneration != coordinator.audioSessionGeneration {
+                synthesizer = AVSpeechSynthesizer()
+                synthesizer.delegate = self
+                bornAudioSessionGeneration = coordinator.audioSessionGeneration
+            }
+        }
         let utt = AVSpeechUtterance(string: text)
         utt.voice = m_Voice
         utt.pitchMultiplier = m_Pitch
