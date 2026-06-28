@@ -4453,3 +4453,39 @@ Fixing the problem
 - Fixed an issue where some novels could not be searched using the "Search" button in the upper left corner of the "Bookshelf screen".
 - Fixed an issue where the app could stop reading aloud until it was restarted, which could occur when the playback position was changed repeatedly (for example, from Control Center) during playback.
 - Fixed an issue where importing from some websites took a long time and sometimes failed.
+
+
+
+
+# Version 2.12.1
+
+問題の修正
+
+- 歯抜け小説の更新確認/補完DL時に、手元にある章を無駄に再取得していた問題を修正
+- アプリを再起動するまで発話が開始できなくなる問題について色々修正
+- 「設定タブ」→「CarPlay接続時に音声モードを変える〜」がONの時の挙動が意図通りになっていなかった問題を修正
+
+今回は問題の修正だけです。以下でざっと解説します。
+
+- 歯抜け小説の更新確認/補完DL時に、手元にある章を無駄に再取得していた問題を修正
+  これは、1,2,3,4,11,12,13,14 という感じで5から10ページ目まで抜けていた場合に、4,5,6,7,8,9,10,11,12,13,14 とアクセスしていた(4ページ目は5ページ目のURLを取り出すために必要)のを 4,5,6,7,8,9,10,14(最後のページは次のページのURLを取り出すために必要) というアクセスになるようにした、というものです。
+
+- アプリを再起動するまで発話が開始できなくなる問題について色々修正
+  これは前回のアップデートで変更したものでは解消しきれていないものについてもうちょっと頑張って幾つかの方式を使って直そうとしてみた、というものです。
+  一応、今のところこちらで再現できている同様の問題については全て潰せたとは思うんですが、お寄せいただいています情報では再現できない問題が多く、これらの方式が効くのかどうかの確証が得られていないので、「完全に直りました！」とは言えないなぁという感じのものになります。
+  なので、これでも直っていないぞ？という方は、できるだけ詳細な再現手順を書いた上で(初期条件や、問題が発生する小説のURL、発生させやすい操作手順など、できるだけ発生条件を厳密に定義できているような「定義」レベルのもの)不都合報告をお寄せいただけますと助かります。
+  というか、そのレベルでないとほぼ再現せず、再現しないと直らないと考えていただけますと助かります。
+
+- 「設定タブ」→「CarPlay接続時に音声モードを変える〜」がONの時の挙動を意図通りにします
+  こちらは、Version 2.10.4 の時に追加した上記の設定についてです。実は、この設定がONの時、通常時は default である mode を CarPlay接続時 には voicePrompt 設定に変えるというはずが、別のモードが設定されていたという問題があったのでそれを是正したものになります。
+  なお、以前から変わらず開発者の手元には CarPlay機器 がありませんので実機でのテストはできておりませんため、これで正しく期待通りになるかどうかよくわからないというものになります。
+  
+  以上となります。
+
+# Version 2.12.1
+
+Fixing the problem
+
+- Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.
+- Implemented various fixes for an issue where speech playback would fail to start until the app was restarted.
+- Fixed an issue where the behavior did not match the intended design when the "Change the audio mode when connected to CarPlay" setting (under the Settings tab) was enabled.

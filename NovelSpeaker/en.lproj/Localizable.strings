@@ -500,7 +500,7 @@
 "ImportFromWebPageViewController_RemoveBookmark_Delete" = "Delete";
 
 "UriLoader_NSURLConnectionRequestFailed" = "Failed conneting with servers. (Check your internet status)";
-"UriLoader_HTTPResponseIsInvalid" = "The server has not returned a valid response. (Server returned error code: \"%ld\") There may be occasions where login are required.However if this problem proceeds feel free to contact support via e-mails";
+"UriLoader_HTTPResponseIsInvalid" = "The server has not returned a valid response. (Server returned error code: \"%ld\") If you encounter this error on a site that requires login, please open the target website in the \"Web Import\" tab, log in (or complete any age verification), and then try again. If the issue persists after doing so, it is likely that the site cannot be supported.";
 "UriLoader_HTMLParseFailed_Parse" = "Failed to parse document. (It doesn't seem to be a valid HTML or XHTML document, etc. NovelSpeaker currently only supports his HTML, XHTML, PDF, RTF, RTFd files)";
 "UriLoader_HTMLParseFailed_Xpath" = "Failed to parse HTML. (Illegal xpath was specified, probably the \"information registered in wedata\" for use in the analysis of this site is out of date or wrong.) Opinions on the support site side of NovelSpeaker Request form etc. Please report it with the URL where this error occurred or solve it by editing wedata yourself using OpenID)";
 "UriLoader_HTMLParseFailed_ContentIsNil" = "Failed to parse HTML. (I could not get the contents of the document, it may be solved by reporting from the opinion request form etc. on the support site side of NovelSpeaker together with the URL where this error occurred and the procedure until the error occurred. not)";
@@ -1081,19 +1081,25 @@
 "SettingsTableViewController_ScrapeInspectButtonTitle" = "Inspect all sites now";
 "SettingsTableViewController_ScrapeInspectProgressMessage" = "Inspecting…\n(Please wait a moment)";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
-- Added \"Specify the portion of each website to be included.\" (a function that allows you to select the portion to be considered as the main text during import) to the \"Settings tab\".
-- Slightly modified the mechanism of \"Notification of in-app error\" in the \"Settings tab\".
-- Added \"Edit / add priority SiteInfo\" to the \"Settings tab\".
-- Partially changed the behavior when retrieving the main text of novels.
-- Fixed an issue where some novels could not be searched using the \"Search\" button in the upper left corner of the \"Bookshelf screen\".
-- Fixed an issue where the app could stop reading aloud until it was restarted, which could occur when the playback position was changed repeatedly (for example, from Control Center) during playback.
-- Fixed an issue where importing from some websites took a long time and sometimes failed.
+- Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.
+- Implemented various fixes for an issue where speech playback would fail to start until the app was restarted.
+- Fixed an issue where the behavior did not match the intended design when the \"Change the audio mode when connected to CarPlay\" setting (under the Settings tab) was enabled.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.12.1
+
+Fixing the problem
+
+- Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.
+- Implemented various fixes for an issue where speech playback would fail to start until the app was restarted.
+- Fixed an issue where the behavior did not match the intended design when the \"Change the audio mode when connected to CarPlay\" setting (under the Settings tab) was enabled.
+
+
+
 Version 2.12.0
 
 Changes in interface/internal operation
