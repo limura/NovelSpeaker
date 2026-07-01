@@ -368,6 +368,9 @@ class SiteInfoEditorViewController: FormViewController {
             $0.value = testURLString
         }.onChange({ [weak self] row in
             self?.testURLString = row.value ?? ""
+        }).cellUpdate({ cell, _ in
+            // Eureka は title 付きセルの clearButtonMode を .never にするため上書きする。
+            cell.textField.clearButtonMode = .whileEditing
         })
         actionSection <<< ButtonRow() {
             $0.title = NSLocalizedString("SiteInfoEditor_TestNow", comment: "この値で今すぐテスト")
@@ -409,6 +412,8 @@ class SiteInfoEditorViewController: FormViewController {
                 if col.tag == "url" { self?.validateUrlRow(row) }
                 self?.refreshDiffIndicator(for: col.tag)
             }).cellUpdate({ [weak self] cell, row in
+                // Eureka は title 付きセルの clearButtonMode を .never にするため、編集中に × で全消しできるよう上書きする。
+                cell.textField.clearButtonMode = .whileEditing
                 // url 正規表現が壊れていると isMatchUrl が常に false でテストが走らない。崩れを赤字で示す。
                 if row.tag == "url" { self?.colorUrlCell(cell, row: row) }
             })
@@ -417,11 +422,31 @@ class SiteInfoEditorViewController: FormViewController {
         for col in SiteInfoEditorViewController.multiLineColumns {
             // TextAreaRow は値が入ると placeholder が消えて何の項目か分からなくなるため、
             // 直前に常時表示の説明ラベル(項目名+入力例)を置く。差分マーカーもこのラベルへ付ける(タグ desc:<列>)。
+            // TextAreaRow(UITextView)には clearButtonMode が無く、セルに × を重ねると本文に隠れて押せない。
+            // そのため常時表示の説明ラベルの右端(accessoryView)に × を置いて全消しできるようにする。
             infoSection <<< LabelRow("desc:\(col.tag)") {
                 $0.title = col.title
                 $0.cell.textLabel?.numberOfLines = 0
                 $0.cell.textLabel?.font = .preferredFont(forTextStyle: .caption1)
-            }
+            }.cellUpdate({ [weak self] cell, row in
+                guard let self = self else { return }
+                // 差分マーカー更新等で updateCell が繰り返し呼ばれるので、既に付いていれば作り直さない。
+                if cell.accessoryView is UIButton { return }
+                let clearButton = UIButton(type: .system)
+                clearButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+                clearButton.accessibilityLabel = NSLocalizedString("SiteInfoEditor_ClearField", comment: "この項目を消去")
+                clearButton.sizeToFit()
+                clearButton.addAction(UIAction { [weak self] _ in
+                    guard let self = self else { return }
+                    if let areaRow = self.form.rowBy(tag: col.tag) as? TextAreaRow {
+                        areaRow.value = nil
+                        areaRow.updateCell()
+                    }
+                    self.cells[col.tag] = nil
+                    self.refreshDiffIndicator(for: col.tag)
+                }, for: .touchUpInside)
+                cell.accessoryView = clearButton
+            })
             <<< TextAreaRow(col.tag) {
                 $0.placeholder = col.placeholder
                 $0.textAreaHeight = .dynamic(initialTextViewHeight: 90)

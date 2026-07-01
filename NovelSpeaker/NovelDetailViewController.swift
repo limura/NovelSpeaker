@@ -410,7 +410,71 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     self.performSegue(withIdentifier: "EditUserTextSegue", sender: self)
                 }
             })
-            
+
+            // 他の小説にこのページを追加する(本文右上ボタンを非表示にしていてもここから使える)。
+            // 「このページ」は現在の読書位置の章(無ければ末尾の章)を使う。
+            actionSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ [weak self] (cellOf, row) in
+                guard let self = self else { return }
+                let page:(content:String, subtitle:String)? = RealmUtil.RealmBlock { (realm) -> (String, String)? in
+                    guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return nil }
+                    guard let story = novel.readingChapterWith(realm: realm) ?? novel.lastChapterWith(realm: realm) else { return nil }
+                    return (story.content, story.subtitle)
+                }
+                guard let page = page else {
+                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("AddPageToOtherNovel_NoPage", comment: "追加できるページがありません。"))
+                    return
+                }
+                MultipleNovelIDSelectorViewController.PushSingleSelector(
+                    parent: self,
+                    excludeNovelID: self.novelID,
+                    title: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する"),
+                    confirmMessage: { novelTitle in
+                        String(format: NSLocalizedString("AddPageToOtherNovel_ConfirmMessage", comment: "「%@」にこのページを追加しますか？"), novelTitle)
+                    },
+                    onConfirmed: { [weak self] targetNovelID in
+                        guard let self = self else { return }
+                        let result = NovelSpeakerUtility.AppendPageToNovelTail(targetNovelID: targetNovelID, content: page.content, subtitle: page.subtitle)
+                        let message = result ? NSLocalizedString("AddPageToOtherNovel_Success", comment: "ページを追加しました。") : NSLocalizedString("AddPageToOtherNovel_Failure", comment: "ページの追加に失敗しました。")
+                        NiftyUtility.EasyDialogMessageDialog(viewController: self, message: message)
+                    })
+            })
+
+            // この小説を別の小説の末尾に追加する(全ページをコピー)。
+            let novelTitleForAppend = novel.title
+            actionSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_AppendThisNovelToOther", comment: "この小説を別の小説の末尾に追加する")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ [weak self] (cellOf, row) in
+                guard let self = self else { return }
+                MultipleNovelIDSelectorViewController.PushSingleSelector(
+                    parent: self,
+                    excludeNovelID: self.novelID,
+                    title: NSLocalizedString("NovelDetailViewController_ActionSection_AppendThisNovelToOther", comment: "この小説を別の小説の末尾に追加する"),
+                    confirmMessage: { novelTitle in
+                        String(format: NSLocalizedString("AppendNovelToOther_ConfirmMessage", comment: "「%@」の末尾に「%@」の全ページを追加しますか？"), novelTitle, novelTitleForAppend)
+                    },
+                    onConfirmed: { [weak self] targetNovelID in
+                        guard let self = self else { return }
+                        let sourceNovelID = self.novelID
+                        let progressDialog = NiftyUtility.EasyDialogBuilder(self)
+                            .label(text: NSLocalizedString("AppendNovelToOther_Processing", comment: "追加しています……"), textAlignment: .center)
+                            .build()
+                        progressDialog.show()
+                        DispatchQueue.global(qos: .userInitiated).async {
+                            let result = NovelSpeakerUtility.AppendAllPagesToNovelTail(sourceNovelID: sourceNovelID, targetNovelID: targetNovelID)
+                            DispatchQueue.main.async {
+                                progressDialog.dismiss(animated: false) {
+                                    let message = result ? NSLocalizedString("AppendNovelToOther_Success", comment: "全ページを追加しました。") : NSLocalizedString("AppendNovelToOther_Failure", comment: "追加に失敗しました。")
+                                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: message)
+                                }
+                            }
+                        }
+                    })
+            })
+
             self.form +++ actionSection
             
             let settingSection = Section(NSLocalizedString("NovelDetailViewController_SettingSectionTitle", comment: "この小説専用の設定"))

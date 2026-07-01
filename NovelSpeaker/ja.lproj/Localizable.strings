@@ -213,6 +213,7 @@
 "RealmModels_MenuItemsNotRemoved_Name_translate" = "翻訳";
 "RealmModels_MenuItemsNotRemoved_Name_addShortcut" = "ユーザ辞書...";
 "RealmModels_MenuItemsNotRemoved_Name_share" = "共有";
+"RealmModels_MenuItemsNotRemoved_Name_selectAll" = "全てを選択する";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
@@ -325,6 +326,7 @@
 "SpeechViewController_UnknownErrorForShare" = "不明なエラーでシェアできませんでした。";
 "SpeechViewController_CheckSpeechTextDialogTitle" = "読み上げに使われる文字列は以下のようになります。";
 "SpeechViewController_AddCheckSpeechText" = "読み替え後を確認";
+"SpeechViewController_SelectAllText" = "全てを選択する";
 "SpeechViewController_AddSpeechModSettingsForThisNovel" = "読み替え登録(この小説用)";
 "SpeechViewController_Subtitles" = "目次";
 "SpeechViewController_CanNotGetStorys" = "小説情報を参照できませんでした。";
@@ -698,6 +700,7 @@
 "CreateSpeechModSettingViewControllerSwift_ConifirmDeleteSettingBecauseNoTargetNovelID" = "適用対象の小説が何もない状態になっています。\nこの読みの修正を削除してもよろしいですか？";
 
 "MultipleNovelIDSelectorViewController_Title" = "小説を選択";
+"MultipleNovelIDSelectorViewController_SortButton" = "並び替え";
 
 "NovelDownloadQueue_DownloadFailedByErrorSiteInfo" = "SiteInfo の読み込みが失敗しているようなのでダウンロードを諦めます";
 
@@ -883,6 +886,16 @@
 "SpeechViewButtonType_SkipBackward" = "(再生中に)少し巻き戻す";
 "SpeechViewButtonType_SkipForward" = "(再生中に)少し進める";
 "SpeechViewButtonType_ShowTableOfContents" = "章リスト(目次)";
+"SpeechViewButtonType_AddPageToOtherNovel" = "他の小説にこのページを追加する";
+"AddPageToOtherNovel_ConfirmMessage" = "「%@」にこのページを追加しますか？";
+"AddPageToOtherNovel_Success" = "ページを追加しました。";
+"AddPageToOtherNovel_Failure" = "ページの追加に失敗しました。";
+"AddPageToOtherNovel_NoPage" = "追加できるページがありません。";
+"NovelDetailViewController_ActionSection_AppendThisNovelToOther" = "この小説を別の小説の末尾に追加する";
+"AppendNovelToOther_ConfirmMessage" = "「%@」の末尾に「%@」の全ページを追加しますか？";
+"AppendNovelToOther_Processing" = "追加しています……";
+"AppendNovelToOther_Success" = "全ページを追加しました。";
+"AppendNovelToOther_Failure" = "追加に失敗しました。";
 "SpeechViewButtonType_SearchByText" = "表示されているページ内で検索";
 
 "SearchFloatingView_SearchTextFieldPlaceHolder" = "検索する文字を入力します";
@@ -1003,6 +1016,7 @@
 "SiteInfoEditor_ExportCreateFailed" = "CSVファイルの作成に失敗しました。";
 "SiteInfoEditor_Test" = "テスト";
 "SiteInfoEditor_Save" = "保存";
+"SiteInfoEditor_ClearField" = "この項目を消去";
 "SiteInfoEditor_TestNow" = "この値で今すぐテスト";
 "SiteInfoEditor_TestURL" = "テスト用URL";
 "SiteInfoEditor_TestURL_Placeholder" = "1ページだけ取得して取得値を確認(空なら checkTargets 全件)";

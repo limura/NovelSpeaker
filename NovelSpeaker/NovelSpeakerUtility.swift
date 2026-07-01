@@ -3979,3 +3979,111 @@ class NovelSpeakerUtility: NSObject {
     }
 
 }
+
+#if !os(watchOS)
+// 「他の小説にこのページを追加する」「この小説を別の小説の末尾に追加する」で使う、
+// 小説の末尾へページ(章)を追加する共通処理。
+extension NovelSpeakerUtility {
+    // 追加先小説(targetNovelID)の末尾に content/subtitle を持つ新しいページを1つ追加する。
+    // 追加先が URL 型なら story.url に「追加先小説の末尾ページの URL」を引き継がせ、以降の更新確認が
+    // 追加先自身のサイトで続くようにする(EditBookViewController.insertNewChapter と同じ考え方)。
+    // Write transaction の外から呼ぶ(内部で RealmBlock/WriteWith する)。返り値は成否。
+    @discardableResult
+    static func AppendPageToNovelTail(targetNovelID: String, content: String, subtitle: String) -> Bool {
+        return RealmUtil.RealmBlock { (realm) -> Bool in
+            var result = false
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID) else { return }
+                let inheritedURL: String? = novel.type == .URL ? novel.lastDownloadURLWith(realm: realm) : nil
+                result = appendOneStory(realm: realm, targetNovel: novel, content: content, subtitle: subtitle, inheritedURL: inheritedURL)
+            }
+            return result
+        }
+    }
+
+    // コピー元小説(sourceNovelID)の全ページを、追加先小説(targetNovelID)の末尾へ順にコピーする。
+    // 追加される全ページの url には「追加先(コピー先)小説の末尾ページの URL」を設定する(コピー元の url は引き継がない)。
+    // 追加先の更新確認が追加先自身のサイトで続けられるようにするため。返り値は成否。
+    @discardableResult
+    static func AppendAllPagesToNovelTail(sourceNovelID: String, targetNovelID: String) -> Bool {
+        return RealmUtil.RealmBlock { (realm) -> Bool in
+            guard RealmNovel.SearchNovelWith(realm: realm, novelID: sourceNovelID) != nil else { return false }
+            // コピー元の全ページを章順で読み出す(bulk 単位でまとめて読む)。
+            var sourceStories:[Story] = []
+            RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: sourceNovelID) { story in
+                sourceStories.append(story)
+            }
+            sourceStories.sort { $0.chapterNumber < $1.chapterNumber }
+            if sourceStories.isEmpty { return false }
+            var result = false
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                guard let targetNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID) else { return }
+                // 追加先の(追加前の)末尾ページ URL。URL 型のときのみ全ページに引き継ぐ。
+                let inheritedURL: String? = targetNovel.type == .URL ? targetNovel.lastDownloadURLWith(realm: realm) : nil
+                result = appendStoriesToTailBulkWise(realm: realm, targetNovel: targetNovel, sourceStories: sourceStories, inheritedURL: inheritedURL)
+            }
+            return result
+        }
+    }
+
+    // Write transaction の中で使う。targetNovel の末尾に1ページ追加する。
+    private static func appendOneStory(realm: RealmSwift.Realm, targetNovel: RealmNovel, content: String, subtitle: String, inheritedURL: String?) -> Bool {
+        var story = Story()
+        story.novelID = targetNovel.novelID
+        story.chapterNumber = (targetNovel.lastChapterNumber ?? 0) + 1
+        story.content = content
+        story.subtitle = subtitle
+        if let url = inheritedURL {
+            story.url = url
+        }
+        return RealmStoryBulk.InsertStoryWith(realm: realm, story: story)
+    }
+
+    // Write transaction の中で使う。targetNovel の末尾へ、RealmStoryBulk 単位でまとめてページを追記する。
+    // 1ページずつ InsertStoryWith を呼ぶと毎回 bulk の読み書きと novel 更新が走って遅いので、
+    // 詰める先の bulk を確定させて bulk ごとに一度だけ書き込む。
+    private static func appendStoriesToTailBulkWise(realm: RealmSwift.Realm, targetNovel: RealmNovel, sourceStories: [Story], inheritedURL: String?) -> Bool {
+        let novelID = targetNovel.novelID
+        var nextChapterNumber = (targetNovel.lastChapterNumber ?? 0) + 1
+        var index = 0
+        let count = sourceStories.count
+        while index < count {
+            let bulkChapterNumber = RealmStoryBulk.CalcBulkChapterNumber(chapterNumber: nextChapterNumber)
+            // 末尾の未満杯 bulk があれば読み込んで追記、無ければ新規作成。
+            let existingBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: nextChapterNumber)
+            var storyArray:[Story] = existingBulk?.LoadStoryArray() ?? []
+            // この bulk が受け持つ章(bulkChapterNumber+1 .. bulkChapterNumber+bulkCount)まで詰める。
+            while index < count, RealmStoryBulk.CalcBulkChapterNumber(chapterNumber: nextChapterNumber) == bulkChapterNumber {
+                var story = Story()
+                story.novelID = novelID
+                story.chapterNumber = nextChapterNumber
+                story.content = sourceStories[index].content
+                story.subtitle = sourceStories[index].subtitle
+                if let url = inheritedURL {
+                    story.url = url
+                }
+                storyArray.append(story)
+                nextChapterNumber += 1
+                index += 1
+            }
+            let bulk = existingBulk ?? RealmStoryBulk()
+            if existingBulk == nil {
+                bulk.id = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: bulkChapterNumber)
+                bulk.novelID = novelID
+                bulk.chapterNumber = bulkChapterNumber
+            }
+            bulk.OverrideStoryListAsset(storyArray: storyArray)
+            realm.add(bulk, update: .modified)
+        }
+        // 末尾章IDを更新(InsertStoryWith と同じ後処理)。
+        targetNovel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: nextChapterNumber - 1)
+        targetNovel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
+        targetNovel.lastReadDate = Date(timeIntervalSinceNow: 0)
+        realm.add(targetNovel, update: .modified)
+        // 変更した bulk がキャッシュに残っていると古い内容が返るので破棄しておく。
+        RealmStoryBulk.bulkStoryArrayCacheID = nil
+        RealmStoryBulk.bulkStoryArrayCache = nil
+        return true
+    }
+}
+#endif

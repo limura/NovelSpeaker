@@ -270,6 +270,7 @@
 "RealmModels_MenuItemsNotRemoved_Name_translate" = "Translate";
 "RealmModels_MenuItemsNotRemoved_Name_addShortcut" = "Add shortcut";
 "RealmModels_MenuItemsNotRemoved_Name_share" = "Share";
+"RealmModels_MenuItemsNotRemoved_Name_selectAll" = "Select All";
 
 "RemoteDataURLSettingViewController_Title" = "Setting URL for internal data reference";
 "RemoteDataURLSettingViewController_Information" = "Note: If you rewrite the settings here poorly, NovelSpeaker may not work properly. Make sure you understand the contents before rewriting.\nThe standard settings are all \"empty (nothing is written)\", so if a problem occurs, you can return to the standard settings by deleting the contents of all items.";
@@ -356,6 +357,7 @@
 "SpeechViewController_UnknownErrorForShare" = "Could not share due to an unknown error.";
 "SpeechViewController_CheckSpeechTextDialogTitle" = "The string used for reading is as follows.";
 "SpeechViewController_AddCheckSpeechText" = "Check the translated text used for speech";
+"SpeechViewController_SelectAllText" = "Select All";
 "SpeechViewController_AddSpeechModSettingsForThisNovel" = "Add to speech mod settings for this novel";
 "SpeechViewController_Subtitles" = "Index";
 "SpeechViewController_CanNotGetStorys" = "I could not refer to the novel information.";
@@ -706,6 +708,7 @@
 "CreateSpeechModSettingViewControllerSwift_ConifirmDeleteSettingBecauseNoTargetNovelID" = "There are no novel in Applicable novel.\nAre you sure you want to delete this setting?";
 
 "MultipleNovelIDSelectorViewController_Title" = "Select novel";
+"MultipleNovelIDSelectorViewController_SortButton" = "Sort";
 
 "NovelDownloadQueue_DownloadFailedByErrorSiteInfo" = "It seems that the loading of SiteInfo is failing, so I give up the download";
 
@@ -893,6 +896,16 @@
 "SpeechViewButtonType_SkipBackward" = "Rewind a little (during playback)";
 "SpeechViewButtonType_SkipForward" = "Advance a little (during playback)";
 "SpeechViewButtonType_ShowTableOfContents" = "Table of Contents";
+"SpeechViewButtonType_AddPageToOtherNovel" = "Add this page to another novel";
+"AddPageToOtherNovel_ConfirmMessage" = "Add this page to \"%@\"?";
+"AddPageToOtherNovel_Success" = "The page was added.";
+"AddPageToOtherNovel_Failure" = "Failed to add the page.";
+"AddPageToOtherNovel_NoPage" = "There is no page to add.";
+"NovelDetailViewController_ActionSection_AppendThisNovelToOther" = "Append this novel to the end of another novel";
+"AppendNovelToOther_ConfirmMessage" = "Add all pages of \"%2$@\" to the end of \"%1$@\"?";
+"AppendNovelToOther_Processing" = "Adding…";
+"AppendNovelToOther_Success" = "All pages were added.";
+"AppendNovelToOther_Failure" = "Failed to add.";
 "SpeechViewButtonType_SearchByText" = "Search within the displayed page";
 
 "SearchFloatingView_SearchTextFieldPlaceHolder" = "Enter the character you want to search for";
@@ -1014,6 +1027,7 @@
 "SiteInfoEditor_ExportCreateFailed" = "Failed to create the CSV file.";
 "SiteInfoEditor_Test" = "Test";
 "SiteInfoEditor_Save" = "Save";
+"SiteInfoEditor_ClearField" = "Clear this field";
 "SiteInfoEditor_TestNow" = "Test with these values now";
 "SiteInfoEditor_TestURL" = "Test URL";
 "SiteInfoEditor_TestURL_Placeholder" = "Fetch just this one page to inspect extracted values (empty = all checkTargets)";

@@ -803,6 +803,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 MenuItemsNotRemovedType.translate,
                 MenuItemsNotRemovedType.addShortcut,
                 MenuItemsNotRemovedType.share,
+                MenuItemsNotRemovedType.selectAll,
             ].map({
                 $0.localizedString()
             })

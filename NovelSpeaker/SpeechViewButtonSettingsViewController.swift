@@ -162,6 +162,15 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                         $0.value = setting.isOn
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
+                case .addPageToOtherNovel:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
+                        if #available(iOS 13.0, *) {
+                            $0.cell.imageView?.image = UIImage(systemName: "book.badge.plus")
+                        }
+                        $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
+                    }.onChange({_ in self.saveCurrentSetting()})
                 default:
                     continue
                 }

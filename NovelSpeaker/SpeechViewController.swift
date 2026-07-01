@@ -250,14 +250,64 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         let speechModMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), action: #selector(setSpeechModSetting(sender:)))
         let speechModForThisNovelMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettingsForThisNovel", comment: "この小説用の読み替え辞書へ登録"), action: #selector(setSpeechModForThisNovelSetting(sender:)))
         let checkSpeechTextMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)))
-        let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem]
+        // 「全てを選択する」は常にメニュー項目として登録し、表示可否は canPerformAction で(長押しメニュー削減設定に従って)判定する。
+        let selectAllMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_SelectAllText", comment: "全てを選択する"), action: #selector(selectAllText(sender:)))
+        let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem, selectAllMenuItem]
         menuController.menuItems = menuItems
+    }
+
+    // 本文は非編集の UITextView なので標準の「すべてを選択」が出ない。独自項目として全選択を提供する。
+    @objc func selectAllText(sender: UIMenuItem) {
+        self.textView.selectAll(nil)
+    }
+
+    // 長押しメニュー削減が ON の時は menuItemsNotRemoved に .selectAll がある時だけ表示する。OFF なら常に表示。
+    func shouldShowSelectAllMenuItem() -> Bool {
+        return RealmUtil.RealmBlock { (realm) -> Bool in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return true }
+            if globalState.isMenuItemIsAddNovelSpeakerItemsOnly {
+                return globalState.menuItemsNotRemoved.contains(MenuItemsNotRemovedType.selectAll.rawValue)
+            }
+            return true
+        }
+    }
+
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(self.selectAllText(sender:)) {
+            if StorySpeaker.shared.isPlayng { return false }
+            return shouldShowSelectAllMenuItem()
+        }
+        return super.canPerformAction(action, withSender: sender)
     }
     func removeCustomUIMenu() {
         let menuController = UIMenuController.shared
         menuController.menuItems = []
     }
-    
+
+    @objc func addPageToOtherNovelButtonClicked(_ sender: Any) {
+        guard let storyID = self.storyID else { return }
+        let currentNovelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+        let story:Story? = RealmUtil.RealmBlock { (realm) -> Story? in
+            return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID)
+        }
+        guard let story = story else { return }
+        let content = story.content
+        let subtitle = story.subtitle
+        MultipleNovelIDSelectorViewController.PushSingleSelector(
+            parent: self,
+            excludeNovelID: currentNovelID,
+            title: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する"),
+            confirmMessage: { novelTitle in
+                String(format: NSLocalizedString("AddPageToOtherNovel_ConfirmMessage", comment: "「%@」にこのページを追加しますか？"), novelTitle)
+            },
+            onConfirmed: { [weak self] targetNovelID in
+                guard let self = self else { return }
+                let result = NovelSpeakerUtility.AppendPageToNovelTail(targetNovelID: targetNovelID, content: content, subtitle: subtitle)
+                let message = result ? NSLocalizedString("AddPageToOtherNovel_Success", comment: "ページを追加しました。") : NSLocalizedString("AddPageToOtherNovel_Failure", comment: "ページの追加に失敗しました。")
+                NiftyUtility.EasyDialogMessageDialog(viewController: self, message: message)
+            })
+    }
+
     var currentWindowWidth:CGFloat = 0.0
     func assignUpperButtons(novelID: String, novelType:NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
         DispatchQueue.main.async {
@@ -387,6 +437,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         image: UIImage(systemName: "list.bullet"),
                         action: #selector(self.showTableOfContentsButtonClicked(_:)),
                         accessibilityLabel: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
+                    )
+                    barButtonArray.append(button)
+                case .addPageToOtherNovel:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "book.badge.plus"),
+                        action: #selector(self.addPageToOtherNovelButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
                     )
                     barButtonArray.append(button)
                 case .speechStop:

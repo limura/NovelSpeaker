@@ -1609,7 +1609,9 @@ extension WebSpeechViewController {
         let speechModMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), action: #selector(setSpeechModSetting(sender:)))
         let speechModForThisNovelMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettingsForThisNovel", comment: "この小説用の読み替え辞書へ登録"), action: #selector(setSpeechModForThisNovelSetting(sender:)))
         let checkSpeechTextMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)))
-        let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem]
+        // 「全てを選択する」は常にメニュー項目として登録し、表示可否は canPerformAction で(長押しメニュー削減設定に従って)判定する。
+        let selectAllMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_SelectAllText", comment: "全てを選択する"), action: #selector(selectAllText(sender:)))
+        let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem, selectAllMenuItem]
         menuController.menuItems = menuItems
         #if targetEnvironment(macCatalyst)
         #if false
@@ -1662,6 +1664,31 @@ extension WebSpeechViewController {
                 NiftyUtility.EasyDialogLongMessageDialog(viewController: self, message: speechText)
             }
         }
+    }
+
+    // WKWebView 上の本文を全選択する(標準の「すべてを選択」が出ないため独自に提供)。
+    @objc func selectAllText(sender: UIMenuItem) {
+        let js = "(function(){var r=document.createRange();r.selectNodeContents(document.body);var s=window.getSelection();s.removeAllRanges();s.addRange(r);})()"
+        self.textWebView?.evaluateJavaScript(js, completionHandler: nil)
+    }
+
+    // 長押しメニュー削減が ON の時は menuItemsNotRemoved に .selectAll がある時だけ表示する。OFF なら常に表示。
+    func shouldShowSelectAllMenuItem() -> Bool {
+        return RealmUtil.RealmBlock { (realm) -> Bool in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return true }
+            if globalState.isMenuItemIsAddNovelSpeakerItemsOnly {
+                return globalState.menuItemsNotRemoved.contains(MenuItemsNotRemovedType.selectAll.rawValue)
+            }
+            return true
+        }
+    }
+
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(self.selectAllText(sender:)) {
+            if StorySpeaker.shared.isPlayng { return false }
+            return shouldShowSelectAllMenuItem()
+        }
+        return super.canPerformAction(action, withSender: sender)
     }
 }
 

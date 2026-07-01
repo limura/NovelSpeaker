@@ -2630,6 +2630,7 @@ enum SpeechViewButtonTypes:String, Codable {
     case skipForward = "skipForward"
     case showTableOfContents = "showTableOfContents"
     case searchByText = "searchByText"
+    case addPageToOtherNovel = "addPageToOtherNovel"
 }
 
 struct SpeechViewButtonSetting: Codable {
@@ -2637,6 +2638,7 @@ struct SpeechViewButtonSetting: Codable {
     var isOn:Bool
     
     static let defaultSetting:[SpeechViewButtonSetting] = [
+        SpeechViewButtonSetting(type: .addPageToOtherNovel, isOn: false),
         SpeechViewButtonSetting(type: .showTableOfContents, isOn: false),
         SpeechViewButtonSetting(type: .skipBackward, isOn: false),
         SpeechViewButtonSetting(type: .skipForward, isOn: false),
@@ -2997,6 +2999,7 @@ enum MenuItemsNotRemovedType: String {
     case translate // 翻訳
     case addShortcut // ユーザ辞書...
     case share // 共有
+    case selectAll // 全てを選択する(ことせかい 独自の selectAllText: 項目)
 
     func localizedString() -> String {
         switch self {
@@ -3010,6 +3013,8 @@ enum MenuItemsNotRemovedType: String {
             return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_addShortcut", comment: "ユーザ辞書...")
         case .share:
             return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_share", comment: "共有")
+        case .selectAll:
+            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_selectAll", comment: "全てを選択する")
         }
     }
     static func convertFromLocalizedString(localizedString: String) -> MenuItemsNotRemovedType? {
@@ -3024,11 +3029,13 @@ enum MenuItemsNotRemovedType: String {
             return .translate
         case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_share", comment: "共有"):
             return .share
+        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_selectAll", comment: "全てを選択する"):
+            return .selectAll
         default:
             return nil
         }
     }
-    
+
     func isTargetSelector(selector: Selector) -> Bool {
         switch self {
         case .define:
@@ -3039,6 +3046,9 @@ enum MenuItemsNotRemovedType: String {
             return selector.description == "_translate:"
         case .share:
             return selector.description == "_share:"
+        case .selectAll:
+            // ことせかい 独自メニュー項目「全てを選択する」の selectAllText(sender:) セレクタ。
+            return selector.description == "selectAllTextWithSender:"
             #if !os(watchOS)
         case .copy:
             return selector == #selector(UIResponderStandardEditActions.copy(_:))

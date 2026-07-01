@@ -39,7 +39,7 @@ struct BugReportViewInputData {
     var IsNeedAppLog = false
 }
 
-class BugReportViewController: FormViewController, MFMailComposeViewControllerDelegate {
+class BugReportViewController: FormViewController, MFMailComposeViewControllerDelegate, MultipleNovelIDSelectorDelegate {
     var additionalHintString:String? = nil
     
     static var value = BugReportViewInputData();
@@ -313,24 +313,15 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     BugReportViewController.value.ProblemOccurenceProcedure = value
                 }
             })
-            <<< MultipleSelectorRow<NovelTitle2ID>("TargetNovelAlertRow") { (row) in
-                row.title = NSLocalizedString("BugReportViewController_TargetNovelName", comment: "問題が発生する小説(もしあれば)")
-                row.selectorTitle = NSLocalizedString("BugReportViewController_TargetNovelName_SelectorTitle", comment: "問題が発生する小説")
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) {
-                        row.options = novelArray.map({NovelTitle2ID(title: $0.title, novelID: $0.novelID)})
-                    }
-                }
-                row.value = BugReportViewController.value.TargetNovelNameSet
-            }.onPresent { from, to in
-                to.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: from, action: #selector(self.multipleSelectorDone(_:)))
-            }.onChange { row in
-                if let value = row.value {
-                    BugReportViewController.value.TargetNovelNameSet = value
-                }else{
-                    BugReportViewController.value.TargetNovelNameSet = []
-                }
-            }
+            <<< ButtonRow("TargetNovelAlertRow") { (row) in
+                row.title = self.targetNovelButtonTitle()
+                row.cell.textLabel?.numberOfLines = 0
+            }.cellUpdate({ [weak self] cell, row in
+                cell.textLabel?.textAlignment = .left
+                row.title = self?.targetNovelButtonTitle()
+            }).onCellSelection({ [weak self] _, _ in
+                self?.showTargetNovelSelector()
+            })
             <<< SwitchRow("IsEnableBackupFileSend") {
                 $0.title = NSLocalizedString("BugReportViewController_IsEnableBackupFileSend", comment: "軽量バックアップファイルを添付する")
                 $0.value = BugReportViewController.value.IsEnabledBackupFileSend
@@ -366,8 +357,8 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 row.hidden = .function(["IsEnableBackupFileSend", "TargetNovelAlertRow"], { form -> Bool in
-                    if let isBackupFileSend = (form.rowBy(tag: "IsEnableBackupFileSend") as? RowOf<Bool>)?.value, let targetNovelAlertSet = (form.rowBy(tag: "TargetNovelAlertRow") as? RowOf<Set<NovelTitle2ID>>)?.value {
-                        if isBackupFileSend == false || targetNovelAlertSet.isEmpty {
+                    if let isBackupFileSend = (form.rowBy(tag: "IsEnableBackupFileSend") as? RowOf<Bool>)?.value {
+                        if isBackupFileSend == false || BugReportViewController.value.TargetNovelNameSet.isEmpty {
                             return true
                         }
                     }
@@ -544,6 +535,47 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     
     @objc func multipleSelectorDone(_ item:UIBarButtonItem) {
         _ = navigationController?.popViewController(animated: true)
+    }
+
+    // 「問題が発生する小説」選択ボタンのタイトル(選択件数を付ける)。
+    func targetNovelButtonTitle() -> String {
+        let base = NSLocalizedString("BugReportViewController_TargetNovelName", comment: "問題が発生する小説(もしあれば)")
+        let count = BugReportViewController.value.TargetNovelNameSet.count
+        if count > 0 {
+            return base + " (\(count))"
+        }
+        return base
+    }
+
+    // 検索・並び替えのできる小説選択画面(共通部品)を開く。
+    func showTargetNovelSelector() {
+        let selector = MultipleNovelIDSelectorViewController()
+        selector.IsUseAnyNovelID = false
+        selector.OverrideTitle = NSLocalizedString("BugReportViewController_TargetNovelName_SelectorTitle", comment: "問題が発生する小説")
+        selector.SelectedNovelIDSet = Set(BugReportViewController.value.TargetNovelNameSet.map({ $0.novelID }))
+        selector.delegate = self
+        self.navigationController?.pushViewController(selector, animated: true)
+    }
+
+    // MARK: - MultipleNovelIDSelectorDelegate
+    func MultipleNovelIDSelectorSelected(selectedNovelIDSet: Set<String>, hint: String) {
+        let newSet = RealmUtil.RealmBlock { (realm) -> Set<NovelTitle2ID> in
+            var s = Set<NovelTitle2ID>()
+            for novelID in selectedNovelIDSet {
+                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                    s.insert(NovelTitle2ID(title: novel.title, novelID: novelID))
+                }
+            }
+            return s
+        }
+        BugReportViewController.value.TargetNovelNameSet = newSet
+        DispatchQueue.main.async {
+            if let row = self.form.rowBy(tag: "TargetNovelAlertRow") as? ButtonRow {
+                row.title = self.targetNovelButtonTitle()
+                row.updateCell()
+            }
+            self.form.rowBy(tag: "IsAppendTargetNovelStoryText")?.evaluateHidden()
+        }
     }
 
     /*

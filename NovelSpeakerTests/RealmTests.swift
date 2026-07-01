@@ -341,3 +341,176 @@ class RealmTests: XCTestCase {
         }
     }
 }
+
+// NovelSpeakerUtility.AppendAllPagesToNovelTail(sourceNovelID:targetNovelID:) のテスト。
+// (コピー元の全ページを追加先の末尾へ bulk 単位でまとめて追記する処理)
+final class AppendAllPagesToNovelTailTests: XCTestCase {
+    private let sourceNovelID = "_AppendTest_Source"
+    private let targetNovelID = "_AppendTest_Target"
+
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        // ローカル Realm を使う(iCloud は使わない)。
+        UserDefaults.standard.set(false, forKey: RealmUtil.UseCloudRealmKey)
+        cleanup()
+    }
+
+    override func tearDownWithError() throws {
+        cleanup()
+        try super.tearDownWithError()
+    }
+
+    private func cleanup() {
+        RealmUtil.Write { realm in
+            for novelID in [sourceNovelID, targetNovelID] {
+                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                    novel.delete(realm: realm)
+                }
+                RealmStoryBulk.RemoveAllStoryWith(realm: realm, novelID: novelID)
+            }
+        }
+    }
+
+    // 指定の novelID に、1..pageCount のページを持つ小説を作る。
+    // 各ページの content/subtitle は "<prefix>-content-<ch>" / "<prefix>-subtitle-<ch>"。
+    // urlPrefix があれば url は "<urlPrefix><ch>"。pageCount が 0 ならページ無し(空の小説)。
+    private func makeNovel(novelID: String, type: NovelType, prefix: String, pageCount: Int, urlPrefix: String?) {
+        RealmUtil.Write { realm in
+            let novel = RealmNovel()
+            novel.novelID = novelID
+            novel.type = type
+            novel.title = "\(prefix) title"
+            var stories: [NovelSpeaker.Story] = []
+            if pageCount > 0 {
+                for ch in 1...pageCount {
+                    var story = Story()
+                    story.novelID = novelID
+                    story.chapterNumber = ch
+                    story.content = "\(prefix)-content-\(ch)"
+                    story.subtitle = "\(prefix)-subtitle-\(ch)"
+                    if let urlPrefix = urlPrefix {
+                        story.url = "\(urlPrefix)\(ch)"
+                    }
+                    stories.append(story)
+                }
+                RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: stories)
+                if let last = stories.last {
+                    novel.m_lastChapterStoryID = last.storyID
+                }
+            }
+            realm.add(novel, update: .modified)
+        }
+    }
+
+    private func story(_ novelID: String, _ chapterNumber: Int) -> NovelSpeaker.Story? {
+        return RealmUtil.RealmBlock { realm in
+            return RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
+        }
+    }
+
+    private func lastChapterNumber(_ novelID: String) -> Int? {
+        return RealmUtil.RealmBlock { realm in
+            return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.lastChapterNumber
+        }
+    }
+
+    // 空の追加先(ユーザ作成型)へ全ページを追加できること。
+    func testAppendToEmptyTarget() {
+        makeNovel(novelID: sourceNovelID, type: .UserCreated, prefix: "src", pageCount: 3, urlPrefix: nil)
+        makeNovel(novelID: targetNovelID, type: .UserCreated, prefix: "tgt", pageCount: 0, urlPrefix: nil)
+
+        let result = NovelSpeakerUtility.AppendAllPagesToNovelTail(sourceNovelID: sourceNovelID, targetNovelID: targetNovelID)
+        XCTAssertTrue(result, "AppendAllPagesToNovelTail が失敗した")
+
+        XCTAssertEqual(lastChapterNumber(targetNovelID), 3, "追加先の末尾章番号が 3 になっていない")
+        for ch in 1...3 {
+            let story = self.story(targetNovelID, ch)
+            XCTAssertEqual(story?.content, "src-content-\(ch)", "ch\(ch) の content がコピーされていない")
+            XCTAssertEqual(story?.subtitle, "src-subtitle-\(ch)", "ch\(ch) の subtitle がコピーされていない")
+        }
+        // 4ページ目は存在しないこと。
+        XCTAssertNil(story(targetNovelID, 4), "余計なページが増えている")
+    }
+
+    // 既存ページを持つ追加先(ユーザ作成型)の末尾へ、正しい章番号・内容で連結されること。
+    func testAppendToNonEmptyTargetKeepsExistingAndNumbersContiguously() {
+        makeNovel(novelID: sourceNovelID, type: .UserCreated, prefix: "src", pageCount: 3, urlPrefix: nil)
+        makeNovel(novelID: targetNovelID, type: .UserCreated, prefix: "tgt", pageCount: 2, urlPrefix: nil)
+
+        let result = NovelSpeakerUtility.AppendAllPagesToNovelTail(sourceNovelID: sourceNovelID, targetNovelID: targetNovelID)
+        XCTAssertTrue(result, "AppendAllPagesToNovelTail が失敗した")
+
+        XCTAssertEqual(lastChapterNumber(targetNovelID), 5, "追加先の末尾章番号が 5 になっていない")
+        // 既存 1,2 は不変。
+        XCTAssertEqual(story(targetNovelID, 1)?.content, "tgt-content-1", "既存 ch1 が変わってしまった")
+        XCTAssertEqual(story(targetNovelID, 2)?.content, "tgt-content-2", "既存 ch2 が変わってしまった")
+        // 3,4,5 はコピー元 1,2,3。
+        for (offset, ch) in [3, 4, 5].enumerated() {
+            XCTAssertEqual(story(targetNovelID, ch)?.content, "src-content-\(offset + 1)", "ch\(ch) の content がコピー元とずれている")
+            XCTAssertEqual(story(targetNovelID, ch)?.subtitle, "src-subtitle-\(offset + 1)", "ch\(ch) の subtitle がコピー元とずれている")
+        }
+    }
+
+    // URL 型の追加先では、追加される全ページの url が「追加先の末尾ページの url」になり、
+    // コピー元の url は一切引き継がれないこと。既存ページの url は不変であること。
+    func testAppendToURLTargetInheritsTargetLastURL() {
+        makeNovel(novelID: sourceNovelID, type: .URL, prefix: "src", pageCount: 3, urlPrefix: "https://src.example/")
+        makeNovel(novelID: targetNovelID, type: .URL, prefix: "tgt", pageCount: 2, urlPrefix: "https://tgt.example/")
+
+        let result = NovelSpeakerUtility.AppendAllPagesToNovelTail(sourceNovelID: sourceNovelID, targetNovelID: targetNovelID)
+        XCTAssertTrue(result, "AppendAllPagesToNovelTail が失敗した")
+
+        // 追加先の末尾ページ url は "https://tgt.example/2"。
+        let expectedURL = "https://tgt.example/2"
+        // 既存ページの url は不変。
+        XCTAssertEqual(story(targetNovelID, 1)?.url, "https://tgt.example/1", "既存 ch1 の url が変わってしまった")
+        XCTAssertEqual(story(targetNovelID, 2)?.url, "https://tgt.example/2", "既存 ch2 の url が変わってしまった")
+        // 追加された 3,4,5 は全て追加先の末尾 url。コピー元 url は入っていない。
+        for ch in 3...5 {
+            XCTAssertEqual(story(targetNovelID, ch)?.url, expectedURL, "追加された ch\(ch) の url が追加先の末尾 url になっていない")
+        }
+    }
+
+    // 100章境界を跨ぐ追加でも、全ページの内容・章番号が正しく、bulk が正しく分割されること。
+    func testAppendCrossesBulkBoundary() {
+        // 追加先を 98 ページにしておき、5 ページ追加して 103 ページ(2 つ目の bulk に跨る)にする。
+        makeNovel(novelID: sourceNovelID, type: .UserCreated, prefix: "src", pageCount: 5, urlPrefix: nil)
+        makeNovel(novelID: targetNovelID, type: .UserCreated, prefix: "tgt", pageCount: 98, urlPrefix: nil)
+
+        let result = NovelSpeakerUtility.AppendAllPagesToNovelTail(sourceNovelID: sourceNovelID, targetNovelID: targetNovelID)
+        XCTAssertTrue(result, "AppendAllPagesToNovelTail が失敗した")
+
+        XCTAssertEqual(lastChapterNumber(targetNovelID), 103, "追加先の末尾章番号が 103 になっていない")
+
+        // 99..103 がコピー元 1..5 になっていること(境界を跨ぐ)。
+        for (offset, ch) in Array(99...103).enumerated() {
+            XCTAssertEqual(story(targetNovelID, ch)?.content, "src-content-\(offset + 1)", "ch\(ch) の content がコピー元とずれている")
+        }
+        // 既存の 98 ページ目は不変。
+        XCTAssertEqual(story(targetNovelID, 98)?.content, "tgt-content-98", "既存 ch98 が変わってしまった")
+
+        // bulk が正しく分割されていること(1 つ目=100章, 2 つ目=3章)。
+        RealmUtil.RealmBlock { realm in
+            let firstBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: self.targetNovelID, chapterNumber: 1))?.LoadStoryArray()
+            XCTAssertEqual(firstBulk?.count, 100, "1 つ目の bulk が 100 章になっていない")
+            let secondBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: self.targetNovelID, chapterNumber: 101))?.LoadStoryArray()
+            XCTAssertEqual(secondBulk?.count, 3, "2 つ目の bulk が 3 章になっていない")
+        }
+    }
+
+    // 全ページの合計数が「追加先の元の数 + コピー元の数」になること。
+    func testAppendTotalPageCount() {
+        makeNovel(novelID: sourceNovelID, type: .UserCreated, prefix: "src", pageCount: 7, urlPrefix: nil)
+        makeNovel(novelID: targetNovelID, type: .UserCreated, prefix: "tgt", pageCount: 4, urlPrefix: nil)
+
+        let result = NovelSpeakerUtility.AppendAllPagesToNovelTail(sourceNovelID: sourceNovelID, targetNovelID: targetNovelID)
+        XCTAssertTrue(result, "AppendAllPagesToNovelTail が失敗した")
+
+        let total = RealmUtil.RealmBlock { realm -> Int in
+            var count = 0
+            RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: self.targetNovelID) { _ in count += 1 }
+            return count
+        }
+        XCTAssertEqual(total, 11, "追加後の総ページ数が 4 + 7 = 11 になっていない")
+    }
+}
