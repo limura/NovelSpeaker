@@ -187,7 +187,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         let generation = speakGeneration
         speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
         //print("Speech: \(speechText)")
-        scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText, generation: generation)
+        scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText, type: block.type, generation: generation)
     }
 
     // ログ用に改行・タブ等を見えるエスケープにし、長すぎる場合は切り詰める。
@@ -216,8 +216,16 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // isSpeaking=true 中なので synthActive 判定で守られ、ここでは無視できる)。
     // その約3倍のマージンとして 1.5秒 とする。
     private let wedgeDetectTimeout:TimeInterval = 1.5
-    private func scheduleWedgeWatch(blockIndex:Int, willSpeakRangeCountAtSpeak:Int, speechTextCount:Int, speechText:String, generation:Int) {
+    private func scheduleWedgeWatch(blockIndex:Int, willSpeakRangeCountAtSpeak:Int, speechTextCount:Int, speechText:String, type:String, generation:Int) {
         if speechTextCount <= 0 { return } // 空発話はすぐ終わるので対象外
+        // この固着検出は AVSpeechSynthesizer 固有の「speak が無音で飲まれて二度とコールバックが
+        // 来なくなる」障害モード向けにチューニングされている(1.5秒 = AVSpeechの起動レイテンシの
+        // 数倍のマージン)。VOICEVOXはブロック全体を一括合成してから再生開始する方式のため、
+        // ブロックが長いと(RTF≈1のため)合成そのものに数秒〜掛かる事があり、これは正常な処理中で
+        // あって固着ではない。同じ閾値を当てはめると誤検出でブロックを延々作り直すことになり、
+        // (前回試行のVOICEVOX合成がactor上でまだ実行中のまま次々新しい合成を投げてしまい)
+        // メモリ/CPUを急激に消費してしまうため、VOICEVOXのブロックはこの監視の対象外とする。
+        if type == "VOICEVOX" { return }
         // premium/enhanced 音声の起動レイテンシを考慮して長めに待つ。
         DispatchQueue.main.asyncAfter(deadline: .now() + wedgeDetectTimeout) { [weak self] in
             guard let self = self else { return }

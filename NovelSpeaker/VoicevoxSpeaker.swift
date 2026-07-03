@@ -161,11 +161,20 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
 
     func Stop() {
         generation += 1
+        let myGeneration = generation
         stopProgressReporting()
         playerNode.stop()
         let text = currentSpeechText
+        // MultiVoiceSpeaker.Stop() は speechQueueLock を保持したままこの Stop() を呼ぶため、
+        // ここで delegate?.finishSpeak(...) を同期的に呼ぶと MultiVoiceSpeaker.finishSpeak() 内の
+        // 同じlockの再入でデッドロックする。そのため呼び出しは async に逃がす必要があるが、
+        // その間に(wedge回復等で)新しい Speech() が同じインスタンスに対して発行されていたら、
+        // この古いキャンセル通知はもう配送してはいけない(新しい発話のqueue項目を誤って
+        // 消費してしまい、実際には発話していないのにブロックが進んでしまうバグになる)。
+        // generation を比較して、世代が変わっていなければ(=まだ誰も上書きしていなければ)のみ配送する。
         DispatchQueue.main.async { [weak self] in
-            self?.m_Delegate?.finishSpeak(isCancel: true, speechString: text)
+            guard let self = self, myGeneration == self.generation else { return }
+            self.m_Delegate?.finishSpeak(isCancel: true, speechString: text)
         }
     }
 
