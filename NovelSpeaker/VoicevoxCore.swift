@@ -56,6 +56,15 @@ actor VoicevoxCore {
     // 一度ロードした声モデルのVVMパスの集合(再ロードによる数百ms級の待ちを避けるため)
     private var loadedVvmPaths: Set<String> = []
 
+    // 先行合成キャッシュ: 現在再生中のブロックより先のブロックを、再生が追いつく前に
+    // バックグラウンドで合成しておくためのもの(VOICEVOX_IOS_INTEGRATION.md §6-2の
+    // SynthesisWorker/PCMキャッシュ相当)。VOICEVOXはブロック全体を一括合成してから
+    // 再生を始める方式で、ブロックを再生している間に次のブロックの合成が終わっていないと
+    // 発話と発話の間に無音の間ができてしまうため、これを埋める。
+    // key は synthesizePrefetchKey(text:styleId:) で作る。
+    private var prefetchedWav: [String: Data] = [:]
+    private var pendingPrefetchTasks: [String: Task<Void, Never>] = [:]
+
     private init() {}
 
     var isSetUp: Bool {
@@ -192,8 +201,13 @@ actor VoicevoxCore {
         loadedVvmPaths.insert(style.vvmPath)
     }
 
-    /// テキストをVOICEVOXで合成し、WAV(24kHz/mono/16bit, ヘッダ付き)のバイト列を返す。
-    func synthesize(text: String, styleId: UInt32) throws -> Data {
+    private static func prefetchKey(text: String, styleId: UInt32) -> String {
+        return "\(styleId)::\(text)"
+    }
+
+    /// 実際にC APIを叩いてテキストをWAV(24kHz/mono/16bit, ヘッダ付き)のバイト列に合成する。
+    /// キャッシュは見ない・作らない、素の合成のみ。
+    private func performSynthesize(text: String, styleId: UInt32) throws -> Data {
         guard let synthesizer = synthesizer else { throw VoicevoxCoreError.notSetUp }
         try ensureVoiceModelLoaded(styleId: styleId)
 
@@ -213,5 +227,72 @@ actor VoicevoxCore {
             throw VoicevoxCoreError.invalidWav
         }
         return data
+    }
+
+    /// テキストをVOICEVOXで合成し、WAV(24kHz/mono/16bit, ヘッダ付き)のバイト列を返す。
+    /// 先行合成済み(prefetch済み)であればそれをそのまま使い、無ければその場で合成する。
+    func synthesize(text: String, styleId: UInt32) async throws -> Data {
+        let key = Self.prefetchKey(text: text, styleId: styleId)
+        if let cached = prefetchedWav.removeValue(forKey: key) {
+            return cached
+        }
+        // 既に先行合成が進行中なら、二重に合成せずその完了を待つ。
+        if let pendingTask = pendingPrefetchTasks.removeValue(forKey: key) {
+            await pendingTask.value
+            if let cached = prefetchedWav.removeValue(forKey: key) {
+                return cached
+            }
+            // 先行合成が失敗していた場合はここに落ちてくるので、その場で合成し直す。
+        }
+        return try performSynthesize(text: text, styleId: styleId)
+    }
+
+    /// 現在再生中のブロックより先のブロックを、実際に必要になる前にバックグラウンドで合成しておく。
+    /// 二重起動(既にキャッシュ済み/進行中)は無視するので、何度呼んでも安全。
+    /// 失敗しても黙って諦める(実際に必要になった時に synthesize() がその場で合成し直す)。
+    func prefetch(text: String, styleId: UInt32) {
+        let key = Self.prefetchKey(text: text, styleId: styleId)
+        if prefetchedWav[key] != nil || pendingPrefetchTasks[key] != nil { return }
+        pendingPrefetchTasks[key] = Task { [weak self] in
+            guard let self = self else { return }
+            do {
+                let data = try await self.performSynthesize(text: text, styleId: styleId)
+                await self.storePrefetched(key: key, data: data)
+            } catch {
+                await self.dropPendingPrefetch(key: key)
+            }
+        }
+    }
+
+    private func storePrefetched(key: String, data: Data) {
+        pendingPrefetchTasks[key] = nil
+        prefetchedWav[key] = data
+    }
+
+    private func dropPendingPrefetch(key: String) {
+        pendingPrefetchTasks[key] = nil
+    }
+
+    /// 先行合成キャッシュを全て破棄する(新しい本文の読み込み・シーク等でこれまでの
+    /// 先読み内容が無意味になった時に呼ぶ)。進行中のタスクはキャンセルはせず、
+    /// 完了時に(誰も参照しない)キャッシュへ書き込まれるだけにして単純化している。
+    func clearPrefetchCache() {
+        prefetchedWav.removeAll()
+        pendingPrefetchTasks.removeAll()
+    }
+
+    /// SpeechBlockSpeaker 等、actorの外(メインスレッド)から気軽に先行合成を蹴るための入り口。
+    nonisolated func schedulePrefetch(text: String, styleId: UInt32) {
+        Task { await self.prefetch(text: text, styleId: styleId) }
+    }
+
+    /// SpeechBlockSpeaker 等、actorの外から気軽にキャッシュをクリアするための入り口。
+    nonisolated func schedulePrefetchCacheClear() {
+        Task { await self.clearPrefetchCache() }
+    }
+
+    // テスト専用: 指定テキストが先行合成キャッシュに乗っているかどうか(進行中/未着手は含まない)。
+    func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool {
+        return prefetchedWav[Self.prefetchKey(text: text, styleId: styleId)] != nil
     }
 }

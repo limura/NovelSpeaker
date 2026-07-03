@@ -188,6 +188,37 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
         //print("Speech: \(speechText)")
         scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText, type: block.type, generation: generation)
+        refillVoicevoxPrefetchIfNeeded()
+    }
+
+    // VOICEVOXはブロック全体を一括合成してから再生開始する方式のため、現在のブロックを再生している
+    // 間に次のブロックの合成が終わっていないと、発話と発話の間に無音の間ができてしまう
+    // (ブロックを小さくするほど、この「合成待ち」の割合が相対的に増えて顕著になる)。
+    // 現在のブロックより先の(連続する)VOICEVOXブロックを、合計文字数が一定の目安に達するまで
+    // 先行してバックグラウンドで合成しておく(VOICEVOX_IOS_INTEGRATION.md §6-2のSynthesisWorker相当、
+    // ただし本実装はシンプルな「先行合成キャッシュ」止まりで、ページ跨ぎ生成等の作り込みはしていない)。
+    // 冪等(同じブロックへ何度呼んでもキャッシュ済み/進行中なら即返るだけ)なので、
+    // enqueueSpeechBlock() の度に呼んで問題ない。
+    private let voicevoxPrefetchTargetCharacterCount = 200
+    private func refillVoicevoxPrefetchIfNeeded() {
+        var accumulated = 0
+        var index = currentSpeechBlockIndex + 1
+        while index < speechBlockArray.count && accumulated < voicevoxPrefetchTargetCharacterCount {
+            let block = speechBlockArray[index]
+            guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else {
+                // VOICEVOX以外のブロックが挟まったらそこで先読みを打ち切る
+                // (先行合成はVOICEVOXの合成待ち解消が目的で、他エンジンには不要なため)。
+                break
+            }
+            let text = block.speechText
+            if text.isEmpty {
+                index += 1
+                continue
+            }
+            VoicevoxCore.shared.schedulePrefetch(text: text, styleId: styleId)
+            accumulated += text.count
+            index += 1
+        }
     }
 
     // ログ用に改行・タブ等を見えるエスケープにし、長すぎる場合は切り詰める。
@@ -292,7 +323,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         currentSpeakingLocation = 0
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
-        
+        // 本文が丸ごと差し替わったので、それまでのVOICEVOX先行合成キャッシュは無意味になる。
+        VoicevoxCore.shared.schedulePrefetchCacheClear()
+
         resetRegisterdVoices()
     }
     func resetRegisterdVoices() {

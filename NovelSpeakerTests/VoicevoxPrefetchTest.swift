@@ -1,0 +1,60 @@
+//
+//  VoicevoxPrefetchTest.swift
+//  NovelSpeakerTests
+//
+//  先行合成キャッシュ(VoicevoxCore.prefetch/synthesize)が実際に機能し、
+//  prefetch済みのテキストは synthesize() が(再合成せず)キャッシュを使う事を確認する。
+//
+
+import XCTest
+@testable import NovelSpeaker
+
+class VoicevoxPrefetchTest: XCTestCase {
+
+    private func setUpCore() async throws -> UInt32 {
+        guard let dictPath = Bundle.main.path(forResource: "open_jtalk_dic_utf_8-1.11", ofType: nil),
+              let vvmPath = Bundle.main.path(forResource: "0", ofType: "vvm") else {
+            XCTFail("同梱の辞書/0.vvm がバンドルに見つかりません")
+            return 0
+        }
+        let vvmDirectory = (vvmPath as NSString).deletingLastPathComponent
+        try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelDirectoryPaths: [vvmDirectory])
+        let styles = await VoicevoxCore.shared.styles
+        guard let style = styles.first else {
+            XCTFail("0.vvm からスタイルが取れませんでした")
+            return 0
+        }
+        return style.styleId
+    }
+
+    func testPrefetchedTextIsServedFromCache() async throws {
+        let styleId = try await setUpCore()
+        await VoicevoxCore.shared.clearPrefetchCache()
+
+        let text = "これは先行合成のテストです"
+        await VoicevoxCore.shared.prefetch(text: text, styleId: styleId)
+
+        // prefetch の完了を待つ(Task内部完了待ちのポーリング。数秒あれば十分)。
+        let deadline = Date().addingTimeInterval(10)
+        while Date() < deadline {
+            if await VoicevoxCore.shared.isPrefetchedForTesting(text: text, styleId: styleId) { break }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        let wasPrefetched = await VoicevoxCore.shared.isPrefetchedForTesting(text: text, styleId: styleId)
+        XCTAssertTrue(wasPrefetched, "prefetchが時間内に完了しませんでした")
+
+        let data = try await VoicevoxCore.shared.synthesize(text: text, styleId: styleId)
+        XCTAssertEqual(data.prefix(4), Data("RIFF".utf8))
+        // synthesize() はキャッシュを消費するので、再度呼ぶとキャッシュはもう無い。
+        let stillCached = await VoicevoxCore.shared.isPrefetchedForTesting(text: text, styleId: styleId)
+        XCTAssertFalse(stillCached, "synthesize()後はキャッシュが消費されているべき")
+    }
+
+    func testClearPrefetchCacheDropsPendingEntries() async throws {
+        let styleId = try await setUpCore()
+        await VoicevoxCore.shared.prefetch(text: "何か適当な文章です", styleId: styleId)
+        await VoicevoxCore.shared.clearPrefetchCache()
+        let cached = await VoicevoxCore.shared.isPrefetchedForTesting(text: "何か適当な文章です", styleId: styleId)
+        XCTAssertFalse(cached)
+    }
+}
