@@ -192,6 +192,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         }
         speakGeneration += 1
         let generation = speakGeneration
+        // VoicevoxCoreの先行合成ログ(絶対時刻付き)と突き合わせて「どこで無音になったか」を
+        // 追えるように、実際に発話を発注した瞬間も同じ絶対時刻フォーマットでログする。
+        NSLog("NovelSpeaker.SpeechBlockSpeaker: [\(VoicevoxCore.logTimestamp())] [発話発注] blockIndex=\(currentSpeechBlockIndex) type=\(block.type) text=\"\(Self.escapeForLog(speechText))\"")
         speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
         //print("Speech: \(speechText)")
         scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText, type: block.type, generation: generation)
@@ -229,10 +232,18 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // 挟まる他エンジンのブロックでは先読みを打ち切らず、飛び越えてその先のVOICEVOXブロックも
     // 探しにいく(ただし際限なく本文全体を舐めないよう、走査するブロック数には上限を設ける)。
     private let voicevoxPrefetchMaxBlocksToScan = 40
+    // 「現在のブロックの直後から毎回スキャンし直す」だけだと、1回の呼び出しで予約できる本数を
+    // 抑えた分だけ先読みの深さも短いままになってしまう。長いブロックを再生している間は
+    // (合成側にとって)実質アイドルな時間があるので、その間も willSpeakRange の度に
+    // refillVoicevoxPrefetchIfNeeded() が呼ばれる事を利用し、前回スキャンを打ち切った続きから
+    // 少しずつ予約を伸ばしていけるように、次にスキャンを始めるべき位置を覚えておく。
+    // (「一度に大量予約しない」という上限は保ったまま、複数回の呼び出しを跨いで
+    //  トータルの先読み量を伸ばせる)
+    private var nextPrefetchScanIndex = 0
     private func refillVoicevoxPrefetchIfNeeded() {
         var accumulated = 0
         var prefetchedBlockCount = 0
-        var index = currentSpeechBlockIndex + 1
+        var index = max(currentSpeechBlockIndex + 1, nextPrefetchScanIndex)
         var scanned = 0
         while index < speechBlockArray.count && scanned < voicevoxPrefetchMaxBlocksToScan
             && prefetchedBlockCount < voicevoxPrefetchMaxBlockCountToQueue
@@ -258,6 +269,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             prefetchedBlockCount += 1
             index += 1
         }
+        nextPrefetchScanIndex = index
     }
 
     // 空白・改行・句読点・記号以外の文字(=実際にVOICEVOXが発話しうる文字)が
@@ -373,6 +385,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         currentSpeakingLocation = 0
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
+        nextPrefetchScanIndex = 0
         // 本文が丸ごと差し替わったので、それまでのVOICEVOX先行合成キャッシュは無意味になる。
         VoicevoxCore.shared.schedulePrefetchCacheClear()
 
@@ -491,6 +504,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             currentBlockDisplayOffset = currentLocation
             currentBlockSpeechOffset = speechBlock.ComputeSpeechLocationFrom(displayLocation: currentLocation)
             currentSpeakingLocation = location
+            // シーク後は先読みスキャン位置も新しい再生位置基準に戻す
+            //(古い位置基準のままだと、後方シーク時に近傍のブロックが先読みされなくなる)。
+            nextPrefetchScanIndex = currentSpeechBlockIndex
             //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex), currentBlockSpeechOffset: \(currentBlockSpeechOffset)")
             return true
         }
@@ -519,14 +535,20 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             index -= 1
         }
         currentSpeakingLocation = currentDisplayStringOffset
+        nextPrefetchScanIndex = currentSpeechBlockIndex
         print("SetSpeechBlockIndex(\(index)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
         return true
     }
-    
+
     func willSpeakRange(range: NSRange) {
         willSpeakRangeCallCount += 1
         // 実発話が進んだので、固着回復カウンタをリセットする。
         wedgeRecoveryCount = 0
+        // 長いブロックを再生している間もこの delegate コールバックは(進捗表示用に)周期的に
+        // 呼ばれ続けるので、そのタイミングで先読みスキャンを続行させる事で、長いブロックの
+        // 再生中という実質アイドルな時間も先読みの延伸に使う(前回打ち切った続きから
+        // 少しずつ、を毎回繰り返す事で、時間をかけて先読みの深さを伸ばしていく)。
+        refillVoicevoxPrefetchIfNeeded()
         guard let delegate = delegate, speechBlockArray.count > currentSpeechBlockIndex else { return }
         let block = speechBlockArray[currentSpeechBlockIndex]
         let location = block.ComputeDisplayLocationFrom(speechLocation: range.location + currentBlockSpeechOffset) + currentDisplayStringOffset
@@ -545,6 +567,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             return
         }
         // ここに来た = synth が utterance を完了して次へ進む = 実際に発話が進んだという事。
+        // [発話発注]ログと突き合わせて「発注してから実際に発話し終えるまでどれだけ掛かったか
+        // (=無音待ちがあったか)」を追えるように、絶対時刻付きでログする。
+        NSLog("NovelSpeaker.SpeechBlockSpeaker: [\(VoicevoxCore.logTimestamp())] [発話完了] blockIndex=\(currentSpeechBlockIndex) isCancel=\(isCancel)")
         // 固着回復の「連続失敗」カウンタをリセットする。
         // (willSpeakRange が飛ばない極短ブロック("。"等)でも確実にリセットするため、
         //  willSpeakRange 側のリセットだけに頼らずここでもリセットする)

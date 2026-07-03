@@ -46,6 +46,17 @@ actor VoicevoxCore {
     // ベストエフォートなスナップショット。reloadStyleCatalog() の度に更新される。
     nonisolated(unsafe) static var cachedStyles: [VoicevoxStyle] = []
 
+    // ログ相関用の絶対時刻(壁時計)文字列。「先行合成待ちで無音になった」等の実機ログを、
+    // 実際に発話(再生)が開始/終了した絶対時刻と突き合わせられるようにするためのもの。
+    // NSLog自体もタイムスタンプ付きだが、コンソールの取得経路によっては見えない事があるため、
+    // ログ本文側にも埋め込む。DateFormatterは複数スレッドから同時に使うと安全でないため、
+    // 呼び出しの都度使い捨てで生成する(ログ出力頻度なら性能上問題にならない)。
+    static func logTimestamp() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss.SSS"
+        return formatter.string(from: Date())
+    }
+
     // OpenJtalkRc / VoicevoxOnnxruntime / VoicevoxSynthesizer / VoicevoxVoiceModelFile はいずれも
     // ヘッダ上では前方宣言のみ(定義本体なし)の不透明型なので、Swiftからは OpaquePointer として扱う。
     private var onnxruntime: OpaquePointer?
@@ -244,25 +255,25 @@ actor VoicevoxCore {
         let key = Self.prefetchKey(text: text, styleId: styleId)
         let snippet = Self.logSnippet(text)
         if let cached = prefetchedWav.removeValue(forKey: key) {
-            NSLog("NovelSpeaker.VoicevoxCore: [キャッシュHIT] styleId=\(styleId) text=\"\(snippet)\"")
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュHIT] styleId=\(styleId) text=\"\(snippet)\"")
             return cached
         }
         // 既に先行合成が進行中なら、二重に合成せずその完了を待つ。
         if let pendingTask = pendingPrefetchTasks.removeValue(forKey: key) {
-            NSLog("NovelSpeaker.VoicevoxCore: [先行合成待ち] styleId=\(styleId) text=\"\(snippet)\"")
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成待ち] styleId=\(styleId) text=\"\(snippet)\"")
             let waitStart = Date()
             await pendingTask.value
             let waited = Date().timeIntervalSince(waitStart)
             if let cached = prefetchedWav.removeValue(forKey: key) {
-                NSLog("NovelSpeaker.VoicevoxCore: [先行合成待ち完了 \(String(format: "%.2f", waited))秒] styleId=\(styleId) text=\"\(snippet)\"")
+                NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成待ち完了 \(String(format: "%.2f", waited))秒] styleId=\(styleId) text=\"\(snippet)\"")
                 return cached
             }
             // 先行合成が失敗していた場合はここに落ちてくるので、その場で合成し直す。
         }
-        NSLog("NovelSpeaker.VoicevoxCore: [キャッシュMISS・その場合成開始] styleId=\(styleId) text=\"\(snippet)\"")
+        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュMISS・その場合成開始] styleId=\(styleId) text=\"\(snippet)\"")
         let synthStart = Date()
         let data = try performSynthesize(text: text, styleId: styleId)
-        NSLog("NovelSpeaker.VoicevoxCore: [その場合成完了 \(String(format: "%.2f", Date().timeIntervalSince(synthStart)))秒] styleId=\(styleId) text=\"\(snippet)\"")
+        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [その場合成完了 \(String(format: "%.2f", Date().timeIntervalSince(synthStart)))秒] styleId=\(styleId) text=\"\(snippet)\"")
         return data
     }
 
@@ -273,7 +284,7 @@ actor VoicevoxCore {
         let key = Self.prefetchKey(text: text, styleId: styleId)
         if prefetchedWav[key] != nil || pendingPrefetchTasks[key] != nil { return }
         let snippet = Self.logSnippet(text)
-        NSLog("NovelSpeaker.VoicevoxCore: [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
+        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
         let scheduledAt = Date()
         // 優先度を低めにしておく。これは actor 上で他の synthesize() 呼び出しと直列化される際、
         // 「今まさに再生に必要な」高優先度の呼び出しが、まだ実行が始まっていない先行合成の
@@ -283,7 +294,7 @@ actor VoicevoxCore {
             guard let self = self else { return }
             do {
                 let data = try await self.performSynthesize(text: text, styleId: styleId)
-                NSLog("NovelSpeaker.VoicevoxCore: [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(scheduledAt)))秒] styleId=\(styleId) text=\"\(snippet)\"")
+                NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(scheduledAt)))秒] styleId=\(styleId) text=\"\(snippet)\"")
                 await self.storePrefetched(key: key, data: data)
             } catch {
                 AppInformationLogger.AddLog(message: "VoicevoxCore: prefetch failed: \(error.localizedDescription)", appendix: [
