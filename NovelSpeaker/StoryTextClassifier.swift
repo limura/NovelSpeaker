@@ -20,6 +20,7 @@ struct SpeechBlockInfo {
     let volume:Float
     let delay:TimeInterval
     let isMod:Bool
+    let type:String
 }
 
 struct SpeechSectionConfig {
@@ -91,7 +92,8 @@ class CombinedSpeechBlock: Identifiable {
     let rate:Float
     let volume:Float
     let delay:TimeInterval
-    
+    let type:String
+
     init(block:SpeechBlockInfo) {
         voiceIdentifier = block.voiceIdentifier
         locale = block.locale
@@ -99,6 +101,7 @@ class CombinedSpeechBlock: Identifiable {
         rate = block.rate
         volume = block.volume
         delay = block.delay
+        type = block.type
         let speechText:String?
         if block.displayText == block.speechText {
             speechText = nil
@@ -145,6 +148,7 @@ class CombinedSpeechBlock: Identifiable {
             && checkFloatEqual(a: rate, b: block.rate)
             && checkFloatEqual(a: volume, b: block.volume)
             && voiceIdentifier == block.voiceIdentifier
+            && type == block.type
             else { return false }
         let speechText:String?
         if block.displayText == block.speechText {
@@ -652,14 +656,14 @@ class StoryTextClassifier {
                     if currentStartIndex != index {
                         let displayText = String(text[currentStartIndex..<index])
                         let speechText = displayText
-                        let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: false)
+                        let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: false, type: speakerSetting.type)
                         waitConfing_delayTimeInSec = TimeInterval(0.0)
                         result.append(blockInfo)
                     }
                     let nextIndex = text.index(index, offsetBy: speechMod.before.count)
                     let displayText = String(text[index..<nextIndex])
                     let speechText = speechMod.after
-                    let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: true)
+                    let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: true, type: speakerSetting.type)
                     waitConfing_delayTimeInSec = TimeInterval(0.0)
                     result.append(blockInfo)
                     index = nextIndex
@@ -672,7 +676,7 @@ class StoryTextClassifier {
         if currentStartIndex != index {
             let displayText = String(text[currentStartIndex..<index])
             let speechText = displayText
-            let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: false)
+            let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: false, type: speakerSetting.type)
             waitConfing_delayTimeInSec = TimeInterval(0.0)
             result.append(blockInfo)
         }

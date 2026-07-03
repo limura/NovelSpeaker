@@ -185,7 +185,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         }
         speakGeneration += 1
         let generation = speakGeneration
-        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
+        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
         //print("Speech: \(speechText)")
         scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText, generation: generation)
     }
@@ -288,12 +288,17 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         resetRegisterdVoices()
     }
     func resetRegisterdVoices() {
-        var voiceIdentifierDictionary:[String?:String?] = [:]
-        for block in speechBlockArray {
-            voiceIdentifierDictionary[block.voiceIdentifier] = block.locale
+        struct VoiceKey: Hashable {
+            let voiceIdentifier:String?
+            let locale:String?
+            let type:String
         }
-        for (voiceIdentifier, locale) in voiceIdentifierDictionary {
-            speaker.RegisterVoiceIdentifier(voiceIdentifier: voiceIdentifier, locale: locale)
+        var voiceKeySet = Set<VoiceKey>()
+        for block in speechBlockArray {
+            voiceKeySet.insert(VoiceKey(voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type))
+        }
+        for key in voiceKeySet {
+            speaker.RegisterVoiceIdentifier(voiceIdentifier: key.voiceIdentifier, locale: key.locale, type: key.type)
         }
     }
     

@@ -20,16 +20,18 @@ fileprivate class SpeechQueue {
     let text:String
     let voiceIdentifier:String?
     let locale:String?
+    let type:String
     let pitch:Float
     let rate:Float
     let volume:Float
     let delay:TimeInterval
     let isDummy:Bool
-    var queuedSpeaker:Speaker?
-    init(text:String, voiceIdentifier:String? = nil, locale:String? = nil, pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval, isDummy:Bool = false) {
+    var queuedSpeaker:SpeechEngineSpeaking?
+    init(text:String, voiceIdentifier:String? = nil, locale:String? = nil, type:String = "AVSpeechSynthesizer", pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval, isDummy:Bool = false) {
         self.text = text
         self.voiceIdentifier = voiceIdentifier
         self.locale = locale
+        self.type = type
         self.pitch = pitch
         self.rate = rate
         self.volume = volume
@@ -37,8 +39,8 @@ fileprivate class SpeechQueue {
         self.queuedSpeaker = nil
         self.isDummy = isDummy
     }
-    
-    func enqueue(speaker:Speaker) {
+
+    func enqueue(speaker:SpeechEngineSpeaking) {
         self.queuedSpeaker = speaker
         speaker.pitch = pitch
         speaker.rate = rate
@@ -76,7 +78,7 @@ fileprivate class SpeechQueue {
 }
 
 class MultiVoiceSpeaker: SpeakRangeDelegate {
-    var speakerCache:[String:Speaker] = [:]
+    var speakerCache:[String:SpeechEngineSpeaking] = [:]
     var voiceCache:[String:AVSpeechSynthesisVoice] = [:]
     var defaultVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
     var currentVoiceIdentifier:String? = nil
@@ -165,7 +167,18 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         return defaultVoice
     }
     
-    func getSpeaker(voiceIdentifier:String?, locale:String?) -> Speaker {
+    // VOICEVOXの話者は RealmSpeakerSetting.voiceIdentifier に styleId の文字列表現を格納して流用する
+    // (SpeakerSettingsViewController でのVOICEVOX選択時の保存形式と合わせる)。
+    func getSpeaker(voiceIdentifier:String?, locale:String?, type:String) -> SpeechEngineSpeaking {
+        if type == "VOICEVOX" {
+            let styleId = UInt32(voiceIdentifier ?? "") ?? 0
+            let cacheKey = "VOICEVOX:\(styleId)"
+            if let speaker = speakerCache[cacheKey] { return speaker }
+            let speaker = VoicevoxSpeaker(styleId: styleId)
+            speaker.delegate = self
+            speakerCache[cacheKey] = speaker
+            return speaker
+        }
         if let voiceIdentifierNotNil = voiceIdentifier, let speaker = speakerCache[voiceIdentifierNotNil] { return speaker }
         let speaker = Speaker()
         let voice = getVoice(voiceIdentifier: voiceIdentifier, fallbackLocale: locale)
@@ -177,16 +190,16 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
         return speaker
     }
-    
+
     fileprivate func startSpeech(queue:SpeechQueue) {
-        let speaker = getSpeaker(voiceIdentifier: queue.voiceIdentifier, locale: queue.locale)
+        let speaker = getSpeaker(voiceIdentifier: queue.voiceIdentifier, locale: queue.locale, type: queue.type)
         isStopping = false
         queue.enqueue(speaker: speaker)
     }
-    
-    func enqueue(text:String, voiceIdentifier:String?, locale:String?, pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval = 0, isDummy:Bool = false) {
+
+    func enqueue(text:String, voiceIdentifier:String?, locale:String?, type:String = "AVSpeechSynthesizer", pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval = 0, isDummy:Bool = false) {
         //print("MultiVoiceSpeaker speech request got: \(text)")
-        let queue = SpeechQueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, pitch: pitch, rate: rate, volume: volume, delay: delay, isDummy: isDummy)
+        let queue = SpeechQueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, type: type, pitch: pitch, rate: rate, volume: volume, delay: delay, isDummy: isDummy)
 
         self.speechQueueLock.lock()
         defer { self.speechQueueLock.unlock() }
@@ -197,9 +210,9 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
         startSpeech(queue: queue)
     }
-    
-    func Speech(text:String, voiceIdentifier:String?, locale:String?, pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval = 0) {
-        enqueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, pitch: pitch, rate: rate, volume: volume, delay: delay)
+
+    func Speech(text:String, voiceIdentifier:String?, locale:String?, type:String = "AVSpeechSynthesizer", pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval = 0) {
+        enqueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, type: type, pitch: pitch, rate: rate, volume: volume, delay: delay)
     }
     
     func Stop() {
@@ -250,11 +263,13 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     }
 
     // 特定の voiceidentifier の speaker について、事前に speech しておく事で初回の speech に時間がかかる問題を回避するためのmethod
-    func RegisterVoiceIdentifier(voiceIdentifier:String?, locale:String?) {
-        let speaker = getSpeaker(voiceIdentifier: voiceIdentifier, locale: locale)
+    // (AVSpeechSynthesizer固有の問題への対策なので、VOICEVOXでは何もしない)
+    func RegisterVoiceIdentifier(voiceIdentifier:String?, locale:String?, type:String = "AVSpeechSynthesizer") {
+        if type == "VOICEVOX" { return }
+        let speaker = getSpeaker(voiceIdentifier: voiceIdentifier, locale: locale, type: type)
         if speaker.isSpeechKicked { return }
         print("register: \(voiceIdentifier ?? "nil"), \(locale ?? "nil")")
-        enqueue(text: " ", voiceIdentifier: voiceIdentifier, locale: locale, pitch: 1, rate: 1, volume: 0, delay: 0, isDummy: true)
+        enqueue(text: " ", voiceIdentifier: voiceIdentifier, locale: locale, type: type, pitch: 1, rate: 1, volume: 0, delay: 0, isDummy: true)
     }
     
     func isDummySpeechAlive() -> Bool {
