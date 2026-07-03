@@ -207,18 +207,29 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // 冪等(同じブロックへ何度呼んでもキャッシュ済み/進行中なら即返るだけ)なので、
     // enqueueSpeechBlock() の度に呼んで問題ない。
     private let voicevoxPrefetchTargetCharacterCount = 200
+    // 会話文(「」)等で別エンジンのブロックが短く挟まると、そのブロックの再生時間が短いために
+    // 先読みの猶予がほとんど無くなる(実機で「短い会話文の直後だけ間が開く」現象として確認)。
+    // 挟まる他エンジンのブロックでは先読みを打ち切らず、飛び越えてその先のVOICEVOXブロックも
+    // 探しにいく(ただし際限なく本文全体を舐めないよう、走査するブロック数には上限を設ける)。
+    private let voicevoxPrefetchMaxBlocksToScan = 30
     private func refillVoicevoxPrefetchIfNeeded() {
         var accumulated = 0
         var index = currentSpeechBlockIndex + 1
-        while index < speechBlockArray.count && accumulated < voicevoxPrefetchTargetCharacterCount {
+        var scanned = 0
+        while index < speechBlockArray.count && accumulated < voicevoxPrefetchTargetCharacterCount && scanned < voicevoxPrefetchMaxBlocksToScan {
             let block = speechBlockArray[index]
+            scanned += 1
             guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else {
-                // VOICEVOX以外のブロックが挟まったらそこで先読みを打ち切る
-                // (先行合成はVOICEVOXの合成待ち解消が目的で、他エンジンには不要なため)。
-                break
+                // VOICEVOX以外のブロックは先読み対象では無いが、この先にVOICEVOXブロックが
+                // 無いとは限らないので、打ち切らずに読み飛ばして探索を続ける。
+                index += 1
+                continue
             }
             let text = block.speechText
-            if text.isEmpty {
+            // enqueueSpeechBlock() 側の「空白のみ/発話しうる文字が無いテキストはVOICEVOXに
+            // 渡さない」判定と同じ基準で、先読みも同様にスキップする(実機でこのガードの
+            // 抜けにより空白テキストの先行合成が失敗し続けるログを確認したため)。
+            if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || Self.hasNoSpeakableCharacter(text) {
                 index += 1
                 continue
             }

@@ -38,4 +38,21 @@ class StoryTextClassifierVoicevoxTest: XCTestCase {
         XCTAssertEqual(combined.count, 1, "AVSpeechSynthesizerは従来通り区切りが無ければ1ブロックのまま")
         XCTAssertEqual(combined.first?.displayText.count, 200)
     }
+
+    private func makeBlock(text: String, type: String, delay: TimeInterval) -> SpeechBlockInfo {
+        return SpeechBlockInfo(speechText: text, displayText: text, voiceIdentifier: "1", locale: "ja-JP", pitch: 1, rate: 1, volume: 1, delay: delay, isMod: false, type: type)
+    }
+
+    // delayを持つピースの直後に、delay=0の短いピースが続いても同じブロックへ merge されない事を
+    // 確認する(mergeされてしまうと、delayが実際に効くタイミングが本来より後ろへずれてしまう)。
+    // 実機で「短いピースに設定した「読み上げ時の間」が、直後のテキストとまとめて読まれた後まで
+    // 遅れて発動する(結果、意図した位置では間が無いように聞こえる)」という形で確認された不具合。
+    func testDelayBearingPieceDoesNotAbsorbFollowingText() {
+        let delayPiece = makeBlock(text: "ことせかいという名前は、", type: "VOICEVOX", delay: 3.0)
+        let followingPiece = makeBlock(text: "iOSの音声合成エンジンが", type: "VOICEVOX", delay: 0)
+        let combined = StoryTextClassifier.ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: [delayPiece, followingPiece], moreSplitMinimumLetterCount: 40, splitTargetLastLetters: ["。", "、"])
+        XCTAssertEqual(combined.count, 2, "delayを持つピースの後には別のピースを追加してはいけない")
+        XCTAssertEqual(combined.first?.displayText, "ことせかいという名前は、")
+        XCTAssertEqual(combined.first?.delay, 3.0)
+    }
 }

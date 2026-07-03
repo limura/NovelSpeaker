@@ -143,7 +143,10 @@ class CombinedSpeechBlock: Identifiable {
         func checkDoubleEqual(a:Double, b:Double) -> Bool {
             return fabs(a - b) < Double.ulpOfOne
         }
-        guard checkDoubleEqual(a: 0.0, b: block.delay) // delay があるなら合成してはいけません
+        guard checkDoubleEqual(a: 0.0, b: self.delay) // このブロック自体が既にdelayを持っているなら、
+            // それ以上何も追加してはいけない(追加してしまうと、delayが実際に効く位置が
+            // 本来の場所より後ろにずれてしまう)。
+            && checkDoubleEqual(a: 0.0, b: block.delay) // delay があるなら合成してはいけません
             && checkFloatEqual(a: pitch, b: block.pitch)
             && checkFloatEqual(a: rate, b: block.rate)
             && checkFloatEqual(a: volume, b: block.volume)
