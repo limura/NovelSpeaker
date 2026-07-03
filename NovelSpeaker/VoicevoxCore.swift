@@ -253,12 +253,20 @@ actor VoicevoxCore {
     func prefetch(text: String, styleId: UInt32) {
         let key = Self.prefetchKey(text: text, styleId: styleId)
         if prefetchedWav[key] != nil || pendingPrefetchTasks[key] != nil { return }
-        pendingPrefetchTasks[key] = Task { [weak self] in
+        // 優先度を低めにしておく。これは actor 上で他の synthesize() 呼び出しと直列化される際、
+        // 「今まさに再生に必要な」高優先度の呼び出しが、まだ実行が始まっていない先行合成の
+        // 順番待ちに割り込みやすくする(実行中のC呼び出し自体はプリエンプトできないので
+        // 完全な解決ではないが、キューイング順の悪化は緩和できる)。
+        pendingPrefetchTasks[key] = Task(priority: .utility) { [weak self] in
             guard let self = self else { return }
             do {
                 let data = try await self.performSynthesize(text: text, styleId: styleId)
                 await self.storePrefetched(key: key, data: data)
             } catch {
+                AppInformationLogger.AddLog(message: "VoicevoxCore: prefetch failed: \(error.localizedDescription)", appendix: [
+                    "text": text,
+                    "styleId": "\(styleId)",
+                ], isForDebug: true)
                 await self.dropPendingPrefetch(key: key)
             }
         }

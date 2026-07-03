@@ -84,7 +84,10 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         generation += 1
         let myGeneration = generation
 
-        Task {
+        // 今まさに再生に必要な合成なので、優先度は先行合成(.utility)より高くしておく
+        // (actor上での順番待ちが少しでも有利になるように。実行中のC呼び出し自体を
+        // 割り込ませることはできないため、完全な保証ではない)。
+        Task(priority: .userInitiated) {
             do {
                 let wavData = try await VoicevoxCore.shared.synthesize(text: text, styleId: styleId)
                 let buffer = try Self.pcmBuffer(fromWavData: wavData)
@@ -92,7 +95,10 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                     self.playBuffer(buffer, generation: myGeneration, text: text)
                 }
             } catch {
-                AppInformationLogger.AddLog(message: "VoicevoxSpeaker: synthesize failed: \(error.localizedDescription)", appendix: [:], isForDebug: true)
+                AppInformationLogger.AddLog(message: "VoicevoxSpeaker: synthesize failed: \(error.localizedDescription)", appendix: [
+                    "text": text,
+                    "styleId": "\(styleId)",
+                ], isForDebug: true)
                 await MainActor.run {
                     guard myGeneration == self.generation else { return }
                     self.m_Delegate?.finishSpeak(isCancel: true, speechString: text)

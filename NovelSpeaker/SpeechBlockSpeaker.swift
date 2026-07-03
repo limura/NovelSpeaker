@@ -175,7 +175,14 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // これが「改行が沢山ある部分で発話できなくなる」バグの真因。
         // そのような block は synth に渡さず、即「発話完了」扱いにして次の block へ進める。
         // (deep recursion を避けるため main queue に逃がす。block.delay があれば尊重する)
-        if speechText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        // VOICEVOX(OpenJTalkによる形態素解析が前提)は、句読点・記号・空白だけで実際に発話しうる
+        // 文字が1つも無いテキスト("。。。。。。。。。。。。。。。。。"のような装飾的な区切り線等)を渡すと、
+        // 「先頭のモーラがpauseになってはいけない」("First mora should not be short pause")という
+        // 警告とともに形態素解析自体に失敗し(実機ログで確認)、そのブロックが無音のまま
+        // スキップされ続ける事があった。AVSpeechSynthesizerはこの種の入力でも問題にならないため、
+        // VOICEVOXの時だけ、この既存の「空白のみはskip」判定に「発話しうる文字が無い」場合も含める。
+        if speechText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || (block.type == "VOICEVOX" && Self.hasNoSpeakableCharacter(speechText)) {
             let skipDelay = max(0, block.delay)
             DispatchQueue.main.asyncAfter(deadline: .now() + skipDelay) { [weak self] in
                 guard let self = self else { return }
@@ -219,6 +226,17 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             accumulated += text.count
             index += 1
         }
+    }
+
+    // 空白・改行・句読点・記号以外の文字(=実際にVOICEVOXが発話しうる文字)が
+    // 1つも含まれていないかどうかを判定する。
+    static func hasNoSpeakableCharacter(_ text: String) -> Bool {
+        for character in text {
+            if character.isWhitespace || character.isNewline { continue }
+            if character.isPunctuation || character.isSymbol { continue }
+            return false
+        }
+        return true
     }
 
     // ログ用に改行・タブ等を見えるエスケープにし、長すぎる場合は切り詰める。
