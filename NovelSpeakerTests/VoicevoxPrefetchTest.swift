@@ -45,9 +45,14 @@ class VoicevoxPrefetchTest: XCTestCase {
 
         let data = try await VoicevoxCore.shared.synthesize(text: text, styleId: styleId)
         XCTAssertEqual(data.prefix(4), Data("RIFF".utf8))
-        // synthesize() はキャッシュを消費するので、再度呼ぶとキャッシュはもう無い。
+        // 同じ文字列が本文中に複数回登場するケース(会話文の相槌等)で、2回目以降も
+        // キャッシュヒットで済むように、synthesize() はヒットしてもキャッシュを消費しない。
         let stillCached = await VoicevoxCore.shared.isPrefetchedForTesting(text: text, styleId: styleId)
-        XCTAssertFalse(stillCached, "synthesize()後はキャッシュが消費されているべき")
+        XCTAssertTrue(stillCached, "synthesize()でヒットしてもキャッシュは消費されず残っているべき(同一文字列の再登場に備えるため)")
+
+        // 実際に、同じキーへの2回目の synthesize() も(再合成せず)キャッシュから返る事を確認する。
+        let secondData = try await VoicevoxCore.shared.synthesize(text: text, styleId: styleId)
+        XCTAssertEqual(secondData, data, "2回目の synthesize() も同じキャッシュ内容を返すべき")
     }
 
     func testClearPrefetchCacheDropsPendingEntries() async throws {

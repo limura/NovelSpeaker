@@ -73,7 +73,48 @@ actor VoicevoxCore {
     // 再生を始める方式で、ブロックを再生している間に次のブロックの合成が終わっていないと
     // 発話と発話の間に無音の間ができてしまうため、これを埋める。
     // key は synthesizePrefetchKey(text:styleId:) で作る。
-    private var prefetchedWav: [String: Data] = [:]
+    //
+    // このキャッシュ本体だけは actor 隔離ではなく専用ロックで守る(nonisolated(unsafe))。
+    // 理由: actor 隔離のままだと、既にキャッシュ済みで即返せるはずの参照(cache HIT)ですら、
+    // actor が他の(無関係で低優先度な)先行合成を実行中だとその完了までactorへ入れず
+    // 待たされてしまう。実機ログで「既に合成済みの短い会話文なのに、何秒も先の長い
+    // 段落の先行合成が終わるまでHITログすら出ない」という現象として確認した
+    // (キャッシュそのものは十分前に用意できていたのに、参照するための「actorの順番待ち」
+    //  だけで無音になっていた)。読み出しをロックだけで完結させる事で、この種の待ちを無くす。
+    private let cacheLock = NSLock()
+    nonisolated(unsafe) private var prefetchedWavUnsafe: [String: Data] = [:]
+    // 際限なく貯め込み続けないよう、挿入順で古いものから追い出す上限を設ける
+    // (会話文の相槌等の短い文字列が主な再利用対象なので、これだけあれば十分実用になる)。
+    private let prefetchedWavCapacity = 64
+    nonisolated(unsafe) private var prefetchedWavOrderUnsafe: [String] = []
+
+    // actorへ入らずに(=今actorが何をしていても待たされずに)呼べるよう、あえて nonisolated。
+    nonisolated private func peekCache(key: String) -> Data? {
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
+        return prefetchedWavUnsafe[key]
+    }
+
+    nonisolated private func storeCache(key: String, data: Data) {
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
+        if prefetchedWavUnsafe[key] == nil {
+            prefetchedWavOrderUnsafe.append(key)
+        }
+        prefetchedWavUnsafe[key] = data
+        while prefetchedWavOrderUnsafe.count > prefetchedWavCapacity {
+            let oldestKey = prefetchedWavOrderUnsafe.removeFirst()
+            prefetchedWavUnsafe.removeValue(forKey: oldestKey)
+        }
+    }
+
+    nonisolated private func clearCache() {
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
+        prefetchedWavUnsafe.removeAll()
+        prefetchedWavOrderUnsafe.removeAll()
+    }
+
     private var pendingPrefetchTasks: [String: Task<Void, Never>] = [:]
     // 先行合成タスクを投入順(=実際に必要になる順)通りに直列実行させるための鎖。
     // 単純に Task(priority: .utility) を並べて投げるだけだと、同一優先度のTaskがどの順で
@@ -258,20 +299,33 @@ actor VoicevoxCore {
     /// 先行合成済み(prefetch済み)であればそれをそのまま使い、無ければその場で合成する。
     /// 再生直前にキャッシュがヒットしたかどうかは「合成待ちで無音になる」不具合の切り分けに
     /// 重要なため、実機ログで後から追えるように状態ごとにログを残す。
-    func synthesize(text: String, styleId: UInt32) async throws -> Data {
+    ///
+    /// あえて nonisolated にしている: キャッシュ済み(cache HIT)の場合は actor に
+    /// 一切入らずロックだけで完結させる事で、actor が他の(無関係で低優先度な)先行合成を
+    /// 実行中でも待たされずに即座に返せるようにする(実機ログで、既に合成済みのはずの
+    /// 短い会話文が、遠く先の長い段落の先行合成が終わるまでHIT扱いにすらならず
+    /// 数秒待たされる、という現象を確認したため)。cache MISS の場合のみ actor 隔離の
+    /// 低速パスに委譲する。
+    nonisolated func synthesize(text: String, styleId: UInt32) async throws -> Data {
         let key = Self.prefetchKey(text: text, styleId: styleId)
-        let snippet = Self.logSnippet(text)
-        if let cached = prefetchedWav.removeValue(forKey: key) {
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュHIT] styleId=\(styleId) text=\"\(snippet)\"")
+        if let cached = peekCache(key: key) {
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュHIT] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
             return cached
         }
+        return try await synthesizeSlowPath(text: text, styleId: styleId, key: key)
+    }
+
+    /// cache MISS 時の低速パス。pendingPrefetchTasks の確認・performSynthesize の呼び出しは
+    /// actor状態を扱うため、ここは(nonisolatedにせず)actor隔離のままにしておく。
+    private func synthesizeSlowPath(text: String, styleId: UInt32, key: String) async throws -> Data {
+        let snippet = Self.logSnippet(text)
         // 既に先行合成が進行中なら、二重に合成せずその完了を待つ。
-        if let pendingTask = pendingPrefetchTasks.removeValue(forKey: key) {
+        if let pendingTask = pendingPrefetchTasks[key] {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成待ち] styleId=\(styleId) text=\"\(snippet)\"")
             let waitStart = Date()
             await pendingTask.value
             let waited = Date().timeIntervalSince(waitStart)
-            if let cached = prefetchedWav.removeValue(forKey: key) {
+            if let cached = peekCache(key: key) {
                 NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成待ち完了 \(String(format: "%.2f", waited))秒] styleId=\(styleId) text=\"\(snippet)\"")
                 return cached
             }
@@ -289,7 +343,7 @@ actor VoicevoxCore {
     /// 失敗しても黙って諦める(実際に必要になった時に synthesize() がその場で合成し直す)。
     func prefetch(text: String, styleId: UInt32) {
         let key = Self.prefetchKey(text: text, styleId: styleId)
-        if prefetchedWav[key] != nil || pendingPrefetchTasks[key] != nil { return }
+        if peekCache(key: key) != nil || pendingPrefetchTasks[key] != nil { return }
         let snippet = Self.logSnippet(text)
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
         let scheduledAt = Date()
@@ -318,7 +372,7 @@ actor VoicevoxCore {
 
     private func storePrefetched(key: String, data: Data) {
         pendingPrefetchTasks[key] = nil
-        prefetchedWav[key] = data
+        storeCache(key: key, data: data)
     }
 
     private func dropPendingPrefetch(key: String) {
@@ -329,7 +383,7 @@ actor VoicevoxCore {
     /// 先読み内容が無意味になった時に呼ぶ)。進行中のタスクはキャンセルはせず、
     /// 完了時に(誰も参照しない)キャッシュへ書き込まれるだけにして単純化している。
     func clearPrefetchCache() {
-        prefetchedWav.removeAll()
+        clearCache()
         pendingPrefetchTasks.removeAll()
         // 鎖を切っておかないと、新しい本文の先読みが「もう誰も要らない旧本文の
         // 残りチェーン」の後ろに繋がってしまい、無駄に待たされる。
@@ -347,7 +401,7 @@ actor VoicevoxCore {
     }
 
     // テスト専用: 指定テキストが先行合成キャッシュに乗っているかどうか(進行中/未着手は含まない)。
-    func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool {
-        return prefetchedWav[Self.prefetchKey(text: text, styleId: styleId)] != nil
+    nonisolated func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool {
+        return peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil
     }
 }
