@@ -229,22 +229,41 @@ actor VoicevoxCore {
         return data
     }
 
+    // ログ用に先頭数文字だけ見えるようにする(全文は長すぎて読みにくいため)。
+    private static func logSnippet(_ text: String) -> String {
+        let escaped = text.replacingOccurrences(of: "\n", with: "\\n")
+        if escaped.count > 20 { return String(escaped.prefix(20)) + "…(\(text.count)文字)" }
+        return escaped
+    }
+
     /// テキストをVOICEVOXで合成し、WAV(24kHz/mono/16bit, ヘッダ付き)のバイト列を返す。
     /// 先行合成済み(prefetch済み)であればそれをそのまま使い、無ければその場で合成する。
+    /// 再生直前にキャッシュがヒットしたかどうかは「合成待ちで無音になる」不具合の切り分けに
+    /// 重要なため、実機ログで後から追えるように状態ごとにログを残す。
     func synthesize(text: String, styleId: UInt32) async throws -> Data {
         let key = Self.prefetchKey(text: text, styleId: styleId)
+        let snippet = Self.logSnippet(text)
         if let cached = prefetchedWav.removeValue(forKey: key) {
+            NSLog("NovelSpeaker.VoicevoxCore: [キャッシュHIT] styleId=\(styleId) text=\"\(snippet)\"")
             return cached
         }
         // 既に先行合成が進行中なら、二重に合成せずその完了を待つ。
         if let pendingTask = pendingPrefetchTasks.removeValue(forKey: key) {
+            NSLog("NovelSpeaker.VoicevoxCore: [先行合成待ち] styleId=\(styleId) text=\"\(snippet)\"")
+            let waitStart = Date()
             await pendingTask.value
+            let waited = Date().timeIntervalSince(waitStart)
             if let cached = prefetchedWav.removeValue(forKey: key) {
+                NSLog("NovelSpeaker.VoicevoxCore: [先行合成待ち完了 \(String(format: "%.2f", waited))秒] styleId=\(styleId) text=\"\(snippet)\"")
                 return cached
             }
             // 先行合成が失敗していた場合はここに落ちてくるので、その場で合成し直す。
         }
-        return try performSynthesize(text: text, styleId: styleId)
+        NSLog("NovelSpeaker.VoicevoxCore: [キャッシュMISS・その場合成開始] styleId=\(styleId) text=\"\(snippet)\"")
+        let synthStart = Date()
+        let data = try performSynthesize(text: text, styleId: styleId)
+        NSLog("NovelSpeaker.VoicevoxCore: [その場合成完了 \(String(format: "%.2f", Date().timeIntervalSince(synthStart)))秒] styleId=\(styleId) text=\"\(snippet)\"")
+        return data
     }
 
     /// 現在再生中のブロックより先のブロックを、実際に必要になる前にバックグラウンドで合成しておく。
@@ -253,6 +272,9 @@ actor VoicevoxCore {
     func prefetch(text: String, styleId: UInt32) {
         let key = Self.prefetchKey(text: text, styleId: styleId)
         if prefetchedWav[key] != nil || pendingPrefetchTasks[key] != nil { return }
+        let snippet = Self.logSnippet(text)
+        NSLog("NovelSpeaker.VoicevoxCore: [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
+        let scheduledAt = Date()
         // 優先度を低めにしておく。これは actor 上で他の synthesize() 呼び出しと直列化される際、
         // 「今まさに再生に必要な」高優先度の呼び出しが、まだ実行が始まっていない先行合成の
         // 順番待ちに割り込みやすくする(実行中のC呼び出し自体はプリエンプトできないので
@@ -261,6 +283,7 @@ actor VoicevoxCore {
             guard let self = self else { return }
             do {
                 let data = try await self.performSynthesize(text: text, styleId: styleId)
+                NSLog("NovelSpeaker.VoicevoxCore: [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(scheduledAt)))秒] styleId=\(styleId) text=\"\(snippet)\"")
                 await self.storePrefetched(key: key, data: data)
             } catch {
                 AppInformationLogger.AddLog(message: "VoicevoxCore: prefetch failed: \(error.localizedDescription)", appendix: [

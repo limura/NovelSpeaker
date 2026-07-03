@@ -206,17 +206,26 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // ただし本実装はシンプルな「先行合成キャッシュ」止まりで、ページ跨ぎ生成等の作り込みはしていない)。
     // 冪等(同じブロックへ何度呼んでもキャッシュ済み/進行中なら即返るだけ)なので、
     // enqueueSpeechBlock() の度に呼んで問題ない。
-    private let voicevoxPrefetchTargetCharacterCount = 200
+    // 実機で「短いブロックが連続する箇所」「長いブロック単体の直後」でよく合成待ちの無音が
+    // 発生するとの報告により、200文字では足りないケースがあった。目安を大きく引き上げる。
+    private let voicevoxPrefetchTargetCharacterCount = 2000
+    // VOICEVOXブロックはハード上限(120文字/ブロック、StoryTextClassifier参照)で切られるため、
+    // 1ブロックが上限一杯("それ単体で200文字"のような)の場合、文字数目安だけでは
+    // 先読みが1〜2ブロック分しか進まない事がある。合成には(RTF≈1のため)ブロック単位で
+    // 数秒かかるので、文字数に加えてブロック数でも最低限の先読み本数を保証する。
+    private let voicevoxPrefetchMinimumBlockCount = 4
     // 会話文(「」)等で別エンジンのブロックが短く挟まると、そのブロックの再生時間が短いために
     // 先読みの猶予がほとんど無くなる(実機で「短い会話文の直後だけ間が開く」現象として確認)。
     // 挟まる他エンジンのブロックでは先読みを打ち切らず、飛び越えてその先のVOICEVOXブロックも
     // 探しにいく(ただし際限なく本文全体を舐めないよう、走査するブロック数には上限を設ける)。
-    private let voicevoxPrefetchMaxBlocksToScan = 30
+    private let voicevoxPrefetchMaxBlocksToScan = 60
     private func refillVoicevoxPrefetchIfNeeded() {
         var accumulated = 0
+        var prefetchedBlockCount = 0
         var index = currentSpeechBlockIndex + 1
         var scanned = 0
-        while index < speechBlockArray.count && accumulated < voicevoxPrefetchTargetCharacterCount && scanned < voicevoxPrefetchMaxBlocksToScan {
+        while index < speechBlockArray.count && scanned < voicevoxPrefetchMaxBlocksToScan
+            && (accumulated < voicevoxPrefetchTargetCharacterCount || prefetchedBlockCount < voicevoxPrefetchMinimumBlockCount) {
             let block = speechBlockArray[index]
             scanned += 1
             guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else {
@@ -235,6 +244,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             }
             VoicevoxCore.shared.schedulePrefetch(text: text, styleId: styleId)
             accumulated += text.count
+            prefetchedBlockCount += 1
             index += 1
         }
     }
