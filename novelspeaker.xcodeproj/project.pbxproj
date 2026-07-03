@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2040F1799AC29B452C5CE81F /* open_jtalk_dic_utf_8-1.11 in Resources */ = {isa = PBXBuildFile; fileRef = BBB05391867F910CC2BC3C5D /* open_jtalk_dic_utf_8-1.11 */; };
 		2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
 		21038DD52F55CE7C0072B3B9 /* MaxWidthButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */; };
 		21038DD72F6FF0010072B3B9 /* AppLaunchCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21038DD62F6FF0010072B3B9 /* AppLaunchCoordinator.swift */; };
@@ -244,10 +245,17 @@
 		21F563D11FD802400037F5D7 /* <@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CE1FD8023F0037F5D7 /* <@3x.png */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
+		3C426D51706ADFD3D604532A /* voicevox_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 651FDED91DB56F790A75C7D5 /* voicevox_core.xcframework */; };
+		41213CBE04DC618401CCB742 /* voicevox_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 651FDED91DB56F790A75C7D5 /* voicevox_core.xcframework */; };
+		486A5E32E85791212EE17462 /* voicevox_core.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 651FDED91DB56F790A75C7D5 /* voicevox_core.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeaderOnCopy, ); }; };
 		8261A40E09A2B1556BFC551B /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */; };
 		9CACC3CB8604EA2A797F6377 /* Pods_NovelSpeakerWatchApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */; };
 		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
+		B62CE9CB1A11475BCDD7AFDA /* voicevox_onnxruntime.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; };
+		B7AD5FDF47A17A848982B113 /* voicevox_onnxruntime.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; };
 		C2296499CD866B828ADB93C5 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */; };
+		D063461FC62C10956C8B3C2F /* voicevox_onnxruntime.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeaderOnCopy, ); }; };
+		D9A2CDCE2FE45C9D525EC442 /* 0.vvm in Resources */ = {isa = PBXBuildFile; fileRef = 7D361F044DB34565EE692F3A /* 0.vvm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -313,6 +321,18 @@
 				2193094223BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CFBCDE44065D61E24DAADA40 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				486A5E32E85791212EE17462 /* voicevox_core.xcframework in Embed Frameworks */,
+				D063461FC62C10956C8B3C2F /* voicevox_onnxruntime.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -593,12 +613,16 @@
 		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
 		470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		651FDED91DB56F790A75C7D5 /* voicevox_core.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; name = voicevox_core.xcframework; path = voicevox_core.xcframework; sourceTree = "<group>"; };
 		7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerURLDownloadExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D361F044DB34565EE692F3A /* 0.vvm */ = {isa = PBXFileReference; includeInIndex = 1; name = 0.vvm; path = vvm/0.vvm; sourceTree = "<group>"; };
 		7DA0062504DB8C705E4A8D40 /* Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig"; sourceTree = "<group>"; };
+		95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; name = voicevox_onnxruntime.xcframework; path = voicevox_onnxruntime.xcframework; sourceTree = "<group>"; };
 		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF64DABA0B88B85E7F1DE40E /* Pods-NovelSpeakerWatchApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp/Pods-NovelSpeakerWatchApp.debug.xcconfig"; sourceTree = "<group>"; };
 		B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBB05391867F910CC2BC3C5D /* open_jtalk_dic_utf_8-1.11 */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder; name = "open_jtalk_dic_utf_8-1.11"; path = "dict/open_jtalk_dic_utf_8-1.11"; sourceTree = "<group>"; };
 		BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.release.xcconfig"; sourceTree = "<group>"; };
 		C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; sourceTree = "<group>"; };
@@ -652,6 +676,8 @@
 				21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */,
 				21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */,
 				A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */,
+				41213CBE04DC618401CCB742 /* voicevox_core.xcframework in Frameworks */,
+				B62CE9CB1A11475BCDD7AFDA /* voicevox_onnxruntime.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,6 +690,8 @@
 				21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */,
 				21F054ED1917E0F200CC6BA9 /* Foundation.framework in Frameworks */,
 				2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */,
+				3C426D51706ADFD3D604532A /* voicevox_core.xcframework in Frameworks */,
+				B7AD5FDF47A17A848982B113 /* voicevox_onnxruntime.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1016,6 +1044,7 @@
 				21B53A1819619BE7009658B7 /* Resources */,
 				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
 				21F054D31917E0F200CC6BA9 /* Supporting Files */,
+				EFAF79F6C8B393A56104EC24 /* Vendor */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -1052,6 +1081,18 @@
 				21F054F41917E0F200CC6BA9 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		34663AD3573DB6459CEC7B18 /* VoicevoxCore */ = {
+			isa = PBXGroup;
+			children = (
+				651FDED91DB56F790A75C7D5 /* voicevox_core.xcframework */,
+				95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */,
+				BBB05391867F910CC2BC3C5D /* open_jtalk_dic_utf_8-1.11 */,
+				7D361F044DB34565EE692F3A /* 0.vvm */,
+			);
+			name = VoicevoxCore;
+			path = VoicevoxCore;
 			sourceTree = "<group>";
 		};
 		4E776B17196247BE00C36AD1 /* ViewControllers */ = {
@@ -1112,6 +1153,15 @@
 				076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		EFAF79F6C8B393A56104EC24 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				34663AD3573DB6459CEC7B18 /* VoicevoxCore */,
+			);
+			name = Vendor;
+			path = Vendor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1201,6 +1251,7 @@
 				21F054C71917E0F200CC6BA9 /* Resources */,
 				2126A2691D9A1B90008E534A /* Embed App Extensions */,
 				455CC71F8AB9A5A5AC429D00 /* [CP] Embed Pods Frameworks */,
+				CFBCDE44065D61E24DAADA40 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1420,6 +1471,8 @@
 				21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */,
 				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
 				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
+				2040F1799AC29B452C5CE81F /* open_jtalk_dic_utf_8-1.11 in Resources */,
+				D9A2CDCE2FE45C9D525EC442 /* 0.vvm in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
