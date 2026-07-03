@@ -14,6 +14,26 @@ protocol SpeakRangeDelegate {
     func finishSpeak(isCancel:Bool, speechString:String)
 }
 
+// MultiVoiceSpeaker が AVSpeechSynthesizer(Speaker)/VOICEVOX(VoicevoxSpeaker) のどちらでも
+// 同じように扱えるようにするための、Speaker の実質的なインターフェース切り出し。
+// AVSpeechSynthesisVoice に依存する部分(voice/SetVoiceWith)は各エンジン固有の話者選択方法が
+// 違いすぎるためここには含めず、MultiVoiceSpeaker.getSpeaker() 側でエンジンごとに設定する。
+protocol SpeechEngineSpeaking: AnyObject {
+    func Speech(text:String)
+    func Stop()
+    func Pause()
+    func Resume()
+    var pitch:Float { get set }
+    var rate:Float { get set }
+    var volume:Float { get set }
+    var delay:TimeInterval { get set }
+    var delegate:SpeakRangeDelegate? { get set }
+    func isSpeaking() -> Bool
+    func isPaused() -> Bool
+    func reloadSynthesizer()
+    var isSpeechKicked:Bool { get }
+}
+
 // Speaker が「発話直前にオーディオセッションを整える」ために使う最小の抽象。
 // 具体的なセッション管理(アクティブ化や deactivate のライフサイクル)は上位レイヤが実装し、
 // Speaker 自身は上位の具象クラス(StorySpeaker 等)に依存しないようにするためのもの。
@@ -233,7 +253,7 @@ class Speaker_Original: NSObject, AVSpeechSynthesizerDelegate {
 }
 #endif // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
 
-class Speaker: NSObject, AVSpeechSynthesizerDelegate {
+class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
     var synthesizer = AVSpeechSynthesizer()
     var m_Voice:AVSpeechSynthesisVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
     var m_Pitch:Float = 1.0
