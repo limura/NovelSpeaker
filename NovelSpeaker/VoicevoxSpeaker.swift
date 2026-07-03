@@ -34,20 +34,51 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     // Stop() やエンジン破棄との競合を避けるための世代カウンタ。
     private var generation: Int = 0
     private var progressTimer: Timer?
+    // playerNode→timePitch→mainMixer を現在何のフォーマットで接続しているか。
+    // VOICEVOXのWAVは24kHz/monoで一定のはずだが、接続時のフォーマットと
+    // scheduleBuffer するバッファのフォーマットが食い違うと
+    // "_outputFormat.channelCount == buffer.format.channelCount" で落ちるため、
+    // 実際に得られたバッファのフォーマットで都度(初回のみ通常)接続し直す。
+    private var connectedFormat: AVAudioFormat?
 
     init(styleId: UInt32) {
         self.styleId = styleId
         super.init()
         engine.attach(playerNode)
         engine.attach(timePitch)
-        engine.connect(playerNode, to: timePitch, format: nil)
-        engine.connect(timePitch, to: engine.mainMixerNode, format: nil)
+        // ここでは接続しない(このタイミングでの適切なフォーマットが分からないため)。
+        // 実際のバッファが得られた時点(playBuffer)でそのフォーマットに合わせて接続する。
+    }
+
+    private func ensureGraphConnected(format: AVAudioFormat) throws {
+        if let connectedFormat = connectedFormat, connectedFormat == format {
+            return
+        }
+        let wasRunning = engine.isRunning
+        if wasRunning {
+            engine.stop()
+        }
+        engine.disconnectNodeOutput(playerNode)
+        engine.disconnectNodeOutput(timePitch)
+        engine.connect(playerNode, to: timePitch, format: format)
+        engine.connect(timePitch, to: engine.mainMixerNode, format: format)
+        connectedFormat = format
+        if wasRunning {
+            try engine.start()
+        }
     }
 
     func Speech(text: String) {
         if NiftyUtility.isTesting() {
             return
         }
+        performSpeech(text: text)
+    }
+
+    // NiftyUtility.isTesting() のガードを経由しない実体。
+    // @testable import 経由でユニットテストから直接呼び、実際の合成→再生パイプライン
+    // (AVAudioEngineへのバッファ投入含む)を検証できるようにするため internal にしている。
+    func performSpeech(text: String) {
         isSpeechKicked = true
         currentSpeechText = text
         generation += 1
@@ -73,6 +104,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     private func playBuffer(_ buffer: AVAudioPCMBuffer, generation myGeneration: Int, text: String) {
         guard myGeneration == generation else { return }
         do {
+            try ensureGraphConnected(format: buffer.format)
             if !engine.isRunning {
                 try engine.start()
             }
