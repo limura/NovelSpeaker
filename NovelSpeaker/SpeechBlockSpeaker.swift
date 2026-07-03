@@ -206,25 +206,36 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // ただし本実装はシンプルな「先行合成キャッシュ」止まりで、ページ跨ぎ生成等の作り込みはしていない)。
     // 冪等(同じブロックへ何度呼んでもキャッシュ済み/進行中なら即返るだけ)なので、
     // enqueueSpeechBlock() の度に呼んで問題ない。
-    // 実機で「短いブロックが連続する箇所」「長いブロック単体の直後」でよく合成待ちの無音が
-    // 発生するとの報告により、200文字では足りないケースがあった。目安を大きく引き上げる。
-    private let voicevoxPrefetchTargetCharacterCount = 2000
+    // VOICEVOXの合成はactor上で完全に直列化されており(1つのC呼び出しが終わるまで次は始まらない)、
+    // かつRTF≈1(合成には結果の音声と同程度の時間がかかる)なので、先読みを「大きな目安文字数」まで
+    // 一気に貯め込んでも合成の総所要時間そのものは短縮できない。それどころか、会話文の相槌のような
+    // 短いブロック("「異世界」"等)が連続する場面では、1ブロックあたりの固定オーバーヘッド
+    // (OpenJTalk解析等)の比率が相対的に大きくなり、実際の合成には「そのブロックの再生時間」より
+    // 長くかかる事がある。目安文字数を大きくして一度に何十ブロックも先読み予約すると、
+    // (実機で確認: 200→2000文字にした結果、約40ブロックが一括で先読みキューに積まれ、
+    //  それを直列に捌き切るのに約58秒かかった一方、その間の実際の再生はもっと早く先読み済みの
+    //  ブロックを消費し尽くしてしまい、後方の未着手ブロックの順番待ちで無音が続いた)
+    // 「先読みの深さを増やす」のではなく「一度に予約するブロック数の上限を小さく保つ」事で、
+    // 直列合成キューが実際の再生ペースより先に積み上がり過ぎないようにする。
+    private let voicevoxPrefetchTargetCharacterCount = 300
     // VOICEVOXブロックはハード上限(120文字/ブロック、StoryTextClassifier参照)で切られるため、
-    // 1ブロックが上限一杯("それ単体で200文字"のような)の場合、文字数目安だけでは
-    // 先読みが1〜2ブロック分しか進まない事がある。合成には(RTF≈1のため)ブロック単位で
-    // 数秒かかるので、文字数に加えてブロック数でも最低限の先読み本数を保証する。
-    private let voicevoxPrefetchMinimumBlockCount = 4
+    // 1ブロックが上限一杯の場合、文字数目安だけでは先読みが1ブロック分しか進まない事がある。
+    private let voicevoxPrefetchMinimumBlockCount = 3
+    // 上記の「一度に大量予約しない」ためのハード上限。目安文字数・最低ブロック数のどちらを
+    // 満たす前でも、これに達したら打ち切る(短いブロックの連続でキューが際限なく膨らむのを防ぐ)。
+    private let voicevoxPrefetchMaxBlockCountToQueue = 8
     // 会話文(「」)等で別エンジンのブロックが短く挟まると、そのブロックの再生時間が短いために
     // 先読みの猶予がほとんど無くなる(実機で「短い会話文の直後だけ間が開く」現象として確認)。
     // 挟まる他エンジンのブロックでは先読みを打ち切らず、飛び越えてその先のVOICEVOXブロックも
     // 探しにいく(ただし際限なく本文全体を舐めないよう、走査するブロック数には上限を設ける)。
-    private let voicevoxPrefetchMaxBlocksToScan = 60
+    private let voicevoxPrefetchMaxBlocksToScan = 40
     private func refillVoicevoxPrefetchIfNeeded() {
         var accumulated = 0
         var prefetchedBlockCount = 0
         var index = currentSpeechBlockIndex + 1
         var scanned = 0
         while index < speechBlockArray.count && scanned < voicevoxPrefetchMaxBlocksToScan
+            && prefetchedBlockCount < voicevoxPrefetchMaxBlockCountToQueue
             && (accumulated < voicevoxPrefetchTargetCharacterCount || prefetchedBlockCount < voicevoxPrefetchMinimumBlockCount) {
             let block = speechBlockArray[index]
             scanned += 1
