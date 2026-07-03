@@ -42,6 +42,10 @@ enum VoicevoxCoreError: LocalizedError {
 actor VoicevoxCore {
     static let shared = VoicevoxCore()
 
+    // UI(SpeakerSettingsViewController等)が話者一覧をactor越しにawaitせず同期参照するための
+    // ベストエフォートなスナップショット。reloadStyleCatalog() の度に更新される。
+    nonisolated(unsafe) static var cachedStyles: [VoicevoxStyle] = []
+
     // OpenJtalkRc / VoicevoxOnnxruntime / VoicevoxSynthesizer / VoicevoxVoiceModelFile はいずれも
     // ヘッダ上では前方宣言のみ(定義本体なし)の不透明型なので、Swiftからは OpaquePointer として扱う。
     private var onnxruntime: OpaquePointer?
@@ -56,6 +60,27 @@ actor VoicevoxCore {
 
     var isSetUp: Bool {
         return synthesizer != nil
+    }
+
+    // voicevox_onnxruntime.xcframework の対応OSがiOS 16以降のため、それ未満では機能自体を無効化する。
+    static var isAvailableOnThisOS: Bool {
+        if #available(iOS 16.0, *) { return true }
+        return false
+    }
+
+    /// アプリに同梱されている辞書/VVMからの起動時セットアップ。
+    /// 同梱リソースが見つからない場合は何もしない(iOS 16未満や、まだVVMを1つも
+    /// 用意していない環境でも安全に呼べる)。
+    static func setUpFromBundleIfNeeded() async {
+        guard isAvailableOnThisOS else { return }
+        guard let dictPath = Bundle.main.path(forResource: "open_jtalk_dic_utf_8-1.11", ofType: nil) else { return }
+        guard let vvmPath = Bundle.main.path(forResource: "0", ofType: "vvm") else { return }
+        let vvmDirectory = (vvmPath as NSString).deletingLastPathComponent
+        do {
+            try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelDirectoryPaths: [vvmDirectory])
+        } catch {
+            AppInformationLogger.AddLog(message: "VoicevoxCore.setUpFromBundleIfNeeded failed: \(error.localizedDescription)", appendix: [:], isForDebug: true)
+        }
     }
 
     /// 起動時(または初回VOICEVOX利用時)に一度だけ呼ぶ。
@@ -108,6 +133,7 @@ actor VoicevoxCore {
             }
         }
         styles = newStyles
+        VoicevoxCore.cachedStyles = newStyles
     }
 
     private func stylesFrom(vvmPath: String) throws -> [VoicevoxStyle] {

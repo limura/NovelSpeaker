@@ -635,6 +635,10 @@
 "SpeakSettingsViewController_PitchTitle" = "高さ";
 "SpeakSettingsViewController_RateTitle" = "速度";
 "SpeakSettingsViewController_VolumeTitle" = "音量";
+"SpeakSettingsViewController_EngineTypeTitle" = "読み上げエンジン";
+"SpeakSettingsViewController_EngineTypeDialogTitle" = "読み上げエンジンを選択してください";
+"SpeakSettingsViewController_VoicevoxStyleTitle" = "VOICEVOX話者";
+"SpeakSettingsViewController_VoicevoxStyleDialogTitle" = "VOICEVOXの話者を選択してください";
 "SpeakSettingsViewController_LangageTitle" = "言語";
 "SpeakSettingsViewController_LanguageDialogTitle" = "言語を選択してください";
 "SpeakSettingsViewController_VoiceIdentifierTitle" = "話者";

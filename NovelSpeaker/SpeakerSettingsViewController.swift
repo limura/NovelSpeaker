@@ -33,6 +33,43 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         registNotificationCenter()
         registNotificationToken()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
+        if VoicevoxCore.isAvailableOnThisOS {
+            Task {
+                await VoicevoxCore.setUpFromBundleIfNeeded()
+                await MainActor.run {
+                    self.refreshAllVoicevoxStyleRows()
+                }
+            }
+        }
+    }
+
+    // VoicevoxCore.cachedStyles が(非同期セットアップ完了後に)更新された事を受けて、
+    // 画面上の全VOICEVOXスタイル選択行のoptionsを最新化する。
+    func refreshAllVoicevoxStyleRows() {
+        #if targetEnvironment(macCatalyst)
+        for row in self.form.rows.compactMap({ $0 as? PushRow<String> }) where row.tag?.hasPrefix("VoicevoxStyleAlertRow-") == true {
+            row.options = SpeakerSettingsViewController.voicevoxStyleOptionLabels()
+            row.updateCell()
+        }
+        #else
+        for row in self.form.rows.compactMap({ $0 as? AlertRow<String> }) where row.tag?.hasPrefix("VoicevoxStyleAlertRow-") == true {
+            row.options = SpeakerSettingsViewController.voicevoxStyleOptionLabels()
+            row.updateCell()
+        }
+        #endif
+    }
+
+    static func voicevoxStyleOptionLabels() -> [String] {
+        return VoicevoxCore.cachedStyles.map { style in
+            "\(style.speakerName) - \(style.name)"
+        }
+    }
+    static func voicevoxStyleLabel(for styleId: UInt32) -> String? {
+        guard let style = VoicevoxCore.cachedStyles.first(where: { $0.styleId == styleId }) else { return nil }
+        return "\(style.speakerName) - \(style.name)"
+    }
+    static func voicevoxStyleId(forLabel label: String) -> UInt32? {
+        return VoicevoxCore.cachedStyles.first(where: { "\($0.speakerName) - \($0.name)" == label })?.styleId
     }
     deinit {
         RealmObserverHandler.shared.RemoveDelegate(delegate: self)
@@ -79,19 +116,33 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
-    func testSpeech(pitch:Float, rate: Float, volume: Float, identifier: String, locale: String, text: String) {
+    func testSpeech(pitch:Float, rate: Float, volume: Float, identifier: String, locale: String, type: String, text: String) {
         let speakerSetting = RealmSpeakerSetting()
         speakerSetting.pitch = pitch
         speakerSetting.rate = rate
         speakerSetting.volume = volume
         speakerSetting.voiceIdentifier = identifier
         speakerSetting.locale = locale
+        speakerSetting.type = type
         let defaultSpeaker = SpeakerSetting(from: speakerSetting)
         speaker.StopSpeech()
         speaker.SetText(content: text, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
         speaker.StartSpeech()
     }
     
+    func currentEngineType(targetID: String) -> String {
+        #if targetEnvironment(macCatalyst)
+        if let row = self.form.rowBy(tag: "EngineTypeAlertRow-\(targetID)") as? PushRow<String> {
+            return row.value ?? "AVSpeechSynthesizer"
+        }
+        #else
+        if let row = self.form.rowBy(tag: "EngineTypeAlertRow-\(targetID)") as? AlertRow<String> {
+            return row.value ?? "AVSpeechSynthesizer"
+        }
+        #endif
+        return "AVSpeechSynthesizer"
+    }
+
     func createSpeakSettingRows(currentSetting:RealmSpeakerSetting) -> Section {
         let targetID = currentSetting.name
         var isDefaultSpeakerSetting = false
@@ -119,8 +170,10 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 "PitchSliderRow-\(targetID)",
                 "RateSliderRow-\(targetID)",
                 "VolumeSliderRow-\(targetID)",
+                "EngineTypeAlertRow-\(targetID)",
                 "LanguageAlertRow-\(targetID)",
                 "VoiceIdentifierAlertRow-\(targetID)",
+                "VoicevoxStyleAlertRow-\(targetID)",
                 "TestSpeechButtonRow-\(targetID)",
                 "RemoveButtonRow-\(targetID)"
                 ] {
@@ -289,6 +342,41 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
             }
         })
         #if targetEnvironment(macCatalyst)
+        let engineTypeRow = PushRow<String>("EngineTypeAlertRow-\(targetID)")
+        ConfigureCatalystSingleSelectionPushRow(engineTypeRow)
+        #else
+        let engineTypeRow = AlertRow<String>("EngineTypeAlertRow-\(targetID)")
+        engineTypeRow.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
+        #endif
+        engineTypeRow.title = NSLocalizedString("SpeakSettingsViewController_EngineTypeTitle", comment: "読み上げエンジン")
+        engineTypeRow.selectorTitle = NSLocalizedString("SpeakSettingsViewController_EngineTypeDialogTitle", comment: "読み上げエンジンを選択してください")
+        var engineTypeOptions = ["AVSpeechSynthesizer"]
+        if VoicevoxCore.isAvailableOnThisOS {
+            engineTypeOptions.append("VOICEVOX")
+        }
+        engineTypeRow.options = engineTypeOptions
+        engineTypeRow.value = engineTypeOptions.contains(currentSetting.type) ? currentSetting.type : "AVSpeechSynthesizer"
+        engineTypeRow.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
+            return self.hideCache[targetID] ?? false
+        })
+        engineTypeRow.onChange({ (row) in
+            guard let type = row.value else { return }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else { return }
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                    setting.type = type
+                }
+            }
+            for tag in ["LanguageAlertRow-\(targetID)", "VoiceIdentifierAlertRow-\(targetID)", "VoicevoxStyleAlertRow-\(targetID)"] {
+                if let row = self.form.rowBy(tag: tag) {
+                    row.evaluateHidden()
+                    row.updateCell()
+                }
+            }
+        })
+        section <<< engineTypeRow
+
+        #if targetEnvironment(macCatalyst)
         let languageRow = PushRow<String>("LanguageAlertRow-\(targetID)")
         ConfigureCatalystSingleSelectionPushRow(languageRow)
         #else
@@ -306,8 +394,9 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         }else{
             languageRow.value = languageCodeArray.first ?? ""
         }
-        languageRow.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-            return self.hideCache[targetID] ?? false
+        languageRow.hidden = Condition.function(["TitleLabelRow-\(targetID)", "EngineTypeAlertRow-\(targetID)"], { (form) -> Bool in
+            if self.hideCache[targetID] ?? false { return true }
+            return self.currentEngineType(targetID: targetID) == "VOICEVOX"
         })
         languageRow.onChange({ (row) in
             RealmUtil.RealmBlock { (realm) -> Void in
@@ -359,8 +448,9 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         }else{
             voiceIdentifierRow.value = voiceNameArray.first ?? ""
         }
-        voiceIdentifierRow.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-            return self.hideCache[targetID] ?? false
+        voiceIdentifierRow.hidden = Condition.function(["TitleLabelRow-\(targetID)", "EngineTypeAlertRow-\(targetID)"], { (form) -> Bool in
+            if self.hideCache[targetID] ?? false { return true }
+            return self.currentEngineType(targetID: targetID) == "VOICEVOX"
         })
         voiceIdentifierRow.onChange({ (row) in
             RealmUtil.RealmBlock { (realm) -> Void in
@@ -379,6 +469,38 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
             }
         })
         section <<< voiceIdentifierRow
+
+        #if targetEnvironment(macCatalyst)
+        let voicevoxStyleRow = PushRow<String>("VoicevoxStyleAlertRow-\(targetID)")
+        ConfigureCatalystSingleSelectionPushRow(voicevoxStyleRow)
+        #else
+        let voicevoxStyleRow = AlertRow<String>("VoicevoxStyleAlertRow-\(targetID)")
+        voicevoxStyleRow.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
+        #endif
+        voicevoxStyleRow.title = NSLocalizedString("SpeakSettingsViewController_VoicevoxStyleTitle", comment: "VOICEVOX話者")
+        voicevoxStyleRow.selectorTitle = NSLocalizedString("SpeakSettingsViewController_VoicevoxStyleDialogTitle", comment: "VOICEVOXの話者を選択してください")
+        let voicevoxStyleOptions = SpeakerSettingsViewController.voicevoxStyleOptionLabels()
+        voicevoxStyleRow.options = voicevoxStyleOptions
+        let currentStyleId = UInt32(currentSetting.voiceIdentifier)
+        if let currentStyleId = currentStyleId, let label = SpeakerSettingsViewController.voicevoxStyleLabel(for: currentStyleId) {
+            voicevoxStyleRow.value = label
+        }else{
+            voicevoxStyleRow.value = voicevoxStyleOptions.first ?? ""
+        }
+        voicevoxStyleRow.hidden = Condition.function(["TitleLabelRow-\(targetID)", "EngineTypeAlertRow-\(targetID)"], { (form) -> Bool in
+            if self.hideCache[targetID] ?? false { return true }
+            return self.currentEngineType(targetID: targetID) != "VOICEVOX"
+        })
+        voicevoxStyleRow.onChange({ (row) in
+            guard let label = row.value, let styleId = SpeakerSettingsViewController.voicevoxStyleId(forLabel: label) else { return }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else { return }
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                    setting.voiceIdentifier = String(styleId)
+                }
+            }
+        })
+        section <<< voicevoxStyleRow
         <<< ButtonRow("TestSpeechButtonRow-\(targetID)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
             $0.cell.textLabel?.numberOfLines = 0
@@ -391,7 +513,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                     return
                 }
                 print("testSpeech: volume: \(setting.volume), name: \(setting.name)")
-                self.testSpeech(pitch: setting.pitch, rate: setting.rate, volume: setting.volume, identifier: setting.voiceIdentifier, locale: setting.locale, text: self.testText)
+                self.testSpeech(pitch: setting.pitch, rate: setting.rate, volume: setting.volume, identifier: setting.voiceIdentifier, locale: setting.locale, type: setting.type, text: self.testText)
             }
         })
         if !isDefaultSpeakerSetting {

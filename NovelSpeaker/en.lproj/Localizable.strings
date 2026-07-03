@@ -643,6 +643,10 @@
 "SpeakSettingsViewController_PitchTitle" = "Pitch";
 "SpeakSettingsViewController_RateTitle" = "Rate";
 "SpeakSettingsViewController_VolumeTitle" = "Volume";
+"SpeakSettingsViewController_EngineTypeTitle" = "Speech Engine";
+"SpeakSettingsViewController_EngineTypeDialogTitle" = "Select a speech engine";
+"SpeakSettingsViewController_VoicevoxStyleTitle" = "VOICEVOX Speaker";
+"SpeakSettingsViewController_VoicevoxStyleDialogTitle" = "Select a VOICEVOX speaker";
 "SpeakSettingsViewController_LangageTitle" = "Language";
 "SpeakSettingsViewController_LanguageDialogTitle" = "Select languate";
 "SpeakSettingsViewController_VoiceIdentifierTitle" = "Speaker";
