@@ -346,6 +346,17 @@ class StoryTextClassifier {
     // ただ、元々の文字列長が長すぎる場合はそのままの長さで残ってしまいますし、
     // 日本語として切れて良い場所かどうかは考慮に入れていないために不自然な所で区切られた文になる可能性もある
     // という事を理解しておいてください。
+    // VOICEVOXはブロック全体を一括合成してから再生開始する方式でRTF≈1(合成時間 ≈ 音声長)のため、
+    // AVSpeechSynthesizer向けにチューニングされた moreSplitMinimumLetterCount(既定200)をそのまま
+    // 使うと、発話開始までの待ちが長くなる(実機で10秒以上)上に、巨大な入力でONNX Runtimeの
+    // メモリ確保に失敗してクラッシュする("Failed to allocate memory for requested buffer of
+    // size 684345600" 等)。VOICEVOXの推奨値(VOICEVOX_IOS_INTEGRATION.md §6-1)に合わせて
+    // ブロックだけ大幅に小さい閾値で区切る。
+    private static let voicevoxMoreSplitMinimumLetterCount = 40
+    // hasValidSuffix(句読点等の区切り)が見つからないまま延々連結され続けるのを防ぐための絶対上限。
+    // これが無いと、区切り文字の無い長文(改行の連続等)でブロックが際限なく巨大化してしまう。
+    private static let voicevoxHardCapLetterCount = 120
+
     static func ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray:[SpeechBlockInfo], moreSplitMinimumLetterCount:Int, splitTargetLastLetters:[String]) -> [CombinedSpeechBlock] {
         var result:[CombinedSpeechBlock] = []
         var currentBlock:CombinedSpeechBlock? = nil
@@ -353,6 +364,8 @@ class StoryTextClassifier {
         for block in speechBlockArray {
             let displayText = block.displayText
             let blockDisplayTextCount = displayText.count
+            let isVoicevox = block.type == "VOICEVOX"
+            let effectiveMinimumLetterCount = isVoicevox ? voicevoxMoreSplitMinimumLetterCount : moreSplitMinimumLetterCount
             var hasValidSuffix = false
             for lastLetter in splitTargetLastLetters {
                 if displayText.hasSuffix(lastLetter) {
@@ -361,13 +374,14 @@ class StoryTextClassifier {
                 }
             }
             if let current = currentBlock {
-                if ((currentDisplayTextCount + blockDisplayTextCount) < moreSplitMinimumLetterCount || hasValidSuffix == false)
-                    && current.Add(block: block) {
-                    currentDisplayTextCount += blockDisplayTextCount
+                let combinedCount = currentDisplayTextCount + blockDisplayTextCount
+                let forceCloseForVoicevoxCap = isVoicevox && combinedCount >= voicevoxHardCapLetterCount
+                let shouldKeepGrowing = !forceCloseForVoicevoxCap && (combinedCount < effectiveMinimumLetterCount || hasValidSuffix == false)
+                if shouldKeepGrowing && current.Add(block: block) {
+                    currentDisplayTextCount = combinedCount
                     continue
                 }
-                if ((currentDisplayTextCount + blockDisplayTextCount) >= moreSplitMinimumLetterCount && hasValidSuffix == true)
-                    && current.Add(block: block) {
+                if !shouldKeepGrowing && current.Add(block: block) {
                     result.append(current)
                     currentBlock = nil
                     currentDisplayTextCount = 0
@@ -376,7 +390,11 @@ class StoryTextClassifier {
                 result.append(current)
             }
             currentBlock = CombinedSpeechBlock(block: block)
-            currentDisplayTextCount = 0
+            // 元々の実装は、ブロックの最初の1ピース(コンストラクタで入る分)を
+            // currentDisplayTextCount に含めない仕様だった(AVSpeech向けの既存挙動はそのまま維持する)。
+            // VOICEVOXのハード上限判定はこの分の誤差(最大で1ピース分)も許さず厳密に効かせたいので、
+            // VOICEVOXの時だけ最初のピースの文字数から数え始める。
+            currentDisplayTextCount = isVoicevox ? blockDisplayTextCount : 0
         }
         if let current = currentBlock {
             result.append(current)

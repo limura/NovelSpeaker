@@ -118,7 +118,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         timePitch.pitch = Self.timePitchCents(fromPitchMultiplier: m_Pitch)
         playerNode.volume = max(0.0, min(1.0, m_Volume))
 
-        startProgressReporting(textLength: text.count, buffer: buffer, generation: myGeneration)
+        startProgressReporting(text: text, buffer: buffer, generation: myGeneration)
 
         playerNode.scheduleBuffer(buffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
             DispatchQueue.main.async {
@@ -134,9 +134,10 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         playerNode.play()
     }
 
-    private func startProgressReporting(textLength: Int, buffer: AVAudioPCMBuffer, generation myGeneration: Int) {
+    private func startProgressReporting(text: String, buffer: AVAudioPCMBuffer, generation myGeneration: Int) {
         stopProgressReporting()
-        guard textLength > 0, buffer.format.sampleRate > 0 else { return }
+        let cumulativeWeights = Self.cumulativeSpeechWeights(for: text)
+        guard let totalWeight = cumulativeWeights.last, totalWeight > 0, buffer.format.sampleRate > 0 else { return }
         let duration = Double(buffer.frameLength) / buffer.format.sampleRate
         guard duration > 0 else { return }
         let startDate = Date()
@@ -147,11 +148,45 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
             }
             let elapsed = Date().timeIntervalSince(startDate)
             let fraction = min(1.0, max(0.0, elapsed / duration))
-            let index = min(textLength - 1, Int(fraction * Double(textLength)))
+            let targetWeight = fraction * totalWeight
+            // cumulativeWeights[i] は「文字 i まで読み終えた時点」の累積重み。
+            // targetWeight を超える最初の文字を「今読んでいる位置」とみなす。
+            var index = cumulativeWeights.count - 1
+            for (i, weight) in cumulativeWeights.enumerated() where weight >= targetWeight {
+                index = i
+                break
+            }
             self.m_Delegate?.willSpeakRange(range: NSRange(location: index, length: 1))
         }
         progressTimer = timer
         RunLoop.main.add(timer, forMode: .common)
+    }
+
+    // 改行・空白・区切り記号の連続("。。。。。。"等)はVOICEVOXが実際にはほぼ音声時間を
+    // 使わない(あるいはまとめて短く発話される)ため、経過時間から読み上げ位置を按分推定する際に
+    // 通常の文字と同じ重みで扱うと、そうした区間が長いほど推定位置が実際より大きく先行してしまう
+    // (実機で「発話箇所と全然違う場所を示す」という形で確認された)。
+    // ここでは目安として、そのような文字の重みを下げてから累積させることで、推定精度の近似を改善する。
+    // ※ あくまで文字種による近似であり、VOICEVOX側の実際の音素タイミングを見ているわけではない。
+    private static func speechWeight(for character: Character) -> Double {
+        if character.isWhitespace || character.isNewline {
+            return 0.05
+        }
+        if character.isPunctuation || character.isSymbol {
+            return 0.15
+        }
+        return 1.0
+    }
+
+    private static func cumulativeSpeechWeights(for text: String) -> [Double] {
+        var result: [Double] = []
+        result.reserveCapacity(text.count)
+        var sum = 0.0
+        for character in text {
+            sum += speechWeight(for: character)
+            result.append(sum)
+        }
+        return result
     }
 
     private func stopProgressReporting() {
