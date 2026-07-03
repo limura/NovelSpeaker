@@ -75,6 +75,13 @@ actor VoicevoxCore {
     // key は synthesizePrefetchKey(text:styleId:) で作る。
     private var prefetchedWav: [String: Data] = [:]
     private var pendingPrefetchTasks: [String: Task<Void, Never>] = [:]
+    // 先行合成タスクを投入順(=実際に必要になる順)通りに直列実行させるための鎖。
+    // 単純に Task(priority: .utility) を並べて投げるだけだと、同一優先度のTaskがどの順で
+    // actorに入るかはSwift concurrency のスケジューラ任せで、投入順が保証されない
+    // (実機ログで、後から予約したはずの短いブロックより先に予約した別ブロックの方が
+    //  何十秒も遅れて完了する、という順序の入れ替わりを確認した)。ここでは新しいタスクが
+    // 「前のタスクの完了を待ってから」実際の合成に入るようにする事で、投入順=実行順を保証する。
+    private var prefetchTailTask: Task<Void, Never>?
 
     private init() {}
 
@@ -286,11 +293,12 @@ actor VoicevoxCore {
         let snippet = Self.logSnippet(text)
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
         let scheduledAt = Date()
-        // 優先度を低めにしておく。これは actor 上で他の synthesize() 呼び出しと直列化される際、
-        // 「今まさに再生に必要な」高優先度の呼び出しが、まだ実行が始まっていない先行合成の
-        // 順番待ちに割り込みやすくする(実行中のC呼び出し自体はプリエンプトできないので
-        // 完全な解決ではないが、キューイング順の悪化は緩和できる)。
-        pendingPrefetchTasks[key] = Task(priority: .utility) { [weak self] in
+        // 前段のタスクを明示的に待ってから自分の合成に入る事で、投入順=実行順を保証する
+        // (優先度は変わらず低めにして、synthesize()側からの割り込み・優先度エスカレーションの
+        // 余地は残す)。
+        let previousTail = prefetchTailTask
+        let newTask = Task(priority: .utility) { [weak self] in
+            await previousTail?.value
             guard let self = self else { return }
             do {
                 let data = try await self.performSynthesize(text: text, styleId: styleId)
@@ -304,6 +312,8 @@ actor VoicevoxCore {
                 await self.dropPendingPrefetch(key: key)
             }
         }
+        pendingPrefetchTasks[key] = newTask
+        prefetchTailTask = newTask
     }
 
     private func storePrefetched(key: String, data: Data) {
@@ -321,6 +331,9 @@ actor VoicevoxCore {
     func clearPrefetchCache() {
         prefetchedWav.removeAll()
         pendingPrefetchTasks.removeAll()
+        // 鎖を切っておかないと、新しい本文の先読みが「もう誰も要らない旧本文の
+        // 残りチェーン」の後ろに繋がってしまい、無駄に待たされる。
+        prefetchTailTask = nil
     }
 
     /// SpeechBlockSpeaker 等、actorの外(メインスレッド)から気軽に先行合成を蹴るための入り口。
