@@ -1047,19 +1047,33 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func GuessSpeakDuration(textLength:Int, speechConfig:RealmSpeakerSetting?) -> Float {
         guard let speechConfig = speechConfig else { return 0.0 }
-        let charCount = self.SpeechRateToCharCountInSecond(rate: speechConfig.rate)
+        let charCount = self.SpeechRateToCharCountInSecond(rate: speechConfig.rate, type: speechConfig.type)
         return Float(textLength) / charCount;
     }
-    
+
     func GuessSpeakLocationFromDulation(dulation:Float, speechConfig:RealmSpeakerSetting) -> Int {
         let rate = speechConfig.rate
-        let charCount = self.SpeechRateToCharCountInSecond(rate: rate)
+        let charCount = self.SpeechRateToCharCountInSecond(rate: rate, type: speechConfig.type)
         return Int(dulation * charCount)
     }
-    
-    func SpeechRateToCharCountInSecond(rate:Float) -> Float {
+
+    // VOICEVOX(等速で合成し再生速度は AVAudioUnitTimePitch 側で変える方式)の
+    // 等速(1倍)での「1秒あたり文字数」の目安。句読点込みの一般的な日本語文で実測した値
+    //(短文や句読点比率で 5.3〜7.1 に振れるが、長めの実文章は概ね 6.4〜6.8)。
+    // 生の文字数(句読点・改行を含む)にそのまま掛けて概算する前提の値なので、別途の重み付けは不要。
+    private static let voicevoxCharsPerSecondAt1x: Float = 6.5
+
+    func SpeechRateToCharCountInSecond(rate:Float, type:String) -> Float {
+        if type == "VOICEVOX" {
+            // VOICEVOX は常に等速(1倍)で合成し、再生速度は再生側で rate/DefaultRate 倍に変える。
+            // よって1秒あたり文字数 = (1倍での実測値) × (rate / DefaultRate)。
+            // AVSpeechSynthesizer の rate は速度が線形には変わらない(下記の経験式が要る)ため、
+            // VOICEVOX には当てはめられない。エンジンごとに別式にする。
+            let playbackRateMultiplier = rate / AVSpeechUtteranceDefaultSpeechRate
+            return Self.voicevoxCharsPerSecondAt1x * max(0.01, playbackRateMultiplier)
+        }
         let rateNormalized = (rate - AVSpeechUtteranceMinimumSpeechRate) / (AVSpeechUtteranceMaximumSpeechRate - AVSpeechUtteranceMinimumSpeechRate);
-        
+
         // 下に膨らんでる感じの補正をかける
         let rateCurved = powf(rateNormalized, 2.8);
         //NSLog(@"rateNormalized: %f -> %f", rateNormalized, rateCurved);
