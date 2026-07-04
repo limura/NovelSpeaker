@@ -360,10 +360,59 @@ class StoryTextClassifier {
     // これが無いと、区切り文字の無い長文(改行の連続等)でブロックが際限なく巨大化してしまう。
     private static let voicevoxHardCapLetterCount = 120
 
+    // ハード上限(voicevoxHardCapLetterCount)は「ピース同士の連結を止める」ためのものなので、
+    // 元々の1ピースがそれより長い場合(初期分割は moreSplitMinimumLetterCount(既定200)を
+    // 超えてから次の句読点で切る仕様のため、200文字超のピースが普通に発生する)は
+    // そのまま素通ししてしまっていた。VOICEVOX(ONNX Runtime)は一度でも大きな入力を
+    // 合成するとその入力サイズに応じた内部メモリ(アリーナ)を確保し、以後解放せずに
+    // 使い回すため、長いブロックが一発通るだけでアプリのメモリ消費が段階的に増えて
+    // 戻らなくなる(実機のInstrumentsで512MB等の巨大mallocとして観測された)。
+    // これを防ぐため、上限を超える単独ピースは連結前にここで分割する。
+    // 読み替え(mod)で表示文字列と発話文字列が異なるピースは、分割位置の対応関係を
+    // 安全に保てないため分割しない(読み替え結果は通常短い単語なので実害はない)。
+    private static let voicevoxPieceSplitBoundaryCharacters: Set<Character> = ["。", "、", "！", "？", "!", "?", "\n", "．", "，", " ", "　"]
+    private static func splitOversizedVoicevoxPieceIfNeeded(block:SpeechBlockInfo) -> [SpeechBlockInfo] {
+        guard block.type == "VOICEVOX",
+              block.displayText.count > voicevoxHardCapLetterCount,
+              block.isMod == false,
+              block.displayText == block.speechText else {
+            return [block]
+        }
+        var pieces:[String] = []
+        var remaining = Substring(block.displayText)
+        while remaining.count > voicevoxHardCapLetterCount {
+            let windowEnd = remaining.index(remaining.startIndex, offsetBy: voicevoxHardCapLetterCount)
+            let window = remaining[remaining.startIndex..<windowEnd]
+            // 上限までの範囲内で、一番後ろにある「切って良い文字」の直後で切る。
+            // 一つも無ければ諦めて上限位置でぶつ切りにする(不自然になるが、
+            // メモリ保護の方を優先する)。
+            var cutIndex = windowEnd
+            var searchIndex = window.endIndex
+            while searchIndex > window.startIndex {
+                searchIndex = window.index(before: searchIndex)
+                if voicevoxPieceSplitBoundaryCharacters.contains(window[searchIndex]) {
+                    cutIndex = window.index(after: searchIndex)
+                    break
+                }
+            }
+            pieces.append(String(remaining[remaining.startIndex..<cutIndex]))
+            remaining = remaining[cutIndex...]
+        }
+        if remaining.count > 0 {
+            pieces.append(String(remaining))
+        }
+        // delay(「読み上げ時の間の設定」由来のポーズ)はブロックの再生完了「後」に挟まる
+        // 待ち時間なので、分割した場合は最後のピースにだけ引き継がせる。
+        return pieces.enumerated().map { (i, text) in
+            SpeechBlockInfo(speechText: text, displayText: text, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: i == pieces.count - 1 ? block.delay : 0, isMod: false, type: block.type)
+        }
+    }
+
     static func ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray:[SpeechBlockInfo], moreSplitMinimumLetterCount:Int, splitTargetLastLetters:[String]) -> [CombinedSpeechBlock] {
         var result:[CombinedSpeechBlock] = []
         var currentBlock:CombinedSpeechBlock? = nil
         var currentDisplayTextCount = 0
+        let speechBlockArray = speechBlockArray.flatMap { splitOversizedVoicevoxPieceIfNeeded(block: $0) }
         for block in speechBlockArray {
             let displayText = block.displayText
             let blockDisplayTextCount = displayText.count
@@ -379,7 +428,18 @@ class StoryTextClassifier {
             if let current = currentBlock {
                 let combinedCount = currentDisplayTextCount + blockDisplayTextCount
                 let forceCloseForVoicevoxCap = isVoicevox && combinedCount >= voicevoxHardCapLetterCount
-                let shouldKeepGrowing = !forceCloseForVoicevoxCap && (combinedCount < effectiveMinimumLetterCount || hasValidSuffix == false)
+                if forceCloseForVoicevoxCap {
+                    // ハード上限に達する場合は、このピースを「足してから閉じる」のではなく
+                    // 「足さずに閉じて、このピースから新しいブロックを始める」。
+                    // 足してから閉じると、上限(120)前後のピース2つで最大240文字近い
+                    // ブロックが作られてしまい、上限の意味が無くなるため
+                    // (実際にテストで108+108=216文字のブロックが検出された)。
+                    result.append(current)
+                    currentBlock = CombinedSpeechBlock(block: block)
+                    currentDisplayTextCount = blockDisplayTextCount
+                    continue
+                }
+                let shouldKeepGrowing = combinedCount < effectiveMinimumLetterCount || hasValidSuffix == false
                 if shouldKeepGrowing && current.Add(block: block) {
                     currentDisplayTextCount = combinedCount
                     continue

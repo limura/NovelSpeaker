@@ -86,7 +86,13 @@ actor VoicevoxCore {
     // 際限なく貯め込み続けないよう、挿入順で古いものから追い出す上限を設ける
     // (会話文の相槌等の短い文字列が主な再利用対象なので、これだけあれば十分実用になる)。
     private let prefetchedWavCapacity = 64
+    // WAVは 24kHz/mono/16bit なので1秒あたり約48KB、長いブロックだと1本で数MBになる。
+    // エントリ数だけの上限だと最悪数十〜100MB級まで太り得るため、合計バイト数でも制限する
+    // (超えたら古い物から追い出す。読み上げ済みの過去のWAVを持ち続けるよりも、
+    //  直近の使い回し(会話文の相槌等)が効けば十分)。
+    private let prefetchedWavTotalByteLimit = 16 * 1024 * 1024
     nonisolated(unsafe) private var prefetchedWavOrderUnsafe: [String] = []
+    nonisolated(unsafe) private var prefetchedWavTotalBytesUnsafe = 0
 
     // actorへ入らずに(=今actorが何をしていても待たされずに)呼べるよう、あえて nonisolated。
     nonisolated private func peekCache(key: String) -> Data? {
@@ -98,13 +104,19 @@ actor VoicevoxCore {
     nonisolated private func storeCache(key: String, data: Data) {
         cacheLock.lock()
         defer { cacheLock.unlock() }
-        if prefetchedWavUnsafe[key] == nil {
+        if let oldData = prefetchedWavUnsafe[key] {
+            prefetchedWavTotalBytesUnsafe -= oldData.count
+        } else {
             prefetchedWavOrderUnsafe.append(key)
         }
         prefetchedWavUnsafe[key] = data
-        while prefetchedWavOrderUnsafe.count > prefetchedWavCapacity {
+        prefetchedWavTotalBytesUnsafe += data.count
+        while prefetchedWavOrderUnsafe.count > prefetchedWavCapacity
+            || (prefetchedWavTotalBytesUnsafe > prefetchedWavTotalByteLimit && prefetchedWavOrderUnsafe.count > 1) {
             let oldestKey = prefetchedWavOrderUnsafe.removeFirst()
-            prefetchedWavUnsafe.removeValue(forKey: oldestKey)
+            if let removed = prefetchedWavUnsafe.removeValue(forKey: oldestKey) {
+                prefetchedWavTotalBytesUnsafe -= removed.count
+            }
         }
     }
 
@@ -113,6 +125,7 @@ actor VoicevoxCore {
         defer { cacheLock.unlock() }
         prefetchedWavUnsafe.removeAll()
         prefetchedWavOrderUnsafe.removeAll()
+        prefetchedWavTotalBytesUnsafe = 0
     }
 
     private var pendingPrefetchTasks: [String: Task<Void, Never>] = [:]
