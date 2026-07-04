@@ -36,6 +36,13 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     // 立たず「再生ボタンが▶️のまま/スキップボタンが有効化されない」という不具合の原因になっていた。
     // そのため、一時停止は推測ではなく明示フラグで管理する。
     private var m_IsPaused: Bool = false
+    // 「今この発話(utterance)が進行中か」の明示フラグ。
+    // isSpeaking() を playerNode.isPlaying で判定すると、AVAudioPlayerNode は再生バッファを
+    // 撃ち終えても stop() するまで isPlaying=true を返し続けるため、発話が自然終了した(Stop()を
+    // 経ていない)スピーカーが「再生中」を報告し続け、MultiVoiceSpeaker.isAnySynthesizerActive が
+    // 真のままになって次の再生開始時に上記の「▶️のまま」不具合を引き起こす。
+    // performSpeech で true、再生完了/停止で false にする。
+    private var m_IsUtteranceActive: Bool = false
 
     // 現在再生中(または直前に再生した)テキスト。finishSpeak の speechString に使う。
     private var currentSpeechText: String = ""
@@ -89,6 +96,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     func performSpeech(text: String) {
         isSpeechKicked = true
         m_IsPaused = false
+        m_IsUtteranceActive = true
         currentSpeechText = text
         generation += 1
         let myGeneration = generation
@@ -110,6 +118,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                 ], isForDebug: true)
                 await MainActor.run {
                     guard myGeneration == self.generation else { return }
+                    self.m_IsUtteranceActive = false
                     self.m_Delegate?.finishSpeak(isCancel: true, speechString: text)
                 }
             }
@@ -125,6 +134,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
             }
         } catch {
             AppInformationLogger.AddLog(message: "VoicevoxSpeaker: AVAudioEngine start failed: \(error.localizedDescription)", appendix: [:], isForDebug: true)
+            m_IsUtteranceActive = false
             m_Delegate?.finishSpeak(isCancel: true, speechString: text)
             return
         }
@@ -138,6 +148,9 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         playerNode.scheduleBuffer(buffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
             DispatchQueue.main.async {
                 guard let self = self, myGeneration == self.generation else { return }
+                // このブロックの音声を撃ち終えた。次のブロックが来れば performSpeech で
+                // 再び true になる。次が無ければ(発話終了)これで false のままになる。
+                self.m_IsUtteranceActive = false
                 self.stopProgressReporting()
                 let delaySeconds = max(0.0, self.m_Delay)
                 DispatchQueue.main.asyncAfter(deadline: .now() + delaySeconds) {
@@ -161,6 +174,11 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         let duration = Double(buffer.frameLength) / buffer.format.sampleRate / playbackRate
         guard duration > 0 else { return }
         let startDate = Date()
+        // 推定位置は必ず前進のみ(単調増加)にする。時間按分だけだと、丸めや下流側
+        //(SpeechBlockSpeaker.willSpeakRange)での speech→display 位置再マッピングとの
+        // 兼ね合いで、ハイライトが1〜2文字前後に細かく行ったり来たりして目まぐるしく
+        // 見えてしまうため、一度進んだ位置より手前は指さないようにして安定させる。
+        var lastReportedIndex = -1
         let timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
             guard let self = self, myGeneration == self.generation else {
                 timer.invalidate()
@@ -176,6 +194,8 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                 index = i
                 break
             }
+            if index <= lastReportedIndex { return } // 後退・同位置なら通知しない(ブレ防止)
+            lastReportedIndex = index
             self.m_Delegate?.willSpeakRange(range: NSRange(location: index, length: 1))
         }
         progressTimer = timer
@@ -218,6 +238,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         generation += 1
         let myGeneration = generation
         m_IsPaused = false
+        m_IsUtteranceActive = false
         stopProgressReporting()
         playerNode.stop()
         let text = currentSpeechText
@@ -276,7 +297,9 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     }
 
     func isSpeaking() -> Bool {
-        return playerNode.isPlaying
+        // playerNode.isPlaying は再生バッファを撃ち終えても stop() まで true を返し続けるため
+        // それには頼らず、明示的な「発話進行中」フラグで判定する(一時停止中は発話中ではない)。
+        return m_IsUtteranceActive && !m_IsPaused
     }
 
     func isPaused() -> Bool {
