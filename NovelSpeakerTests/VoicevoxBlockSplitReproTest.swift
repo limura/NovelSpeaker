@@ -176,4 +176,57 @@ class VoicevoxBlockSplitReproTest: XCTestCase {
             XCTAssertFalse(b.displayText.hasSuffix("読み上げ"), "「読み上げる」が途中で切れている: \(b.displayText)")
         }
     }
+
+    private func categorize(engine: String, text: String, mods: [NovelSpeaker.SpeechModSetting], waitConfigList: [NovelSpeaker.SpeechWaitConfig]) -> [CombinedSpeechBlock] {
+        let realm = RealmSpeakerSetting()
+        realm.type = engine
+        realm.voiceIdentifier = engine == "VOICEVOX" ? "3" : "com.apple.voice.compact.ja-JP.Kyoko"
+        realm.locale = "ja-JP"
+        return StoryTextClassifier.CategorizeStoryText(
+            content: text,
+            withMoreSplitTargets: ["。", "、", "　", "\n"],
+            moreSplitMinimumLetterCount: 200,
+            defaultSpeaker: SpeakerSetting(from: realm),
+            sectionConfigList: [],
+            waitConfigList: waitConfigList,
+            sortedSpeechModArray: mods
+        )
+    }
+
+    // 読み替え(mod)で切れたピースが、「間の設定」(wait config)由来の delay を持つ後続ピースへ
+    // 連結できずに単独ブロックとして孤立し、VOICEVOX で不自然な間が入る問題の回帰テスト。
+    // VOICEVOX では delay 付き末尾ピースを吸収して句読点まで1ブロックにまとめる。
+    func testVoicevoxAbsorbsTrailingDelayAcrossModBoundary() {
+        let text = "投資には、金に糸目をつけずに株を買った。"
+        let mods = [NovelSpeaker.SpeechModSetting(before: "金に糸目", after: "カネに糸目", isUseRegularExpression: false)]
+        let wait = [makeWaitConfig(target: "。", delay: 0.5), makeWaitConfig(target: "、", delay: 0.2)]
+
+        let voicevox = categorize(engine: "VOICEVOX", text: text, mods: mods, waitConfigList: wait)
+        // 「金に糸目」が単独ブロックにならず、「をつけずに株を買った。」と1ブロックに融合していること。
+        XCTAssertFalse(voicevox.contains { $0.displayText == "金に糸目" },
+                       "VOICEVOXで「金に糸目」が単独ブロックとして孤立している: \(voicevox.map { $0.displayText })")
+        XCTAssertTrue(voicevox.contains { $0.displayText == "金に糸目をつけずに株を買った。" },
+                      "VOICEVOXで「金に糸目」以降が句読点まで1ブロックに融合していない: \(voicevox.map { $0.displayText })")
+        // 「。」由来の 0.5 秒の間は、その句読点で終わるブロックに残っていること。
+        if let merged = voicevox.first(where: { $0.displayText == "金に糸目をつけずに株を買った。" }) {
+            XCTAssertEqual(merged.delay, 0.5, accuracy: 0.0001, "融合後ブロックに「。」の間(0.5)が引き継がれていない")
+        }
+        // 読み上げテキスト自体は読み替えが効いていること(全エンジン対象modなので)。
+        XCTAssertEqual(voicevox.map { $0.speechText }.joined(), "投資には、カネに糸目をつけずに株を買った。")
+
+        // AVSpeechSynthesizer 側は従来通り分割を維持(この最適化は VOICEVOX 専用)。
+        let avSpeech = categorize(engine: "AVSpeechSynthesizer", text: text, mods: mods, waitConfigList: wait)
+        XCTAssertTrue(avSpeech.contains { $0.displayText == "金に糸目" },
+                      "AVSpeechSynthesizer では従来通り「金に糸目」が独立ブロックのままであるべき: \(avSpeech.map { $0.displayText })")
+    }
+
+    // wait config が無い場合は元々1ブロックにまとまる(この最適化で挙動が変わらないことの確認)。
+    func testModBoundaryWithoutWaitConfigStaysSingleBlock() {
+        let text = "投資には金に糸目をつけずに株を買った。"
+        let mods = [NovelSpeaker.SpeechModSetting(before: "金に糸目", after: "カネに糸目", isUseRegularExpression: false)]
+        for engine in ["VOICEVOX", "AVSpeechSynthesizer"] {
+            let blocks = categorize(engine: engine, text: text, mods: mods, waitConfigList: [])
+            XCTAssertEqual(blocks.count, 1, "[\(engine)] wait config 無しでは1ブロックのはず: \(blocks.map { $0.displayText })")
+        }
+    }
 }

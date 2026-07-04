@@ -112,7 +112,7 @@ class CombinedSpeechBlock: Identifiable {
     let pitch:Float
     let rate:Float
     let volume:Float
-    let delay:TimeInterval
+    var delay:TimeInterval
     let type:String
 
     init(block:SpeechBlockInfo) {
@@ -183,7 +183,42 @@ class CombinedSpeechBlock: Identifiable {
         speechBlockArray.append(speechBlock(displayText: block.displayText, speechText: speechText, isMod: block.isMod))
         return true
     }
-    
+
+    // VOICEVOX専用。後続ピースが delay(「間の設定」由来のポーズ)を持っている場合でも、
+    // それを「このブロックの最後のピース」として吸収し、delay はブロック全体の後ろの間として
+    // 引き継いでブロックを閉じる(この後は何も追加できない、呼び出し側で閉じること)。
+    // delay は元々「そのピースを読み終えた後の間」なので、末尾ピースとして取り込む分には
+    // 意味が変わらない。これにより読み替え(mod)で切れたピースが、後続の delay 付きピースへ
+    // 連結できずに単独ブロックとして孤立し、VOICEVOX で不自然な間が入る問題を防ぐ。
+    // 話者設定(pitch/rate/volume/voiceIdentifier/type)が一致し、かつ自身がまだ delay を
+    // 持っていない場合のみ吸収する。
+    func AbsorbTrailingDelayBlock(block:SpeechBlockInfo) -> Bool {
+        func checkFloatEqual(a:Float, b:Float) -> Bool {
+            return fabsf(a - b) < Float.ulpOfOne
+        }
+        func checkDoubleEqual(a:Double, b:Double) -> Bool {
+            return fabs(a - b) < Double.ulpOfOne
+        }
+        guard type == "VOICEVOX"
+            && checkDoubleEqual(a: 0.0, b: self.delay) // 自身が既に delay を持つ = 既に閉じている
+            && block.delay > 0.0 // 吸収対象は delay を持つピースだけ(delay=0 は通常の Add で連結される)
+            && checkFloatEqual(a: pitch, b: block.pitch)
+            && checkFloatEqual(a: rate, b: block.rate)
+            && checkFloatEqual(a: volume, b: block.volume)
+            && voiceIdentifier == block.voiceIdentifier
+            && type == block.type
+            else { return false }
+        let speechText:String?
+        if block.displayText == block.speechText {
+            speechText = nil
+        }else{
+            speechText = block.speechText
+        }
+        speechBlockArray.append(speechBlock(displayText: block.displayText, speechText: speechText, isMod: block.isMod))
+        self.delay = block.delay
+        return true
+    }
+
     func GenerateSpeechTextFrom(displayLocation:Int) -> String {
         var location = displayLocation
         if location < 0 { return "" }
@@ -458,6 +493,17 @@ class StoryTextClassifier {
                     result.append(current)
                     currentBlock = CombinedSpeechBlock(block: block)
                     currentDisplayTextCount = blockDisplayTextCount
+                    continue
+                }
+                // VOICEVOX: 後続ピースが「間の設定」由来の delay を持っていても、同一話者なら
+                // このブロックの末尾ピースとして吸収してブロックを閉じる。読み替え(mod)で切れた
+                // 直前ピースが delay 付きピースへ連結できずに孤立するのを防ぎ、句読点(delayの付く
+                // 位置)まで一つの発話単位にまとめる。AVSpeechSynthesizer では従来通り分割したままにする
+                //(標準辞書の同一文字列mod等、既存のブロック分割挙動を変えないため)。
+                if isVoicevox && block.delay > 0.0 && current.AbsorbTrailingDelayBlock(block: block) {
+                    result.append(current)
+                    currentBlock = nil
+                    currentDisplayTextCount = 0
                     continue
                 }
                 let shouldKeepGrowing = combinedCount < effectiveMinimumLetterCount || hasValidSuffix == false
