@@ -482,6 +482,11 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         m_IsSpeaking = false
         self.stopSpeechHandler = stopSpeechHandler
         speaker.Stop()
+        // 停止したら、まだ着手していない先読み(先行合成)のバックログは止める。
+        // 完成済みのキャッシュは残すので、同じ位置から再開した時は再利用できる。
+        // (これをしないと、長時間再生で本の残り全ブロックが先読みキューに積まれたまま、
+        //  停止後も延々と合成が走り続けてCPU/電池/メモリを浪費する)
+        VoicevoxCore.shared.scheduleCancelPendingPrefetch()
     }
 
     /// 読み上げ開始位置を指定します。範囲外を指定された場合は false を返します

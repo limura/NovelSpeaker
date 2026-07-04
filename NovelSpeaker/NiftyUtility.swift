@@ -1912,7 +1912,7 @@ class NiftyUtility: NSObject {
     }
     // <ruby><rb>赤</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>い</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>リ</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>ボ</rb><rp>(</rp><rt>・</rt><rp>)</rp><rb>ン</rb><rp>(</rp><rt>・</rt><rp>)</rp></ruby>
     // を、
-    // |赤(・)|い(・)|リ(・)|ボ(・)|ン(・))
+    // |赤(・)|い(・)|リ(・)|ボ(・)|ン(・)
     // に変えます。こっちの方が昔の動き方になります
     static func ConvertRubyTagToVerticalBarRubyText_transformRubyTagSequential(html: String, rubyRegex: NSRegularExpression, rtRegex: NSRegularExpression, rpRemoveRegex: NSRegularExpression, tagRemoveRegex: NSRegularExpression) -> String {
         let nsString = html as NSString
@@ -1954,7 +1954,13 @@ class NiftyUtility: NSObject {
             let remainingRange = NSRange(location: lastEndIndex, length: nsInner.length - lastEndIndex)
             if remainingRange.length > 0 {
                 let remainingRaw = nsInner.substring(with: remainingRange)
-                let cleanRemaining = tagRemoveRegex.stringByReplacingMatches(in: remainingRaw, options: [], range: NSRange(location: 0, length: (remainingRaw as NSString).length), withTemplate: "")
+                // base部分と同様に、まず <rp>...</rp> を中身ごと除去してからタグを剥がす。
+                // これをしないと、最後の <rt> の後ろに残る閉じ側の <rp>）</rp> のタグだけが
+                // 剥がれて中身の「）」が本文に残ってしまう
+                // (例: <ruby><rb>親譲</rb><rp>（</rp><rt>おやゆず</rt><rp>）</rp></ruby>りの が
+                //  |親譲(おやゆず)）りの となり、余分な「）」が残る不具合)。
+                let noRpRemaining = rpRemoveRegex.stringByReplacingMatches(in: remainingRaw, options: [], range: NSRange(location: 0, length: (remainingRaw as NSString).length), withTemplate: "")
+                let cleanRemaining = tagRemoveRegex.stringByReplacingMatches(in: noRpRemaining, options: [], range: NSRange(location: 0, length: (noRpRemaining as NSString).length), withTemplate: "")
                 combinedResult += cleanRemaining
             }
             

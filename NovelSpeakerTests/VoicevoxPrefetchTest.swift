@@ -62,4 +62,27 @@ class VoicevoxPrefetchTest: XCTestCase {
         let cached = await VoicevoxCore.shared.isPrefetchedForTesting(text: "何か適当な文章です", styleId: styleId)
         XCTAssertFalse(cached)
     }
+
+    // cancelPendingPrefetch() は、まだ着手していない先読みのバックログをキャンセルしつつ、
+    // 既に完成しているキャッシュは残す事を確認する(読み上げ停止時の挙動)。
+    func testCancelPendingPrefetchKeepsCompletedCache() async throws {
+        let styleId = try await setUpCore()
+        await VoicevoxCore.shared.clearPrefetchCache()
+
+        // 1つ先行合成して完成させる
+        let doneText = "これは完成済みのキャッシュです"
+        await VoicevoxCore.shared.prefetch(text: doneText, styleId: styleId)
+        let deadline = Date().addingTimeInterval(10)
+        while Date() < deadline {
+            if await VoicevoxCore.shared.isPrefetchedForTesting(text: doneText, styleId: styleId) { break }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        let doneBeforeCancel = await VoicevoxCore.shared.isPrefetchedForTesting(text: doneText, styleId: styleId)
+        XCTAssertTrue(doneBeforeCancel, "先行合成が完了しているべき")
+
+        // バックログをキャンセルしても、完成済みのキャッシュは残るべき
+        await VoicevoxCore.shared.cancelPendingPrefetch()
+        let doneAfterCancel = await VoicevoxCore.shared.isPrefetchedForTesting(text: doneText, styleId: styleId)
+        XCTAssertTrue(doneAfterCancel, "cancelPendingPrefetch() 後も完成済みキャッシュは残るべき")
+    }
 }

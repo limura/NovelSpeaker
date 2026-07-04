@@ -367,6 +367,14 @@ actor VoicevoxCore {
         let newTask = Task(priority: .utility) { [weak self] in
             await previousTail?.value
             guard let self = self else { return }
+            // 読み上げ停止等でキャンセルされていたら、実際の合成(重いC呼び出し)には入らず即終了する。
+            // これをしないと、長時間再生で本の残り全ブロックが先読みキューに積まれたまま、
+            // 停止後も延々と(実機で16分=983秒の先行合成完了ログを確認)直列に合成され続け、
+            // CPU/電池を浪費し、合成結果を保持してメモリも増え続けてしまう。
+            if Task.isCancelled {
+                await self.dropPendingPrefetch(key: key)
+                return
+            }
             do {
                 let data = try await self.performSynthesize(text: text, styleId: styleId)
                 NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(scheduledAt)))秒] styleId=\(styleId) text=\"\(snippet)\"")
@@ -392,15 +400,25 @@ actor VoicevoxCore {
         pendingPrefetchTasks[key] = nil
     }
 
-    /// 先行合成キャッシュを全て破棄する(新しい本文の読み込み・シーク等でこれまでの
-    /// 先読み内容が無意味になった時に呼ぶ)。進行中のタスクはキャンセルはせず、
-    /// 完了時に(誰も参照しない)キャッシュへ書き込まれるだけにして単純化している。
-    func clearPrefetchCache() {
-        clearCache()
+    /// 未着手/進行中の先行合成タスク(バックログ)を全てキャンセルする。
+    /// 完成済みのキャッシュ(prefetchedWav)は残すので、停止→同じ位置から再開した時に
+    /// 直近の先読み結果は再利用できる。読み上げ停止時に呼ぶ想定。
+    /// (実際に走っているC呼び出し1本はプリエンプトできないが、その1本が終われば
+    ///  後続はキャンセル判定で即抜けるので、バックログは速やかに解消される)
+    func cancelPendingPrefetch() {
+        for task in pendingPrefetchTasks.values {
+            task.cancel()
+        }
         pendingPrefetchTasks.removeAll()
-        // 鎖を切っておかないと、新しい本文の先読みが「もう誰も要らない旧本文の
-        // 残りチェーン」の後ろに繋がってしまい、無駄に待たされる。
+        prefetchTailTask?.cancel()
         prefetchTailTask = nil
+    }
+
+    /// 先行合成キャッシュを全て破棄し、進行中のバックログもキャンセルする
+    /// (新しい本文の読み込み・シーク等でこれまでの先読み内容が無意味になった時に呼ぶ)。
+    func clearPrefetchCache() {
+        cancelPendingPrefetch()
+        clearCache()
     }
 
     /// SpeechBlockSpeaker 等、actorの外(メインスレッド)から気軽に先行合成を蹴るための入り口。
@@ -411,6 +429,12 @@ actor VoicevoxCore {
     /// SpeechBlockSpeaker 等、actorの外から気軽にキャッシュをクリアするための入り口。
     nonisolated func schedulePrefetchCacheClear() {
         Task { await self.clearPrefetchCache() }
+    }
+
+    /// SpeechBlockSpeaker 等、actorの外(読み上げ停止時等)から、完成済みキャッシュは残しつつ
+    /// 先読みのバックログだけを止めるための入り口。
+    nonisolated func scheduleCancelPendingPrefetch() {
+        Task { await self.cancelPendingPrefetch() }
     }
 
     // テスト専用: 指定テキストが先行合成キャッシュに乗っているかどうか(進行中/未着手は含まない)。
