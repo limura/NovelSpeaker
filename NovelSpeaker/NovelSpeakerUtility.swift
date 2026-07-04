@@ -87,6 +87,30 @@ class NovelSpeakerUtility: NSObject {
         let isRegexp:Bool?
     }
     
+    // 標準の読み替え辞書(バンドルの DefaultSpeechModList.json)の (before, after, isRegexp) を
+    // まとめたキー集合。Realm 上のエントリが標準辞書由来かどうかを値一致で判定するために使う。
+    // (標準辞書と利用者の追加分は同じ Realm テーブルに混ざって保存されており、区別する印が
+    //  無いため。将来的には読み替え辞書自体に対象エンジンの情報を持たせるのが正しい)
+    // 5000件超あり毎回作るのは無駄なので一度だけ構築してキャッシュする。ここでは(ネットワークに
+    // 出る可能性のある getSpeechModSettings ではなく)確実にバンドルの JSON だけを読む。
+    private static var cachedDefaultSpeechModKeySet: Set<String>? = nil
+    static func DefaultSpeechModKey(before:String, after:String, isRegexp:Bool) -> String {
+        return "\(isRegexp ? "1" : "0")\t\(before)\t\(after)"
+    }
+    static func GetDefaultSpeechModKeySet() -> Set<String> {
+        if let cached = cachedDefaultSpeechModKeySet { return cached }
+        var keySet = Set<String>()
+        if let path = Bundle.main.path(forResource: "DefaultSpeechModList", ofType: "json"),
+           let handle = FileHandle(forReadingAtPath: path),
+           let result = try? JSONDecoder().decode([SpeechModSetting].self, from: handle.readDataToEndOfFile()) {
+            for modSetting in result {
+                keySet.insert(DefaultSpeechModKey(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isRegexp ?? false))
+            }
+        }
+        cachedDefaultSpeechModKeySet = keySet
+        return keySet
+    }
+
     static func getSpeechModSettings(completion:([SpeechModSetting])->Void) {
         var speechModSettings:[SpeechModSetting]? = nil
         RealmUtil.RealmBlock { (realm) -> Void in

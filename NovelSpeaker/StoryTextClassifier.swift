@@ -63,15 +63,24 @@ struct SpeechModSetting {
     let before : String
     let after : String
     let isUseRegularExpression : Bool
-    init(from:RealmSpeechModSetting) {
+    // 標準の読み替え辞書(DefaultSpeechModList.json)由来のエントリは、AVSpeechSynthesizer が
+    // 前後の文字に影響されて変な読み方をするのを避けるためのもの(例: 「実際」→「"実際"」で囲う等)が
+    // 多く、VOICEVOX にそのまま適用すると余計な記号(")が入って不自然な分割・発話を招く。
+    // そのため「標準辞書由来 = AVSpeechSynthesizer 向け」とみなし、VOICEVOX 話者のブロックには
+    // 適用しない。ユーザーが自分で追加した読み替えや、ルビ由来の読み替えは全エンジンに適用する。
+    // (将来は読み替え辞書に対象エンジンの情報を持たせるのが正しいが、今はこの近似で運用する)
+    let isForAVSpeechSynthesizerOnly : Bool
+    init(from:RealmSpeechModSetting, isForAVSpeechSynthesizerOnly:Bool = false) {
         before = from.before
         after = from.after
         isUseRegularExpression = from.isUseRegularExpression
+        self.isForAVSpeechSynthesizerOnly = isForAVSpeechSynthesizerOnly
     }
-    init(before:String, after:String, isUseRegularExpression:Bool) {
+    init(before:String, after:String, isUseRegularExpression:Bool, isForAVSpeechSynthesizerOnly:Bool = false) {
         self.before = before
         self.after = after
         self.isUseRegularExpression = isUseRegularExpression
+        self.isForAVSpeechSynthesizerOnly = isForAVSpeechSynthesizerOnly
     }
 }
 
@@ -741,6 +750,8 @@ class StoryTextClassifier {
             }
             let targetText = text[index..<text.endIndex]
             for speechMod in sortedSpeechModArray {
+                // 標準辞書由来(AVSpeechSynthesizer向け)の読み替えは、VOICEVOX 話者には適用しない。
+                if speechMod.isForAVSpeechSynthesizerOnly && speakerSetting.type == "VOICEVOX" { continue }
                 if targetText.starts(with: speechMod.before) {
                     if currentStartIndex != index {
                         let displayText = String(text[currentStartIndex..<index])
@@ -864,7 +875,14 @@ class StoryTextClassifier {
             
             // 正規表現周りでゴニョゴニョする奴や、
             // URLを読まないようにするなどといった動的に読み替え辞書を生成するのはここでやります。
-            if let modSettingListFromSetting = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: story.novelID)?.map({ SpeechModSetting(from: $0) }) {
+            // 標準の読み替え辞書由来のエントリは「AVSpeechSynthesizer向け」とみなして印を付ける
+            //(VOICEVOX 話者のブロックではこの印の付いた読み替えを適用しない)。
+            let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
+            if let modSettingListFromSetting = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: story.novelID)?.map({ (realmModSetting) -> SpeechModSetting in
+                let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
+                let isDefaultDictionaryEntry = defaultSpeechModKeySet.contains(key)
+                return SpeechModSetting(from: realmModSetting, isForAVSpeechSynthesizerOnly: isDefaultDictionaryEntry)
+            }) {
                 speechModSettingList.append(contentsOf: modSettingListFromSetting)
             }
             
@@ -916,7 +934,7 @@ class StoryTextClassifier {
                         let before = String(content[contentRange])
                         if beforeHit[before] == true { return }
                         let after = regexp.stringByReplacingMatches(in: before, options: [], range: NSMakeRange(0, before.count), withTemplate: modSetting.after)
-                        let setting = SpeechModSetting(before: before, after: after, isUseRegularExpression: false)
+                        let setting = SpeechModSetting(before: before, after: after, isUseRegularExpression: false, isForAVSpeechSynthesizerOnly: modSetting.isForAVSpeechSynthesizerOnly)
                         speechModSettingList.append(setting)
                         beforeHit[before] = true
                     }

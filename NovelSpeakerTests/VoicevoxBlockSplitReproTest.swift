@@ -35,6 +35,45 @@ class VoicevoxBlockSplitReproTest: XCTestCase {
         SpeechModSetting(before: "例え", after: "たとえ", isUseRegularExpression: false),
     ]
 
+    // 標準辞書由来(isForAVSpeechSynthesizerOnly=true)の読み替えは、VOICEVOX話者には
+    // 適用されず、AVSpeechSynthesizer話者には適用される事を確認する。
+    // 実機の「実際→"実際" の読み替えで " が入り、その " の位置でブロックが分割される」
+    // という不具合はこれで解消される(VOICEVOXでは " が入らないので分割もされない)。
+    func testDefaultDictionaryModIsSkippedForVoicevox() {
+        let text = "をタップすることで実際に読み替えが行われた"
+        // 「実際」→「"実際"」(標準辞書由来を想定してフラグを立てる)
+        let avSpeechOnlyMod = SpeechModSetting(before: "実際", after: "\"実際\"", isUseRegularExpression: false, isForAVSpeechSynthesizerOnly: true)
+
+        // VOICEVOX話者: 標準辞書modは適用されない → 発話テキストに " が入らない
+        let voicevoxBlocks = StoryTextClassifier.CategorizeStoryText(
+            content: text,
+            withMoreSplitTargets: ["。", "、", "　", "\n"],
+            moreSplitMinimumLetterCount: 200,
+            defaultSpeaker: makeVoicevoxSpeakerSetting(styleId: 3),
+            sectionConfigList: [],
+            waitConfigList: [],
+            sortedSpeechModArray: [avSpeechOnlyMod]
+        )
+        let voicevoxSpeech = voicevoxBlocks.map { $0.speechText }.joined()
+        XCTAssertFalse(voicevoxSpeech.contains("\""), "VOICEVOXでは標準辞書modが適用されず \" が入らないはず。実際: \(voicevoxSpeech)")
+        XCTAssertEqual(voicevoxSpeech, text, "VOICEVOXでは読み替えされず元テキストのままのはず")
+
+        // AVSpeechSynthesizer話者: 標準辞書modは従来通り適用される → " が入る
+        let dummy = RealmSpeakerSetting()
+        dummy.type = "AVSpeechSynthesizer"
+        let avSpeechBlocks = StoryTextClassifier.CategorizeStoryText(
+            content: text,
+            withMoreSplitTargets: ["。", "、", "　", "\n"],
+            moreSplitMinimumLetterCount: 200,
+            defaultSpeaker: SpeakerSetting(from: dummy),
+            sectionConfigList: [],
+            waitConfigList: [],
+            sortedSpeechModArray: [avSpeechOnlyMod]
+        )
+        let avSpeechSpeech = avSpeechBlocks.map { $0.speechText }.joined()
+        XCTAssertTrue(avSpeechSpeech.contains("\"実際\""), "AVSpeechSynthesizerでは標準辞書modが適用され \"実際\" になるはず。実際: \(avSpeechSpeech)")
+    }
+
     func testDumpBlocksForModScenario() {
         let text = "今作ってるアプリはWeb小説を読み上げる奴なんだけどさ、色々読み間違えるんだよね。例えば"
         let blocks = StoryTextClassifier.CategorizeStoryText(
