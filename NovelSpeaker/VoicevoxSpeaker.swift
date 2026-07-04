@@ -28,6 +28,14 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     private var m_Delay: TimeInterval = 0.0
     private var m_Delegate: SpeakRangeDelegate? = nil
     private(set) var isSpeechKicked: Bool = false
+    // ユーザーが明示的に Pause() した状態かどうか。
+    // isPaused() を playerNode.isPlaying から推測すると、ブロックの合成中やブロック間で
+    // (一時停止していないのに)再生していない状態も「一時停止中」と誤判定してしまい、
+    // MultiVoiceSpeaker.isAnySynthesizerActive が誤って真になって
+    // SpeechBlockSpeaker.StartSpeech() が idle 待ちに落ち、再生開始時に m_IsSpeaking が
+    // 立たず「再生ボタンが▶️のまま/スキップボタンが有効化されない」という不具合の原因になっていた。
+    // そのため、一時停止は推測ではなく明示フラグで管理する。
+    private var m_IsPaused: Bool = false
 
     // 現在再生中(または直前に再生した)テキスト。finishSpeak の speechString に使う。
     private var currentSpeechText: String = ""
@@ -80,6 +88,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     // (AVAudioEngineへのバッファ投入含む)を検証できるようにするため internal にしている。
     func performSpeech(text: String) {
         isSpeechKicked = true
+        m_IsPaused = false
         currentSpeechText = text
         generation += 1
         let myGeneration = generation
@@ -144,7 +153,12 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         stopProgressReporting()
         let cumulativeWeights = Self.cumulativeSpeechWeights(for: text)
         guard let totalWeight = cumulativeWeights.last, totalWeight > 0, buffer.format.sampleRate > 0 else { return }
-        let duration = Double(buffer.frameLength) / buffer.format.sampleRate
+        // frameLength/sampleRate は等速(1倍)での音声長。実際の再生は timePitch.rate 倍速で行われるため、
+        // 実際の再生時間は (等速長 / 再生倍率) になる。ここで倍率を割らずに等速長のまま進捗を按分すると、
+        // 例えば2倍速では実際は半分の時間で再生が終わるのに表示上の位置は半分までしか進まない
+        // (=「ブロックの半分あたりを示した所で発話が終わる」)という位置ずれになる。
+        let playbackRate = max(0.0001, Double(timePitch.rate))
+        let duration = Double(buffer.frameLength) / buffer.format.sampleRate / playbackRate
         guard duration > 0 else { return }
         let startDate = Date()
         let timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
@@ -203,6 +217,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     func Stop() {
         generation += 1
         let myGeneration = generation
+        m_IsPaused = false
         stopProgressReporting()
         playerNode.stop()
         let text = currentSpeechText
@@ -220,12 +235,14 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     }
 
     func Pause() {
+        m_IsPaused = true
         stopProgressReporting()
         playerNode.pause()
     }
 
     func Resume() {
         guard engine.isRunning else { return }
+        m_IsPaused = false
         playerNode.play()
     }
 
@@ -263,7 +280,10 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     }
 
     func isPaused() -> Bool {
-        return !playerNode.isPlaying && isSpeechKicked && engine.isRunning
+        // 「再生していない」ことから推測するのではなく、明示的に Pause() された状態のみを
+        // 一時停止とみなす(ブロックの合成中やブロック間で再生していないだけの状態を
+        // 一時停止と誤判定しないため)。
+        return m_IsPaused
     }
 
     func reloadSynthesizer() {

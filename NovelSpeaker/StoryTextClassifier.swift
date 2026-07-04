@@ -724,7 +724,15 @@ class StoryTextClassifier {
         var result:[SpeechBlockInfo] = []
         var index = text.startIndex
         var currentStartIndex = index
-        var waitConfing_delayTimeInSec = TimeInterval(waitConfig?.delayTimeInSec ?? 0.0)
+        // この関数に渡されるチャンクは、呼び出し側(CategorizeStoryText)が「間の設定」(wait config)の
+        // 対象文字(。、等)で区切った単位で、必ずその対象文字がチャンク末尾に来る。
+        // よって遅延(間)は「その句読点の後」= このチャンクの最後のピースに付けるべき。
+        // 以前は最初のピースに付けていたため、チャンク内が読み替え(mod)で複数ピースに割れると
+        // 遅延が先頭ピースに乗ってしまい、(a)間が本来より前で発動する、(b)遅延付きピースは
+        // それ以上連結できない(ConcatinateのAdd()ガード)ため、"読み上げ|る" のように語の途中で
+        // ブロックが分断される、という2つの不具合を起こしていた。全ピースをdelay=0で作り、
+        // 最後に末尾ピースへだけ遅延を移す。
+        let waitDelayTimeInSec = TimeInterval(waitConfig?.delayTimeInSec ?? 0.0)
         whileLoop: while index < text.endIndex {
             let c = text[index]
             guard let sortedSpeechModArray = indexedSpeechModArray[c] else {
@@ -737,15 +745,13 @@ class StoryTextClassifier {
                     if currentStartIndex != index {
                         let displayText = String(text[currentStartIndex..<index])
                         let speechText = displayText
-                        let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: false, type: speakerSetting.type)
-                        waitConfing_delayTimeInSec = TimeInterval(0.0)
+                        let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: 0.0, isMod: false, type: speakerSetting.type)
                         result.append(blockInfo)
                     }
                     let nextIndex = text.index(index, offsetBy: speechMod.before.count)
                     let displayText = String(text[index..<nextIndex])
                     let speechText = speechMod.after
-                    let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: true, type: speakerSetting.type)
-                    waitConfing_delayTimeInSec = TimeInterval(0.0)
+                    let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: 0.0, isMod: true, type: speakerSetting.type)
                     result.append(blockInfo)
                     index = nextIndex
                     currentStartIndex = nextIndex
@@ -757,9 +763,12 @@ class StoryTextClassifier {
         if currentStartIndex != index {
             let displayText = String(text[currentStartIndex..<index])
             let speechText = displayText
-            let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: false, type: speakerSetting.type)
-            waitConfing_delayTimeInSec = TimeInterval(0.0)
+            let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: 0.0, isMod: false, type: speakerSetting.type)
             result.append(blockInfo)
+        }
+        // 遅延(間)はこのチャンクの最後のピースに付ける。
+        if waitDelayTimeInSec > 0, let last = result.last {
+            result[result.count - 1] = SpeechBlockInfo(speechText: last.speechText, displayText: last.displayText, voiceIdentifier: last.voiceIdentifier, locale: last.locale, pitch: last.pitch, rate: last.rate, volume: last.volume, delay: waitDelayTimeInSec, isMod: last.isMod, type: last.type)
         }
         return result
     }
