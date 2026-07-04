@@ -1421,7 +1421,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 newRange = range
             }
             if contentLength >= (newRange.location + newRange.length) {
-                self.textView.select(self) // この「おまじない」をしないと選択範囲が表示されない
+                // select(self) は「選択範囲を表示させるためのおまじない」だが、現在位置の単語全体を
+                // 一瞬選択する副作用があり、毎回呼ぶと直後の selectedRange 更新で上書きされる前の
+                // 「単語まるごと選択」状態が描画に乗って、読み上げ位置より前の単語まで選択が伸びて
+                // 見えるちらつきになる(特に更新頻度の高いVOICEVOXで顕著)。
+                // 選択がまだ表示されていない(length==0)時だけ呼べば、一度表示モードに入った後は
+                // selectedRange の更新だけで反映されるため、ちらつかない。
+                if self.textView.selectedRange.length == 0 {
+                    self.textView.select(self)
+                }
                 self.textView.selectedRange = newRange
             }
             self.textViewScrollTo(readLocation: range.location)

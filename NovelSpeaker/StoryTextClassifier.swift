@@ -63,24 +63,36 @@ struct SpeechModSetting {
     let before : String
     let after : String
     let isUseRegularExpression : Bool
+    // この読み替えをどの音声合成エンジン(type)向けに適用するかの一覧。
+    // 空配列 = 「どのエンジンにも適用する」(未設定扱い)。
+    // 特定のエンジン type("AVSpeechSynthesizer" / "VOICEVOX" 等)を列挙すると、
+    // そのエンジンの話者のブロックにのみ適用される。
+    //
     // 標準の読み替え辞書(DefaultSpeechModList.json)由来のエントリは、AVSpeechSynthesizer が
     // 前後の文字に影響されて変な読み方をするのを避けるためのもの(例: 「実際」→「"実際"」で囲う等)が
-    // 多く、VOICEVOX にそのまま適用すると余計な記号(")が入って不自然な分割・発話を招く。
-    // そのため「標準辞書由来 = AVSpeechSynthesizer 向け」とみなし、VOICEVOX 話者のブロックには
-    // 適用しない。ユーザーが自分で追加した読み替えや、ルビ由来の読み替えは全エンジンに適用する。
-    // (将来は読み替え辞書に対象エンジンの情報を持たせるのが正しいが、今はこの近似で運用する)
-    let isForAVSpeechSynthesizerOnly : Bool
-    init(from:RealmSpeechModSetting, isForAVSpeechSynthesizerOnly:Bool = false) {
+    // 多く、VOICEVOX 等にそのまま適用すると余計な記号(")が入って不自然な分割・発話を招くため、
+    // ["AVSpeechSynthesizer"] を指定して VOICEVOX 等には適用しないようにする。
+    // ユーザー追加の読み替えやルビ由来の読み替えは空配列(=全エンジン)にしておく。
+    // (将来は読み替え辞書のデータ自体にこの対象エンジン情報を持たせるのが正しい)
+    let targetSpeechEngineTypeArray : [String]
+
+    // 指定した話者エンジンtypeにこの読み替えを適用すべきか。
+    func isAppliedTo(speechEngineType:String) -> Bool {
+        if targetSpeechEngineTypeArray.isEmpty { return true } // 未設定=全エンジン
+        return targetSpeechEngineTypeArray.contains(speechEngineType)
+    }
+
+    init(from:RealmSpeechModSetting, targetSpeechEngineTypeArray:[String] = []) {
         before = from.before
         after = from.after
         isUseRegularExpression = from.isUseRegularExpression
-        self.isForAVSpeechSynthesizerOnly = isForAVSpeechSynthesizerOnly
+        self.targetSpeechEngineTypeArray = targetSpeechEngineTypeArray
     }
-    init(before:String, after:String, isUseRegularExpression:Bool, isForAVSpeechSynthesizerOnly:Bool = false) {
+    init(before:String, after:String, isUseRegularExpression:Bool, targetSpeechEngineTypeArray:[String] = []) {
         self.before = before
         self.after = after
         self.isUseRegularExpression = isUseRegularExpression
-        self.isForAVSpeechSynthesizerOnly = isForAVSpeechSynthesizerOnly
+        self.targetSpeechEngineTypeArray = targetSpeechEngineTypeArray
     }
 }
 
@@ -750,8 +762,9 @@ class StoryTextClassifier {
             }
             let targetText = text[index..<text.endIndex]
             for speechMod in sortedSpeechModArray {
-                // 標準辞書由来(AVSpeechSynthesizer向け)の読み替えは、VOICEVOX 話者には適用しない。
-                if speechMod.isForAVSpeechSynthesizerOnly && speakerSetting.type == "VOICEVOX" { continue }
+                // この読み替えが対象としているエンジン以外(例: 標準辞書=AVSpeechSynthesizer専用を
+                // VOICEVOX話者へ)は適用しない。
+                if speechMod.isAppliedTo(speechEngineType: speakerSetting.type) == false { continue }
                 if targetText.starts(with: speechMod.before) {
                     if currentStartIndex != index {
                         let displayText = String(text[currentStartIndex..<index])
@@ -880,8 +893,10 @@ class StoryTextClassifier {
             let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
             if let modSettingListFromSetting = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: story.novelID)?.map({ (realmModSetting) -> SpeechModSetting in
                 let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
-                let isDefaultDictionaryEntry = defaultSpeechModKeySet.contains(key)
-                return SpeechModSetting(from: realmModSetting, isForAVSpeechSynthesizerOnly: isDefaultDictionaryEntry)
+                // 標準辞書由来のエントリは AVSpeechSynthesizer 専用として扱う。それ以外(ユーザー追加)は
+                // 空配列=全エンジンに適用。
+                let targetEngines:[String] = defaultSpeechModKeySet.contains(key) ? ["AVSpeechSynthesizer"] : []
+                return SpeechModSetting(from: realmModSetting, targetSpeechEngineTypeArray: targetEngines)
             }) {
                 speechModSettingList.append(contentsOf: modSettingListFromSetting)
             }
@@ -934,7 +949,7 @@ class StoryTextClassifier {
                         let before = String(content[contentRange])
                         if beforeHit[before] == true { return }
                         let after = regexp.stringByReplacingMatches(in: before, options: [], range: NSMakeRange(0, before.count), withTemplate: modSetting.after)
-                        let setting = SpeechModSetting(before: before, after: after, isUseRegularExpression: false, isForAVSpeechSynthesizerOnly: modSetting.isForAVSpeechSynthesizerOnly)
+                        let setting = SpeechModSetting(before: before, after: after, isUseRegularExpression: false, targetSpeechEngineTypeArray: modSetting.targetSpeechEngineTypeArray)
                         speechModSettingList.append(setting)
                         beforeHit[before] = true
                     }

@@ -35,14 +35,14 @@ class VoicevoxBlockSplitReproTest: XCTestCase {
         SpeechModSetting(before: "例え", after: "たとえ", isUseRegularExpression: false),
     ]
 
-    // 標準辞書由来(isForAVSpeechSynthesizerOnly=true)の読み替えは、VOICEVOX話者には
+    // 標準辞書由来(targetSpeechEngineTypeArray=["AVSpeechSynthesizer"])の読み替えは、VOICEVOX話者には
     // 適用されず、AVSpeechSynthesizer話者には適用される事を確認する。
     // 実機の「実際→"実際" の読み替えで " が入り、その " の位置でブロックが分割される」
     // という不具合はこれで解消される(VOICEVOXでは " が入らないので分割もされない)。
     func testDefaultDictionaryModIsSkippedForVoicevox() {
         let text = "をタップすることで実際に読み替えが行われた"
-        // 「実際」→「"実際"」(標準辞書由来を想定してフラグを立てる)
-        let avSpeechOnlyMod = SpeechModSetting(before: "実際", after: "\"実際\"", isUseRegularExpression: false, isForAVSpeechSynthesizerOnly: true)
+        // 「実際」→「"実際"」(標準辞書由来を想定して AVSpeechSynthesizer 専用にする)
+        let avSpeechOnlyMod = SpeechModSetting(before: "実際", after: "\"実際\"", isUseRegularExpression: false, targetSpeechEngineTypeArray: ["AVSpeechSynthesizer"])
 
         // VOICEVOX話者: 標準辞書modは適用されない → 発話テキストに " が入らない
         let voicevoxBlocks = StoryTextClassifier.CategorizeStoryText(
