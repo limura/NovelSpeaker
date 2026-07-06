@@ -825,13 +825,20 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             let contentLength = story.content.unicodeScalars.count
             if nextReadingPoint > contentLength {
                 self.LoadNextChapter(realm: realm) { (result) in
-                    RealmUtil.RealmBlock { realm in
-                        if result == true, story.readLocation(realm: realm) != contentLength {
-                            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                                story.SetCurrentReadLocationWith(realm: realm, location: contentLength)
+                    // この completion は SetStoryAsync のバックグラウンドキューから呼ばれることがある。
+                    // bookmarkObserverToken はメインスレッドの Realm のものなので、
+                    // 別スレッドの Realm で withoutNotifying に渡すと
+                    // "Incorrect Realm: only notifications for the Realm being modified can be skipped"
+                    // で落ちる。StopSpeech と同様にメインキューに移ってから書き込む。
+                    NiftyUtility.DispatchSyncMainQueue {
+                        RealmUtil.RealmBlock { realm in
+                            if result == true, story.readLocation(realm: realm) != contentLength {
+                                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                                    story.SetCurrentReadLocationWith(realm: realm, location: contentLength)
+                                }
                             }
+                            completion()
                         }
-                        completion()
                     }
                 }
             }else{
