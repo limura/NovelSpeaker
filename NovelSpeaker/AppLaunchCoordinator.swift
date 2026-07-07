@@ -43,6 +43,7 @@ final class AppLaunchCoordinator: NSObject {
         ImportFromWebPageViewController.ClearDownloadTemporaryDirectory()
         NovelSpeakerUtility.SetInitialAvailableMemory()
         NovelSpeakerUtility.StartPrivacyTrackingBlockRuleListRefreshTimerIfNeeded()
+        WatchSessionCoordinator.shared.start()
         if !NiftyUtility.isTesting() {
             Task {
                 await VoicevoxCore.setUpFromBundleIfNeeded()

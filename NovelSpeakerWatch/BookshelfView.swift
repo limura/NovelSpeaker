@@ -1,0 +1,138 @@
+//
+//  BookshelfView.swift
+//  NovelSpeakerWatch
+//
+//  ③本棚。iPhone から送られた全小説のメタデータを一覧し、転送状態を表示する。
+//  タップ時: 本文が Watch に揃っていれば再生画面へ。
+//  未転送・章が足りない(iPhone側で更新された)場合は選択ダイアログを出す。
+//
+
+import SwiftUI
+
+struct BookshelfView: View {
+    @ObservedObject private var session = PhoneSessionManager.shared
+    /// タップで再生ページへ移動するための親タブ selection
+    @Binding var tabSelection: Int
+    @State private var dialogNovel: WatchNovelSummary?
+
+    var body: some View {
+        List {
+            if session.novels.isEmpty {
+                Text("iPhoneのことせかいを一度起動すると、本棚がここに表示されます。")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(session.novels, id: \.novelID) { novel in
+                Button {
+                    if transferState(novel: novel) == .complete {
+                        openNovel(novel)
+                    } else {
+                        dialogNovel = novel
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        transferStateIcon(novel: novel)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(novel.title)
+                                .font(.footnote)
+                                .lineLimit(2)
+                            Text(chapterText(novel: novel))
+                                .font(.system(size: 10))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if novel.isLiked {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.pink)
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("本棚")
+        .confirmationDialog(
+            dialogNovel?.title ?? "",
+            isPresented: Binding(
+                get: { dialogNovel != nil },
+                set: { presented in
+                    if !presented { dialogNovel = nil }
+                }
+            ),
+            titleVisibility: .visible,
+            presenting: dialogNovel
+        ) { novel in
+            Button(transferButtonLabel(novel: novel)) {
+                session.requestTransfer(novelID: novel.novelID)
+            }
+            Button("再生画面へ移動") {
+                openNovel(novel)
+            }
+            Button("キャンセル", role: .cancel) {}
+        } message: { novel in
+            Text(dialogMessage(novel: novel))
+        }
+    }
+
+    private func openNovel(_ novel: WatchNovelSummary) {
+        session.send(.openNovel, args: [WatchMessage.Arg.novelID: novel.novelID])
+        tabSelection = 1
+    }
+
+    // MARK: - 転送状態
+
+    private enum TransferState {
+        case complete   // 全章が Watch にある
+        case partial    // 転送済みだが iPhone 側の方が章が多い(更新された)
+        case none       // 未転送
+        case requested  // 特急転送を依頼中
+    }
+
+    private func transferState(novel: WatchNovelSummary) -> TransferState {
+        if session.transferRequestedNovelIDs.contains(novel.novelID) { return .requested }
+        guard let storedCount = session.storedChapterCounts[novel.novelID] else { return .none }
+        if novel.chapterCount > 0 && storedCount < novel.chapterCount { return .partial }
+        return .complete
+    }
+
+    @ViewBuilder private func transferStateIcon(novel: WatchNovelSummary) -> some View {
+        switch transferState(novel: novel) {
+        case .complete:
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 12))
+                .foregroundStyle(.green)
+        case .partial:
+            Image(systemName: "arrow.triangle.2.circlepath.circle")
+                .font(.system(size: 12))
+                .foregroundStyle(.orange)
+        case .requested:
+            ProgressView()
+                .frame(width: 12, height: 12)
+        case .none:
+            Image(systemName: "cloud")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func transferButtonLabel(novel: WatchNovelSummary) -> String {
+        if let storedCount = session.storedChapterCounts[novel.novelID] {
+            return "更新分を転送 (\(storedCount)→\(novel.chapterCount)章)"
+        }
+        return "本文をWatchへ転送"
+    }
+
+    private func dialogMessage(novel: WatchNovelSummary) -> String {
+        if session.storedChapterCounts[novel.novelID] != nil {
+            return "この小説はiPhone側で更新されています。"
+        }
+        return "この小説の本文はまだWatchにありません。"
+    }
+
+    private func chapterText(novel: WatchNovelSummary) -> String {
+        if novel.chapterCount > 0 {
+            return "\(novel.readingChapterNumber)/\(novel.chapterCount)章"
+        }
+        return ""
+    }
+}

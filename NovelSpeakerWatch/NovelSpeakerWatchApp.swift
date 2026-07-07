@@ -10,15 +10,24 @@ struct NovelSpeakerWatchApp: App {
 }
 
 struct WatchRootView: View {
+    /// 0=本棚 1=再生(ルート) 2=本文
+    @State private var tabSelection = 1
+
     var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "book.closed")
-                .font(.title2)
-            Text("ことせかい")
-                .font(.headline)
-            Text("Apple Watch 対応 開発中")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+        TabView(selection: $tabSelection) {
+            NavigationStack {
+                BookshelfView(tabSelection: $tabSelection)
+            }
+            .tag(0)
+            NavigationStack {
+                PlayerView()
+            }
+            .tag(1)
+            NavigationStack {
+                TextPageView()
+            }
+            .tag(2)
         }
+        .tabViewStyle(.page)
     }
 }
