@@ -630,12 +630,23 @@ class SiteInfoEditorViewController: FormViewController {
             return
         }
 
+        // テスト対象URLが url 正規表現にマッチしない場合は警告を出す。
+        // このテスト(値確認/checkTargets検査)はマッチ判定を経由せず「この SiteInfo」を直接使うため
+        // 取得自体は成功し得るが、本番の取り込みは isMatchUrl で SiteInfo を選ぶので、マッチしなければ
+        // 別の(汎用の)SiteInfo が使われてしまい「テストは通るのに取り込みは失敗する」状態になる
+        // (実例: ハーメルンの url が h.syosetu.org にマッチせず、テスト成功・取り込み403だった)。
+        // url 正規表現が壊れている/空の場合は上で専用の警告が出ているので二重には警告しない。
+        let isURLRegexUsable = urlCompileError(cells["url"]) == nil && !(cells["url"]?.isEmpty ?? true)
+
         // テスト用URLが入っていれば、その1ページだけ取得して「取得できた値/できなかった項目」を表示する(サイト負荷を抑える・繰り返しやすい)。
         let trimmedTestURL = testURLString.trimmingCharacters(in: .whitespaces)
         if !trimmedTestURL.isEmpty {
             guard let url = URL(string: trimmedTestURL) else {
                 showReport(title: resultTitle, body: (preNotes + [String(format: NSLocalizedString("SiteInfoEditor_ValueTest_BadURL", comment: "⚠️ テスト用URLが不正です: %@"), trimmedTestURL)]).joined(separator: "\n"))
                 return
+            }
+            if isURLRegexUsable && !siteInfo.isMatchUrl(urlString: trimmedTestURL) {
+                preNotes.append(String(format: NSLocalizedString("SiteInfoEditor_Test_TestURLNotMatch", comment: "⚠️ テスト用URLが url 正規表現にマッチしません。このテストは通っても、本番の取り込みではこの SiteInfo は選ばれません: %@"), trimmedTestURL))
             }
             runSingleURLValueInspection(siteInfo: siteInfo, url: url, preNotes: preNotes, resultTitle: resultTitle)
             return
@@ -651,6 +662,13 @@ class SiteInfoEditorViewController: FormViewController {
             ]).joined(separator: "\n")
             showReport(title: resultTitle, body: body)
             return
+        }
+
+        // checkTargets の URL も同じ罠(検査は通るのに本番の取り込みでは選ばれない)になるので警告する。
+        if isURLRegexUsable {
+            for target in siteInfo.checkTargets where !siteInfo.isMatchUrl(urlString: target.url.absoluteString) {
+                preNotes.append(String(format: NSLocalizedString("SiteInfoEditor_Test_CheckTargetNotMatch", comment: "⚠️ checkTargets のURLが url 正規表現にマッチしません。検査は通っても、本番の取り込みではこの SiteInfo は選ばれません: %@"), target.url.absoluteString))
+            }
         }
 
         let inspector = ScrapeInspector()
