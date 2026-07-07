@@ -1119,6 +1119,26 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                             })
                         })
                     }
+                    func AddSendToAppleWatchButton(buttonSection:Section, epvc:EurekaPopupViewController) {
+                        buttonSection <<< ButtonRow() {
+                            $0.title = NSLocalizedString(
+                                "BookShelfTreeViewController_checkboxselected_SendToAppleWatch",
+                                comment: "Apple Watchへ転送"
+                            )
+                            $0.cell.textLabel?.numberOfLines = 0
+                            $0.cell.accessibilityTraits = .button
+                        }.onCellSelection({ cell, row in
+                            epvc.close(animated: true) {
+                                if WatchSessionCoordinator.isWatchTransferReady {
+                                    WatchSessionCoordinator.shared.TransferNovels(novelIDArray: checkedNovelIDArray)
+                                    let format = NSLocalizedString("BookShelfTreeViewController_checkboxselected_SendToAppleWatch_QueuedFormat", comment: "%d冊の小説をApple Watchへの転送キューに追加しました。Watch側への反映には少し時間がかかることがあります。")
+                                    NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: String(format: format, checkedNovelIDArray.count), buttonTitle: nil, buttonAction: nil)
+                                } else {
+                                    NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("BookShelfTreeViewController_checkboxselected_SendToAppleWatch_Failed", comment: "Apple Watchへ転送できませんでした。Apple Watch側のことせかいを一度起動してから、もう一度お試しください。"), buttonTitle: nil, buttonAction: nil)
+                                }
+                            }
+                        })
+                    }
                     func AddCancelButton(cancelSection: Section, epvc:EurekaPopupViewController) {
                         cancelSection <<< ButtonRow() {
                             $0.title = NSLocalizedString("Cancel_button", comment: "Cancel")
@@ -1139,6 +1159,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                         AddAssignFolderButton(buttonSection: buttonSection, epvc: epvc)
                         AddDeleteNovelButton(buttonSection: buttonSection, epvc: epvc)
                         AddCreateBackupFileButton(buttonSection: buttonSection, epvc: epvc)
+                        if WatchSessionCoordinator.isWatchPaired {
+                            AddSendToAppleWatchButton(buttonSection: buttonSection, epvc: epvc)
+                        }
                         epvc.form +++ buttonSection
                         let cancelSection = Section()
                         AddCancelButton(cancelSection: cancelSection, epvc: epvc)
@@ -1247,34 +1270,51 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         if let searchText = self.searchText, searchText.count > 0 {
             allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", searchText, searchText)
         }
+        let novelArray:[RealmNovel]
         switch sortType {
         case .Ncode:
-            return Array(allNovels.sorted(byKeyPath: "novelID", ascending: true))
+            novelArray = Array(allNovels.sorted(byKeyPath: "novelID", ascending: true))
         case .NovelUpdatedAtWithFolder:
             fallthrough
         case .NovelUpdatedAt:
-            return Array(allNovels.sorted(byKeyPath: "lastDownloadDate", ascending: false))
+            novelArray = Array(allNovels.sorted(byKeyPath: "lastDownloadDate", ascending: false))
+        case .LastReadDateWithFolder:
+            fallthrough
+        case .AppleWatchTransferState:
+            fallthrough
         case .LastReadDate:
-            return Array(allNovels.sorted(byKeyPath: "lastReadDate", ascending: false))
+            novelArray = Array(allNovels.sorted(byKeyPath: "lastReadDate", ascending: false))
         case .Writer:
-            return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
+            novelArray = Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
         case .LikeLevel:
-            let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
-            let sortedNovels = allNovels.sorted { (a, b) -> Bool in
-                return globalState?.calcLikeLevel(novelID: a.novelID) ?? 0 > globalState?.calcLikeLevel(novelID: b.novelID) ?? 0
+            // calcLikeLevel() は novelLikeOrder(List)の線形探索なので、比較のたびに呼ぶと
+            // 実質 O(n^2 log n) になり数千冊で顕著に遅くなる。
+            // novelID→お気に入り度 の辞書を一度だけ作ってから比較する。
+            var likeLevelMap:[String:Int] = [:]
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                let likeCount = globalState.novelLikeOrder.count
+                for (index, novelID) in globalState.novelLikeOrder.enumerated() {
+                    likeLevelMap[novelID] = likeCount - index
+                }
             }
-            return sortedNovels
+            novelArray = allNovels.sorted { (a, b) -> Bool in
+                return likeLevelMap[a.novelID] ?? 0 > likeLevelMap[b.novelID] ?? 0
+            }
         case .WebSite:
             // .WebSite はどうせ host を key とした辞書に入れてからsortするのでここでsortして返す意味がありません。
-            return Array(allNovels)
+            novelArray = Array(allNovels)
         case .CreatedDate:
-            return Array(allNovels.sorted(byKeyPath: "createdDate", ascending: false))
+            novelArray = Array(allNovels.sorted(byKeyPath: "createdDate", ascending: false))
         case .PageCount:
-            return allNovels.sorted(by: { (a, b) -> Bool in
+            novelArray = allNovels.sorted(by: { (a, b) -> Bool in
                 let aId = RealmStoryBulk.StoryIDToChapterNumber(storyID: a.m_lastChapterStoryID)
                 let bId = RealmStoryBulk.StoryIDToChapterNumber(storyID: b.m_lastChapterStoryID)
                 return aId < bId
             })
+        case .UnreadChapterCount:
+            // ソート(未読章数順)は createUnreadChapterCountBookShelfRATreeViewCellDataTree() 側で
+            // 未読章数の計算と同時に行う
+            novelArray = Array(allNovels)
         case .Title:
             fallthrough
         case .SelfCreatedFolder:
@@ -1282,7 +1322,102 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         case .KeywordTag:
             fallthrough
         @unknown default:
-            return Array(allNovels.sorted(byKeyPath: "title", ascending: false))
+            novelArray = Array(allNovels.sorted(byKeyPath: "title", ascending: false))
+        }
+        if bookShelfFilterCondition.isActive {
+            return applyBookShelfFilter(realm: realm, novels: novelArray)
+        }
+        return novelArray
+    }
+
+    /// 検索の「絞り込み」条件。検索文字列(searchText)と同じく永続化しない(アプリ再起動で解除)
+    struct BookShelfFilterCondition {
+        enum UnreadState { case none, hasUnread, caughtUp }
+        enum WatchState { case none, transferred, notTransferred }
+        var unread:UnreadState = .none
+        var likedOnly:Bool = false
+        var watch:WatchState = .none
+        var isActive:Bool { return unread != .none || likedOnly || watch != .none }
+    }
+    var bookShelfFilterCondition = BookShelfFilterCondition()
+
+    /// 未読章数。RealmNovel の保存済みフィールドの参照だけなので全件ループしても安価。
+    /// 「読了(未読 0)」の判定は本棚の栞ゲージが紫になる条件
+    /// (BookShelfTreeViewCell.applyCurrentReadingPointToIndicatorWith: 最終章 かつ
+    /// 章の最後まで(±10文字の誤差許容)読んだ)と同じにしてある。
+    /// 最終章を開いているだけでまだ読み終えていないものは「あと1章分残っている」として 1 を返す
+    /// (青空文庫のような1ページ構成の長い小説を途中まで読んだ場合の対策)。
+    static func unreadChapterCount(novel:RealmNovel) -> Int {
+        let lastChapter = novel.lastChapterNumber ?? 0
+        guard let readingChapter = novel.readingChapterNumber else {
+            // 一度も開いていない = 全部未読として扱う
+            return max(0, lastChapter)
+        }
+        if readingChapter == lastChapter {
+            let readLocation = novel.m_readingChapterReadingPoint
+            let contentCount = novel.m_readingChapterContentCount > 0 ? novel.m_readingChapterContentCount : 1
+            if contentCount <= readLocation + 10 {
+                return 0  // 読了
+            }
+            return 1  // 最終章の途中
+        }
+        if readingChapter > lastChapter {
+            // 栞が最終章より先に進んでいる壊れ気味のデータ
+            // (章構成の変更・再ダウンロード・バックアップ復元などで章数が減ると起きる)。
+            // 栞ゲージの判定(reading == last の等値比較)では読了(紫)にならないので、
+            // ここでも読了扱いにしない(見た目のゲージ色と判定を揃える)
+            return 1
+        }
+        return lastChapter - readingChapter
+    }
+
+    func applyBookShelfFilter(realm: Realm, novels:[RealmNovel]) -> [RealmNovel] {
+        let condition = bookShelfFilterCondition
+        // Set を1回だけ構築して O(1) 判定にする(calcLikeLevel 等の線形探索は使わない)
+        var likedSet:Set<String> = []
+        if condition.likedOnly, let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+            likedSet = Set(globalState.novelLikeOrder.map { $0 })
+        }
+        let watchSet:Set<String>
+        if condition.watch != .none {
+            watchSet = WatchSessionCoordinator.WatchStoredNovelIDs()
+        } else {
+            watchSet = []
+        }
+        return novels.filter { novel in
+            switch condition.unread {
+            case .none:
+                break
+            case .hasUnread:
+                if BookShelfTreeViewController.unreadChapterCount(novel: novel) <= 0 { return false }
+            case .caughtUp:
+                if BookShelfTreeViewController.unreadChapterCount(novel: novel) > 0 { return false }
+            }
+            if condition.likedOnly && !likedSet.contains(novel.novelID) { return false }
+            switch condition.watch {
+            case .none:
+                break
+            case .transferred:
+                if !watchSet.contains(novel.novelID) { return false }
+            case .notTransferred:
+                if watchSet.contains(novel.novelID) { return false }
+            }
+            return true
+        }
+    }
+
+    /// 絞り込み結果の件数だけを数える(ツリーは構築しない軽量パス。件数プレビュー用)
+    func countNovelsForFilterPreview(condition:BookShelfFilterCondition) -> Int {
+        return RealmUtil.RealmBlock { (realm) -> Int in
+            guard var allNovels = RealmNovel.GetAllObjectsWith(realm: realm) else { return 0 }
+            if let searchText = self.searchText, searchText.count > 0 {
+                allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", searchText, searchText)
+            }
+            let savedCondition = bookShelfFilterCondition
+            bookShelfFilterCondition = condition
+            defer { bookShelfFilterCondition = savedCondition }
+            if !condition.isActive { return allNovels.count }
+            return applyBookShelfFilter(realm: realm, novels: Array(allNovels)).count
         }
     }
     
@@ -1302,41 +1437,120 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
     }
     
+    // 日付でフォルダ分けする共通処理。novelsDescending には対象日付の降順で渡すこと。
+    // ソートは呼び出し側の1回だけで、ここでは単一パスで振り分ける
+    // (旧実装はバケツごとに novels.sorted を再実行していて、数千冊で顕著に遅かった)。
+    // フォルダ内の並びは旧実装と同じ日付昇順を踏襲する。
+    func createDateBucketBookShelfRATreeViewCellDataTree(novelsDescending:[RealmNovel], dateOf:(RealmNovel)->Date) -> (Bool, [BookShelfRATreeViewCellData]) {
+        struct filterStruct {
+            let title:String
+            let date:Date
+        }
+        let filterList = [
+            filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1DayAgo", comment: "1日前まで"), date: Date(timeIntervalSinceNow: -60*60*24)),
+            filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo7DayAgo", comment: "7日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*7)),
+            filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo30DayAgo", comment: "30日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30)),
+            filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo6MonthsAgo", comment: "6ヶ月前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30*6)),
+            filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1YearAgo", comment: "1年前まで"), date: Date(timeIntervalSinceNow: -60*60*24*365)),
+            filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_BeforeThat", comment: "それ以前"), date: Date(timeIntervalSinceNow: -60*60*24*365*100)),
+        ]
+        let folders = filterList.map { (filter) -> BookShelfRATreeViewCellData in
+            let folder = BookShelfRATreeViewCellData()
+            folder.title = filter.title
+            folder.childrens = []
+            return folder
+        }
+        // 昇順(古い順)に走査して、古いバケツから新しいバケツへ単調に移動しながら詰める
+        var folderIndex = filterList.count - 1
+        for novel in novelsDescending.reversed() {
+            let date = dateOf(novel)
+            while folderIndex > 0 && date > filterList[folderIndex - 1].date {
+                folderIndex -= 1
+            }
+            let data = BookShelfRATreeViewCellData()
+            data.novelID = novel.novelID
+            data.title = novel.title
+            folders[folderIndex].addChild(data)
+        }
+        return (true, folders)
+    }
+
     // 更新日時でフォルダ分けします(フォルダ分けする版)
     func createUpdateDateBookShelfRATreeViewCellDataTreeWithFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
         return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
             guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.NovelUpdatedAt) else { return (false,[]) }
-            struct filterStruct {
+            return createDateBucketBookShelfRATreeViewCellDataTree(novelsDescending: novels, dateOf: { $0.lastDownloadDate })
+        }
+    }
+
+    // 小説を開いた日時でフォルダ分けします
+    func createLastReadDateBookShelfRATreeViewCellDataTreeWithFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.LastReadDate) else { return (false,[]) }
+            return createDateBucketBookShelfRATreeViewCellDataTree(novelsDescending: novels, dateOf: { $0.lastReadDate })
+        }
+    }
+
+    // 未読章数でフォルダ分けします
+    func createUnreadChapterCountBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.UnreadChapterCount) else { return (false,[]) }
+            // 未読章数の計算は m_*StoryID 文字列のパースだけなので全件でも安価。
+            // 1回計算して (novel, 未読数) の配列を作り、未読数の降順に1回だけソートする
+            let novelAndUnreadArray = novels.map { ($0, BookShelfTreeViewController.unreadChapterCount(novel: $0)) }
+                .sorted { $0.1 > $1.1 }
+            struct bucketStruct {
                 let title:String
-                let date:Date
+                let lowerBound:Int
             }
-            let filterList = [
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1DayAgo", comment: "1日前まで"), date: Date(timeIntervalSinceNow: -60*60*24)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo7DayAgo", comment: "7日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*7)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo30DayAgo", comment: "30日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo6MonthsAgo", comment: "6ヶ月前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30*6)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1YearAgo", comment: "1年前まで"), date: Date(timeIntervalSinceNow: -60*60*24*365)),
-                filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_BeforeThat", comment: "それ以前"), date: Date(timeIntervalSinceNow: -60*60*24*365*100)),
+            let bucketList = [
+                bucketStruct(title: NSLocalizedString("BookShelfRATreeViewController_UnreadBucket_100Plus", comment: "未読 100章以上"), lowerBound: 100),
+                bucketStruct(title: NSLocalizedString("BookShelfRATreeViewController_UnreadBucket_10To99", comment: "未読 10〜99章"), lowerBound: 10),
+                bucketStruct(title: NSLocalizedString("BookShelfRATreeViewController_UnreadBucket_1To9", comment: "未読 1〜9章"), lowerBound: 1),
+                bucketStruct(title: NSLocalizedString("BookShelfRATreeViewController_UnreadBucket_CaughtUp", comment: "追いついている"), lowerBound: 0),
             ]
-            var result = [] as [BookShelfRATreeViewCellData]
-            var prevDate = Date(timeIntervalSinceNow: 9999999999)
-            for filter in filterList {
+            let folders = bucketList.map { (bucket) -> BookShelfRATreeViewCellData in
                 let folder = BookShelfRATreeViewCellData()
-                folder.title = filter.title
+                folder.title = bucket.title
                 folder.childrens = []
-                for novel in novels.sorted(by: {$0.lastDownloadDate < $1.lastDownloadDate}) {
-                    let lastDownloadDate = novel.lastDownloadDate
-                    if lastDownloadDate <= prevDate && lastDownloadDate > filter.date {
-                        let data = BookShelfRATreeViewCellData()
-                        data.novelID = novel.novelID
-                        data.title = novel.title
-                        folder.addChild(data)
-                    }
-                }
-                result.append(folder)
-                prevDate = filter.date
+                return folder
             }
-            return (true, result)
+            var bucketIndex = 0
+            for (novel, unreadCount) in novelAndUnreadArray {
+                while bucketIndex < bucketList.count - 1 && unreadCount < bucketList[bucketIndex].lowerBound {
+                    bucketIndex += 1
+                }
+                let data = BookShelfRATreeViewCellData()
+                data.novelID = novel.novelID
+                data.title = novel.title
+                folders[bucketIndex].addChild(data)
+            }
+            return (true, folders)
+        }
+    }
+
+    // Apple Watch への転送状況でフォルダ分けします
+    func createAppleWatchTransferStateBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool,[BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.AppleWatchTransferState) else { return (false,[]) }
+            let transferredNovelIDSet = WatchSessionCoordinator.WatchStoredNovelIDs()
+            let transferredFolder = BookShelfRATreeViewCellData()
+            transferredFolder.title = NSLocalizedString("BookShelfRATreeViewController_WatchBucket_Transferred", comment: "Apple Watchに転送済み")
+            transferredFolder.childrens = []
+            let notTransferredFolder = BookShelfRATreeViewCellData()
+            notTransferredFolder.title = NSLocalizedString("BookShelfRATreeViewController_WatchBucket_NotTransferred", comment: "未転送")
+            notTransferredFolder.childrens = []
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.novelID = novel.novelID
+                data.title = novel.title
+                if transferredNovelIDSet.contains(novel.novelID) {
+                    transferredFolder.addChild(data)
+                } else {
+                    notTransferredFolder.addChild(data)
+                }
+            }
+            return (true, [transferredFolder, notTransferredFolder])
         }
     }
 
@@ -1633,6 +1847,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             return createCreatedDateBookShelfRATreeViewCellDataTreeWithoutFolder()
         case .PageCount:
             return createPageCountBookShelfRATreeViewCellDataTreeWithoutFolder()
+        case .LastReadDateWithFolder:
+            return createLastReadDateBookShelfRATreeViewCellDataTreeWithFolder()
+        case .UnreadChapterCount:
+            return createUnreadChapterCountBookShelfRATreeViewCellDataTree()
+        case .AppleWatchTransferState:
+            return createAppleWatchTransferStateBookShelfRATreeViewCellDataTree()
         default:
             break
         }
@@ -2277,16 +2497,37 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             if let searchButton = self.navigationItem.leftBarButtonItem?.customView as? MaxWidthButton, abs(searchButton.maxWidth - self.searchButton.maxWidth) < ep {
                 return
             }
-            self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: self.searchButton)
-            //self.navigationItem.leftBarButtonItems = [self.searchButton]
+            if self.filterBarButtonItem == nil {
+                let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), style: .plain, target: self, action: #selector(self.filterButtonClicked))
+                barButtonItem.accessibilityLabel = NSLocalizedString("BookShelfTreeViewController_FilterButton_AccessibilityLabel", comment: "絞り込み")
+                self.filterBarButtonItem = barButtonItem
+            }
+            var leftBarButtonItems = [UIBarButtonItem(customView: self.searchButton)]
+            if let filterBarButtonItem = self.filterBarButtonItem {
+                leftBarButtonItems.append(filterBarButtonItem)
+            }
+            self.navigationItem.leftBarButtonItems = leftBarButtonItems
         }
     }
+    /// 検索文字列の変更などで左バーボタンのサイズが変わった後、
+    /// バーボタンを作り直して UINavigationBar に再レイアウトさせる。
+    /// (customView のサイズだけ変えるとナビバーのタッチ判定領域が古いままになり、
+    /// 右上のボタン群が押せなくなることがあるため)
+    func forceReassignLeftBarButtons() {
+        DispatchQueue.main.async {
+            self.navigationItem.leftBarButtonItems = nil
+            self.assignLeftBarButtons()
+        }
+    }
+
     var currentleftBarButtonWidth:CGFloat = 0.0
     func updateLeftBarButtonWidth() {
         guard let navBar = navigationController?.navigationBar else { return }
         let isPad = traitCollection.userInterfaceIdiom == .pad
         let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
-        searchButton.maxWidth = navBar.bounds.width * ((isPad && (isUpperTabBarDisabled != true)) ? 0.20 : 0.4)
+        // 隣に置いた絞り込み(ファネル)ボタンのぶんだけ検索ボタンの上限幅を狭める
+        let filterButtonWidth:CGFloat = 50.0
+        searchButton.maxWidth = max(80.0, navBar.bounds.width * ((isPad && (isUpperTabBarDisabled != true)) ? 0.20 : 0.4) - filterButtonWidth)
         let epsilon: CGFloat = 0.000001
         if abs(currentleftBarButtonWidth - searchButton.maxWidth) < epsilon {
             return
@@ -2428,6 +2669,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             , NSLocalizedString("BookShelfRATreeViewController_SorteTypeWebSite", comment: "Webサイト順"): NarouContentSortType.WebSite
             , NSLocalizedString("BookShelfRATreeViewController_SorteTypeCreatedDate", comment: "本棚登録順"): NarouContentSortType.CreatedDate
             , NSLocalizedString("BookShelfRATreeViewController_SortTypePageCount", comment: "ページ数順"): NarouContentSortType.PageCount
+            , NSLocalizedString("BookShelfRATreeViewController_SortTypeLastReadDateWithFolder", comment: "小説を開いた日時順(フォルダ分類版)"): NarouContentSortType.LastReadDateWithFolder
+            , NSLocalizedString("BookShelfRATreeViewController_SortTypeUnreadChapterCount", comment: "未読章数別"): NarouContentSortType.UnreadChapterCount
+            , NSLocalizedString("BookShelfRATreeViewController_SortTypeAppleWatchTransferState", comment: "Apple Watch転送状況別"): NarouContentSortType.AppleWatchTransferState
         ]
     }
 
@@ -2525,6 +2769,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             DispatchQueue.global(qos: .userInteractive).async {
                 self.reloadAllData(doScroll: true)
             }
+            // ボタンタイトル変更で幅が変わるので、ナビバーに再レイアウトさせる(タッチ判定ずれ対策)
+            self.forceReassignLeftBarButtons()
             dialog.dismiss(animated: false, completion: nil)
         }
         if let parent = self.parent {
@@ -2540,6 +2786,143 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback:assignNewSearchText)
             .build().show()
         }
+    }
+
+    var filterBarButtonItem:UIBarButtonItem? = nil
+
+    /// 絞り込みの適用状態をボタンアイコンへ反映する。
+    /// navigationItem.prompt でのサマリー表示は「iPhoneで回転するまで出ない」
+    /// 「出ると先頭の小説が隠れる」「iPadで上部タブ表示と重なる」問題があったため使わない。
+    /// 適用中の表示はアイコンの塗りつぶしと VoiceOver 用ラベルのみとする
+    func updateFilterButtonState() {
+        DispatchQueue.main.async {
+            let isActive = self.bookShelfFilterCondition.isActive
+            self.filterBarButtonItem?.image = UIImage(systemName: isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+            self.filterBarButtonItem?.accessibilityLabel = isActive ? self.filterSummaryText() : NSLocalizedString("BookShelfTreeViewController_FilterButton_AccessibilityLabel", comment: "絞り込み")
+            self.navigationItem.prompt = nil
+        }
+    }
+
+    func filterSummaryText() -> String {
+        let condition = self.bookShelfFilterCondition
+        var parts:[String] = []
+        switch condition.unread {
+        case .none: break
+        case .hasUnread: parts.append(NSLocalizedString("BookShelfTreeViewController_FilterPopup_UnreadHasUnread", comment: "未読あり"))
+        case .caughtUp: parts.append(NSLocalizedString("BookShelfTreeViewController_FilterPopup_UnreadCaughtUp", comment: "未読なし"))
+        }
+        if condition.likedOnly {
+            parts.append(NSLocalizedString("BookShelfTreeViewController_FilterPopup_LikedOnly", comment: "お気に入りのみ"))
+        }
+        switch condition.watch {
+        case .none: break
+        case .transferred: parts.append(NSLocalizedString("BookShelfRATreeViewController_WatchBucket_Transferred", comment: "Apple Watchに転送済み"))
+        case .notTransferred: parts.append(NSLocalizedString("BookShelfTreeViewController_FilterPopup_WatchNotTransferred", comment: "Watch未転送"))
+        }
+        return NSLocalizedString("BookShelfTreeViewController_FilterPopup_SummaryPrefix", comment: "絞り込み: ") + parts.joined(separator: "・")
+    }
+
+    @objc func filterButtonClicked(sender:Any) {
+        // シート内での編集は一時変数に対して行い、「適用」で初めて反映する。
+        // 絞り込み状態は検索文字列と同じく永続化しない(アプリ再起動で解除される)
+        var condition = self.bookShelfFilterCondition
+        let noSelection = NSLocalizedString("BookShelfTreeViewController_FilterPopup_NoSelection", comment: "指定なし")
+        let hasUnread = NSLocalizedString("BookShelfTreeViewController_FilterPopup_UnreadHasUnread", comment: "未読あり")
+        let caughtUp = NSLocalizedString("BookShelfTreeViewController_FilterPopup_UnreadCaughtUp", comment: "未読なし")
+        let watchTransferred = NSLocalizedString("BookShelfTreeViewController_FilterPopup_WatchTransferred", comment: "転送済み")
+        let watchNotTransferred = NSLocalizedString("BookShelfTreeViewController_FilterPopup_WatchNotTransferredSegment", comment: "未転送")
+        EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { (epvc) in
+            let section = Section(NSLocalizedString("BookShelfTreeViewController_FilterPopup_Title", comment: "絞り込み"))
+            let countRow = LabelRow() {
+                $0.title = ""
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+            }
+            func updateCountRow() {
+                // ツリーを作らず件数だけ数える軽量パスなので、条件変更のたびに呼んでも安価
+                let count = self.countNovelsForFilterPreview(condition: condition)
+                let format = NSLocalizedString("BookShelfTreeViewController_FilterPopup_CountFormat", comment: "対象: %d冊")
+                countRow.title = String(format: format, count)
+                countRow.updateCell()
+            }
+            section <<< SegmentedRow<String>() {
+                $0.title = NSLocalizedString("BookShelfTreeViewController_FilterPopup_Unread", comment: "未読")
+                $0.options = [noSelection, hasUnread, caughtUp]
+                switch condition.unread {
+                case .none: $0.value = noSelection
+                case .hasUnread: $0.value = hasUnread
+                case .caughtUp: $0.value = caughtUp
+                }
+            }.onChange({ (row) in
+                switch row.value {
+                case hasUnread: condition.unread = .hasUnread
+                case caughtUp: condition.unread = .caughtUp
+                default: condition.unread = .none
+                }
+                updateCountRow()
+            })
+            section <<< SwitchRow() {
+                $0.title = NSLocalizedString("BookShelfTreeViewController_FilterPopup_LikedOnly", comment: "お気に入りのみ")
+                $0.value = condition.likedOnly
+            }.onChange({ (row) in
+                condition.likedOnly = row.value ?? false
+                updateCountRow()
+            })
+            // Apple Watch の軸は非所持者には出さない。出す場合も最下段(所持者の方が少数派のため)
+            if WatchSessionCoordinator.isWatchPaired {
+                section <<< SegmentedRow<String>() {
+                    $0.title = "Apple Watch"
+                    $0.options = [noSelection, watchTransferred, watchNotTransferred]
+                    switch condition.watch {
+                    case .none: $0.value = noSelection
+                    case .transferred: $0.value = watchTransferred
+                    case .notTransferred: $0.value = watchNotTransferred
+                    }
+                }.onChange({ (row) in
+                    switch row.value {
+                    case watchTransferred: condition.watch = .transferred
+                    case watchNotTransferred: condition.watch = .notTransferred
+                    default: condition.watch = .none
+                    }
+                    updateCountRow()
+                })
+            }
+            section <<< countRow
+            epvc.form +++ section
+            let buttonSection = Section()
+            buttonSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("BookShelfTreeViewController_FilterPopup_Apply", comment: "適用")
+                $0.cell.accessibilityTraits = .button
+            }.onCellSelection({ (_, _) in
+                epvc.close(animated: true) {
+                    self.bookShelfFilterCondition = condition
+                    self.updateFilterButtonState()
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        self.reloadAllData(doScroll: true)
+                    }
+                }
+            })
+            buttonSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("BookShelfTreeViewController_FilterPopup_Clear", comment: "絞り込みを解除")
+                $0.cell.accessibilityTraits = .button
+            }.onCellSelection({ (_, _) in
+                epvc.close(animated: true) {
+                    self.bookShelfFilterCondition = BookShelfFilterCondition()
+                    self.updateFilterButtonState()
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        self.reloadAllData(doScroll: true)
+                    }
+                }
+            })
+            buttonSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("Cancel_button", comment: "Cancel")
+                $0.cell.accessibilityTraits = .button
+            }.onCellSelection({ (_, _) in
+                epvc.close(animated: true, completion: nil)
+            })
+            epvc.form +++ buttonSection
+            updateCountRow()
+        }, parentViewController: self, animated: true, completion: nil)
     }
 
     func showNovelInformation(novelID:String) {
