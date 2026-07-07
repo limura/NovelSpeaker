@@ -30,6 +30,10 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @Published var storedTitles: [String: String] = [:]
     /// 特急転送を依頼中の小説ID(受信完了で消える)
     @Published var transferRequestedNovelIDs: Set<String> = []
+    /// Watch で最後に再生した日時(novelID → Date)。キャッシュ整理の並び順に使う
+    @Published var lastPlayedDates: [String: Date] = PhoneSessionManager.loadLastPlayedDates()
+
+    private var didVerifyStoredNovels = false
 
     private override init() {
         super.init()
@@ -55,6 +59,13 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                 self.storedChapterCounts = counts
                 self.storedTitles = titles
                 self.storedNovelIDs = Set(counts.keys)
+                // iPhone 側の本棚(Apple Watch転送状況別・絞り込み)が参照できるよう、
+                // 転送済み一覧を Watch→iPhone 方向の applicationContext で知らせておく
+                if WCSession.default.activationState == .activated {
+                    try? WCSession.default.updateApplicationContext([
+                        WatchMessage.Context.watchStoredNovelIDs: Array(counts.keys),
+                    ])
+                }
             }
         }
     }
@@ -136,6 +147,11 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                 self.transferRequestedNovelIDs.remove(novelID)
             }
         }
+        // 転送依頼は通ったのにファイルが届かない場合(iPhone側の転送失敗等)に
+        // スピナーが回りっぱなしにならないよう、5分で依頼中表示を諦める
+        DispatchQueue.main.asyncAfter(deadline: .now() + 300) {
+            self.transferRequestedNovelIDs.remove(novelID)
+        }
     }
 
     // MARK: - 受信データの反映
@@ -161,6 +177,11 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                 self.novels = novelList
             }
             self.autoRefreshStaleStoredNovels()
+            // セッション中に一度だけ、本棚から消えた小説の孤児キャッシュを掃除する
+            if !self.didVerifyStoredNovels, WCSession.default.isReachable {
+                self.didVerifyStoredNovels = true
+                self.verifyStoredNovelsAgainstBookshelf()
+            }
         }
     }
 
@@ -168,7 +189,47 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     private func applyPlayStateIfNewer(_ state: WatchPlayState) {
         if playState == nil || state.updatedAt >= (playState?.updatedAt ?? Date(timeIntervalSince1970: 0)) {
             playState = state
+            if state.isPlaying {
+                recordLastPlayed(novelID: state.novelID)
+            }
         }
+    }
+
+    // MARK: - 最終再生日時の記録(キャッシュ整理用)
+
+    private static let lastPlayedDatesKey = "NovelLastPlayedDates"
+
+    private static func loadLastPlayedDates() -> [String: Date] {
+        guard let raw = UserDefaults.standard.dictionary(forKey: lastPlayedDatesKey) as? [String: Double] else { return [:] }
+        return raw.mapValues { Date(timeIntervalSince1970: $0) }
+    }
+
+    private func recordLastPlayed(novelID: String) {
+        guard !novelID.isEmpty else { return }
+        // 高頻度で来るので、1時間単位でしか更新しない(UserDefaults 書き込みの節約)
+        if let last = lastPlayedDates[novelID], Date().timeIntervalSince(last) < 3600 { return }
+        lastPlayedDates[novelID] = Date()
+        UserDefaults.standard.set(lastPlayedDates.mapValues { $0.timeIntervalSince1970 },
+                                  forKey: PhoneSessionManager.lastPlayedDatesKey)
+    }
+
+    // MARK: - 孤児キャッシュの掃除
+
+    /// Watch に本文がある小説が iPhone の本棚から削除されていないか確認し、
+    /// 削除されていたらキャッシュも消す(本棚から消した=意思表示済みなので自動でよい)。
+    /// 小説一覧は件数制限付きで送られてくるため「一覧に居ない」では判定できず、明示的に問い合わせる。
+    func verifyStoredNovelsAgainstBookshelf() {
+        let novelIDs = Array(storedNovelIDs)
+        guard !novelIDs.isEmpty, WCSession.default.isReachable else { return }
+        var message: [String: Any] = [WatchMessage.commandKey: WatchMessage.Command.checkNovelExistence.rawValue]
+        message[WatchMessage.Arg.novelIDs] = novelIDs
+        WCSession.default.sendMessage(message, replyHandler: { reply in
+            guard let missing = reply[WatchMessage.Reply.missingNovelIDs] as? [String], !missing.isEmpty else { return }
+            for novelID in missing {
+                NovelStorage.remove(novelID: novelID)
+            }
+            self.refreshStoredNovels()
+        }, errorHandler: nil)
     }
 }
 

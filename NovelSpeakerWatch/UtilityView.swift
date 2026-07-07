@@ -76,9 +76,12 @@ struct UtilityView: View {
 /// Watch に転送済みの本文の一覧。転送し直し(古いデータの更新)と削除ができる。
 /// 転送済みの小説は iPhone 側で章が増えると自動で転送し直されるので、
 /// ここでの削除は「自動同期をやめる」の意味も持つ。
+/// 並び順は「Watchで最後に再生した日が古い順」= 削除候補が上に集まる。
 struct CacheManagementView: View {
     @ObservedObject private var session = PhoneSessionManager.shared
     @State private var dialogNovelID: String?
+    @State private var isSelecting = false
+    @State private var selectedNovelIDs: Set<String> = []
 
     var body: some View {
         List {
@@ -87,22 +90,66 @@ struct CacheManagementView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
-            ForEach(session.storedNovelIDs.sorted(), id: \.self) { novelID in
-                Button {
-                    dialogNovelID = novelID
+            if isSelecting && !session.storedNovelIDs.isEmpty {
+                Button(role: .destructive) {
+                    for novelID in selectedNovelIDs {
+                        session.removeStoredNovel(novelID: novelID)
+                    }
+                    selectedNovelIDs = []
+                    isSelecting = false
                 } label: {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(storedTitle(novelID: novelID))
-                            .font(.footnote)
-                            .lineLimit(2)
-                        Text("\(session.storedChapterCounts[novelID] ?? 0)章")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
+                    Label("選択した\(selectedNovelIDs.count)件を削除", systemImage: "trash")
+                }
+                .disabled(selectedNovelIDs.isEmpty)
+            }
+            ForEach(sortedStoredNovelIDs, id: \.self) { novelID in
+                Button {
+                    if isSelecting {
+                        if selectedNovelIDs.contains(novelID) {
+                            selectedNovelIDs.remove(novelID)
+                        } else {
+                            selectedNovelIDs.insert(novelID)
+                        }
+                    } else {
+                        dialogNovelID = novelID
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        if isSelecting {
+                            Image(systemName: selectedNovelIDs.contains(novelID) ? "checkmark.circle.fill" : "circle")
+                                .font(.system(size: 14))
+                                .foregroundStyle(selectedNovelIDs.contains(novelID) ? .green : .secondary)
+                        }
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(storedTitle(novelID: novelID))
+                                .font(.footnote)
+                                .lineLimit(2)
+                            Text(detailText(novelID: novelID))
+                                .font(.system(size: 10))
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
         }
         .navigationTitle("Watch内の本文")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if !session.storedNovelIDs.isEmpty {
+                    Button(isSelecting ? "完了" : "選択") {
+                        isSelecting.toggle()
+                        if !isSelecting {
+                            selectedNovelIDs = []
+                        }
+                    }
+                    .font(.footnote)
+                }
+            }
+        }
+        .onAppear {
+            // 本棚から削除された小説の孤児キャッシュを掃除
+            session.verifyStoredNovelsAgainstBookshelf()
+        }
         .confirmationDialog(
             storedTitle(novelID: dialogNovelID ?? ""),
             isPresented: Binding(
@@ -124,10 +171,32 @@ struct CacheManagementView: View {
         }
     }
 
+    /// Watchで最後に再生した日が古い順(未再生が先頭)
+    private var sortedStoredNovelIDs: [String] {
+        return session.storedNovelIDs.sorted { a, b in
+            let dateA = session.lastPlayedDates[a] ?? Date(timeIntervalSince1970: 0)
+            let dateB = session.lastPlayedDates[b] ?? Date(timeIntervalSince1970: 0)
+            if dateA != dateB { return dateA < dateB }
+            return a < b
+        }
+    }
+
     private func storedTitle(novelID: String) -> String {
         if let title = session.novels.first(where: { $0.novelID == novelID })?.title, !title.isEmpty {
             return title
         }
         return session.storedTitles[novelID] ?? novelID
+    }
+
+    private func detailText(novelID: String) -> String {
+        let chapters = "\(session.storedChapterCounts[novelID] ?? 0)章"
+        guard let lastPlayed = session.lastPlayedDates[novelID] else {
+            return "\(chapters) · Watchで未再生"
+        }
+        let days = Int(Date().timeIntervalSince(lastPlayed) / (24 * 60 * 60))
+        if days <= 0 {
+            return "\(chapters) · 今日再生"
+        }
+        return "\(chapters) · \(days)日前に再生"
     }
 }

@@ -31,6 +31,9 @@ enum WatchMessage {
         case requestTransfer
         /// 現在状態と小説一覧の再送を依頼
         case requestStatus
+        /// 指定した novelID 群が iPhone の本棚にまだ存在するか確認する
+        /// (本棚から削除された小説の孤児キャッシュを Watch 側で掃除するため)
+        case checkNovelExistence
         // 本文表示の位置購読(purchase/subscribe モデル)
         case subscribeSpeechBlock
         case unsubscribeSpeechBlock
@@ -39,6 +42,7 @@ enum WatchMessage {
     /// コマンド引数のキー
     enum Arg {
         static let novelID = "novelID"
+        static let novelIDs = "novelIDs"
         static let enabled = "enabled"
         static let chapterNumber = "chapter"
         static let location = "location"
@@ -52,6 +56,8 @@ enum WatchMessage {
         static let novelList = "novelList"
         /// 送信時刻(TimeInterval)。古い context の判別用
         static let sentAt = "sentAt"
+        /// Watch→iPhone 方向: Watch に本文が転送されている小説の novelID 一覧([String])
+        static let watchStoredNovelIDs = "storedNovelIDs"
     }
 
     /// コマンドへの返信辞書のキー
@@ -60,6 +66,8 @@ enum WatchMessage {
         static let errorMessage = "error"
         /// 返信に相乗りする最新の再生状態
         static let playState = "playState"
+        /// checkNovelExistence の返信: 本棚に存在しなかった novelID 群
+        static let missingNovelIDs = "missing"
     }
 }
 

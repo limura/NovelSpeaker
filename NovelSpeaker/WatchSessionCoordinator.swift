@@ -25,6 +25,35 @@ class WatchSessionCoordinator: NSObject {
     /// applicationContext に載せる小説一覧の上限(サイズ制限対策)
     static let novelListLimit = 300
 
+    private static let watchStoredNovelIDsKey = "WatchSessionCoordinator_WatchStoredNovelIDs"
+
+    /// Watch 側に本文が転送されている小説の novelID 集合。
+    /// Watch から applicationContext(Watch→iPhone 方向)で送られてきたものを保持している。
+    /// 本棚の「Apple Watch転送状況別」フォルダ分類や検索絞り込みが O(1) 判定に使う
+    static func WatchStoredNovelIDs() -> Set<String> {
+        return Set(UserDefaults.standard.stringArray(forKey: watchStoredNovelIDsKey) ?? [])
+    }
+
+    /// Apple Watch とペアリングされているか(複数選択メニューの表示条件などに使う)
+    static var isWatchPaired: Bool {
+        guard WCSession.isSupported() else { return false }
+        let session = WCSession.default
+        return session.activationState == .activated && session.isPaired
+    }
+
+    /// Watch へファイル転送が積める状態か(転送実行前の確認に使う)
+    static var isWatchTransferReady: Bool {
+        return isWatchPaired && WCSession.default.isWatchAppInstalled
+    }
+
+    /// 複数の小説をまとめて Watch へ転送する(本棚の複数選択操作用)。
+    /// transferFile はキュー式なので順に積むだけでよい
+    func TransferNovels(novelIDArray: [String]) {
+        for novelID in novelIDArray {
+            transferNovel(novelID: novelID)
+        }
+    }
+
     private override init() {
         super.init()
     }
@@ -61,7 +90,9 @@ class WatchSessionCoordinator: NSObject {
 
     private func pushContextNow() {
         let session = WCSession.default
-        guard isStarted, session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
+        // isWatchAppInstalled は開発時のインストール経路によっては false のままになるが、
+        // sendMessage が通る状態なら updateApplicationContext も通ることが多いので条件にしない
+        guard isStarted, session.activationState == .activated, session.isPaired else { return }
         var fullContext: [String: Any] = [:]
         fullContext[WatchMessage.Context.playState] = currentPlayState().toDictionary()
         let novelList = currentNovelList().map { $0.toDictionary() }
@@ -159,6 +190,20 @@ class WatchSessionCoordinator: NSObject {
             replyHandler?([WatchMessage.Reply.ok: false, WatchMessage.Reply.errorMessage: "unknown command"])
             return
         }
+        // checkNovelExistence だけは返信の形が特殊(missing リスト)なので独立して処理する
+        if command == .checkNovelExistence {
+            let novelIDs = message[WatchMessage.Arg.novelIDs] as? [String] ?? []
+            DispatchQueue.main.async {
+                let missing = RealmUtil.RealmBlock { realm -> [String] in
+                    return novelIDs.filter { RealmNovel.SearchNovelWith(realm: realm, novelID: $0) == nil }
+                }
+                replyHandler?([
+                    WatchMessage.Reply.ok: true,
+                    WatchMessage.Reply.missingNovelIDs: missing,
+                ])
+            }
+            return
+        }
         DispatchQueue.main.async {
             let finish: ((ok: Bool, errorMessage: String?)) -> Void = { result in
                 var reply: [String: Any] = [WatchMessage.Reply.ok: result.ok]
@@ -249,10 +294,20 @@ class WatchSessionCoordinator: NSObject {
                 completion((false, "novelID がありません"))
                 return
             }
+            // sendMessage は届いているのに isWatchAppInstalled が false になり
+            // transferFile だけ WCErrorDomain 7006 で失敗する状態が観測されている
+            // (Watch アプリを Xcode から直接インストールすると companion の関連付けが
+            // 壊れてこうなることがある)。転送を積まずにエラーを返してスピナーを止めさせる。
+            guard WCSession.default.isWatchAppInstalled else {
+                completion((false, "Watchアプリが未インストール扱いになっています。Watch側のことせかいを一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。"))
+                return
+            }
             transferNovel(novelID: novelID)
             completion((true, nil))
         case .requestStatus:
             completion((true, nil))  // 返信とpushContextSoon()で状態が送られる
+        case .checkNovelExistence:
+            completion((true, nil))  // handleCommand で処理済み(ここには来ない)
         case .subscribeSpeechBlock:
             isSpeechBlockSubscribed = true
             completion((true, nil))
@@ -397,6 +452,7 @@ class WatchSessionCoordinator: NSObject {
 extension WatchSessionCoordinator: WCSessionDelegate {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         if activationState == .activated {
+            print("WatchSessionCoordinator: activated isPaired=\(session.isPaired) isWatchAppInstalled=\(session.isWatchAppInstalled) isReachable=\(session.isReachable)")
             // 完了しない転送が残っていると OS が再試行を繰り返して電池を消費するので観測しておく
             let outstanding = session.outstandingFileTransfers.count
             if outstanding > 0 {
@@ -420,6 +476,13 @@ extension WatchSessionCoordinator: WCSessionDelegate {
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         handleCommand(message: message, replyHandler: nil)
+    }
+
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        // Watch 側から「Watch に本文がある小説の一覧」が送られてくる
+        if let storedNovelIDs = applicationContext[WatchMessage.Context.watchStoredNovelIDs] as? [String] {
+            UserDefaults.standard.set(storedNovelIDs, forKey: WatchSessionCoordinator.watchStoredNovelIDsKey)
+        }
     }
 
     func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: Error?) {

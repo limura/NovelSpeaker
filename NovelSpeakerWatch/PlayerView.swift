@@ -90,28 +90,10 @@ struct PlayerView: View {
         .sheet(isPresented: $isUtilityPresented) {
             UtilityView()
         }
-        // 小さい画面でも必ず全文が読めるようにエラーはアラートで出す(アラートは自動でスクロール可能)
-        .alert("操作できませんでした", isPresented: isErrorPresented) {
-            Button("OK") {
-                session.lastErrorMessage = nil
-            }
-        } message: {
-            Text(session.lastErrorMessage ?? "")
-        }
+        // エラーのアラート表示はルート(WatchRootView)で行う
         .onAppear {
             session.send(.requestStatus)
         }
-    }
-
-    private var isErrorPresented: Binding<Bool> {
-        Binding(
-            get: { session.lastErrorMessage != nil },
-            set: { presented in
-                if !presented {
-                    session.lastErrorMessage = nil
-                }
-            }
-        )
     }
 
     private func chapterButton(systemName: String, action: @escaping () -> Void) -> some View {
