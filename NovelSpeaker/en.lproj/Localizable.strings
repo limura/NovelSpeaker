@@ -1068,6 +1068,8 @@
 "SiteInfoEditor_CopiedMessage" = "Paste starting from the id column cell in your spreadsheet. The pageElement (formula) column is left untouched and recalculated.";
 "SiteInfoEditor_Test_URLRegexError" = "⚠️ The url regular expression does not compile (the test will not run): %@";
 "SiteInfoEditor_Test_URLEmpty" = "⚠️ The url is empty. isMatchUrl will always be false, so this SiteInfo will not be selected in production.";
+"SiteInfoEditor_Test_TestURLNotMatch" = "⚠️ The test URL does not match the url regular expression. Even if this test succeeds, this SiteInfo will not be selected when actually importing: %@";
+"SiteInfoEditor_Test_CheckTargetNotMatch" = "⚠️ A checkTargets URL does not match the url regular expression. Even if the check succeeds, this SiteInfo will not be selected when actually importing: %@";
 "SiteInfoEditor_TestResultTitle" = "Test result";
 "SiteInfoEditor_Test_NoPageElementV2" = "Could not create a StorySiteInfo because pageElementV2 is missing.";
 "SiteInfoEditor_Test_NoCheckTargets_1" = "checkTargets is not set. There is no target URL, so the test cannot run.";

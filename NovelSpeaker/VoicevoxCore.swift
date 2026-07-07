@@ -5,9 +5,18 @@
 //  voicevox_core (C API, XCFramework同梱) への最小限のSwiftラッパー。
 //  VOICEVOX_IOS_INTEGRATION.md の §2/§3 を踏まえた実装。
 //
+//  Mac Catalyst では voicevox_core / voicevox_onnxruntime の XCFramework に
+//  Catalyst(ios-macabi)スライスが配布されておらずリンクできないため、
+//  末尾の #else 側で「常に利用不可」を返す同一サーフェスのスタブに差し替える
+//  (Catalyst ビルドは SiteInfo 検査(--scrape-inspect)用途で、VOICEVOX は不要)。
+//  pbxproj 側でも framework のリンク/埋め込みと辞書/VVMリソースに
+//  platformFilter = ios を付けて Catalyst から除外している。
+//
 
 import Foundation
+#if !targetEnvironment(macCatalyst)
 import voicevox_core
+#endif
 
 struct VoicevoxStyle {
     let name: String
@@ -16,6 +25,8 @@ struct VoicevoxStyle {
     let speakerUUID: String
     let vvmPath: String
 }
+
+#if !targetEnvironment(macCatalyst)
 
 enum VoicevoxCoreError: LocalizedError {
     case core(VoicevoxResultCode)
@@ -442,3 +453,57 @@ actor VoicevoxCore {
         return peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil
     }
 }
+
+#else // targetEnvironment(macCatalyst)
+
+// Mac Catalyst 用スタブ。実装本体と同じ公開サーフェスを提供しつつ、
+// isAvailableOnThisOS = false によって VOICEVOX 機能全体を「常に利用不可」にする。
+// これにより VoicevoxSpeaker / SpeechBlockSpeaker / SpeakerSettingsViewController 等の
+// 呼び出し側は #if を書かずにそのままコンパイルできる。
+
+enum VoicevoxCoreError: LocalizedError {
+    case notSetUp
+    case styleNotFound(UInt32)
+    case invalidWav
+
+    var errorDescription: String? {
+        switch self {
+        case .notSetUp:
+            return "VOICEVOXはMac Catalystでは利用できません"
+        case .styleNotFound(let styleId):
+            return "指定されたVOICEVOXスタイル(\(styleId))に対応する音声モデルが見つかりません"
+        case .invalidWav:
+            return "VOICEVOXの合成結果が不正なWAVデータでした"
+        }
+    }
+}
+
+final class VoicevoxCore {
+    static let shared = VoicevoxCore()
+    static var cachedStyles: [VoicevoxStyle] = []
+    static var isAvailableOnThisOS: Bool { return false }
+
+    private init() {}
+
+    var isSetUp: Bool { return false }
+
+    static func logTimestamp() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss.SSS"
+        return formatter.string(from: Date())
+    }
+
+    static func setUpFromBundleIfNeeded() async {}
+
+    func synthesize(text: String, styleId: UInt32) async throws -> Data {
+        throw VoicevoxCoreError.notSetUp
+    }
+
+    func schedulePrefetch(text: String, styleId: UInt32) {}
+    func schedulePrefetchCacheClear() {}
+    func scheduleCancelPendingPrefetch() {}
+
+    func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool { return false }
+}
+
+#endif

@@ -1057,6 +1057,8 @@
 "SiteInfoEditor_CopiedMessage" = "スプレッドシートの id 列のセルから貼り付けてください。pageElement(数式列)は触られず再計算されます。";
 "SiteInfoEditor_Test_URLRegexError" = "⚠️ url 正規表現がコンパイルできません(このままだと検査が走りません): %@";
 "SiteInfoEditor_Test_URLEmpty" = "⚠️ url が空です。isMatchUrl が常に false になり、本番ではこの SiteInfo が選ばれません。";
+"SiteInfoEditor_Test_TestURLNotMatch" = "⚠️ テスト用URLが url 正規表現にマッチしません。このテストは通っても、本番の取り込みではこの SiteInfo は選ばれません: %@";
+"SiteInfoEditor_Test_CheckTargetNotMatch" = "⚠️ checkTargets のURLが url 正規表現にマッチしません。検査は通っても、本番の取り込みではこの SiteInfo は選ばれません: %@";
 "SiteInfoEditor_TestResultTitle" = "テスト結果";
 "SiteInfoEditor_Test_NoPageElementV2" = "pageElementV2 が無いため StorySiteInfo を生成できませんでした。";
 "SiteInfoEditor_Test_NoCheckTargets_1" = "checkTargets が未設定です。テスト対象URLがないため検査を実行できません。";

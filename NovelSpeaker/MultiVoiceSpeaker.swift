@@ -170,6 +170,10 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     // VOICEVOXの話者は RealmSpeakerSetting.voiceIdentifier に styleId の文字列表現を格納して流用する
     // (SpeakerSettingsViewController でのVOICEVOX選択時の保存形式と合わせる)。
     func getSpeaker(voiceIdentifier:String?, locale:String?, type:String) -> SpeechEngineSpeaking {
+        // Mac Catalyst では VOICEVOX は利用不可(VoicevoxCore.swift 冒頭のコメント参照)。
+        // iCloud同期等で type == "VOICEVOX" な話者設定が来た場合でも、無音でブロックが
+        // 空回りしないよう AVSpeechSynthesizer(既定話者)へフォールバックさせる。
+        #if !targetEnvironment(macCatalyst)
         if type == "VOICEVOX" {
             let styleId = UInt32(voiceIdentifier ?? "") ?? 0
             let cacheKey = "VOICEVOX:\(styleId)"
@@ -179,6 +183,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             speakerCache[cacheKey] = speaker
             return speaker
         }
+        #endif
         if let voiceIdentifierNotNil = voiceIdentifier, let speaker = speakerCache[voiceIdentifierNotNil] { return speaker }
         let speaker = Speaker()
         let voice = getVoice(voiceIdentifier: voiceIdentifier, fallbackLocale: locale)
