@@ -473,6 +473,84 @@ class StoryFetcherTest: XCTestCase {
         XCTAssertFalse(tsv.contains("\"//h1\""))
     }
 
+    func testDecodeSiteInfoDataFillsResourceUrlFromSourceURL() throws {
+        // resourceUrl 列が空の行は、データの取得元URLを resourceUrl として埋める
+        // (「HTMLの解析に失敗…SiteInfo resourceUrls(N)」の診断に CSV/TSV 由来の SiteInfo も載せるため)。
+        // 列に値がある行はそちらを優先する。
+        let tsvURL = "https://example.com/siteinfo.tsv"
+        let tsv = "name\tpageElement\turl\tresourceUrl\n"
+            + "siteA\t//div[@id='a']\t^https://a\\.example\\.com/\t\n"
+            + "siteB\t//div[@id='b']\t^https://b\\.example\\.com/\thttps://example.com/original"
+        let tsvSiteInfos = try XCTUnwrap(StoryHtmlDecoder.DecodeTSVSiteInfoData(data: Data(tsv.utf8), urlString: tsvURL))
+        XCTAssertEqual(tsvSiteInfos.count, 2)
+        XCTAssertEqual(tsvSiteInfos.first(where: { $0.name == "siteA" })?.resourceUrl, tsvURL)
+        XCTAssertEqual(tsvSiteInfos.first(where: { $0.name == "siteB" })?.resourceUrl, "https://example.com/original")
+
+        // CSV(makeFromCellDict 経由)も同様。
+        let csvURL = "https://example.com/siteinfo.csv"
+        let csv = "name,pageElementV2,url,resourceUrl\n"
+            + "siteC,//div[@id='c'],^https://c\\.example\\.com/,\n"
+            + "siteD,//div[@id='d'],^https://d\\.example\\.com/,https://example.com/original"
+        let csvSiteInfos = try XCTUnwrap(StoryHtmlDecoder.DecodeCSVSiteInfoData(data: Data(csv.utf8), urlString: csvURL))
+        XCTAssertEqual(csvSiteInfos.count, 2)
+        XCTAssertEqual(csvSiteInfos.first(where: { $0.name == "siteC" })?.resourceUrl, csvURL)
+        XCTAssertEqual(csvSiteInfos.first(where: { $0.name == "siteD" })?.resourceUrl, "https://example.com/original")
+    }
+
+    func testStorySiteInfoBooleanColumnsAcceptUppercaseFALSE() throws {
+        // Google スプレッドシートのブール値セルは "TRUE"/"FALSE"(全大文字)でエクスポートされる。
+        // かつて falseValues が ["false", "False", ...] の完全一致だったため "FALSE" が真扱いになり、
+        // 「シートで allowSmartWait を FALSE にしたのに smart-wait が止まらない」バグがあった。
+        let tsv = "name\tpageElement\turl\tisNeedHeadless\tallowSmartWait\tisNeedWhitespaceSplitForTag\n"
+            + "upper\t//div\t^https://a\\.example\\.com/\tFALSE\tFALSE\tFALSE\n"
+            + "lower\t//div\t^https://b\\.example\\.com/\tfalse\tfalse\tfalse\n"
+            + "truthy\t//div\t^https://c\\.example\\.com/\tTRUE\tTRUE\tTRUE"
+        let siteInfos = try XCTUnwrap(StoryHtmlDecoder.DecodeTSVSiteInfoData(data: Data(tsv.utf8), urlString: "https://example.com/siteinfo.tsv"))
+        let upper = try XCTUnwrap(siteInfos.first(where: { $0.name == "upper" }))
+        XCTAssertFalse(upper.isNeedHeadless)
+        XCTAssertFalse(upper.allowSmartWait)
+        XCTAssertFalse(upper.isNeedWhitespaceSplitForTag)
+        let lower = try XCTUnwrap(siteInfos.first(where: { $0.name == "lower" }))
+        XCTAssertFalse(lower.isNeedHeadless)
+        XCTAssertFalse(lower.allowSmartWait)
+        XCTAssertFalse(lower.isNeedWhitespaceSplitForTag)
+        let truthy = try XCTUnwrap(siteInfos.first(where: { $0.name == "truthy" }))
+        XCTAssertTrue(truthy.isNeedHeadless)
+        XCTAssertTrue(truthy.allowSmartWait)
+        XCTAssertTrue(truthy.isNeedWhitespaceSplitForTag)
+    }
+
+    func testSpreadsheetTSVRowNormalizesBoolFalseToZero() throws {
+        // Google Sheets は "false" を貼るとブール値化して "FALSE"(全大文字)でエクスポートし、
+        // 配信済みの旧アプリ(falseValues 完全一致)がそれを真と誤読する。
+        // 貼り戻しTSVではブール3列の偽値を、Sheets で化けず旧アプリも偽と読める "0" に正規化する。
+        func columnValue(_ tsv: String, _ col: String) -> String? {
+            guard let index = LocalSiteInfoStore.spreadsheetColumnOrder.firstIndex(of: col) else { return nil }
+            let fields = tsv.components(separatedBy: "\t")
+            return index < fields.count ? fields[index] : nil
+        }
+        let falseRow = LocalSiteInfoStore.spreadsheetTSVRow([
+            "id": "1", "url": "^https://a/.*$", "pageElementV2": "//a",
+            "isNeedHeadless": "false", "allowSmartWait": "FALSE", "isNeedWhitespaceSplitForTag": "False",
+        ])
+        XCTAssertEqual(columnValue(falseRow, "isNeedHeadless"), "0")
+        XCTAssertEqual(columnValue(falseRow, "allowSmartWait"), "0")
+        XCTAssertEqual(columnValue(falseRow, "isNeedWhitespaceSplitForTag"), "0")
+        // 空(未設定)は空のまま、真値はそのまま。
+        let otherRow = LocalSiteInfoStore.spreadsheetTSVRow([
+            "id": "1", "url": "^https://a/.*$", "pageElementV2": "//a",
+            "isNeedHeadless": "true", "allowSmartWait": "",
+        ])
+        XCTAssertEqual(columnValue(otherRow, "isNeedHeadless"), "true")
+        XCTAssertEqual(columnValue(otherRow, "allowSmartWait"), "")
+        XCTAssertEqual(columnValue(otherRow, "isNeedWhitespaceSplitForTag"), "")
+        // ブール列以外の "false" 的な値は書き換えない(例: name)。
+        let nameRow = LocalSiteInfoStore.spreadsheetTSVRow([
+            "id": "1", "url": "^https://a/.*$", "pageElementV2": "//a", "name": "FALSE",
+        ])
+        XCTAssertEqual(columnValue(nameRow, "name"), "FALSE")
+    }
+
     func testSpreadsheetTSVRowStripsSourceURLSuffixFromId() throws {
         // アプリ内 id `5:https://docs.google.com/...csv` はシート貼付け時に `5` へ戻す(二重 suffix 防止)。
         XCTAssertEqual(LocalSiteInfoStore.sheetIdValue(from: "5:https://docs.google.com/spreadsheets/d/x/pub?gid=0&single=true&output=csv"), "5")

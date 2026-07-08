@@ -456,13 +456,16 @@ struct StorySiteInfo : Identifiable {
         func emptyToNil(_ s:String?) -> String? { (s?.isEmpty == false) ? s : nil }
         self.nextButton = emptyToNil(nextButton)
         self.firstPageButton = emptyToNil(firstPageButton)
-        let falseValues:[String] = ["false", "False", "nil", "0"]
-        if let isNeedHeadlessString = isNeedHeadless, isNeedHeadlessString.count > 0 && !falseValues.contains(isNeedHeadlessString) {
+        // Google スプレッドシートのブール値セルは "TRUE"/"FALSE"(全大文字)でエクスポートされるため、
+        // 大文字小文字を区別せず偽値と判定する(JSON(wedata)側のデコードも lowercased() で同様)。
+        // かつては ["false", "False", ...] の完全一致だったため "FALSE" が真扱いになるバグがあった(2026-07-08 修正)。
+        let falseValues:[String] = ["false", "nil", "0"]
+        if let isNeedHeadlessString = isNeedHeadless, isNeedHeadlessString.count > 0 && !falseValues.contains(isNeedHeadlessString.lowercased()) {
             self.isNeedHeadless = true
         }else{
             self.isNeedHeadless = false
         }
-        if let allowSmartWaitString = allowSmartWait, allowSmartWaitString.count > 0 && !falseValues.contains(allowSmartWaitString) {
+        if let allowSmartWaitString = allowSmartWait, allowSmartWaitString.count > 0 && !falseValues.contains(allowSmartWaitString.lowercased()) {
             self.allowSmartWait = true
         }else{
             self.allowSmartWait = false
@@ -473,7 +476,7 @@ struct StorySiteInfo : Identifiable {
         self.overrideUserAgent = overrideUserAgent
         self.forceErrorMessageAndElement = forceErrorMessageAndElement
         self.scrollTo = emptyToNil(scrollTo)
-        if let isNeedWhitespaceSplitForTagString = isNeedWhitespaceSplitForTag, isNeedWhitespaceSplitForTagString.count > 0 && !falseValues.contains(isNeedWhitespaceSplitForTagString) {
+        if let isNeedWhitespaceSplitForTagString = isNeedWhitespaceSplitForTag, isNeedWhitespaceSplitForTagString.count > 0 && !falseValues.contains(isNeedWhitespaceSplitForTagString.lowercased()) {
             self.isNeedWhitespaceSplitForTag = true
         }else{
             self.isNeedWhitespaceSplitForTag = false
@@ -498,6 +501,16 @@ struct StorySiteInfo : Identifiable {
     static func makeFromCellDict(_ dict:[String:String], urlString:String, importTargetsForSettingId:((String) -> [String])? = nil, useStoredId:Bool = false) -> StorySiteInfo? {
         guard let pageElementV2 = dict["pageElementV2"] else { return nil }
         let siteInfoId = dict["id"]
+        // resourceUrl 列が空ならデータの取得元URL(urlString)を出所として使う。
+        // 「HTMLの解析に失敗…SiteInfo resourceUrls(N)」の診断で、CSV/TSV/最優先SiteInfo由来の
+        // SiteInfo も試された事が見えるようにするため(resourceUrl が nil だとリストに載らない)。
+        // シートへの貼り戻し(spreadsheetColumnOrder)には resourceUrl 列が無いのでシート側は汚れない。
+        let resourceUrl:String
+        if let ru = dict["resourceUrl"], !ru.isEmpty {
+            resourceUrl = ru
+        } else {
+            resourceUrl = urlString
+        }
         let storySiteInfoId = useStoredId ? (siteInfoId ?? UUID.init().uuidString) : ((siteInfoId ?? UUID.init().uuidString) + ":" + urlString)
         let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: .site, siteInfoId: storySiteInfoId, novelID: nil)
         let importTargets:[String]
@@ -528,7 +541,7 @@ struct StorySiteInfo : Identifiable {
             firstPageButton: dict["firstPageButton"],
             waitSecondInHeadless: Double(dict["waitSecondInHeadless"] ?? "0"),
             forceClickButton: dict["forceClickButton"],
-            resourceUrl: dict["resourceUrl"],
+            resourceUrl: resourceUrl,
             overrideUserAgent: dict["overrideUserAgent"],
             forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
             scrollTo: dict["scrollTo"],
@@ -981,7 +994,9 @@ class StoryHtmlDecoder {
         }
     }
     
-    static func DecodeTSVSiteInfoData(data:Data) -> [StorySiteInfo]? {
+    // urlString: TSVデータの取得元URL。resourceUrl 列が空の行の resourceUrl として使う
+    // (「HTMLの解析に失敗…SiteInfo resourceUrls(N)」の診断にTSV由来のSiteInfoも載せるため)。
+    static func DecodeTSVSiteInfoData(data:Data, urlString:String) -> [StorySiteInfo]? {
         guard let tsvString = String(data: data, encoding: .utf8) else { return nil }
         // 行ごとにデータを分割
         var lines:[String] = []
@@ -1025,7 +1040,7 @@ class StoryHtmlDecoder {
                 firstPageButton: dict["firstPageButton"],
                 waitSecondInHeadless: Double(dict["waitSecondInHeadless"] ?? "0"),
                 forceClickButton: dict["forceClickButton"],
-                resourceUrl: dict["resourceUrl"],
+                resourceUrl: dict["resourceUrl"] ?? urlString,
                 overrideUserAgent: dict["overrideUserAgent"],
                 forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
                 scrollTo: dict["scrollTo"],
@@ -1149,7 +1164,7 @@ class StoryHtmlDecoder {
             return DecodeCSVSiteInfoData(data: data, urlString:urlString)
         }
         // 駄目ならTSVとしてデコードしようとしてみます。
-        return DecodeTSVSiteInfoData(data: data)
+        return DecodeTSVSiteInfoData(data: data, urlString: urlString)
     }
     
     static func testSiteInfoURLValid(urlString:String, completion: @escaping (_ errorString: String?, _ urlString: String)->Void) {
@@ -2436,6 +2451,13 @@ class LocalSiteInfoStore {
         return String(id.prefix(while: { $0 != ":" }))
     }
 
+    // スプレッドシートへ貼り戻す時にブール値の偽を "0" へ正規化する列。
+    // Google Sheets は "false"(小文字でも)を貼るとブール値に自動変換し、TSV/CSV エクスポートで全大文字 "FALSE" になるが、
+    // 配信済みの旧アプリは falseValues(["false","False","nil","0"])の完全一致判定なので "FALSE" を真と誤読する。
+    // "0" は Sheets 上で数値のまま化けず、旧アプリの falseValues にも含まれるため、全バージョンで確実に「偽」と読める。
+    // 空セル(未設定=偽)は空のまま出力する。真値はそのまま(Sheets が "TRUE" に変えても全バージョンで真と読まれるので無害)。
+    static let spreadsheetBoolColumns: Set<String> = ["isNeedHeadless", "isNeedWhitespaceSplitForTag", "allowSmartWait"]
+
     // 1サイト分の生セルを、スプレッドシート貼付け用の1行 TSV にする。
     // 区切りはタブ。タブ/改行/`"` を含むフィールドのみ `"…"` で括り内部の `"` は `""` にエスケープ(Sheets は CSV と同じ規則で1セル扱いにする)。
     // id 列はシート元の値(suffix除去)にする。
@@ -2446,8 +2468,16 @@ class LocalSiteInfoStore {
             }
             return value
         }
+        let falseValues: Set<String> = ["false", "nil", "0"]
         return spreadsheetColumnOrder.map { col -> String in
-            let raw = (col == "id") ? sheetIdValue(from: cells["id"] ?? "") : (cells[col] ?? "")
+            let raw: String
+            if col == "id" {
+                raw = sheetIdValue(from: cells["id"] ?? "")
+            } else if spreadsheetBoolColumns.contains(col), let value = cells[col], !value.isEmpty, falseValues.contains(value.lowercased()) {
+                raw = "0"
+            } else {
+                raw = cells[col] ?? ""
+            }
             return tsvEscape(raw)
         }.joined(separator: "\t")
     }
