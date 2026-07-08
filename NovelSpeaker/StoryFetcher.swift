@@ -456,13 +456,16 @@ struct StorySiteInfo : Identifiable {
         func emptyToNil(_ s:String?) -> String? { (s?.isEmpty == false) ? s : nil }
         self.nextButton = emptyToNil(nextButton)
         self.firstPageButton = emptyToNil(firstPageButton)
-        let falseValues:[String] = ["false", "False", "nil", "0"]
-        if let isNeedHeadlessString = isNeedHeadless, isNeedHeadlessString.count > 0 && !falseValues.contains(isNeedHeadlessString) {
+        // Google スプレッドシートのブール値セルは "TRUE"/"FALSE"(全大文字)でエクスポートされるため、
+        // 大文字小文字を区別せず偽値と判定する(JSON(wedata)側のデコードも lowercased() で同様)。
+        // かつては ["false", "False", ...] の完全一致だったため "FALSE" が真扱いになるバグがあった(2026-07-08 修正)。
+        let falseValues:[String] = ["false", "nil", "0"]
+        if let isNeedHeadlessString = isNeedHeadless, isNeedHeadlessString.count > 0 && !falseValues.contains(isNeedHeadlessString.lowercased()) {
             self.isNeedHeadless = true
         }else{
             self.isNeedHeadless = false
         }
-        if let allowSmartWaitString = allowSmartWait, allowSmartWaitString.count > 0 && !falseValues.contains(allowSmartWaitString) {
+        if let allowSmartWaitString = allowSmartWait, allowSmartWaitString.count > 0 && !falseValues.contains(allowSmartWaitString.lowercased()) {
             self.allowSmartWait = true
         }else{
             self.allowSmartWait = false
@@ -473,7 +476,7 @@ struct StorySiteInfo : Identifiable {
         self.overrideUserAgent = overrideUserAgent
         self.forceErrorMessageAndElement = forceErrorMessageAndElement
         self.scrollTo = emptyToNil(scrollTo)
-        if let isNeedWhitespaceSplitForTagString = isNeedWhitespaceSplitForTag, isNeedWhitespaceSplitForTagString.count > 0 && !falseValues.contains(isNeedWhitespaceSplitForTagString) {
+        if let isNeedWhitespaceSplitForTagString = isNeedWhitespaceSplitForTag, isNeedWhitespaceSplitForTagString.count > 0 && !falseValues.contains(isNeedWhitespaceSplitForTagString.lowercased()) {
             self.isNeedWhitespaceSplitForTag = true
         }else{
             self.isNeedWhitespaceSplitForTag = false
@@ -498,6 +501,16 @@ struct StorySiteInfo : Identifiable {
     static func makeFromCellDict(_ dict:[String:String], urlString:String, importTargetsForSettingId:((String) -> [String])? = nil, useStoredId:Bool = false) -> StorySiteInfo? {
         guard let pageElementV2 = dict["pageElementV2"] else { return nil }
         let siteInfoId = dict["id"]
+        // resourceUrl 列が空ならデータの取得元URL(urlString)を出所として使う。
+        // 「HTMLの解析に失敗…SiteInfo resourceUrls(N)」の診断で、CSV/TSV/最優先SiteInfo由来の
+        // SiteInfo も試された事が見えるようにするため(resourceUrl が nil だとリストに載らない)。
+        // シートへの貼り戻し(spreadsheetColumnOrder)には resourceUrl 列が無いのでシート側は汚れない。
+        let resourceUrl:String
+        if let ru = dict["resourceUrl"], !ru.isEmpty {
+            resourceUrl = ru
+        } else {
+            resourceUrl = urlString
+        }
         let storySiteInfoId = useStoredId ? (siteInfoId ?? UUID.init().uuidString) : ((siteInfoId ?? UUID.init().uuidString) + ":" + urlString)
         let settingId = RealmNovelImportSetting.CreateUniqueID(scopeType: .site, siteInfoId: storySiteInfoId, novelID: nil)
         let importTargets:[String]
@@ -528,7 +541,7 @@ struct StorySiteInfo : Identifiable {
             firstPageButton: dict["firstPageButton"],
             waitSecondInHeadless: Double(dict["waitSecondInHeadless"] ?? "0"),
             forceClickButton: dict["forceClickButton"],
-            resourceUrl: dict["resourceUrl"],
+            resourceUrl: resourceUrl,
             overrideUserAgent: dict["overrideUserAgent"],
             forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
             scrollTo: dict["scrollTo"],
@@ -981,7 +994,9 @@ class StoryHtmlDecoder {
         }
     }
     
-    static func DecodeTSVSiteInfoData(data:Data) -> [StorySiteInfo]? {
+    // urlString: TSVデータの取得元URL。resourceUrl 列が空の行の resourceUrl として使う
+    // (「HTMLの解析に失敗…SiteInfo resourceUrls(N)」の診断にTSV由来のSiteInfoも載せるため)。
+    static func DecodeTSVSiteInfoData(data:Data, urlString:String) -> [StorySiteInfo]? {
         guard let tsvString = String(data: data, encoding: .utf8) else { return nil }
         // 行ごとにデータを分割
         var lines:[String] = []
@@ -1025,7 +1040,7 @@ class StoryHtmlDecoder {
                 firstPageButton: dict["firstPageButton"],
                 waitSecondInHeadless: Double(dict["waitSecondInHeadless"] ?? "0"),
                 forceClickButton: dict["forceClickButton"],
-                resourceUrl: dict["resourceUrl"],
+                resourceUrl: dict["resourceUrl"] ?? urlString,
                 overrideUserAgent: dict["overrideUserAgent"],
                 forceErrorMessageAndElement: dict["forceErrorMessageAndElement"],
                 scrollTo: dict["scrollTo"],
@@ -1149,7 +1164,7 @@ class StoryHtmlDecoder {
             return DecodeCSVSiteInfoData(data: data, urlString:urlString)
         }
         // 駄目ならTSVとしてデコードしようとしてみます。
-        return DecodeTSVSiteInfoData(data: data)
+        return DecodeTSVSiteInfoData(data: data, urlString: urlString)
     }
     
     static func testSiteInfoURLValid(urlString:String, completion: @escaping (_ errorString: String?, _ urlString: String)->Void) {
@@ -1600,6 +1615,14 @@ class StoryHtmlDecoder {
 class StoryFetcher {
     var novelIDForImportSetting:String? = nil
 
+    // SiteInfoエディタの「編集中のSiteInfoだけでテスト」(InspectFetchSinglePageWith)用。
+    // 非nilの間、headless の待ち方(smart-wait の有効判定・ready セレクタ収集)も、グローバルの
+    // キャッシュ済み SiteInfo をURLで検索する代わりにこの配列で解決する(NiftyUtility.headlessWaitThenContent へ渡る)。
+    // これが無いと、fetch層の resolveAllowSmartWait が「URLマッチのどれかが true なら ON」のOR判定のため、
+    // エディタで allowSmartWait を FALSE にしてもキャッシュ側の TRUE を打ち消せずテストに反映されない。
+    // InspectFetchSinglePageWith が設定し、通常経路(FetchFirst / InspectFetchSinglePage)は nil に戻す。
+    var headlessSiteInfoArrayOverride:[StorySiteInfo]? = nil
+
     #if !os(watchOS)
     let httpClient:HeadlessHttpClient
     #endif
@@ -1778,7 +1801,7 @@ class StoryFetcher {
                     // クリック後の待ちも共通ヘルパに委譲(①)。allowSmartWait なら ready 要素で即進み、
                     // forceClick は自己クリックで消す。それ以外は従来どおり waitSecondInHeadless の固定待ち。
                     let clickUrl = self.httpClient.GetCurrentURL() ?? currentState.url
-                    NiftyUtility.headlessWaitThenContent(client: self.httpClient, url: clickUrl, withWaitSecond: currentState.waitSecondInHeadless) { (document, error) in
+                    NiftyUtility.headlessWaitThenContent(client: self.httpClient, url: clickUrl, withWaitSecond: currentState.waitSecondInHeadless, siteInfoArrayOverride: self.headlessSiteInfoArrayOverride) { (document, error) in
                             if let err = error {
                                 completionHandler?(nil, err)
                                 return
@@ -1900,7 +1923,7 @@ class StoryFetcher {
                 }else{
                     scrollToJavaScript = nil
                 }
-                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, injectJavaScript: scrollToJavaScript, successAction: { (doc) in
+                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, injectJavaScript: scrollToJavaScript, siteInfoArrayOverride: self.headlessSiteInfoArrayOverride, successAction: { (doc) in
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton, forceErrorMessage: currentState.forceErrorMessage)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
@@ -1994,6 +2017,7 @@ class StoryFetcher {
     }
     
     func FetchFirst(url:URL, cookieString:String?, previousContent:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        self.headlessSiteInfoArrayOverride = nil
         StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: previousContent, completion:{ (dummyState, errorString) in
             if let errorString = errorString, errorString.count > 0 {
                 failedAction?(url, errorString)
@@ -2010,6 +2034,7 @@ class StoryFetcher {
     // successAction で受けた state を ScrapeCheckTarget.evaluate(state:) に渡して期待項目と突合する。
     // 設計メモ: DESIGN_スクレイプ検査.md
     func InspectFetchSinglePage(url:URL, cookieString:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        self.headlessSiteInfoArrayOverride = nil
         StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: nil, completion: { (state, errorString) in
             if let errorString = errorString, errorString.count > 0 {
                 failedAction?(url, errorString)
@@ -2025,6 +2050,8 @@ class StoryFetcher {
     // SiteInfo エディタの「この値で今すぐテスト」用。SiteInfo を自前で渡すため WaitLoadSiteInfoReady も不要。
     // 設計メモ: DESIGN_SiteInfoエディタ.md
     func InspectFetchSinglePageWith(siteInfoArray:[StorySiteInfo], url:URL, cookieString:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        // fetch層(smart-wait 判定/ready セレクタ)もこの配列で解決させる(編集中の allowSmartWait=FALSE 等を反映するため)。
+        self.headlessSiteInfoArrayOverride = siteInfoArray
         let state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: nil)
         self.FetchNext(currentState: state, inspectionTargetURL: url, successAction: successAction, failedAction: failedAction)
     }
@@ -2424,6 +2451,13 @@ class LocalSiteInfoStore {
         return String(id.prefix(while: { $0 != ":" }))
     }
 
+    // スプレッドシートへ貼り戻す時にブール値の偽を "0" へ正規化する列。
+    // Google Sheets は "false"(小文字でも)を貼るとブール値に自動変換し、TSV/CSV エクスポートで全大文字 "FALSE" になるが、
+    // 配信済みの旧アプリは falseValues(["false","False","nil","0"])の完全一致判定なので "FALSE" を真と誤読する。
+    // "0" は Sheets 上で数値のまま化けず、旧アプリの falseValues にも含まれるため、全バージョンで確実に「偽」と読める。
+    // 空セル(未設定=偽)は空のまま出力する。真値はそのまま(Sheets が "TRUE" に変えても全バージョンで真と読まれるので無害)。
+    static let spreadsheetBoolColumns: Set<String> = ["isNeedHeadless", "isNeedWhitespaceSplitForTag", "allowSmartWait"]
+
     // 1サイト分の生セルを、スプレッドシート貼付け用の1行 TSV にする。
     // 区切りはタブ。タブ/改行/`"` を含むフィールドのみ `"…"` で括り内部の `"` は `""` にエスケープ(Sheets は CSV と同じ規則で1セル扱いにする)。
     // id 列はシート元の値(suffix除去)にする。
@@ -2434,8 +2468,16 @@ class LocalSiteInfoStore {
             }
             return value
         }
+        let falseValues: Set<String> = ["false", "nil", "0"]
         return spreadsheetColumnOrder.map { col -> String in
-            let raw = (col == "id") ? sheetIdValue(from: cells["id"] ?? "") : (cells[col] ?? "")
+            let raw: String
+            if col == "id" {
+                raw = sheetIdValue(from: cells["id"] ?? "")
+            } else if spreadsheetBoolColumns.contains(col), let value = cells[col], !value.isEmpty, falseValues.contains(value.lowercased()) {
+                raw = "0"
+            } else {
+                raw = cells[col] ?? ""
+            }
             return tsvEscape(raw)
         }.joined(separator: "\t")
     }

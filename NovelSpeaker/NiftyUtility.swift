@@ -776,15 +776,18 @@ class NiftyUtility: NSObject {
     }
     // この URL にマッチする SiteInfo のうち1つでも allowSmartWait=true なら smart-wait を有効にする。
     // 既定(フラグ無し)は false = 従来の固定待ち。レート制限回避目的の waitSecondInHeadless を壊さないための opt-in。
-    private static func resolveAllowSmartWait(url: URL) -> Bool {
-        return StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString).contains { $0.allowSmartWait }
+    // siteInfoArrayOverride が渡された場合(SiteInfoエディタの単一SiteInfoテスト等)はグローバル検索せずそれだけで判定する。
+    private static func resolveAllowSmartWait(url: URL, siteInfoArrayOverride: [StorySiteInfo]?) -> Bool {
+        let matched = siteInfoArrayOverride ?? StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
+        return matched.contains { $0.allowSmartWait }
     }
 
     // URL にマッチする SiteInfo 群から ready セレクタを動的に集める。fallback(//body)は常にテキストを持つので除外。
     // forceClickButton は「ready」ではなく「クリックして消す障害物」として clickCssSelectors に分ける(③)。
-    private static func resolveReadySelectors(url: URL) -> ReadySelectors {
+    // siteInfoArrayOverride が渡された場合はグローバル検索せずその配列からだけ集める。
+    private static func resolveReadySelectors(url: URL, siteInfoArrayOverride: [StorySiteInfo]?) -> ReadySelectors {
         var content: [String] = []; var node: [String] = []; var readyCss: [String] = []; var clickCss: [String] = []
-        let matched = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
+        let matched = siteInfoArrayOverride ?? StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
         for si in matched {
             for v in si.pageElementDict.values where !v.xpath.isEmpty && v.xpath != "//body" {
                 content.append(v.xpath)
@@ -889,9 +892,11 @@ class NiftyUtility: NSObject {
     //  ・allowSmartWait=true かつ ready セレクタあり → ready 要素で即進む smart-wait(forceClick も自己クリック・連続対応:②③)。
     //  ・それ以外で forceClickButton あり → dismiss-only watcher を仕込み、固定待ちの間に障害物だけ消す(③)。
     //  ・それ以外 → 従来の固定待ち。
-    static func headlessWaitThenContent(client: HeadlessHttpClient, url: URL, withWaitSecond: TimeInterval?, onContent: @escaping (Document?, Error?) -> Void) {
-        let selectors = resolveReadySelectors(url: url)
-        if resolveAllowSmartWait(url: url) && !selectors.isEmpty {
+    // siteInfoArrayOverride: smart-wait 判定と ready セレクタを、グローバルのキャッシュ済み SiteInfo ではなく
+    // この配列で解決する(SiteInfoエディタの「編集中のSiteInfoでテスト」用。nil なら従来どおりURLでグローバル検索)。
+    static func headlessWaitThenContent(client: HeadlessHttpClient, url: URL, withWaitSecond: TimeInterval?, siteInfoArrayOverride: [StorySiteInfo]? = nil, onContent: @escaping (Document?, Error?) -> Void) {
+        let selectors = resolveReadySelectors(url: url, siteInfoArrayOverride: siteInfoArrayOverride)
+        if resolveAllowSmartWait(url: url, siteInfoArrayOverride: siteInfoArrayOverride) && !selectors.isEmpty {
             let startedAt = Date()
             let cap: TimeInterval = withWaitSecond ?? 0
             smartWaitForReady(client: client, selectors: selectors, cap: cap, startedAt: startedAt) { elapsed, found, which in
@@ -914,7 +919,7 @@ class NiftyUtility: NSObject {
         }
     }
 
-    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, withWaitSecond:TimeInterval? = nil, injectJavaScript:String? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
+    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, withWaitSecond:TimeInterval? = nil, injectJavaScript:String? = nil, siteInfoArrayOverride:[StorySiteInfo]? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
         // TODO: おおよそ関係の無い所で Realm を触る必要があってうぅむ。
         let allowsCellularAccess:Bool = RealmUtil.RealmBlock { (realm) -> Bool in
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm), globalData.IsDisallowsCellularAccess {
@@ -943,7 +948,7 @@ class NiftyUtility: NSObject {
                 func waitProcess() {
                     // 待ち(allowSmartWait なら ready で即進む smart-wait / forceClick は自己クリック / それ以外は固定待ち)を
                     // 共通ヘルパに委譲する。クリック後の再取得(StoryFetcher.buttonClick)とロジックを共有する。
-                    headlessWaitThenContent(client: client, url: url, withWaitSecond: withWaitSecond) { document, err in
+                    headlessWaitThenContent(client: client, url: url, withWaitSecond: withWaitSecond, siteInfoArrayOverride: siteInfoArrayOverride) { document, err in
                         if let document = document { successAction?(document) } else { failedAction?(err) }
                     }
                 }

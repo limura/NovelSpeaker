@@ -320,7 +320,9 @@ class SiteInfoEditorViewController: FormViewController {
         ("allowSmartWait", "allowSmartWait"),
     ]
 
-    private static let falseValues: Set<String> = ["false", "False", "nil", "0", ""]
+    // Google スプレッドシートのブールセル由来の "FALSE"(全大文字)等も偽と判定できるよう、
+    // 判定時に lowercased() してから比較する(StorySiteInfo の falseValues と同じ方式)。
+    private static let falseValues: Set<String> = ["false", "nil", "0", ""]
 
     // 列 → 表示タイトル(差分マーカーの付け外しで素のタイトルへ戻すために使う)。
     private static let columnTitle: [String: String] = {
@@ -476,7 +478,7 @@ class SiteInfoEditorViewController: FormViewController {
 
     private func boolValue(_ string: String?) -> Bool {
         guard let string = string else { return false }
-        return !SiteInfoEditorViewController.falseValues.contains(string)
+        return !SiteInfoEditorViewController.falseValues.contains(string.lowercased())
     }
 
     // MARK: - 差分(標準データと違うカラム)の強調

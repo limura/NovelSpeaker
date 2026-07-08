@@ -478,4 +478,62 @@ class DownloadTest: XCTestCase {
         waitForExpectations(timeout: 120)
     }
  #endif
+
+    // StoryFetcher.headlessSiteInfoArrayOverride(SiteInfoエディタの単一SiteInfoテスト経路)で、編集中の
+    // allowSmartWait が fetch層の smart-wait 判定にも反映されることを実URLで確認する手動テスト。
+    // - false: 固定待ち(waitSecondInHeadless=6秒)になる → StellaJean 目次(title/author はハイドレーション後に
+    //   しか現れない)でも title/author が揃い、所要時間も6秒を超える。ここを assert する。
+    // - true : smart-wait が SSR 時点で存在するエピソード一覧(firstPageLink)で即 ready になり早く返る(参考出力のみ)。
+    // これが無かった頃は resolveAllowSmartWait がグローバルのキャッシュ済みSiteInfoをOR判定していたため、
+    // エディタで false にしてもキャッシュ側の true を打ち消せなかった。確認が済んだら削除してよい。
+    // (実ネットワークを使う統合テスト。NovelSpeakerTests は VOICEVOX xcframework の都合で Catalyst ビルド不可のため
+    //  iOS シミュレータで動かす。headless WKWebView・住宅IPともシミュレータでも同条件)
+    // 設計メモ: DESIGN_SiteInfoエディタ.md / DESIGN_取得状態機械とheadlessReady判定.md
+    func testManual_InspectFetchSinglePageWith_AllowSmartWaitOverride() throws {
+        let tocURL = try XCTUnwrap(URL(string: "https://stellajean.jp/novels/019dcee8-04c5-745a-91a6-49ca235171cf"))
+        func makeSiteInfo(allowSmartWait: String) -> StorySiteInfo {
+            return StorySiteInfo(
+                id: "test-stellajean-\(allowSmartWait)",
+                name: "StellaJean(test)",
+                pageElementV2: "//main//div[contains(@class,'styles_storyReader')]//div[contains(@class,'styles_content')]",
+                url: "^https://stellajean\\.jp/novels/",
+                title: "//main//div[child::div/span]/a[not(contains(@href,'/episodes/')) and child::span]|//div[child::div/a[contains(@href,'/authors/')]]/h3",
+                subtitle: "//main//div[child::a[not(contains(@href,'/episodes/'))]]/div/span",
+                firstPageLink: "//main//div[contains(@class,'ant-spin-nested-loading')]//div[contains(@class,'ant-spin-container')]//a[contains(@href,'/novels/')]",
+                nextLink: "//main//div[child::div[@id='episode-comments']]//a[contains(@href,'/episodes/') and contains(@href,'/novels/')]",
+                tag: "//main//div[child::h3[not(child::*)]]/div[not(child::*)]|//main//div[child::h3[not(child::*)] and child::div[not(child::*)]]/div/span[not(child::*)]",
+                author: "//main//div[child::h3]/div/a[contains(@href,'/authors/')]|//main//div[child::a[contains(@href,'/novels/') and not(contains(@href,'/episodes/'))]]/div[not(child::*)]",
+                isNeedHeadless: "true",
+                injectStyle: nil, nextButton: nil, firstPageButton: nil,
+                waitSecondInHeadless: 6,
+                forceClickButton: nil, resourceUrl: nil,
+                overrideUserAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15",
+                forceErrorMessageAndElement: nil, scrollTo: nil, isNeedWhitespaceSplitForTag: nil,
+                allowSmartWait: allowSmartWait)
+        }
+        let fetcher = StoryFetcher()
+        func run(_ label: String, _ siteInfo: StorySiteInfo, completion: @escaping (StoryState?, TimeInterval) -> Void) {
+            let started = Date()
+            fetcher.InspectFetchSinglePageWith(siteInfoArray: [siteInfo], url: tocURL, cookieString: "", successAction: { state in
+                completion(state, Date().timeIntervalSince(started))
+            }, failedAction: { _, message in
+                print("[\(label)] 取得失敗: \(message)")
+                completion(nil, Date().timeIntervalSince(started))
+            })
+        }
+        let finished = expectation(description: "both runs")
+        run("allowSmartWait=false", makeSiteInfo(allowSmartWait: "false")) { state, elapsed in
+            // 抽出値は環境依存(シミュレータのコールド起動だとハイドレーションが6秒を超え title/author が空のことがある)
+            // ため参考出力に留め、assert は「override が fetch層に効いたか」をタイミングで判定する。
+            print("[false] elapsed=\(String(format: "%.1f", elapsed))s title=\(state?.title ?? "nil") author=\(state?.author ?? "nil") tag=\(state?.tagArray.joined(separator: ",") ?? "nil") firstPageLink?=\(state?.firstPageLink != nil)")
+            XCTAssertNotNil(state, "allowSmartWait=false: 取得自体が失敗")
+            XCTAssertGreaterThan(elapsed, 5.0, "allowSmartWait=false なのに固定待ち(6秒)より早く返った = override が fetch層に効いていない")
+            run("allowSmartWait=true", makeSiteInfo(allowSmartWait: "true")) { state, elapsed in
+                print("[true] elapsed=\(String(format: "%.1f", elapsed))s title=\(state?.title ?? "nil") author=\(state?.author ?? "nil") firstPageLink?=\(state?.firstPageLink != nil)")
+                XCTAssertLessThan(elapsed, 5.0, "allowSmartWait=true なら SSR のエピソード一覧で即 ready になるはず")
+                finished.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 120)
+    }
 }
