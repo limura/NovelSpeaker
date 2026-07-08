@@ -46,12 +46,14 @@ fileprivate class SpeechQueue {
         speaker.rate = rate
         speaker.volume = volume
         speaker.delay = delay
+        #if !os(watchOS)
         if NovelSpeakerUtility.CheckMemoryUsageIsValid() == false {
             DispatchQueue.main.async {
                 StorySpeaker.shared.InterruptByiOS16_3MemoryLeak()
             }
             return
         }
+        #endif
         speaker.Speech(text: text)
     }
     
@@ -135,6 +137,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             return voice
         }
 
+        #if !os(watchOS) // GetVoiceIdentifierChangeTable はネットワーク/キャッシュ前提なので watch では使わない(下の getNearVoice で代替)
         let changeTable = NovelSpeakerUtility.GetVoiceIdentifierChangeTable()
         if let voiceIdentifierNotNil = voiceIdentifier , let changeToArray = changeTable.filter({ $0.contains(voiceIdentifierNotNil) }).first {
             for changeTo in changeToArray {
@@ -151,6 +154,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
                 }
             }
         }
+        #endif
         if let voiceIdentifierNotNil = voiceIdentifier, let voice = getNearVoice(voiceIdentifier: voiceIdentifierNotNil, targetLocale: fallbackLocale) {
             AppInformationLogger.AddLog(message: NSLocalizedString("MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning", comment: "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします"), appendix: ["from": voiceIdentifierNotNil, "to": "\(voice.identifier): \(voice.name)"], isForDebug: false)
             voiceCache[voice.identifier] = voice
@@ -171,9 +175,10 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     // (SpeakerSettingsViewController でのVOICEVOX選択時の保存形式と合わせる)。
     func getSpeaker(voiceIdentifier:String?, locale:String?, type:String) -> SpeechEngineSpeaking {
         // Mac Catalyst では VOICEVOX は利用不可(VoicevoxCore.swift 冒頭のコメント参照)。
+        // watchOS も同様(VOICEVOXエンジンをWatchに載せる予定は無い)。
         // iCloud同期等で type == "VOICEVOX" な話者設定が来た場合でも、無音でブロックが
         // 空回りしないよう AVSpeechSynthesizer(既定話者)へフォールバックさせる。
-        #if !targetEnvironment(macCatalyst)
+        #if !targetEnvironment(macCatalyst) && !os(watchOS)
         if type == "VOICEVOX" {
             let styleId = UInt32(voiceIdentifier ?? "") ?? 0
             let cacheKey = "VOICEVOX:\(styleId)"

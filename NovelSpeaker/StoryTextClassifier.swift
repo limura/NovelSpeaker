@@ -7,7 +7,9 @@
 //
 
 import Foundation
+#if !os(watchOS)
 import RealmSwift
+#endif
 import AVFoundation
 
 struct SpeechBlockInfo {
@@ -39,6 +41,7 @@ struct SpeakerSetting {
     let type : String
     let voiceIdentifier : String
     let locale : String
+    #if !os(watchOS)
     init(from:RealmSpeakerSetting) {
         pitch = from.pitch
         rate = from.rate
@@ -50,13 +53,32 @@ struct SpeakerSetting {
         voiceIdentifier = from.voiceIdentifier
         locale = from.locale
     }
+    #endif
+    // 既定値は RealmSpeakerSetting の既定値に合わせてあります(watchOS 等 Realm の無い環境用)
+    init(pitch:Float = 1.0, rate:Float = 0.5, lmd:Float = 1.0, acc:Float = 1.0, base:Int32 = 1, volume:Float = 1.0, type:String = "AVSpeechSynthesizer", voiceIdentifier:String = "", locale:String = "ja-JP") {
+        self.pitch = pitch
+        self.rate = rate
+        self.lmd = lmd
+        self.acc = acc
+        self.base = base
+        self.volume = volume
+        self.type = type
+        self.voiceIdentifier = voiceIdentifier
+        self.locale = locale
+    }
 }
 struct SpeechWaitConfig {
     let targetText : String
     let delayTimeInSec : Float
+    #if !os(watchOS)
     init(from:RealmSpeechWaitConfig) {
         targetText = from.targetText
         delayTimeInSec = from.delayTimeInSec
+    }
+    #endif
+    init(targetText:String, delayTimeInSec:Float) {
+        self.targetText = targetText
+        self.delayTimeInSec = delayTimeInSec
     }
 }
 struct SpeechModSetting {
@@ -82,12 +104,14 @@ struct SpeechModSetting {
         return targetSpeechEngineTypeArray.contains(speechEngineType)
     }
 
+    #if !os(watchOS)
     init(from:RealmSpeechModSetting, targetSpeechEngineTypeArray:[String] = []) {
         before = from.before
         after = from.after
         isUseRegularExpression = from.isUseRegularExpression
         self.targetSpeechEngineTypeArray = targetSpeechEngineTypeArray
     }
+    #endif
     init(before:String, after:String, isUseRegularExpression:Bool, targetSpeechEngineTypeArray:[String] = []) {
         self.before = before
         self.after = after
@@ -379,6 +403,11 @@ extension CombinedSpeechBlock: Hashable {
 }
 
 class StoryTextClassifier {
+    // 「URIを読み上げない」設定で使う URI 検出用正規表現。
+    // iOS 側(CategorizeStoryText(story:))と watchOS 側(WatchSpeechPlayer)の両方から使う
+    static let ignoreURIStringRegexpPattern = "[a-zA-Z][0-9a-zA-Z-+.]*:(//((%[0-9a-f][0-9a-f]|[0-9a-zA-Z-._~!$&'()*+,;=:])*@)?(\\[(::(ffff:([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}|(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){0,5})?)|([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){0,4})?|:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){0,3})?|:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){0,2})?|:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3}))?)?|:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})?|(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){3})))))|v[0-9a-fA-F]\\.([0-9a-zA-Z-._~!$&'()*+,;=:])+)\\]|(%[0-9a-fA-F][0-9a-fA-F]|[0-9a-zA-Z-._~!$&'()*+,;=])*)(:[1-9][0-9]*)?)?(/(%[0-9a-fA-F][0-9a-fA-F]|[0-9a-zA-Z-._~!$&'()*+,;=:@])*)*(\\?(%[0-9a-fA-F][0-9a-fA-F]|[0-9a-zA-Z-._~!$&'()*+,;=:@/?])*)?(#(%[0-9a-fA-F][0-9a-fA-F]|[0-9a-zA-Z-._~!$&'()*+,;=:@/?])*)?"
+
+    #if !os(watchOS)
     // RealmSpeechSectionConfig を SpeechSectionConfig に変換します。
     // 単に speakerID を RealmSpeakerSetting に変えるだけです。
     // RealmSpeakerSetting を検索する部分はキャッシュを使って無駄に Realm上 での検索を走らせない程度のことはします。
@@ -399,7 +428,8 @@ class StoryTextClassifier {
         }
         return result
     }
-    
+    #endif
+
     // 同じ話者の設定SpeechBlockInfoが連続している物を纏めた CombiledSpeechBlock へと変換します。
     // 一応、表示用の文字列長が moreSplitMinimumLetterCount よりも長い文字列になるようならそこで分割しようとします。
     // ただ、元々の文字列長が長すぎる場合はそのままの長さで残ってしまいますし、
@@ -896,6 +926,7 @@ class StoryTextClassifier {
     }
     
     //
+    #if !os(watchOS)
     static func CategorizeStoryText(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) -> [CombinedSpeechBlock] {
         RealmUtil.RealmBlock { (realm) -> [CombinedSpeechBlock] in
             let defaultSpeaker:RealmSpeakerSetting
@@ -966,7 +997,7 @@ class StoryTextClassifier {
             }
             if isIgnoreURIStringSpeechEnabled {
                 let modSetting = SpeechModSetting(
-                    before: "[a-zA-Z][0-9a-zA-Z-+.]*:(//((%[0-9a-f][0-9a-f]|[0-9a-zA-Z-._~!$&'()*+,;=:])*@)?(\\[(::(ffff:([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}|(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){0,5})?)|([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){0,4})?|:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){0,3})?|:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){0,2})?|:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::(([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3}))?)?|:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})(::([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})?|(:([0-9a-fA-F]|[1-9a-fA-F][0-9a-fA-F]{1,3})){3})))))|v[0-9a-fA-F]\\.([0-9a-zA-Z-._~!$&'()*+,;=:])+)\\]|(%[0-9a-fA-F][0-9a-fA-F]|[0-9a-zA-Z-._~!$&'()*+,;=])*)(:[1-9][0-9]*)?)?(/(%[0-9a-fA-F][0-9a-fA-F]|[0-9a-zA-Z-._~!$&'()*+,;=:@])*)*(\\?(%[0-9a-fA-F][0-9a-fA-F]|[0-9a-zA-Z-._~!$&'()*+,;=:@/?])*)?(#(%[0-9a-fA-F][0-9a-fA-F]|[0-9a-zA-Z-._~!$&'()*+,;=:@/?])*)?",
+                    before: ignoreURIStringRegexpPattern,
                     after: "",
                     isUseRegularExpression: true
                 )
@@ -980,7 +1011,8 @@ class StoryTextClassifier {
             return CategorizeStoryText(content: story.content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: SpeakerSetting(from: defaultSpeaker), sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, speechModArray: speechModSettingList)
         }
     }
-    
+    #endif
+
     // speechModArray の正規表現周りを計算して単なる読み替え設定にして、
     // 読み替え前の文字列長でソートされた状態にする部分だけを別関数としておきます
     static func CategorizeStoryText(content:String, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], speechModArray:[SpeechModSetting]) -> [CombinedSpeechBlock] {

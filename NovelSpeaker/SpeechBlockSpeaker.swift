@@ -407,8 +407,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func SetTextWitoutSettings(content:String) {
-        let dummySpeaker = RealmSpeakerSetting()
-        let blockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: [], moreSplitMinimumLetterCount: 99999, defaultSpeaker: SpeakerSetting(from: dummySpeaker), sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
+        let dummySpeaker = SpeakerSetting() // 既定値は RealmSpeakerSetting の既定値と同じ
+        let blockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: [], moreSplitMinimumLetterCount: 99999, defaultSpeaker: dummySpeaker, sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
         setSpeechBlockArray(blockArray: blockArray)
     }
     
@@ -422,6 +422,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         setSpeechBlockArray(blockArray: blockArray)
     }
     
+    #if !os(watchOS)
     func SetStory(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
         let blockArray = StoryTextClassifier.CategorizeStoryText(story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
         setSpeechBlockArray(blockArray: blockArray)
@@ -430,6 +431,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     func SetStory(story:Story) {
         SetStory(story: story, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max)
     }
+    #endif
     
     func StartSpeech() {
         if m_IsSpeaking == true { return }
