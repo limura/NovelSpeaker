@@ -32,8 +32,18 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @Published var transferRequestedNovelIDs: Set<String> = []
     /// Watch で最後に再生した日時(novelID → Date)。キャッシュ整理の並び順に使う
     @Published var lastPlayedDates: [String: Date] = PhoneSessionManager.loadLastPlayedDates()
+    /// iPhone 側の読み上げ位置(本文ページの購読中に届く)。表示文字ベースの位置
+    @Published var phoneReadingPoint: PhoneReadingPoint?
+
+    struct PhoneReadingPoint: Equatable {
+        let novelID: String
+        let chapter: Int
+        let location: Int
+    }
 
     private var didVerifyStoredNovels = false
+    /// 本文ページが購読を望んでいるか(reachable 復帰時の再購読に使う)
+    private var wantsReadingPointSubscription = false
 
     private override init() {
         super.init()
@@ -169,6 +179,16 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         })
     }
 
+    /// 本文ページの表示中だけ iPhone の読み上げ位置(readingPoint)の購読を ON にする。
+    /// 手首を下ろす等で unreachable になった場合は iPhone 側が自動で購読を解除するので、
+    /// reachable 復帰時にはこちらから購読し直す(sessionReachabilityDidChange 参照)
+    func setReadingPointSubscription(_ wants: Bool) {
+        guard wants != wantsReadingPointSubscription else { return }
+        wantsReadingPointSubscription = wants
+        guard WCSession.default.activationState == .activated else { return }
+        send(wants ? .subscribeSpeechBlock : .unsubscribeSpeechBlock, quiet: true)
+    }
+
     /// quiet: 自動再転送などバックグラウンド用途では「接続中…」表示やエラー表示を出さない
     func requestTransfer(novelID: String, quiet: Bool = false) {
         DispatchQueue.main.async {
@@ -275,11 +295,39 @@ extension PhoneSessionManager: WCSessionDelegate {
         }
         // 前回 iPhone 側が送った applicationContext は再起動後も残っているので初期表示に使う
         applyContext(session.receivedApplicationContext)
+        requestStatusIfNovelUnknown()
+    }
+
+    /// 小説が未選択(前回の applicationContext も無い)のに iPhone と繋がっているなら、
+    /// iPhone に現在の状態(=最後に読んでいた小説)を教えてもらう。
+    /// デバッグ実行での再インストール等で受信済み context が消えた直後の「初回未選択」対策。
+    private func requestStatusIfNovelUnknown() {
+        guard playState?.novelID.isEmpty != false, WCSession.default.activationState == .activated,
+              WCSession.default.isReachable else { return }
+        send(.requestStatus, quiet: true)
     }
 
     func sessionReachabilityDidChange(_ session: WCSession) {
         DispatchQueue.main.async {
             self.isReachable = session.isReachable
+            // unreachable の間に iPhone 側で自動解除された購読を購読し直す
+            if session.isReachable && self.wantsReadingPointSubscription {
+                self.send(.subscribeSpeechBlock, quiet: true)
+            }
+            // 繋がったタイミングで小説が未選択なら状態を聞く
+            self.requestStatusIfNovelUnknown()
+        }
+    }
+
+    /// iPhone からの片方向プッシュ(replyHandler なしの sendMessage)。
+    /// 現状は本文ページ購読中の読み上げ位置(readingPoint)のみ
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        guard let point = message[WatchMessage.Push.readingPoint] as? [String: Any],
+              let novelID = point["novelID"] as? String,
+              let chapter = point["chapter"] as? Int,
+              let location = point["location"] as? Int else { return }
+        DispatchQueue.main.async {
+            self.phoneReadingPoint = PhoneReadingPoint(novelID: novelID, chapter: chapter, location: location)
         }
     }
 

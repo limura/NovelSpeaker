@@ -32,6 +32,8 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     @Published var chapterSubtitle = ""
     /// 章内の読み上げ位置(0.0-1.0、表示文字ベース)。ブロック境界ごとにしか進まない
     @Published var progress: Double = 0
+    /// 章内の読み上げ位置(表示文字の unicodeScalar オフセット)。本文ページのハイライトが使う
+    @Published var speakingLocation = 0
 
     private let speaker = SpeechBlockSpeaker()
     private var stories: [Int: NovelStorage.StoredChapter] = [:]
@@ -39,8 +41,8 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     private var lastPositionSaveDate = Date(timeIntervalSince1970: 0)
 
     /// iOS 側 StorySpeaker と同じブロック分割指定
-    private let withMoreSplitTargets = ["。", "、", "　", "\n"]
-    private let moreSplitMinimumLetterCount = 200
+    private static let withMoreSplitTargets = ["。", "、", "　", "\n"]
+    private static let moreSplitMinimumLetterCount = 200
     /// スキップ量(文字数)。iPhone 側リモコンの停止中スキップと同じ量
     static let skipLength = 100
 
@@ -76,13 +78,29 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         chapterSubtitle = story.subtitle
         currentContentLength = story.content.unicodeScalars.count
         speaker.StopSpeech()
-        speaker.setSpeechBlockArray(blockArray: buildBlocks(content: story.content))
+        speaker.setSpeechBlockArray(blockArray: Self.buildBlocks(content: story.content))
         speaker.SetSpeechLocation(location: min(max(0, location), max(0, currentContentLength - 1)))
         updateProgress()
         return true
     }
 
-    private func buildBlocks(content: String) -> [CombinedSpeechBlock] {
+    /// 本文ページのハイライト用。指定の小説・章が現在の発話対象なら、
+    /// 発話ブロックの表示文字範囲(unicodeScalar オフセット)一覧を返す
+    func displayBlockScalarRanges(novelID: String, chapter: Int) -> [Range<Int>]? {
+        guard novelID == self.novelID, chapter == self.chapterNumber,
+              !speaker.speechBlockArray.isEmpty else { return nil }
+        var ranges: [Range<Int>] = []
+        var offset = 0
+        for block in speaker.speechBlockArray {
+            let length = block.displayText.unicodeScalars.count
+            ranges.append(offset..<(offset + length))
+            offset += length
+        }
+        return ranges
+    }
+
+    /// 現在の発話設定で本文をブロック分割する(本文ページのハイライト範囲計算にも使う)
+    static func buildBlocks(content: String) -> [CombinedSpeechBlock] {
         let settings = WatchSpeechSettingsStorage.current()
         func toSpeakerSetting(_ speaker: WatchSpeechSettings.Speaker) -> SpeakerSetting {
             return SpeakerSetting(pitch: speaker.pitch, rate: speaker.rate, volume: speaker.volume, type: speaker.type, voiceIdentifier: speaker.voiceIdentifier, locale: speaker.locale)
@@ -202,8 +220,14 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
 
     /// 読み上げ位置を前後に動かす(章内でクランプ、iPhone 側の停止中スキップと同じ挙動)
     func skip(by offset: Int) {
+        seek(toLocation: speaker.currentLocation + offset)
+    }
+
+    /// 読み上げ位置を章内の指定位置(表示文字の unicodeScalar オフセット)へ動かす。
+    /// 再生中ならその位置から発話し直す(本文ページのタップ/長押しでの位置指定が使う)
+    func seek(toLocation location: Int) {
         guard !novelID.isEmpty else { return }
-        let target = min(max(0, speaker.currentLocation + offset), max(0, currentContentLength - 1))
+        let target = min(max(0, location), max(0, currentContentLength - 1))
         if isPlaying && speaker.isSpeaking {
             speaker.StopSpeech { [weak self] in
                 DispatchQueue.main.async {
@@ -251,6 +275,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     }
 
     private func updateProgress() {
+        speakingLocation = speaker.currentLocation
         guard currentContentLength > 0 else {
             progress = 0
             return

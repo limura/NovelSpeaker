@@ -41,6 +41,11 @@ enum TextDisplayDefaults {
     static func backgroundColor(named name: String) -> Color {
         return backgroundColors.first(where: { $0.name == name })?.color ?? .black
     }
+
+    /// 読み上げ位置ハイライト(マーカー)の色。背景色に埋もれないよう背景側で選ぶ
+    static func highlightColor(backgroundName name: String) -> Color {
+        return name == "white" ? Color.yellow.opacity(0.55) : Color.blue.opacity(0.45)
+    }
 }
 
 struct TextSettingsView: View {

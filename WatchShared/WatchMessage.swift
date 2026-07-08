@@ -68,6 +68,13 @@ enum WatchMessage {
         static let watchReadingPosition = "readingPosition"
     }
 
+    /// iPhone → Watch: 返信ではない片方向プッシュ(sendMessage, replyHandler なし)のキー
+    enum Push {
+        /// 本文ページの購読(subscribeSpeechBlock)中に送られる読み上げ位置。
+        /// 値は辞書: novelID(String) / chapter(Int) / location(Int, 表示文字ベース)
+        static let readingPoint = "readingPoint"
+    }
+
     /// コマンドへの返信辞書のキー
     enum Reply {
         static let ok = "ok"

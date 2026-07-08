@@ -161,7 +161,23 @@ class WatchSessionCoordinator: NSObject {
         var state = WatchPlayState()
         state.updatedAt = Date()
         let storyID = StorySpeaker.shared.storyID
-        guard !storyID.isEmpty else { return state }
+        // StorySpeaker にまだ小説がセットされていない(アプリ起動直後など)場合でも、
+        // Watch 側が「初回は未選択」にならないよう、iPhone が最後に読んでいた小説を報告する。
+        // その場合は発話コアには触れず(isPlaying=false)、栞の位置だけを進捗として載せる。
+        if storyID.isEmpty {
+            RealmUtil.RealmBlock { realm in
+                guard let story = RealmGlobalState.GetLastReadStory(realm: realm) else { return }
+                state.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: story.storyID)
+                state.chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: story.storyID)
+                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: state.novelID) {
+                    state.title = novel.title
+                    state.chapterCount = novel.lastChapterNumber ?? 0
+                    let length = max(story.content.count, 1)
+                    state.progress = min(1.0, Double(novel.m_readingChapterReadingPoint) / Double(length))
+                }
+            }
+            return state
+        }
         state.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         state.chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
         state.isPlaying = StorySpeaker.shared.isPlayng
@@ -356,6 +372,12 @@ class WatchSessionCoordinator: NSObject {
             completion((true, nil))  // handleCommand で処理済み(ここには来ない)
         case .subscribeSpeechBlock:
             isSpeechBlockSubscribed = true
+            // 購読直後は次のブロック境界を待たずに現在位置を即送る(本文ページのハイライト初期表示用)
+            lastReadingPointSentDate = Date(timeIntervalSince1970: 0)
+            let storyID = StorySpeaker.shared.storyID
+            if !storyID.isEmpty {
+                sendReadingPoint(storyID: storyID, location: StorySpeaker.shared.readLocation)
+            }
             completion((true, nil))
         case .unsubscribeSpeechBlock:
             isSpeechBlockSubscribed = false
@@ -642,6 +664,14 @@ extension WatchSessionCoordinator: WCSessionDelegate {
     func sessionDidBecomeInactive(_ session: WCSession) {
     }
 
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        // 手首を下ろす等で Watch が unreachable になったら本文ページの購読は切れたものとみなす
+        // (Watch 側からの明示的な unsubscribe が届かなかった場合の保険。無駄な位置送信を残さない)
+        if !session.isReachable {
+            isSpeechBlockSubscribed = false
+        }
+    }
+
     func sessionDidDeactivate(_ session: WCSession) {
         // Apple Watch の切り替え時など。再アクティベートが作法
         WCSession.default.activate()
@@ -739,17 +769,23 @@ extension WatchSessionCoordinator: StorySpeakerDeletgate {
     }
 
     func storySpeakerUpdateReadingPoint(storyID: String, range: NSRange) {
-        // 本文表示の購読中のみ、2秒に1回まで読み上げ位置を送る(v1.5 の本文ページ用)
+        // 本文表示の購読中のみ、2秒に1回まで読み上げ位置を送る(本文ページのハイライト用)
         guard isSpeechBlockSubscribed else { return }
         let now = Date()
         guard now.timeIntervalSince(lastReadingPointSentDate) >= 2.0 else { return }
         lastReadingPointSentDate = now
+        sendReadingPoint(storyID: storyID, location: range.location)
+    }
+
+    /// 現在の読み上げ位置(表示文字ベース)を Watch へプッシュする(スロットルは呼び出し側)
+    func sendReadingPoint(storyID: String, location: Int) {
         let session = WCSession.default
         guard session.activationState == .activated, session.isReachable else { return }
         session.sendMessage([
-            "readingPoint": [
-                "storyID": storyID,
-                "location": range.location,
+            WatchMessage.Push.readingPoint: [
+                "novelID": RealmStoryBulk.StoryIDToNovelID(storyID: storyID),
+                "chapter": RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID),
+                "location": location,
             ],
         ], replyHandler: nil, errorHandler: nil)
     }
