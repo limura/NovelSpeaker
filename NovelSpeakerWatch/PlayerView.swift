@@ -4,28 +4,42 @@
 //
 //  ①再生画面(ルート)。再生中アプリ準拠 + 章移動ボタンを章ラベルの左右に常設。
 //  時計は OS が右上に描画するため、メニューボタンは空いている左上に置く。
+//  タイトル下のソースバッジをタップすると「iPhoneで聴く/Watchで聴く(単体再生)」を切り替えられる。
 //
 
 import SwiftUI
 
 struct PlayerView: View {
     @ObservedObject private var session = PhoneSessionManager.shared
+    @ObservedObject private var player = WatchSpeechPlayer.shared
     @State private var isUtilityPresented = false
+    @State private var isSourceDialogPresented = false
+
+    /// 発話元として Watch 単体再生が選ばれているか
+    private var isWatchSource: Bool { player.isSelectedAsSource }
 
     var body: some View {
         VStack(spacing: 4) {
-            Text(session.playState?.title.isEmpty == false ? session.playState!.title : "小説が選ばれていません")
+            Text(titleLabel)
                 .font(.headline)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
-            // ソースバッジ。将来ここが「iPhoneで聴く/Watchで聴く」の切替ボタンになる予定なので
-            // 再生停止ボタンから離れたこの位置に置いておく
-            statusBadge
+            // ソースバッジ = 発話元セレクタ。タップで iPhone/Watch を切り替える
+            Button {
+                isSourceDialogPresented = true
+            } label: {
+                statusBadge
+            }
+            .buttonStyle(.plain)
 
             HStack(spacing: 8) {
                 chapterButton(systemName: "backward.end") {
-                    session.send(.previousChapter)
+                    if isWatchSource {
+                        player.moveChapter(offset: -1)
+                    } else {
+                        session.send(.previousChapter)
+                    }
                 }
                 Text(chapterLabel)
                     .font(.footnote)
@@ -34,17 +48,25 @@ struct PlayerView: View {
                     .minimumScaleFactor(0.5)
                     .frame(maxWidth: .infinity)
                 chapterButton(systemName: "forward.end") {
-                    session.send(.nextChapter)
+                    if isWatchSource {
+                        player.moveChapter(offset: 1)
+                    } else {
+                        session.send(.nextChapter)
+                    }
                 }
             }
             .padding(.horizontal, 6)
 
             Spacer(minLength: 2)
 
-            // 30字戻る/進むは誤タップ防止のため再生停止ボタンから左右いっぱいに離す
+            // 少し戻る/進むは誤タップ防止のため再生停止ボタンから左右いっぱいに離す
             HStack(spacing: 0) {
                 Button {
-                    session.send(.skipBackward)
+                    if isWatchSource {
+                        player.skip(by: -WatchSpeechPlayer.skipLength)
+                    } else {
+                        session.send(.skipBackward)
+                    }
                 } label: {
                     Image(systemName: "gobackward")
                         .font(.system(size: 18))
@@ -55,9 +77,13 @@ struct PlayerView: View {
                 Spacer(minLength: 8)
 
                 Button {
-                    session.send(.togglePlayPause)
+                    if isWatchSource {
+                        player.togglePlayPause()
+                    } else {
+                        session.send(.togglePlayPause)
+                    }
                 } label: {
-                    Image(systemName: session.playState?.isPlaying == true ? "pause.circle.fill" : "play.circle.fill")
+                    Image(systemName: isPlayingNow ? "pause.circle.fill" : "play.circle.fill")
                         .font(.system(size: 44))
                 }
                 .buttonStyle(.plain)
@@ -65,7 +91,11 @@ struct PlayerView: View {
                 Spacer(minLength: 8)
 
                 Button {
-                    session.send(.skipForward)
+                    if isWatchSource {
+                        player.skip(by: WatchSpeechPlayer.skipLength)
+                    } else {
+                        session.send(.skipForward)
+                    }
                 } label: {
                     Image(systemName: "goforward")
                         .font(.system(size: 18))
@@ -90,10 +120,69 @@ struct PlayerView: View {
         .sheet(isPresented: $isUtilityPresented) {
             UtilityView()
         }
+        .confirmationDialog("どこで読み上げますか？", isPresented: $isSourceDialogPresented) {
+            Button {
+                selectPhoneSource()
+            } label: {
+                Label("iPhoneで聴く", systemImage: isWatchSource ? "iphone" : "checkmark")
+            }
+            Button {
+                selectWatchSource()
+            } label: {
+                Label("Watchで聴く(単体再生)", systemImage: isWatchSource ? "checkmark" : "applewatch")
+            }
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("Watch単体再生は、転送済みの本文をWatchのスピーカーやイヤホンで読み上げます(iPhoneが無くても動きます)")
+        }
         // エラーのアラート表示はルート(WatchRootView)で行う
         .onAppear {
-            session.send(.requestStatus)
+            if !isWatchSource {
+                session.send(.requestStatus)
+            }
         }
+    }
+
+    // MARK: - 発話元の切り替え
+
+    private func selectWatchSource() {
+        if isWatchSource { return }
+        let targetNovelID = session.playState?.novelID ?? ""
+        guard !targetNovelID.isEmpty else {
+            session.lastErrorMessage = "小説が選ばれていません。本棚から小説を選んでください。"
+            return
+        }
+        guard player.open(novelID: targetNovelID, fallbackTitle: session.playState?.title ?? "") else {
+            session.lastErrorMessage = "この小説の本文がWatchに転送されていません。本棚の小説をタップして転送してから、もう一度お試しください。"
+            return
+        }
+        // iPhone 側で再生中なら止めてから引き継ぐ(二重読み上げ防止)
+        if session.playState?.isPlaying == true {
+            session.send(.togglePlayPause, quiet: true)
+        }
+        player.isSelectedAsSource = true
+    }
+
+    private func selectPhoneSource() {
+        if !isWatchSource { return }
+        if player.isPlaying {
+            player.stop()
+        }
+        player.isSelectedAsSource = false
+        session.send(.requestStatus, quiet: true)
+    }
+
+    // MARK: - 表示
+
+    private var isPlayingNow: Bool {
+        return isWatchSource ? player.isPlaying : (session.playState?.isPlaying == true)
+    }
+
+    private var titleLabel: String {
+        if isWatchSource {
+            return player.title.isEmpty ? "小説が選ばれていません" : player.title
+        }
+        return session.playState?.title.isEmpty == false ? session.playState!.title : "小説が選ばれていません"
     }
 
     private func chapterButton(systemName: String, action: @escaping () -> Void) -> some View {
@@ -108,6 +197,10 @@ struct PlayerView: View {
     }
 
     private var chapterLabel: String {
+        if isWatchSource {
+            guard !player.novelID.isEmpty else { return "-" }
+            return "\(player.chapterNumber)/\(player.chapterCount)章 · \(Int(player.progress * 100))%"
+        }
         guard let state = session.playState, !state.novelID.isEmpty else { return "-" }
         if state.chapterCount > 0 {
             return "\(state.chapterNumber)/\(state.chapterCount)章 · \(Int(state.progress * 100))%"
@@ -116,7 +209,13 @@ struct PlayerView: View {
     }
 
     @ViewBuilder private var statusBadge: some View {
-        if session.isSending {
+        if isWatchSource {
+            if player.isPlaying {
+                badge(text: "Watchで再生中", color: .purple)
+            } else {
+                badge(text: "Watch単体モード", color: .purple)
+            }
+        } else if session.isSending {
             HStack(spacing: 4) {
                 ProgressView()
                     .frame(width: 12, height: 12)
@@ -134,12 +233,17 @@ struct PlayerView: View {
     }
 
     private func badge(text: String, color: Color) -> some View {
-        Text(text)
-            .font(.system(size: 11))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 1)
-            .background(color.opacity(0.25))
-            .clipShape(Capsule())
-            .frame(height: 16)
+        HStack(spacing: 2) {
+            Text(text)
+                .font(.system(size: 11))
+            Image(systemName: "chevron.up.chevron.down")
+                .font(.system(size: 8))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 1)
+        .background(color.opacity(0.25))
+        .clipShape(Capsule())
+        .frame(height: 16)
     }
 }

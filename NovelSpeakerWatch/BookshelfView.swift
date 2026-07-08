@@ -75,6 +75,16 @@ struct BookshelfView: View {
     }
 
     private func openNovel(_ novel: WatchNovelSummary) {
+        // Watch 単体再生モード中で本文が転送済みなら、Watch 側のプレイヤーに開く
+        // (未転送なら iPhone モードへ戻して従来どおり iPhone 側に開かせる)
+        let player = WatchSpeechPlayer.shared
+        if player.isSelectedAsSource {
+            if player.open(novelID: novel.novelID, fallbackTitle: novel.title) {
+                tabSelection = 1
+                return
+            }
+            player.isSelectedAsSource = false
+        }
         session.send(.openNovel, args: [WatchMessage.Arg.novelID: novel.novelID])
         tabSelection = 1
     }

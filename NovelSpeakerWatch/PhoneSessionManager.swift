@@ -59,14 +59,33 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                 self.storedChapterCounts = counts
                 self.storedTitles = titles
                 self.storedNovelIDs = Set(counts.keys)
-                // iPhone 側の本棚(Apple Watch転送状況別・絞り込み)が参照できるよう、
-                // 転送済み一覧を Watch→iPhone 方向の applicationContext で知らせておく
-                if WCSession.default.activationState == .activated {
-                    try? WCSession.default.updateApplicationContext([
-                        WatchMessage.Context.watchStoredNovelIDs: Array(counts.keys),
-                    ])
-                }
+                self.pushWatchContext()
             }
+        }
+    }
+
+    /// Watch→iPhone 方向の applicationContext を送る。
+    /// updateApplicationContext は「最新の1つだけが残る」方式なので、
+    /// 転送済み一覧と読み上げ位置をまとめた全量を毎回作って送る(キー単位の差分更新はできない)
+    func pushWatchContext() {
+        guard WCSession.default.activationState == .activated else { return }
+        var context: [String: Any] = [
+            // iPhone 側の本棚(Apple Watch転送状況別・絞り込み)が参照する転送済み一覧
+            WatchMessage.Context.watchStoredNovelIDs: Array(storedChapterCounts.keys),
+        ]
+        // Watch 単体再生の読み上げ位置(最新の1件)。iPhone 側はこれで栞を更新する
+        if let latest = WatchReadingPositionStore.latest() {
+            context[WatchMessage.Context.watchReadingPosition] = [
+                "novelID": latest.novelID,
+                "chapter": latest.position.chapter,
+                "location": latest.position.location,
+                "updatedAt": latest.position.updatedAt.timeIntervalSince1970,
+            ]
+        }
+        do {
+            try WCSession.default.updateApplicationContext(context)
+        } catch {
+            print("PhoneSessionManager: updateApplicationContext(Watch→iPhone) 失敗: \(error)")
         }
     }
 
@@ -137,6 +156,19 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         })
     }
 
+    /// 返信辞書そのものが欲しい場合用(UI表示なし・リトライなし)。
+    /// 失敗時は nil を返す。発話直前の設定同期(syncSpeechSettings)などが使う
+    func sendForReply(_ command: WatchMessage.Command, args: [String: Any] = [:], completion: @escaping ([String: Any]?) -> Void) {
+        var message: [String: Any] = args
+        message[WatchMessage.commandKey] = command.rawValue
+        WCSession.default.sendMessage(message, replyHandler: { reply in
+            completion(reply)
+        }, errorHandler: { error in
+            print("PhoneSessionManager: sendForReply(\(command.rawValue)) 失敗: \(error)")
+            completion(nil)
+        })
+    }
+
     /// quiet: 自動再転送などバックグラウンド用途では「接続中…」表示やエラー表示を出さない
     func requestTransfer(novelID: String, quiet: Bool = false) {
         DispatchQueue.main.async {
@@ -204,7 +236,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         return raw.mapValues { Date(timeIntervalSince1970: $0) }
     }
 
-    private func recordLastPlayed(novelID: String) {
+    /// Watch 単体再生(WatchSpeechPlayer)からも記録するので private にしない
+    func recordLastPlayed(novelID: String) {
         guard !novelID.isEmpty else { return }
         // 高頻度で来るので、1時間単位でしか更新しない(UserDefaults 書き込みの節約)
         if let last = lastPlayedDates[novelID], Date().timeIntervalSince(last) < 3600 { return }
@@ -255,6 +288,20 @@ extension PhoneSessionManager: WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceive file: WCSessionFile) {
+        // Watch 単体再生用の発話設定ファイル
+        if (file.metadata?[WatchSpeechSettings.transferTypeKey] as? String) == WatchSpeechSettings.transferTypeValue {
+            do {
+                try WatchSpeechSettingsStorage.store(
+                    receivedFileURL: file.fileURL,
+                    fingerprint: file.metadata?[WatchSpeechSettings.transferFingerprintKey] as? String)
+                print("PhoneSessionManager: 発話設定を受信・保存")
+                // 停止中なら現在の章を新しい設定で組み直す(再生中は次の章から反映)
+                WatchSpeechPlayer.shared.applyReceivedSettingsIfIdle()
+            } catch {
+                print("PhoneSessionManager: 発話設定の保存に失敗: \(error)")
+            }
+            return
+        }
         guard let novelID = file.metadata?["novelID"] as? String else { return }
         do {
             try NovelStorage.store(fileURL: file.fileURL, novelID: novelID)

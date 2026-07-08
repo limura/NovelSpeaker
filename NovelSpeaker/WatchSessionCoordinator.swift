@@ -11,6 +11,8 @@
 import Foundation
 import WatchConnectivity
 import RealmSwift
+import CryptoKit
+import UIKit
 
 class WatchSessionCoordinator: NSObject {
     static let shared = WatchSessionCoordinator()
@@ -52,6 +54,7 @@ class WatchSessionCoordinator: NSObject {
         for novelID in novelIDArray {
             transferNovel(novelID: novelID)
         }
+        transferSpeechSettingsIfNeeded()
     }
 
     private override init() {
@@ -65,6 +68,24 @@ class WatchSessionCoordinator: NSObject {
         WCSession.default.delegate = self
         WCSession.default.activate()
         StorySpeaker.shared.AddDelegate(delegate: self)
+        // サスペンド中に Watch から届いた applicationContext は delegate が呼ばれないまま
+        // 受信済みプロパティにだけ入っていることがあるので、フォアグラウンド復帰時に必ず処理する
+        // (updatedAt のガードがあるので何度呼んでも冪等)
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            guard let self = self else { return }
+            let session = WCSession.default
+            guard session.activationState == .activated else { return }
+            let received = session.receivedApplicationContext
+            if !received.isEmpty {
+                self.session(session, didReceiveApplicationContext: received)
+            }
+        }
+        // 「iPhone側で発話設定を変える → iPhoneをしまう → Watchで再生」という典型フローで
+        // Watch 側の発話直前同期(最大2秒待ち)を待たずに済むよう、バックグラウンドに入る時に
+        // 設定の変更があれば先回りで送っておく(変更が無ければ指紋が一致して何も送らない)
+        NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.transferSpeechSettingsIfNeeded()
+        }
     }
 
     // MARK: - Watch への状態送信
@@ -190,6 +211,27 @@ class WatchSessionCoordinator: NSObject {
             replyHandler?([WatchMessage.Reply.ok: false, WatchMessage.Reply.errorMessage: "unknown command"])
             return
         }
+        // syncSpeechSettings は返信の形が特殊(settingsUpToDate)なので独立して処理する。
+        // Watch が発話直前に「手元の発話設定の指紋」を送ってくるので、最新なら即返信、
+        // 古ければ transferFile を積んでから返信する(Watch 側はファイル到着を少しだけ待つ)
+        if command == .syncSpeechSettings {
+            let watchFingerprint = message[WatchMessage.Arg.fingerprint] as? String ?? ""
+            DispatchQueue.global(qos: .userInitiated).async {
+                guard let encoded = self.encodeSpeechSettings() else {
+                    replyHandler?([WatchMessage.Reply.ok: false, WatchMessage.Reply.errorMessage: "発話設定の生成に失敗しました"])
+                    return
+                }
+                let upToDate = (encoded.fingerprint == watchFingerprint)
+                if !upToDate {
+                    self.enqueueSpeechSettingsTransfer(data: encoded.data, fingerprint: encoded.fingerprint)
+                }
+                replyHandler?([
+                    WatchMessage.Reply.ok: true,
+                    WatchMessage.Reply.speechSettingsUpToDate: upToDate,
+                ])
+            }
+            return
+        }
         // checkNovelExistence だけは返信の形が特殊(missing リスト)なので独立して処理する
         if command == .checkNovelExistence {
             let novelIDs = message[WatchMessage.Arg.novelIDs] as? [String] ?? []
@@ -303,10 +345,14 @@ class WatchSessionCoordinator: NSObject {
                 return
             }
             transferNovel(novelID: novelID)
+            // Watch 単体再生用の発話設定も(変わっていれば)一緒に送っておく
+            transferSpeechSettingsIfNeeded()
             completion((true, nil))
         case .requestStatus:
+            // Watch アプリが開かれたタイミングなので、発話設定の変更もここで拾って送る
+            transferSpeechSettingsIfNeeded()
             completion((true, nil))  // 返信とpushContextSoon()で状態が送られる
-        case .checkNovelExistence:
+        case .checkNovelExistence, .syncSpeechSettings:
             completion((true, nil))  // handleCommand で処理済み(ここには来ない)
         case .subscribeSpeechBlock:
             isSpeechBlockSubscribed = true
@@ -446,6 +492,129 @@ class WatchSessionCoordinator: NSObject {
             ])
         }
     }
+
+    // MARK: - 発話設定の転送(Watch 単体再生用)
+
+    private static let lastSpeechSettingsFingerprintKey = "WatchSessionCoordinator_LastSpeechSettingsFingerprint"
+
+    /// Watch 単体再生用の発話設定を transferFile で送る。内容が前回送信時と同じなら送らない。
+    /// 呼び出しは activation 時と Watch からの requestStatus / requestTransfer 時
+    /// (= Watch アプリを開いた・転送を頼んだ時)に限られるので、Realm 全読みのコストは許容範囲。
+    func transferSpeechSettingsIfNeeded() {
+        let session = WCSession.default
+        guard isStarted, session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
+        DispatchQueue.global(qos: .utility).async {
+            guard let encoded = self.encodeSpeechSettings() else { return }
+            if UserDefaults.standard.string(forKey: WatchSessionCoordinator.lastSpeechSettingsFingerprintKey) == encoded.fingerprint { return }
+            self.enqueueSpeechSettingsTransfer(data: encoded.data, fingerprint: encoded.fingerprint)
+        }
+    }
+
+    /// 現在の発話設定を JSON に変換して指紋付きで返す(重いので background queue で呼ぶこと)
+    private func encodeSpeechSettings() -> (fingerprint: String, data: Data)? {
+        var settings = buildSpeechSettings()
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        // 指紋は毎回変わる updatedAt を除いて(固定して)計算する
+        settings.updatedAt = Date(timeIntervalSince1970: 0)
+        guard let fingerprintSource = try? encoder.encode(settings) else { return nil }
+        let fingerprint = SHA256.hash(data: fingerprintSource).map { String(format: "%02x", $0) }.joined()
+        settings.updatedAt = Date()
+        guard let data = try? encoder.encode(settings) else { return nil }
+        return (fingerprint, data)
+    }
+
+    private func enqueueSpeechSettingsTransfer(data: Data, fingerprint: String) {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("WatchSpeechSettings-\(UUID().uuidString).json")
+        do {
+            try data.write(to: fileURL)
+        } catch {
+            print("WatchSessionCoordinator: 発話設定の一時ファイル書き込み失敗: \(error)")
+            return
+        }
+        WCSession.default.transferFile(fileURL, metadata: [
+            WatchSpeechSettings.transferTypeKey: WatchSpeechSettings.transferTypeValue,
+            WatchSpeechSettings.transferFingerprintKey: fingerprint,
+        ])
+        // transferFile はキュー式で OS が再試行してくれるので、積めた時点で送信済み扱いにする。
+        // 転送がエラーで終わった場合は didFinish 側で指紋を消して次回再送させる
+        UserDefaults.standard.set(fingerprint, forKey: WatchSessionCoordinator.lastSpeechSettingsFingerprintKey)
+        print("WatchSessionCoordinator: 発話設定を転送キューに追加 (\(data.count) bytes)")
+    }
+
+    /// Realm 上の発話設定を WatchSpeechSettings に変換する。
+    /// v1.5 は「全小説対象(anyTarget)のグローバル設定のみ」(小説別の話者・読み替えは未対応)。
+    private func buildSpeechSettings() -> WatchSpeechSettings {
+        // SearchSettingsFor は「anyTarget + 指定 novelID」を返すので、
+        // 存在しない novelID を渡して anyTarget(全小説対象)の設定だけを拾う
+        let globalOnlyNovelID = "novelspeakerdata://watch-global-settings"
+        return RealmUtil.RealmBlock { realm -> WatchSpeechSettings in
+            var settings = WatchSpeechSettings()
+            func convertSpeaker(_ speaker: RealmSpeakerSetting) -> WatchSpeechSettings.Speaker {
+                // VOICEVOX は Watch では動かないので既定の AVSpeechSynthesizer 話者に読み替える
+                // (rate 等の値もエンジン毎にスケールが違うので引き継がない)
+                guard speaker.type != "VOICEVOX" else { return WatchSpeechSettings.Speaker() }
+                var result = WatchSpeechSettings.Speaker()
+                result.pitch = speaker.pitch
+                result.rate = speaker.rate
+                result.volume = speaker.volume
+                result.type = speaker.type
+                result.voiceIdentifier = speaker.voiceIdentifier
+                result.locale = speaker.locale
+                return result
+            }
+            let defaultSpeaker: RealmSpeakerSetting
+            if let globalDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) {
+                defaultSpeaker = globalDefaultSpeaker
+            } else {
+                defaultSpeaker = RealmSpeakerSetting()
+            }
+            settings.defaultSpeaker = convertSpeaker(defaultSpeaker)
+            if let sectionConfigs = RealmSpeechSectionConfig.SearchSettingsFor(realm: realm, novelID: globalOnlyNovelID) {
+                for sectionConfig in sectionConfigs {
+                    let speaker = sectionConfig.speakerWith(realm: realm) ?? defaultSpeaker
+                    settings.sectionConfigs.append(WatchSpeechSettings.SectionConfig(startText: sectionConfig.startText, endText: sectionConfig.endText, speaker: convertSpeaker(speaker)))
+                }
+            }
+            var waitConfigs: [WatchSpeechSettings.WaitConfig] = []
+            if let allWaitConfigList = RealmSpeechWaitConfig.GetAllObjectsWith(realm: realm) {
+                for waitConfig in allWaitConfigList {
+                    waitConfigs.append(WatchSpeechSettings.WaitConfig(targetText: waitConfig.targetText, delayTimeInSec: waitConfig.delayTimeInSec))
+                }
+            }
+            // 「間の仕組み」が非推奨型なら読み替え辞書へ変換する
+            // (StoryTextClassifier.CategorizeStoryText(story:) と同じ変換)
+            if RealmGlobalState.GetInstanceWith(realm: realm)?.isSpeechWaitSettingUseExperimentalWait == true {
+                for waitConfig in waitConfigs {
+                    let count = Int(waitConfig.delayTimeInSec * 10)
+                    if count <= 0 { continue }
+                    settings.speechMods.append(WatchSpeechSettings.Mod(before: waitConfig.targetText, after: "。" + String(repeating: "_。", count: count), isRegexp: false, targetEngines: []))
+                }
+                waitConfigs = []
+            }
+            settings.waitConfigs = waitConfigs
+            // 読み替え辞書。標準辞書由来のエントリは AVSpeechSynthesizer 専用マークを引き継ぐ
+            let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
+            if let modSettings = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: globalOnlyNovelID) {
+                for modSetting in modSettings {
+                    let key = NovelSpeakerUtility.DefaultSpeechModKey(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isUseRegularExpression)
+                    let targetEngines: [String] = defaultSpeechModKeySet.contains(key) ? ["AVSpeechSynthesizer"] : []
+                    settings.speechMods.append(WatchSpeechSettings.Mod(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isUseRegularExpression, targetEngines: targetEngines))
+                }
+            }
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                if globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled {
+                    settings.speechMods.append(WatchSpeechSettings.Mod(before: "\\s+", after: "α", isRegexp: true, targetEngines: []))
+                }
+                settings.isIgnoreURIStringSpeechEnabled = globalState.isIgnoreURIStringSpeechEnabled
+                settings.isOverrideRubyEnabled = globalState.isOverrideRubyIsEnabled
+                settings.notRubyCharactorStringArray = globalState.notRubyCharactorStringArray
+                settings.isDisableNarouRuby = globalState.isDisableNarouRuby
+            }
+            return settings
+        }
+    }
 }
 
 // MARK: - WCSessionDelegate
@@ -459,6 +628,14 @@ extension WatchSessionCoordinator: WCSessionDelegate {
                 print("WatchSessionCoordinator: 未完了のファイル転送が \(outstanding) 件残っています")
             }
             pushContextSoon()
+            transferSpeechSettingsIfNeeded()
+            // Watch→iPhone の applicationContext はアプリがサスペンド中に届いた場合
+            // delegate が呼ばれないまま受信済みプロパティにだけ入っていることがあるので、
+            // アクティベート時に必ず一度処理する(updatedAt のガードがあるので冪等)
+            let received = session.receivedApplicationContext
+            if !received.isEmpty {
+                self.session(session, didReceiveApplicationContext: received)
+            }
         }
     }
 
@@ -483,12 +660,70 @@ extension WatchSessionCoordinator: WCSessionDelegate {
         if let storedNovelIDs = applicationContext[WatchMessage.Context.watchStoredNovelIDs] as? [String] {
             UserDefaults.standard.set(storedNovelIDs, forKey: WatchSessionCoordinator.watchStoredNovelIDsKey)
         }
+        // Watch 単体再生の読み上げ位置。iPhone 側の栞より新しければ反映する
+        if let positionDictionary = applicationContext[WatchMessage.Context.watchReadingPosition] as? [String: Any],
+           let novelID = positionDictionary["novelID"] as? String,
+           let chapter = positionDictionary["chapter"] as? Int,
+           let location = positionDictionary["location"] as? Int,
+           let updatedAtInterval = positionDictionary["updatedAt"] as? TimeInterval {
+            applyWatchReadingPosition(novelID: novelID, chapter: chapter, location: location, updatedAt: Date(timeIntervalSince1970: updatedAtInterval))
+        }
+    }
+
+    /// Watch 単体再生の読み上げ位置を iPhone 側の栞に反映する。
+    /// 「新しい方優先」: iPhone 側でその後に読んでいたら(lastReadDate の方が新しければ)何もしない
+    private func applyWatchReadingPosition(novelID: String, chapter: Int, location: Int, updatedAt: Date) {
+        DispatchQueue.main.async {
+            // Watch で聴く小説は直前に iPhone 側でも開いている(openNovel 等で StorySpeaker が
+            // 保持している)のが普通なので、「開いているから反映しない」にすると同期したい小説ほど
+            // 反映されなくなってしまう。iPhone 側でまさに発話中の場合だけ諦める(発話側の位置が正)
+            let currentStoryID = StorySpeaker.shared.storyID
+            let isCurrentNovel = !currentStoryID.isEmpty && RealmStoryBulk.StoryIDToNovelID(storyID: currentStoryID) == novelID
+            if isCurrentNovel && StorySpeaker.shared.isPlayng {
+                print("WatchSessionCoordinator: Watchの読み上げ位置は iPhone 側が発話中のため反映しない novelID=\(novelID)")
+                return
+            }
+            var appliedStory: Story? = nil
+            // withoutNotifying: StorySpeaker.updateReadDate と同じ作法で、画面側(SpeechViewController等)の
+            // novel オブザーバに通知しない。素の Write で書くと iCloud 同期用の
+            // 「他端末で更新された n章 へ移動」フローティングボタンが誤って出てしまう
+            // (あちらの仕組みは触らず、Watch 直通での更新はこちらで直接反映するので不要)
+            RealmUtil.Write(withoutNotifying: StorySpeaker.shared.updateDateWithoutNotifyingTokens) { realm in
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+                guard updatedAt > novel.lastReadDate else {
+                    print("WatchSessionCoordinator: Watchの読み上げ位置は iPhone 側の栞の方が新しいため反映しない novelID=\(novelID) watch=\(updatedAt) iPhone=\(novel.lastReadDate)")
+                    return
+                }
+                guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapter) else { return }
+                let contentCount = story.content.count
+                let clampedLocation = min(max(0, location), max(0, contentCount - 1))
+                story.SetCurrentReadLocationWith(realm: realm, location: clampedLocation)
+                novel.lastReadDate = updatedAt
+                novel.m_readingChapterStoryID = story.storyID
+                novel.m_readingChapterContentCount = contentCount
+                print("WatchSessionCoordinator: Watchの読み上げ位置を栞に反映 novelID=\(novelID) chapter=\(chapter) location=\(clampedLocation)")
+                appliedStory = story
+            }
+            guard let story = appliedStory else { return }
+            // StorySpeaker が同じ小説を(停止状態で)保持している場合は開き直して追従させる。
+            // Realm の栞だけ動かすと画面と StorySpeaker 内部の位置が古いまま残り、
+            // 再生開始や updateReadDate で古い位置に巻き戻されてしまう。
+            // (SetStory は栞から readLocation を読み直す)
+            if isCurrentNovel {
+                StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: false)
+            }
+            self.pushContextSoon()
+        }
     }
 
     func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: Error?) {
         try? FileManager.default.removeItem(at: fileTransfer.file.fileURL)
         if let error = error {
             print("WatchSessionCoordinator: transferFile 失敗: \(error)")
+            // 発話設定の転送に失敗した場合は「送信済み」の指紋を消して、次の機会に再送させる
+            if (fileTransfer.file.metadata?[WatchSpeechSettings.transferTypeKey] as? String) == WatchSpeechSettings.transferTypeValue {
+                UserDefaults.standard.removeObject(forKey: WatchSessionCoordinator.lastSpeechSettingsFingerprintKey)
+            }
         }
     }
 }

@@ -34,6 +34,9 @@ enum WatchMessage {
         /// 指定した novelID 群が iPhone の本棚にまだ存在するか確認する
         /// (本棚から削除された小説の孤児キャッシュを Watch 側で掃除するため)
         case checkNovelExistence
+        /// Watch 単体再生の発話直前に、手元の発話設定(args: fingerprint)が最新か確認する。
+        /// 古ければ iPhone 側が transferFile を積む(reply: settingsUpToDate)
+        case syncSpeechSettings
         // 本文表示の位置購読(purchase/subscribe モデル)
         case subscribeSpeechBlock
         case unsubscribeSpeechBlock
@@ -46,6 +49,8 @@ enum WatchMessage {
         static let enabled = "enabled"
         static let chapterNumber = "chapter"
         static let location = "location"
+        /// Watch が保存している発話設定の指紋(SHA256 hex)
+        static let fingerprint = "fingerprint"
     }
 
     /// iPhone → Watch: applicationContext のキー
@@ -58,6 +63,9 @@ enum WatchMessage {
         static let sentAt = "sentAt"
         /// Watch→iPhone 方向: Watch に本文が転送されている小説の novelID 一覧([String])
         static let watchStoredNovelIDs = "storedNovelIDs"
+        /// Watch→iPhone 方向: Watch 単体再生の読み上げ位置
+        /// (辞書: novelID/chapter/location/updatedAt(TimeInterval))
+        static let watchReadingPosition = "readingPosition"
     }
 
     /// コマンドへの返信辞書のキー
@@ -68,6 +76,8 @@ enum WatchMessage {
         static let playState = "playState"
         /// checkNovelExistence の返信: 本棚に存在しなかった novelID 群
         static let missingNovelIDs = "missing"
+        /// syncSpeechSettings の返信: Watch の発話設定が最新なら true(false ならファイルが届く)
+        static let speechSettingsUpToDate = "settingsUpToDate"
     }
 }
 
