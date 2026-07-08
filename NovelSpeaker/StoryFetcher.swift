@@ -1600,6 +1600,14 @@ class StoryHtmlDecoder {
 class StoryFetcher {
     var novelIDForImportSetting:String? = nil
 
+    // SiteInfoエディタの「編集中のSiteInfoだけでテスト」(InspectFetchSinglePageWith)用。
+    // 非nilの間、headless の待ち方(smart-wait の有効判定・ready セレクタ収集)も、グローバルの
+    // キャッシュ済み SiteInfo をURLで検索する代わりにこの配列で解決する(NiftyUtility.headlessWaitThenContent へ渡る)。
+    // これが無いと、fetch層の resolveAllowSmartWait が「URLマッチのどれかが true なら ON」のOR判定のため、
+    // エディタで allowSmartWait を FALSE にしてもキャッシュ側の TRUE を打ち消せずテストに反映されない。
+    // InspectFetchSinglePageWith が設定し、通常経路(FetchFirst / InspectFetchSinglePage)は nil に戻す。
+    var headlessSiteInfoArrayOverride:[StorySiteInfo]? = nil
+
     #if !os(watchOS)
     let httpClient:HeadlessHttpClient
     #endif
@@ -1778,7 +1786,7 @@ class StoryFetcher {
                     // クリック後の待ちも共通ヘルパに委譲(①)。allowSmartWait なら ready 要素で即進み、
                     // forceClick は自己クリックで消す。それ以外は従来どおり waitSecondInHeadless の固定待ち。
                     let clickUrl = self.httpClient.GetCurrentURL() ?? currentState.url
-                    NiftyUtility.headlessWaitThenContent(client: self.httpClient, url: clickUrl, withWaitSecond: currentState.waitSecondInHeadless) { (document, error) in
+                    NiftyUtility.headlessWaitThenContent(client: self.httpClient, url: clickUrl, withWaitSecond: currentState.waitSecondInHeadless, siteInfoArrayOverride: self.headlessSiteInfoArrayOverride) { (document, error) in
                             if let err = error {
                                 completionHandler?(nil, err)
                                 return
@@ -1900,7 +1908,7 @@ class StoryFetcher {
                 }else{
                     scrollToJavaScript = nil
                 }
-                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, injectJavaScript: scrollToJavaScript, successAction: { (doc) in
+                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, injectJavaScript: scrollToJavaScript, siteInfoArrayOverride: self.headlessSiteInfoArrayOverride, successAction: { (doc) in
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton, forceErrorMessage: currentState.forceErrorMessage)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
@@ -1994,6 +2002,7 @@ class StoryFetcher {
     }
     
     func FetchFirst(url:URL, cookieString:String?, previousContent:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        self.headlessSiteInfoArrayOverride = nil
         StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: previousContent, completion:{ (dummyState, errorString) in
             if let errorString = errorString, errorString.count > 0 {
                 failedAction?(url, errorString)
@@ -2010,6 +2019,7 @@ class StoryFetcher {
     // successAction で受けた state を ScrapeCheckTarget.evaluate(state:) に渡して期待項目と突合する。
     // 設計メモ: DESIGN_スクレイプ検査.md
     func InspectFetchSinglePage(url:URL, cookieString:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        self.headlessSiteInfoArrayOverride = nil
         StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: nil, completion: { (state, errorString) in
             if let errorString = errorString, errorString.count > 0 {
                 failedAction?(url, errorString)
@@ -2025,6 +2035,8 @@ class StoryFetcher {
     // SiteInfo エディタの「この値で今すぐテスト」用。SiteInfo を自前で渡すため WaitLoadSiteInfoReady も不要。
     // 設計メモ: DESIGN_SiteInfoエディタ.md
     func InspectFetchSinglePageWith(siteInfoArray:[StorySiteInfo], url:URL, cookieString:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        // fetch層(smart-wait 判定/ready セレクタ)もこの配列で解決させる(編集中の allowSmartWait=FALSE 等を反映するため)。
+        self.headlessSiteInfoArrayOverride = siteInfoArray
         let state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: nil)
         self.FetchNext(currentState: state, inspectionTargetURL: url, successAction: successAction, failedAction: failedAction)
     }
