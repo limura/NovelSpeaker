@@ -12,6 +12,7 @@
 		0613A55AAEA3E316EF451788 /* VoicevoxBlockSplitReproTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F2CDCDF8C81C79ACE6686E /* VoicevoxBlockSplitReproTest.swift */; };
 		0BBBDA569CD9452EA6E2C410 /* PhoneSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF2F640224389D5D9030AD1 /* PhoneSessionManager.swift */; };
 		0FF8C389ACCE44ABDE66303F /* UtilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B1FE1F7B8340C5E2BF6AFE /* UtilityView.swift */; };
+		119ACBD4F7305BE226154931 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55E7B603DAF58E2B3172040E /* Foundation.framework */; };
 		13A7072EBE2F60E84F64F559 /* BookshelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230452D16B2D5EFE6879D77A /* BookshelfView.swift */; };
 		2040F1799AC29B452C5CE81F /* open_jtalk_dic_utf_8-1.11 in Resources */ = {isa = PBXBuildFile; fileRef = BBB05391867F910CC2BC3C5D /* open_jtalk_dic_utf_8-1.11 */; platformFilter = ios; };
 		21038DD52F55CE7C0072B3B9 /* MaxWidthButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */; };
@@ -215,6 +216,8 @@
 		49C5FE8A933F2DC1BE480AA9 /* TextPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8A56ADCB6B752A2BDF2BF5 /* TextPageView.swift */; };
 		52C4EB6B45D5A6AB28D271B6 /* WatchSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86DEB6F3AC6354016F30B111 /* WatchSessionCoordinator.swift */; };
 		553136DC99A7C65535AA3DCB /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320ED5957BE18A57C229BABE /* WatchMessage.swift */; };
+		56DE1C4F53CDCE01000533AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFD5476A36FAD6CD441DBF86 /* Assets.xcassets */; };
+		56F2236BDCBC70F86153D390 /* NovelSpeakerWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */; };
 		630CBEF68D26A0F0E98C83A4 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
 		643AF738328D8F71DCC7C396 /* IOSSpeechCoreShims.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5305C5CDBD0A0B66521EDD19 /* IOSSpeechCoreShims.swift */; };
 		67B43BB0FC18A7B3AB5B64B6 /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
@@ -234,6 +237,7 @@
 		B7AD5FDF47A17A848982B113 /* voicevox_onnxruntime.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; };
 		C2A2E6FEDE90E092AEFFFD65 /* VoicevoxPrefetchTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062FAB1C5C7A8DFB5D0EC781 /* VoicevoxPrefetchTest.swift */; };
 		D063461FC62C10956C8B3C2F /* voicevox_onnxruntime.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; platformFilter = ios; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeaderOnCopy, ); }; };
+		D4BAC0A2E6713DF29423991C /* NovelSpeakerWatchWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6E4A0478584A794080C4D53E /* NovelSpeakerWatchWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D70A66842ADA72D4A78A0B8C /* VoicevoxCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF22ADCC56BF76579F8F345 /* VoicevoxCore.swift */; };
 		D9A2CDCE2FE45C9D525EC442 /* 0.vvm in Resources */ = {isa = PBXBuildFile; fileRef = 7D361F044DB34565EE692F3A /* 0.vvm */; platformFilter = ios; };
 		E2820FFFB99FF91B3E84EEEE /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0164B2D4D5F2582B7B2AC42F /* PlayerView.swift */; };
@@ -262,6 +266,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 6493B253C863CD70E0C6D660;
 			remoteInfo = NovelSpeakerWatch;
+		};
+		BB2256A0A784E52AD7D8F8DB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 400C3487E660013CB5F95922;
+			remoteInfo = NovelSpeakerWatchWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -298,6 +309,17 @@
 				D063461FC62C10956C8B3C2F /* voicevox_onnxruntime.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E78B7DA5C04D3B777EBC1909 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D4BAC0A2E6713DF29423991C /* NovelSpeakerWatchWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -560,13 +582,16 @@
 		470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		472A1C58C9BB83466543CE75 /* NiftyUtilityRubyTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NiftyUtilityRubyTest.swift; sourceTree = "<group>"; };
 		4C2B2CD3363998B01E4E4027 /* StoryTextClassifierVoicevoxTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoryTextClassifierVoicevoxTest.swift; sourceTree = "<group>"; };
+		4F7DBAD3B7D83A3215CEB69C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5305C5CDBD0A0B66521EDD19 /* IOSSpeechCoreShims.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IOSSpeechCoreShims.swift; sourceTree = "<group>"; };
 		55E7B603DAF58E2B3172040E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS11.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NovelSpeakerWatchWidget.swift; sourceTree = "<group>"; };
 		5AF22ADCC56BF76579F8F345 /* VoicevoxCore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCore.swift; sourceTree = "<group>"; };
 		5B20E49D521B34FB248A1E17 /* WatchSpeechPlayer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSpeechPlayer.swift; sourceTree = "<group>"; };
 		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5EB3010D5FCE0D2459A82D57 /* NovelSpeakerWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NovelSpeakerWatchApp.swift; sourceTree = "<group>"; };
 		651FDED91DB56F790A75C7D5 /* voicevox_core.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; path = voicevox_core.xcframework; sourceTree = "<group>"; };
+		6E4A0478584A794080C4D53E /* NovelSpeakerWatchWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerWatchWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerURLDownloadExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CD5762C06C829E7F1F33CAE /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7D361F044DB34565EE692F3A /* 0.vvm */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = 0.vvm; path = vvm/0.vvm; sourceTree = "<group>"; };
@@ -586,6 +611,7 @@
 		BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		BBFF504221254797802A0F4C /* NovelSpeakerWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeakerWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.release.xcconfig"; sourceTree = "<group>"; };
+		BFD5476A36FAD6CD441DBF86 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2F380DAEC93EA2F37A0EF6D /* VoicevoxCoreTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCoreTest.swift; sourceTree = "<group>"; };
 		C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; sourceTree = "<group>"; };
 		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
@@ -638,6 +664,14 @@
 				2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */,
 				3C426D51706ADFD3D604532A /* voicevox_core.xcframework in Frameworks */,
 				B7AD5FDF47A17A848982B113 /* voicevox_onnxruntime.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		41B2A4AC28E06624AD90D6FC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				119ACBD4F7305BE226154931 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -867,6 +901,7 @@
 				A889DD6179ED1DDD1D382860 /* Pods */,
 				F77309E24963F7BDD39778CF /* NovelSpeakerWatch */,
 				30CD47F867E015250A5B61F9 /* WatchShared */,
+				EAEDD3ECF086E17B254743A3 /* NovelSpeakerWatchWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -877,6 +912,7 @@
 				21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */,
 				21BBC10E28DC994900DB4C3B /* ShareExtension.appex */,
 				BBFF504221254797802A0F4C /* NovelSpeakerWatch.app */,
+				6E4A0478584A794080C4D53E /* NovelSpeakerWatchWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1077,6 +1113,17 @@
 			name = watchOS;
 			sourceTree = "<group>";
 		};
+		EAEDD3ECF086E17B254743A3 /* NovelSpeakerWatchWidget */ = {
+			isa = PBXGroup;
+			children = (
+				58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */,
+				BFD5476A36FAD6CD441DBF86 /* Assets.xcassets */,
+				4F7DBAD3B7D83A3215CEB69C /* Info.plist */,
+			);
+			name = NovelSpeakerWatchWidget;
+			path = NovelSpeakerWatchWidget;
+			sourceTree = "<group>";
+		};
 		EFAF79F6C8B393A56104EC24 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
@@ -1167,6 +1214,23 @@
 			productReference = 21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		400C3487E660013CB5F95922 /* NovelSpeakerWatchWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E39CBE144CE3A79F82A7F8CC /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchWidgetExtension" */;
+			buildPhases = (
+				853AC0D90BC2FF99C5866881 /* Sources */,
+				41B2A4AC28E06624AD90D6FC /* Frameworks */,
+				20FCB1681EB6019A37EF51CD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NovelSpeakerWatchWidgetExtension;
+			productName = NovelSpeakerWatchWidgetExtension;
+			productReference = 6E4A0478584A794080C4D53E /* NovelSpeakerWatchWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		6493B253C863CD70E0C6D660 /* NovelSpeakerWatch */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 31921259D373255C1658E8CA /* Build configuration list for PBXNativeTarget "NovelSpeakerWatch" */;
@@ -1174,10 +1238,12 @@
 				1AD8899B125F18CFA89D1BD8 /* Sources */,
 				B579F68C29BF8D97A4977201 /* Frameworks */,
 				D52E0FE1F05CAE5386AF4CEC /* Resources */,
+				E78B7DA5C04D3B777EBC1909 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				BAAAD573D04EB8F0AFB7BB9E /* PBXTargetDependency */,
 			);
 			name = NovelSpeakerWatch;
 			productName = NovelSpeakerWatch;
@@ -1243,11 +1309,20 @@
 				21F054E91917E0F200CC6BA9 /* NovelSpeakerTests */,
 				21BBC10D28DC994900DB4C3B /* ShareExtension */,
 				6493B253C863CD70E0C6D660 /* NovelSpeakerWatch */,
+				400C3487E660013CB5F95922 /* NovelSpeakerWatchWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		20FCB1681EB6019A37EF51CD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56DE1C4F53CDCE01000533AF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		21BBC10C28DC994900DB4C3B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1584,6 +1659,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		853AC0D90BC2FF99C5866881 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56F2236BDCBC70F86153D390 /* NovelSpeakerWatchWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1596,6 +1679,12 @@
 			isa = PBXTargetDependency;
 			target = 21F054C81917E0F200CC6BA9 /* NovelSpeaker */;
 			targetProxy = 21F054EF1917E0F200CC6BA9 /* PBXContainerItemProxy */;
+		};
+		BAAAD573D04EB8F0AFB7BB9E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NovelSpeakerWatchWidgetExtension;
+			target = 400C3487E660013CB5F95922 /* NovelSpeakerWatchWidgetExtension */;
+			targetProxy = BB2256A0A784E52AD7D8F8DB /* PBXContainerItemProxy */;
 		};
 		CF8A14472BFE7CFFC8883BA5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2110,6 +2199,39 @@
 			};
 			name = Release;
 		};
+		A2CE57BBF4848B07E8DB07F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2.12.4;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_PREVIEWS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NovelSpeakerWatchWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ことせかい";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.12.1;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.watchkitapp.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
 		CFD0ED5643B745333F597D3E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2135,6 +2257,38 @@
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
+		};
+		E7F1EE2D21FC1DA58208BC11 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2.12.4;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NovelSpeakerWatchWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ことせかい";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.12.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.watchkitapp.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -2180,6 +2334,15 @@
 			buildConfigurations = (
 				0182D55A9F52EE9CE44D9AF5 /* Release */,
 				CFD0ED5643B745333F597D3E /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E39CBE144CE3A79F82A7F8CC /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7F1EE2D21FC1DA58208BC11 /* Release */,
+				A2CE57BBF4848B07E8DB07F8 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
