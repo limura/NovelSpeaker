@@ -129,7 +129,7 @@ struct LauncherComplicationView: View {
         } else if let reading = reading {
             BrandGlyph().padding(2).widgetLabel { Text(reading.title) }
         } else {
-            BrandGlyph().padding(2).widgetLabel { Text("ことせかい") }
+            BrandGlyph().padding(2).widgetLabel { Text(NSLocalizedString("Watch_Widget_AppName", comment: "ことせかい")) }
         }
     }
 
@@ -159,8 +159,8 @@ struct LauncherComplicationView: View {
             HStack(spacing: 6) {
                 BrandGlyph().frame(width: 22, height: 22)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("ことせかい").font(.headline)
-                    Text("タップして開く").font(.caption).foregroundStyle(.secondary)
+                    Text(NSLocalizedString("Watch_Widget_AppName", comment: "ことせかい")).font(.headline)
+                    Text(NSLocalizedString("Watch_Widget_TapToOpen", comment: "タップして開く")).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
             }
@@ -175,8 +175,8 @@ struct LauncherComplication: Widget {
                             provider: LauncherProvider()) { entry in
             LauncherComplicationView(entry: entry)
         }
-        .configurationDisplayName("ことせかい")
-        .description("読んでいる小説の進捗を表示し、タップで ことせかい を開きます。")
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_AppName", comment: "ことせかい"))
+        .description(NSLocalizedString("Watch_Widget_Description", comment: "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular])
     }
 }

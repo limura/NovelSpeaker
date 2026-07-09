@@ -2843,6 +2843,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 }
                 if isChanged {
                     self.reloadAllData(doScroll: true)
+                    // Watch の本棚もこの並び順に追従しているので、変更を即座に送っておく
+                    WatchSessionCoordinator.shared.pushContextSoon()
                 }
             }
         }

@@ -207,7 +207,10 @@ class WatchSessionCoordinator: NSObject {
         return RealmUtil.RealmBlock { realm -> [WatchNovelSummary] in
             guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else { return [] }
             let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
-            let sorted = novels.sorted(byKeyPath: "lastReadDate", ascending: false)
+            let sorted = WatchSessionCoordinator.sortNovelsForWatch(
+                novels: novels,
+                sortType: globalState?.bookShelfSortType ?? .LastReadDate,
+                globalState: globalState)
             var result: [WatchNovelSummary] = []
             for novel in sorted {
                 if result.count >= WatchSessionCoordinator.novelListLimit { break }
@@ -223,6 +226,51 @@ class WatchSessionCoordinator: NSObject {
         }
     }
 
+    /// Watch の本棚に載せる並び順。iPhone の本棚の並び順設定(bookShelfSortType)に追従する。
+    /// フォルダ分け系の並び順は Watch では平坦なリストにしか出せないので、
+    /// 「iPhone のフォルダ内と同じ整列キー」で平坦に並べた近似にする
+    /// (整列キーの昇順/降順は BookShelfTreeViewController.getNovelArray と揃えること)
+    private static func sortNovelsForWatch(novels: Results<RealmNovel>, sortType: NarouContentSortType, globalState: RealmGlobalState?) -> [RealmNovel] {
+        switch sortType {
+        case .Ncode:
+            return Array(novels.sorted(byKeyPath: "novelID", ascending: true))
+        case .WebSite:
+            // iPhone ではサイト別フォルダ分け。novelID は URL なので昇順で並べると同一サイトが固まる
+            return Array(novels.sorted(byKeyPath: "novelID", ascending: true))
+        case .NovelUpdatedAt, .NovelUpdatedAtWithFolder:
+            return Array(novels.sorted(byKeyPath: "lastDownloadDate", ascending: false))
+        case .Writer:
+            return Array(novels.sorted(byKeyPath: "writer", ascending: false))
+        case .LikeLevel:
+            var likeLevelMap: [String: Int] = [:]
+            if let globalState = globalState {
+                let likeCount = globalState.novelLikeOrder.count
+                for (index, novelID) in globalState.novelLikeOrder.enumerated() {
+                    likeLevelMap[novelID] = likeCount - index
+                }
+            }
+            return novels.sorted { likeLevelMap[$0.novelID] ?? 0 > likeLevelMap[$1.novelID] ?? 0 }
+        case .CreatedDate:
+            return Array(novels.sorted(byKeyPath: "createdDate", ascending: false))
+        case .PageCount:
+            return novels.sorted { a, b in
+                let aCount = RealmStoryBulk.StoryIDToChapterNumber(storyID: a.m_lastChapterStoryID)
+                let bCount = RealmStoryBulk.StoryIDToChapterNumber(storyID: b.m_lastChapterStoryID)
+                return aCount < bCount
+            }
+        case .UnreadChapterCount:
+            return novels.map { ($0, BookShelfTreeViewController.unreadChapterCount(novel: $0)) }
+                .sorted { $0.1 > $1.1 }
+                .map { $0.0 }
+        case .Title, .SelfCreatedFolder, .KeywordTag:
+            return Array(novels.sorted(byKeyPath: "title", ascending: false))
+        case .LastReadDate, .LastReadDateWithFolder, .AppleWatchTransferState:
+            return Array(novels.sorted(byKeyPath: "lastReadDate", ascending: false))
+        @unknown default:
+            return Array(novels.sorted(byKeyPath: "lastReadDate", ascending: false))
+        }
+    }
+
     // MARK: - コマンド処理
 
     /// 実行前に StorySpeaker へ小説がセットされている必要があるコマンド
@@ -233,7 +281,7 @@ class WatchSessionCoordinator: NSObject {
     private func handleCommand(message: [String: Any], replyHandler: (([String: Any]) -> Void)?) {
         guard let commandString = message[WatchMessage.commandKey] as? String,
               let command = WatchMessage.Command(rawValue: commandString) else {
-            replyHandler?([WatchMessage.Reply.ok: false, WatchMessage.Reply.errorMessage: "unknown command"])
+            replyHandler?([WatchMessage.Reply.ok: false, WatchMessage.Reply.errorMessage: NSLocalizedString("WatchSessionCoordinator_ErrorUnknownCommand", comment: "対応していない操作です。iPhone側の ことせかい が古い可能性があります。")])
             return
         }
         // syncSpeechSettings は返信の形が特殊(settingsUpToDate)なので独立して処理する。
@@ -243,7 +291,7 @@ class WatchSessionCoordinator: NSObject {
             let watchFingerprint = message[WatchMessage.Arg.fingerprint] as? String ?? ""
             DispatchQueue.global(qos: .userInitiated).async {
                 guard let encoded = self.encodeSpeechSettings() else {
-                    replyHandler?([WatchMessage.Reply.ok: false, WatchMessage.Reply.errorMessage: "発話設定の生成に失敗しました"])
+                    replyHandler?([WatchMessage.Reply.ok: false, WatchMessage.Reply.errorMessage: NSLocalizedString("WatchSessionCoordinator_ErrorSpeechSettingsEncodeFailed", comment: "発話設定の生成に失敗しました")])
                     return
                 }
                 let upToDate = (encoded.fingerprint == watchFingerprint)
@@ -292,7 +340,7 @@ class WatchSessionCoordinator: NSObject {
                     return RealmGlobalState.GetLastReadStory(realm: realm)
                 }
                 guard let story = story else {
-                    finish((false, "小説が選ばれていません"))
+                    finish((false, NSLocalizedString("WatchSessionCoordinator_ErrorNoNovelSelected", comment: "小説が選ばれていません")))
                     return
                 }
                 StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true) { _ in
@@ -331,7 +379,7 @@ class WatchSessionCoordinator: NSObject {
             moveChapter(isNext: true, completion: completion)
         case .openNovel:
             guard let novelID = message[WatchMessage.Arg.novelID] as? String else {
-                completion((false, "novelID がありません"))
+                completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorNovelIDMissing", comment: "novelID がありません")))
                 return
             }
             openNovel(novelID: novelID, completion: completion)
@@ -344,7 +392,7 @@ class WatchSessionCoordinator: NSObject {
             completion((true, nil))
         case .checkUpdates:
             guard let novelID = message[WatchMessage.Arg.novelID] as? String else {
-                completion((false, "novelID がありません"))
+                completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorNovelIDMissing", comment: "novelID がありません")))
                 return
             }
             NovelDownloadQueue.shared.addQueue(novelID: novelID)
@@ -352,13 +400,13 @@ class WatchSessionCoordinator: NSObject {
         case .setLike:
             guard let novelID = message[WatchMessage.Arg.novelID] as? String,
                   let enabled = message[WatchMessage.Arg.enabled] as? Bool else {
-                completion((false, "引数が不正です"))
+                completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorInvalidArguments", comment: "引数が不正です")))
                 return
             }
             completion(setLike(novelID: novelID, enabled: enabled))
         case .requestTransfer:
             guard let novelID = message[WatchMessage.Arg.novelID] as? String else {
-                completion((false, "novelID がありません"))
+                completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorNovelIDMissing", comment: "novelID がありません")))
                 return
             }
             // sendMessage は届いているのに isWatchAppInstalled が false になり
@@ -366,7 +414,7 @@ class WatchSessionCoordinator: NSObject {
             // (Watch アプリを Xcode から直接インストールすると companion の関連付けが
             // 壊れてこうなることがある)。転送を積まずにエラーを返してスピナーを止めさせる。
             guard WCSession.default.isWatchAppInstalled else {
-                completion((false, "Watchアプリが未インストール扱いになっています。Watch側の ことせかい を一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。"))
+                completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorWatchAppNotInstalled", comment: "Watchアプリが未インストール扱いになっています。Watch側の ことせかい を一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。")))
                 return
             }
             transferNovel(novelID: novelID)
@@ -408,7 +456,7 @@ class WatchSessionCoordinator: NSObject {
             StorySpeaker.shared.setReadLocationWith(realm: realm, location: newLocation)
             return true
         }
-        return (ok, ok ? nil : "小説が選ばれていません")
+        return (ok, ok ? nil : NSLocalizedString("WatchSessionCoordinator_ErrorNoNovelSelected", comment: "小説が選ばれていません"))
     }
 
     /// 発話の開始/停止直後は isSpeaking がまだ切り替わっていないことがあるので、
@@ -427,7 +475,9 @@ class WatchSessionCoordinator: NSObject {
         let loadCompletion: (Bool) -> Void = { result in
             DispatchQueue.main.async {
                 guard result else {
-                    completion((false, isNext ? "次の章はありません" : "前の章はありません"))
+                    completion((false, isNext
+                        ? NSLocalizedString("WatchSessionCoordinator_ErrorNoNextChapter", comment: "次の章はありません")
+                        : NSLocalizedString("WatchSessionCoordinator_ErrorNoPreviousChapter", comment: "前の章はありません")))
                     return
                 }
                 if wasPlaying {
@@ -457,7 +507,7 @@ class WatchSessionCoordinator: NSObject {
             return RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
         }
         guard let story = story else {
-            completion((false, "小説が見つかりません"))
+            completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorNovelNotFound", comment: "小説が見つかりません")))
             return
         }
         // SetStory は非同期で重い(章のブロック分割等)ので、完了してから返信を作らせる。

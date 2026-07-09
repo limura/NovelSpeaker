@@ -23,7 +23,7 @@ struct UtilityView: View {
             NavigationLink {
                 CacheManagementView()
             } label: {
-                Label("Watch内の本文", systemImage: "internaldrive")
+                Label(NSLocalizedString("Watch_Utility_StoredTexts", comment: "Watch内の本文"), systemImage: "internaldrive")
             }
             if let feedbackMessage = feedbackMessage {
                 Text(feedbackMessage)
@@ -32,18 +32,18 @@ struct UtilityView: View {
             }
             Button {
                 session.send(.checkUpdatesAll) { ok in
-                    if ok { feedbackMessage = "全小説の更新確認を開始しました" }
+                    if ok { feedbackMessage = NSLocalizedString("Watch_Utility_CheckUpdatesAllStarted", comment: "全小説の更新確認を開始しました") }
                 }
             } label: {
-                Label("全小説の更新確認", systemImage: "arrow.triangle.2.circlepath")
+                Label(NSLocalizedString("Watch_Utility_CheckUpdatesAll", comment: "全小説の更新確認"), systemImage: "arrow.triangle.2.circlepath")
             }
             if let state = session.playState, !state.novelID.isEmpty {
                 Button {
                     session.send(.checkUpdates, args: [WatchMessage.Arg.novelID: state.novelID]) { ok in
-                        if ok { feedbackMessage = "「\(state.title)」の更新確認を開始しました" }
+                        if ok { feedbackMessage = String(format: NSLocalizedString("Watch_Utility_CheckUpdatesStarted", comment: "「%@」の更新確認を開始しました"), state.title) }
                     }
                 } label: {
-                    Label("この小説を更新確認", systemImage: "arrow.down.circle")
+                    Label(NSLocalizedString("Watch_Utility_CheckUpdatesThis", comment: "この小説を更新確認"), systemImage: "arrow.down.circle")
                 }
                 Button {
                     let isLiked = session.novels.first(where: { $0.novelID == state.novelID })?.isLiked ?? false
@@ -51,20 +51,26 @@ struct UtilityView: View {
                         WatchMessage.Arg.novelID: state.novelID,
                         WatchMessage.Arg.enabled: !isLiked,
                     ]) { ok in
-                        if ok { feedbackMessage = isLiked ? "お気に入りを解除しました" : "お気に入りにしました" }
+                        if ok {
+                            feedbackMessage = isLiked
+                                ? NSLocalizedString("Watch_Utility_LikeOffDone", comment: "お気に入りを解除しました")
+                                : NSLocalizedString("Watch_Utility_LikeOnDone", comment: "お気に入りにしました")
+                        }
                     }
                 } label: {
-                    Label(currentNovelIsLiked ? "お気に入りを解除" : "お気に入りにする",
+                    Label(currentNovelIsLiked
+                            ? NSLocalizedString("Watch_Utility_LikeOff", comment: "お気に入りを解除")
+                            : NSLocalizedString("Watch_Utility_LikeOn", comment: "お気に入りにする"),
                           systemImage: currentNovelIsLiked ? "heart.slash" : "heart")
                 }
             }
             Section {
-                Text("Watchへ転送する小説の選択は、本棚で小説を左にスワイプするか、iPhoneの ことせかい の設定から行えます。")
+                Text(NSLocalizedString("Watch_Utility_TransferHint", comment: "Watchへ転送する小説の選択は、本棚で小説を左にスワイプするか、iPhoneの ことせかい の設定から行えます。"))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
         }
-        .navigationTitle("便利機能")
+        .navigationTitle(NSLocalizedString("Watch_Utility_Title", comment: "便利機能"))
     }
 
     private var currentNovelIsLiked: Bool {
@@ -86,7 +92,7 @@ struct CacheManagementView: View {
     var body: some View {
         List {
             if session.storedNovelIDs.isEmpty {
-                Text("転送済みの小説はありません。本棚から転送できます。")
+                Text(NSLocalizedString("Watch_Cache_Empty", comment: "転送済みの小説はありません。本棚から転送できます。"))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -98,7 +104,7 @@ struct CacheManagementView: View {
                     selectedNovelIDs = []
                     isSelecting = false
                 } label: {
-                    Label("選択した\(selectedNovelIDs.count)件を削除", systemImage: "trash")
+                    Label(String(format: NSLocalizedString("Watch_Cache_DeleteSelected", comment: "選択した%d件を削除"), selectedNovelIDs.count), systemImage: "trash")
                 }
                 .disabled(selectedNovelIDs.isEmpty)
             }
@@ -132,11 +138,13 @@ struct CacheManagementView: View {
                 }
             }
         }
-        .navigationTitle("Watch内の本文")
+        .navigationTitle(NSLocalizedString("Watch_Utility_StoredTexts", comment: "Watch内の本文"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 if !session.storedNovelIDs.isEmpty {
-                    Button(isSelecting ? "完了" : "選択") {
+                    Button(isSelecting
+                            ? NSLocalizedString("Watch_Cache_Done", comment: "完了")
+                            : NSLocalizedString("Watch_Cache_Select", comment: "選択")) {
                         isSelecting.toggle()
                         if !isSelecting {
                             selectedNovelIDs = []
@@ -161,13 +169,13 @@ struct CacheManagementView: View {
             titleVisibility: .visible,
             presenting: dialogNovelID
         ) { novelID in
-            Button("本文を転送し直す") {
+            Button(NSLocalizedString("Watch_Cache_Retransfer", comment: "本文を転送し直す")) {
                 session.requestTransfer(novelID: novelID)
             }
-            Button("Watchから削除", role: .destructive) {
+            Button(NSLocalizedString("Watch_Cache_RemoveFromWatch", comment: "Watchから削除"), role: .destructive) {
                 session.removeStoredNovel(novelID: novelID)
             }
-            Button("キャンセル", role: .cancel) {}
+            Button(NSLocalizedString("Watch_Cancel", comment: "キャンセル"), role: .cancel) {}
         }
     }
 
@@ -189,14 +197,14 @@ struct CacheManagementView: View {
     }
 
     private func detailText(novelID: String) -> String {
-        let chapters = "\(session.storedChapterCounts[novelID] ?? 0)章"
+        let chapters = String(format: NSLocalizedString("Watch_Cache_ChapterCount", comment: "%d章"), session.storedChapterCounts[novelID] ?? 0)
         guard let lastPlayed = session.lastPlayedDates[novelID] else {
-            return "\(chapters) · Watchで未再生"
+            return String(format: NSLocalizedString("Watch_Cache_Detail_NeverPlayed", comment: "%@ · Watchで未再生"), chapters)
         }
         let days = Int(Date().timeIntervalSince(lastPlayed) / (24 * 60 * 60))
         if days <= 0 {
-            return "\(chapters) · 今日再生"
+            return String(format: NSLocalizedString("Watch_Cache_Detail_PlayedToday", comment: "%@ · 今日再生"), chapters)
         }
-        return "\(chapters) · \(days)日前に再生"
+        return String(format: NSLocalizedString("Watch_Cache_Detail_PlayedDaysAgo", comment: "%1$@ · %2$d日前に再生"), chapters, days)
     }
 }

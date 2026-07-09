@@ -32,7 +32,7 @@ struct WatchRootView: View {
         .tabViewStyle(.page)
         // エラーはページ遷移に巻き込まれないようルートで表示する
         // (ページ内に置くと遷移中に出ようとして即座に消えることがある)
-        .alert("操作できませんでした", isPresented: isErrorPresented) {
+        .alert(NSLocalizedString("Watch_ErrorAlert_Title", comment: "操作できませんでした"), isPresented: isErrorPresented) {
             Button("OK") {
                 session.lastErrorMessage = nil
             }

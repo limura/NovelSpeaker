@@ -56,7 +56,7 @@ struct TextSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
-                Text("メロスは激怒した。")
+                Text(NSLocalizedString("Watch_TextSettings_SampleText", comment: "メロスは激怒した。"))
                     .font(.system(size: fontSize))
                     .foregroundStyle(TextDisplayDefaults.textColor(named: textColorName))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -65,21 +65,21 @@ struct TextSettingsView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 HStack {
-                    Text("文字サイズ").font(.footnote)
+                    Text(NSLocalizedString("Watch_TextSettings_FontSize", comment: "文字サイズ")).font(.footnote)
                     Spacer()
                     Text("\(Int(fontSize))").font(.footnote).foregroundStyle(.secondary)
                 }
                 Slider(value: $fontSize, in: 10...28, step: 1)
 
-                Text("文字色").font(.footnote)
+                Text(NSLocalizedString("Watch_TextSettings_TextColor", comment: "文字色")).font(.footnote)
                 colorRow(palette: TextDisplayDefaults.textColors, selectedName: $textColorName)
 
-                Text("背景色").font(.footnote)
+                Text(NSLocalizedString("Watch_TextSettings_BackgroundColor", comment: "背景色")).font(.footnote)
                 colorRow(palette: TextDisplayDefaults.backgroundColors, selectedName: $backgroundColorName)
             }
             .padding(.horizontal, 2)
         }
-        .navigationTitle("本文の表示")
+        .navigationTitle(NSLocalizedString("Watch_TextSettings_Title", comment: "本文の表示"))
     }
 
     private func colorRow(palette: [(name: String, color: Color)], selectedName: Binding<String>) -> some View {

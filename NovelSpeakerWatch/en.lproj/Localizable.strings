@@ -1,0 +1,82 @@
+/* Watch app localization (English). App name is "NovelSpeaker" in English. */
+
+/* Common */
+"Watch_Cancel" = "Cancel";
+"Watch_NoNovelSelected" = "No novel is selected";
+"Watch_ErrorAlert_Title" = "Operation Failed";
+
+/* Bookshelf */
+"Watch_Bookshelf_Title" = "Bookshelf";
+"Watch_Bookshelf_EmptyMessage" = "Launch NovelSpeaker on your iPhone once, and your bookshelf will appear here.";
+"Watch_Bookshelf_GoToPlayer" = "Go to Player";
+"Watch_Bookshelf_TransferUpdates" = "Transfer Updates (Ch. %1$d→%2$d)";
+"Watch_Bookshelf_TransferBody" = "Transfer Text to Watch";
+"Watch_Bookshelf_UpdatedOnPhone" = "This novel has been updated on the iPhone.";
+"Watch_Bookshelf_NotTransferred" = "The text of this novel is not on the Watch yet.";
+"Watch_Bookshelf_ChapterProgress" = "Ch. %1$d/%2$d";
+
+/* Communication with iPhone */
+"Watch_Session_CommandFailed" = "The operation failed";
+"Watch_Session_NotReachable" = "Can't communicate with the iPhone. After the iPhone restarts, it needs to be unlocked once.";
+"Watch_Session_SaveBodyFailed" = "Failed to save the novel text: %@";
+
+/* Player */
+"Watch_Player_SourceDialog_Title" = "Where should it speak?";
+"Watch_Player_SourceDialog_Message" = "Standalone playback reads the transferred text with the Watch's speaker or earphones (works without the iPhone).";
+"Watch_Player_SourcePhone" = "Listen on iPhone";
+"Watch_Player_SourceWatch" = "Listen on Watch (Standalone)";
+"Watch_Player_NoNovelSelected_ChooseFromBookshelf" = "No novel is selected. Choose a novel from the bookshelf.";
+"Watch_Player_BodyNotTransferred" = "The text of this novel has not been transferred to the Watch. Tap the novel in the bookshelf to transfer it, then try again.";
+"Watch_Player_ChapterProgress" = "Ch. %1$d/%2$d · %3$d%%";
+"Watch_Player_ChapterOnly" = "Chapter %d";
+"Watch_Player_Badge_PlayingOnWatch" = "Playing on Watch";
+"Watch_Player_Badge_WatchStandaloneMode" = "Watch Standalone Mode";
+"Watch_Player_Badge_Connecting" = "Connecting…";
+"Watch_Player_Badge_PlayingOnPhone" = "Playing on iPhone";
+"Watch_Player_Badge_PhoneConnected" = "iPhone Connected";
+"Watch_Player_Badge_PhoneNotConnected" = "iPhone Not Connected";
+
+/* Text page */
+"Watch_TextPage_Title" = "Text";
+"Watch_TextPage_AutoScrollPaused" = "Auto-scroll paused";
+"Watch_TextPage_NovelNotTransferred" = "The text of \"%@\" has not been transferred to the Watch yet. You can transfer it from the bookshelf.";
+"Watch_TextPage_ChapterNotTransferred" = "This chapter (Ch. %d) has not been transferred to the Watch yet. You can re-transfer it from the bookshelf.";
+"Watch_TextPage_PrevChapter" = "◀ Previous";
+"Watch_TextPage_NextChapter" = "Next ▶";
+"Watch_TextPage_CannotSeekWhilePhonePlaying" = "You can't set the position while the iPhone is speaking. Pause it first, then try again.";
+
+/* Utilities */
+"Watch_Utility_Title" = "Utilities";
+"Watch_Utility_StoredTexts" = "Texts on Watch";
+"Watch_Utility_CheckUpdatesAll" = "Check All Novels for Updates";
+"Watch_Utility_CheckUpdatesAllStarted" = "Started checking all novels for updates";
+"Watch_Utility_CheckUpdatesThis" = "Check This Novel for Updates";
+"Watch_Utility_CheckUpdatesStarted" = "Started checking \"%@\" for updates";
+"Watch_Utility_LikeOn" = "Add to Favorites";
+"Watch_Utility_LikeOff" = "Remove from Favorites";
+"Watch_Utility_LikeOnDone" = "Added to Favorites";
+"Watch_Utility_LikeOffDone" = "Removed from Favorites";
+"Watch_Utility_TransferHint" = "To choose novels to transfer to the Watch, swipe a novel to the left in the bookshelf, or use the settings of NovelSpeaker on the iPhone.";
+
+/* Texts on Watch (cache management) */
+"Watch_Cache_Empty" = "No transferred novels. You can transfer them from the bookshelf.";
+"Watch_Cache_DeleteSelected" = "Delete %d Selected";
+"Watch_Cache_Select" = "Select";
+"Watch_Cache_Done" = "Done";
+"Watch_Cache_Retransfer" = "Transfer Text Again";
+"Watch_Cache_RemoveFromWatch" = "Remove from Watch";
+"Watch_Cache_ChapterCount" = "%d chapters";
+"Watch_Cache_Detail_NeverPlayed" = "%@ · Not played on Watch";
+"Watch_Cache_Detail_PlayedToday" = "%@ · Played today";
+"Watch_Cache_Detail_PlayedDaysAgo" = "%1$@ · Played %2$d days ago";
+
+/* Text display settings */
+"Watch_TextSettings_Title" = "Text Display";
+"Watch_TextSettings_SampleText" = "Call me Ishmael.";
+"Watch_TextSettings_FontSize" = "Text Size";
+"Watch_TextSettings_TextColor" = "Text Color";
+"Watch_TextSettings_BackgroundColor" = "Background Color";
+
+/* Watch standalone playback */
+"Watch_SpeechPlayer_AudioSetupFailed" = "Failed to configure audio: %@";
+"Watch_SpeechPlayer_AudioRouteFailed" = "Couldn't connect to an audio output. %@";

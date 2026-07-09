@@ -18,7 +18,7 @@ struct BookshelfView: View {
     var body: some View {
         List {
             if session.novels.isEmpty {
-                Text("iPhoneの ことせかい を一度起動すると、本棚がここに表示されます。")
+                Text(NSLocalizedString("Watch_Bookshelf_EmptyMessage", comment: "iPhoneの ことせかい を一度起動すると、本棚がここに表示されます。"))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -50,7 +50,7 @@ struct BookshelfView: View {
                 }
             }
         }
-        .navigationTitle("本棚")
+        .navigationTitle(NSLocalizedString("Watch_Bookshelf_Title", comment: "本棚"))
         .onAppear {
             // 本棚が空(再インストール直後など)なら iPhone に一覧を要求する。
             // iPhone 側は requestStatus を受けると重複抑止を飛ばして必ず送り返す
@@ -72,10 +72,10 @@ struct BookshelfView: View {
             Button(transferButtonLabel(novel: novel)) {
                 session.requestTransfer(novelID: novel.novelID)
             }
-            Button("再生画面へ移動") {
+            Button(NSLocalizedString("Watch_Bookshelf_GoToPlayer", comment: "再生画面へ移動")) {
                 openNovel(novel)
             }
-            Button("キャンセル", role: .cancel) {}
+            Button(NSLocalizedString("Watch_Cancel", comment: "キャンセル"), role: .cancel) {}
         } message: { novel in
             Text(dialogMessage(novel: novel))
         }
@@ -134,21 +134,21 @@ struct BookshelfView: View {
 
     private func transferButtonLabel(novel: WatchNovelSummary) -> String {
         if let storedCount = session.storedChapterCounts[novel.novelID] {
-            return "更新分を転送 (\(storedCount)→\(novel.chapterCount)章)"
+            return String(format: NSLocalizedString("Watch_Bookshelf_TransferUpdates", comment: "更新分を転送 (%1$d→%2$d章)"), storedCount, novel.chapterCount)
         }
-        return "本文をWatchへ転送"
+        return NSLocalizedString("Watch_Bookshelf_TransferBody", comment: "本文をWatchへ転送")
     }
 
     private func dialogMessage(novel: WatchNovelSummary) -> String {
         if session.storedChapterCounts[novel.novelID] != nil {
-            return "この小説はiPhone側で更新されています。"
+            return NSLocalizedString("Watch_Bookshelf_UpdatedOnPhone", comment: "この小説はiPhone側で更新されています。")
         }
-        return "この小説の本文はまだWatchにありません。"
+        return NSLocalizedString("Watch_Bookshelf_NotTransferred", comment: "この小説の本文はまだWatchにありません。")
     }
 
     private func chapterText(novel: WatchNovelSummary) -> String {
         if novel.chapterCount > 0 {
-            return "\(novel.readingChapterNumber)/\(novel.chapterCount)章"
+            return String(format: NSLocalizedString("Watch_Bookshelf_ChapterProgress", comment: "%1$d/%2$d章"), novel.readingChapterNumber, novel.chapterCount)
         }
         return ""
     }

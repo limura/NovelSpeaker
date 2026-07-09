@@ -120,20 +120,20 @@ struct PlayerView: View {
         .sheet(isPresented: $isUtilityPresented) {
             UtilityView()
         }
-        .confirmationDialog("どこで読み上げますか？", isPresented: $isSourceDialogPresented) {
+        .confirmationDialog(NSLocalizedString("Watch_Player_SourceDialog_Title", comment: "どこで読み上げますか？"), isPresented: $isSourceDialogPresented) {
             Button {
                 selectPhoneSource()
             } label: {
-                Label("iPhoneで聴く", systemImage: isWatchSource ? "iphone" : "checkmark")
+                Label(NSLocalizedString("Watch_Player_SourcePhone", comment: "iPhoneで聴く"), systemImage: isWatchSource ? "iphone" : "checkmark")
             }
             Button {
                 selectWatchSource()
             } label: {
-                Label("Watchで聴く(単体再生)", systemImage: isWatchSource ? "checkmark" : "applewatch")
+                Label(NSLocalizedString("Watch_Player_SourceWatch", comment: "Watchで聴く(単体再生)"), systemImage: isWatchSource ? "checkmark" : "applewatch")
             }
-            Button("キャンセル", role: .cancel) {}
+            Button(NSLocalizedString("Watch_Cancel", comment: "キャンセル"), role: .cancel) {}
         } message: {
-            Text("Watch単体再生は、転送済みの本文をWatchのスピーカーやイヤホンで読み上げます(iPhoneが無くても動きます)")
+            Text(NSLocalizedString("Watch_Player_SourceDialog_Message", comment: "Watch単体再生は、転送済みの本文をWatchのスピーカーやイヤホンで読み上げます(iPhoneが無くても動きます)"))
         }
         // エラーのアラート表示はルート(WatchRootView)で行う
         .onAppear {
@@ -149,11 +149,11 @@ struct PlayerView: View {
         if isWatchSource { return }
         let targetNovelID = session.playState?.novelID ?? ""
         guard !targetNovelID.isEmpty else {
-            session.lastErrorMessage = "小説が選ばれていません。本棚から小説を選んでください。"
+            session.lastErrorMessage = NSLocalizedString("Watch_Player_NoNovelSelected_ChooseFromBookshelf", comment: "小説が選ばれていません。本棚から小説を選んでください。")
             return
         }
         guard player.open(novelID: targetNovelID, fallbackTitle: session.playState?.title ?? "") else {
-            session.lastErrorMessage = "この小説の本文がWatchに転送されていません。本棚の小説をタップして転送してから、もう一度お試しください。"
+            session.lastErrorMessage = NSLocalizedString("Watch_Player_BodyNotTransferred", comment: "この小説の本文がWatchに転送されていません。本棚の小説をタップして転送してから、もう一度お試しください。")
             return
         }
         // iPhone 側で再生中なら止めてから引き継ぐ(二重読み上げ防止)
@@ -180,10 +180,11 @@ struct PlayerView: View {
     }
 
     private var titleLabel: String {
+        let noNovel = NSLocalizedString("Watch_NoNovelSelected", comment: "小説が選ばれていません")
         if isWatchSource {
-            return player.title.isEmpty ? "小説が選ばれていません" : player.title
+            return player.title.isEmpty ? noNovel : player.title
         }
-        return session.playState?.title.isEmpty == false ? session.playState!.title : "小説が選ばれていません"
+        return session.playState?.title.isEmpty == false ? session.playState!.title : noNovel
     }
 
     private func chapterButton(systemName: String, action: @escaping () -> Void) -> some View {
@@ -198,38 +199,39 @@ struct PlayerView: View {
     }
 
     private var chapterLabel: String {
+        let progressFormat = NSLocalizedString("Watch_Player_ChapterProgress", comment: "%1$d/%2$d章 · %3$d%%")
         if isWatchSource {
             guard !player.novelID.isEmpty else { return "-" }
-            return "\(player.chapterNumber)/\(player.chapterCount)章 · \(Int(player.progress * 100))%"
+            return String(format: progressFormat, player.chapterNumber, player.chapterCount, Int(player.progress * 100))
         }
         guard let state = session.playState, !state.novelID.isEmpty else { return "-" }
         if state.chapterCount > 0 {
-            return "\(state.chapterNumber)/\(state.chapterCount)章 · \(Int(state.progress * 100))%"
+            return String(format: progressFormat, state.chapterNumber, state.chapterCount, Int(state.progress * 100))
         }
-        return "第\(state.chapterNumber)章"
+        return String(format: NSLocalizedString("Watch_Player_ChapterOnly", comment: "第%d章"), state.chapterNumber)
     }
 
     @ViewBuilder private var statusBadge: some View {
         if isWatchSource {
             if player.isPlaying {
-                badge(text: "Watchで再生中", color: .purple)
+                badge(text: NSLocalizedString("Watch_Player_Badge_PlayingOnWatch", comment: "Watchで再生中"), color: .purple)
             } else {
-                badge(text: "Watch単体モード", color: .purple)
+                badge(text: NSLocalizedString("Watch_Player_Badge_WatchStandaloneMode", comment: "Watch単体モード"), color: .purple)
             }
         } else if session.isSending {
             HStack(spacing: 4) {
                 ProgressView()
                     .frame(width: 12, height: 12)
-                Text("接続中…")
+                Text(NSLocalizedString("Watch_Player_Badge_Connecting", comment: "接続中…"))
                     .font(.system(size: 11))
             }
             .frame(height: 16)
         } else if session.playState?.isPlaying == true {
-            badge(text: "iPhoneで再生中", color: .green)
+            badge(text: NSLocalizedString("Watch_Player_Badge_PlayingOnPhone", comment: "iPhoneで再生中"), color: .green)
         } else if session.isReachable {
-            badge(text: "iPhone接続中", color: .teal)
+            badge(text: NSLocalizedString("Watch_Player_Badge_PhoneConnected", comment: "iPhone接続中"), color: .teal)
         } else {
-            badge(text: "iPhone未接続", color: .orange)
+            badge(text: NSLocalizedString("Watch_Player_Badge_PhoneNotConnected", comment: "iPhone未接続"), color: .orange)
         }
     }
 

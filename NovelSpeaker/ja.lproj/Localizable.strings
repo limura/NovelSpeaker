@@ -1116,6 +1116,17 @@
 "SettingsTableViewController_ScrapeInspectButtonTitle" = "今すぐ全サイトを検査する";
 "SettingsTableViewController_ScrapeInspectProgressMessage" = "検査中…\n(しばらくお待ちください)";
 
+// Apple Watch 連携(WatchSessionCoordinator)が Watch へ返すエラー文言
+"WatchSessionCoordinator_ErrorUnknownCommand" = "対応していない操作です。iPhone側の ことせかい が古い可能性があります。";
+"WatchSessionCoordinator_ErrorSpeechSettingsEncodeFailed" = "発話設定の生成に失敗しました";
+"WatchSessionCoordinator_ErrorNoNovelSelected" = "小説が選ばれていません";
+"WatchSessionCoordinator_ErrorNovelIDMissing" = "novelID がありません";
+"WatchSessionCoordinator_ErrorInvalidArguments" = "引数が不正です";
+"WatchSessionCoordinator_ErrorWatchAppNotInstalled" = "Watchアプリが未インストール扱いになっています。Watch側の ことせかい を一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。";
+"WatchSessionCoordinator_ErrorNoNextChapter" = "次の章はありません";
+"WatchSessionCoordinator_ErrorNoPreviousChapter" = "前の章はありません";
+"WatchSessionCoordinator_ErrorNovelNotFound" = "小説が見つかりません";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.1
 
 - 歯抜け小説の更新確認/補完DL時に、手元にある章を無駄に再取得していた問題を修正

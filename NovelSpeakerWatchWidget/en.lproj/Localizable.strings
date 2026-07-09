@@ -1,0 +1,5 @@
+/* Complication (Widget Extension) localization (English) */
+
+"Watch_Widget_AppName" = "NovelSpeaker";
+"Watch_Widget_TapToOpen" = "Tap to Open";
+"Watch_Widget_Description" = "Shows the progress of the novel you are reading. Tap to open NovelSpeaker.";

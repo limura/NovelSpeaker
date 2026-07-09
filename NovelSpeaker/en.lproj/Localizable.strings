@@ -1127,6 +1127,17 @@
 "SettingsTableViewController_ScrapeInspectButtonTitle" = "Inspect all sites now";
 "SettingsTableViewController_ScrapeInspectProgressMessage" = "Inspecting…\n(Please wait a moment)";
 
+// Error messages that the Apple Watch integration (WatchSessionCoordinator) returns to the Watch
+"WatchSessionCoordinator_ErrorUnknownCommand" = "Unsupported operation. NovelSpeaker on the iPhone may be out of date.";
+"WatchSessionCoordinator_ErrorSpeechSettingsEncodeFailed" = "Failed to generate the speech settings";
+"WatchSessionCoordinator_ErrorNoNovelSelected" = "No novel is selected";
+"WatchSessionCoordinator_ErrorNovelIDMissing" = "novelID is missing";
+"WatchSessionCoordinator_ErrorInvalidArguments" = "Invalid arguments";
+"WatchSessionCoordinator_ErrorWatchAppNotInstalled" = "The Watch app is being treated as not installed. Deleting NovelSpeaker on the Watch side and reinstalling it from \"Available Apps\" in the Watch app on the iPhone may fix this.";
+"WatchSessionCoordinator_ErrorNoNextChapter" = "There is no next chapter";
+"WatchSessionCoordinator_ErrorNoPreviousChapter" = "There is no previous chapter";
+"WatchSessionCoordinator_ErrorNovelNotFound" = "The novel was not found";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.

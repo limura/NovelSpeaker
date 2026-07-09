@@ -121,7 +121,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
 
     func play() {
         guard !novelID.isEmpty else {
-            reportError("小説が選ばれていません。本棚から選んでください。")
+            reportError(NSLocalizedString("Watch_Player_NoNovelSelected_ChooseFromBookshelf", comment: "小説が選ばれていません。本棚から小説を選んでください。"))
             return
         }
         // 発話直前に iPhone との発話設定の同期を試みる。時間を食ってまごつかないよう、
@@ -182,7 +182,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         do {
             try session.setCategory(.playback, mode: .spokenAudio, policy: .longFormAudio, options: [])
         } catch {
-            reportError("オーディオ設定に失敗しました: \(error.localizedDescription)")
+            reportError(String(format: NSLocalizedString("Watch_SpeechPlayer_AudioSetupFailed", comment: "オーディオ設定に失敗しました: %@"), error.localizedDescription))
             return
         }
         // Bluetooth イヤホン等への出力先選択 UI がここで出る(必要な時だけ)
@@ -190,7 +190,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 guard success else {
-                    self.reportError("オーディオ出力先に接続できませんでした。\(error?.localizedDescription ?? "")")
+                    self.reportError(String(format: NSLocalizedString("Watch_SpeechPlayer_AudioRouteFailed", comment: "オーディオ出力先に接続できませんでした。%@"), error?.localizedDescription ?? ""))
                     return
                 }
                 self.isPlaying = true

@@ -145,7 +145,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                 }
                 let ok = reply[WatchMessage.Reply.ok] as? Bool ?? false
                 if !ok && !quiet {
-                    self.lastErrorMessage = reply[WatchMessage.Reply.errorMessage] as? String ?? "操作に失敗しました"
+                    self.lastErrorMessage = reply[WatchMessage.Reply.errorMessage] as? String ?? NSLocalizedString("Watch_Session_CommandFailed", comment: "操作に失敗しました")
                 }
                 completion?(ok)
             }
@@ -159,7 +159,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 if !quiet {
                     self.isSending = false
-                    self.lastErrorMessage = "iPhoneと通信できません。iPhoneを再起動した後は、一度ロック解除が必要です。"
+                    self.lastErrorMessage = NSLocalizedString("Watch_Session_NotReachable", comment: "iPhoneと通信できません。iPhoneを再起動した後は、一度ロック解除が必要です。")
                 }
                 completion?(false)
             }
@@ -367,7 +367,7 @@ extension PhoneSessionManager: WCSessionDelegate {
             refreshStoredNovels()
         } catch {
             DispatchQueue.main.async {
-                self.lastErrorMessage = "本文の保存に失敗しました: \(error.localizedDescription)"
+                self.lastErrorMessage = String(format: NSLocalizedString("Watch_Session_SaveBodyFailed", comment: "本文の保存に失敗しました: %@"), error.localizedDescription)
                 self.transferRequestedNovelIDs.remove(novelID)
             }
         }

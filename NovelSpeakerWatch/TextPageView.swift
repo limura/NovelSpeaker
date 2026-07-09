@@ -144,7 +144,7 @@ struct TextPageView: View {
         .overlay(alignment: .bottom) {
             // 上部はナビゲーションバーに隠れるので下部に出す
             if model.isAutoScrollPaused && isPlayingNow {
-                Text("自動スクロール停止中")
+                Text(NSLocalizedString("Watch_TextPage_AutoScrollPaused", comment: "自動スクロール停止中"))
                     .font(.system(size: 11))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 8)
@@ -153,7 +153,7 @@ struct TextPageView: View {
                     .padding(.bottom, 2)
             }
         }
-        .navigationTitle(displayTarget?.title.isEmpty == false ? displayTarget!.title : "本文")
+        .navigationTitle(displayTarget?.title.isEmpty == false ? displayTarget!.title : NSLocalizedString("Watch_TextPage_Title", comment: "本文"))
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
@@ -190,7 +190,7 @@ struct TextPageView: View {
     private func contentBody(textColor: Color, highlightColor: Color, highlight: Range<Int>?) -> some View {
         if let target = displayTarget {
             if !session.storedNovelIDs.contains(target.novelID) {
-                Text("「\(target.title)」の本文はまだWatchに転送されていません。本棚から転送できます。")
+                Text(String(format: NSLocalizedString("Watch_TextPage_NovelNotTransferred", comment: "「%@」の本文はまだWatchに転送されていません。本棚から転送できます。"), target.title))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             } else if model.hasChapter {
@@ -203,19 +203,19 @@ struct TextPageView: View {
                     .font(.system(size: 11))
                     .foregroundStyle(textColor.opacity(0.6))
                 if hasPreviousChapter {
-                    chapterMoveButton(label: "◀ 前の章", offset: -1)
+                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_PrevChapter", comment: "◀ 前の章"), offset: -1)
                 }
                 paragraphList(textColor: textColor, highlightColor: highlightColor, highlight: highlight)
                 if hasNextChapter {
-                    chapterMoveButton(label: "次の章へ ▶", offset: 1)
+                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_NextChapter", comment: "次の章へ ▶"), offset: 1)
                 }
             } else {
-                Text("この章(\(target.chapter)章)はまだWatchに転送されていません。本棚から転送し直せます。")
+                Text(String(format: NSLocalizedString("Watch_TextPage_ChapterNotTransferred", comment: "この章(%d章)はまだWatchに転送されていません。本棚から転送し直せます。"), target.chapter))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
         } else {
-            Text("小説が選ばれていません")
+            Text(NSLocalizedString("Watch_NoNovelSelected", comment: "小説が選ばれていません"))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -309,7 +309,7 @@ struct TextPageView: View {
         // iPhone が発話元の場合は Watch の栞として送り、iPhone 側の「新しい方優先」で反映してもらう
         // (発話中は iPhone 側が採用しない作りなので、こちらでも弾いて理由を出す)
         if session.playState?.isPlaying == true {
-            session.lastErrorMessage = "iPhoneで再生中は位置を指定できません。一時停止してからやり直してください。"
+            session.lastErrorMessage = NSLocalizedString("Watch_TextPage_CannotSeekWhilePhonePlaying", comment: "iPhoneで再生中は位置を指定できません。一時停止してからやり直してください。")
             return
         }
         WatchReadingPositionStore.save(novelID: target.novelID, chapter: target.chapter, location: location)

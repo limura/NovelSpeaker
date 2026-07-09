@@ -1,0 +1,5 @@
+/* コンプリケーション(Widget Extension)のローカライズ(日本語) */
+
+"Watch_Widget_AppName" = "ことせかい";
+"Watch_Widget_TapToOpen" = "タップして開く";
+"Watch_Widget_Description" = "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。";
