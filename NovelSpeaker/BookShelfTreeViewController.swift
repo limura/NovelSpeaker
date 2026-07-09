@@ -1956,9 +1956,14 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 self.registObserver()
             }
         }
-        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { (notification) in
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            // 間隔が変わると使える幅も変わるので、作り直しフラグを立て、実測上限もリセットして測り直す。
+            self.isUpperRightButtonsChanged = true
+            self.resetUpperButtonFittedSlotLimit(reason: "spacing")
             self.updateLeftBarButtonWidth()
             self.assinButtons()
+            self.scheduleUpperButtonTrim()
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BookshelfRightTopButtonTitleChanged, queue: .main) { (notification) in
             self.isUpperRightButtonsChanged = true
@@ -2114,6 +2119,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     var upperButtonFittedSlotLimitWidth: CGFloat = -1
     // trim のデバウンス用: 直前の実測結果(読書画面 SpeechViewController と同じ)。
     var upperButtonTrimPendingMeasure: (n: Int, overflow: CGFloat)? = nil
+    // 現在のボタン群を組み立てた時の間隔設定。設定変更(間隔)を検知して作り直すために保持する。
+    var currentBarButtonItemSpacing: CGFloat = -1
 
     // 実測で決めたスロット上限をリセットして、次のレイアウトで再見積もり+再実測させる。
     // 回転・文字サイズ変更・画面への入り直しで呼ぶ(「一度縮んだら戻らない」の防止)。
@@ -2284,9 +2291,10 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 
                 return true
             }
-            // 幅が前回と同じで同じアクションのボタンが入っているならこれ以上することはないはず
+            // 幅が前回と同じで、同じアクションのボタンが、同じ間隔で入っているならすることはないはず。
+            // (間隔設定を変えた時に反映されるよう spacing も一致条件に加える)
             let epsilon: CGFloat = 0.000001
-            if abs(self.currentWindowWidth - nowWidth) < epsilon {
+            if abs(self.currentWindowWidth - nowWidth) < epsilon && abs(self.currentBarButtonItemSpacing - spacing) < epsilon {
                 if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
                     let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
                     let buttons = visibleButtons
@@ -2297,6 +2305,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 }
             }
             self.currentWindowWidth = nowWidth
+            self.currentBarButtonItemSpacing = spacing
             self.isUpperRightButtonsChanged = false
             NSLog("[BTNBAR] shelf-assign nowW=\(Int(nowWidth)) maxButtons=\(maxButtons) fitted=\(String(describing: self.upperButtonFittedSlotLimit)) all=\(allButtons.count) visible=\(visibleButtons.count) spacing=\(spacing)")
 

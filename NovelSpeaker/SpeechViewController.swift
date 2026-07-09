@@ -61,6 +61,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     // trim のデバウンス用: 直前の実測結果。回転直後などの過渡レイアウトを1回だけ掴んで
     // 誤って削るのを防ぐため、2回連続で同じはみ出しを観測した時だけ削る。
     var upperButtonTrimPendingMeasure: (n: Int, overflow: CGFloat)? = nil
+    // 現在のボタン群を組み立てた時の間隔設定。設定変更(間隔)を検知して作り直すために保持する。
+    var currentBarButtonItemSpacing: CGFloat = -1
 
     // 実測で決めたスロット上限をリセットして、次のレイアウトで再見積もり+再実測させる。
     // 回転・文字サイズ(Dynamic Type)変更・画面への入り直しで呼ぶことで、
@@ -682,9 +684,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 
                 return true
             }
-            // 幅が前回と同じで同じアクションのボタンが入っているならこれ以上することはないはず
+            // 幅が前回と同じで、同じアクションのボタンが、同じ間隔で入っているならすることはないはず。
+            // (間隔設定を変えた時に「アクションは同じ」で早期 return してしまい反映されなかったので、
+            //  spacing も一致条件に加える)
             let epsilon: CGFloat = 0.000001
-            if abs(self.currentWindowWidth - nowWidth) < epsilon {
+            if abs(self.currentWindowWidth - nowWidth) < epsilon && abs(self.currentBarButtonItemSpacing - spacing) < epsilon {
                 if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
                     let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
                     let buttons = visibleButtons
@@ -695,6 +699,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
             }
             self.currentWindowWidth = nowWidth
+            self.currentBarButtonItemSpacing = spacing
             self.isUpperRightButtonsChanged = false
             NSLog("[BTNBAR] speech-assign nowW=\(Int(nowWidth)) maxButtons=\(maxButtons) fitted=\(String(describing: self.upperButtonFittedSlotLimit)) all=\(allButtons.count) visible=\(visibleButtons.count) spacing=\(spacing)")
 
@@ -879,8 +884,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 self.navigationController?.popViewController(animated: true)
             }
         }
-        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { (notification) in
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            // 間隔が変わると使える幅も変わるので、作り直しフラグを立て、実測上限もリセットして測り直す。
+            self.isUpperRightButtonsChanged = true
+            self.resetUpperButtonFittedSlotLimit(reason: "spacing")
             self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { (notification) in
             self.isUpperRightButtonsChanged = true
