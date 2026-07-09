@@ -236,7 +236,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // 画面に入り直すたびに実測上限をリセットしてから測り直す(誤検出で縮んだままの固着を防ぐ)。
-        self.resetUpperButtonFittedSlotLimit()
+        self.resetUpperButtonFittedSlotLimit(reason: "appear")
         // 画面表示が完了し customView がナビバーに載ったこのタイミングで実測補正する(主トリガ)。
         self.scheduleUpperButtonTrim()
     }
@@ -1966,7 +1966,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         // Dynamic Type の文字サイズ変更で使える幅が変わるので、実測上限をリセットして測り直す。
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
-            self.resetUpperButtonFittedSlotLimit()
+            self.resetUpperButtonFittedSlotLimit(reason: "sizeCat")
             self.assignRightBarButtons()
             self.scheduleUpperButtonTrim()
         }
@@ -2117,8 +2117,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
 
     // 実測で決めたスロット上限をリセットして、次のレイアウトで再見積もり+再実測させる。
     // 回転・文字サイズ変更・画面への入り直しで呼ぶ(「一度縮んだら戻らない」の防止)。
-    func resetUpperButtonFittedSlotLimit() {
+    func resetUpperButtonFittedSlotLimit(reason: String = "") {
         if self.upperButtonFittedSlotLimit == nil { return }
+        NSLog("[BTNBAR] shelf-reset limit(was \(String(describing: self.upperButtonFittedSlotLimit))) cleared by \(reason)")
         self.upperButtonFittedSlotLimit = nil
         self.upperButtonFittedSlotLimitWidth = -1
         self.upperButtonTrimPendingMeasure = nil
@@ -2128,7 +2129,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         // 回転等で使える幅が変わるので、実測上限を捨てて新しい幅で再見積もり+再実測する
-        self.resetUpperButtonFittedSlotLimit()
+        self.resetUpperButtonFittedSlotLimit(reason: "rotate")
         coordinator.animate(alongsideTransition: nil) { _ in
             self.assignRightBarButtons()
             self.scheduleUpperButtonTrim()
@@ -2297,6 +2298,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             }
             self.currentWindowWidth = nowWidth
             self.isUpperRightButtonsChanged = false
+            NSLog("[BTNBAR] shelf-assign nowW=\(Int(nowWidth)) maxButtons=\(maxButtons) fitted=\(String(describing: self.upperButtonFittedSlotLimit)) all=\(allButtons.count) visible=\(visibleButtons.count) spacing=\(spacing)")
 
             let stack = UIStackView()
             stack.axis = .horizontal
@@ -2339,8 +2341,12 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     func scheduleUpperButtonTrim(attempt: Int = 0) {
         DispatchQueue.main.asyncAfter(deadline: .now() + (attempt == 0 ? 0 : 0.15)) { [weak self] in
             guard let self = self else { return }
-            if self.trimUpperButtonsToFitIfNeeded() == false && attempt < 10 {
-                self.scheduleUpperButtonTrim(attempt: attempt + 1)
+            if self.trimUpperButtonsToFitIfNeeded() == false {
+                if attempt < 10 {
+                    self.scheduleUpperButtonTrim(attempt: attempt + 1)
+                } else {
+                    NSLog("[BTNBAR] shelf-trim giveup(10 attempts)")
+                }
             }
         }
     }
@@ -2351,15 +2357,21 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     // 戻り値: 実測できたら true、まだ測れなければ false(呼び出し側が再試行)。
     @discardableResult
     func trimUpperButtonsToFitIfNeeded() -> Bool {
-        if self.navigationController?.transitionCoordinator != nil { return false }
+        if self.navigationController?.transitionCoordinator != nil { NSLog("[BTNBAR] shelf-trim skip=transition"); return false }
         guard let stack = self.upperButtonStackView,
               let navBar = self.navigationController?.navigationBar,
-              navBar.window != nil else { return false }
+              navBar.window != nil else {
+            NSLog("[BTNBAR] shelf-trim skip=refs stack=\(self.upperButtonStackView != nil) navWin=\(self.navigationController?.navigationBar.window != nil)")
+            return false
+        }
         let n = stack.arrangedSubviews.count
         // 「…」+ 保護対象1個 の 2個未満はこれ以上減らせない
-        guard n >= 2 else { return true }
+        guard n >= 2 else { NSLog("[BTNBAR] shelf-trim skip=n<2 n=\(n)"); return true }
 
-        guard let overflow = NovelSpeakerUtility.UpperButtonBarLayout.rightmostButtonOverflow(navBar: navBar, stack: stack, container: self.upperButtonContainerView) else { return false }
+        let overflowOpt = NovelSpeakerUtility.UpperButtonBarLayout.rightmostButtonOverflow(navBar: navBar, stack: stack, container: self.upperButtonContainerView)
+        let diag = NovelSpeakerUtility.UpperButtonBarLayout.diagnosticString(navBar: navBar, stack: stack, container: self.upperButtonContainerView)
+        NSLog("[BTNBAR] shelf-trim n=\(n) ovf=\(overflowOpt.map{String(format:"%.1f",$0)} ?? "nil") limit=\(String(describing: self.upperButtonFittedSlotLimit)) pend=\(String(describing: self.upperButtonTrimPendingMeasure)) sizeCat=\(self.traitCollection.preferredContentSizeCategory.rawValue) \(diag)")
+        guard let overflow = overflowOpt else { return false }
 
         if overflow > 0.5 {
             // 過渡レイアウトの誤検出を防ぐため、2回連続で同じはみ出しを観測した時だけ削る(デバウンス)。
@@ -2370,6 +2382,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             self.upperButtonTrimPendingMeasure = nil
             let newLimit = n - 1
             if self.upperButtonFittedSlotLimit == nil || newLimit < (self.upperButtonFittedSlotLimit ?? Int.max) || abs(self.upperButtonFittedSlotLimitWidth - self.currentWindowWidth) >= 0.5 {
+                NSLog("[BTNBAR] shelf-TRIM! n=\(n) -> limit=\(newLimit) ovf=\(String(format:"%.1f",overflow))")
                 self.upperButtonFittedSlotLimit = newLimit
                 self.upperButtonFittedSlotLimitWidth = self.currentWindowWidth
                 self.isUpperRightButtonsChanged = true
