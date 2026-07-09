@@ -1959,11 +1959,9 @@ class NiftyUtility: NSObject {
             let remainingRange = NSRange(location: lastEndIndex, length: nsInner.length - lastEndIndex)
             if remainingRange.length > 0 {
                 let remainingRaw = nsInner.substring(with: remainingRange)
-                // base部分と同様に、まず <rp>...</rp> を中身ごと除去してからタグを剥がす。
-                // これをしないと、最後の <rt> の後ろに残る閉じ側の <rp>）</rp> のタグだけが
-                // 剥がれて中身の「）」が本文に残ってしまう
-                // (例: <ruby><rb>親譲</rb><rp>（</rp><rt>おやゆず</rt><rp>）</rp></ruby>りの が
-                //  |親譲(おやゆず)）りの となり、余分な「）」が残る不具合)。
+                // base 部分(1944行目)と同様に、まず <rp>…</rp> を中身ごと除去する。
+                // これを掛けないと、最後の <rt> の後ろに来る閉じ <rp>）</rp> の「）」だけが
+                // テキストとして残ってしまう(青空文庫のルビが |親譲(おやゆず)） になる不具合)。
                 let noRpRemaining = rpRemoveRegex.stringByReplacingMatches(in: remainingRaw, options: [], range: NSRange(location: 0, length: (remainingRaw as NSString).length), withTemplate: "")
                 let cleanRemaining = tagRemoveRegex.stringByReplacingMatches(in: noRpRemaining, options: [], range: NSRange(location: 0, length: (noRpRemaining as NSString).length), withTemplate: "")
                 combinedResult += cleanRemaining

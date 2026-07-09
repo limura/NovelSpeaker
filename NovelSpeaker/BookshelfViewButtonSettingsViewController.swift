@@ -42,7 +42,9 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             globalState.SetBookshelfViewButtonSettingWith(realm: realm, newValue: newSetting)
         }
-        NovelSpeakerNotificationTool.AnnounceSpeechViewRightTopButtonTitleChanged()
+        // 本棚のボタン設定変更なので、本棚用の通知を送る(以前は読書画面用の通知を送っていて、
+        // 本棚の右上ボタンが回転するまで反映されなかった)。
+        NovelSpeakerNotificationTool.AnnounceBookshelfRightTopButtonTitleChanged()
     }
     
     func CreateRows(settingArray:[BookshelfViewButtonSetting]) {

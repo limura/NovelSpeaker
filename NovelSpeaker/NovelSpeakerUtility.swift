@@ -3988,6 +3988,55 @@ class NovelSpeakerUtility: NSObject {
         defaults.synchronize()
     }
 
+    // ナビバー右上のボタン群(customView + UIStackView)が実レイアウトで
+    // 「最右ボタンを黙ってクリップして消す」不具合を実測で潰すための共通ヘルパ。
+    //
+    // 事前見積もり(assignUpperButtons/assignRightBarButtons の maxButtons)だけでは、
+    // ナビバーが「中央寄せタイトル」と「戻る/検索ボタン」にどれだけ幅を割り振るかを正確に
+    // 知り得ず、実際に収まる数より多くを「収まる」と誤判定して最右ボタンをクリップし得る。
+    // そこで viewDidLayoutSubviews で実レイアウト後にこのヘルパで実残り幅を測り、はみ出して
+    // いれば1スロットずつ減らして溢れ分を「…」オーバーフローへ退避させ、収束させる。
+    enum UpperButtonBarLayout {
+        // 右ボタン群がナビバーに収まりきらないと、UIKit は状況により2通りの潰し方をする:
+        //   (A) スピル … ボタン群がナビバー右端を越えて配置され、最右ボタンが黙ってクリップされる
+        //   (B) 圧縮   … コンテナ幅上限やスタックの制約でボタンが 28pt 未満に押し潰される
+        // どちらも「保護対象である最右ボタン(28pt 制約)が、本来の 28pt でフル表示できていない」ことに
+        // 帰着するので、**最右ボタン1個のフレームだけ**から両方を判定する。
+        //
+        // 重要: 個数×28pt の合計幅(requiredSpan)方式は使わない。オーバーフローの「…」ボタンは 28pt 制約が
+        // 無く intrinsic 幅(≒23pt)なので、合計方式だと「収まっているのに圧縮」と誤検出して過剰に削る
+        // (iPad で 6→2 まで削れる不具合の原因だった)。最右基準ならこの誤差を受けない。また、レイアウト
+        // 確定前(全ボタンが原点に重なる/幅0)でも spill は負・圧縮量は0となり、誤って削らない。
+        //
+        // 返り値(はみ出し/潰れ量。スピル量と圧縮量の大きい方):
+        //   > 0 … 収まっていない(最右がクリップ、または最右ボタンが潰されている)
+        //   <= 0 … 収まっている
+        //   nil … まだ実測できない(customView/ボタンが window に載っていない・未レイアウト)。呼び出し側は再試行。
+        static func rightmostButtonOverflow(navBar: UINavigationBar, stack: UIStackView, container: UIView?, buttonWidth: CGFloat = 28) -> CGFloat? {
+            guard let navWindow = navBar.window,
+                  let container = container,
+                  container.window === navWindow else { return nil }
+            guard let last = stack.arrangedSubviews.last else { return nil }
+            let lastInBar = last.convert(last.bounds, to: navBar)
+            // まだレイアウトされていない(幅がほぼ0)なら測定不能とみなす
+            guard lastInBar.width > 1 else { return nil }
+
+            // 使用可能右端は「バーの物理右端(bounds.width)」を基準にする。
+            // layoutMargins.trailing を差し引いてはいけない: UIKit が customView を置く位置は
+            // マージンの内側とは限らず(実機 iPad ではマージン20の外側=バー右端から14ptに配置、
+            // シミュレータではマージン0)、マージンを引くと「正常に見えているのに右端を越えている」
+            // と定常的に誤判定して 2 個まで削り続ける(実機でのみ再現した不具合の真因)。
+            // クリップとして実害があるのは「バーの物理右端を越えて描画が切れる」ことだけ。
+            let usableRightEdge = navBar.bounds.width
+            // (A) スピル: 最右ボタンが使用可能右端をどれだけ越えているか
+            let spill = lastInBar.maxX - usableRightEdge
+            // (B) 圧縮: 最右ボタン(本来 28pt)が実際にどれだけ 28pt 未満に潰されているか。
+            //   テキストボタン等で本来 28pt より広いものは負(=圧縮なし)になり安全側。
+            let compression = buttonWidth - lastInBar.width
+            return max(spill, compression)
+        }
+    }
+
     // SiteInfo エディタの「スプレッドシート用にコピー」ボタンを表示するか。
     // 通常は作者しか使わないので既定 OFF。設定タブのデバッグメニューで ON にした時だけ表示する。
     static let IsSiteInfoEditorSpreadsheetCopyEnabledKey = "IsSiteInfoEditorSpreadsheetCopyEnabledKey"
