@@ -28,6 +28,9 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var isNeedUpdateReadDate:Bool = true
     var textWebView:CustomWKWebView? = nil
     let webSpeechTool = WebSpeechViewTool()
+    // 「全て選択」後に標準の編集メニュー(コピー等)を出すための UIEditMenuInteraction(iOS16+)。
+    // availability で型を書けないので AnyObject で保持しておく。
+    private var selectionEditMenuInteraction: AnyObject? = nil
     var toggleInterfaceButton:UIButton? = nil
     
     var isNeedCollectDisplayLocation = false
@@ -1667,9 +1670,53 @@ extension WebSpeechViewController {
     }
 
     // WKWebView 上の本文を全選択する(標準の「すべてを選択」が出ないため独自に提供)。
+    // プログラムによる選択では標準の編集メニュー(コピー等)が自動で出ないので、
+    // 選択範囲の矩形を取得して自前で編集メニューを提示する。
     @objc func selectAllText(sender: UIMenuItem) {
-        let js = "(function(){var r=document.createRange();r.selectNodeContents(document.body);var s=window.getSelection();s.removeAllRanges();s.addRange(r);})()"
-        self.textWebView?.evaluateJavaScript(js, completionHandler: nil)
+        guard let webView = self.textWebView else { return }
+        // 全選択し、選択範囲の矩形(getBoundingClientRect: ビューポート座標)を JSON で返す。
+        let js = "(function(){var r=document.createRange();r.selectNodeContents(document.body);var s=window.getSelection();s.removeAllRanges();s.addRange(r);try{var rc=s.getRangeAt(0).getBoundingClientRect();return JSON.stringify({x:rc.left,y:rc.top,w:rc.width,h:rc.height});}catch(e){return \"\";}})()"
+        webView.evaluateJavaScript(js) { [weak self] result, _ in
+            guard let self = self else { return }
+            guard let jsonString = result as? String,
+                  let data = jsonString.data(using: .utf8),
+                  let dict = (try? JSONSerialization.jsonObject(with: data)) as? [String: Double],
+                  let x = dict["x"], let y = dict["y"], let w = dict["w"], let h = dict["h"] else { return }
+            // getBoundingClientRect はビューポート座標なので、そのまま WKWebView 自身の座標系として扱える(ズーム無し前提)。
+            let rectInWebView = CGRect(x: x, y: y, width: w, height: h)
+            DispatchQueue.main.async {
+                self.presentEditMenu(webView: webView, rectInWebView: rectInWebView)
+            }
+        }
+    }
+
+    // 選択範囲の矩形に編集メニュー(コピー等)を提示する。
+    // WKWebView の copy: を効かせるため、メニューは WKWebView に紐付けて(= WKWebView の
+    // レスポンダ連鎖を辿らせて)提示する。iOS16+ は UIEditMenuInteraction、それ未満は UIMenuController。
+    private func presentEditMenu(webView: WKWebView, rectInWebView: CGRect) {
+        // 選択が無い(全選択で何も選べなかった)場合は矩形が空になるので出さない。
+        guard rectInWebView.width > 0.5 || rectInWebView.height > 0.5 else { return }
+        if #available(iOS 16.0, *) {
+            let interaction: UIEditMenuInteraction
+            if let existing = self.selectionEditMenuInteraction as? UIEditMenuInteraction {
+                interaction = existing
+                if interaction.view !== webView {
+                    interaction.view?.removeInteraction(interaction)
+                    webView.addInteraction(interaction)
+                }
+            } else {
+                interaction = UIEditMenuInteraction(delegate: nil)
+                webView.addInteraction(interaction)
+                self.selectionEditMenuInteraction = interaction
+            }
+            let point = CGPoint(x: rectInWebView.midX, y: max(rectInWebView.minY, 0))
+            let config = UIEditMenuConfiguration(identifier: nil, sourcePoint: point)
+            interaction.presentEditMenu(with: config)
+        } else {
+            let menu = UIMenuController.shared
+            webView.becomeFirstResponder()
+            menu.showMenu(from: webView, rect: rectInWebView)
+        }
     }
 
     // 長押しメニュー削減が ON の時は menuItemsNotRemoved に .selectAll がある時だけ表示する。OFF なら常に表示。

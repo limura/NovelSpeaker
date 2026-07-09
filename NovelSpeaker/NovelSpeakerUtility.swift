@@ -3964,6 +3964,48 @@ class NovelSpeakerUtility: NSObject {
         defaults.synchronize()
     }
 
+    // ナビバー右上のボタン群(customView + UIStackView)が実レイアウトで
+    // 「最右ボタンを黙ってクリップして消す」不具合を実測で潰すための共通ヘルパ。
+    //
+    // 事前見積もり(assignUpperButtons/assignRightBarButtons の maxButtons)だけでは、
+    // ナビバーが「中央寄せタイトル」と「戻る/検索ボタン」にどれだけ幅を割り振るかを正確に
+    // 知り得ず、実際に収まる数より多くを「収まる」と誤判定して最右ボタンをクリップし得る。
+    // そこで viewDidLayoutSubviews で実レイアウト後にこのヘルパで実残り幅を測り、はみ出して
+    // いれば1スロットずつ減らして溢れ分を「…」オーバーフローへ退避させ、収束させる。
+    enum UpperButtonBarLayout {
+        // 右ボタン群がナビバーに収まりきらないと、UIKit は状況により2通りの潰し方をする:
+        //   (A) スピル … ボタン群がナビバー右端を越えて配置され、最右ボタンが黙ってクリップされる
+        //   (B) 圧縮   … コンテナ幅上限やスタックの制約でボタンが 28pt 未満に押し潰される
+        // どちらも「本来 28pt であるべきボタンがそうなっていない/画面外」なので、実際に描画された
+        // ボタンのフレームから両方まとめて検出する。中央寄せタイトルの位置はボタン数に依って動く
+        // (=事前に幅を見積もると循環する)ため、タイトル幅からの逆算はしない。
+        //
+        // 返り値(はみ出し/潰れ量。スピル量と圧縮量の大きい方):
+        //   > 0 … 収まっていない(最右がクリップ、またはボタンが潰されている)
+        //   <= 0 … 収まっている
+        //   nil … まだ実測できない(customView/ボタンが window に載っていない・未レイアウト)。呼び出し側は再試行。
+        static func rightmostButtonOverflow(navBar: UINavigationBar, stack: UIStackView, container: UIView?, buttonWidth: CGFloat = 28) -> CGFloat? {
+            guard let navWindow = navBar.window,
+                  let container = container,
+                  container.window === navWindow else { return nil }
+            let buttons = stack.arrangedSubviews
+            guard let first = buttons.first, let last = buttons.last else { return nil }
+            let firstInBar = first.convert(first.bounds, to: navBar)
+            let lastInBar = last.convert(last.bounds, to: navBar)
+            // まだレイアウトされていない(幅がほぼ0)なら測定不能とみなす
+            guard lastInBar.width > 1 else { return nil }
+
+            let usableRightEdge = navBar.bounds.width - navBar.directionalLayoutMargins.trailing
+            // (A) スピル: 最右ボタンが使用可能右端をどれだけ越えているか
+            let spill = lastInBar.maxX - usableRightEdge
+            // (B) 圧縮: 本来の必要幅(28pt×個数 + すきま)に対して、実際の描画幅がどれだけ縮んでいるか
+            let requiredSpan = CGFloat(buttons.count) * buttonWidth + CGFloat(buttons.count - 1) * stack.spacing
+            let renderedSpan = lastInBar.maxX - firstInBar.minX
+            let compression = requiredSpan - renderedSpan
+            return max(spill, compression)
+        }
+    }
+
     // SiteInfo エディタの「スプレッドシート用にコピー」ボタンを表示するか。
     // 通常は作者しか使わないので既定 OFF。設定タブのデバッグメニューで ON にした時だけ表示する。
     static let IsSiteInfoEditorSpreadsheetCopyEnabledKey = "IsSiteInfoEditorSpreadsheetCopyEnabledKey"
