@@ -49,7 +49,16 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var currentReadStoryIDChangeAlertFloatingButton:FloatingButton? = nil
     
     var isUpperRightButtonsChanged:Bool = true
-    
+
+    // 右上ボタン群を「実レイアウト後に実測してはみ出したら『…』へ追い出す」ための状態。
+    // 事前見積もり(assignUpperButtons の maxButtons)だけでは、ナビバーが戻るボタン/タイトルに
+    // どれだけ幅を割り振るかを正確に知り得ずクリップし得るため、viewDidLayoutSubviews で実測して補正する。
+    weak var upperButtonContainerView: UIView? = nil
+    weak var upperButtonStackView: UIStackView? = nil
+    // ある画面幅で「実測の結果ここまでしか入らない」と判明したスロット数の上限(その幅でのみ有効)。
+    var upperButtonFittedSlotLimit: Int? = nil
+    var upperButtonFittedSlotLimitWidth: CGFloat = -1
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -140,6 +149,49 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         forceUpdateUpperButtons()
+        trimUpperButtonsToFitIfNeeded()
+    }
+
+    // 右上ボタン群が実際のナビバー幅に収まっているかを実レイアウト後に実測し、
+    // はみ出している(=最右がクリップされて消える)場合は表示スロット数を1段階減らして
+    // 溢れ分を「…」オーバーフローメニューに追い出す。収まるまで繰り返し呼ばれて収束する。
+    // 事前見積もり(assignUpperButtons)は左側の戻るボタン/タイトルが食う幅を正確には知り得ないので、
+    // クリップを確実にゼロにするにはこの実測補正が必要。
+    func trimUpperButtonsToFitIfNeeded() {
+        // 遷移アニメーション中はナビバー各部のフレームが過渡的で誤測しやすいので触らない
+        if self.navigationController?.transitionCoordinator != nil { return }
+        guard let container = self.upperButtonContainerView,
+              let stack = self.upperButtonStackView,
+              let navBar = self.navigationController?.navigationBar,
+              container.window != nil else { return }
+        let n = stack.arrangedSubviews.count
+        // 「…」+ 保護対象1個 の 2個未満はこれ以上減らせない
+        guard n >= 2 else { return }
+
+        let spacing = stack.spacing
+        let buttonWidth: CGFloat = 28
+        let unitWidth = buttonWidth + spacing
+        let requiredWidth = CGFloat(n) * buttonWidth + CGFloat(n - 1) * spacing
+
+        // 実際にボタン群が使える幅を、コンテナの実寸とナビバー内での右端余白の両面から測る。
+        // ・container.bounds.width … 上限(0.76*画面幅)やナビバーの圧縮で縮められた実寸を拾う
+        // ・rightLimit - コンテナ左端 … コンテナがナビバー右端をはみ出して(=タイトル側に食い込んで)
+        //   クリップされているケースを拾う
+        let containerInBar = container.convert(container.bounds, to: navBar)
+        let rightLimit = navBar.bounds.width - navBar.directionalLayoutMargins.trailing
+        let available = min(container.bounds.width, rightLimit - containerInBar.minX)
+        guard available > 0 else { return }
+
+        if requiredWidth > available + 0.5 {
+            let fitSlots = max(1, Int(floor((available + spacing) / unitWidth)))
+            if fitSlots < n {
+                // この幅ではここまでしか入らない、と記録して再構築させる
+                self.upperButtonFittedSlotLimit = fitSlots
+                self.upperButtonFittedSlotLimitWidth = self.currentWindowWidth
+                self.isUpperRightButtonsChanged = true // 幅が同じでも作り直させる
+                self.forceUpdateUpperButtons()
+            }
+        }
     }
     
     deinit {
@@ -469,14 +521,38 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
                 // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
                 let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
-                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.70)
 
                 let buttonWidth: CGFloat = 28
-
                 let totalUnitWidth = buttonWidth + spacing
 
-                return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
+                // 単純に画面幅 * 0.70 で見積もると、左側の「戻るボタン + タイトル」が食う幅を
+                // 無視してしまい、実際に収まる数より多くを「収まる」と誤判定して最右ボタンを黙って
+                // クリップしてしまう(BUGDOC_SpeechView_RightButton_Clip.md 参照)。
+                // なので戻るボタンとタイトルの実描画幅を差し引いて、実際に使える幅から数を出す。
+                // 過小評価すれば溢れ分は必ず「…」オーバーフローに逃げるので安全側、過大評価だと
+                // クリップする(危険側)なので、少し保守的に見積もる。
+                let titleFont = UIFont.preferredFont(forTextStyle: .headline) // ナビバータイトルフォント(Dynamic Type反映。AppLaunchCoordinator で設定)
+                let title = self.navigationItem.title ?? ""
+                let titleWidth = title.isEmpty ? 0 : (title as NSString).size(withAttributes: [.font: titleFont]).width
+                // 戻るボタン(chevron + 直前画面のタイトル文字) とナビバー左右マージンのおおよその消費幅
+                let backButtonAndMargins: CGFloat = 88
+
+                // iPad で上部タブバーがある場合のみ従来通り控えめな割合を絶対上限にする。
+                // それ以外は描画側コンテナ上限(container.widthAnchor <= screenWidth * 0.76)に合わせる。
+                let widthFraction: CGFloat = (isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.76
+                let containerHardCap = UIScreen.main.bounds.width * widthFraction
+
+                let usableWidth = nowWidth - backButtonAndMargins - titleWidth
+                // 最低でもボタン1個(= 保護対象の speechStop)は必ず表示できるようにする
+                let containerMaxWidth = max(totalUnitWidth, min(usableWidth, containerHardCap))
+
+                return max(1, Int(floor((containerMaxWidth + spacing) / totalUnitWidth)))
             }()
+            // 同じ画面幅で「実測の結果ここまでしか入らない」と判明していれば、その上限まで下げる。
+            // (見積もりが実レイアウトで溢れる=クリップするのを確実に防ぐための頭打ち。trimUpperButtonsToFitIfNeeded が設定する)
+            if let fittedLimit = self.upperButtonFittedSlotLimit, abs(self.upperButtonFittedSlotLimitWidth - nowWidth) < 0.5 {
+                maxButtons = min(maxButtons, fittedLimit)
+            }
             // VoiceOver 環境下 であれば重なってしまってもよしとする
             if UIAccessibility.isVoiceOverRunning {
                 // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
@@ -583,6 +659,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
             ])
             self.navigationItem.rightBarButtonItem = barItem
+            // viewDidLayoutSubviews で実測補正するために参照を控えておく
+            self.upperButtonContainerView = container
+            self.upperButtonStackView = stack
         }
     }
     
