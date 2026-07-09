@@ -4011,29 +4011,6 @@ class NovelSpeakerUtility: NSObject {
             let compression = buttonWidth - lastInBar.width
             return max(spill, compression)
         }
-
-        // 実機調査用の診断文字列(一時計装。調査が終わったら呼び出しごと撤去する)。
-        // spill/comp の内訳・ナビバー幅・コンテナ/スタック実寸・各ボタンの実フレームを1行にまとめる。
-        static func diagnosticString(navBar: UINavigationBar, stack: UIStackView, container: UIView?, buttonWidth: CGFloat = 28) -> String {
-            let navW = navBar.bounds.width
-            let edge = navW // 使用可能右端 = バー物理右端(rightmostButtonOverflow と同じ基準)
-            let mTrail = navBar.directionalLayoutMargins.trailing
-            let cWin = (container?.window != nil) && (container?.window === navBar.window)
-            let contW = container?.bounds.width ?? -1
-            let stackW = stack.bounds.width
-            var spill = "?", comp = "?"
-            var btns: [String] = []
-            for s in stack.arrangedSubviews {
-                let f = s.convert(s.bounds, to: navBar)
-                btns.append("\(Int(f.minX)),w\(String(format: "%.1f", f.width))")
-            }
-            if let last = stack.arrangedSubviews.last {
-                let f = last.convert(last.bounds, to: navBar)
-                spill = String(format: "%.1f", f.maxX - edge)
-                comp = String(format: "%.1f", buttonWidth - f.width)
-            }
-            return "navW=\(Int(navW)) mTrail=\(Int(mTrail)) contW=\(Int(contW)) stackW=\(Int(stackW)) cWin=\(cWin) spill=\(spill) comp=\(comp) btns=[\(btns.joined(separator: " "))]"
-        }
     }
 
     // SiteInfo エディタの「スプレッドシート用にコピー」ボタンを表示するか。
