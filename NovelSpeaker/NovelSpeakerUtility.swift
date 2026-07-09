@@ -3997,7 +3997,13 @@ class NovelSpeakerUtility: NSObject {
             // まだレイアウトされていない(幅がほぼ0)なら測定不能とみなす
             guard lastInBar.width > 1 else { return nil }
 
-            let usableRightEdge = navBar.bounds.width - navBar.directionalLayoutMargins.trailing
+            // 使用可能右端は「バーの物理右端(bounds.width)」を基準にする。
+            // layoutMargins.trailing を差し引いてはいけない: UIKit が customView を置く位置は
+            // マージンの内側とは限らず(実機 iPad ではマージン20の外側=バー右端から14ptに配置、
+            // シミュレータではマージン0)、マージンを引くと「正常に見えているのに右端を越えている」
+            // と定常的に誤判定して 2 個まで削り続ける(実機でのみ再現した不具合の真因)。
+            // クリップとして実害があるのは「バーの物理右端を越えて描画が切れる」ことだけ。
+            let usableRightEdge = navBar.bounds.width
             // (A) スピル: 最右ボタンが使用可能右端をどれだけ越えているか
             let spill = lastInBar.maxX - usableRightEdge
             // (B) 圧縮: 最右ボタン(本来 28pt)が実際にどれだけ 28pt 未満に潰されているか。
@@ -4010,7 +4016,8 @@ class NovelSpeakerUtility: NSObject {
         // spill/comp の内訳・ナビバー幅・コンテナ/スタック実寸・各ボタンの実フレームを1行にまとめる。
         static func diagnosticString(navBar: UINavigationBar, stack: UIStackView, container: UIView?, buttonWidth: CGFloat = 28) -> String {
             let navW = navBar.bounds.width
-            let edge = navW - navBar.directionalLayoutMargins.trailing
+            let edge = navW // 使用可能右端 = バー物理右端(rightmostButtonOverflow と同じ基準)
+            let mTrail = navBar.directionalLayoutMargins.trailing
             let cWin = (container?.window != nil) && (container?.window === navBar.window)
             let contW = container?.bounds.width ?? -1
             let stackW = stack.bounds.width
@@ -4025,7 +4032,7 @@ class NovelSpeakerUtility: NSObject {
                 spill = String(format: "%.1f", f.maxX - edge)
                 comp = String(format: "%.1f", buttonWidth - f.width)
             }
-            return "navW=\(Int(navW)) edge=\(Int(edge)) contW=\(Int(contW)) stackW=\(Int(stackW)) cWin=\(cWin) spill=\(spill) comp=\(comp) btns=[\(btns.joined(separator: " "))]"
+            return "navW=\(Int(navW)) mTrail=\(Int(mTrail)) contW=\(Int(contW)) stackW=\(Int(stackW)) cWin=\(cWin) spill=\(spill) comp=\(comp) btns=[\(btns.joined(separator: " "))]"
         }
     }
 
