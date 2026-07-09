@@ -892,8 +892,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             self.forceUpdateUpperButtons()
             self.scheduleUpperButtonTrim()
         }
-        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { (notification) in
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            // ボタンの表示/非表示が変わったので、実測上限もリセットして作り直し+trim をやり直す。
+            self.resetUpperButtonFittedSlotLimit(reason: "buttonEdit")
             self.isUpperRightButtonsChanged = true
+            self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
         }
         // Dynamic Type の文字サイズが変わるとタイトルや戻るボタンの幅が変わり、
         // 右上ボタン群に使える幅も変わるので、実測上限をリセットして測り直す。

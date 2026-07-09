@@ -1965,8 +1965,13 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             self.assinButtons()
             self.scheduleUpperButtonTrim()
         }
-        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BookshelfRightTopButtonTitleChanged, queue: .main) { (notification) in
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BookshelfRightTopButtonTitleChanged, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            // ボタンの表示/非表示が変わったので、実測上限もリセットして作り直し+trim をやり直す。
+            self.resetUpperButtonFittedSlotLimit(reason: "buttonEdit")
             self.isUpperRightButtonsChanged = true
+            self.assinButtons()
+            self.scheduleUpperButtonTrim()
         }
         // Dynamic Type の文字サイズ変更で使える幅が変わるので、実測上限をリセットして測り直す。
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in

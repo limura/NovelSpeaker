@@ -177,8 +177,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             self.forceUpdateUpperButtons()
             self.scheduleUpperButtonTrim()
         }
-        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { (notification) in
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            // ボタンの表示/非表示が変わったので、実測上限もリセットして作り直し+trim をやり直す。
+            self.resetUpperButtonFittedSlotLimit(reason: "buttonEdit")
             self.isUpperRightButtonsChanged = true
+            self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
         }
         // Dynamic Type の文字サイズ変更で使える幅が変わるので、実測上限をリセットして測り直す。
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in
@@ -1085,14 +1090,25 @@ body.NovelSpeakerBody {
             }
 
             let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
+            // 見積もりは通常の本文画面(SpeechViewController)と完全に同一にする。
+            // (以前は WebView 側だけ 0.30/nowWidth 基準で、iPad 縦だと通常版より多く見積もって
+            //  「…」が中央タブに潜って押せなくなっていた。飯村さん報告 2026-07-09)
             var maxButtons: Int = {
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
+                // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
                 let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
-                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
 
                 let buttonWidth: CGFloat = 28
-
                 let totalUnitWidth = buttonWidth + spacing
+
+                // 本文画面ではタイトルを潰してでもボタン数を優先する。タイトル幅は引かず、
+                // iPad で上部タブバーがある場合のみ控えめな割合を絶対上限にする。
+                let backButtonAndMargins: CGFloat = 88
+                let widthFraction: CGFloat = (isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.76
+                let containerHardCap = UIScreen.main.bounds.width * widthFraction
+
+                let usableWidth = nowWidth - backButtonAndMargins
+                let containerMaxWidth = max(totalUnitWidth, min(usableWidth, containerHardCap))
 
                 return max(1, Int(floor((containerMaxWidth + spacing) / totalUnitWidth)))
             }()
