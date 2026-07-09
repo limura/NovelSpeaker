@@ -1954,7 +1954,11 @@ class NiftyUtility: NSObject {
             let remainingRange = NSRange(location: lastEndIndex, length: nsInner.length - lastEndIndex)
             if remainingRange.length > 0 {
                 let remainingRaw = nsInner.substring(with: remainingRange)
-                let cleanRemaining = tagRemoveRegex.stringByReplacingMatches(in: remainingRaw, options: [], range: NSRange(location: 0, length: (remainingRaw as NSString).length), withTemplate: "")
+                // base 部分(1944行目)と同様に、まず <rp>…</rp> を中身ごと除去する。
+                // これを掛けないと、最後の <rt> の後ろに来る閉じ <rp>）</rp> の「）」だけが
+                // テキストとして残ってしまう(青空文庫のルビが |親譲(おやゆず)） になる不具合)。
+                let noRpRemaining = rpRemoveRegex.stringByReplacingMatches(in: remainingRaw, options: [], range: NSRange(location: 0, length: (remainingRaw as NSString).length), withTemplate: "")
+                let cleanRemaining = tagRemoveRegex.stringByReplacingMatches(in: noRpRemaining, options: [], range: NSRange(location: 0, length: (noRpRemaining as NSString).length), withTemplate: "")
                 combinedResult += cleanRemaining
             }
             

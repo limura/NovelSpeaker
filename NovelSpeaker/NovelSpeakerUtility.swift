@@ -3976,21 +3976,23 @@ class NovelSpeakerUtility: NSObject {
         // 右ボタン群がナビバーに収まりきらないと、UIKit は状況により2通りの潰し方をする:
         //   (A) スピル … ボタン群がナビバー右端を越えて配置され、最右ボタンが黙ってクリップされる
         //   (B) 圧縮   … コンテナ幅上限やスタックの制約でボタンが 28pt 未満に押し潰される
-        // どちらも「本来 28pt であるべきボタンがそうなっていない/画面外」なので、実際に描画された
-        // ボタンのフレームから両方まとめて検出する。中央寄せタイトルの位置はボタン数に依って動く
-        // (=事前に幅を見積もると循環する)ため、タイトル幅からの逆算はしない。
+        // どちらも「保護対象である最右ボタン(28pt 制約)が、本来の 28pt でフル表示できていない」ことに
+        // 帰着するので、**最右ボタン1個のフレームだけ**から両方を判定する。
+        //
+        // 重要: 個数×28pt の合計幅(requiredSpan)方式は使わない。オーバーフローの「…」ボタンは 28pt 制約が
+        // 無く intrinsic 幅(≒23pt)なので、合計方式だと「収まっているのに圧縮」と誤検出して過剰に削る
+        // (iPad で 6→2 まで削れる不具合の原因だった)。最右基準ならこの誤差を受けない。また、レイアウト
+        // 確定前(全ボタンが原点に重なる/幅0)でも spill は負・圧縮量は0となり、誤って削らない。
         //
         // 返り値(はみ出し/潰れ量。スピル量と圧縮量の大きい方):
-        //   > 0 … 収まっていない(最右がクリップ、またはボタンが潰されている)
+        //   > 0 … 収まっていない(最右がクリップ、または最右ボタンが潰されている)
         //   <= 0 … 収まっている
         //   nil … まだ実測できない(customView/ボタンが window に載っていない・未レイアウト)。呼び出し側は再試行。
         static func rightmostButtonOverflow(navBar: UINavigationBar, stack: UIStackView, container: UIView?, buttonWidth: CGFloat = 28) -> CGFloat? {
             guard let navWindow = navBar.window,
                   let container = container,
                   container.window === navWindow else { return nil }
-            let buttons = stack.arrangedSubviews
-            guard let first = buttons.first, let last = buttons.last else { return nil }
-            let firstInBar = first.convert(first.bounds, to: navBar)
+            guard let last = stack.arrangedSubviews.last else { return nil }
             let lastInBar = last.convert(last.bounds, to: navBar)
             // まだレイアウトされていない(幅がほぼ0)なら測定不能とみなす
             guard lastInBar.width > 1 else { return nil }
@@ -3998,10 +4000,9 @@ class NovelSpeakerUtility: NSObject {
             let usableRightEdge = navBar.bounds.width - navBar.directionalLayoutMargins.trailing
             // (A) スピル: 最右ボタンが使用可能右端をどれだけ越えているか
             let spill = lastInBar.maxX - usableRightEdge
-            // (B) 圧縮: 本来の必要幅(28pt×個数 + すきま)に対して、実際の描画幅がどれだけ縮んでいるか
-            let requiredSpan = CGFloat(buttons.count) * buttonWidth + CGFloat(buttons.count - 1) * stack.spacing
-            let renderedSpan = lastInBar.maxX - firstInBar.minX
-            let compression = requiredSpan - renderedSpan
+            // (B) 圧縮: 最右ボタン(本来 28pt)が実際にどれだけ 28pt 未満に潰されているか。
+            //   テキストボタン等で本来 28pt より広いものは負(=圧縮なし)になり安全側。
+            let compression = buttonWidth - lastInBar.width
             return max(spill, compression)
         }
     }

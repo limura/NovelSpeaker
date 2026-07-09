@@ -160,3 +160,27 @@ class UpperButtonBarLayoutTest: XCTestCase {
         XCTAssertNil(overflow, "window に載っていなければ nil(測定不能)を返すこと")
     }
 }
+
+// 青空文庫HTMLのルビ変換で閉じ <rp>）</rp> の「）」が残らないことの回帰テスト。
+class RubyTagConvertTest: XCTestCase {
+    // 青空文庫形式(rb + 開き/閉じ rp + rt)。閉じ rp の「）」が残っていた不具合の再現。
+    func testAozoraRubyClosingRpRemoved() {
+        let html = "<ruby><rb>親譲</rb><rp>（</rp><rt>おやゆず</rt><rp>）</rp></ruby>りの"
+        let result = NiftyUtility.ConvertRubyTagToVerticalBarRubyText(htmlString: html)
+        XCTAssertEqual(result, "|親譲(おやゆず)りの", "閉じ <rp>）</rp> の「）」が残らないこと")
+    }
+
+    // rb 無し・開き/閉じ rp 付きのルビも「）」が残らないこと。
+    func testRubyWithoutRbClosingRpRemoved() {
+        let html = "<ruby>無鉄砲<rp>（</rp><rt>むてっぽう</rt><rp>）</rp></ruby>"
+        let result = NiftyUtility.ConvertRubyTagToVerticalBarRubyText(htmlString: html)
+        XCTAssertEqual(result, "|無鉄砲(むてっぽう)", "rb 無しでも閉じ rp が残らないこと")
+    }
+
+    // rp を持たない素朴なルビは従来通り変換できること(退行防止)。
+    func testSimpleRubyStillWorks() {
+        let html = "<ruby>漢字<rt>かんじ</rt></ruby>"
+        let result = NiftyUtility.ConvertRubyTagToVerticalBarRubyText(htmlString: html)
+        XCTAssertEqual(result, "|漢字(かんじ)", "rp 無しの素朴なルビも変換できること")
+    }
+}

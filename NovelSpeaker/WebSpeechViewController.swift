@@ -70,7 +70,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     let myScriptNamespace = "NovelSpeaker_\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
     
     var isUpperRightButtonsChanged:Bool = true
-    
+    // 右上ボタン群を「実レイアウト後に実測してはみ出したら『…』へ追い出す」ための状態
+    // (読書画面 SpeechViewController と同一の仕組み。詳細は NovelSpeakerUtility.UpperButtonBarLayout 参照)。
+    weak var upperButtonContainerView: UIView? = nil
+    weak var upperButtonStackView: UIStackView? = nil
+    var upperButtonFittedSlotLimit: Int? = nil
+    var upperButtonFittedSlotLimitWidth: CGFloat = -1
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -115,6 +121,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.forceUpdateUpperButtons()
+        self.scheduleUpperButtonTrim()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // 画面表示が完了し customView がナビバーに載ったこのタイミングで実測補正する(主トリガ)。
+        self.scheduleUpperButtonTrim()
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -1035,8 +1048,14 @@ body.NovelSpeakerBody {
 
                 let totalUnitWidth = buttonWidth + spacing
 
-                return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
+                return max(1, Int(floor((containerMaxWidth + spacing) / totalUnitWidth)))
             }()
+            // 同じ画面幅で「実測の結果ここまでしか入らない」と判明していれば、その上限まで下げる。
+            // (見積もりが実レイアウトで溢れる=クリップするのを確実に防ぐための頭打ち。
+            //  trimUpperButtonsToFitIfNeeded が設定する)
+            if let fittedLimit = self.upperButtonFittedSlotLimit, abs(self.upperButtonFittedSlotLimitWidth - nowWidth) < 0.5 {
+                maxButtons = min(maxButtons, fittedLimit)
+            }
             // VoiceOver 環境下 であれば重なってしまってもよしとする
             if UIAccessibility.isVoiceOverRunning {
                 // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
@@ -1143,9 +1162,53 @@ body.NovelSpeakerBody {
                 stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
             ])
             self.navigationItem.rightBarButtonItem = barItem
+            // viewDidLayoutSubviews / viewDidAppear で実測補正するために参照を控えておく
+            self.upperButtonContainerView = container
+            self.upperButtonStackView = stack
+            // customView がナビバーに取り込まれて実フレームが確定するのは次のレイアウト後なので、
+            // 遅延+数回リトライで確実に実測補正する(読書画面 SpeechViewController と同じ理由)。
+            self.scheduleUpperButtonTrim()
         }
     }
-    
+
+    // まだ実測できないうちは短い間隔で数回だけ再試行する(読書画面 SpeechViewController と同じ)。
+    func scheduleUpperButtonTrim(attempt: Int = 0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + (attempt == 0 ? 0 : 0.15)) { [weak self] in
+            guard let self = self else { return }
+            if self.trimUpperButtonsToFitIfNeeded() == false && attempt < 10 {
+                self.scheduleUpperButtonTrim(attempt: attempt + 1)
+            }
+        }
+    }
+
+    // 右上ボタン群が実際のナビバー幅に収まっているかを実レイアウト後に実測し、はみ出して
+    // いる(=最右がクリップされて消える)場合は表示スロット数を1段階減らして溢れ分を「…」へ
+    // 追い出す。収まるまで繰り返し呼ばれて収束する。読書画面と同一の仕組み。
+    // 戻り値: 実測できたら true、まだ測れなければ false(呼び出し側が再試行)。
+    @discardableResult
+    func trimUpperButtonsToFitIfNeeded() -> Bool {
+        if self.navigationController?.transitionCoordinator != nil { return false }
+        guard let stack = self.upperButtonStackView,
+              let navBar = self.navigationController?.navigationBar,
+              navBar.window != nil else { return false }
+        let n = stack.arrangedSubviews.count
+        // 「…」+ 保護対象1個 の 2個未満はこれ以上減らせない
+        guard n >= 2 else { return true }
+
+        guard let overflow = NovelSpeakerUtility.UpperButtonBarLayout.rightmostButtonOverflow(navBar: navBar, stack: stack, container: self.upperButtonContainerView) else { return false }
+
+        if overflow > 0.5 {
+            let newLimit = n - 1
+            if self.upperButtonFittedSlotLimit == nil || newLimit < (self.upperButtonFittedSlotLimit ?? Int.max) || abs(self.upperButtonFittedSlotLimitWidth - self.currentWindowWidth) >= 0.5 {
+                self.upperButtonFittedSlotLimit = newLimit
+                self.upperButtonFittedSlotLimitWidth = self.currentWindowWidth
+                self.isUpperRightButtonsChanged = true
+                self.forceUpdateUpperButtons()
+            }
+        }
+        return true
+    }
+
     //MARK: @objc Delegate methods
     @objc func backupButtonClicked(_ sender: UIBarButtonItem) {
         let storyID = StorySpeaker.shared.storyID
