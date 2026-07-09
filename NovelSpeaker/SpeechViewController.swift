@@ -580,16 +580,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 let buttonWidth: CGFloat = 28
                 let totalUnitWidth = buttonWidth + spacing
 
-                // 単純に画面幅 * 0.70 で見積もると、左側の「戻るボタン + タイトル」が食う幅を
-                // 無視してしまい、実際に収まる数より多くを「収まる」と誤判定して最右ボタンを黙って
-                // クリップしてしまう(BUGDOC_SpeechView_RightButton_Clip.md 参照)。
-                // なので戻るボタンとタイトルの実描画幅を差し引いて、実際に使える幅から数を出す。
-                // 過小評価すれば溢れ分は必ず「…」オーバーフローに逃げるので安全側、過大評価だと
-                // クリップする(危険側)なので、少し保守的に見積もる。
-                let titleFont = UIFont.preferredFont(forTextStyle: .headline) // ナビバータイトルフォント(Dynamic Type反映。AppLaunchCoordinator で設定)
-                let title = self.navigationItem.title ?? ""
-                let titleWidth = title.isEmpty ? 0 : (title as NSString).size(withAttributes: [.font: titleFont]).width
-                // 戻るボタン(chevron + 直前画面のタイトル文字) とナビバー左右マージンのおおよその消費幅
+                // 方針: 本文画面ではタイトルを潰してでも右上ボタンの数をできるだけ増やす
+                // (飯村さん指示 2026-07-09。AppStore 版と同じく多めに見積もり、タイトルは
+                //  ナビバーが中央で truncate する)。以前はタイトル幅を差し引いて過小評価し、
+                //  長いタイトルだと「…」込み3個まで減っていた。
+                // クリップ(最右ボタンがバー右端で切れて消える)は trimUpperButtonsToFitIfNeeded が
+                // 実測(バー物理右端基準)で検出して「…」へ退避するので、ここは過大評価で構わない
+                // (過大でも黙ってクリップはしない=安全)。タイトル幅は引かない。
+                // 戻るボタン+左右マージンぶんだけは引いておく。
                 let backButtonAndMargins: CGFloat = 88
 
                 // iPad で上部タブバーがある場合のみ従来通り控えめな割合を絶対上限にする。
@@ -597,7 +595,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 let widthFraction: CGFloat = (isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.76
                 let containerHardCap = UIScreen.main.bounds.width * widthFraction
 
-                let usableWidth = nowWidth - backButtonAndMargins - titleWidth
+                let usableWidth = nowWidth - backButtonAndMargins
                 // 最低でもボタン1個(= 保護対象の speechStop)は必ず表示できるようにする
                 let containerMaxWidth = max(totalUnitWidth, min(usableWidth, containerHardCap))
 

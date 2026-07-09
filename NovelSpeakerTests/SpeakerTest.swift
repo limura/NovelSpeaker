@@ -149,6 +149,19 @@ class UpperButtonBarLayoutTest: XCTestCase {
         XCTAssertLessThanOrEqual(value, 0.5, "5個は収まるので削らないこと(overflow=\(value))")
     }
 
+    // 本文画面の方針(タイトルは潰してでもボタン数を優先)の回帰テスト。
+    // 長いタイトルでも、ナビバーがタイトルを truncate してボタン群にフル幅を譲るので、
+    // iPhone 標準幅(390pt)で 7 個までは全ボタンが収まる(overflow <= 0)。
+    // 以前はタイトル幅を差し引いた見積もりで「…」込み3個まで減っていた退行の防止。
+    func testLongTitleTruncatesForManyButtons() throws {
+        for count in [5, 6, 7] {
+            let (navBar, stack, container) = layoutReadingLikeNavBar(
+                title: "とても長い小説のタイトルですあいうえおかきくけこさしすせそ", buttonCount: count, screenWidth: 390)
+            let overflow = try XCTUnwrap(NovelSpeakerUtility.UpperButtonBarLayout.rightmostButtonOverflow(navBar: navBar, stack: stack, container: container))
+            XCTAssertLessThanOrEqual(overflow, 0.5, "長いタイトルでも \(count) 個は収まる(タイトルが truncate される)こと。overflow=\(overflow)")
+        }
+    }
+
     // window に載っていない container では測定不能(nil)を返し、呼び出し側が再試行できること。
     func testReturnsNilWhenNotInWindow() {
         let stack = UIStackView()
