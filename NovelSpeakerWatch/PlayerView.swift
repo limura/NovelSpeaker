@@ -161,6 +161,7 @@ struct PlayerView: View {
             session.send(.togglePlayPause, quiet: true)
         }
         player.isSelectedAsSource = true
+        player.refreshComplication()
     }
 
     private func selectPhoneSource() {

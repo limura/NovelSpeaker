@@ -276,11 +276,26 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
 
     private func updateProgress() {
         speakingLocation = speaker.currentLocation
-        guard currentContentLength > 0 else {
+        if currentContentLength > 0 {
+            progress = min(1.0, Double(speaker.currentLocation) / Double(currentContentLength))
+        } else {
             progress = 0
-            return
         }
-        progress = min(1.0, Double(speaker.currentLocation) / Double(currentContentLength))
+        pushComplication()
+    }
+
+    /// Watch 単体再生が発話元の時、コンプリケーションの「今読んでいる小説」を更新する
+    private func pushComplication() {
+        guard isSelectedAsSource, !novelID.isEmpty else { return }
+        WatchComplicationUpdater.update(
+            novelID: novelID, title: title, chapterSubtitle: chapterSubtitle,
+            chapterNumber: chapterNumber, chapterCount: chapterCount,
+            progressInChapter: progress)
+    }
+
+    /// 発話元に選ばれた直後など、即時にコンプリケーションへ現在の小説を反映する
+    func refreshComplication() {
+        pushComplication()
     }
 
     private func savePosition(pushContext: Bool = false) {

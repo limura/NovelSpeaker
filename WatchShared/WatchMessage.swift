@@ -94,6 +94,8 @@ struct WatchPlayState {
     var title: String = ""
     var chapterNumber: Int = 0
     var chapterCount: Int = 0
+    /// 現在の章タイトル(subtitle)。無い章もある。コンプリケーション表示に使う
+    var chapterSubtitle: String = ""
     var isPlaying: Bool = false
     /// 章内の読み上げ位置(0.0-1.0)
     var progress: Double = 0
@@ -105,6 +107,7 @@ struct WatchPlayState {
             "title": title,
             "chapterNumber": chapterNumber,
             "chapterCount": chapterCount,
+            "chapterSubtitle": chapterSubtitle,
             "isPlaying": isPlaying,
             "progress": progress,
             "updatedAt": updatedAt.timeIntervalSince1970,
@@ -118,6 +121,7 @@ struct WatchPlayState {
         state.title = dictionary["title"] as? String ?? ""
         state.chapterNumber = dictionary["chapterNumber"] as? Int ?? 0
         state.chapterCount = dictionary["chapterCount"] as? Int ?? 0
+        state.chapterSubtitle = dictionary["chapterSubtitle"] as? String ?? ""
         state.isPlaying = dictionary["isPlaying"] as? Bool ?? false
         state.progress = dictionary["progress"] as? Double ?? 0
         state.updatedAt = Date(timeIntervalSince1970: dictionary["updatedAt"] as? TimeInterval ?? 0)

@@ -244,6 +244,14 @@ final class PhoneSessionManager: NSObject, ObservableObject {
             if state.isPlaying {
                 recordLastPlayed(novelID: state.novelID)
             }
+            // Watch 単体再生が発話元の時はそちらがコンプリケーションを更新するので、ここでは触らない
+            // (playState には章タイトルが無く、単体側の subtitle 表示を上書きしてしまうため)
+            if !WatchSpeechPlayer.shared.isSelectedAsSource, !state.novelID.isEmpty {
+                WatchComplicationUpdater.update(
+                    novelID: state.novelID, title: state.title, chapterSubtitle: state.chapterSubtitle,
+                    chapterNumber: state.chapterNumber, chapterCount: state.chapterCount,
+                    progressInChapter: state.progress)
+            }
         }
     }
 

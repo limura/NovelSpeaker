@@ -92,8 +92,12 @@ class WatchSessionCoordinator: NSObject {
 
     /// 現在の再生状態と小説一覧を applicationContext で送る。
     /// 高頻度で呼ばれても実際の送信は1秒に1回に抑える。
-    func pushContextSoon() {
+    /// force: 内容が前回と同じでも必ず送る。Watch が requestStatus で「状態が欲しい」と
+    /// 言ってきた時に使う(Watch を再インストールすると受信済み context が消えるが、
+    /// iPhone 側の指紋は残っているので、通常の重複抑止だと二度と送られなくなるため)
+    func pushContextSoon(force: Bool = false) {
         DispatchQueue.main.async {
+            if force { self.forceNextContextPush = true }
             if self.contextPushScheduled { return }
             let interval = Date().timeIntervalSince(self.lastContextPushDate)
             let delay = max(0, 1.0 - interval)
@@ -108,20 +112,23 @@ class WatchSessionCoordinator: NSObject {
 
     private var lastContextFingerprint: Data? = nil
     private var contextPushCount = 0
+    private var forceNextContextPush = false
 
     private func pushContextNow() {
         let session = WCSession.default
         // isWatchAppInstalled は開発時のインストール経路によっては false のままになるが、
         // sendMessage が通る状態なら updateApplicationContext も通ることが多いので条件にしない
         guard isStarted, session.activationState == .activated, session.isPaired else { return }
+        let force = forceNextContextPush
+        forceNextContextPush = false
         var fullContext: [String: Any] = [:]
         fullContext[WatchMessage.Context.playState] = currentPlayState().toDictionary()
         let novelList = currentNovelList().map { $0.toDictionary() }
         fullContext[WatchMessage.Context.novelList] = novelList
         // 内容が前回送信時と同じなら送らない(Bluetooth 送信を減らして電池を守る)。
-        // updatedAt は毎回変わるので比較から除外する。
+        // updatedAt は毎回変わるので比較から除外する。force 指定時はこの抑止を飛ばす。
         let fingerprint = WatchSessionCoordinator.fingerprint(of: fullContext)
-        if fingerprint != nil && fingerprint == lastContextFingerprint { return }
+        if !force && fingerprint != nil && fingerprint == lastContextFingerprint { return }
         // applicationContext にはサイズ上限があるため、失敗したら小説一覧を減らして再試行する
         for limit in [novelList.count, 50, 10] {
             var context = fullContext
@@ -169,6 +176,7 @@ class WatchSessionCoordinator: NSObject {
                 guard let story = RealmGlobalState.GetLastReadStory(realm: realm) else { return }
                 state.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: story.storyID)
                 state.chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: story.storyID)
+                state.chapterSubtitle = story.subtitle
                 if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: state.novelID) {
                     state.title = novel.title
                     state.chapterCount = novel.lastChapterNumber ?? 0
@@ -187,6 +195,7 @@ class WatchSessionCoordinator: NSObject {
                 state.chapterCount = novel.lastChapterNumber ?? 0
             }
             if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
+                state.chapterSubtitle = story.subtitle
                 let length = max(story.content.count, 1)
                 state.progress = min(1.0, Double(StorySpeaker.shared.readLocation) / Double(length))
             }
@@ -357,7 +366,7 @@ class WatchSessionCoordinator: NSObject {
             // (Watch アプリを Xcode から直接インストールすると companion の関連付けが
             // 壊れてこうなることがある)。転送を積まずにエラーを返してスピナーを止めさせる。
             guard WCSession.default.isWatchAppInstalled else {
-                completion((false, "Watchアプリが未インストール扱いになっています。Watch側のことせかいを一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。"))
+                completion((false, "Watchアプリが未インストール扱いになっています。Watch側の ことせかい を一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。"))
                 return
             }
             transferNovel(novelID: novelID)
@@ -367,6 +376,9 @@ class WatchSessionCoordinator: NSObject {
         case .requestStatus:
             // Watch アプリが開かれたタイミングなので、発話設定の変更もここで拾って送る
             transferSpeechSettingsIfNeeded()
+            // Watch は「状態が無いから欲しい」と言ってきている。再インストール直後などは内容が
+            // 前回と同じでも Watch 側は空なので、重複抑止を飛ばして必ず小説一覧を送る
+            pushContextSoon(force: true)
             completion((true, nil))  // 返信とpushContextSoon()で状態が送られる
         case .checkNovelExistence, .syncSpeechSettings:
             completion((true, nil))  // handleCommand で処理済み(ここには来ない)

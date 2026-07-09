@@ -18,7 +18,7 @@ struct BookshelfView: View {
     var body: some View {
         List {
             if session.novels.isEmpty {
-                Text("iPhoneのことせかいを一度起動すると、本棚がここに表示されます。")
+                Text("iPhoneの ことせかい を一度起動すると、本棚がここに表示されます。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -51,6 +51,13 @@ struct BookshelfView: View {
             }
         }
         .navigationTitle("本棚")
+        .onAppear {
+            // 本棚が空(再インストール直後など)なら iPhone に一覧を要求する。
+            // iPhone 側は requestStatus を受けると重複抑止を飛ばして必ず送り返す
+            if session.novels.isEmpty {
+                session.send(.requestStatus, quiet: true)
+            }
+        }
         .confirmationDialog(
             dialogNovel?.title ?? "",
             isPresented: Binding(

@@ -59,7 +59,7 @@ struct UtilityView: View {
                 }
             }
             Section {
-                Text("Watchへ転送する小説の選択は、本棚で小説を左にスワイプするか、iPhoneのことせかいの設定から行えます。")
+                Text("Watchへ転送する小説の選択は、本棚で小説を左にスワイプするか、iPhoneの ことせかい の設定から行えます。")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
