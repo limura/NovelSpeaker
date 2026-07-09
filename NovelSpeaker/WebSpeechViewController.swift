@@ -1068,6 +1068,13 @@ body.NovelSpeakerBody {
                         accessibilityLabel: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
                     )
                     barButtonArray.append(button)
+                case .addPageToOtherNovel:
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "book.badge.plus"),
+                        action: #selector(self.addPageToOtherNovelButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
+                    )
+                    barButtonArray.append(button)
                 case .speechStop:
                     let button = createBarButtonItem(image: UIImage(systemName: "play.fill"), action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
                     self.startStopButton = button
@@ -1580,7 +1587,32 @@ body.NovelSpeakerBody {
             StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
         }
     }
-    
+
+    // 「他の小説にこのページを追加する」。通常の本文画面(SpeechViewController)と同一実装。
+    @objc func addPageToOtherNovelButtonClicked(_ sender: Any) {
+        let storyID = StorySpeaker.shared.storyID
+        let currentNovelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+        let story:Story? = RealmUtil.RealmBlock { (realm) -> Story? in
+            return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID)
+        }
+        guard let story = story else { return }
+        let content = story.content
+        let subtitle = story.subtitle
+        MultipleNovelIDSelectorViewController.PushSingleSelector(
+            parent: self,
+            excludeNovelID: currentNovelID,
+            title: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する"),
+            confirmMessage: { novelTitle in
+                String(format: NSLocalizedString("AddPageToOtherNovel_ConfirmMessage", comment: "「%@」にこのページを追加しますか？"), novelTitle)
+            },
+            onConfirmed: { [weak self] targetNovelID in
+                guard let self = self else { return }
+                let result = NovelSpeakerUtility.AppendPageToNovelTail(targetNovelID: targetNovelID, content: content, subtitle: subtitle)
+                let message = result ? NSLocalizedString("AddPageToOtherNovel_Success", comment: "ページを追加しました。") : NSLocalizedString("AddPageToOtherNovel_Failure", comment: "ページの追加に失敗しました。")
+                NiftyUtility.EasyDialogMessageDialog(viewController: self, message: message)
+            })
+    }
+
     @objc func chapterSliderValueChanged(_ sender: Any) {
         disableCurrentReadingStoryChangeFloatingButton()
         let storyID = StorySpeaker.shared.storyID
