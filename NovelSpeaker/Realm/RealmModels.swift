@@ -2678,6 +2678,7 @@ struct SpeechViewButtonSetting: Codable {
         return result
     }
     // speechStopボタンが無ければ列の「最後に」追加します
+    // (設定タブで並び順を変えられるようになっているので、既にある speechStop の位置は動かさない)
     static func InjectSpeechStopButtonIfNeeded(settingArray:[SpeechViewButtonSetting]) -> [SpeechViewButtonSetting] {
         var result: [SpeechViewButtonSetting] = []
         var speechStopButtonExists:Bool = false

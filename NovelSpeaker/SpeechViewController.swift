@@ -49,7 +49,42 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var currentReadStoryIDChangeAlertFloatingButton:FloatingButton? = nil
     
     var isUpperRightButtonsChanged:Bool = true
-    
+
+    // 右上ボタン群を「実レイアウト後に実測してはみ出したら『…』へ追い出す」ための状態。
+    // 事前見積もり(assignUpperButtons の maxButtons)だけでは、ナビバーが戻るボタン/タイトルに
+    // どれだけ幅を割り振るかを正確に知り得ずクリップし得るため、viewDidLayoutSubviews で実測して補正する。
+    weak var upperButtonContainerView: UIView? = nil
+    weak var upperButtonStackView: UIStackView? = nil
+    // ある画面幅で「実測の結果ここまでしか入らない」と判明したスロット数の上限(その幅でのみ有効)。
+    var upperButtonFittedSlotLimit: Int? = nil
+    var upperButtonFittedSlotLimitWidth: CGFloat = -1
+    // trim のデバウンス用: 直前の実測結果。回転直後などの過渡レイアウトを1回だけ掴んで
+    // 誤って削るのを防ぐため、2回連続で同じはみ出しを観測した時だけ削る。
+    var upperButtonTrimPendingMeasure: (n: Int, overflow: CGFloat)? = nil
+    // 現在のボタン群を組み立てた時の間隔設定。設定変更(間隔)を検知して作り直すために保持する。
+    var currentBarButtonItemSpacing: CGFloat = -1
+
+    // 実測で決めたスロット上限をリセットして、次のレイアウトで再見積もり+再実測させる。
+    // 回転・文字サイズ(Dynamic Type)変更・画面への入り直しで呼ぶことで、
+    // 「一度縮んだら二度と戻らない」状態を避ける(条件が変われば増える方向にも戻る)。
+    func resetUpperButtonFittedSlotLimit() {
+        if self.upperButtonFittedSlotLimit == nil { return }
+        self.upperButtonFittedSlotLimit = nil
+        self.upperButtonFittedSlotLimitWidth = -1
+        self.upperButtonTrimPendingMeasure = nil
+        self.isUpperRightButtonsChanged = true
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        // 回転等で使える幅が変わるので、実測上限を捨てて新しい幅で再見積もり+再実測する
+        self.resetUpperButtonFittedSlotLimit()
+        coordinator.animate(alongsideTransition: nil) { _ in
+            self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -110,6 +145,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        // 画面に入り直すたびに実測上限をリセットしてから測り直す(誤検出で縮んだままの固着を防ぐ)。
+        self.resetUpperButtonFittedSlotLimit()
+        // 画面表示が完了し customView がナビバーに載ったこのタイミングで実測補正する(主トリガ)。
+        self.scheduleUpperButtonTrim()
         self.textView.becomeFirstResponder()
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
@@ -140,6 +179,64 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         forceUpdateUpperButtons()
+        scheduleUpperButtonTrim()
+    }
+
+    // ナビバー(タイトルラベル/customView)が実レイアウトで確定するタイミングは、状態復元や
+    // push アニメーションの都合で viewDidLayoutSubviews より後になることがある。まだ実測できない
+    // (navBar が window に載っていない/タイトルラベル未生成)うちは、短い間隔で数回だけ実測を
+    // 再試行して確実に1回は測れるようにする。
+    func scheduleUpperButtonTrim(attempt: Int = 0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + (attempt == 0 ? 0 : 0.15)) { [weak self] in
+            guard let self = self else { return }
+            if self.trimUpperButtonsToFitIfNeeded() == false && attempt < 10 {
+                self.scheduleUpperButtonTrim(attempt: attempt + 1)
+            }
+        }
+    }
+
+    // 右上ボタン群が実際のナビバー幅に収まっているかを実レイアウト後に実測し、
+    // はみ出している(=最右がクリップされて消える)場合は表示スロット数を1段階減らして
+    // 溢れ分を「…」オーバーフローメニューに追い出す。収まるまで繰り返し呼ばれて収束する。
+    // 事前見積もり(assignUpperButtons)は左側の戻るボタン/タイトルが食う幅を正確には知り得ないので、
+    // クリップを確実にゼロにするにはこの実測補正が必要。
+    // 戻り値: 実測できたら true(はみ出しの有無に依らず)。まだ測れなければ false(呼び出し側が再試行)。
+    @discardableResult
+    func trimUpperButtonsToFitIfNeeded() -> Bool {
+        // 遷移アニメーション中はナビバー各部のフレームが過渡的で誤測しやすいので触らない
+        if self.navigationController?.transitionCoordinator != nil { return false }
+        // customView(container)はナビバーに取り込まれるまで window に載らないので guard には使わない。
+        // 実測に必要なのは navBar とその中のタイトルラベルで、こちらは navBar が window にあれば有効。
+        guard let stack = self.upperButtonStackView,
+              let navBar = self.navigationController?.navigationBar,
+              navBar.window != nil else { return false }
+        let n = stack.arrangedSubviews.count
+        // 「…」+ 保護対象1個 の 2個未満はこれ以上減らせない
+        guard n >= 2 else { return true }
+
+        guard let overflow = NovelSpeakerUtility.UpperButtonBarLayout.rightmostButtonOverflow(navBar: navBar, stack: stack, container: self.upperButtonContainerView) else { return false }
+
+        if overflow > 0.5 {
+            // 回転直後などの過渡レイアウトを1回だけ掴んで誤って削るのを防ぐため、
+            // 0.15秒おいて2回連続で同じはみ出しを観測した時だけ削る(デバウンス)。
+            guard let pending = self.upperButtonTrimPendingMeasure, pending.n == n, abs(pending.overflow - overflow) < 0.5 else {
+                self.upperButtonTrimPendingMeasure = (n, overflow)
+                return false // 再試行(次の実測)で確認する
+            }
+            self.upperButtonTrimPendingMeasure = nil
+            // 実測で最右ボタンがはみ出している(クリップ)ので、表示スロットを1段階だけ減らして
+            // 溢れ分を「…」に追い出し、再構築させる。1個ずつ減らして「収まるまで」収束させる。
+            let newLimit = n - 1
+            if self.upperButtonFittedSlotLimit == nil || newLimit < (self.upperButtonFittedSlotLimit ?? Int.max) || abs(self.upperButtonFittedSlotLimitWidth - self.currentWindowWidth) >= 0.5 {
+                self.upperButtonFittedSlotLimit = newLimit
+                self.upperButtonFittedSlotLimitWidth = self.currentWindowWidth
+                self.isUpperRightButtonsChanged = true // 幅が同じでも作り直させる
+                self.forceUpdateUpperButtons()
+            }
+        } else {
+            self.upperButtonTrimPendingMeasure = nil
+        }
+        return true
     }
     
     deinit {
@@ -469,14 +566,36 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 let isPad = self.traitCollection.userInterfaceIdiom == .pad
                 // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
                 let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
-                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.70)
 
                 let buttonWidth: CGFloat = 28
-
                 let totalUnitWidth = buttonWidth + spacing
 
-                return Int(floor((containerMaxWidth + spacing) / totalUnitWidth))
+                // 方針: 本文画面ではタイトルを潰してでも右上ボタンの数をできるだけ増やす
+                // (飯村さん指示 2026-07-09。AppStore 版と同じく多めに見積もり、タイトルは
+                //  ナビバーが中央で truncate する)。以前はタイトル幅を差し引いて過小評価し、
+                //  長いタイトルだと「…」込み3個まで減っていた。
+                // クリップ(最右ボタンがバー右端で切れて消える)は trimUpperButtonsToFitIfNeeded が
+                // 実測(バー物理右端基準)で検出して「…」へ退避するので、ここは過大評価で構わない
+                // (過大でも黙ってクリップはしない=安全)。タイトル幅は引かない。
+                // 戻るボタン+左右マージンぶんだけは引いておく。
+                let backButtonAndMargins: CGFloat = 88
+
+                // iPad で上部タブバーがある場合のみ従来通り控えめな割合を絶対上限にする。
+                // それ以外は描画側コンテナ上限(container.widthAnchor <= screenWidth * 0.76)に合わせる。
+                let widthFraction: CGFloat = (isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.76
+                let containerHardCap = UIScreen.main.bounds.width * widthFraction
+
+                let usableWidth = nowWidth - backButtonAndMargins
+                // 最低でもボタン1個(= 保護対象の speechStop)は必ず表示できるようにする
+                let containerMaxWidth = max(totalUnitWidth, min(usableWidth, containerHardCap))
+
+                return max(1, Int(floor((containerMaxWidth + spacing) / totalUnitWidth)))
             }()
+            // 同じ画面幅で「実測の結果ここまでしか入らない」と判明していれば、その上限まで下げる。
+            // (見積もりが実レイアウトで溢れる=クリップするのを確実に防ぐための頭打ち。trimUpperButtonsToFitIfNeeded が設定する)
+            if let fittedLimit = self.upperButtonFittedSlotLimit, abs(self.upperButtonFittedSlotLimitWidth - nowWidth) < 0.5 {
+                maxButtons = min(maxButtons, fittedLimit)
+            }
             // VoiceOver 環境下 であれば重なってしまってもよしとする
             if UIAccessibility.isVoiceOverRunning {
                 // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
@@ -523,6 +642,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 moreButton.menu = menu
                 moreButton.showsMenuAsPrimaryAction = true
                 moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
+                // 他のボタンと同じ 28pt 固定にする。これが無いと「…」だけ intrinsic 幅
+                // (Dynamic Type で変動)になり、幅見積もり(28pt×個数)と実レイアウトがズレる。
+                moreButton.translatesAutoresizingMaskIntoConstraints = false
+                let moreWidthConstraint = moreButton.widthAnchor.constraint(equalToConstant: 28)
+                moreWidthConstraint.priority = UILayoutPriority(999)
+                let moreHeightConstraint = moreButton.heightAnchor.constraint(equalToConstant: 28)
+                moreHeightConstraint.priority = UILayoutPriority(999)
+                NSLayoutConstraint.activate([moreWidthConstraint, moreHeightConstraint])
 
                 visibleButtons.insert(moreButton, at: 0)
             }
@@ -545,9 +672,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 
                 return true
             }
-            // 幅が前回と同じで同じアクションのボタンが入っているならこれ以上することはないはず
+            // 幅が前回と同じで、同じアクションのボタンが、同じ間隔で入っているならすることはないはず。
+            // (間隔設定を変えた時に「アクションは同じ」で早期 return してしまい反映されなかったので、
+            //  spacing も一致条件に加える)
             let epsilon: CGFloat = 0.000001
-            if abs(self.currentWindowWidth - nowWidth) < epsilon {
+            if abs(self.currentWindowWidth - nowWidth) < epsilon && abs(self.currentBarButtonItemSpacing - spacing) < epsilon {
                 if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
                     let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
                     let buttons = visibleButtons
@@ -558,6 +687,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
             }
             self.currentWindowWidth = nowWidth
+            self.currentBarButtonItemSpacing = spacing
             self.isUpperRightButtonsChanged = false
 
             let stack = UIStackView()
@@ -568,7 +698,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             for button in visibleButtons {
                 stack.addArrangedSubview(button)
             }
-            
+
             let container = UIView()
             container.translatesAutoresizingMaskIntoConstraints = false
             let maxWidth = UIScreen.main.bounds.width * 0.76
@@ -583,6 +713,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
             ])
             self.navigationItem.rightBarButtonItem = barItem
+            // viewDidLayoutSubviews で実測補正するために参照を控えておく
+            self.upperButtonContainerView = container
+            self.upperButtonStackView = stack
+            // customView がナビバーに取り込まれて実フレームが確定するのは次のレイアウト後なので、
+            // 遅延+数回リトライで確実に実測補正する(viewDidLayoutSubviews のタイミングでは navBar/
+            // タイトルラベルがまだ整っておらず measure できないことがあるため、こちらを主トリガにする)。
+            self.scheduleUpperButtonTrim()
         }
     }
     
@@ -734,11 +871,29 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 self.navigationController?.popViewController(animated: true)
             }
         }
-        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { (notification) in
-            self.forceUpdateUpperButtons()
-        }
-        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { (notification) in
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            // 間隔が変わると使える幅も変わるので、作り直しフラグを立て、実測上限もリセットして測り直す。
             self.isUpperRightButtonsChanged = true
+            self.resetUpperButtonFittedSlotLimit()
+            self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
+        }
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            // ボタンの表示/非表示が変わったので、実測上限もリセットして作り直し+trim をやり直す。
+            self.resetUpperButtonFittedSlotLimit()
+            self.isUpperRightButtonsChanged = true
+            self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
+        }
+        // Dynamic Type の文字サイズが変わるとタイトルや戻るボタンの幅が変わり、
+        // 右上ボタン群に使える幅も変わるので、実測上限をリセットして測り直す。
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            self.resetUpperButtonFittedSlotLimit()
+            self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
         }
     }
     func unregistNotificationCenter() {
