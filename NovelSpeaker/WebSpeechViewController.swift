@@ -76,6 +76,28 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     weak var upperButtonStackView: UIStackView? = nil
     var upperButtonFittedSlotLimit: Int? = nil
     var upperButtonFittedSlotLimitWidth: CGFloat = -1
+    // trim のデバウンス用: 直前の実測結果(読書画面 SpeechViewController と同じ)。
+    var upperButtonTrimPendingMeasure: (n: Int, overflow: CGFloat)? = nil
+
+    // 実測で決めたスロット上限をリセットして、次のレイアウトで再見積もり+再実測させる。
+    // 回転・文字サイズ変更・画面への入り直しで呼ぶ(「一度縮んだら戻らない」の防止)。
+    func resetUpperButtonFittedSlotLimit() {
+        if self.upperButtonFittedSlotLimit == nil { return }
+        self.upperButtonFittedSlotLimit = nil
+        self.upperButtonFittedSlotLimitWidth = -1
+        self.upperButtonTrimPendingMeasure = nil
+        self.isUpperRightButtonsChanged = true
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        // 回転等で使える幅が変わるので、実測上限を捨てて新しい幅で再見積もり+再実測する
+        self.resetUpperButtonFittedSlotLimit()
+        coordinator.animate(alongsideTransition: nil) { _ in
+            self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -126,6 +148,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        // 画面に入り直すたびに実測上限をリセットしてから測り直す(誤検出で縮んだままの固着を防ぐ)。
+        self.resetUpperButtonFittedSlotLimit()
         // 画面表示が完了し customView がナビバーに載ったこのタイミングで実測補正する(主トリガ)。
         self.scheduleUpperButtonTrim()
     }
@@ -147,6 +171,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { (notification) in
             self.isUpperRightButtonsChanged = true
+        }
+        // Dynamic Type の文字サイズ変更で使える幅が変わるので、実測上限をリセットして測り直す。
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in
+            guard let self = self else { return }
+            self.resetUpperButtonFittedSlotLimit()
+            self.forceUpdateUpperButtons()
+            self.scheduleUpperButtonTrim()
         }
     }
     func unregistNotificationCenter() {
@@ -1102,6 +1133,14 @@ body.NovelSpeakerBody {
                 moreButton.menu = menu
                 moreButton.showsMenuAsPrimaryAction = true
                 moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
+                // 他のボタンと同じ 28pt 固定にする。これが無いと「…」だけ intrinsic 幅
+                // (Dynamic Type で変動)になり、幅見積もり(28pt×個数)と実レイアウトがズレる。
+                moreButton.translatesAutoresizingMaskIntoConstraints = false
+                let moreWidthConstraint = moreButton.widthAnchor.constraint(equalToConstant: 28)
+                moreWidthConstraint.priority = UILayoutPriority(999)
+                let moreHeightConstraint = moreButton.heightAnchor.constraint(equalToConstant: 28)
+                moreHeightConstraint.priority = UILayoutPriority(999)
+                NSLayoutConstraint.activate([moreWidthConstraint, moreHeightConstraint])
 
                 visibleButtons.insert(moreButton, at: 0)
             }
@@ -1198,6 +1237,12 @@ body.NovelSpeakerBody {
         guard let overflow = NovelSpeakerUtility.UpperButtonBarLayout.rightmostButtonOverflow(navBar: navBar, stack: stack, container: self.upperButtonContainerView) else { return false }
 
         if overflow > 0.5 {
+            // 過渡レイアウトの誤検出を防ぐため、2回連続で同じはみ出しを観測した時だけ削る(デバウンス)。
+            guard let pending = self.upperButtonTrimPendingMeasure, pending.n == n, abs(pending.overflow - overflow) < 0.5 else {
+                self.upperButtonTrimPendingMeasure = (n, overflow)
+                return false // 再試行(次の実測)で確認する
+            }
+            self.upperButtonTrimPendingMeasure = nil
             let newLimit = n - 1
             if self.upperButtonFittedSlotLimit == nil || newLimit < (self.upperButtonFittedSlotLimit ?? Int.max) || abs(self.upperButtonFittedSlotLimitWidth - self.currentWindowWidth) >= 0.5 {
                 self.upperButtonFittedSlotLimit = newLimit
@@ -1205,6 +1250,8 @@ body.NovelSpeakerBody {
                 self.isUpperRightButtonsChanged = true
                 self.forceUpdateUpperButtons()
             }
+        } else {
+            self.upperButtonTrimPendingMeasure = nil
         }
         return true
     }
