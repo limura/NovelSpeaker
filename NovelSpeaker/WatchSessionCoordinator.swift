@@ -13,6 +13,7 @@ import WatchConnectivity
 import RealmSwift
 import CryptoKit
 import UIKit
+import AVFoundation
 
 class WatchSessionCoordinator: NSObject {
     static let shared = WatchSessionCoordinator()
@@ -430,6 +431,28 @@ class WatchSessionCoordinator: NSObject {
             completion((true, nil))  // 返信とpushContextSoon()で状態が送られる
         case .checkNovelExistence, .syncSpeechSettings:
             completion((true, nil))  // handleCommand で処理済み(ここには来ない)
+        case .setDefaultSpeakerConfig:
+            guard let rate = message[WatchMessage.Arg.rate] as? Double,
+                  let volume = message[WatchMessage.Arg.volume] as? Double else {
+                completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorInvalidArguments", comment: "引数が不正です")))
+                return
+            }
+            let clampedRate = min(max(Float(rate), AVSpeechUtteranceMinimumSpeechRate), AVSpeechUtteranceMaximumSpeechRate)
+            let clampedVolume = min(max(Float(volume), 0.0), 1.0)
+            RealmUtil.RealmBlock { realm in
+                guard let speakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) else { return }
+                RealmUtil.WriteWith(realm: realm) { _ in
+                    speakerSetting.rate = clampedRate
+                    speakerSetting.volume = clampedVolume
+                }
+            }
+            // 発話中なら次のブロックから反映させる(保存だけだと次の再生開始まで反映されない)
+            StorySpeaker.shared.applyLiveDefaultSpeakerConfig(rate: clampedRate, volume: clampedVolume)
+            // アナウンス音声(「次の章はありません」等)も新しい速度・音量に合わせる
+            StorySpeaker.shared.ApplyDefaultSpeakerSettingToAnnounceSpeaker()
+            // Watch 単体再生用の設定ファイルも新しい値で送り直す(指紋が変わるので実際に送られる)
+            transferSpeechSettingsIfNeeded()
+            completion((true, nil))
         case .subscribeSpeechBlock:
             isSpeechBlockSubscribed = true
             // 購読直後は次のブロック境界を待たずに現在位置を即送る(本文ページのハイライト初期表示用)

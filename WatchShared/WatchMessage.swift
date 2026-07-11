@@ -40,6 +40,9 @@ enum WatchMessage {
         // 本文表示の位置購読(purchase/subscribe モデル)
         case subscribeSpeechBlock
         case unsubscribeSpeechBlock
+        /// デフォルト話者の速度・音量を変更する(args: rate, volume)。
+        /// iPhone 側の RealmSpeakerSetting に保存され、発話中なら次のブロックから反映される
+        case setDefaultSpeakerConfig
     }
 
     /// コマンド引数のキー
@@ -51,6 +54,10 @@ enum WatchMessage {
         static let location = "location"
         /// Watch が保存している発話設定の指紋(SHA256 hex)
         static let fingerprint = "fingerprint"
+        /// 発話速度(Double, AVSpeechUtterance.rate と同じ 0.0-1.0)
+        static let rate = "rate"
+        /// 発話音量(Double, 0.0-1.0)
+        static let volume = "volume"
     }
 
     /// iPhone → Watch: applicationContext のキー

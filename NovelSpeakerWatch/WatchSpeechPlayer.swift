@@ -39,6 +39,11 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     private var stories: [Int: NovelStorage.StoredChapter] = [:]
     private var currentContentLength = 0
     private var lastPositionSaveDate = Date(timeIntervalSince1970: 0)
+    // 現在のブロック列に焼き込まれているデフォルト話者の rate/volume。
+    // 発話中の速度・音量変更を「新しい値 ÷ 焼き込み値」の倍率で反映するために覚えておく
+    private var bakedDefaultSpeakerRate: Float = AVSpeechUtteranceDefaultSpeechRate
+    private var bakedDefaultSpeakerVolume: Float = 1.0
+    private var configSendWorkItem: DispatchWorkItem?
 
     /// iOS 側 StorySpeaker と同じブロック分割指定
     private static let withMoreSplitTargets = ["。", "、", "　", "\n"]
@@ -79,6 +84,9 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         currentContentLength = story.content.unicodeScalars.count
         speaker.StopSpeech()
         speaker.setSpeechBlockArray(blockArray: Self.buildBlocks(content: story.content))
+        let baked = Self.effectiveDefaultSpeakerConfig()
+        bakedDefaultSpeakerRate = baked.rate
+        bakedDefaultSpeakerVolume = baked.volume
         speaker.SetSpeechLocation(location: min(max(0, location), max(0, currentContentLength - 1)))
         updateProgress()
         return true
@@ -102,6 +110,12 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     /// 現在の発話設定で本文をブロック分割する(本文ページのハイライト範囲計算にも使う)
     static func buildBlocks(content: String) -> [CombinedSpeechBlock] {
         let settings = WatchSpeechSettingsStorage.current()
+        // Watch 側で速度・音量を変更した分(iPhone へ書き戻し中のローカル差分)を重ねる
+        var defaultSpeaker = settings.defaultSpeaker
+        if let override = WatchSpeechConfigStore.localOverride() {
+            defaultSpeaker.rate = override.rate
+            defaultSpeaker.volume = override.volume
+        }
         func toSpeakerSetting(_ speaker: WatchSpeechSettings.Speaker) -> SpeakerSetting {
             return SpeakerSetting(pitch: speaker.pitch, rate: speaker.rate, volume: speaker.volume, type: speaker.type, voiceIdentifier: speaker.voiceIdentifier, locale: speaker.locale)
         }
@@ -114,7 +128,58 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         }
         let sectionConfigs = settings.sectionConfigs.map { SpeechSectionConfig(startText: $0.startText, endText: $0.endText, speakerSetting: toSpeakerSetting($0.speaker)) }
         let waitConfigs = settings.waitConfigs.map { SpeechWaitConfig(targetText: $0.targetText, delayTimeInSec: $0.delayTimeInSec) }
-        return StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: toSpeakerSetting(settings.defaultSpeaker), sectionConfigList: sectionConfigs, waitConfigList: waitConfigs, speechModArray: mods)
+        return StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: toSpeakerSetting(defaultSpeaker), sectionConfigList: sectionConfigs, waitConfigList: waitConfigs, speechModArray: mods)
+    }
+
+    /// 現在有効なデフォルト話者の速度・音量(ローカル差分があればそちら、無ければ同期済み設定)。
+    /// 速度・音量設定 UI の初期値と、発話中変更の倍率計算の基準値に使う
+    static func effectiveDefaultSpeakerConfig() -> (rate: Float, volume: Float) {
+        if let override = WatchSpeechConfigStore.localOverride() {
+            return (override.rate, override.volume)
+        }
+        let speaker = WatchSpeechSettingsStorage.current().defaultSpeaker
+        return (speaker.rate, speaker.volume)
+    }
+
+    // MARK: - 速度・音量の変更
+
+    /// デフォルト話者の速度・音量を変更する(速度・音量設定 UI から呼ばれる)。
+    /// - 単体再生中なら次のブロックから反映される
+    /// - iPhone に繋がっていれば iPhone の標準話者設定にも保存される(繋がっていなければ後で送る)
+    func setSpeechConfig(rate: Float, volume: Float) {
+        let clampedRate = min(max(rate, AVSpeechUtteranceMinimumSpeechRate), AVSpeechUtteranceMaximumSpeechRate)
+        let clampedVolume = min(max(volume, 0.0), 1.0)
+        WatchSpeechConfigStore.set(rate: clampedRate, volume: clampedVolume)
+        if !novelID.isEmpty {
+            speaker.rateMultiplier = clampedRate / max(0.01, bakedDefaultSpeakerRate)
+            speaker.volumeMultiplier = clampedVolume / max(0.01, bakedDefaultSpeakerVolume)
+        }
+        // スライダー操作の途中で毎回送らないよう、少し待ってまとめて送る
+        configSendWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.sendPendingSpeechConfigIfPossible()
+        }
+        configSendWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: work)
+    }
+
+    /// 未送信の速度・音量変更を iPhone へ送る(reachable になった時などにも呼ばれる)
+    func sendPendingSpeechConfigIfPossible() {
+        guard WatchSpeechConfigStore.isPendingSend,
+              let override = WatchSpeechConfigStore.localOverride() else { return }
+        guard WCSession.default.activationState == .activated, WCSession.default.isReachable else { return }
+        PhoneSessionManager.shared.send(.setDefaultSpeakerConfig, args: [
+            WatchMessage.Arg.rate: Double(override.rate),
+            WatchMessage.Arg.volume: Double(override.volume),
+        ], quiet: true) { ok in
+            if ok { WatchSpeechConfigStore.markSent() }
+        }
+    }
+
+    /// 発話設定ファイルを受信した時に PhoneSessionManager から呼ばれる。
+    /// ローカル差分が iPhone 側へ反映済みなら差分を解消する
+    func reconcileSpeechConfigAfterSettingsReceived() {
+        WatchSpeechConfigStore.reconcileAfterSettingsReceived()
     }
 
     // MARK: - 再生操作
@@ -453,5 +518,77 @@ enum WatchSpeechSettingsStorage {
         let fallback = WatchSpeechSettings()
         cache = fallback
         return fallback
+    }
+}
+
+// MARK: - 速度・音量の Watch 側ローカル差分
+
+/// Watch で変更したデフォルト話者の速度・音量。
+/// 正本は iPhone の RealmSpeakerSetting で、ここは「iPhone へ書き戻すまでの間(オフライン中など)も
+/// Watch の発話に効かせるためのローカル差分」。同期済み設定ファイル(と指紋)には手を付けないので、
+/// 発話直前の設定同期(指紋比較)と衝突しない。
+/// 書き戻しが済んで新しい設定ファイルが届いたら reconcile で解消される。
+enum WatchSpeechConfigStore {
+    private struct Stored: Codable {
+        var rate: Float
+        var volume: Float
+        var updatedAt: Date
+        var pendingSend: Bool
+    }
+
+    private static let key = "WatchSpeechConfigOverride"
+
+    private static func loadStored() -> Stored? {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let stored = try? JSONDecoder().decode(Stored.self, from: data) else { return nil }
+        return stored
+    }
+
+    private static func save(_ stored: Stored?) {
+        if let stored = stored, let data = try? JSONEncoder().encode(stored) {
+            UserDefaults.standard.set(data, forKey: key)
+        } else {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
+    static func localOverride() -> (rate: Float, volume: Float)? {
+        guard let stored = loadStored() else { return nil }
+        return (stored.rate, stored.volume)
+    }
+
+    static var isPendingSend: Bool {
+        return loadStored()?.pendingSend == true
+    }
+
+    static func set(rate: Float, volume: Float) {
+        save(Stored(rate: rate, volume: volume, updatedAt: Date(), pendingSend: true))
+    }
+
+    /// iPhone への送信が成功した(iPhone 側の Realm に保存された)。
+    /// 差分自体は新しい設定ファイルが届く(reconcile)まで発話用に残しておく
+    static func markSent() {
+        guard var stored = loadStored() else { return }
+        stored.pendingSend = false
+        save(stored)
+    }
+
+    static func clear() {
+        save(nil)
+    }
+
+    /// 発話設定ファイルの受信後に呼ぶ。ローカル差分が iPhone 側に反映済み
+    /// (届いた設定が差分と一致)か、iPhone 側でより新しい変更があった場合は差分を解消する。
+    /// まだ送れていない(pendingSend)差分は保持し、次に繋がった時に送る
+    static func reconcileAfterSettingsReceived() {
+        guard let stored = loadStored(), stored.pendingSend == false else { return }
+        let settings = WatchSpeechSettingsStorage.current()
+        let matches = abs(settings.defaultSpeaker.rate - stored.rate) < 0.001
+            && abs(settings.defaultSpeaker.volume - stored.volume) < 0.001
+        if matches || settings.updatedAt > stored.updatedAt {
+            clear()
+        }
+        // どちらでもない場合は「書き戻しより前に作られた古い設定ファイル」が届いただけなので、
+        // 差分は保持したまま次のファイル(書き戻し後の内容)を待つ
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct UtilityView: View {
     @ObservedObject private var session = PhoneSessionManager.shared
@@ -24,6 +25,11 @@ struct UtilityView: View {
                 CacheManagementView()
             } label: {
                 Label(NSLocalizedString("Watch_Utility_StoredTexts", comment: "Watch内の本文"), systemImage: "internaldrive")
+            }
+            NavigationLink {
+                SpeechConfigView()
+            } label: {
+                Label(NSLocalizedString("Watch_SpeechConfig_Title", comment: "速度と音量"), systemImage: "speedometer")
             }
             if let feedbackMessage = feedbackMessage {
                 Text(feedbackMessage)
@@ -79,6 +85,72 @@ struct UtilityView: View {
     }
 }
 
+/// 発話の速度・音量の設定。値は iPhone の標準話者設定(RealmSpeakerSetting)が正本で、
+/// ここでの変更は Watch の発話に即時(次のブロックから)効かせつつ iPhone へ書き戻される。
+/// スライダーの範囲・クランプは iPhone の「発話設定」画面と同じ。
+struct SpeechConfigView: View {
+    @State private var rate: Double = Double(AVSpeechUtteranceDefaultSpeechRate)
+    @State private var volume: Double = 1.0
+    @State private var hasLoaded = false
+
+    private let rateRange = Double(AVSpeechUtteranceMinimumSpeechRate)...Double(AVSpeechUtteranceMaximumSpeechRate)
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(NSLocalizedString("Watch_SpeechConfig_Rate", comment: "速度")).font(.footnote)
+                    Spacer()
+                    Text(String(format: "%.2f", rate)).font(.footnote).foregroundStyle(.secondary)
+                }
+                Slider(value: $rate, in: rateRange, step: 0.05)
+                    .accessibilityLabel(NSLocalizedString("Watch_SpeechConfig_Rate", comment: "速度"))
+                    .accessibilityValue(String(format: "%.2f", rate))
+
+                HStack {
+                    Text(NSLocalizedString("Watch_SpeechConfig_Volume", comment: "音量")).font(.footnote)
+                    Spacer()
+                    Text("\(Int((volume * 100).rounded()))%").font(.footnote).foregroundStyle(.secondary)
+                }
+                Slider(value: $volume, in: 0...1, step: 0.05)
+                    .accessibilityLabel(NSLocalizedString("Watch_SpeechConfig_Volume", comment: "音量"))
+                    .accessibilityValue("\(Int((volume * 100).rounded()))%")
+
+                Text(NSLocalizedString("Watch_SpeechConfig_Note", comment: "変更は iPhone の標準の話者設定に保存されます。発話中の変更は次の文から反映されます。"))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
+            }
+            .padding(.horizontal, 2)
+        }
+        .navigationTitle(NSLocalizedString("Watch_SpeechConfig_Title", comment: "速度と音量"))
+        .onAppear {
+            let current = WatchSpeechPlayer.effectiveDefaultSpeakerConfig()
+            rate = Double(current.rate)
+            volume = Double(current.volume)
+            // onAppear での初期値セットによる onChange 発火では書き込まないようにする
+            DispatchQueue.main.async { hasLoaded = true }
+        }
+        .onChange(of: rate) { _ in apply() }
+        .onChange(of: volume) { _ in apply() }
+        // 画面を開いている間に iPhone から新しい発話設定が届いたら表示も追従させる
+        // (値が同じなら何もしないので、自分の変更で apply とループすることはない)
+        .onReceive(NotificationCenter.default.publisher(for: WatchSpeechSettingsStorage.didUpdateNotification)) { _ in
+            guard hasLoaded else { return }
+            let current = WatchSpeechPlayer.effectiveDefaultSpeakerConfig()
+            if abs(Float(rate) - current.rate) >= 0.001 { rate = Double(current.rate) }
+            if abs(Float(volume) - current.volume) >= 0.001 { volume = Double(current.volume) }
+        }
+    }
+
+    private func apply() {
+        guard hasLoaded else { return }
+        let current = WatchSpeechPlayer.effectiveDefaultSpeakerConfig()
+        if abs(current.rate - Float(rate)) < 0.001 && abs(current.volume - Float(volume)) < 0.001 { return }
+        WatchSpeechPlayer.shared.setSpeechConfig(rate: Float(rate), volume: Float(volume))
+    }
+}
+
 /// Watch に転送済みの本文の一覧。転送し直し(古いデータの更新)と削除ができる。
 /// 転送済みの小説は iPhone 側で章が増えると自動で転送し直されるので、
 /// ここでの削除は「自動同期をやめる」の意味も持つ。
@@ -125,6 +197,7 @@ struct CacheManagementView: View {
                             Image(systemName: selectedNovelIDs.contains(novelID) ? "checkmark.circle.fill" : "circle")
                                 .font(.system(size: 14))
                                 .foregroundStyle(selectedNovelIDs.contains(novelID) ? .green : .secondary)
+                                .accessibilityHidden(true) // 選択状態はボタンの isSelected トレイトで伝える
                         }
                         VStack(alignment: .leading, spacing: 1) {
                             Text(storedTitle(novelID: novelID))
@@ -136,6 +209,7 @@ struct CacheManagementView: View {
                         }
                     }
                 }
+                .accessibilityAddTraits(isSelecting && selectedNovelIDs.contains(novelID) ? [.isSelected] : [])
             }
         }
         .navigationTitle(NSLocalizedString("Watch_Utility_StoredTexts", comment: "Watch内の本文"))

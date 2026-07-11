@@ -161,6 +161,7 @@ struct TextPageView: View {
                 } label: {
                     Image(systemName: "textformat.size")
                 }
+                .accessibilityLabel(NSLocalizedString("Watch_AX_TextSettings", comment: "本文の表示設定"))
             }
         }
         .sheet(isPresented: $isSettingsPresented) {
@@ -203,11 +204,15 @@ struct TextPageView: View {
                     .font(.system(size: 11))
                     .foregroundStyle(textColor.opacity(0.6))
                 if hasPreviousChapter {
-                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_PrevChapter", comment: "◀ 前の章"), offset: -1)
+                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_PrevChapter", comment: "◀ 前の章"),
+                                      accessibilityLabel: NSLocalizedString("Watch_AX_PrevChapter", comment: "前の章へ"),
+                                      offset: -1)
                 }
                 paragraphList(textColor: textColor, highlightColor: highlightColor, highlight: highlight)
                 if hasNextChapter {
-                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_NextChapter", comment: "次の章へ ▶"), offset: 1)
+                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_NextChapter", comment: "次の章へ ▶"),
+                                      accessibilityLabel: NSLocalizedString("Watch_AX_NextChapter", comment: "次の章へ"),
+                                      offset: 1)
                 }
             } else {
                 Text(String(format: NSLocalizedString("Watch_TextPage_ChapterNotTransferred", comment: "この章(%d章)はまだWatchに転送されていません。本棚から転送し直せます。"), target.chapter))
@@ -243,7 +248,15 @@ struct TextPageView: View {
                     }
                 }
                 .id(paragraph.id)
+                // watchOS 10 (Series 4 で確認) では段落への onLongPressGesture がスクロールの
+                // タッチを食ってしまい、段落上での上下スクロール・左右ページ移動が効かなくなる。
+                // 空のタップジェスチャを長押しより先に置くとスクロールが優先される(定番の回避策)
+                .onTapGesture {}
                 .onLongPressGesture {
+                    performSeek(toLocation: paragraph.scalarRange.lowerBound)
+                }
+                // VoiceOver では長押しジェスチャが使えないので、同じ操作をカスタムアクションで提供する
+                .accessibilityAction(named: Text(NSLocalizedString("Watch_AX_SeekHere", comment: "ここから読み上げ"))) {
                     performSeek(toLocation: paragraph.scalarRange.lowerBound)
                 }
             }
@@ -282,7 +295,7 @@ struct TextPageView: View {
         return false
     }
 
-    private func chapterMoveButton(label: String, offset: Int) -> some View {
+    private func chapterMoveButton(label: String, accessibilityLabel: String, offset: Int) -> some View {
         Button {
             if player.isSelectedAsSource {
                 player.moveChapter(offset: offset)
@@ -295,6 +308,8 @@ struct TextPageView: View {
                 .frame(maxWidth: .infinity)
         }
         .padding(.vertical, 4)
+        // VoiceOver では「◀」が「左向き黒三角」と読まれてしまうので、記号抜きのラベルを与える
+        .accessibilityLabel(accessibilityLabel)
     }
 
     // MARK: - 読み上げ位置の指定(段落の長押し)

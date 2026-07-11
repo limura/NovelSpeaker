@@ -175,9 +175,33 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func ApplyStoryToSpeaker(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, readLocation:Int) {
         speaker.SetStory(story: story, withMoreSplitTargets:withMoreSplitTargets, moreSplitMinimumLetterCount:moreSplitMinimumLetterCount)
+        recordBakedDefaultSpeakerConfig()
         observeSpeechConfig(novelID: story.novelID)
         speaker.SetSpeechLocation(location: readLocation)
         self.isNeedApplySpeechConfigs = false
+    }
+
+    // Watch からの速度・音量変更を「次のブロックから」反映するために、
+    // 現在のブロック列に焼き込まれているデフォルト話者の rate/volume を覚えておく
+    // (倍率 = 新しい値 ÷ 焼き込み値 を SpeechBlockSpeaker に渡すため)
+    private var bakedDefaultSpeakerRate: Float = AVSpeechUtteranceDefaultSpeechRate
+    private var bakedDefaultSpeakerVolume: Float = 1.0
+
+    private func recordBakedDefaultSpeakerConfig() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let speakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) else { return }
+            bakedDefaultSpeakerRate = speakerSetting.rate
+            bakedDefaultSpeakerVolume = speakerSetting.volume
+        }
+    }
+
+    /// デフォルト話者の速度・音量の変更を、発話中のブロック列にも(次のブロックから)反映する。
+    /// Realm 側の保存は呼び出し元が行う想定(保存だけだと反映は次の StartSpeech になるため、
+    /// 発話中の変更用にこちらも呼ぶ)。ブロック列が組み直されると倍率は自動で 1.0 に戻り、
+    /// その時には新しい設定値が焼き込まれているので二重適用にはならない。
+    func applyLiveDefaultSpeakerConfig(rate: Float, volume: Float) {
+        speaker.rateMultiplier = rate / max(0.01, bakedDefaultSpeakerRate)
+        speaker.volumeMultiplier = volume / max(0.01, bakedDefaultSpeakerVolume)
     }
     
     func ApplyDefaultSpeakerSettingToAnnounceSpeaker() {

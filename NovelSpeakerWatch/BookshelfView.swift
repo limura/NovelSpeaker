@@ -45,6 +45,7 @@ struct BookshelfView: View {
                             Image(systemName: "heart.fill")
                                 .font(.system(size: 10))
                                 .foregroundStyle(.pink)
+                                .accessibilityLabel(NSLocalizedString("Watch_AX_Liked", comment: "お気に入り"))
                         }
                     }
                 }
@@ -113,22 +114,27 @@ struct BookshelfView: View {
     }
 
     @ViewBuilder private func transferStateIcon(novel: WatchNovelSummary) -> some View {
+        // VoiceOver は行全体を読むので、アイコンには転送状態の説明を持たせる
         switch transferState(novel: novel) {
         case .complete:
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 12))
                 .foregroundStyle(.green)
+                .accessibilityLabel(NSLocalizedString("Watch_AX_TransferState_Complete", comment: "転送済み"))
         case .partial:
             Image(systemName: "arrow.triangle.2.circlepath.circle")
                 .font(.system(size: 12))
                 .foregroundStyle(.orange)
+                .accessibilityLabel(NSLocalizedString("Watch_AX_TransferState_Partial", comment: "iPhone側で更新あり"))
         case .requested:
             ProgressView()
                 .frame(width: 12, height: 12)
+                .accessibilityLabel(NSLocalizedString("Watch_AX_TransferState_Requested", comment: "転送依頼中"))
         case .none:
             Image(systemName: "cloud")
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
+                .accessibilityLabel(NSLocalizedString("Watch_AX_TransferState_None", comment: "未転送"))
         }
     }
 

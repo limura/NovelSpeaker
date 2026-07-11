@@ -324,6 +324,10 @@ extension PhoneSessionManager: WCSessionDelegate {
             }
             // 繋がったタイミングで小説が未選択なら状態を聞く
             self.requestStatusIfNovelUnknown()
+            // オフライン中に変更した速度・音量があれば iPhone へ書き戻す
+            if session.isReachable {
+                WatchSpeechPlayer.shared.sendPendingSpeechConfigIfPossible()
+            }
         }
     }
 
@@ -351,6 +355,8 @@ extension PhoneSessionManager: WCSessionDelegate {
                     receivedFileURL: file.fileURL,
                     fingerprint: file.metadata?[WatchSpeechSettings.transferFingerprintKey] as? String)
                 print("PhoneSessionManager: 発話設定を受信・保存")
+                // Watch 側で変更した速度・音量が iPhone に反映済みなら、ローカル差分を解消する
+                WatchSpeechPlayer.shared.reconcileSpeechConfigAfterSettingsReceived()
                 // 停止中なら現在の章を新しい設定で組み直す(再生中は次の章から反映)
                 WatchSpeechPlayer.shared.applyReceivedSettingsIfIdle()
             } catch {

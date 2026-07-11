@@ -60,7 +60,7 @@
 
 /* Watch内の本文(キャッシュ管理) */
 "Watch_Cache_Empty" = "転送済みの小説はありません。本棚から転送できます。";
-"Watch_Cache_DeleteSelected" = "選択した%d件を削除";
+"Watch_Cache_DeleteSelected" = "選択した%d件の本文をWatchから削除";
 "Watch_Cache_Select" = "選択";
 "Watch_Cache_Done" = "完了";
 "Watch_Cache_Retransfer" = "本文を転送し直す";
@@ -80,3 +80,38 @@
 /* Watch 単体再生 */
 "Watch_SpeechPlayer_AudioSetupFailed" = "オーディオ設定に失敗しました: %@";
 "Watch_SpeechPlayer_AudioRouteFailed" = "オーディオ出力先に接続できませんでした。%@";
+
+/* 発話の速度・音量 */
+"Watch_SpeechConfig_Title" = "速度と音量";
+"Watch_SpeechConfig_Rate" = "速度";
+"Watch_SpeechConfig_Volume" = "音量";
+"Watch_SpeechConfig_Note" = "変更は iPhone の標準の話者設定に保存されます。発話中の変更は次の文から反映されます。";
+
+/* VoiceOver 用ラベル */
+"Watch_AX_Menu" = "メニュー";
+"Watch_AX_PrevChapter" = "前の章へ";
+"Watch_AX_NextChapter" = "次の章へ";
+"Watch_AX_SkipBackward" = "少し戻る";
+"Watch_AX_SkipForward" = "少し進む";
+"Watch_AX_Play" = "再生";
+"Watch_AX_Pause" = "一時停止";
+"Watch_AX_SourceBadgeHint" = "読み上げ先(iPhoneまたはWatch)を切り替えます";
+"Watch_AX_TextSettings" = "本文の表示設定";
+"Watch_AX_Liked" = "お気に入り";
+"Watch_AX_TransferState_Complete" = "転送済み";
+"Watch_AX_TransferState_Partial" = "iPhone側で更新あり";
+"Watch_AX_TransferState_Requested" = "転送依頼中";
+"Watch_AX_TransferState_None" = "未転送";
+"Watch_AX_SeekHere" = "ここから読み上げ";
+
+/* 色名(表示設定の色ボタンの VoiceOver 用) */
+"Watch_Color_white" = "白";
+"Watch_Color_lightGray" = "明るい灰色";
+"Watch_Color_yellow" = "黄色";
+"Watch_Color_orange" = "オレンジ";
+"Watch_Color_green" = "緑";
+"Watch_Color_cyan" = "シアン";
+"Watch_Color_black" = "黒";
+"Watch_Color_darkGray" = "暗い灰色";
+"Watch_Color_navy" = "紺色";
+"Watch_Color_sepia" = "セピア";

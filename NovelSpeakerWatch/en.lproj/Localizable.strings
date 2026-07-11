@@ -60,7 +60,7 @@
 
 /* Texts on Watch (cache management) */
 "Watch_Cache_Empty" = "No transferred novels. You can transfer them from the bookshelf.";
-"Watch_Cache_DeleteSelected" = "Delete %d Selected";
+"Watch_Cache_DeleteSelected" = "Remove %d Selected Texts from Watch";
 "Watch_Cache_Select" = "Select";
 "Watch_Cache_Done" = "Done";
 "Watch_Cache_Retransfer" = "Transfer Text Again";
@@ -80,3 +80,38 @@
 /* Watch standalone playback */
 "Watch_SpeechPlayer_AudioSetupFailed" = "Failed to configure audio: %@";
 "Watch_SpeechPlayer_AudioRouteFailed" = "Couldn't connect to an audio output. %@";
+
+/* Speech speed & volume */
+"Watch_SpeechConfig_Title" = "Speed & Volume";
+"Watch_SpeechConfig_Rate" = "Speed";
+"Watch_SpeechConfig_Volume" = "Volume";
+"Watch_SpeechConfig_Note" = "Changes are saved to the default speaker settings on the iPhone. Changes made while speaking take effect from the next sentence.";
+
+/* VoiceOver labels */
+"Watch_AX_Menu" = "Menu";
+"Watch_AX_PrevChapter" = "Previous chapter";
+"Watch_AX_NextChapter" = "Next chapter";
+"Watch_AX_SkipBackward" = "Skip backward";
+"Watch_AX_SkipForward" = "Skip forward";
+"Watch_AX_Play" = "Play";
+"Watch_AX_Pause" = "Pause";
+"Watch_AX_SourceBadgeHint" = "Switches where the novel is spoken (iPhone or Watch)";
+"Watch_AX_TextSettings" = "Text display settings";
+"Watch_AX_Liked" = "Favorite";
+"Watch_AX_TransferState_Complete" = "Transferred";
+"Watch_AX_TransferState_Partial" = "Updated on the iPhone";
+"Watch_AX_TransferState_Requested" = "Transfer requested";
+"Watch_AX_TransferState_None" = "Not transferred";
+"Watch_AX_SeekHere" = "Start speaking from here";
+
+/* Color names (VoiceOver labels for the color buttons in the display settings) */
+"Watch_Color_white" = "White";
+"Watch_Color_lightGray" = "Light gray";
+"Watch_Color_yellow" = "Yellow";
+"Watch_Color_orange" = "Orange";
+"Watch_Color_green" = "Green";
+"Watch_Color_cyan" = "Cyan";
+"Watch_Color_black" = "Black";
+"Watch_Color_darkGray" = "Dark gray";
+"Watch_Color_navy" = "Navy";
+"Watch_Color_sepia" = "Sepia";

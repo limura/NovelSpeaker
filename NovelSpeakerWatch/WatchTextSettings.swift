@@ -70,6 +70,8 @@ struct TextSettingsView: View {
                     Text("\(Int(fontSize))").font(.footnote).foregroundStyle(.secondary)
                 }
                 Slider(value: $fontSize, in: 10...28, step: 1)
+                    .accessibilityLabel(NSLocalizedString("Watch_TextSettings_FontSize", comment: "文字サイズ"))
+                    .accessibilityValue("\(Int(fontSize))")
 
                 Text(NSLocalizedString("Watch_TextSettings_TextColor", comment: "文字色")).font(.footnote)
                 colorRow(palette: TextDisplayDefaults.textColors, selectedName: $textColorName)
@@ -83,7 +85,8 @@ struct TextSettingsView: View {
     }
 
     private func colorRow(palette: [(name: String, color: Color)], selectedName: Binding<String>) -> some View {
-        HStack(spacing: 6) {
+        // 40mm では文字色7個が1行に収まらず画面外へはみ出すので、入り切らない分は折り返す
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 24), spacing: 6)], alignment: .leading, spacing: 6) {
             ForEach(palette, id: \.name) { entry in
                 Button {
                     selectedName.wrappedValue = entry.name
@@ -99,6 +102,9 @@ struct TextSettingsView: View {
                         )
                 }
                 .buttonStyle(.plain)
+                // VoiceOver 用: 色の丸ボタンに色名を読み上げさせる(キーは Watch_Color_<内部色名>)
+                .accessibilityLabel(NSLocalizedString("Watch_Color_\(entry.name)", comment: "色名"))
+                .accessibilityAddTraits(selectedName.wrappedValue == entry.name ? [.isSelected] : [])
             }
         }
     }

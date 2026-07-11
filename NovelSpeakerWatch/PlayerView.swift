@@ -32,9 +32,11 @@ struct PlayerView: View {
                 statusBadge
             }
             .buttonStyle(.plain)
+            .accessibilityHint(NSLocalizedString("Watch_AX_SourceBadgeHint", comment: "読み上げ先(iPhone/Watch)を切り替えます"))
 
             HStack(spacing: 8) {
-                chapterButton(systemName: "backward.end") {
+                chapterButton(systemName: "backward.end",
+                              accessibilityLabel: NSLocalizedString("Watch_AX_PrevChapter", comment: "前の章へ")) {
                     if isWatchSource {
                         player.moveChapter(offset: -1)
                     } else {
@@ -47,7 +49,8 @@ struct PlayerView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
                     .frame(maxWidth: .infinity)
-                chapterButton(systemName: "forward.end") {
+                chapterButton(systemName: "forward.end",
+                              accessibilityLabel: NSLocalizedString("Watch_AX_NextChapter", comment: "次の章へ")) {
                     if isWatchSource {
                         player.moveChapter(offset: 1)
                     } else {
@@ -73,6 +76,7 @@ struct PlayerView: View {
                         .frame(width: 36, height: 44)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(NSLocalizedString("Watch_AX_SkipBackward", comment: "少し戻る"))
 
                 Spacer(minLength: 8)
 
@@ -87,6 +91,9 @@ struct PlayerView: View {
                         .font(.system(size: 44))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(isPlayingNow
+                    ? NSLocalizedString("Watch_AX_Pause", comment: "一時停止")
+                    : NSLocalizedString("Watch_AX_Play", comment: "再生"))
 
                 Spacer(minLength: 8)
 
@@ -102,6 +109,7 @@ struct PlayerView: View {
                         .frame(width: 36, height: 44)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(NSLocalizedString("Watch_AX_SkipForward", comment: "少し進む"))
             }
             .padding(.horizontal, 2)
 
@@ -115,6 +123,7 @@ struct PlayerView: View {
                 } label: {
                     Image(systemName: "line.3.horizontal")
                 }
+                .accessibilityLabel(NSLocalizedString("Watch_AX_Menu", comment: "メニュー"))
             }
         }
         .sheet(isPresented: $isUtilityPresented) {
@@ -187,7 +196,7 @@ struct PlayerView: View {
         return session.playState?.title.isEmpty == false ? session.playState!.title : noNovel
     }
 
-    private func chapterButton(systemName: String, action: @escaping () -> Void) -> some View {
+    private func chapterButton(systemName: String, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 11))
@@ -196,6 +205,7 @@ struct PlayerView: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
     }
 
     private var chapterLabel: String {

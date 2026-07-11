@@ -7,11 +7,18 @@
 //
 
 import Foundation
+import AVFoundation
 
 class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     let speaker = MultiVoiceSpeaker()
-    
+
     var speechBlockArray:[CombinedSpeechBlock] = []
+    // 発話中の速度・音量変更(次のブロックから適用)用の倍率。
+    // block には話者設定の値が焼き込まれているので、設定変更を発話中に反映したい時は
+    // ここに「新しい値 ÷ 焼き込み時の値」を入れる(enqueue 時に block の値へ掛ける)。
+    // ブロック列が組み直される時(setSpeechBlockArray)は最新の設定で焼き直されるので 1.0 に戻す。
+    var rateMultiplier: Float = 1.0
+    var volumeMultiplier: Float = 1.0
     var currentSpeechBlockIndex:Int = 0
     var delegate:SpeakRangeDelegate? = nil
     var m_IsSpeaking = false
@@ -195,7 +202,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // VoicevoxCoreの先行合成ログ(絶対時刻付き)と突き合わせて「どこで無音になったか」を
         // 追えるように、実際に発話を発注した瞬間も同じ絶対時刻フォーマットでログする。
         NSLog("NovelSpeaker.SpeechBlockSpeaker: [\(VoicevoxCore.logTimestamp())] [発話発注] blockIndex=\(currentSpeechBlockIndex) type=\(block.type) text=\"\(Self.escapeForLog(speechText))\"")
-        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
+        let effectiveRate = min(max(block.rate * rateMultiplier, AVSpeechUtteranceMinimumSpeechRate), AVSpeechUtteranceMaximumSpeechRate)
+        let effectiveVolume = min(max(block.volume * volumeMultiplier, 0.0), 1.0)
+        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: effectiveRate, volume: effectiveVolume, delay: block.delay)
         //print("Speech: \(speechText)")
         scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText, type: block.type, generation: generation)
         refillVoicevoxPrefetchIfNeeded()
@@ -380,6 +389,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     
     func setSpeechBlockArray(blockArray:[CombinedSpeechBlock]) {
         speechBlockArray = blockArray
+        // 新しいブロック列は最新の話者設定で焼き込まれているので、発話中変更用の倍率は戻す
+        rateMultiplier = 1.0
+        volumeMultiplier = 1.0
         currentDisplayStringOffset = 0
         currentSpeechBlockIndex = 0
         currentSpeakingLocation = 0
