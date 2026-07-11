@@ -722,6 +722,11 @@ class WatchSessionCoordinator: NSObject {
                 settings.isOverrideRubyEnabled = globalState.isOverrideRubyIsEnabled
                 settings.notRubyCharactorStringArray = globalState.notRubyCharactorStringArray
                 settings.isDisableNarouRuby = globalState.isDisableNarouRuby
+                // 「再生が末尾に達した時の動作」。Watch 単体再生の末尾到達時に使う
+                settings.repeatSpeechTypeRawValue = globalState.repeatSpeechType.rawValue
+                settings.isRepeatSpeechLoopNoCheckReadingPoint = (globalState.repeatSpeechLoopType == .noCheckReadingPoint)
+                settings.isAnnounceAtRepatSpeechTime = globalState.isAnnounceAtRepatSpeechTime
+                settings.novelLikeOrder = Array(globalState.novelLikeOrder)
             }
             return settings
         }
@@ -779,12 +784,21 @@ extension WatchSessionCoordinator: WCSessionDelegate {
         if let storedNovelIDs = applicationContext[WatchMessage.Context.watchStoredNovelIDs] as? [String] {
             UserDefaults.standard.set(storedNovelIDs, forKey: WatchSessionCoordinator.watchStoredNovelIDsKey)
         }
-        // Watch 単体再生の読み上げ位置。iPhone 側の栞より新しければ反映する
-        if let positionDictionary = applicationContext[WatchMessage.Context.watchReadingPosition] as? [String: Any],
-           let novelID = positionDictionary["novelID"] as? String,
-           let chapter = positionDictionary["chapter"] as? Int,
-           let location = positionDictionary["location"] as? Int,
-           let updatedAtInterval = positionDictionary["updatedAt"] as? TimeInterval {
+        // Watch 単体再生の読み上げ位置。iPhone 側の栞より新しければ反映する。
+        // 新形式(直近の複数件)があればそちらを、無ければ旧形式(最新1件)を使う
+        let positionDictionaryArray: [[String: Any]]
+        if let array = applicationContext[WatchMessage.Context.watchReadingPositions] as? [[String: Any]] {
+            positionDictionaryArray = array
+        } else if let single = applicationContext[WatchMessage.Context.watchReadingPosition] as? [String: Any] {
+            positionDictionaryArray = [single]
+        } else {
+            positionDictionaryArray = []
+        }
+        for positionDictionary in positionDictionaryArray {
+            guard let novelID = positionDictionary["novelID"] as? String,
+                  let chapter = positionDictionary["chapter"] as? Int,
+                  let location = positionDictionary["location"] as? Int,
+                  let updatedAtInterval = positionDictionary["updatedAt"] as? TimeInterval else { continue }
             applyWatchReadingPosition(novelID: novelID, chapter: chapter, location: location, updatedAt: Date(timeIntervalSince1970: updatedAtInterval))
         }
     }

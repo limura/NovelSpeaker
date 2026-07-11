@@ -63,14 +63,25 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     /// 新しい方から。どちらも無ければ先頭から。
     @discardableResult
     func open(novelID: String, fallbackTitle: String = "") -> Bool {
-        guard let novel = NovelStorage.loadNovel(novelID: novelID), !novel.stories.isEmpty else { return false }
         if isPlaying { stop() }
+        guard switchNovel(novelID: novelID, fromBeginning: false) else { return false }
+        if title.isEmpty { title = fallbackTitle }
+        return true
+    }
+
+    /// 再生対象の小説を差し替える(オーディオセッションには触れないので連続再生の途中でも使える)。
+    /// fromBeginning=false なら「Watch ローカルの保存位置 vs iPhone の栞」の新しい方から。
+    private func switchNovel(novelID: String, fromBeginning: Bool) -> Bool {
+        guard let novel = NovelStorage.loadNovel(novelID: novelID), !novel.stories.isEmpty else { return false }
         self.novelID = novelID
-        self.title = novel.title.isEmpty ? fallbackTitle : novel.title
+        self.title = novel.title
         self.stories = novel.stories
         self.chapterCount = novel.stories.keys.max() ?? novel.stories.count
-        let position = WatchReadingPositionStore.load(novelID: novelID)
         let firstChapter = novel.stories.keys.min() ?? 1
+        if fromBeginning {
+            return applyChapter(firstChapter, location: 0)
+        }
+        let position = WatchReadingPositionStore.load(novelID: novelID)
         // iPhone 側の栞の方が新しければそちらから開く(新しい方優先)。
         // 採用したら iPhone 側のタイムスタンプごとローカルに控える
         // (次のオフライン起動でも同じ位置から開けるように。時刻を進めないので
@@ -81,10 +92,10 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
                                            location: speaker.currentLocation, updatedAt: phone.updatedAt)
             return true
         }
-        if applyChapter(position?.chapter ?? firstChapter, location: position?.location ?? 0) == false {
-            _ = applyChapter(firstChapter, location: 0)
+        if applyChapter(position?.chapter ?? firstChapter, location: position?.location ?? 0) {
+            return true
         }
-        return true
+        return applyChapter(firstChapter, location: 0)
     }
 
     /// iPhone の栞(playState に相乗りしてくる位置)が指定時刻より新しければ返す
@@ -299,6 +310,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     func stop() {
         let wasSpeaking = speaker.isSpeaking
         isPlaying = false
+        announcer?.cancel()
         savePosition(pushContext: true)
         if wasSpeaking {
             speaker.StopSpeech { [weak self] in
@@ -361,6 +373,123 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
             savePosition()
         }
         return true
+    }
+
+    // MARK: - 再生が末尾に達した時の動作
+
+    /// 最終章まで読み終えた時の分岐。「再生が末尾に達した時の動作」(iPhone から同期)に従う。
+    /// フォルダ・作者・Webサイト系は必要なメタデータが Watch に無いので停止扱い(v1)
+    private func handleReachedEnd(repeatType: WatchRepeatSpeechType, settings: WatchSpeechSettings) {
+        savePosition()  // 読み終えた位置(章末)を控えておく
+        switch repeatType {
+        case .rewindToFirstStory:
+            guard let firstChapter = stories.keys.min() else { break }
+            announceIfEnabled(settings: settings,
+                              text: NSLocalizedString("Watch_SpeechPlayer_RewindFirstStory", comment: "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。")) { [weak self] in
+                guard let self = self, self.isPlaying else { return }
+                guard self.applyChapter(firstChapter, location: 0) else {
+                    self.finishPlaybackAtEnd()
+                    return
+                }
+                self.speaker.StartSpeech()
+                self.savePosition()
+            }
+            return
+        case .goToNextLikeNovel:
+            guard let next = nextLikeNovelTarget(settings: settings) else { break }
+            announceIfEnabled(settings: settings,
+                              text: String(format: NSLocalizedString("Watch_SpeechPlayer_SpeechNextNovelFormat", comment: "読み上げが最後に達したため、次に %@ を再生します。"), next.title)) { [weak self] in
+                guard let self = self, self.isPlaying else { return }
+                guard self.switchNovel(novelID: next.novelID, fromBeginning: next.fromBeginning) else {
+                    self.finishPlaybackAtEnd()
+                    return
+                }
+                self.speaker.StartSpeech()
+                self.savePosition(pushContext: true)
+                PhoneSessionManager.shared.recordLastPlayed(novelID: self.novelID)
+            }
+            return
+        default:
+            break
+        }
+        finishPlaybackAtEnd()
+    }
+
+    /// 継続再生はせず終了する(iPhone 側と同じく末尾到達を発話で知らせてからオーディオを解放)
+    private func finishPlaybackAtEnd() {
+        isPlaying = false
+        savePosition(pushContext: true)
+        announceSpeaker().speak(text: NSLocalizedString("Watch_SpeechPlayer_SpeechStoppedByEnd", comment: "読み上げが最後に達しました。")) { [weak self] in
+            guard let self = self, !self.isPlaying else { return }
+            self.deactivateAudioSession()
+        }
+    }
+
+    /// 「別のお気に入り小説を再生」の次の対象を、Watch に転送済みの小説の中から選ぶ。
+    /// - 通常ループ: お気に入り順で最初の「自分以外・転送済み・未読あり」の小説(栞の続きから)
+    /// - 栞の位置を確認しないループ: 現在の小説の次から順番に転送済みのものを先頭章から
+    private func nextLikeNovelTarget(settings: WatchSpeechSettings) -> (novelID: String, title: String, fromBeginning: Bool)? {
+        guard let order = settings.novelLikeOrder, !order.isEmpty else { return nil }
+        let stored = PhoneSessionManager.shared.storedNovelIDs
+        func title(of novelID: String) -> String {
+            if let title = PhoneSessionManager.shared.storedTitles[novelID], !title.isEmpty { return title }
+            return PhoneSessionManager.shared.novels.first(where: { $0.novelID == novelID })?.title ?? novelID
+        }
+        if settings.isRepeatSpeechLoopNoCheckReadingPoint == true {
+            // iPhone 側と同じく「現在の小説がお気に入りに居る」ことが前提(居なければ停止)
+            guard let currentIndex = order.firstIndex(of: novelID) else { return nil }
+            for offset in 1...order.count {
+                let candidate = order[(currentIndex + offset) % order.count]
+                guard stored.contains(candidate) else { continue }
+                return (candidate, title(of: candidate), true)
+            }
+            return nil
+        }
+        for candidate in order where candidate != novelID && stored.contains(candidate) && hasUnreadContent(novelID: candidate) {
+            return (candidate, title(of: candidate), false)
+        }
+        return nil
+    }
+
+    /// 転送済みの小説に未読部分が残っているか。
+    /// iPhone 側の未読判定に合わせて章末5文字の遊びを持つ。位置情報が無ければ未読とみなす
+    private func hasUnreadContent(novelID: String) -> Bool {
+        guard let novel = NovelStorage.loadNovel(novelID: novelID), !novel.stories.isEmpty else { return false }
+        let lastChapter = novel.stories.keys.max() ?? 0
+        let chapter: Int
+        let location: Int
+        if let position = WatchReadingPositionStore.load(novelID: novelID) {
+            chapter = position.chapter
+            location = position.location
+        } else if let summary = PhoneSessionManager.shared.novels.first(where: { $0.novelID == novelID }),
+                  summary.readingChapterNumber > 0 {
+            // iPhone の栞は章単位でしか分からないので章の頭からとみなす
+            chapter = summary.readingChapterNumber
+            location = 0
+        } else {
+            return true
+        }
+        if chapter < lastChapter { return true }
+        guard let story = novel.stories[chapter] else { return true }
+        return location + 5 < story.content.unicodeScalars.count
+    }
+
+    /// isAnnounceAtRepatSpeechTime(既定 true)が有効ならアナウンスしてから、無効なら直ちに continuation を呼ぶ
+    private func announceIfEnabled(settings: WatchSpeechSettings, text: String, continuation: @escaping () -> Void) {
+        guard settings.isAnnounceAtRepatSpeechTime ?? true else {
+            continuation()
+            return
+        }
+        announceSpeaker().speak(text: text, completion: continuation)
+    }
+
+    private var announcer: WatchAnnounceSpeaker?
+
+    private func announceSpeaker() -> WatchAnnounceSpeaker {
+        if let announcer = announcer { return announcer }
+        let created = WatchAnnounceSpeaker()
+        announcer = created
+        return created
     }
 
     // MARK: - 内部処理
@@ -451,15 +580,75 @@ extension WatchSpeechPlayer: SpeakRangeDelegate {
             // 停止操作による cancel はここに来ない(StopSpeech ハンドラ側で処理)ので、
             // isPlaying が立っていれば「章を読み終えた」という意味になる
             guard self.isPlaying else { return }
+            let settings = WatchSpeechSettingsStorage.current()
+            let repeatType = WatchRepeatSpeechType(rawValue: settings.repeatSpeechTypeRawValue ?? 0) ?? .noRepeat
+            // 「現在の章を再生し直す」は次の章があっても同じ章をループする(iPhone 側と同じ)
+            if repeatType == .rewindToThisStory, self.applyChapter(self.chapterNumber, location: 0) {
+                self.speaker.StartSpeech()
+                self.savePosition()
+                return
+            }
             if self.applyChapter(self.chapterNumber + 1, location: 0) {
                 self.speaker.StartSpeech()
                 self.savePosition()
-            } else {
-                // 最終章まで読み終えた
-                self.isPlaying = false
-                self.savePosition(pushContext: true)
-                self.deactivateAudioSession()
+                return
             }
+            // 最終章まで読み終えた。「再生が末尾に達した時の動作」に従う
+            self.handleReachedEnd(repeatType: repeatType, settings: settings)
+        }
+    }
+}
+
+// MARK: - 切替アナウンス用の軽量スピーカー
+
+/// 「次に◯◯を再生します」等のアナウンス用。本文用の SpeechBlockSpeaker とは独立させて、
+/// finishSpeak のイベントが本文の再生フローに混ざらないようにする。
+/// willSpeakRange は実装しない(定義するだけで約40MBのメモリを消費するため。ファイル冒頭の注意書き参照)
+private final class WatchAnnounceSpeaker: NSObject, AVSpeechSynthesizerDelegate {
+    private let synthesizer = AVSpeechSynthesizer()
+    private var completion: (() -> Void)?
+
+    override init() {
+        super.init()
+        synthesizer.delegate = self
+    }
+
+    /// デフォルト話者の声・速度・音量でアナウンスを発話する。終わったら completion(main queue)
+    func speak(text: String, completion: @escaping () -> Void) {
+        // 前回の completion が残っていたら「呼ばずに」破棄する(古い継続処理を今呼ぶと発話が被る)
+        self.completion = completion
+        let speaker = WatchSpeechSettingsStorage.current().defaultSpeaker
+        let config = WatchSpeechPlayer.effectiveDefaultSpeakerConfig()
+        let utterance = AVSpeechUtterance(string: text)
+        if !speaker.voiceIdentifier.isEmpty, let voice = AVSpeechSynthesisVoice(identifier: speaker.voiceIdentifier) {
+            utterance.voice = voice
+        } else {
+            utterance.voice = AVSpeechSynthesisVoice(language: speaker.locale)
+        }
+        utterance.pitchMultiplier = speaker.pitch
+        utterance.rate = config.rate
+        utterance.volume = config.volume
+        synthesizer.speak(utterance)
+    }
+
+    func cancel() {
+        synthesizer.stopSpeaking(at: .immediate)
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        resolve()
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        resolve()
+    }
+
+    private func resolve() {
+        // delegate コールバックは main queue とは限らないので、completion の取り出しごと main に寄せる
+        DispatchQueue.main.async {
+            guard let completion = self.completion else { return }
+            self.completion = nil
+            completion()
         }
     }
 }
@@ -489,6 +678,14 @@ enum WatchReadingPositionStore {
     static func latest() -> (novelID: String, position: Position)? {
         guard let entry = loadAll().max(by: { $0.value.updatedAt < $1.value.updatedAt }) else { return nil }
         return (entry.key, entry.value)
+    }
+
+    /// 最近更新された読み上げ位置(新しい順、最大 limit 件)。
+    /// 連続再生で複数の小説を読み終えた場合の iPhone への同期漏れを防ぐため、複数件返す
+    static func recent(limit: Int) -> [(novelID: String, position: Position)] {
+        return loadAll().sorted { $0.value.updatedAt > $1.value.updatedAt }
+            .prefix(limit)
+            .map { ($0.key, $0.value) }
     }
 
     /// updatedAt は通常は現在時刻。iPhone の栞を取り込む時だけ iPhone 側のタイムスタンプを

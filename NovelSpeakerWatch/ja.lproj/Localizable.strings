@@ -80,6 +80,9 @@
 /* Watch 単体再生 */
 "Watch_SpeechPlayer_AudioSetupFailed" = "オーディオ設定に失敗しました: %@";
 "Watch_SpeechPlayer_AudioRouteFailed" = "オーディオ出力先に接続できませんでした。%@";
+"Watch_SpeechPlayer_SpeechStoppedByEnd" = "読み上げが最後に達しました。";
+"Watch_SpeechPlayer_SpeechNextNovelFormat" = "読み上げが最後に達したため、次に %@ を再生します。";
+"Watch_SpeechPlayer_RewindFirstStory" = "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。";
 
 /* 発話の速度・音量 */
 "Watch_SpeechConfig_Title" = "速度と音量";

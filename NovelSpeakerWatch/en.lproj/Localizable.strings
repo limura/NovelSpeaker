@@ -80,6 +80,9 @@
 /* Watch standalone playback */
 "Watch_SpeechPlayer_AudioSetupFailed" = "Failed to configure audio: %@";
 "Watch_SpeechPlayer_AudioRouteFailed" = "Couldn't connect to an audio output. %@";
+"Watch_SpeechPlayer_SpeechStoppedByEnd" = "The Book ends here.";
+"Watch_SpeechPlayer_SpeechNextNovelFormat" = "Now that the reading has reached the end, it's time to play %@";
+"Watch_SpeechPlayer_RewindFirstStory" = "Since the reading has reached the end, go back to the first chapter and repeat the playback.";
 
 /* Speech speed & volume */
 "Watch_SpeechConfig_Title" = "Speed & Volume";

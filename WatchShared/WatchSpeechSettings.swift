@@ -12,6 +12,20 @@
 
 import Foundation
 
+/// 「再生が末尾に達した時の動作」。rawValue は iOS 側 RepeatSpeechType と一致させること。
+/// Watch v1 で対応するのは noRepeat/rewindToFirstStory/rewindToThisStory/goToNextLikeNovel。
+/// フォルダ・作者・Webサイト系はフォルダ等のメタデータ転送が必要なので未対応(末尾で停止)
+enum WatchRepeatSpeechType: Int {
+    case noRepeat = 0
+    case rewindToFirstStory = 1
+    case rewindToThisStory = 2
+    case goToNextLikeNovel = 3
+    case goToNextSameFolderdNovel = 4
+    case goToNextSelectedFolderdNovel = 5
+    case goToNextSameWriterNovel = 6
+    case goToNextSameWebsiteNovel = 7
+}
+
 struct WatchSpeechSettings: Codable {
     struct Speaker: Codable {
         var pitch: Float = 1.0
@@ -50,6 +64,15 @@ struct WatchSpeechSettings: Codable {
     var notRubyCharactorStringArray = ""
     var isDisableNarouRuby = false
     var updatedAt = Date(timeIntervalSince1970: 0)
+    // 「再生が末尾に達した時の動作」関連。旧形式の設定ファイルも decode できるよう Optional にする
+    /// WatchRepeatSpeechType の rawValue
+    var repeatSpeechTypeRawValue: Int? = nil
+    /// ループ種別が「栞の位置を確認しない(リストを順番にループ)」か
+    var isRepeatSpeechLoopNoCheckReadingPoint: Bool? = nil
+    /// 小説を切り替える時にアナウンスを発話するか
+    var isAnnounceAtRepatSpeechTime: Bool? = nil
+    /// お気に入り小説の novelID 一覧(お気に入り順 = RealmGlobalState.novelLikeOrder)
+    var novelLikeOrder: [String]? = nil
 
     /// transferFile の metadata でファイル種別(本文か発話設定か)を区別するためのキーと値
     static let transferTypeKey = "type"

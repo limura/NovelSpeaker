@@ -72,7 +72,11 @@ enum WatchMessage {
         static let watchStoredNovelIDs = "storedNovelIDs"
         /// Watch→iPhone 方向: Watch 単体再生の読み上げ位置
         /// (辞書: novelID/chapter/location/updatedAt(TimeInterval))
+        /// 旧形式(最新1件)。新しい watchReadingPositions が使えない場合のフォールバック用に残す
         static let watchReadingPosition = "readingPosition"
+        /// Watch→iPhone 方向: Watch 単体再生の読み上げ位置(直近の複数件、上と同じ辞書の配列)。
+        /// 連続再生で複数の小説を読み終えた場合も、読了位置が漏れずに iPhone の栞へ反映されるように
+        static let watchReadingPositions = "readingPositions"
     }
 
     /// iPhone → Watch: 返信ではない片方向プッシュ(sendMessage, replyHandler なし)のキー

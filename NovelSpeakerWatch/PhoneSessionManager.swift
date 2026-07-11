@@ -83,14 +83,25 @@ final class PhoneSessionManager: NSObject, ObservableObject {
             // iPhone 側の本棚(Apple Watch転送状況別・絞り込み)が参照する転送済み一覧
             WatchMessage.Context.watchStoredNovelIDs: Array(storedChapterCounts.keys),
         ]
-        // Watch 単体再生の読み上げ位置(最新の1件)。iPhone 側はこれで栞を更新する
-        if let latest = WatchReadingPositionStore.latest() {
-            context[WatchMessage.Context.watchReadingPosition] = [
-                "novelID": latest.novelID,
-                "chapter": latest.position.chapter,
-                "location": latest.position.location,
-                "updatedAt": latest.position.updatedAt.timeIntervalSince1970,
+        // Watch 単体再生の読み上げ位置。iPhone 側はこれで栞を更新する。
+        // 毎回「保存している位置の全量」を送る(applicationContext は最新の1つに差し替わる方式で
+        // ACK も無いので、全量+iPhone 側の「新しい方優先」で冪等に反映するのが取りこぼしが無い)。
+        // 件数制限は updateApplicationContext のペイロード上限に引っかかって全滅しないための
+        // 安全弁で、Watch で再生した小説の数しか増えないため実際に届くことはまず無い
+        func positionDictionary(novelID: String, position: WatchReadingPositionStore.Position) -> [String: Any] {
+            return [
+                "novelID": novelID,
+                "chapter": position.chapter,
+                "location": position.location,
+                "updatedAt": position.updatedAt.timeIntervalSince1970,
             ]
+        }
+        let recentPositions = WatchReadingPositionStore.recent(limit: 200)
+        if let latest = recentPositions.first {
+            context[WatchMessage.Context.watchReadingPosition] = positionDictionary(novelID: latest.novelID, position: latest.position)
+            context[WatchMessage.Context.watchReadingPositions] = recentPositions.map {
+                positionDictionary(novelID: $0.novelID, position: $0.position)
+            }
         }
         do {
             try WCSession.default.updateApplicationContext(context)
