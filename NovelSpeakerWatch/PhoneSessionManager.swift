@@ -252,6 +252,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                     chapterNumber: state.chapterNumber, chapterCount: state.chapterCount,
                     progressInChapter: state.progress)
             }
+            // 単体再生で開いている小説の栞が iPhone 側の方が新しければ位置を追従させる
+            WatchSpeechPlayer.shared.adoptPhoneBookmarkIfNewer(state)
         }
     }
 

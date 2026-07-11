@@ -59,7 +59,8 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     // MARK: - 小説のオープン
 
     /// 転送済み本文を読み込んで再生対象にする。本文が無ければ false。
-    /// 再生位置は Watch ローカルの保存位置があればそこから、無ければ先頭から。
+    /// 再生位置は「Watch ローカルの保存位置」と「iPhone の栞(playState に相乗り)」の
+    /// 新しい方から。どちらも無ければ先頭から。
     @discardableResult
     func open(novelID: String, fallbackTitle: String = "") -> Bool {
         guard let novel = NovelStorage.loadNovel(novelID: novelID), !novel.stories.isEmpty else { return false }
@@ -70,10 +71,40 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         self.chapterCount = novel.stories.keys.max() ?? novel.stories.count
         let position = WatchReadingPositionStore.load(novelID: novelID)
         let firstChapter = novel.stories.keys.min() ?? 1
+        // iPhone 側の栞の方が新しければそちらから開く(新しい方優先)。
+        // 採用したら iPhone 側のタイムスタンプごとローカルに控える
+        // (次のオフライン起動でも同じ位置から開けるように。時刻を進めないので
+        //  逆方向へ送り返しても iPhone 側の「厳密に新しい時だけ反映」で無視される)
+        if let phone = phoneBookmarkIfNewer(novelID: novelID, than: position?.updatedAt),
+           applyChapter(phone.chapter, location: phone.location) {
+            WatchReadingPositionStore.save(novelID: novelID, chapter: chapterNumber,
+                                           location: speaker.currentLocation, updatedAt: phone.updatedAt)
+            return true
+        }
         if applyChapter(position?.chapter ?? firstChapter, location: position?.location ?? 0) == false {
             _ = applyChapter(firstChapter, location: 0)
         }
         return true
+    }
+
+    /// iPhone の栞(playState に相乗りしてくる位置)が指定時刻より新しければ返す
+    private func phoneBookmarkIfNewer(novelID: String, than date: Date?) -> (chapter: Int, location: Int, updatedAt: Date)? {
+        guard let state = PhoneSessionManager.shared.playState,
+              state.novelID == novelID,
+              state.bookmarkUpdatedAt > (date ?? Date(timeIntervalSince1970: 0)) else { return nil }
+        return (state.chapterNumber, state.readingLocation, state.bookmarkUpdatedAt)
+    }
+
+    /// iPhone の再生状態を受信した時に PhoneSessionManager から呼ばれる。
+    /// 開いている小説の栞が iPhone 側の方が新しければ、停止中に限りそちらへ追従する
+    /// (再生中は Watch 側の位置が正。停止時の savePosition が iPhone へ送られてそちらが追従する)
+    func adoptPhoneBookmarkIfNewer(_ state: WatchPlayState) {
+        guard !novelID.isEmpty, state.novelID == novelID, !isPlaying else { return }
+        let local = WatchReadingPositionStore.load(novelID: novelID)
+        guard state.bookmarkUpdatedAt > (local?.updatedAt ?? Date(timeIntervalSince1970: 0)) else { return }
+        guard applyChapter(state.chapterNumber, location: state.readingLocation) else { return }
+        WatchReadingPositionStore.save(novelID: novelID, chapter: chapterNumber,
+                                       location: speaker.currentLocation, updatedAt: state.bookmarkUpdatedAt)
     }
 
     /// 指定章の本文をブロック分割して発話対象にする(発話は開始しない)
@@ -460,9 +491,11 @@ enum WatchReadingPositionStore {
         return (entry.key, entry.value)
     }
 
-    static func save(novelID: String, chapter: Int, location: Int) {
+    /// updatedAt は通常は現在時刻。iPhone の栞を取り込む時だけ iPhone 側のタイムスタンプを
+    /// そのまま渡す(時刻を進めると「新しい方優先」の比較が壊れるため)
+    static func save(novelID: String, chapter: Int, location: Int, updatedAt: Date = Date()) {
         var positions = loadAll()
-        positions[novelID] = Position(chapter: chapter, location: location, updatedAt: Date())
+        positions[novelID] = Position(chapter: chapter, location: location, updatedAt: updatedAt)
         if let data = try? JSONEncoder().encode(positions) {
             UserDefaults.standard.set(data, forKey: key)
         }

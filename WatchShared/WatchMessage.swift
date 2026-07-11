@@ -107,6 +107,10 @@ struct WatchPlayState {
     /// 章内の読み上げ位置(0.0-1.0)
     var progress: Double = 0
     var updatedAt: Date = Date(timeIntervalSince1970: 0)
+    /// 栞の位置(読み上げ中の章内の文字オフセット)。Watch 単体再生の開始位置同期に使う
+    var readingLocation: Int = 0
+    /// 栞の更新日時(RealmNovel.lastReadDate)。Watch ローカル位置との「新しい方優先」比較に使う
+    var bookmarkUpdatedAt: Date = Date(timeIntervalSince1970: 0)
 
     func toDictionary() -> [String: Any] {
         return [
@@ -118,6 +122,8 @@ struct WatchPlayState {
             "isPlaying": isPlaying,
             "progress": progress,
             "updatedAt": updatedAt.timeIntervalSince1970,
+            "readingLocation": readingLocation,
+            "bookmarkUpdatedAt": bookmarkUpdatedAt.timeIntervalSince1970,
         ]
     }
 
@@ -132,6 +138,8 @@ struct WatchPlayState {
         state.isPlaying = dictionary["isPlaying"] as? Bool ?? false
         state.progress = dictionary["progress"] as? Double ?? 0
         state.updatedAt = Date(timeIntervalSince1970: dictionary["updatedAt"] as? TimeInterval ?? 0)
+        state.readingLocation = dictionary["readingLocation"] as? Int ?? 0
+        state.bookmarkUpdatedAt = Date(timeIntervalSince1970: dictionary["bookmarkUpdatedAt"] as? TimeInterval ?? 0)
         return state
     }
 }

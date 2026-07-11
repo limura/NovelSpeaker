@@ -183,6 +183,8 @@ class WatchSessionCoordinator: NSObject {
                     state.chapterCount = novel.lastChapterNumber ?? 0
                     let length = max(story.content.count, 1)
                     state.progress = min(1.0, Double(novel.m_readingChapterReadingPoint) / Double(length))
+                    state.readingLocation = novel.m_readingChapterReadingPoint
+                    state.bookmarkUpdatedAt = novel.lastReadDate
                 }
             }
             return state
@@ -194,6 +196,7 @@ class WatchSessionCoordinator: NSObject {
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: state.novelID) {
                 state.title = novel.title
                 state.chapterCount = novel.lastChapterNumber ?? 0
+                state.bookmarkUpdatedAt = novel.lastReadDate
             }
             if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
                 state.chapterSubtitle = story.subtitle
@@ -201,6 +204,7 @@ class WatchSessionCoordinator: NSObject {
                 state.progress = min(1.0, Double(StorySpeaker.shared.readLocation) / Double(length))
             }
         }
+        state.readingLocation = StorySpeaker.shared.readLocation
         return state
     }
 
