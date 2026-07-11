@@ -93,8 +93,27 @@ struct BookshelfView: View {
             }
             player.isSelectedAsSource = false
         }
-        session.send(.openNovel, args: [WatchMessage.Arg.novelID: novel.novelID])
+        // iPhone に繋がっていない(ランニング中・別の Watch が接続中など)場合でも、
+        // 本文が転送済みなら Watch 単体モードへ切り替えて開く(小説を替えられないと困る)
+        if !session.isReachable, openAsWatchSourceFallback(novel) { return }
+        session.send(.openNovel, args: [WatchMessage.Arg.novelID: novel.novelID]) { ok in
+            if !ok, openAsWatchSourceFallback(novel) {
+                // 単体モードで開けたのでエラーアラートは出さない
+                // (エラー文言は completion の直前にセットされるため、ここで消せば表示前に消える)
+                session.lastErrorMessage = nil
+            }
+        }
         tabSelection = 1
+    }
+
+    /// iPhone に開かせられない時のフォールバック。転送済みなら Watch 単体モードで開いて true
+    private func openAsWatchSourceFallback(_ novel: WatchNovelSummary) -> Bool {
+        let player = WatchSpeechPlayer.shared
+        guard player.open(novelID: novel.novelID, fallbackTitle: novel.title) else { return false }
+        player.isSelectedAsSource = true
+        player.refreshComplication()
+        tabSelection = 1
+        return true
     }
 
     // MARK: - 転送状態
