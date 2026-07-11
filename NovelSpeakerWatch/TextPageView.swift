@@ -141,8 +141,8 @@ struct TextPageView: View {
             }
         }
         .background(TextDisplayDefaults.backgroundColor(named: backgroundColorName).ignoresSafeArea())
-        .overlay(alignment: .bottom) {
-            // 上部はナビゲーションバーに隠れるので下部に出す
+        .overlay(alignment: .bottomLeading) {
+            // 上部はナビゲーションバーに隠れるので下部に出す(右下の再生ボタンを避けて左寄せ)
             if model.isAutoScrollPaused && isPlayingNow {
                 Text(NSLocalizedString("Watch_TextPage_AutoScrollPaused", comment: "自動スクロール停止中"))
                     .font(.system(size: 11))
@@ -150,6 +150,7 @@ struct TextPageView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(Color.black.opacity(0.65), in: Capsule())
+                    .padding(.leading, 2)
                     .padding(.bottom, 2)
             }
         }
@@ -162,6 +163,24 @@ struct TextPageView: View {
                     Image(systemName: "textformat.size")
                 }
                 .accessibilityLabel(NSLocalizedString("Watch_AX_TextSettings", comment: "本文の表示設定"))
+            }
+            // iPhone 版の本文画面右上の再生ボタンに相当。watchOS は右上を時計が占有するので下端の隅に置く
+            ToolbarItem(placement: .bottomBar) {
+                HStack {
+                    Spacer()
+                    Button {
+                        if player.isSelectedAsSource {
+                            player.togglePlayPause()
+                        } else {
+                            session.send(.togglePlayPause)
+                        }
+                    } label: {
+                        Image(systemName: isPlayingNow ? "pause.fill" : "play.fill")
+                    }
+                    .accessibilityLabel(isPlayingNow
+                        ? NSLocalizedString("Watch_AX_Pause", comment: "一時停止")
+                        : NSLocalizedString("Watch_AX_Play", comment: "再生"))
+                }
             }
         }
         .sheet(isPresented: $isSettingsPresented) {
