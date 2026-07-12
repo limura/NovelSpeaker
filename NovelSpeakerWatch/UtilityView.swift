@@ -20,37 +20,31 @@ struct UtilityView: View {
     }
 
     private var utilityList: some View {
+        // 並びは「よく触る設定 → 一覧 → 現在の小説への操作 → 押し間違いのペナルティが大きい物」の順。
+        // 「この小説の更新確認」は "どの小説が対象か" が画面から読み取れず混乱するため置かない
         List {
-            NavigationLink {
-                CacheManagementView()
-            } label: {
-                Label(NSLocalizedString("Watch_Utility_StoredTexts", comment: "Watch内の本文"), systemImage: "internaldrive")
-            }
             NavigationLink {
                 SpeechConfigView()
             } label: {
                 Label(NSLocalizedString("Watch_SpeechConfig_Title", comment: "速度と音量"), systemImage: "speedometer")
             }
-            if let feedbackMessage = feedbackMessage {
-                Text(feedbackMessage)
-                    .font(.footnote)
-                    .foregroundStyle(.green)
-            }
-            Button {
-                session.send(.checkUpdatesAll) { ok in
-                    if ok { feedbackMessage = NSLocalizedString("Watch_Utility_CheckUpdatesAllStarted", comment: "全小説の更新確認を開始しました") }
-                }
+            NavigationLink {
+                RepeatConfigView()
             } label: {
-                Label(NSLocalizedString("Watch_Utility_CheckUpdatesAll", comment: "全小説の更新確認"), systemImage: "arrow.triangle.2.circlepath")
+                VStack(alignment: .leading, spacing: 1) {
+                    Label(NSLocalizedString("Watch_RepeatConfig_Title", comment: "連続再生"), systemImage: "repeat")
+                    // 現在のモードをここで確認できるようにする(再生画面には表示を置かない)
+                    Text(repeatTypeLocalizedName(WatchSpeechPlayer.effectiveRepeatConfig().repeatType))
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            NavigationLink {
+                CacheManagementView()
+            } label: {
+                Label(NSLocalizedString("Watch_Utility_StoredTexts", comment: "Watchに転送済みの本文"), systemImage: "internaldrive")
             }
             if let state = session.playState, !state.novelID.isEmpty {
-                Button {
-                    session.send(.checkUpdates, args: [WatchMessage.Arg.novelID: state.novelID]) { ok in
-                        if ok { feedbackMessage = String(format: NSLocalizedString("Watch_Utility_CheckUpdatesStarted", comment: "「%@」の更新確認を開始しました"), state.title) }
-                    }
-                } label: {
-                    Label(NSLocalizedString("Watch_Utility_CheckUpdatesThis", comment: "この小説を更新確認"), systemImage: "arrow.down.circle")
-                }
                 Button {
                     let isLiked = session.novels.first(where: { $0.novelID == state.novelID })?.isLiked ?? false
                     session.send(.setLike, args: [
@@ -70,6 +64,18 @@ struct UtilityView: View {
                           systemImage: currentNovelIsLiked ? "heart.slash" : "heart")
                 }
             }
+            if let feedbackMessage = feedbackMessage {
+                Text(feedbackMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.green)
+            }
+            Button {
+                session.send(.checkUpdatesAll) { ok in
+                    if ok { feedbackMessage = NSLocalizedString("Watch_Utility_CheckUpdatesAllStarted", comment: "全小説の更新確認を開始しました") }
+                }
+            } label: {
+                Label(NSLocalizedString("Watch_Utility_CheckUpdatesAll", comment: "全小説の更新確認"), systemImage: "arrow.triangle.2.circlepath")
+            }
             Section {
                 Text(NSLocalizedString("Watch_Utility_TransferHint", comment: "Watchへ転送する小説の選択は、本棚で小説を左にスワイプするか、iPhoneの ことせかい の設定から行えます。"))
                     .font(.system(size: 11))
@@ -82,6 +88,113 @@ struct UtilityView: View {
     private var currentNovelIsLiked: Bool {
         guard let novelID = session.playState?.novelID else { return false }
         return session.novels.first(where: { $0.novelID == novelID })?.isLiked ?? false
+    }
+}
+
+/// 「再生が末尾に達した時の動作」の種別名(iPhone の設定画面と同じ文言)
+func repeatTypeLocalizedName(_ type: WatchRepeatSpeechType) -> String {
+    switch type {
+    case .noRepeat:
+        return NSLocalizedString("Watch_RepeatType_NoRepeat", comment: "そのまま停止する")
+    case .rewindToFirstStory:
+        return NSLocalizedString("Watch_RepeatType_RewindToFirstStory", comment: "最初の章から再生し直す")
+    case .rewindToThisStory:
+        return NSLocalizedString("Watch_RepeatType_RewindToThisStory", comment: "現在の章を再生し直す")
+    case .goToNextLikeNovel:
+        return NSLocalizedString("Watch_RepeatType_GoToNextLikeNovel", comment: "別のお気に入り小説を再生")
+    case .goToNextSameFolderdNovel:
+        return NSLocalizedString("Watch_RepeatType_GoToNextSameFolderdNovel", comment: "同じフォルダの別の小説を再生")
+    case .goToNextSelectedFolderdNovel:
+        return NSLocalizedString("Watch_RepeatType_GoToNextSelectedFolderdNovel", comment: "指定フォルダの別の小説を再生")
+    case .goToNextSameWriterNovel:
+        return NSLocalizedString("Watch_RepeatType_GoToNextSameWriterNovel", comment: "同じ作者の別の小説を再生")
+    case .goToNextSameWebsiteNovel:
+        return NSLocalizedString("Watch_RepeatType_GoToNextSameWebsiteNovel", comment: "同じWebサイトの別の小説を再生")
+    }
+}
+
+/// 「再生が末尾に達した時の動作」の設定。値は iPhone の RealmGlobalState が正本で、
+/// ここでの変更は Watch の連続再生に即時効かせつつ iPhone へ書き戻される(速度・音量と同じ意味論)。
+struct RepeatConfigView: View {
+    @State private var repeatTypeRawValue: Int = WatchRepeatSpeechType.noRepeat.rawValue
+    @State private var isLoopNoCheckReadingPoint = false
+
+    private static let allTypes: [WatchRepeatSpeechType] = [
+        .noRepeat, .rewindToFirstStory, .rewindToThisStory,
+        .goToNextLikeNovel, .goToNextSameFolderdNovel, .goToNextSelectedFolderdNovel,
+        .goToNextSameWriterNovel, .goToNextSameWebsiteNovel,
+    ]
+    /// 「次の小説の選択方式」が意味を持つ種別(iPhone の設定画面の表示条件と同じ)
+    private static let loopTargetTypes: Set<Int> = Set([
+        WatchRepeatSpeechType.goToNextLikeNovel, .goToNextSameFolderdNovel,
+        .goToNextSelectedFolderdNovel, .goToNextSameWriterNovel, .goToNextSameWebsiteNovel,
+    ].map { $0.rawValue })
+
+    var body: some View {
+        List {
+            Section(NSLocalizedString("Watch_RepeatConfig_TypeTitle", comment: "再生が末尾に達した時の動作")) {
+                ForEach(Self.allTypes, id: \.rawValue) { type in
+                    selectionRow(title: repeatTypeLocalizedName(type), isSelected: repeatTypeRawValue == type.rawValue) {
+                        repeatTypeRawValue = type.rawValue
+                        apply()
+                    }
+                }
+            }
+            if Self.loopTargetTypes.contains(repeatTypeRawValue) {
+                Section(NSLocalizedString("Watch_RepeatConfig_LoopTitle", comment: "次の小説の選択方式")) {
+                    selectionRow(title: NSLocalizedString("Watch_RepeatLoop_Normal", comment: "未読分の続きから再生"), isSelected: !isLoopNoCheckReadingPoint) {
+                        isLoopNoCheckReadingPoint = false
+                        apply()
+                    }
+                    selectionRow(title: NSLocalizedString("Watch_RepeatLoop_NoCheckReadingPoint", comment: "順に1ページ目から再生"), isSelected: isLoopNoCheckReadingPoint) {
+                        isLoopNoCheckReadingPoint = true
+                        apply()
+                    }
+                }
+            }
+            Section {
+                Text(NSLocalizedString("Watch_RepeatConfig_Note", comment: "Watch単体モードでの連続再生の対象になるのは、Watchに転送済みの小説だけです。変更は iPhone の設定に保存されます。"))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .navigationTitle(NSLocalizedString("Watch_RepeatConfig_Title", comment: "連続再生"))
+        .onAppear {
+            load()
+        }
+        // 画面を開いている間に iPhone から新しい設定が届いたら表示も追従させる
+        .onReceive(NotificationCenter.default.publisher(for: WatchSpeechSettingsStorage.didUpdateNotification)) { _ in
+            load()
+        }
+    }
+
+    private func selectionRow(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(.footnote)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.green)
+                        .accessibilityHidden(true)
+                }
+            }
+        }
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+
+    private func load() {
+        let config = WatchSpeechPlayer.effectiveRepeatConfig()
+        repeatTypeRawValue = config.repeatType.rawValue
+        isLoopNoCheckReadingPoint = config.isLoopNoCheckReadingPoint
+    }
+
+    private func apply() {
+        WatchSpeechPlayer.shared.setRepeatConfig(
+            repeatType: WatchRepeatSpeechType(rawValue: repeatTypeRawValue) ?? .noRepeat,
+            isLoopNoCheckReadingPoint: isLoopNoCheckReadingPoint)
     }
 }
 

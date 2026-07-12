@@ -10,7 +10,8 @@
 //    UnitPoint に揃える」仕様しかない(文字単位のスクロールAPIが無い)ので、ハイライト中の段落の
 //    高さを実測し、段落内の文字位置の割合からアンカーを逆算して「ハイライト行が画面の40%の高さに
 //    来る」ように寄せる(画面より背の高い段落でも読んでいる行が画面内に収まる)
-//  - 手動スクロール(竜頭含む)で自動追従を一時解除し、5秒無操作で復帰
+//  - 「手動スクロールで自動追従を一時解除」は検知が実質機能していなかったため撤去した(2026-07-14)。
+//    再生中の手動スクロールは次のブロック境界で読み上げ位置へ引き戻される
 //  - 段落の長押しで読み上げ位置を指定(ハプティクスで応答。タップ+確認は試用の結果廃止)
 //  - 本文の先頭/末尾に前後の章への移動ボタン
 //
@@ -27,6 +28,8 @@ struct TextPageView: View {
     @StateObject private var model = TextPageModel()
     @Environment(\.scenePhase) private var scenePhase
     @State private var isSettingsPresented = false
+    /// ツールバー(ScrollViewReader の外)から「一番上へ」スクロールするための橋渡し
+    @State private var scrollProxy: ScrollViewProxy?
 
     @AppStorage(TextDisplayDefaults.fontSizeKey) private var fontSize: Double = 14
     @AppStorage(TextDisplayDefaults.textColorKey) private var textColorName: String = "white"
@@ -35,6 +38,9 @@ struct TextPageView: View {
     /// ハイライト行を画面のどの高さに寄せるか(0=最上部, 1=最下部)。
     /// 上部はナビゲーションバーに隠れるので中央よりやや上の 0.4 にする
     private static let scrollTargetHeightFraction = 0.4
+
+    /// 「一番上へ」ボタンのスクロール先の id
+    private static let topAnchorID = "TextPageTopAnchor"
 
     /// 表示対象の小説と章。Watch 単体再生が発話元ならそちらを、そうでなければ iPhone の状態を表示する
     private var displayTarget: (novelID: String, title: String, chapter: Int)? {
@@ -92,23 +98,13 @@ struct TextPageView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 6) {
+                        // 「一番上へ」ボタンのスクロール先(高さ0の目印)
+                        Color.clear
+                            .frame(height: 0)
+                            .id(Self.topAnchorID)
                         contentBody(textColor: textColor, highlightColor: highlightColor, highlight: highlight)
                     }
                     .padding(.horizontal, 2)
-                    .background(GeometryReader { geometry in
-                        Color.clear.preference(key: TextScrollOffsetKey.self,
-                                               value: geometry.frame(in: .named("TextPageScroll")).minY)
-                    })
-                }
-                .coordinateSpace(name: "TextPageScroll")
-                .onPreferenceChange(TextScrollOffsetKey.self) { offset in
-                    // 指でも竜頭でもスクロールはこのオフセット変化で拾う。
-                    // (watchOS では ScrollView に DragGesture を足すとスクロール/横スワイプごと
-                    //  奪ってしまうためジェスチャは使えない。自動スクロールを瞬間移動にして自前の
-                    //  抑止窓を短くすることで、頻繁なブロック更新でも手動検出が飢餓しないようにしている)
-                    model.handleScrollOffset(offset, trackManual: isPlayingNow) {
-                        scrollToHighlight(proxy: proxy, viewportHeight: outer.size.height)
-                    }
                 }
                 .onPreferenceChange(ParagraphHeightsKey.self) { heights in
                     model.storeParagraphHeights(heights)
@@ -135,25 +131,13 @@ struct TextPageView: View {
                     model.clearParagraphHeights()
                 }
                 .onAppear {
+                    scrollProxy = proxy
                     prepareAndScroll(proxy: proxy, viewportHeight: outer.size.height)
                     updateSubscription()
                 }
             }
         }
         .background(TextDisplayDefaults.backgroundColor(named: backgroundColorName).ignoresSafeArea())
-        .overlay(alignment: .bottomLeading) {
-            // 上部はナビゲーションバーに隠れるので下部に出す(右下の再生ボタンを避けて左寄せ)
-            if model.isAutoScrollPaused && isPlayingNow {
-                Text(NSLocalizedString("Watch_TextPage_AutoScrollPaused", comment: "自動スクロール停止中"))
-                    .font(.system(size: 11))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color.black.opacity(0.65), in: Capsule())
-                    .padding(.leading, 2)
-                    .padding(.bottom, 2)
-            }
-        }
         .navigationTitle(displayTarget?.title.isEmpty == false ? displayTarget!.title : NSLocalizedString("Watch_TextPage_Title", comment: "本文"))
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -164,9 +148,17 @@ struct TextPageView: View {
                 }
                 .accessibilityLabel(NSLocalizedString("Watch_AX_TextSettings", comment: "本文の表示設定"))
             }
-            // iPhone 版の本文画面右上の再生ボタンに相当。watchOS は右上を時計が占有するので下端の隅に置く
+            // iPhone 版の本文画面右上の再生ボタンに相当。watchOS は右上を時計が占有するので下端の隅に置く。
+            // 左下は「一番上へ」(iPhone の「画面上部タップで先頭へ」に相当。watchOS にはその仕組みが無い)
             ToolbarItem(placement: .bottomBar) {
                 HStack {
+                    Button {
+                        // 再生中は次のブロック境界で読み上げ位置へ戻る(自動追従の一時解除は撤去済み)
+                        scrollProxy?.scrollTo(Self.topAnchorID, anchor: .top)
+                    } label: {
+                        Image(systemName: "arrow.up.to.line")
+                    }
+                    .accessibilityLabel(NSLocalizedString("Watch_AX_ScrollToTop", comment: "一番上へ"))
                     Spacer()
                     Button {
                         if player.isSelectedAsSource {
@@ -175,8 +167,14 @@ struct TextPageView: View {
                             session.send(.togglePlayPause)
                         }
                     } label: {
-                        Image(systemName: isPlayingNow ? "pause.fill" : "play.fill")
+                        if player.isSelectedAsSource && player.isStartingPlayback {
+                            // 単体再生の開始処理中。再生画面のボタンと同じくスピナー表示にする
+                            ProgressView()
+                        } else {
+                            Image(systemName: isPlayingNow ? "pause.fill" : "play.fill")
+                        }
                     }
+                    .disabled(player.isSelectedAsSource && player.isStartingPlayback)
                     .accessibilityLabel(isPlayingNow
                         ? NSLocalizedString("Watch_AX_Pause", comment: "一時停止")
                         : NSLocalizedString("Watch_AX_Play", comment: "再生"))
@@ -360,8 +358,7 @@ struct TextPageView: View {
     /// scrollTo(id:anchor:) は「段落のアンカー点を画面の同じアンカー点に揃える」ことしかできないので、
     /// 段落の実測高さと段落内の文字位置の割合からアンカーを逆算する
     private func scrollToHighlight(proxy: ScrollViewProxy, viewportHeight: CGFloat) {
-        guard !model.isAutoScrollPaused,
-              let highlight = highlightScalarRange,
+        guard let highlight = highlightScalarRange,
               let paragraph = model.paragraphs.first(where: { $0.scalarRange.upperBound > highlight.lowerBound }) else { return }
         let anchor: UnitPoint
         if let paragraphHeight = model.paragraphHeights[paragraph.id], viewportHeight > 0 {
@@ -381,11 +378,7 @@ struct TextPageView: View {
             anchor = .center
             model.pendingHeightScrollParagraphID = paragraph.id
         }
-        // アニメーション無しの瞬間移動。offset 差分による手動スクロール検出を飢餓させないよう、
-        // 自前スクロールが offset を動かす時間を最小(1フレーム)に抑える狙い
-        model.performProgrammaticScroll {
-            proxy.scrollTo(paragraph.id, anchor: anchor)
-        }
+        proxy.scrollTo(paragraph.id, anchor: anchor)
     }
 
     /// 段落内の位置 fraction(0-1、文字数比からの近似)にあるハイライト行が
@@ -466,8 +459,6 @@ final class TextPageModel: ObservableObject {
     /// 発話ブロックの表示文字範囲一覧(ハイライトの粒度)。非同期に埋まることがある
     @Published private(set) var blockRanges: [Range<Int>] = []
     @Published private(set) var hasChapter = false
-    /// 手動スクロールで自動追従を一時解除中か
-    @Published var isAutoScrollPaused = false
 
     private(set) var contentScalarCount = 0
     private(set) var subtitle = ""
@@ -493,7 +484,6 @@ final class TextPageModel: ObservableObject {
         let key = "\(novelID)#\(chapter)"
         guard key != contentKey else { return }
         contentKey = key
-        resetScrollState()
         clearParagraphHeights()
         guard let novel = NovelStorage.loadNovel(novelID: novelID) else {
             availableChapters = []
@@ -559,51 +549,6 @@ final class TextPageModel: ObservableObject {
         return nil
     }
 
-    // MARK: 自動スクロールの一時解除
-
-    /// 復帰までの無操作時間(秒)
-    private static let resumeAfterIdle: TimeInterval = 5.0
-
-    private var lastScrollOffset: CGFloat?
-    private var lastManualScrollDate = Date.distantPast
-    private var programmaticScrollDeadline = Date.distantPast
-
-    private func resetScrollState() {
-        lastScrollOffset = nil
-        isAutoScrollPaused = false
-    }
-
-    /// スクロールのオフセット変化(指・竜頭とも)。自前の scrollTo(プログラム起因)以外の変化を
-    /// 手動スクロールとみなして自動追従を一時解除する
-    func handleScrollOffset(_ offset: CGFloat, trackManual: Bool, onResume: @escaping () -> Void) {
-        defer { lastScrollOffset = offset }
-        guard trackManual, let last = lastScrollOffset else { return }
-        // 自前スクロールは瞬間移動なので抑止窓は 0.3秒で足りる。この窓を短く保つことで、
-        // ブロックが小さく自動スクロールが頻発しても手動検出が飢餓状態にならない
-        guard abs(offset - last) > 2, Date() >= programmaticScrollDeadline else { return }
-        lastManualScrollDate = Date()
-        if !isAutoScrollPaused { isAutoScrollPaused = true }
-        // 無操作が続けば自動追従に戻る(操作が続く限り lastManualScrollDate が更新され延期される)
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.resumeAfterIdle) { [weak self] in
-            guard let self = self, self.isAutoScrollPaused else { return }
-            guard Date().timeIntervalSince(self.lastManualScrollDate) >= Self.resumeAfterIdle - 0.1 else { return }
-            self.isAutoScrollPaused = false
-            onResume()
-        }
-    }
-
-    /// scrollTo によるオフセット変化を手動スクロールと誤検出しないよう、短い抑止窓を張って包む
-    func performProgrammaticScroll(_ scroll: () -> Void) {
-        programmaticScrollDeadline = Date().addingTimeInterval(0.3)
-        scroll()
-    }
-}
-
-private struct TextScrollOffsetKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
 }
 
 /// ハイライト中の段落の実測高さ(段落ID → 高さ)。ハイライトが乗っている段落だけが emit する

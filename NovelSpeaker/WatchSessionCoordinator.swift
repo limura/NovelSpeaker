@@ -87,6 +87,63 @@ class WatchSessionCoordinator: NSObject {
         NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in
             self?.transferSpeechSettingsIfNeeded()
         }
+        observeSettingsChangesForWatch()
+    }
+
+    // MARK: - 発話設定の変更監視(変更されたらすぐ Watch へ送る)
+
+    private var settingsObserverTokens: [NotificationToken] = []
+    private var settingsTransferDebounceWorkItem: DispatchWorkItem?
+
+    /// Watch へ送る発話設定(WatchSpeechSettings)の材料になる Realm オブジェクト群を監視して、
+    /// 変更されたらデバウンス付きで設定ファイルを送り直す。内容が変わっていなければ指紋が一致して
+    /// 実際には送られないので、多少過剰に発火しても害はない(iCloud同期由来の変更でも同じ)。
+    /// これで「iPhone 側で設定を変えた時も、Watch 側の変更と同じようにすぐ相手へ伝わる」になる
+    private func observeSettingsChangesForWatch() {
+        DispatchQueue.main.async {
+            RealmUtil.RealmBlock { realm in
+                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                    self.settingsObserverTokens.append(globalState.observe { [weak self] _ in
+                        self?.scheduleSettingsTransferSoon()
+                    })
+                }
+                if let speakerSettings = RealmSpeakerSetting.GetAllObjectsWith(realm: realm) {
+                    self.settingsObserverTokens.append(speakerSettings.observe { [weak self] _ in
+                        self?.scheduleSettingsTransferSoon()
+                    })
+                }
+                if let sectionConfigs = RealmSpeechSectionConfig.GetAllObjectsWith(realm: realm) {
+                    self.settingsObserverTokens.append(sectionConfigs.observe { [weak self] _ in
+                        self?.scheduleSettingsTransferSoon()
+                    })
+                }
+                if let waitConfigs = RealmSpeechWaitConfig.GetAllObjectsWith(realm: realm) {
+                    self.settingsObserverTokens.append(waitConfigs.observe { [weak self] _ in
+                        self?.scheduleSettingsTransferSoon()
+                    })
+                }
+                if let modSettings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) {
+                    self.settingsObserverTokens.append(modSettings.observe { [weak self] _ in
+                        self?.scheduleSettingsTransferSoon()
+                    })
+                }
+                if let novelTags = RealmNovelTag.GetAllObjectsWith(realm: realm) {
+                    self.settingsObserverTokens.append(novelTags.observe { [weak self] _ in
+                        self?.scheduleSettingsTransferSoon()
+                    })
+                }
+            }
+        }
+    }
+
+    /// 設定変更の連打(スライダー操作や iCloud 同期のバースト)をまとめるためのデバウンス
+    private func scheduleSettingsTransferSoon() {
+        settingsTransferDebounceWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.transferSpeechSettingsIfNeeded()
+        }
+        settingsTransferDebounceWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: work)
     }
 
     // MARK: - Watch への状態送信
@@ -122,10 +179,21 @@ class WatchSessionCoordinator: NSObject {
         guard isStarted, session.activationState == .activated, session.isPaired else { return }
         let force = forceNextContextPush
         forceNextContextPush = false
+        // 小説一覧の全量(ファイル)も内容が変わっていれば送り直す(指紋で dedup される)
+        transferNovelListIfNeeded()
         var fullContext: [String: Any] = [:]
         fullContext[WatchMessage.Context.playState] = currentPlayState().toDictionary()
         let novelList = currentNovelList().map { $0.toDictionary() }
         fullContext[WatchMessage.Context.novelList] = novelList
+        // iPhone の並び順のグループ種別(Watch の「iPhoneと同じ」がフォルダ分けを再現するのに使う)
+        let sortType = RealmUtil.RealmBlock { realm in
+            RealmGlobalState.GetInstanceWith(realm: realm)?.bookShelfSortType ?? .LastReadDate
+        }
+        fullContext[WatchMessage.Context.phoneSortGrouping] = WatchSessionCoordinator.groupingKind(sortType: sortType)
+        // 最後に転送キューへ積んだ小説一覧の指紋(Watch 側の「同期中…」表示用)
+        if let novelListFingerprint = UserDefaults.standard.string(forKey: WatchSessionCoordinator.lastNovelListFingerprintKey) {
+            fullContext[WatchMessage.Context.novelListFingerprint] = novelListFingerprint
+        }
         // 内容が前回送信時と同じなら送らない(Bluetooth 送信を減らして電池を守る)。
         // updatedAt は毎回変わるので比較から除外する。force 指定時はこの抑止を飛ばす。
         let fingerprint = WatchSessionCoordinator.fingerprint(of: fullContext)
@@ -208,7 +276,7 @@ class WatchSessionCoordinator: NSObject {
         return state
     }
 
-    private func currentNovelList() -> [WatchNovelSummary] {
+    private func currentNovelList(limit: Int = WatchSessionCoordinator.novelListLimit) -> [WatchNovelSummary] {
         return RealmUtil.RealmBlock { realm -> [WatchNovelSummary] in
             guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else { return [] }
             let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
@@ -218,7 +286,7 @@ class WatchSessionCoordinator: NSObject {
                 globalState: globalState)
             var result: [WatchNovelSummary] = []
             for novel in sorted {
-                if result.count >= WatchSessionCoordinator.novelListLimit { break }
+                if result.count >= limit { break }
                 var summary = WatchNovelSummary()
                 summary.novelID = novel.novelID
                 summary.title = novel.title
@@ -226,16 +294,46 @@ class WatchSessionCoordinator: NSObject {
                 summary.readingChapterNumber = novel.readingChapterNumber ?? 0
                 summary.isLiked = (globalState?.calcLikeLevel(novelID: novel.novelID) ?? 0) > 0
                 summary.writer = novel.writer
+                summary.lastReadDate = novel.lastReadDate
+                summary.lastDownloadDate = novel.lastDownloadDate
+                summary.createdDate = novel.createdDate
+                summary.readingChapterReadingPoint = novel.m_readingChapterReadingPoint
+                summary.readingChapterContentCount = novel.m_readingChapterContentCount
                 result.append(summary)
             }
             return result
         }
     }
 
+    /// iPhone の並び順のグループ種別。Watch はこれを見て「iPhoneと同じ」表示のフォルダ分けを再現する。
+    /// タグ名順(タグ情報が Watch に無い)と Apple Watch 転送状況別(iPhone 側の転送対象設定が必要)は
+    /// 再現できないので flat 扱い
+    private static func groupingKind(sortType: NarouContentSortType) -> String {
+        switch sortType {
+        case .SelfCreatedFolder:
+            return "folder"
+        case .Writer:
+            return "writer"
+        case .WebSite:
+            return "website"
+        case .LastReadDateWithFolder:
+            return "readDateBuckets"
+        case .NovelUpdatedAtWithFolder:
+            return "downloadDateBuckets"
+        case .UnreadChapterCount:
+            return "unreadBuckets"
+        case .AppleWatchTransferState:
+            return "watchTransferState"
+        default:
+            return "flat"
+        }
+    }
+
     /// Watch の本棚に載せる並び順。iPhone の本棚の並び順設定(bookShelfSortType)に追従する。
     /// フォルダ分け系の並び順は Watch では平坦なリストにしか出せないので、
-    /// 「iPhone のフォルダ内と同じ整列キー」で平坦に並べた近似にする
-    /// (整列キーの昇順/降順は BookShelfTreeViewController.getNovelArray と揃えること)
+    /// 「iPhone のフォルダを開いた時と同じ順」で平坦に並べた近似にする。
+    /// 注意: 揃える相手は getNovelArray ではなく「実際の画面表示を作る」
+    /// BookShelfTreeViewController.create*CellDataTree 側(表示側で並べ直すケースがある)
     private static func sortNovelsForWatch(novels: Results<RealmNovel>, sortType: NarouContentSortType, globalState: RealmGlobalState?) -> [RealmNovel] {
         switch sortType {
         case .Ncode:
@@ -246,7 +344,11 @@ class WatchSessionCoordinator: NSObject {
         case .NovelUpdatedAt, .NovelUpdatedAtWithFolder:
             return Array(novels.sorted(byKeyPath: "lastDownloadDate", ascending: false))
         case .Writer:
-            return Array(novels.sorted(byKeyPath: "writer", ascending: false))
+            // iPhone の表示は「作者名(昇順)のフォルダ+フォルダ内は小説名(昇順)」
+            return Array(novels.sorted(by: [
+                RealmSwift.SortDescriptor(keyPath: "writer", ascending: true),
+                RealmSwift.SortDescriptor(keyPath: "title", ascending: true),
+            ]))
         case .LikeLevel:
             var likeLevelMap: [String: Int] = [:]
             if let globalState = globalState {
@@ -259,16 +361,39 @@ class WatchSessionCoordinator: NSObject {
         case .CreatedDate:
             return Array(novels.sorted(byKeyPath: "createdDate", ascending: false))
         case .PageCount:
+            // iPhone の表示側は「章の数が多い順」(getNovelArray とは逆)
             return novels.sorted { a, b in
                 let aCount = RealmStoryBulk.StoryIDToChapterNumber(storyID: a.m_lastChapterStoryID)
                 let bCount = RealmStoryBulk.StoryIDToChapterNumber(storyID: b.m_lastChapterStoryID)
-                return aCount < bCount
+                return aCount > bCount
             }
         case .UnreadChapterCount:
             return novels.map { ($0, BookShelfTreeViewController.unreadChapterCount(novel: $0)) }
                 .sorted { $0.1 > $1.1 }
                 .map { $0.0 }
-        case .Title, .SelfCreatedFolder, .KeywordTag:
+        case .SelfCreatedFolder:
+            // iPhone の表示は「フォルダ(名前昇順)→フォルダ内は登録順→未分類はタイトル降順」。
+            // 同じ順で平坦化する(複数フォルダに属する小説は最初の一回だけ)
+            var novelMap: [String: RealmNovel] = [:]
+            for novel in novels {
+                novelMap[novel.novelID] = novel
+            }
+            var result: [RealmNovel] = []
+            var listed = Set<String>()
+            if let realm = novels.realm, let folders = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) {
+                for folder in folders.sorted(by: { $0.name < $1.name }) {
+                    for novelID in folder.targetNovelIDArray {
+                        guard !listed.contains(novelID), let novel = novelMap[novelID] else { continue }
+                        listed.insert(novelID)
+                        result.append(novel)
+                    }
+                }
+            }
+            for novel in novels.sorted(byKeyPath: "title", ascending: false) where !listed.contains(novel.novelID) {
+                result.append(novel)
+            }
+            return result
+        case .Title, .KeywordTag:
             return Array(novels.sorted(byKeyPath: "title", ascending: false))
         case .LastReadDate, .LastReadDateWithFolder, .AppleWatchTransferState:
             return Array(novels.sorted(byKeyPath: "lastReadDate", ascending: false))
@@ -458,6 +583,23 @@ class WatchSessionCoordinator: NSObject {
             // Watch 単体再生用の設定ファイルも新しい値で送り直す(指紋が変わるので実際に送られる)
             transferSpeechSettingsIfNeeded()
             completion((true, nil))
+        case .setRepeatSpeechConfig:
+            guard let repeatTypeRawValue = message[WatchMessage.Arg.repeatType] as? Int,
+                  let isLoopNoCheck = message[WatchMessage.Arg.loopNoCheckReadingPoint] as? Bool,
+                  let repeatType = RepeatSpeechType(rawValue: repeatTypeRawValue) else {
+                completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorInvalidArguments", comment: "引数が不正です")))
+                return
+            }
+            RealmUtil.RealmBlock { realm in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                RealmUtil.WriteWith(realm: realm) { _ in
+                    globalState.repeatSpeechType = repeatType
+                    globalState.repeatSpeechLoopType = isLoopNoCheck ? .noCheckReadingPoint : .normal
+                }
+            }
+            // Watch 単体再生用の設定ファイルも新しい値で送り直す(指紋が変わるので実際に送られる)
+            transferSpeechSettingsIfNeeded()
+            completion((true, nil))
         case .subscribeSpeechBlock:
             isSpeechBlockSubscribed = true
             // 購読直後は次のブロック境界を待たずに現在位置を即送る(本文ページのハイライト初期表示用)
@@ -605,6 +747,41 @@ class WatchSessionCoordinator: NSObject {
         }
     }
 
+    // MARK: - 小説一覧の転送(本棚の全量)
+
+    private static let lastNovelListFingerprintKey = "WatchSessionCoordinator_LastNovelListFingerprint"
+
+    /// 小説一覧の全量を transferFile で送る。内容が前回送信時と同じなら送らない。
+    /// applicationContext の novelList は先頭 novelListLimit 冊しか入らない(サイズ上限)ため、
+    /// 本棚が大きい場合のフォルダ表示や並び替えはこちらの全量が正になる
+    private func transferNovelListIfNeeded() {
+        let session = WCSession.default
+        guard isStarted, session.activationState == .activated, session.isPaired else { return }
+        DispatchQueue.global(qos: .utility).async {
+            let novels = self.currentNovelList(limit: Int.max).map { $0.toDictionary() }
+            guard !novels.isEmpty,
+                  let data = try? JSONSerialization.data(withJSONObject: [WatchNovelListFile.novelsKey: novels], options: [.sortedKeys]) else { return }
+            let fingerprint = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+            if UserDefaults.standard.string(forKey: WatchSessionCoordinator.lastNovelListFingerprintKey) == fingerprint { return }
+            let fileURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("WatchNovelList-\(UUID().uuidString).json")
+            do {
+                try data.write(to: fileURL)
+            } catch {
+                print("WatchSessionCoordinator: 小説一覧の一時ファイル書き込み失敗: \(error)")
+                return
+            }
+            session.transferFile(fileURL, metadata: [
+                WatchNovelListFile.transferTypeKey: WatchNovelListFile.transferTypeValue,
+                WatchNovelListFile.transferFingerprintKey: fingerprint,
+            ])
+            // transferFile はキュー式で OS が再試行してくれるので、積めた時点で送信済み扱いにする。
+            // 転送がエラーで終わった場合は didFinish 側で指紋を消して次回再送させる
+            UserDefaults.standard.set(fingerprint, forKey: WatchSessionCoordinator.lastNovelListFingerprintKey)
+            print("WatchSessionCoordinator: 小説一覧を転送キューに追加 (\(data.count) bytes)")
+        }
+    }
+
     // MARK: - 発話設定の転送(Watch 単体再生用)
 
     private static let lastSpeechSettingsFingerprintKey = "WatchSessionCoordinator_LastSpeechSettingsFingerprint"
@@ -729,9 +906,10 @@ class WatchSessionCoordinator: NSObject {
                 settings.isAnnounceAtRepatSpeechTime = globalState.isAnnounceAtRepatSpeechTime
                 settings.novelLikeOrder = Array(globalState.novelLikeOrder)
             }
-            // フォルダ一覧(「同じ/指定フォルダの小説を再生」の候補選び用)
+            // フォルダ一覧(「同じ/指定フォルダの小説を再生」の候補選びと本棚のフォルダ表示用)。
+            // iPhone の本棚(自作フォルダ順)のフォルダの並びと同じく名前順で送る
             if let folders = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) {
-                settings.novelFolders = folders.map {
+                settings.novelFolders = folders.sorted(by: { $0.name < $1.name }).map {
                     WatchSpeechSettings.Folder(name: $0.name, novelIDs: Array($0.targetNovelIDArray))
                 }
             }
@@ -790,6 +968,21 @@ extension WatchSessionCoordinator: WCSessionDelegate {
         // Watch 側から「Watch に本文がある小説の一覧」が送られてくる
         if let storedNovelIDs = applicationContext[WatchMessage.Context.watchStoredNovelIDs] as? [String] {
             UserDefaults.standard.set(storedNovelIDs, forKey: WatchSessionCoordinator.watchStoredNovelIDsKey)
+        }
+        // Watch が受信済みの小説一覧の指紋。こちらが最後に送った物と違うなら送り直す
+        // (Watch の再インストール等でファイルが消えていても「送信済み」の dedup で
+        //  二度と送られなくならないように)
+        if let receivedFingerprint = applicationContext[WatchMessage.Context.watchNovelListReceivedFingerprint] as? String,
+           receivedFingerprint != (UserDefaults.standard.string(forKey: WatchSessionCoordinator.lastNovelListFingerprintKey) ?? "") {
+            // 一覧ファイルが転送待ちのうちは積み直さない(転送中に Watch から context が
+            // 届くたびに同じファイルを重複キューしないため)
+            let hasOutstandingNovelListTransfer = session.outstandingFileTransfers.contains {
+                ($0.file.metadata?[WatchNovelListFile.transferTypeKey] as? String) == WatchNovelListFile.transferTypeValue
+            }
+            if !hasOutstandingNovelListTransfer {
+                UserDefaults.standard.removeObject(forKey: WatchSessionCoordinator.lastNovelListFingerprintKey)
+                transferNovelListIfNeeded()
+            }
         }
         // Watch 単体再生の読み上げ位置。iPhone 側の栞より新しければ反映する。
         // 新形式(直近の複数件)があればそちらを、無ければ旧形式(最新1件)を使う
@@ -860,9 +1053,12 @@ extension WatchSessionCoordinator: WCSessionDelegate {
         try? FileManager.default.removeItem(at: fileTransfer.file.fileURL)
         if let error = error {
             print("WatchSessionCoordinator: transferFile 失敗: \(error)")
-            // 発話設定の転送に失敗した場合は「送信済み」の指紋を消して、次の機会に再送させる
+            // 発話設定・小説一覧の転送に失敗した場合は「送信済み」の指紋を消して、次の機会に再送させる
             if (fileTransfer.file.metadata?[WatchSpeechSettings.transferTypeKey] as? String) == WatchSpeechSettings.transferTypeValue {
                 UserDefaults.standard.removeObject(forKey: WatchSessionCoordinator.lastSpeechSettingsFingerprintKey)
+            }
+            if (fileTransfer.file.metadata?[WatchNovelListFile.transferTypeKey] as? String) == WatchNovelListFile.transferTypeValue {
+                UserDefaults.standard.removeObject(forKey: WatchSessionCoordinator.lastNovelListFingerprintKey)
             }
         }
     }

@@ -13,6 +13,7 @@ struct WatchRootView: View {
     /// 0=本棚 1=再生(ルート) 2=本文
     @State private var tabSelection = 1
     @ObservedObject private var session = PhoneSessionManager.shared
+    @ObservedObject private var player = WatchSpeechPlayer.shared
 
     var body: some View {
         TabView(selection: $tabSelection) {
@@ -39,6 +40,30 @@ struct WatchRootView: View {
         } message: {
             Text(session.lastErrorMessage ?? "")
         }
+        // Bluetooth 未接続の注意(「Watchで聴く」を選んだ時)。「今後表示しない」を選べる
+        // (Watch のスピーカーで聴くことを主とする人には毎回出ると邪魔なため)
+        .alert(NSLocalizedString("Watch_InfoAlert_Title", comment: "お知らせ"), isPresented: $player.isNoBluetoothWarningPresented) {
+            Button("OK") {}
+            Button(NSLocalizedString("Watch_Player_NoBluetoothWarning_DontShowAgain", comment: "今後表示しない")) {
+                UserDefaults.standard.set(true, forKey: WatchSpeechPlayer.suppressNoBluetoothWarningKey)
+            }
+        } message: {
+            Text(NSLocalizedString("Watch_Player_NoBluetoothWarning", comment: "Bluetoothのイヤホン等が接続されていません。"))
+        }
+        // 「指定フォルダの小説を再生」で対象フォルダの選択が必要な時に出す(iPhone 側の選択UIと同等)。
+        // 再生ボタンは再生画面にも本文ページにもあるので、ダイアログはルートに置く
+        .confirmationDialog(
+            NSLocalizedString("Watch_Player_SelectFolder_Title", comment: "続けて再生するフォルダを選択"),
+            isPresented: isFolderSelectionPresented,
+            titleVisibility: .visible
+        ) {
+            ForEach(player.folderSelectionRequest ?? [], id: \.self) { folderName in
+                Button(folderName) {
+                    player.selectFolderForRepeatAndPlay(name: folderName)
+                }
+            }
+            Button(NSLocalizedString("Watch_Cancel", comment: "キャンセル"), role: .cancel) {}
+        }
     }
 
     private var isErrorPresented: Binding<Bool> {
@@ -47,6 +72,17 @@ struct WatchRootView: View {
             set: { presented in
                 if !presented {
                     session.lastErrorMessage = nil
+                }
+            }
+        )
+    }
+
+    private var isFolderSelectionPresented: Binding<Bool> {
+        Binding(
+            get: { player.folderSelectionRequest != nil },
+            set: { presented in
+                if !presented {
+                    player.folderSelectionRequest = nil
                 }
             }
         )

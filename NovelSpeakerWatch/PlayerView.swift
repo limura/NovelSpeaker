@@ -8,6 +8,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct PlayerView: View {
     @ObservedObject private var session = PhoneSessionManager.shared
@@ -87,10 +88,17 @@ struct PlayerView: View {
                         session.send(.togglePlayPause)
                     }
                 } label: {
-                    Image(systemName: isPlayingNow ? "pause.circle.fill" : "play.circle.fill")
-                        .font(.system(size: 44))
+                    if isWatchSource && player.isStartingPlayback {
+                        // 単体再生の開始処理中(初回は数十秒かかることがある)。押せたことが分かるように
+                        ProgressView()
+                            .frame(width: 44, height: 44)
+                    } else {
+                        Image(systemName: isPlayingNow ? "pause.circle.fill" : "play.circle.fill")
+                            .font(.system(size: 44))
+                    }
                 }
                 .buttonStyle(.plain)
+                .disabled(isWatchSource && player.isStartingPlayback)
                 .accessibilityLabel(isPlayingNow
                     ? NSLocalizedString("Watch_AX_Pause", comment: "一時停止")
                     : NSLocalizedString("Watch_AX_Play", comment: "再生"))
@@ -171,6 +179,22 @@ struct PlayerView: View {
         }
         player.isSelectedAsSource = true
         player.refreshComplication()
+        warnIfNoBluetoothOutput()
+    }
+
+    /// Watch のスピーカーでの読み上げ(longFormAudio)は対応していない機種があるため、
+    /// Bluetooth のイヤホン等が繋がっていない場合は単体モード選択の時点で知らせておく。
+    /// モード自体は設定できる(後から接続してもよいし、対応機種ならスピーカーで再生できる)
+    private func warnIfNoBluetoothOutput() {
+        guard !UserDefaults.standard.bool(forKey: WatchSpeechPlayer.suppressNoBluetoothWarningKey) else { return }
+        let audioSession = AVAudioSession.sharedInstance()
+        // 出力先の判定が実際の再生と同じ条件になるよう、再生時と同じカテゴリを先に設定しておく
+        try? audioSession.setCategory(.playback, mode: .spokenAudio, policy: .longFormAudio, options: [])
+        let bluetoothPorts: [AVAudioSession.Port] = [.bluetoothA2DP, .bluetoothHFP, .bluetoothLE]
+        let hasBluetoothOutput = audioSession.currentRoute.outputs.contains { bluetoothPorts.contains($0.portType) }
+        if !hasBluetoothOutput {
+            player.isNoBluetoothWarningPresented = true
+        }
     }
 
     private func selectPhoneSource() {

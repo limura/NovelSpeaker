@@ -25,6 +25,9 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     /// 再生画面の発話元として Watch 単体再生が選ばれているか
     @Published var isSelectedAsSource = false
     @Published var isPlaying = false
+    /// 再生開始処理中(タップから発話準備が整うまで)。初回は設定同期+オーディオ確立で
+    /// 数秒〜数十秒かかることがあるので、再生ボタンをスピナーにして再タップも無視する
+    @Published var isStartingPlayback = false
     @Published var novelID = ""
     @Published var title = ""
     @Published var chapterNumber = 0
@@ -34,6 +37,17 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     @Published var progress: Double = 0
     /// 章内の読み上げ位置(表示文字の unicodeScalar オフセット)。本文ページのハイライトが使う
     @Published var speakingLocation = 0
+    /// 「指定フォルダの小説を再生」で対象フォルダの選択が必要な時、候補のフォルダ名が入る。
+    /// UI(WatchRootView)がこれを監視してダイアログを出し、選択されたら
+    /// selectFolderForRepeatAndPlay() で再生が再開される。キャンセルなら nil に戻すだけでよい
+    @Published var folderSelectionRequest: [String]?
+    /// Bluetooth 未接続の注意を表示したい(WatchRootView がアラートを出す)。
+    /// ソース選択ダイアログと同じビューに付けるとダイアログが閉じた直後の表示が失敗するため、
+    /// エラーアラートと同じくルートに置く
+    @Published var isNoBluetoothWarningPresented = false
+
+    /// 「Bluetooth未接続の注意を今後表示しない」の UserDefaults キー
+    static let suppressNoBluetoothWarningKey = "SuppressNoBluetoothWarning"
 
     private let speaker = SpeechBlockSpeaker()
     private var stories: [Int: NovelStorage.StoredChapter] = [:]
@@ -183,6 +197,63 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         return (speaker.rate, speaker.volume)
     }
 
+    /// 「再生が末尾に達した時の動作」の実効値
+    struct EffectiveRepeatConfig {
+        let repeatType: WatchRepeatSpeechType
+        let isLoopNoCheckReadingPoint: Bool
+    }
+
+    /// 現在有効な「再生が末尾に達した時の動作」(ローカル差分があればそちら、無ければ同期済み設定)。
+    /// 連続再生設定 UI の初期値と、末尾到達時の分岐に使う
+    static func effectiveRepeatConfig() -> EffectiveRepeatConfig {
+        if let override = WatchRepeatConfigStore.localOverride() {
+            return EffectiveRepeatConfig(
+                repeatType: WatchRepeatSpeechType(rawValue: override.repeatTypeRawValue) ?? .noRepeat,
+                isLoopNoCheckReadingPoint: override.isLoopNoCheck)
+        }
+        let settings = WatchSpeechSettingsStorage.current()
+        return EffectiveRepeatConfig(
+            repeatType: WatchRepeatSpeechType(rawValue: settings.repeatSpeechTypeRawValue ?? 0) ?? .noRepeat,
+            isLoopNoCheckReadingPoint: settings.isRepeatSpeechLoopNoCheckReadingPoint == true)
+    }
+
+    // MARK: - 連続再生モードの変更
+
+    /// 「再生が末尾に達した時の動作」を変更する(連続再生設定 UI から呼ばれる)。
+    /// iPhone の設定(RealmGlobalState)へ書き戻される。繋がっていなければローカル差分として
+    /// 保持して Watch の発話には即時効かせ、繋がった時に送る(速度・音量と同じ仕組み)
+    func setRepeatConfig(repeatType: WatchRepeatSpeechType, isLoopNoCheckReadingPoint: Bool) {
+        WatchRepeatConfigStore.set(repeatTypeRawValue: repeatType.rawValue, isLoopNoCheck: isLoopNoCheckReadingPoint)
+        // スライダーと違い連打はしにくいが、選択方式と種別を続けて変える操作をまとめて送る
+        repeatConfigSendWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.sendPendingRepeatConfigIfPossible()
+        }
+        repeatConfigSendWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: work)
+    }
+
+    /// 未送信の連続再生モード変更を iPhone へ送る(reachable になった時などにも呼ばれる)
+    func sendPendingRepeatConfigIfPossible() {
+        guard WatchRepeatConfigStore.isPendingSend,
+              let override = WatchRepeatConfigStore.localOverride() else { return }
+        guard WCSession.default.activationState == .activated, WCSession.default.isReachable else { return }
+        PhoneSessionManager.shared.send(.setRepeatSpeechConfig, args: [
+            WatchMessage.Arg.repeatType: override.repeatTypeRawValue,
+            WatchMessage.Arg.loopNoCheckReadingPoint: override.isLoopNoCheck,
+        ], quiet: true) { ok in
+            if ok { WatchRepeatConfigStore.markSent() }
+        }
+    }
+
+    /// 発話設定ファイルを受信した時に PhoneSessionManager から呼ばれる。
+    /// ローカル差分が iPhone 側へ反映済みなら差分を解消する
+    func reconcileRepeatConfigAfterSettingsReceived() {
+        WatchRepeatConfigStore.reconcileAfterSettingsReceived()
+    }
+
+    private var repeatConfigSendWorkItem: DispatchWorkItem?
+
     // MARK: - 速度・音量の変更
 
     /// デフォルト話者の速度・音量を変更する(速度・音量設定 UI から呼ばれる)。
@@ -227,15 +298,32 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     // MARK: - 再生操作
 
     func play() {
+        startPlayFlow(askFolderSelection: true)
+    }
+
+    private func startPlayFlow(askFolderSelection: Bool) {
+        guard !isStartingPlayback else { return }  // 開始処理中の再タップは無視(誤爆防止)
         guard !novelID.isEmpty else {
             reportError(NSLocalizedString("Watch_Player_NoNovelSelected_ChooseFromBookshelf", comment: "小説が選ばれていません。本棚から小説を選んでください。"))
             return
         }
+        // 「指定フォルダの小説を再生」で複数フォルダに属する小説なら、iPhone 側と同じく
+        // 再生開始のたびにユーザへ選んでもらう(フォルダを選び直せるように)。
+        // ダイアログでの選択直後の再開(askFolderSelection=false)だけはスキップする
+        if askFolderSelection, let candidates = folderSelectionCandidatesIfNeeded() {
+            DispatchQueue.main.async { self.folderSelectionRequest = candidates }
+            return
+        }
+        isStartingPlayback = true
         // 発話直前に iPhone との発話設定の同期を試みる。時間を食ってまごつかないよう、
         // 最大2秒で諦めてそのまま(手元の設定で)発話を開始する
         syncSettingsBeforePlay { [weak self] settingsUpdated in
             DispatchQueue.main.async {
-                guard let self = self, !self.isPlaying else { return }
+                guard let self = self else { return }
+                guard !self.isPlaying else {
+                    self.isStartingPlayback = false
+                    return
+                }
                 if settingsUpdated {
                     // 新しい設定が届いたので現在の章を組み直してから開始する(位置は維持)
                     _ = self.applyChapter(self.chapterNumber, location: self.speaker.currentLocation)
@@ -291,6 +379,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         do {
             try session.setCategory(.playback, mode: .spokenAudio, policy: .longFormAudio, options: [])
         } catch {
+            isStartingPlayback = false
             reportError(String(format: NSLocalizedString("Watch_SpeechPlayer_AudioSetupFailed", comment: "オーディオ設定に失敗しました: %@"), error.localizedDescription))
             return
         }
@@ -298,6 +387,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         session.activate(options: []) { [weak self] success, error in
             DispatchQueue.main.async {
                 guard let self = self else { return }
+                self.isStartingPlayback = false
                 guard success else {
                     self.reportError(String(format: NSLocalizedString("Watch_SpeechPlayer_AudioRouteFailed", comment: "オーディオ出力先に接続できませんでした。%@"), error?.localizedDescription ?? ""))
                     return
@@ -312,6 +402,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     func stop() {
         let wasSpeaking = speaker.isSpeaking
         isPlaying = false
+        isStartingPlayback = false
         announcer?.cancel()
         savePosition(pushContext: true)
         if wasSpeaking {
@@ -380,9 +471,9 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     // MARK: - 再生が末尾に達した時の動作
 
     /// 最終章まで読み終えた時の分岐。「再生が末尾に達した時の動作」(iPhone から同期)に従う
-    private func handleReachedEnd(repeatType: WatchRepeatSpeechType, settings: WatchSpeechSettings) {
+    private func handleReachedEnd(repeatConfig: EffectiveRepeatConfig, settings: WatchSpeechSettings) {
         savePosition()  // 読み終えた位置(章末)を控えておく
-        switch repeatType {
+        switch repeatConfig.repeatType {
         case .rewindToFirstStory:
             guard let firstChapter = stories.keys.min() else { break }
             announceIfEnabled(settings: settings,
@@ -398,7 +489,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
             return
         case .goToNextLikeNovel, .goToNextSameFolderdNovel, .goToNextSelectedFolderdNovel,
              .goToNextSameWriterNovel, .goToNextSameWebsiteNovel:
-            guard let next = nextNovelTarget(repeatType: repeatType, settings: settings) else { break }
+            guard let next = nextNovelTarget(repeatConfig: repeatConfig, settings: settings) else { break }
             announceIfEnabled(settings: settings,
                               text: String(format: NSLocalizedString("Watch_SpeechPlayer_SpeechNextNovelFormat", comment: "読み上げが最後に達したため、次に %@ を再生します。"), next.title)) { [weak self] in
                 guard let self = self, self.isPlaying else { return }
@@ -431,7 +522,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     /// 同じWebサイト)の次の対象を、Watch に転送済みの小説の中から選ぶ。
     /// - 通常ループ: 候補順で最初の「自分以外・転送済み・未読あり」の小説(栞の続きから)
     /// - 栞の位置を確認しないループ: 現在の小説の次から順番に、転送済みのものを先頭章から
-    private func nextNovelTarget(repeatType: WatchRepeatSpeechType, settings: WatchSpeechSettings) -> (novelID: String, title: String, fromBeginning: Bool)? {
+    private func nextNovelTarget(repeatConfig: EffectiveRepeatConfig, settings: WatchSpeechSettings) -> (novelID: String, title: String, fromBeginning: Bool)? {
         let stored = PhoneSessionManager.shared.storedNovelIDs
         func title(of novelID: String) -> String {
             if let title = PhoneSessionManager.shared.storedTitles[novelID], !title.isEmpty { return title }
@@ -439,7 +530,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         }
         /// 候補リスト(order)から次の1冊を選ぶ
         func pick(order: [String]) -> (novelID: String, title: String, fromBeginning: Bool)? {
-            if settings.isRepeatSpeechLoopNoCheckReadingPoint == true {
+            if repeatConfig.isLoopNoCheckReadingPoint {
                 // iPhone 側と同じく「現在の小説が候補リストに居る」ことが前提(居なければ停止)
                 guard let currentIndex = order.firstIndex(of: novelID) else { return nil }
                 for offset in 1...order.count {
@@ -460,7 +551,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
                 .sorted { $0.title < $1.title }
                 .map { $0.novelID }
         }
-        switch repeatType {
+        switch repeatConfig.repeatType {
         case .goToNextLikeNovel:
             guard let order = settings.novelLikeOrder, !order.isEmpty else { return nil }
             return pick(order: order)
@@ -494,17 +585,36 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     /// 「指定フォルダの小説を再生」の対象フォルダ。再生開始時に決めて連続再生中は維持する
     private var selectedFolderNameForRepeat: String?
 
-    /// iPhone 側は複数フォルダに属する小説だと再生開始時にユーザへ選択ダイアログを出すが、
-    /// Watch では所属フォルダがちょうど1つの時だけ自動選択とし、複数・無所属なら末尾で停止する
-    /// (iPhone でも選択 UI を経由せずに再生を始めた場合は同様に停止する)
+    /// 再生開始時に対象フォルダを確定する。iPhone 側と同じく、所属フォルダが1つなら自動選択。
+    /// 複数の場合はユーザの選択(folderSelectionRequest 経由)が既に済んでいればそれを維持する
     private func updateSelectedFolderForRepeat() {
         let settings = WatchSpeechSettingsStorage.current()
-        guard WatchRepeatSpeechType(rawValue: settings.repeatSpeechTypeRawValue ?? 0) == .goToNextSelectedFolderdNovel else {
+        guard WatchSpeechPlayer.effectiveRepeatConfig().repeatType == .goToNextSelectedFolderdNovel else {
             selectedFolderNameForRepeat = nil
             return
         }
         let containing = (settings.novelFolders ?? []).filter { $0.novelIDs.contains(novelID) }
+        // 選択済みのフォルダに現在の小説が居るならそれを維持(ダイアログでの選択を尊重)
+        if let name = selectedFolderNameForRepeat, containing.contains(where: { $0.name == name }) { return }
         selectedFolderNameForRepeat = containing.count == 1 ? containing.first?.name : nil
+    }
+
+    /// 「指定フォルダの小説を再生」で対象フォルダの選択が必要なら候補のフォルダ名を返す。
+    /// 選択が不要(設定が違う・所属フォルダが1つ以下)なら nil。
+    /// 複数フォルダ所属なら選択済みでも毎回聞く(iPhone 側と同じ。フォルダを選び直せるように)
+    private func folderSelectionCandidatesIfNeeded() -> [String]? {
+        let settings = WatchSpeechSettingsStorage.current()
+        guard WatchSpeechPlayer.effectiveRepeatConfig().repeatType == .goToNextSelectedFolderdNovel else { return nil }
+        let containing = (settings.novelFolders ?? []).filter { $0.novelIDs.contains(novelID) }
+        guard containing.count > 1 else { return nil }
+        return containing.map { $0.name }
+    }
+
+    /// フォルダ選択ダイアログでフォルダが選ばれた。選択を覚えて再生を再開する
+    func selectFolderForRepeatAndPlay(name: String) {
+        folderSelectionRequest = nil
+        selectedFolderNameForRepeat = name
+        startPlayFlow(askFolderSelection: false)
     }
 
     /// 転送済みの小説に未読部分が残っているか。
@@ -637,9 +747,9 @@ extension WatchSpeechPlayer: SpeakRangeDelegate {
             // isPlaying が立っていれば「章を読み終えた」という意味になる
             guard self.isPlaying else { return }
             let settings = WatchSpeechSettingsStorage.current()
-            let repeatType = WatchRepeatSpeechType(rawValue: settings.repeatSpeechTypeRawValue ?? 0) ?? .noRepeat
+            let repeatConfig = WatchSpeechPlayer.effectiveRepeatConfig()
             // 「現在の章を再生し直す」は次の章があっても同じ章をループする(iPhone 側と同じ)
-            if repeatType == .rewindToThisStory, self.applyChapter(self.chapterNumber, location: 0) {
+            if repeatConfig.repeatType == .rewindToThisStory, self.applyChapter(self.chapterNumber, location: 0) {
                 self.speaker.StartSpeech()
                 self.savePosition()
                 return
@@ -650,7 +760,7 @@ extension WatchSpeechPlayer: SpeakRangeDelegate {
                 return
             }
             // 最終章まで読み終えた。「再生が末尾に達した時の動作」に従う
-            self.handleReachedEnd(repeatType: repeatType, settings: settings)
+            self.handleReachedEnd(repeatConfig: repeatConfig, settings: settings)
         }
     }
 }
@@ -876,5 +986,70 @@ enum WatchSpeechConfigStore {
         }
         // どちらでもない場合は「書き戻しより前に作られた古い設定ファイル」が届いただけなので、
         // 差分は保持したまま次のファイル(書き戻し後の内容)を待つ
+    }
+}
+
+// MARK: - 「再生が末尾に達した時の動作」の Watch 側ローカル差分
+
+/// Watch で変更した「再生が末尾に達した時の動作」。仕組み・意味論は WatchSpeechConfigStore
+/// (速度・音量のローカル差分)と同じ: 正本は iPhone の RealmGlobalState で、ここは
+/// 書き戻すまでの間も Watch の連続再生に効かせるための差分。書き戻しが済んで
+/// 新しい設定ファイルが届いたら reconcile で解消される
+enum WatchRepeatConfigStore {
+    private struct Stored: Codable {
+        var repeatTypeRawValue: Int
+        var isLoopNoCheck: Bool
+        var updatedAt: Date
+        var pendingSend: Bool
+    }
+
+    private static let key = "WatchRepeatConfigOverride"
+
+    private static func loadStored() -> Stored? {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let stored = try? JSONDecoder().decode(Stored.self, from: data) else { return nil }
+        return stored
+    }
+
+    private static func save(_ stored: Stored?) {
+        if let stored = stored, let data = try? JSONEncoder().encode(stored) {
+            UserDefaults.standard.set(data, forKey: key)
+        } else {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
+    static func localOverride() -> (repeatTypeRawValue: Int, isLoopNoCheck: Bool)? {
+        guard let stored = loadStored() else { return nil }
+        return (stored.repeatTypeRawValue, stored.isLoopNoCheck)
+    }
+
+    static var isPendingSend: Bool {
+        return loadStored()?.pendingSend == true
+    }
+
+    static func set(repeatTypeRawValue: Int, isLoopNoCheck: Bool) {
+        save(Stored(repeatTypeRawValue: repeatTypeRawValue, isLoopNoCheck: isLoopNoCheck,
+                    updatedAt: Date(), pendingSend: true))
+    }
+
+    static func markSent() {
+        guard var stored = loadStored() else { return }
+        stored.pendingSend = false
+        save(stored)
+    }
+
+    static func clear() {
+        save(nil)
+    }
+
+    static func reconcileAfterSettingsReceived() {
+        guard let stored = loadStored(), stored.pendingSend == false else { return }
+        let settings = WatchSpeechSettingsStorage.current()
+        let matches = (settings.repeatSpeechTypeRawValue ?? 0) == stored.repeatTypeRawValue
+            && (settings.isRepeatSpeechLoopNoCheckReadingPoint == true) == stored.isLoopNoCheck
+        if matches || settings.updatedAt > stored.updatedAt {
+            clear()
+        }
     }
 }

@@ -4,6 +4,7 @@
 "Watch_Cancel" = "Cancel";
 "Watch_NoNovelSelected" = "No novel is selected";
 "Watch_ErrorAlert_Title" = "Operation Failed";
+"Watch_InfoAlert_Title" = "Note";
 
 /* Bookshelf */
 "Watch_Bookshelf_Title" = "Bookshelf";
@@ -14,6 +15,37 @@
 "Watch_Bookshelf_UpdatedOnPhone" = "This novel has been updated on the iPhone.";
 "Watch_Bookshelf_NotTransferred" = "The text of this novel is not on the Watch yet.";
 "Watch_Bookshelf_ChapterProgress" = "Ch. %1$d/%2$d";
+"Watch_Bookshelf_Sort_Title" = "Sort Order";
+"Watch_BookshelfSort_PhoneOrder" = "Same as iPhone";
+"Watch_BookshelfSort_Writer" = "Writer name";
+"Watch_BookshelfSort_TitleOrder" = "Novel name";
+"Watch_BookshelfSort_Updated" = "Last download date";
+"Watch_BookshelfSort_Folder" = "Original folder order";
+"Watch_BookshelfSort_UpdatedWithFolder" = "Last download date (with folder)";
+"Watch_BookshelfSort_LastRead" = "Last read date";
+"Watch_BookshelfSort_LikeLevel" = "Favorite order";
+"Watch_BookshelfSort_WebSite" = "Web site order";
+"Watch_BookshelfSort_CreatedDate" = "Bookshelf registration order";
+"Watch_BookshelfSort_PageCount" = "Page count order";
+"Watch_BookshelfSort_LastReadWithFolder" = "Last read date (with folders)";
+"Watch_BookshelfSort_UnreadChapterCount" = "Unread chapter count";
+"Watch_BookshelfSort_WatchTransferState" = "Apple Watch transfer state";
+"Watch_WatchBucket_Transferred" = "Transferred to Apple Watch";
+"Watch_WatchBucket_NotTransferred" = "Not transferred";
+"Watch_Bookshelf_Uncategorized" = "(Uncategorized)";
+"Watch_Bookshelf_UnknownWriter" = "(unknown name)";
+"Watch_Bookshelf_SelfMadeNovel" = "Self-made novel";
+"Watch_Bookshelf_Syncing" = "Syncing with iPhone…";
+"Watch_Bucket_UpTo1DayAgo" = "Up to one day ago";
+"Watch_Bucket_UpTo7DayAgo" = "Up to 7 days ago";
+"Watch_Bucket_UpTo30DayAgo" = "Up to 30 days ago";
+"Watch_Bucket_UpTo6MonthsAgo" = "Up to 6 months ago";
+"Watch_Bucket_UpTo1YearAgo" = "Up to a year ago";
+"Watch_Bucket_BeforeThat" = "More than a year ago";
+"Watch_UnreadBucket_100Plus" = "100+ chapters unread";
+"Watch_UnreadBucket_10To99" = "10-99 chapters unread";
+"Watch_UnreadBucket_1To9" = "1-9 chapters unread";
+"Watch_UnreadBucket_CaughtUp" = "Caught up";
 
 /* Communication with iPhone */
 "Watch_Session_CommandFailed" = "The operation failed";
@@ -35,10 +67,12 @@
 "Watch_Player_Badge_PlayingOnPhone" = "Playing on iPhone";
 "Watch_Player_Badge_PhoneConnected" = "iPhone Connected";
 "Watch_Player_Badge_PhoneNotConnected" = "iPhone Not Connected";
+"Watch_Player_SelectFolder_Title" = "Select a folder to play continuously";
+"Watch_Player_NoBluetoothWarning" = "No Bluetooth headphones are connected. On models that can't speak through the built-in speaker, a Bluetooth audio device is required to start playback.";
+"Watch_Player_NoBluetoothWarning_DontShowAgain" = "Don't Show Again";
 
 /* Text page */
 "Watch_TextPage_Title" = "Text";
-"Watch_TextPage_AutoScrollPaused" = "Auto-scroll paused";
 "Watch_TextPage_NovelNotTransferred" = "The text of \"%@\" has not been transferred to the Watch yet. You can transfer it from the bookshelf.";
 "Watch_TextPage_ChapterNotTransferred" = "This chapter (Ch. %d) has not been transferred to the Watch yet. You can re-transfer it from the bookshelf.";
 "Watch_TextPage_PrevChapter" = "◀ Previous";
@@ -47,11 +81,9 @@
 
 /* Utilities */
 "Watch_Utility_Title" = "Utilities";
-"Watch_Utility_StoredTexts" = "Texts on Watch";
+"Watch_Utility_StoredTexts" = "Texts Transferred to Watch";
 "Watch_Utility_CheckUpdatesAll" = "Check All Novels for Updates";
 "Watch_Utility_CheckUpdatesAllStarted" = "Started checking all novels for updates";
-"Watch_Utility_CheckUpdatesThis" = "Check This Novel for Updates";
-"Watch_Utility_CheckUpdatesStarted" = "Started checking \"%@\" for updates";
 "Watch_Utility_LikeOn" = "Add to Favorites";
 "Watch_Utility_LikeOff" = "Remove from Favorites";
 "Watch_Utility_LikeOnDone" = "Added to Favorites";
@@ -90,6 +122,22 @@
 "Watch_SpeechConfig_Volume" = "Volume";
 "Watch_SpeechConfig_Note" = "Changes are saved to the default speaker settings on the iPhone. Changes made while speaking take effect from the next sentence.";
 
+/* Continuous playback (operation at the end of playback) */
+"Watch_RepeatConfig_Title" = "Continuous Playback";
+"Watch_RepeatConfig_TypeTitle" = "Operation at the end of playback";
+"Watch_RepeatConfig_LoopTitle" = "Selection method for the next novel";
+"Watch_RepeatConfig_Note" = "In Watch standalone mode, only novels transferred to the Watch are played continuously. Changes are saved to the settings on the iPhone.";
+"Watch_RepeatType_NoRepeat" = "Stop";
+"Watch_RepeatType_RewindToFirstStory" = "Play from the beginning";
+"Watch_RepeatType_RewindToThisStory" = "Replay the current chapter";
+"Watch_RepeatType_GoToNextLikeNovel" = "Play another favorite novel";
+"Watch_RepeatType_GoToNextSameFolderdNovel" = "Play another novel in the same folder";
+"Watch_RepeatType_GoToNextSelectedFolderdNovel" = "Play another novel in the specified folder";
+"Watch_RepeatType_GoToNextSameWriterNovel" = "Play another novel by the same author";
+"Watch_RepeatType_GoToNextSameWebsiteNovel" = "Play another novel on the same website";
+"Watch_RepeatLoop_Normal" = "Play from the continuation of the unread part";
+"Watch_RepeatLoop_NoCheckReadingPoint" = "Play from the first page in order";
+
 /* VoiceOver labels */
 "Watch_AX_Menu" = "Menu";
 "Watch_AX_PrevChapter" = "Previous chapter";
@@ -106,6 +154,9 @@
 "Watch_AX_TransferState_Requested" = "Transfer requested";
 "Watch_AX_TransferState_None" = "Not transferred";
 "Watch_AX_SeekHere" = "Start speaking from here";
+"Watch_AX_SortOrder" = "Sort order";
+"Watch_AX_ScrollToTop" = "Scroll to top";
+
 
 /* Color names (VoiceOver labels for the color buttons in the display settings) */
 "Watch_Color_white" = "White";

@@ -34,6 +34,21 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @Published var lastPlayedDates: [String: Date] = PhoneSessionManager.loadLastPlayedDates()
     /// iPhone 側の読み上げ位置(本文ページの購読中に届く)。表示文字ベースの位置
     @Published var phoneReadingPoint: PhoneReadingPoint?
+    /// iPhone の本棚の並び順のグループ種別(WatchMessage.Context.phoneSortGrouping の値)。
+    /// 本棚の「iPhoneと同じ」が iPhone と同じフォルダ分けを再現するのに使う
+    @Published var phoneSortGrouping = "flat"
+    /// 小説一覧(全量ファイル)が iPhone 側の最新とズレている(=転送待ち)か。本棚の「同期中…」表示用
+    @Published var isNovelListSyncing = false
+
+    /// 受信済みの小説一覧ファイルの指紋
+    private static let receivedNovelListFingerprintKey = "WatchNovelListReceivedFingerprint"
+    /// iPhone が最後に知らせてきた小説一覧の指紋(applicationContext 経由)
+    private var lastContextNovelListFingerprint: String?
+
+    private func updateNovelListSyncingState() {
+        let received = UserDefaults.standard.string(forKey: PhoneSessionManager.receivedNovelListFingerprintKey)
+        isNovelListSyncing = (lastContextNovelListFingerprint != nil && lastContextNovelListFingerprint != received)
+    }
 
     struct PhoneReadingPoint: Equatable {
         let novelID: String
@@ -48,6 +63,10 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     private override init() {
         super.init()
         refreshStoredNovels()
+        // 受信済みの小説一覧(全量ファイル)があれば初期表示に使う
+        if let storedList = WatchNovelListStorage.load() {
+            novels = storedList
+        }
         guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
         WCSession.default.activate()
@@ -82,6 +101,10 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         var context: [String: Any] = [
             // iPhone 側の本棚(Apple Watch転送状況別・絞り込み)が参照する転送済み一覧
             WatchMessage.Context.watchStoredNovelIDs: Array(storedChapterCounts.keys),
+            // 受信済みの小説一覧の指紋。iPhone 側と食い違っていたら一覧ファイルが再送される
+            // (再インストール直後など、ファイルが無いのに iPhone が「送信済み」と思っている場合の回復用)
+            WatchMessage.Context.watchNovelListReceivedFingerprint:
+                UserDefaults.standard.string(forKey: PhoneSessionManager.receivedNovelListFingerprintKey) ?? "",
         ]
         // Watch 単体再生の読み上げ位置。iPhone 側はこれで栞を更新する。
         // 毎回「保存している位置の全量」を送る(applicationContext は最新の1つに差し替わる方式で
@@ -236,8 +259,19 @@ final class PhoneSessionManager: NSObject, ObservableObject {
             if let state = state, !state.novelID.isEmpty {
                 self.applyPlayStateIfNewer(state)
             }
-            if !novelList.isEmpty {
+            // 全量ファイル(WatchNovelListStorage)を受信済みならそちらが正。
+            // context の novelList は先頭300冊までしか入らないので、ファイル未着時だけ使う
+            if !novelList.isEmpty, !WatchNovelListStorage.exists {
                 self.novels = novelList
+            }
+            if let grouping = context[WatchMessage.Context.phoneSortGrouping] as? String {
+                if grouping != self.phoneSortGrouping {
+                    self.phoneSortGrouping = grouping
+                }
+            }
+            if let fingerprint = context[WatchMessage.Context.novelListFingerprint] as? String {
+                self.lastContextNovelListFingerprint = fingerprint
+                self.updateNovelListSyncingState()
             }
             self.autoRefreshStaleStoredNovels()
             // セッション中に一度だけ、本棚から消えた小説の孤児キャッシュを掃除する
@@ -337,9 +371,10 @@ extension PhoneSessionManager: WCSessionDelegate {
             }
             // 繋がったタイミングで小説が未選択なら状態を聞く
             self.requestStatusIfNovelUnknown()
-            // オフライン中に変更した速度・音量があれば iPhone へ書き戻す
+            // オフライン中に変更した速度・音量/連続再生モードがあれば iPhone へ書き戻す
             if session.isReachable {
                 WatchSpeechPlayer.shared.sendPendingSpeechConfigIfPossible()
+                WatchSpeechPlayer.shared.sendPendingRepeatConfigIfPossible()
             }
         }
     }
@@ -368,12 +403,42 @@ extension PhoneSessionManager: WCSessionDelegate {
                     receivedFileURL: file.fileURL,
                     fingerprint: file.metadata?[WatchSpeechSettings.transferFingerprintKey] as? String)
                 print("PhoneSessionManager: 発話設定を受信・保存")
-                // Watch 側で変更した速度・音量が iPhone に反映済みなら、ローカル差分を解消する
+                // Watch 側で変更した速度・音量/連続再生モードが iPhone に反映済みなら、ローカル差分を解消する
                 WatchSpeechPlayer.shared.reconcileSpeechConfigAfterSettingsReceived()
+                WatchSpeechPlayer.shared.reconcileRepeatConfigAfterSettingsReceived()
                 // 停止中なら現在の章を新しい設定で組み直す(再生中は次の章から反映)
                 WatchSpeechPlayer.shared.applyReceivedSettingsIfIdle()
             } catch {
                 print("PhoneSessionManager: 発話設定の保存に失敗: \(error)")
+            }
+            return
+        }
+        // 小説一覧(全量)ファイル
+        if (file.metadata?[WatchNovelListFile.transferTypeKey] as? String) == WatchNovelListFile.transferTypeValue {
+            do {
+                try WatchNovelListStorage.store(receivedFileURL: file.fileURL)
+                let fingerprint = file.metadata?[WatchNovelListFile.transferFingerprintKey] as? String
+                if let fingerprint = fingerprint {
+                    UserDefaults.standard.set(fingerprint, forKey: PhoneSessionManager.receivedNovelListFingerprintKey)
+                }
+                if let novels = WatchNovelListStorage.load() {
+                    DispatchQueue.main.async {
+                        self.novels = novels
+                        // context の指紋は「ファイルを積む前の値」のことがある(iPhone 側は
+                        // context 送信後に指紋を更新するため)ので、届いたファイルを最新とみなして
+                        // 揃える。これをしないと「同期中…」が次の context まで消えない
+                        if let fingerprint = fingerprint {
+                            self.lastContextNovelListFingerprint = fingerprint
+                        }
+                        self.updateNovelListSyncingState()
+                        self.autoRefreshStaleStoredNovels()
+                        // 受信済み指紋が変わったことを iPhone へ知らせる(再送ループの停止条件)
+                        self.pushWatchContext()
+                    }
+                }
+                print("PhoneSessionManager: 小説一覧(全量)を受信・保存")
+            } catch {
+                print("PhoneSessionManager: 小説一覧の保存に失敗: \(error)")
             }
             return
         }
@@ -390,6 +455,33 @@ extension PhoneSessionManager: WCSessionDelegate {
                 self.transferRequestedNovelIDs.remove(novelID)
             }
         }
+    }
+}
+
+/// iPhone から transferFile で届く小説一覧(全量)の保存と読み出し。
+/// applicationContext の novelList(先頭300冊)はこのファイルが届くまでのフォールバック
+enum WatchNovelListStorage {
+    static var fileURL: URL {
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("NovelList.json")
+    }
+
+    static var exists: Bool {
+        return FileManager.default.fileExists(atPath: fileURL.path)
+    }
+
+    static func store(receivedFileURL: URL) throws {
+        let destination = fileURL
+        try? FileManager.default.removeItem(at: destination)
+        try FileManager.default.moveItem(at: receivedFileURL, to: destination)
+    }
+
+    static func load() -> [WatchNovelSummary]? {
+        guard let data = try? Data(contentsOf: fileURL),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let novelArray = payload[WatchNovelListFile.novelsKey] as? [[String: Any]] else { return nil }
+        let novels = novelArray.compactMap { WatchNovelSummary.from(dictionary: $0) }
+        return novels.isEmpty ? nil : novels
     }
 }
 

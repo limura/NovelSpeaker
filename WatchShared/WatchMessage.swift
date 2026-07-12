@@ -43,6 +43,9 @@ enum WatchMessage {
         /// デフォルト話者の速度・音量を変更する(args: rate, volume)。
         /// iPhone 側の RealmSpeakerSetting に保存され、発話中なら次のブロックから反映される
         case setDefaultSpeakerConfig
+        /// 「再生が末尾に達した時の動作」を変更する(args: repeatType, loopNoCheck)。
+        /// iPhone 側の RealmGlobalState に保存される
+        case setRepeatSpeechConfig
     }
 
     /// コマンド引数のキー
@@ -58,6 +61,10 @@ enum WatchMessage {
         static let rate = "rate"
         /// 発話音量(Double, 0.0-1.0)
         static let volume = "volume"
+        /// 「再生が末尾に達した時の動作」(Int, WatchRepeatSpeechType の rawValue)
+        static let repeatType = "repeatType"
+        /// 「次の小説の選択方式」が「順に1ページ目から再生」か(Bool)
+        static let loopNoCheckReadingPoint = "loopNoCheck"
     }
 
     /// iPhone → Watch: applicationContext のキー
@@ -68,8 +75,20 @@ enum WatchMessage {
         static let novelList = "novelList"
         /// 送信時刻(TimeInterval)。古い context の判別用
         static let sentAt = "sentAt"
+        /// iPhone の本棚の並び順のグループ種別(String)。Watch の「iPhoneと同じ」表示が
+        /// iPhone と同じフォルダ分けを再現するのに使う。
+        /// 値: "folder" / "writer" / "website" / "readDateBuckets" / "downloadDateBuckets" /
+        ///     "unreadBuckets" / "flat"(グループ無し。再現できない種別も flat)
+        static let phoneSortGrouping = "sortGrouping"
+        /// iPhone が最後に転送キューへ積んだ小説一覧(全量ファイル)の指紋(String)。
+        /// Watch は受信済みファイルの指紋と比較して「同期中…」表示を出すのに使う
+        static let novelListFingerprint = "novelListFingerprint"
         /// Watch→iPhone 方向: Watch に本文が転送されている小説の novelID 一覧([String])
         static let watchStoredNovelIDs = "storedNovelIDs"
+        /// Watch→iPhone 方向: Watch が受信済みの小説一覧ファイルの指紋(String、未受信なら "")。
+        /// iPhone は自分が最後に送った指紋と比較し、違えば一覧ファイルを送り直す
+        /// (再インストール等でファイルが消えた Watch に「送信済みだから送らない」とならないように)
+        static let watchNovelListReceivedFingerprint = "receivedNovelListFingerprint"
         /// Watch→iPhone 方向: Watch 単体再生の読み上げ位置
         /// (辞書: novelID/chapter/location/updatedAt(TimeInterval))
         /// 旧形式(最新1件)。新しい watchReadingPositions が使えない場合のフォールバック用に残す
@@ -97,6 +116,18 @@ enum WatchMessage {
         /// syncSpeechSettings の返信: Watch の発話設定が最新なら true(false ならファイルが届く)
         static let speechSettingsUpToDate = "settingsUpToDate"
     }
+}
+
+/// 小説一覧ファイル(transferFile)の共通定義。
+/// 本棚が大きいと applicationContext のサイズ上限に収まらないため、全量はファイルで送る。
+/// applicationContext の novelList(先頭 novelListLimit 冊)は旧バージョン互換と
+/// ファイル未着時のフォールバック用
+enum WatchNovelListFile {
+    static let transferTypeKey = "type"
+    static let transferTypeValue = "novelList"
+    static let transferFingerprintKey = "fingerprint"
+    /// ファイル JSON のトップレベルキー(値は WatchNovelSummary 辞書の配列、本棚の並び順)
+    static let novelsKey = "novels"
 }
 
 /// iPhone の現在の再生状態。applicationContext / sendMessage 返信で Watch へ送る
@@ -156,8 +187,18 @@ struct WatchNovelSummary {
     var chapterCount: Int = 0
     /// 読み上げ中(しおり)の章番号
     var readingChapterNumber: Int = 0
-    /// 作者名(「同じ作者の小説を再生」の候補選びに使う)
+    /// 作者名(「同じ作者の小説を再生」の候補選びと本棚の作者順に使う)
     var writer: String = ""
+    /// 栞の更新日時(本棚の「小説を開いた日時順」に使う)
+    var lastReadDate: Date = Date(timeIntervalSince1970: 0)
+    /// 最終ダウンロード日時(本棚の「最終ダウンロード日時順」に使う)
+    var lastDownloadDate: Date = Date(timeIntervalSince1970: 0)
+    /// 本棚に登録した日時(本棚の「本棚登録順」に使う)
+    var createdDate: Date = Date(timeIntervalSince1970: 0)
+    /// 栞の章内位置(「未読章数別」の読了判定に使う。iPhone の m_readingChapterReadingPoint)
+    var readingChapterReadingPoint: Int = 0
+    /// 栞の章の本文の長さ(同上。iPhone の m_readingChapterContentCount)
+    var readingChapterContentCount: Int = 0
 
     func toDictionary() -> [String: Any] {
         return [
@@ -167,6 +208,11 @@ struct WatchNovelSummary {
             "chapters": chapterCount,
             "reading": readingChapterNumber,
             "writer": writer,
+            "lastRead": lastReadDate.timeIntervalSince1970,
+            "lastDownload": lastDownloadDate.timeIntervalSince1970,
+            "created": createdDate.timeIntervalSince1970,
+            "readPoint": readingChapterReadingPoint,
+            "readContentCount": readingChapterContentCount,
         ]
     }
 
@@ -179,6 +225,11 @@ struct WatchNovelSummary {
         summary.chapterCount = dictionary["chapters"] as? Int ?? 0
         summary.readingChapterNumber = dictionary["reading"] as? Int ?? 0
         summary.writer = dictionary["writer"] as? String ?? ""
+        summary.lastReadDate = Date(timeIntervalSince1970: dictionary["lastRead"] as? TimeInterval ?? 0)
+        summary.lastDownloadDate = Date(timeIntervalSince1970: dictionary["lastDownload"] as? TimeInterval ?? 0)
+        summary.createdDate = Date(timeIntervalSince1970: dictionary["created"] as? TimeInterval ?? 0)
+        summary.readingChapterReadingPoint = dictionary["readPoint"] as? Int ?? 0
+        summary.readingChapterContentCount = dictionary["readContentCount"] as? Int ?? 0
         return summary
     }
 }
