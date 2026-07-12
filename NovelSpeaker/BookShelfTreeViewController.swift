@@ -1469,12 +1469,13 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             folder.childrens = []
             return folder
         }
-        // 昇順(古い順)に走査して、古いバケツから新しいバケツへ単調に移動しながら詰める
-        var folderIndex = filterList.count - 1
-        for novel in novelsDescending.reversed() {
+        // 新しい順に走査して、新しいバケツから古いバケツへ単調に移動しながら詰める。
+        // (以前は古い順に走査していたため、フォルダの中が古い順=最新が一番下になっていた)
+        var folderIndex = 0
+        for novel in novelsDescending {
             let date = dateOf(novel)
-            while folderIndex > 0 && date > filterList[folderIndex - 1].date {
-                folderIndex -= 1
+            while folderIndex < filterList.count - 1 && date <= filterList[folderIndex].date {
+                folderIndex += 1
             }
             let data = BookShelfRATreeViewCellData()
             data.novelID = novel.novelID
