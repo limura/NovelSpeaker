@@ -51,6 +51,11 @@ struct WatchSpeechSettings: Codable {
         /// 空 = 全エンジン対象。標準の読み替え辞書由来のエントリは ["AVSpeechSynthesizer"]
         var targetEngines: [String]
     }
+    /// フォルダ(RealmNovelTag の Folder)1つ分。「同じ/指定フォルダの小説を再生」の候補選びに使う
+    struct Folder: Codable {
+        var name: String
+        var novelIDs: [String]
+    }
 
     var defaultSpeaker = Speaker()
     var sectionConfigs: [SectionConfig] = []
@@ -73,6 +78,13 @@ struct WatchSpeechSettings: Codable {
     var isAnnounceAtRepatSpeechTime: Bool? = nil
     /// お気に入り小説の novelID 一覧(お気に入り順 = RealmGlobalState.novelLikeOrder)
     var novelLikeOrder: [String]? = nil
+    /// フォルダの一覧(「同じ/指定フォルダの小説を再生」の候補選びに使う)
+    var novelFolders: [Folder]? = nil
+
+    /// ユーザ作成小説の novelID プレフィクス。「同じWebサイト」判定でユーザ作成小説を
+    /// 区別するのに使う。NovelSpeakerUtility.UserCreatedContentPrefix と同じ値であること
+    /// (あちらは iOS 専用コードなので Watch からは参照できない)
+    static let userCreatedContentPrefix = "https://novelspeaker.example.com/UserCreatedContent/"
 
     /// transferFile の metadata でファイル種別(本文か発話設定か)を区別するためのキーと値
     static let transferTypeKey = "type"

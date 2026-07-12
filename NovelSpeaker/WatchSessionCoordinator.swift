@@ -225,6 +225,7 @@ class WatchSessionCoordinator: NSObject {
                 summary.chapterCount = novel.lastChapterNumber ?? 0
                 summary.readingChapterNumber = novel.readingChapterNumber ?? 0
                 summary.isLiked = (globalState?.calcLikeLevel(novelID: novel.novelID) ?? 0) > 0
+                summary.writer = novel.writer
                 result.append(summary)
             }
             return result
@@ -727,6 +728,12 @@ class WatchSessionCoordinator: NSObject {
                 settings.isRepeatSpeechLoopNoCheckReadingPoint = (globalState.repeatSpeechLoopType == .noCheckReadingPoint)
                 settings.isAnnounceAtRepatSpeechTime = globalState.isAnnounceAtRepatSpeechTime
                 settings.novelLikeOrder = Array(globalState.novelLikeOrder)
+            }
+            // フォルダ一覧(「同じ/指定フォルダの小説を再生」の候補選び用)
+            if let folders = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) {
+                settings.novelFolders = folders.map {
+                    WatchSpeechSettings.Folder(name: $0.name, novelIDs: Array($0.targetNovelIDArray))
+                }
             }
             return settings
         }

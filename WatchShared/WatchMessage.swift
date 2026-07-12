@@ -156,6 +156,8 @@ struct WatchNovelSummary {
     var chapterCount: Int = 0
     /// 読み上げ中(しおり)の章番号
     var readingChapterNumber: Int = 0
+    /// 作者名(「同じ作者の小説を再生」の候補選びに使う)
+    var writer: String = ""
 
     func toDictionary() -> [String: Any] {
         return [
@@ -164,6 +166,7 @@ struct WatchNovelSummary {
             "like": isLiked,
             "chapters": chapterCount,
             "reading": readingChapterNumber,
+            "writer": writer,
         ]
     }
 
@@ -175,6 +178,7 @@ struct WatchNovelSummary {
         summary.isLiked = dictionary["like"] as? Bool ?? false
         summary.chapterCount = dictionary["chapters"] as? Int ?? 0
         summary.readingChapterNumber = dictionary["reading"] as? Int ?? 0
+        summary.writer = dictionary["writer"] as? String ?? ""
         return summary
     }
 }

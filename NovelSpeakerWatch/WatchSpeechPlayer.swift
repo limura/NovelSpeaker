@@ -285,6 +285,8 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     }
 
     private func startPlayback() {
+        // 「指定フォルダの小説を再生」の対象フォルダは再生開始時に決める(連続再生中は維持)
+        updateSelectedFolderForRepeat()
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(.playback, mode: .spokenAudio, policy: .longFormAudio, options: [])
@@ -377,8 +379,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
 
     // MARK: - 再生が末尾に達した時の動作
 
-    /// 最終章まで読み終えた時の分岐。「再生が末尾に達した時の動作」(iPhone から同期)に従う。
-    /// フォルダ・作者・Webサイト系は必要なメタデータが Watch に無いので停止扱い(v1)
+    /// 最終章まで読み終えた時の分岐。「再生が末尾に達した時の動作」(iPhone から同期)に従う
     private func handleReachedEnd(repeatType: WatchRepeatSpeechType, settings: WatchSpeechSettings) {
         savePosition()  // 読み終えた位置(章末)を控えておく
         switch repeatType {
@@ -395,8 +396,9 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
                 self.savePosition()
             }
             return
-        case .goToNextLikeNovel:
-            guard let next = nextLikeNovelTarget(settings: settings) else { break }
+        case .goToNextLikeNovel, .goToNextSameFolderdNovel, .goToNextSelectedFolderdNovel,
+             .goToNextSameWriterNovel, .goToNextSameWebsiteNovel:
+            guard let next = nextNovelTarget(repeatType: repeatType, settings: settings) else { break }
             announceIfEnabled(settings: settings,
                               text: String(format: NSLocalizedString("Watch_SpeechPlayer_SpeechNextNovelFormat", comment: "読み上げが最後に達したため、次に %@ を再生します。"), next.title)) { [weak self] in
                 guard let self = self, self.isPlaying else { return }
@@ -425,30 +427,84 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         }
     }
 
-    /// 「別のお気に入り小説を再生」の次の対象を、Watch に転送済みの小説の中から選ぶ。
-    /// - 通常ループ: お気に入り順で最初の「自分以外・転送済み・未読あり」の小説(栞の続きから)
-    /// - 栞の位置を確認しないループ: 現在の小説の次から順番に転送済みのものを先頭章から
-    private func nextLikeNovelTarget(settings: WatchSpeechSettings) -> (novelID: String, title: String, fromBeginning: Bool)? {
-        guard let order = settings.novelLikeOrder, !order.isEmpty else { return nil }
+    /// 「別の小説に切り替えて再生する」系(お気に入り/同じフォルダ/指定フォルダ/同じ作者/
+    /// 同じWebサイト)の次の対象を、Watch に転送済みの小説の中から選ぶ。
+    /// - 通常ループ: 候補順で最初の「自分以外・転送済み・未読あり」の小説(栞の続きから)
+    /// - 栞の位置を確認しないループ: 現在の小説の次から順番に、転送済みのものを先頭章から
+    private func nextNovelTarget(repeatType: WatchRepeatSpeechType, settings: WatchSpeechSettings) -> (novelID: String, title: String, fromBeginning: Bool)? {
         let stored = PhoneSessionManager.shared.storedNovelIDs
         func title(of novelID: String) -> String {
             if let title = PhoneSessionManager.shared.storedTitles[novelID], !title.isEmpty { return title }
             return PhoneSessionManager.shared.novels.first(where: { $0.novelID == novelID })?.title ?? novelID
         }
-        if settings.isRepeatSpeechLoopNoCheckReadingPoint == true {
-            // iPhone 側と同じく「現在の小説がお気に入りに居る」ことが前提(居なければ停止)
-            guard let currentIndex = order.firstIndex(of: novelID) else { return nil }
-            for offset in 1...order.count {
-                let candidate = order[(currentIndex + offset) % order.count]
-                guard stored.contains(candidate) else { continue }
-                return (candidate, title(of: candidate), true)
+        /// 候補リスト(order)から次の1冊を選ぶ
+        func pick(order: [String]) -> (novelID: String, title: String, fromBeginning: Bool)? {
+            if settings.isRepeatSpeechLoopNoCheckReadingPoint == true {
+                // iPhone 側と同じく「現在の小説が候補リストに居る」ことが前提(居なければ停止)
+                guard let currentIndex = order.firstIndex(of: novelID) else { return nil }
+                for offset in 1...order.count {
+                    let candidate = order[(currentIndex + offset) % order.count]
+                    guard stored.contains(candidate) else { continue }
+                    return (candidate, title(of: candidate), true)
+                }
+                return nil
+            }
+            for candidate in order where candidate != novelID && stored.contains(candidate) && hasUnreadContent(novelID: candidate) {
+                return (candidate, title(of: candidate), false)
             }
             return nil
         }
-        for candidate in order where candidate != novelID && stored.contains(candidate) && hasUnreadContent(novelID: candidate) {
-            return (candidate, title(of: candidate), false)
+        /// 条件に合う小説をタイトル順で(iPhone 側の作者・Webサイト系の並びと同じ)
+        func titleSortedNovelIDs(where predicate: (WatchNovelSummary) -> Bool) -> [String] {
+            return PhoneSessionManager.shared.novels.filter(predicate)
+                .sorted { $0.title < $1.title }
+                .map { $0.novelID }
         }
-        return nil
+        switch repeatType {
+        case .goToNextLikeNovel:
+            guard let order = settings.novelLikeOrder, !order.isEmpty else { return nil }
+            return pick(order: order)
+        case .goToNextSameFolderdNovel:
+            // 現在の小説が属するフォルダを順に試す(iPhone 側と同じ)
+            for folder in settings.novelFolders ?? [] where folder.novelIDs.contains(novelID) {
+                if let next = pick(order: folder.novelIDs) { return next }
+            }
+            return nil
+        case .goToNextSelectedFolderdNovel:
+            guard let folderName = selectedFolderNameForRepeat,
+                  let folder = (settings.novelFolders ?? []).first(where: { $0.name == folderName }) else { return nil }
+            return pick(order: folder.novelIDs)
+        case .goToNextSameWriterNovel:
+            guard let currentWriter = PhoneSessionManager.shared.novels.first(where: { $0.novelID == novelID })?.writer else { return nil }
+            return pick(order: titleSortedNovelIDs(where: { $0.writer == currentWriter }))
+        case .goToNextSameWebsiteNovel:
+            guard let currentWebsite = Self.websiteIdentifier(novelID: novelID) else { return nil }
+            return pick(order: titleSortedNovelIDs(where: { Self.websiteIdentifier(novelID: $0.novelID) == currentWebsite }))
+        default:
+            return nil
+        }
+    }
+
+    /// iPhone 側の「同じWebサイト」判定と同じ: ユーザ作成小説は "" 扱い、それ以外は URL のホスト名
+    private static func websiteIdentifier(novelID: String) -> String? {
+        if novelID.hasPrefix(WatchSpeechSettings.userCreatedContentPrefix) { return "" }
+        return URL(string: novelID)?.host
+    }
+
+    /// 「指定フォルダの小説を再生」の対象フォルダ。再生開始時に決めて連続再生中は維持する
+    private var selectedFolderNameForRepeat: String?
+
+    /// iPhone 側は複数フォルダに属する小説だと再生開始時にユーザへ選択ダイアログを出すが、
+    /// Watch では所属フォルダがちょうど1つの時だけ自動選択とし、複数・無所属なら末尾で停止する
+    /// (iPhone でも選択 UI を経由せずに再生を始めた場合は同様に停止する)
+    private func updateSelectedFolderForRepeat() {
+        let settings = WatchSpeechSettingsStorage.current()
+        guard WatchRepeatSpeechType(rawValue: settings.repeatSpeechTypeRawValue ?? 0) == .goToNextSelectedFolderdNovel else {
+            selectedFolderNameForRepeat = nil
+            return
+        }
+        let containing = (settings.novelFolders ?? []).filter { $0.novelIDs.contains(novelID) }
+        selectedFolderNameForRepeat = containing.count == 1 ? containing.first?.name : nil
     }
 
     /// 転送済みの小説に未読部分が残っているか。
