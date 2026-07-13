@@ -126,6 +126,22 @@ struct TextPageView: View {
                     // 本文転送の完了(新規・章の追加)で表示できるようになったら読み直す
                     prepareAndScroll(proxy: proxy, viewportHeight: outer.size.height)
                 }
+                .onReceive(NotificationCenter.default.publisher(for: NovelStorage.didUpdateNotification)) { notification in
+                    // 表示中の小説のバルク/manifest が届いたら本文を読み直す。
+                    // 章数が変わらない内容だけの更新(誤字修正等)もこれで画面に反映される
+                    guard let target = displayTarget,
+                          notification.userInfo?["novelID"] as? String == target.novelID else { return }
+                    if model.hasChapter, let bulkChapter = notification.userInfo?["bulkChapter"] as? Int,
+                       bulkChapter != NovelStorage.bulkChapter(for: target.chapter) {
+                        // 表示済みで、かつ表示中の章を含まないバルクの到着なら読み直し不要。
+                        // (未表示の間は歯抜けが埋まって表示可能になる場合があるので毎回試す)
+                        return
+                    }
+                    model.prepare(novelID: target.novelID, chapter: target.chapter, force: true)
+                    DispatchQueue.main.async {
+                        scrollToHighlight(proxy: proxy, viewportHeight: outer.size.height)
+                    }
+                }
                 .onChange(of: fontSize) { _ in
                     // 文字サイズが変わると段落の高さが全部変わる
                     model.clearParagraphHeights()
@@ -208,9 +224,10 @@ struct TextPageView: View {
     private func contentBody(textColor: Color, highlightColor: Color, highlight: Range<Int>?) -> some View {
         if let target = displayTarget {
             if !session.storedNovelIDs.contains(target.novelID) {
-                Text(String(format: NSLocalizedString("Watch_TextPage_NovelNotTransferred", comment: "「%@」の本文はまだWatchに転送されていません。本棚から転送できます。"), target.title))
+                Text(String(format: NSLocalizedString("Watch_TextPage_NovelNotTransferred", comment: "「%@」の本文はまだWatchに転送されていません。"), target.title))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                transferNowButton(novelID: target.novelID)
             } else if model.hasChapter {
                 if !model.subtitle.isEmpty {
                     Text(model.subtitle)
@@ -232,14 +249,45 @@ struct TextPageView: View {
                                       offset: 1)
                 }
             } else {
-                Text(String(format: NSLocalizedString("Watch_TextPage_ChapterNotTransferred", comment: "この章(%d章)はまだWatchに転送されていません。本棚から転送し直せます。"), target.chapter))
+                Text(String(format: NSLocalizedString("Watch_TextPage_ChapterNotTransferred", comment: "この章(%d章)はまだWatchに転送されていません。"), target.chapter))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                transferNowButton(novelID: target.novelID)
             }
         } else {
             Text(NSLocalizedString("Watch_NoNovelSelected", comment: "小説が選ばれていません"))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    /// 未転送/章不足の案内の下に置く「この小説の本文を同期」ボタン。
+    /// 押すと通常の転送依頼(指紋付き差分転送)が走り、依頼中はスピナー表示になる。
+    /// 必要なバルクが届くと didUpdateNotification 経由で本文表示に自動で切り替わる
+    @ViewBuilder private func transferNowButton(novelID: String) -> some View {
+        if session.transferRequestedNovelIDs.contains(novelID) {
+            HStack(spacing: 6) {
+                ProgressView()
+                    .frame(width: 12, height: 12)
+                Text(NSLocalizedString("Watch_TextPage_Transferring", comment: "iPhoneから転送中…"))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.vertical, 4)
+        } else {
+            Button {
+                session.requestTransfer(novelID: novelID)
+            } label: {
+                Label(NSLocalizedString("Watch_TextPage_TransferNow", comment: "この小説の本文を同期"), systemImage: "arrow.down.circle")
+                    .font(.footnote)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.vertical, 4)
+            if let errorMessage = session.lastErrorMessage {
+                Text(errorMessage)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.red)
+            }
         }
     }
 
@@ -484,13 +532,18 @@ final class TextPageModel: ObservableObject {
         pendingHeightScrollParagraphID = nil
     }
 
+    /// 表示中の本文のハッシュ。内容だけの更新(誤字修正等)で本当に変わったかの判定に使う
+    private var contentHash = 0
+
     /// 表示対象の章の本文を読み込み、段落と発話ブロック範囲を作る(同じ章なら何もしない)。
-    /// 本文はバルク単位のオンデマンド展開なので、章切替時に読むのは該当バルクだけ
-    func prepare(novelID: String, chapter: Int) {
+    /// 本文はバルク単位のオンデマンド展開なので、章切替時に読むのは該当バルクだけ。
+    /// force: 同じ章でも読み直す(iPhone 側の内容だけの更新が転送されてきた時)。
+    /// その場合も本文が実際には変わっていなければ表示は触らない(スクロールを飛ばさない)
+    func prepare(novelID: String, chapter: Int, force: Bool = false) {
         let key = "\(novelID)#\(chapter)"
-        guard key != contentKey else { return }
+        guard force || key != contentKey else { return }
+        let isSameChapterReload = force && key == contentKey && hasChapter
         contentKey = key
-        clearParagraphHeights()
         storedChapterCount = NovelStorage.storedChapterCount(novelID: novelID)
         guard storedChapterCount > 0 else {
             applyEmptyChapter()
@@ -502,9 +555,14 @@ final class TextPageModel: ObservableObject {
             contentKey = ""  // 後から本文が転送されてきた時に読み直せるように
             return
         }
+        if isSameChapterReload && story.content.hashValue == contentHash {
+            return  // 同じ章の読み直しで内容が変わっていない(マニフェストだけの再送等)
+        }
+        clearParagraphHeights()
         hasChapter = true
         subtitle = story.subtitle
         let content = story.content
+        contentHash = content.hashValue
         contentScalarCount = content.unicodeScalars.count
         var result: [Paragraph] = []
         var offset = 0

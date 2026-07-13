@@ -515,11 +515,13 @@ extension PhoneSessionManager: WCSessionDelegate {
         guard fileType == WatchNovelBulkFile.bulkTypeValue || fileType == WatchNovelBulkFile.manifestTypeValue,
               let novelID = file.metadata?[WatchNovelBulkFile.novelIDKey] as? String else { return }
         do {
+            var notificationUserInfo: [String: Any] = ["novelID": novelID]
             if fileType == WatchNovelBulkFile.bulkTypeValue {
                 guard let bulkChapter = file.metadata?[WatchNovelBulkFile.bulkChapterKey] as? Int,
                       let fingerprint = file.metadata?[WatchNovelBulkFile.fingerprintKey] as? String else { return }
                 try NovelStorage.storeBulk(fileURL: file.fileURL, novelID: novelID,
                                            bulkChapter: bulkChapter, fingerprint: fingerprint)
+                notificationUserInfo["bulkChapter"] = bulkChapter
             } else {
                 try NovelStorage.storeManifest(fileURL: file.fileURL, novelID: novelID)
             }
@@ -531,6 +533,11 @@ extension PhoneSessionManager: WCSessionDelegate {
                 }
             }
             refreshStoredNovels()
+            // 本文ページ等に「この小説の本文が変わった/届いた」を知らせる(表示の読み直し用)
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: NovelStorage.didUpdateNotification, object: nil,
+                                                userInfo: notificationUserInfo)
+            }
         } catch {
             DispatchQueue.main.async {
                 self.lastErrorMessage = String(format: NSLocalizedString("Watch_Session_SaveBodyFailed", comment: "本文の保存に失敗しました: %@"), error.localizedDescription)
@@ -576,6 +583,11 @@ enum WatchNovelListStorage {
 ///   - manifest.json                    … タイトル・最終章番号・全バルクの指紋一覧(iPhone 発行)
 ///   - bulk_<開始章>_<指紋>.bin          … バルクバイナリ(LZFSE 圧縮のまま保存)
 enum NovelStorage {
+    /// バルク/manifest の受信・保存が完了した時に post される(object: nil)。
+    /// userInfo: "novelID" (String)、バルクの場合は "bulkChapter" (Int) も入る。
+    /// 本文ページが「表示中の章の内容が変わった/表示できるようになった」を検知して読み直すのに使う
+    static let didUpdateNotification = Notification.Name("NovelStorageDidUpdate")
+
     static var directory: URL {
         let base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Novels", isDirectory: true)
@@ -736,7 +748,8 @@ enum NovelStorage {
 
     /// RealmStoryBulk.CalcBulkChapterNumber と同じ(100章 = 1バルク)
     private static let bulkSize = 100
-    private static func bulkChapter(for chapter: Int) -> Int {
+    /// 指定の章を含むバルクの開始章番号(didUpdateNotification の "bulkChapter" との照合にも使う)
+    static func bulkChapter(for chapter: Int) -> Int {
         return ((chapter - 1) / bulkSize) * bulkSize
     }
 
