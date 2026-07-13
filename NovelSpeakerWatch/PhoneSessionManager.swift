@@ -11,12 +11,20 @@
 import Foundation
 import WatchConnectivity
 import Combine
+import Compression
 
 final class PhoneSessionManager: NSObject, ObservableObject {
     static let shared = PhoneSessionManager()
 
     @Published var playState: WatchPlayState?
-    @Published var novels: [WatchNovelSummary] = []
+    @Published var novels: [WatchNovelSummary] = [] {
+        didSet {
+            novelsByID = Dictionary(novels.map { ($0.novelID, $0) }, uniquingKeysWith: { first, _ in first })
+        }
+    }
+    /// novelID → 最新の summary。NavigationLink で push 済みの一覧(push 時のスナップショット)でも
+    /// 行の表示内容(章数など)を最新にできるよう、描画時にこちらで引き直す
+    private(set) var novelsByID: [String: WatchNovelSummary] = [:]
     @Published var isReachable = false
     @Published var isActivated = false
     /// コマンド送信中(「接続中…」表示用)。iPhone 側がコールドスタートだと6〜7秒かかることがある
@@ -66,6 +74,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         // 受信済みの小説一覧(全量ファイル)があれば初期表示に使う
         if let storedList = WatchNovelListStorage.load() {
             novels = storedList
+            // init 中の代入ではプロパティオブザーバ(didSet)が呼ばれないため、辞書は明示的に作る
+            novelsByID = Dictionary(storedList.map { ($0.novelID, $0) }, uniquingKeysWith: { first, _ in first })
         }
         guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
@@ -74,15 +84,14 @@ final class PhoneSessionManager: NSObject, ObservableObject {
 
     private func refreshStoredNovels() {
         DispatchQueue.global(qos: .utility).async {
+            // manifest(小さい JSON)を読むだけで、本文バルクの展開はしない
             var counts: [String: Int] = [:]
             var titles: [String: String] = [:]
             for novelID in NovelStorage.storedNovelIDs() {
-                if let novel = NovelStorage.loadNovel(novelID: novelID) {
-                    counts[novelID] = novel.stories.count
-                    titles[novelID] = novel.title
-                } else {
-                    counts[novelID] = 0
-                }
+                let count = NovelStorage.storedChapterCount(novelID: novelID)
+                guard count > 0 else { continue }  // manifest だけあってバルク未着(先頭すら無い)は未転送扱い
+                counts[novelID] = count
+                titles[novelID] = NovelStorage.manifest(novelID: novelID)?.title ?? ""
             }
             DispatchQueue.main.async {
                 self.storedChapterCounts = counts
@@ -140,12 +149,14 @@ final class PhoneSessionManager: NSObject, ObservableObject {
 
     /// 転送済みの小説が iPhone 側で更新されて古くなっていたら、自動で転送し直しを依頼する。
     /// 「Watchに転送済み = 自動同期ON」というモデル(削除すれば同期も止まる)。
+    /// 章数の差だけでなく指紋の不一致(章数が同じで内容だけ変わった・バルクの取りこぼし)も
+    /// 依頼の対象にする(依頼は指紋の突き合わせによる差分転送なので過剰に頼んでも実転送は最小)
     private func autoRefreshStaleStoredNovels() {
         guard WCSession.default.isReachable else { return }
         for novel in novels {
             guard let storedCount = storedChapterCounts[novel.novelID],
-                  novel.chapterCount > storedCount,
                   !transferRequestedNovelIDs.contains(novel.novelID) else { continue }
+            guard novel.chapterCount > storedCount || !NovelStorage.isComplete(novelID: novel.novelID) else { continue }
             requestTransfer(novelID: novel.novelID, quiet: true)
         }
     }
@@ -228,7 +239,12 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         DispatchQueue.main.async {
             self.transferRequestedNovelIDs.insert(novelID)
         }
-        send(.requestTransfer, args: [WatchMessage.Arg.novelID: novelID], quiet: quiet) { ok in
+        // 手持ちバルクの指紋を添えて、iPhone 側に「変わったバルクだけ」を送らせる(差分転送)
+        let args: [String: Any] = [
+            WatchMessage.Arg.novelID: novelID,
+            WatchMessage.Arg.bulkFingerprints: NovelStorage.storedBulkFingerprints(novelID: novelID),
+        ]
+        send(.requestTransfer, args: args, quiet: quiet) { ok in
             if !ok {
                 self.transferRequestedNovelIDs.remove(novelID)
             }
@@ -442,11 +458,25 @@ extension PhoneSessionManager: WCSessionDelegate {
             }
             return
         }
-        guard let novelID = file.metadata?["novelID"] as? String else { return }
+        // 小説本文(バルク/manifest)
+        let fileType = file.metadata?[WatchNovelBulkFile.transferTypeKey] as? String
+        guard fileType == WatchNovelBulkFile.bulkTypeValue || fileType == WatchNovelBulkFile.manifestTypeValue,
+              let novelID = file.metadata?[WatchNovelBulkFile.novelIDKey] as? String else { return }
         do {
-            try NovelStorage.store(fileURL: file.fileURL, novelID: novelID)
-            DispatchQueue.main.async {
-                self.transferRequestedNovelIDs.remove(novelID)
+            if fileType == WatchNovelBulkFile.bulkTypeValue {
+                guard let bulkChapter = file.metadata?[WatchNovelBulkFile.bulkChapterKey] as? Int,
+                      let fingerprint = file.metadata?[WatchNovelBulkFile.fingerprintKey] as? String else { return }
+                try NovelStorage.storeBulk(fileURL: file.fileURL, novelID: novelID,
+                                           bulkChapter: bulkChapter, fingerprint: fingerprint)
+            } else {
+                try NovelStorage.storeManifest(fileURL: file.fileURL, novelID: novelID)
+            }
+            // manifest の全バルクが揃ったら転送完了(依頼中スピナーを止める)。
+            // バルクと manifest の到着順は保証を仮定しない(どちらが最後でも判定できる)
+            if NovelStorage.isComplete(novelID: novelID) {
+                DispatchQueue.main.async {
+                    self.transferRequestedNovelIDs.remove(novelID)
+                }
             }
             refreshStoredNovels()
         } catch {
@@ -485,7 +515,14 @@ enum WatchNovelListStorage {
     }
 }
 
-/// 受信した小説本文(JSON)の保存と読み出し
+/// 受信した小説本文の保存と読み出し。
+/// iPhone の RealmStoryBulk のバイナリ(最大100章ぶんの [Story] JSON を LZFSE 圧縮した物)を
+/// 無加工のまま「バルク」としてファイル保存し、読む時にバルク単位でオンデマンドに展開する。
+/// 小説全体を一度にメモリへ載せない(1000章級の小説でも常に1〜2バルク分しか展開しない)。
+///
+/// レイアウト: Documents/Novels/<エンコード済みnovelID>/
+///   - manifest.json                    … タイトル・最終章番号・全バルクの指紋一覧(iPhone 発行)
+///   - bulk_<開始章>_<指紋>.bin          … バルクバイナリ(LZFSE 圧縮のまま保存)
 enum NovelStorage {
     static var directory: URL {
         let base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -494,21 +531,10 @@ enum NovelStorage {
         return base
     }
 
-    static func fileURL(novelID: String) -> URL {
+    static func novelDirectory(novelID: String) -> URL {
         // novelID は URL 文字列なのでファイル名に使えるようエンコードする
         let name = novelID.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? novelID
-        return directory.appendingPathComponent("\(name).json")
-    }
-
-    static func storedNovelIDs() -> [String] {
-        guard let files = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil) else { return [] }
-        return files.compactMap { $0.deletingPathExtension().lastPathComponent.removingPercentEncoding }
-    }
-
-    static func store(fileURL: URL, novelID: String) throws {
-        let destination = self.fileURL(novelID: novelID)
-        try? FileManager.default.removeItem(at: destination)
-        try FileManager.default.moveItem(at: fileURL, to: destination)
+        return directory.appendingPathComponent(name, isDirectory: true)
     }
 
     struct StoredChapter {
@@ -516,25 +542,312 @@ enum NovelStorage {
         let content: String
     }
 
-    /// 章番号 → 章タイトル・本文 の辞書として読み出す
-    static func loadNovel(novelID: String) -> (title: String, stories: [Int: StoredChapter])? {
-        guard let data = try? Data(contentsOf: fileURL(novelID: novelID)),
-              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let storyArray = payload["stories"] as? [[String: Any]] else { return nil }
-        var stories: [Int: StoredChapter] = [:]
-        for storyDictionary in storyArray {
-            if let chapter = storyDictionary["chapter"] as? Int,
-               let content = storyDictionary["content"] as? String {
-                stories[chapter] = StoredChapter(
-                    subtitle: storyDictionary["subtitle"] as? String ?? "",
-                    content: content
-                )
+    struct Manifest: Codable {
+        struct Bulk: Codable {
+            let chapter: Int
+            let fingerprint: String
+        }
+        let novelID: String
+        let title: String
+        /// 小説の最終章番号(iPhone の RealmNovel.lastChapterNumber)
+        let chapterCount: Int
+        /// chapter 昇順
+        let bulks: [Bulk]
+    }
+
+    // 展開済みバルクと manifest の小さなメモリキャッシュ。
+    // 発話(現在章+次章の先読み)と本文ページが同じバルクを何度も展開しないためのもの
+    private static let cache = NovelStorageCache()
+
+    // MARK: 保存(PhoneSessionManager の didReceive から呼ばれる)
+
+    static func storeBulk(fileURL: URL, novelID: String, bulkChapter: Int, fingerprint: String) throws {
+        let dir = novelDirectory(novelID: novelID)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let destination = dir.appendingPathComponent("bulk_\(bulkChapter)_\(fingerprint).bin")
+        try? FileManager.default.removeItem(at: destination)
+        try FileManager.default.moveItem(at: fileURL, to: destination)
+        // 同じ開始章の古いバルク(更新前の内容)は置き換わったので消す
+        if let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
+            for file in files where file.lastPathComponent.hasPrefix("bulk_\(bulkChapter)_")
+                && file.lastPathComponent != destination.lastPathComponent {
+                try? FileManager.default.removeItem(at: file)
             }
         }
-        return (payload["title"] as? String ?? "", stories)
+        cache.invalidate(novelID: novelID)
+    }
+
+    static func storeManifest(fileURL: URL, novelID: String) throws {
+        let dir = novelDirectory(novelID: novelID)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let destination = dir.appendingPathComponent("manifest.json")
+        try? FileManager.default.removeItem(at: destination)
+        try FileManager.default.moveItem(at: fileURL, to: destination)
+        cache.invalidate(novelID: novelID)
+        // manifest から消えた開始章のバルク(iPhone 側で章が減った等)を掃除する。
+        // 同じ開始章で指紋だけ違う古いバルクは、新しいバルクが届くまで読める方が良いので残す
+        // (storeBulk が置き換え時に消す)
+        guard let manifest = manifest(novelID: novelID),
+              let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return }
+        let validChapters = Set(manifest.bulks.map { $0.chapter })
+        for file in files {
+            let name = file.lastPathComponent
+            guard name.hasPrefix("bulk_") else { continue }
+            let parts = name.dropFirst("bulk_".count).split(separator: "_")
+            guard let chapter = parts.first.flatMap({ Int($0) }), !validChapters.contains(chapter) else { continue }
+            try? FileManager.default.removeItem(at: file)
+        }
     }
 
     static func remove(novelID: String) {
-        try? FileManager.default.removeItem(at: fileURL(novelID: novelID))
+        try? FileManager.default.removeItem(at: novelDirectory(novelID: novelID))
+        cache.invalidate(novelID: novelID)
+    }
+
+    // MARK: メタ情報(manifest ベース。バルクの展開はしない)
+
+    static func storedNovelIDs() -> [String] {
+        guard let dirs = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil) else { return [] }
+        return dirs.compactMap { dir in
+            guard FileManager.default.fileExists(atPath: dir.appendingPathComponent("manifest.json").path) else { return nil }
+            return dir.lastPathComponent.removingPercentEncoding
+        }
+    }
+
+    static func manifest(novelID: String) -> Manifest? {
+        if let cached = cache.manifest(novelID: novelID) { return cached }
+        let url = novelDirectory(novelID: novelID).appendingPathComponent("manifest.json")
+        guard let data = try? Data(contentsOf: url),
+              let manifest = try? JSONDecoder().decode(Manifest.self, from: data) else { return nil }
+        cache.storeManifest(novelID: novelID, manifest: manifest)
+        return manifest
+    }
+
+    private static func bulkFileURL(novelID: String, chapter: Int, fingerprint: String) -> URL {
+        return novelDirectory(novelID: novelID).appendingPathComponent("bulk_\(chapter)_\(fingerprint).bin")
+    }
+
+    /// 保存済みバルクの指紋一覧(開始章番号の文字列 → SHA256 hex)。
+    /// 転送依頼(requestTransfer)に添えて iPhone 側の差分送信に使われる
+    static func storedBulkFingerprints(novelID: String) -> [String: String] {
+        let dir = novelDirectory(novelID: novelID)
+        guard let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return [:] }
+        var result: [String: String] = [:]
+        for file in files {
+            let name = file.lastPathComponent
+            guard name.hasPrefix("bulk_"), name.hasSuffix(".bin") else { continue }
+            let parts = name.dropFirst("bulk_".count).dropLast(".bin".count).split(separator: "_")
+            guard parts.count == 2, let chapter = Int(parts[0]) else { continue }
+            result["\(chapter)"] = String(parts[1])
+        }
+        return result
+    }
+
+    /// manifest の全バルクが「指紋まで一致して」手元に揃っているか(=転送完了)。
+    /// 転送依頼中スピナーの停止条件と、autoRefreshStaleStoredNovels の再依頼条件に使う
+    static func isComplete(novelID: String) -> Bool {
+        guard let manifest = manifest(novelID: novelID), !manifest.bulks.isEmpty else { return false }
+        let stored = storedBulkFingerprints(novelID: novelID)
+        return manifest.bulks.allSatisfy { stored["\($0.chapter)"] == $0.fingerprint }
+    }
+
+    /// 再生・表示できる章の上限(1〜この値の章が対象)。
+    /// manifest のバルクを先頭から辿り、最初の「未受信バルク」の手前までの被覆で数える。
+    /// 全バルクが揃っていれば manifest の最終章番号と一致する。
+    /// - 指紋の一致までは求めない: 更新転送の途中(新 manifest+旧バルク、またはその逆)でも
+    ///   同じ開始章のバルクがあれば読める(loadBulk がフォールバックする)ので、
+    ///   「読める範囲」として数える。本当に最新かどうかは isComplete が別に判定する。
+    ///   これで更新転送の間に本棚の「Apple Watchに転送済み」から一瞬消える事もなくなる
+    /// - iPhone 側のバルクに歯抜け(章のギャップ)があっても、それは iPhone にも無い章なので
+    ///   「被覆済み」として数える(章の実在は読み出し時に判定される)
+    static func storedChapterCount(novelID: String) -> Int {
+        guard let manifest = manifest(novelID: novelID), !manifest.bulks.isEmpty else { return 0 }
+        let stored = storedBulkFingerprints(novelID: novelID)
+        var covered = 0
+        for (index, bulk) in manifest.bulks.enumerated() {
+            guard stored["\(bulk.chapter)"] != nil else { break }
+            if index + 1 < manifest.bulks.count {
+                covered = manifest.bulks[index + 1].chapter
+            } else {
+                covered = max(manifest.chapterCount, bulk.chapter + 1)
+            }
+        }
+        return covered
+    }
+
+    /// 指定章が読める(はずの)バルクを受信済みか。バルク内の歯抜けまでは確認しない(軽い判定)
+    static func hasChapter(novelID: String, chapter: Int) -> Bool {
+        return chapter >= 1 && chapter <= storedChapterCount(novelID: novelID)
+    }
+
+    // MARK: 本文の読み出し(バルク単位のオンデマンド展開)
+
+    /// RealmStoryBulk.CalcBulkChapterNumber と同じ(100章 = 1バルク)
+    private static let bulkSize = 100
+    private static func bulkChapter(for chapter: Int) -> Int {
+        return ((chapter - 1) / bulkSize) * bulkSize
+    }
+
+    /// 指定章の本文を読み出す。必要なバルクだけを展開する(展開結果は少数キャッシュされる)
+    static func chapter(novelID: String, chapter: Int) -> StoredChapter? {
+        guard chapter >= 1 else { return nil }
+        return loadBulk(novelID: novelID, bulkChapter: bulkChapter(for: chapter))?[chapter]
+    }
+
+    /// 指定章の「次の章」が別バルクなら、そのバルクをバックグラウンドで展開してキャッシュに
+    /// 温めておく(発話がバルク境界をまたぐ時に待たせないため)
+    static func prefetchNextBulkIfNeeded(novelID: String, currentChapter: Int) {
+        let current = bulkChapter(for: currentChapter)
+        let next = bulkChapter(for: currentChapter + 1)
+        guard next != current, hasChapter(novelID: novelID, chapter: currentChapter + 1) else { return }
+        DispatchQueue.global(qos: .utility).async {
+            _ = loadBulk(novelID: novelID, bulkChapter: next)
+        }
+    }
+
+    /// 保存済みの最初の章番号(通常は 1)。先頭バルクの展開を伴う
+    static func firstStoredChapter(novelID: String) -> Int? {
+        guard let manifest = manifest(novelID: novelID), let firstBulk = manifest.bulks.first else { return nil }
+        return loadBulk(novelID: novelID, bulkChapter: firstBulk.chapter)?.keys.min()
+    }
+
+    private static func loadBulk(novelID: String, bulkChapter: Int) -> [Int: StoredChapter]? {
+        if let cached = cache.bulk(novelID: novelID, bulkChapter: bulkChapter) { return cached }
+        // manifest と一致するバルクを優先し、無ければ同じ開始章の手持ち(更新転送の途中でも読めるように)
+        let dir = novelDirectory(novelID: novelID)
+        var url: URL?
+        if let fingerprint = manifest(novelID: novelID)?.bulks.first(where: { $0.chapter == bulkChapter })?.fingerprint,
+           FileManager.default.fileExists(atPath: bulkFileURL(novelID: novelID, chapter: bulkChapter, fingerprint: fingerprint).path) {
+            url = bulkFileURL(novelID: novelID, chapter: bulkChapter, fingerprint: fingerprint)
+        } else if let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
+            url = files.first { $0.lastPathComponent.hasPrefix("bulk_\(bulkChapter)_") }
+        }
+        guard let bulkURL = url,
+              let compressed = try? Data(contentsOf: bulkURL),
+              let raw = LZFSE.decompress(data: compressed) else { return nil }
+        // iPhone の Story と同じ JSON キー。必要な3つだけ読む(url/novelID/downloadDate は無視される)
+        struct BulkStory: Codable {
+            let subtitle: String
+            let content: String
+            let chapterNumber: Int
+        }
+        guard let storyArray = try? JSONDecoder().decode([BulkStory].self, from: raw) else { return nil }
+        var stories: [Int: StoredChapter] = [:]
+        for story in storyArray {
+            // iPhone は Story のデコード時に改行を正規化している(保存データは正規化前)ので、
+            // 発話ブロック分割や位置同期が iPhone とズレないよう同じ正規化をかける
+            stories[story.chapterNumber] = StoredChapter(
+                subtitle: story.subtitle,
+                content: normalizeNewlines(story.content))
+        }
+        guard !stories.isEmpty else { return nil }
+        cache.storeBulk(novelID: novelID, bulkChapter: bulkChapter, stories: stories)
+        return stories
+    }
+
+    /// NovelSpeakerUtility.NormalizeNewlineString と同じ変換
+    private static let newlinePattern = "(\r\n|[\r\u{000B}\u{000C}\u{0085}\u{2028}\u{2029}])"
+    private static let newlineDetectSet = CharacterSet(charactersIn: "\r\u{000B}\u{000C}\u{0085}\u{2028}\u{2029}")
+    private static func normalizeNewlines(_ string: String) -> String {
+        // ほとんどの本文は \n のみなので、対象文字が無ければ正規表現を走らせない
+        guard string.rangeOfCharacter(from: newlineDetectSet) != nil else { return string }
+        return string.replacingOccurrences(of: newlinePattern, with: "\n", options: [.regularExpression])
+    }
+}
+
+/// NovelStorage のメモリキャッシュ(展開済みバルク+manifest)。
+/// バルクは「現在のバルク+先読みした次のバルク+α」だけ保持できればよいので少数の LRU
+private final class NovelStorageCache {
+    private let lock = NSLock()
+    private var manifests: [String: NovelStorage.Manifest] = [:]
+    private var bulks: [String: [Int: NovelStorage.StoredChapter]] = [:]
+    private var bulkOrder: [String] = []
+    private let bulkLimit = 3
+
+    func manifest(novelID: String) -> NovelStorage.Manifest? {
+        lock.lock(); defer { lock.unlock() }
+        return manifests[novelID]
+    }
+
+    func storeManifest(novelID: String, manifest: NovelStorage.Manifest) {
+        lock.lock(); defer { lock.unlock() }
+        manifests[novelID] = manifest
+    }
+
+    func bulk(novelID: String, bulkChapter: Int) -> [Int: NovelStorage.StoredChapter]? {
+        lock.lock(); defer { lock.unlock() }
+        return bulks["\(novelID)#\(bulkChapter)"]
+    }
+
+    func storeBulk(novelID: String, bulkChapter: Int, stories: [Int: NovelStorage.StoredChapter]) {
+        lock.lock(); defer { lock.unlock() }
+        let key = "\(novelID)#\(bulkChapter)"
+        if bulks[key] == nil {
+            bulkOrder.append(key)
+            if bulkOrder.count > bulkLimit {
+                bulks.removeValue(forKey: bulkOrder.removeFirst())
+            }
+        }
+        bulks[key] = stories
+    }
+
+    func invalidate(novelID: String) {
+        lock.lock(); defer { lock.unlock() }
+        manifests.removeValue(forKey: novelID)
+        let prefix = "\(novelID)#"
+        bulkOrder.removeAll { key in
+            guard key.hasPrefix(prefix) else { return false }
+            bulks.removeValue(forKey: key)
+            return true
+        }
+    }
+}
+
+/// LZFSE の解凍(Compression framework)。
+/// iPhone 側の NiftyUtility.compress()(DataCompression pod の compress(withAlgorithm: .lzfse))が
+/// 作る「ヘッダ無しの compression_stream 生ストリーム」を解凍する。
+/// 入力を 64KB ずつ与えると Apple の LZFSE デコーダが FINALIZE フラグ付きで稀に失敗する既知の
+/// 問題があるため、DataCompression と同じく大きい入力ではフラグを 0 にして最後だけ FINALIZE にする
+enum LZFSE {
+    static func decompress(data: Data) -> Data? {
+        guard !data.isEmpty else { return nil }
+        return data.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) -> Data? in
+            guard let source = rawBuffer.bindMemory(to: UInt8.self).baseAddress else { return nil }
+            let sourceSize = rawBuffer.count
+            var stream = compression_stream(dst_ptr: UnsafeMutablePointer<UInt8>.allocate(capacity: 1),
+                                            dst_size: 0, src_ptr: source, src_size: 0, state: nil)
+            stream.dst_ptr.deallocate()
+            guard compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_LZFSE) != COMPRESSION_STATUS_ERROR else { return nil }
+            defer { compression_stream_destroy(&stream) }
+
+            let blockLimit = 64 * 1024
+            let bufferSize = min(max(sourceSize, 64), blockLimit)
+            var flags: Int32 = sourceSize > blockLimit ? 0 : Int32(COMPRESSION_STREAM_FINALIZE.rawValue)
+            let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+            defer { buffer.deallocate() }
+
+            var result = Data()
+            stream.dst_ptr = buffer
+            stream.dst_size = bufferSize
+            stream.src_ptr = source
+            stream.src_size = sourceSize
+            while true {
+                switch compression_stream_process(&stream, flags) {
+                case COMPRESSION_STATUS_OK:
+                    guard stream.dst_size == 0 else { return nil }
+                    result.append(buffer, count: stream.dst_ptr - buffer)
+                    stream.dst_ptr = buffer
+                    stream.dst_size = bufferSize
+                    if flags == 0 && stream.src_size == 0 {
+                        flags = Int32(COMPRESSION_STREAM_FINALIZE.rawValue)
+                    }
+                case COMPRESSION_STATUS_END:
+                    result.append(buffer, count: stream.dst_ptr - buffer)
+                    return result
+                default:
+                    return nil
+                }
+            }
+        }
     }
 }

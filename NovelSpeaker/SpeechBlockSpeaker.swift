@@ -317,7 +317,15 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // 実機計測では立ち上がりは iPhone 6s Plus でも最大 ~0.5秒(音声生成自体の遅さは
     // isSpeaking=true 中なので synthActive 判定で守られ、ここでは無視できる)。
     // その約3倍のマージンとして 1.5秒 とする。
+    // watchOS は willSpeakRange デリゲートを実装していない(実装すると synth が約40MB余計に
+    // 使うため)ので progressed 判定が常に false になり、blockMoved と synthActive だけが頼りになる。
+    // Series 4 実機では「didFinish の配送遅れ」「発話立ち上がりの遅さ」が 1.5秒 を超える事があり、
+    // 誤検出→同じブロックの二度読みが起きたため、大きめの値にする(検出後の再確認も併用。下記)
+    #if os(watchOS)
+    private let wedgeDetectTimeout:TimeInterval = 6.0
+    #else
     private let wedgeDetectTimeout:TimeInterval = 1.5
+    #endif
     private func scheduleWedgeWatch(blockIndex:Int, willSpeakRangeCountAtSpeak:Int, speechTextCount:Int, speechText:String, type:String, generation:Int) {
         if speechTextCount <= 0 { return } // 空発話はすぐ終わるので対象外
         // この固着検出は AVSpeechSynthesizer 固有の「speak が無音で飲まれて二度とコールバックが
@@ -328,27 +336,41 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // (前回試行のVOICEVOX合成がactor上でまだ実行中のまま次々新しい合成を投げてしまい)
         // メモリ/CPUを急激に消費してしまうため、VOICEVOXのブロックはこの監視の対象外とする。
         if type == "VOICEVOX" { return }
-        // premium/enhanced 音声の起動レイテンシを考慮して長めに待つ。
-        DispatchQueue.main.asyncAfter(deadline: .now() + wedgeDetectTimeout) { [weak self] in
-            guard let self = self else { return }
-            // 停止/次の speak で世代が変わっていたら、この watcher はもう現役ではないので何もしない
-            //(「停止→同じブロックで再生し直し」をまたいだ誤回復を防ぐ)。
-            if self.speakGeneration != generation { return }
+        // 停止/次の speak で世代が変わっていたら、この watcher はもう現役ではない
+        //(「停止→同じブロックで再生し直し」をまたいだ誤回復を防ぐ)。
+        func isStillWedged(_ self: SpeechBlockSpeaker) -> Bool {
+            if self.speakGeneration != generation { return false }
             let progressed = self.willSpeakRangeCallCount != willSpeakRangeCountAtSpeak
             let blockMoved = self.currentSpeechBlockIndex != blockIndex
             let synthActive = self.isAnySynthesizerActive
-            if self.m_IsSpeaking == true && progressed == false && blockMoved == false && synthActive == false {
-                let message = "synth wedge疑い: speakしたが\(self.wedgeDetectTimeout)秒間発話が始まらずsynthもidle blockIndex=\(blockIndex) len=\(speechTextCount) text=\"\(Self.escapeForLog(speechText))\""
-                NSLog("NovelSpeaker.SynthWedge: ⚠️ \(message)")
-                AppInformationLogger.AddLog(message: message, appendix: [
-                    "blockIndex": "\(blockIndex)",
-                    "speechTextCount": "\(speechTextCount)",
-                    "willSpeakRangeCallCount": "\(self.willSpeakRangeCallCount)",
-                    "isSpeakingBySynthesizerState": "\(self.isSpeakingBySynthesizerState)",
-                    "isPausedBySynthesizerState": "\(self.isPausedBySynthesizerState)",
-                ], isForDebug: true)
-                self.recoverFromWedge(blockIndex: blockIndex)
+            return self.m_IsSpeaking == true && progressed == false && blockMoved == false && synthActive == false
+        }
+        func logAndRecover(_ self: SpeechBlockSpeaker) {
+            let message = "synth wedge疑い: speakしたが\(self.wedgeDetectTimeout)秒間発話が始まらずsynthもidle blockIndex=\(blockIndex) len=\(speechTextCount) text=\"\(Self.escapeForLog(speechText))\""
+            NSLog("NovelSpeaker.SynthWedge: ⚠️ \(message)")
+            AppInformationLogger.AddLog(message: message, appendix: [
+                "blockIndex": "\(blockIndex)",
+                "speechTextCount": "\(speechTextCount)",
+                "willSpeakRangeCallCount": "\(self.willSpeakRangeCallCount)",
+                "isSpeakingBySynthesizerState": "\(self.isSpeakingBySynthesizerState)",
+                "isPausedBySynthesizerState": "\(self.isPausedBySynthesizerState)",
+            ], isForDebug: true)
+            self.recoverFromWedge(blockIndex: blockIndex)
+        }
+        // premium/enhanced 音声の起動レイテンシを考慮して長めに待つ。
+        DispatchQueue.main.asyncAfter(deadline: .now() + wedgeDetectTimeout) { [weak self] in
+            guard let self = self, isStillWedged(self) else { return }
+            #if os(watchOS)
+            // watchOS は progressed 判定が効かない(willSpeakRange 未実装)ため、
+            // 「didFinish の配送が遅れているだけ」でも上の条件が成立しうる。
+            // 1秒おいてもう一度確認し、まだ動いていない時だけ回復する(誤検出の二度読み防止)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                guard let self = self, isStillWedged(self) else { return }
+                logAndRecover(self)
             }
+            #else
+            logAndRecover(self)
+            #endif
         }
     }
 

@@ -50,7 +50,6 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     static let suppressNoBluetoothWarningKey = "SuppressNoBluetoothWarning"
 
     private let speaker = SpeechBlockSpeaker()
-    private var stories: [Int: NovelStorage.StoredChapter] = [:]
     private var currentContentLength = 0
     private var lastPositionSaveDate = Date(timeIntervalSince1970: 0)
     // 現在のブロック列に焼き込まれているデフォルト話者の rate/volume。
@@ -85,15 +84,18 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
 
     /// 再生対象の小説を差し替える(オーディオセッションには触れないので連続再生の途中でも使える)。
     /// fromBeginning=false なら「Watch ローカルの保存位置 vs iPhone の栞」の新しい方から。
+    /// 本文は全章をメモリに載せず、章を開くたびに必要なバルクだけ NovelStorage が展開する
     private func switchNovel(novelID: String, fromBeginning: Bool) -> Bool {
-        guard let novel = NovelStorage.loadNovel(novelID: novelID), !novel.stories.isEmpty else { return false }
+        guard let manifest = NovelStorage.manifest(novelID: novelID) else { return false }
+        let storedCount = NovelStorage.storedChapterCount(novelID: novelID)
+        guard storedCount > 0 else { return false }
         self.novelID = novelID
-        self.title = novel.title
-        self.stories = novel.stories
-        self.chapterCount = novel.stories.keys.max() ?? novel.stories.count
-        let firstChapter = novel.stories.keys.min() ?? 1
+        self.title = manifest.title
+        self.chapterCount = storedCount
+        // firstStoredChapter は先頭バルクの展開を伴うので、栞から開ける時は呼ばずに済ませる
+        func firstChapter() -> Int { return NovelStorage.firstStoredChapter(novelID: novelID) ?? 1 }
         if fromBeginning {
-            return applyChapter(firstChapter, location: 0)
+            return applyChapter(firstChapter(), location: 0)
         }
         let position = WatchReadingPositionStore.load(novelID: novelID)
         // iPhone 側の栞の方が新しければそちらから開く(新しい方優先)。
@@ -106,10 +108,10 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
                                            location: speaker.currentLocation, updatedAt: phone.updatedAt)
             return true
         }
-        if applyChapter(position?.chapter ?? firstChapter, location: position?.location ?? 0) {
+        if let position = position, applyChapter(position.chapter, location: position.location) {
             return true
         }
-        return applyChapter(firstChapter, location: 0)
+        return applyChapter(firstChapter(), location: 0)
     }
 
     /// iPhone の栞(playState に相乗りしてくる位置)が指定時刻より新しければ返す
@@ -134,17 +136,20 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
 
     /// 指定章の本文をブロック分割して発話対象にする(発話は開始しない)
     private func applyChapter(_ chapter: Int, location: Int) -> Bool {
-        guard let story = stories[chapter] else { return false }
+        guard let story = NovelStorage.chapter(novelID: novelID, chapter: chapter) else { return false }
         chapterNumber = chapter
         chapterSubtitle = story.subtitle
         currentContentLength = story.content.unicodeScalars.count
         speaker.StopSpeech()
-        speaker.setSpeechBlockArray(blockArray: Self.buildBlocks(content: story.content))
+        let blocks = Self.buildBlocks(content: story.content)
+        speaker.setSpeechBlockArray(blockArray: blocks)
         let baked = Self.effectiveDefaultSpeakerConfig()
         bakedDefaultSpeakerRate = baked.rate
         bakedDefaultSpeakerVolume = baked.volume
         speaker.SetSpeechLocation(location: min(max(0, location), max(0, currentContentLength - 1)))
         updateProgress()
+        // 次章が別バルクなら先に展開しておく(章をまたぐ時に待たせない)
+        NovelStorage.prefetchNextBulkIfNeeded(novelID: novelID, currentChapter: chapter)
         return true
     }
 
@@ -162,6 +167,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         }
         return ranges
     }
+
 
     /// 現在の発話設定で本文をブロック分割する(本文ページのハイライト範囲計算にも使う)
     static func buildBlocks(content: String) -> [CombinedSpeechBlock] {
@@ -449,7 +455,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     @discardableResult
     func moveChapter(offset: Int) -> Bool {
         let target = chapterNumber + offset
-        guard stories[target] != nil else { return false }
+        guard NovelStorage.hasChapter(novelID: novelID, chapter: target) else { return false }
         if isPlaying && speaker.isSpeaking {
             speaker.StopSpeech { [weak self] in
                 DispatchQueue.main.async {
@@ -475,7 +481,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         savePosition()  // 読み終えた位置(章末)を控えておく
         switch repeatConfig.repeatType {
         case .rewindToFirstStory:
-            guard let firstChapter = stories.keys.min() else { break }
+            guard let firstChapter = NovelStorage.firstStoredChapter(novelID: novelID) else { break }
             announceIfEnabled(settings: settings,
                               text: NSLocalizedString("Watch_SpeechPlayer_RewindFirstStory", comment: "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。")) { [weak self] in
                 guard let self = self, self.isPlaying else { return }
@@ -618,10 +624,11 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     }
 
     /// 転送済みの小説に未読部分が残っているか。
-    /// iPhone 側の未読判定に合わせて章末5文字の遊びを持つ。位置情報が無ければ未読とみなす
+    /// iPhone 側の未読判定に合わせて章末5文字の遊びを持つ。位置情報が無ければ未読とみなす。
+    /// 栞が最終章にある時だけ最終バルクを展開する(候補走査で全小説を展開しないように)
     private func hasUnreadContent(novelID: String) -> Bool {
-        guard let novel = NovelStorage.loadNovel(novelID: novelID), !novel.stories.isEmpty else { return false }
-        let lastChapter = novel.stories.keys.max() ?? 0
+        let lastChapter = NovelStorage.storedChapterCount(novelID: novelID)
+        guard lastChapter > 0 else { return false }
         let chapter: Int
         let location: Int
         if let position = WatchReadingPositionStore.load(novelID: novelID) {
@@ -636,7 +643,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
             return true
         }
         if chapter < lastChapter { return true }
-        guard let story = novel.stories[chapter] else { return true }
+        guard let story = NovelStorage.chapter(novelID: novelID, chapter: chapter) else { return true }
         return location + 5 < story.content.unicodeScalars.count
     }
 

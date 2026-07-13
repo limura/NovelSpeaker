@@ -527,7 +527,10 @@ struct BookshelfNovelList: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
-            ForEach(novels, id: \.novelID) { novel in
+            ForEach(novels, id: \.novelID) { staleNovel in
+                // novels は push 時のスナップショットなので、表示は最新の summary で行う
+                // (iPhone 側の更新→転送で章数が変わった時に、開いたままの一覧でも数字が追従する)
+                let novel = session.novelsByID[staleNovel.novelID] ?? staleNovel
                 Button {
                     if transferState(novel: novel) == .complete {
                         openNovel(novel)

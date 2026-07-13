@@ -65,6 +65,10 @@ enum WatchMessage {
         static let repeatType = "repeatType"
         /// 「次の小説の選択方式」が「順に1ページ目から再生」か(Bool)
         static let loopNoCheckReadingPoint = "loopNoCheck"
+        /// requestTransfer: Watch が保存済みの本文バルクの指紋
+        /// ([String: String]、キーはバルク開始章番号の文字列、値は SHA256 hex)。
+        /// iPhone はこれと一致するバルクの送信を省略する(差分転送)
+        static let bulkFingerprints = "bulkFingerprints"
     }
 
     /// iPhone → Watch: applicationContext のキー
@@ -128,6 +132,32 @@ enum WatchNovelListFile {
     static let transferFingerprintKey = "fingerprint"
     /// ファイル JSON のトップレベルキー(値は WatchNovelSummary 辞書の配列、本棚の並び順)
     static let novelsKey = "novels"
+}
+
+/// 小説本文の転送(transferFile)の共通定義。
+/// iPhone の RealmStoryBulk が保存している「最大100章ぶんの [Story] JSON を LZFSE 圧縮した
+/// バイナリ」を無加工のまま転送・保存する(iPhone 側で展開・再構築しない)。
+/// 転送は「変わったバルクだけ」+「manifest(全バルクの指紋一覧)」の組で行い、
+/// 1章の更新で全章を送り直さずに済むようにする。Watch 側は manifest と手元のバルクを
+/// 突き合わせて完成/不足を判定する
+enum WatchNovelBulkFile {
+    static let transferTypeKey = "type"
+    /// バルク1個(LZFSE 圧縮された [Story] JSON)
+    static let bulkTypeValue = "novelBulk"
+    /// manifest(JSON)。バルクを全部積んだ後に送る
+    static let manifestTypeValue = "novelManifest"
+    static let novelIDKey = "novelID"
+    /// バルクの開始章番号(RealmStoryBulk.chapterNumber と同じ。0, 100, 200, ...)
+    static let bulkChapterKey = "bulkChapter"
+    /// バルクバイナリの SHA256 hex
+    static let fingerprintKey = "fingerprint"
+
+    // manifest JSON のキー
+    static let manifestTitleKey = "title"
+    /// 小説の最終章番号(RealmNovel.lastChapterNumber)
+    static let manifestChapterCountKey = "chapterCount"
+    /// [{"chapter": Int, "fingerprint": String}] (chapter 昇順)
+    static let manifestBulksKey = "bulks"
 }
 
 /// iPhone の現在の再生状態。applicationContext / sendMessage 返信で Watch へ送る

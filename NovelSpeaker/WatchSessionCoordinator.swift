@@ -132,6 +132,14 @@ class WatchSessionCoordinator: NSObject {
                         self?.scheduleSettingsTransferSoon()
                     })
                 }
+                // 本文の変化(ダウンロード・自作小説の編集・削除)は RealmStoryBulk に必ず現れるので
+                // これを監視して context+小説一覧を送り直す。Watch 側は届いた一覧で章数の差に気づき、
+                // 転送済み小説なら自動で差分転送を依頼してくる(=iPhone 側で本文が変われば
+                // Watch を操作しなくても同期される)。RealmNovel は栞の更新等でも高頻度に変わるので
+                // 監視対象にしない。一覧は指紋で dedup されるので過剰発火しても実転送は起きない
+                self.settingsObserverTokens.append(realm.objects(RealmStoryBulk.self).observe { [weak self] _ in
+                    self?.scheduleContextPushForNovelChanges()
+                })
             }
         }
     }
@@ -144,6 +152,19 @@ class WatchSessionCoordinator: NSObject {
         }
         settingsTransferDebounceWorkItem = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: work)
+    }
+
+    private var novelChangesPushDebounceWorkItem: DispatchWorkItem?
+
+    /// 本文変更の連打(全小説の更新確認で次々ダウンロードされる等)をまとめるためのデバウンス。
+    /// pushContextNow は小説一覧の全量構築を伴うので、設定より長めに取る
+    private func scheduleContextPushForNovelChanges() {
+        novelChangesPushDebounceWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.pushContextSoon()
+        }
+        novelChangesPushDebounceWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: work)
     }
 
     // MARK: - Watch への状態送信
@@ -548,7 +569,8 @@ class WatchSessionCoordinator: NSObject {
                 completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorWatchAppNotInstalled", comment: "Watchアプリが未インストール扱いになっています。Watch側の ことせかい を一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。")))
                 return
             }
-            transferNovel(novelID: novelID)
+            transferNovel(novelID: novelID,
+                          knownBulkFingerprints: message[WatchMessage.Arg.bulkFingerprints] as? [String: String] ?? [:])
             // Watch 単体再生用の発話設定も(変わっていれば)一緒に送っておく
             transferSpeechSettingsIfNeeded()
             completion((true, nil))
@@ -709,41 +731,90 @@ class WatchSessionCoordinator: NSObject {
 
     // MARK: - 本文転送
 
-    /// 小説の全章テキストを JSON にまとめて transferFile で Watch へ送る
-    private func transferNovel(novelID: String) {
+    /// 小説の本文を RealmStoryBulk のバイナリ(LZFSE 圧縮の [Story] JSON)のまま、バルク単位で
+    /// Watch へ送る。knownBulkFingerprints(Watch が保存済みのバルクの指紋)と一致するバルクは
+    /// 送信を省略し、最後に manifest(全バルクの指紋一覧)を送る。
+    /// iPhone 側は送信状態を持たない(毎回 Watch 申告の指紋と突き合わせる)ので、
+    /// 転送失敗や Watch 再インストール後も次の依頼で自然に回復する
+    private func transferNovel(novelID: String, knownBulkFingerprints: [String: String] = [:]) {
         DispatchQueue.global(qos: .utility).async {
-            var payload: [String: Any] = ["novelID": novelID]
-            var stories: [[String: Any]] = []
+            var title = ""
+            var chapterCount = 0
+            // data が nil のバルクは Watch 側が同じ物を保存済みなので送らない
+            var bulks: [(chapter: Int, fingerprint: String, data: Data?)] = []
             RealmUtil.RealmBlock { realm in
                 if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                    payload["title"] = novel.title
+                    title = novel.title
+                    chapterCount = novel.lastChapterNumber ?? 0
                 }
-                RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novelID) { story in
-                    stories.append([
-                        "chapter": story.chapterNumber,
-                        "subtitle": story.subtitle,
-                        "content": story.content,
-                    ])
+                guard let bulkList = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID) else { return }
+                for bulk in bulkList {
+                    guard let binary = bulk.LoadCreamAssetBinary() else { continue }
+                    let fingerprint = SHA256.hash(data: binary).map { String(format: "%02x", $0) }.joined()
+                    let needsSend = knownBulkFingerprints["\(bulk.chapterNumber)"] != fingerprint
+                    bulks.append((bulk.chapterNumber, fingerprint, needsSend ? binary : nil))
                 }
             }
-            payload["stories"] = stories
-            guard stories.count > 0,
-                  let data = try? JSONSerialization.data(withJSONObject: payload) else {
-                print("WatchSessionCoordinator: transferNovel payload 生成失敗 novelID=\(novelID)")
+            guard !bulks.isEmpty else {
+                print("WatchSessionCoordinator: transferNovel バルクがありません novelID=\(novelID)")
                 return
             }
-            let fileURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("WatchTransfer-\(UUID().uuidString).json")
+            let session = WCSession.default
+            // 既に転送キューに積まれている同一バルクは重複して積まない
+            // (自動再転送依頼が転送完了前に再発火した時のため)
+            let outstanding = Set(session.outstandingFileTransfers.compactMap { transfer -> String? in
+                guard let metadata = transfer.file.metadata,
+                      (metadata[WatchNovelBulkFile.transferTypeKey] as? String) == WatchNovelBulkFile.bulkTypeValue,
+                      let outstandingNovelID = metadata[WatchNovelBulkFile.novelIDKey] as? String,
+                      let fingerprint = metadata[WatchNovelBulkFile.fingerprintKey] as? String else { return nil }
+                return "\(outstandingNovelID)#\(fingerprint)"
+            })
+            var queuedCount = 0
+            for bulk in bulks {
+                guard let data = bulk.data, !outstanding.contains("\(novelID)#\(bulk.fingerprint)") else { continue }
+                let fileURL = FileManager.default.temporaryDirectory
+                    .appendingPathComponent("WatchNovelBulk-\(UUID().uuidString).bin")
+                do {
+                    try data.write(to: fileURL)
+                } catch {
+                    print("WatchSessionCoordinator: transferNovel 一時ファイル書き込み失敗: \(error)")
+                    return
+                }
+                session.transferFile(fileURL, metadata: [
+                    WatchNovelBulkFile.transferTypeKey: WatchNovelBulkFile.bulkTypeValue,
+                    WatchNovelBulkFile.novelIDKey: novelID,
+                    WatchNovelBulkFile.bulkChapterKey: bulk.chapter,
+                    WatchNovelBulkFile.fingerprintKey: bulk.fingerprint,
+                ])
+                queuedCount += 1
+            }
+            // manifest は毎回送る(バルクを全部持っていた場合も、これが Watch 側の
+            // 「転送完了」判定と依頼中スピナーの停止条件になる)
+            let manifest: [String: Any] = [
+                WatchNovelBulkFile.novelIDKey: novelID,
+                WatchNovelBulkFile.manifestTitleKey: title,
+                WatchNovelBulkFile.manifestChapterCountKey: chapterCount,
+                WatchNovelBulkFile.manifestBulksKey: bulks.map {
+                    ["chapter": $0.chapter, "fingerprint": $0.fingerprint]
+                },
+            ]
+            guard let manifestData = try? JSONSerialization.data(withJSONObject: manifest) else {
+                print("WatchSessionCoordinator: transferNovel manifest 生成失敗 novelID=\(novelID)")
+                return
+            }
+            let manifestURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("WatchNovelManifest-\(UUID().uuidString).json")
             do {
-                try data.write(to: fileURL)
+                try manifestData.write(to: manifestURL)
             } catch {
-                print("WatchSessionCoordinator: transferNovel 一時ファイル書き込み失敗: \(error)")
+                print("WatchSessionCoordinator: transferNovel manifest 書き込み失敗: \(error)")
                 return
             }
-            WCSession.default.transferFile(fileURL, metadata: [
-                "novelID": novelID,
-                "title": (payload["title"] as? String) ?? "",
+            session.transferFile(manifestURL, metadata: [
+                WatchNovelBulkFile.transferTypeKey: WatchNovelBulkFile.manifestTypeValue,
+                WatchNovelBulkFile.novelIDKey: novelID,
             ])
+            print("WatchSessionCoordinator: 本文を転送キューに追加 novelID=\(novelID) バルク \(queuedCount)/\(bulks.count) 個")
         }
     }
 

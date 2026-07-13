@@ -301,13 +301,13 @@ struct TextPageView: View {
 
     private var hasPreviousChapter: Bool {
         guard let target = displayTarget else { return false }
-        if player.isSelectedAsSource { return model.availableChapters.contains(target.chapter - 1) }
+        if player.isSelectedAsSource { return model.isChapterAvailable(target.chapter - 1) }
         return target.chapter > 1
     }
 
     private var hasNextChapter: Bool {
         guard let target = displayTarget else { return false }
-        if player.isSelectedAsSource { return model.availableChapters.contains(target.chapter + 1) }
+        if player.isSelectedAsSource { return model.isChapterAvailable(target.chapter + 1) }
         if let count = session.playState?.chapterCount, count > 0 { return target.chapter < count }
         return false
     }
@@ -462,8 +462,13 @@ final class TextPageModel: ObservableObject {
 
     private(set) var contentScalarCount = 0
     private(set) var subtitle = ""
-    private(set) var availableChapters: Set<Int> = []
+    /// 転送済みバルクで読める章の上限(1〜この値)。0 なら本文未転送
+    private(set) var storedChapterCount = 0
     private var contentKey = ""
+
+    func isChapterAvailable(_ chapter: Int) -> Bool {
+        return chapter >= 1 && chapter <= storedChapterCount
+    }
 
     /// ハイライト中(だった)段落の実測高さ。スクロール位置の逆算に使う
     private(set) var paragraphHeights: [Int: CGFloat] = [:]
@@ -479,20 +484,20 @@ final class TextPageModel: ObservableObject {
         pendingHeightScrollParagraphID = nil
     }
 
-    /// 表示対象の章の本文を読み込み、段落と発話ブロック範囲を作る(同じ章なら何もしない)
+    /// 表示対象の章の本文を読み込み、段落と発話ブロック範囲を作る(同じ章なら何もしない)。
+    /// 本文はバルク単位のオンデマンド展開なので、章切替時に読むのは該当バルクだけ
     func prepare(novelID: String, chapter: Int) {
         let key = "\(novelID)#\(chapter)"
         guard key != contentKey else { return }
         contentKey = key
         clearParagraphHeights()
-        guard let novel = NovelStorage.loadNovel(novelID: novelID) else {
-            availableChapters = []
+        storedChapterCount = NovelStorage.storedChapterCount(novelID: novelID)
+        guard storedChapterCount > 0 else {
             applyEmptyChapter()
             contentKey = ""  // 後から本文が転送されてきた時に読み直せるように
             return
         }
-        availableChapters = Set(novel.stories.keys)
-        guard let story = novel.stories[chapter] else {
+        guard let story = NovelStorage.chapter(novelID: novelID, chapter: chapter) else {
             applyEmptyChapter()
             contentKey = ""  // 後から本文が転送されてきた時に読み直せるように
             return
