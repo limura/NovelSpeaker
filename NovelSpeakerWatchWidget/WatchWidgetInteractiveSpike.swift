@@ -17,15 +17,18 @@
 //  対話型ウィジェット(Button(intent:))は watchOS 11+ で、Smart Stack と一部の大型
 //  コンプリケーションのみ。文字盤の通常コンプリケーションはタップ=アプリ起動のまま。
 //
-//  ★シミュレータ(Series 11 / watchOS 26.5)での調査結果★
+//  ★調査結果(シミュレータ Series 11 / watchOS 26.5 + 実機 Series 11)★
 //  - .buttonStyle(.bordered) を付けると【全ボタンが非対話化】し、タップ=アプリ起動になる
 //    (ClockFace のログで touch delivery layers が空になる)。デフォルトスタイルなら動く。
-//  - 素のAppIntent・AudioPlaybackIntent とも widget拡張プロセスで perform() が実行される。
-//  - AudioPlaybackIntent は拡張プロセスから AVAudioSession(longFormAudio)の activate と
-//    AVSpeechSynthesizer.speak() の発注まで成功する(実際に音が出るかは実機で要確認)。
+//  - intent の perform() は【常に widget拡張プロセス】で実行される。アプリ本体にも intent を
+//    登録(両ターゲット)しても実行場所は変わらない(iOS の AudioPlaybackIntent のような
+//    「アプリ側プロセスで実行」の経路は watchOS には無い)。
+//  - WCSession は widget拡張プロセスでは activate できない(実機で activationState=0 のまま)。
+//  - AudioPlaybackIntent は拡張から AVAudioSession activate + speak() の発注までは通るが、
+//    実機では音が出ない(ルート選択シートは出る)。拡張からの発話は実用不可。
 //  - openAppWhenRun=true の intent はウィジェットからは実行されない(無反応)。
-//    アプリを起動したいボタンは Link/widgetURL で行うこと。
-//  - WCSession はシミュレータ(ペアリング相手なし)では activate 失敗。実機で要確認。
+//  → 結論: ウィジェットのボタンで出来るのは「拡張プロセス内で完結する処理」だけ。
+//    アプリの機能(WCSession送信・発話)を使う操作は Link/widgetURL でアプリを起動して行う。
 //
 
 import Foundation
