@@ -83,6 +83,10 @@ class WatchSessionCoordinator: NSObject {
 
     private static let watchStoredNovelIDsKey = "WatchSessionCoordinator_WatchStoredNovelIDs"
 
+    /// 本文(RealmStoryBulk)が最後に変化した時刻。context の bulkChangeToken として Watch へ届き、
+    /// 章数が変わらない内容だけの更新の同期トリガになる(アプリ再起動を跨いでも進み続けるよう永続化)
+    private static let lastBulkChangeTokenKey = "WatchSessionCoordinator_LastBulkChangeToken"
+
     /// Watch 側に本文が転送されている小説の novelID 集合。
     /// Watch から applicationContext(Watch→iPhone 方向)で送られてきたものを保持している。
     /// 本棚の「Apple Watch転送状況別」フォルダ分類や検索絞り込みが O(1) 判定に使う
@@ -189,8 +193,15 @@ class WatchSessionCoordinator: NSObject {
                 // これを監視して context+小説一覧を送り直す。Watch 側は届いた一覧で章数の差に気づき、
                 // 転送済み小説なら自動で差分転送を依頼してくる(=iPhone 側で本文が変われば
                 // Watch を操作しなくても同期される)。RealmNovel は栞の更新等でも高頻度に変わるので
-                // 監視対象にしない。一覧は指紋で dedup されるので過剰発火しても実転送は起きない
-                self.settingsObserverTokens.append(realm.objects(RealmStoryBulk.self).observe { [weak self] _ in
+                // 監視対象にしない。一覧は指紋で dedup されるので過剰発火しても実転送は起きない。
+                // また、章数が変わらない内容だけの更新(誤字修正等)は章数比較では検知できないため、
+                // 変更トークン(時刻)を永続化して context に載せる(Watch 側の再検証トリガ)。
+                // どの小説が変わったかを Realm 通知のインデックスから特定するのは
+                // (deletions/modifications が旧状態のインデックスで誤対応しうるため)やらない
+                self.settingsObserverTokens.append(realm.objects(RealmStoryBulk.self).observe { [weak self] changes in
+                    guard case .update(_, let deletions, let insertions, let modifications) = changes,
+                          !(deletions.isEmpty && insertions.isEmpty && modifications.isEmpty) else { return }
+                    UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: WatchSessionCoordinator.lastBulkChangeTokenKey)
                     self?.scheduleContextPushForNovelChanges()
                 })
             }
@@ -267,6 +278,12 @@ class WatchSessionCoordinator: NSObject {
         // 最後に転送キューへ積んだ小説一覧の指紋(Watch 側の「同期中…」表示用)
         if let novelListFingerprint = UserDefaults.standard.string(forKey: WatchSessionCoordinator.lastNovelListFingerprintKey) {
             fullContext[WatchMessage.Context.novelListFingerprint] = novelListFingerprint
+        }
+        // 本文の変更トークン(章数が変わらない内容だけの更新を Watch に検知させる)。
+        // この値が変わると context の指紋も変わるので、内容だけの更新でも dedup を抜けて必ず届く
+        let bulkChangeToken = UserDefaults.standard.double(forKey: WatchSessionCoordinator.lastBulkChangeTokenKey)
+        if bulkChangeToken > 0 {
+            fullContext[WatchMessage.Context.bulkChangeToken] = bulkChangeToken
         }
         // 内容が前回送信時と同じなら送らない(Bluetooth 送信を減らして電池を守る)。
         // updatedAt は毎回変わるので比較から除外する。force 指定時はこの抑止を飛ばす。

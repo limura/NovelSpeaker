@@ -171,6 +171,32 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         }
     }
 
+    /// 確認済みの本文変更トークン(iPhone 側で最後に本文が変化した時刻)
+    private static let verifiedBulkChangeTokenKey = "WatchVerifiedBulkChangeToken"
+
+    /// iPhone 側で本文(RealmStoryBulk)が変化した印。章数の変わらない内容だけの更新
+    /// (誤字修正等)は章数比較(autoRefreshStaleStoredNovels)では検知できないため、
+    /// トークンが前回確認時より進んでいたら転送済みの全小説を指紋付きで再依頼する。
+    /// 変わっていない小説は iPhone がマニフェスト1個を返すだけで済む(差分転送)ので、
+    /// 転送済み冊数が現実的な範囲なら過剰なコストにはならない
+    private func handleBulkChangeToken(_ token: Double) {
+        let verified = UserDefaults.standard.double(forKey: PhoneSessionManager.verifiedBulkChangeTokenKey)
+        if verified <= 0 {
+            // 初回(またはアプリ再インストール後)は現在のトークンを既知として採用するだけにする。
+            // 過去分の取りこぼしは isComplete 判定(autoRefresh)側の自己修復に任せる
+            UserDefaults.standard.set(token, forKey: PhoneSessionManager.verifiedBulkChangeTokenKey)
+            return
+        }
+        guard token > verified else { return }
+        // iPhone に届く時にだけトークンを消費する(届かない時に消費すると変更を取りこぼす)
+        guard WCSession.default.isReachable else { return }
+        UserDefaults.standard.set(token, forKey: PhoneSessionManager.verifiedBulkChangeTokenKey)
+        for novelID in storedNovelIDs {
+            guard !transferRequestedNovelIDs.contains(novelID) else { continue }
+            requestTransfer(novelID: novelID, quiet: true)
+        }
+    }
+
     // MARK: - コマンド送信
 
     /// quiet: バックグラウンド用途(自動再転送等)では「接続中…」やエラーを UI に出さない
@@ -304,6 +330,9 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                 self.updateNovelListSyncingState()
             }
             self.autoRefreshStaleStoredNovels()
+            if let bulkChangeToken = context[WatchMessage.Context.bulkChangeToken] as? Double, bulkChangeToken > 0 {
+                self.handleBulkChangeToken(bulkChangeToken)
+            }
             // セッション中に一度だけ、本棚から消えた小説の孤児キャッシュを掃除する
             if !self.didVerifyStoredNovels, WCSession.default.isReachable {
                 self.didVerifyStoredNovels = true

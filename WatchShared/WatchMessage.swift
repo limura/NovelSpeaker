@@ -87,6 +87,11 @@ enum WatchMessage {
         /// iPhone が最後に転送キューへ積んだ小説一覧(全量ファイル)の指紋(String)。
         /// Watch は受信済みファイルの指紋と比較して「同期中…」表示を出すのに使う
         static let novelListFingerprint = "novelListFingerprint"
+        /// iPhone 側で本文(RealmStoryBulk)が最後に変化した時刻(TimeInterval)。
+        /// 章数が変わらない内容だけの更新(誤字修正等)は章数比較では検知できないため、
+        /// Watch はこの値が前回確認時より進んでいたら転送済み小説を指紋付きで再依頼する
+        /// (変わっていない小説はマニフェスト1個が返るだけの軽い往復で済む)
+        static let bulkChangeToken = "bulkChangeToken"
         /// Watch→iPhone 方向: Watch に本文が転送されている小説の novelID 一覧([String])
         static let watchStoredNovelIDs = "storedNovelIDs"
         /// Watch→iPhone 方向: Watch が受信済みの小説一覧ファイルの指紋(String、未受信なら "")。
