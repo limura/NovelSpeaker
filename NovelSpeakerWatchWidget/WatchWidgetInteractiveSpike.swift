@@ -17,6 +17,16 @@
 //  対話型ウィジェット(Button(intent:))は watchOS 11+ で、Smart Stack と一部の大型
 //  コンプリケーションのみ。文字盤の通常コンプリケーションはタップ=アプリ起動のまま。
 //
+//  ★シミュレータ(Series 11 / watchOS 26.5)での調査結果★
+//  - .buttonStyle(.bordered) を付けると【全ボタンが非対話化】し、タップ=アプリ起動になる
+//    (ClockFace のログで touch delivery layers が空になる)。デフォルトスタイルなら動く。
+//  - 素のAppIntent・AudioPlaybackIntent とも widget拡張プロセスで perform() が実行される。
+//  - AudioPlaybackIntent は拡張プロセスから AVAudioSession(longFormAudio)の activate と
+//    AVSpeechSynthesizer.speak() の発注まで成功する(実際に音が出るかは実機で要確認)。
+//  - openAppWhenRun=true の intent はウィジェットからは実行されない(無反応)。
+//    アプリを起動したいボタンは Link/widgetURL で行うこと。
+//  - WCSession はシミュレータ(ペアリング相手なし)では activate 失敗。実機で要確認。
+//
 
 import Foundation
 import AppIntents
@@ -115,10 +125,20 @@ private func trySendTogglePlayPause() async -> String {
 
 // MARK: - テスト用 intent 3種
 
+/// ⓪ 最小テスト: UserDefaults に記録するだけ(WCSession等を一切触らない)。
+/// これが動かなければ「対話型ウィジェットの土台」自体が機能していない
+struct SpikeSimpleIntent: AppIntent {
+    static var title: LocalizedStringResource = "テスト0 最小"
+
+    func perform() async throws -> some IntentResult {
+        WidgetSpikeLog.record("⓪ \(WidgetSpikeLog.processName): 実行された")
+        return .result()
+    }
+}
+
 /// ① 素の AppIntent: 実行プロセスと WCSession の可否を調べる
 struct SpikePhoneToggleIntent: AppIntent {
     static var title: LocalizedStringResource = "テスト① iPhone再生トグル"
-    static var isDiscoverable: Bool = false
 
     func perform() async throws -> some IntentResult {
         let result = await trySendTogglePlayPause()
@@ -130,7 +150,6 @@ struct SpikePhoneToggleIntent: AppIntent {
 /// ② openAppWhenRun: Watch アプリが前面起動するか
 struct SpikeOpenAppIntent: AppIntent {
     static var title: LocalizedStringResource = "テスト② アプリ起動"
-    static var isDiscoverable: Bool = false
     static var openAppWhenRun: Bool = true
 
     func perform() async throws -> some IntentResult {
@@ -142,7 +161,6 @@ struct SpikeOpenAppIntent: AppIntent {
 /// ③ AudioPlaybackIntent: 実行プロセスと発話可否
 struct SpikeAudioIntent: AudioPlaybackIntent {
     static var title: LocalizedStringResource = "テスト③ 音声テスト"
-    static var isDiscoverable: Bool = false
 
     /// 発話が終わる前に解放されないよう保持する
     private static let synthesizer = AVSpeechSynthesizer()
@@ -194,6 +212,8 @@ struct SpikeComplicationView: View {
 
     @ViewBuilder
     private var content: some View {
+        // 最小構成(全面1ボタン+最小intent)は動作確認済み。
+        // isDiscoverable=false を外した状態で3ボタン構成が動くかの切り分け中
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
                 Button(intent: SpikePhoneToggleIntent()) {
@@ -206,7 +226,6 @@ struct SpikeComplicationView: View {
                     Text("③").font(.caption).frame(maxWidth: .infinity)
                 }
             }
-            .buttonStyle(.bordered)
             Text(entry.lastResult)
                 .font(.system(size: 10))
                 .foregroundStyle(.secondary)
