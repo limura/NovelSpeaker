@@ -78,6 +78,7 @@
 "Watch_TextPage_ChapterNotTransferred" = "この章(%d章)はまだWatchに転送されていません。";
 "Watch_TextPage_TransferNow" = "この小説の本文を同期";
 "Watch_TextPage_Transferring" = "iPhoneから転送中…";
+"Watch_TextPage_TransferringProgress" = "iPhoneから転送中… (%1$d/%2$d)";
 "Watch_TextPage_PrevChapter" = "◀ 前の章";
 "Watch_TextPage_NextChapter" = "次の章へ ▶";
 "Watch_TextPage_CannotSeekWhilePhonePlaying" = "iPhoneで再生中は位置を指定できません。一時停止してからやり直してください。";

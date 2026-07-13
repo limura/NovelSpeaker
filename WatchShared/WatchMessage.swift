@@ -154,6 +154,12 @@ enum WatchNovelBulkFile {
     static let novelIDKey = "novelID"
     /// バルクの開始章番号(RealmStoryBulk.chapterNumber と同じ。0, 100, 200, ...)
     static let bulkChapterKey = "bulkChapter"
+    /// 今回の転送で何個目のバルクか(0始まり)。Watch 側の「転送中 (n/m)」進捗表示用。
+    /// 依頼への返信に載せない(巨大小説では指紋計算が sendMessage の返信期限に間に合わない)で、
+    /// 届いたバルク自身に載せることでタイミング問題を避ける
+    static let queueIndexKey = "queueIndex"
+    /// 今回の転送で送るバルクの総数(差分転送なので「小説全体のバルク数」ではない)
+    static let queueTotalKey = "queueTotal"
     /// バルクバイナリの SHA256 hex
     static let fingerprintKey = "fingerprint"
 

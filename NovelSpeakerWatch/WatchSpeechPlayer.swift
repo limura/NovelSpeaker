@@ -51,6 +51,10 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
 
     private let speaker = SpeechBlockSpeaker()
     private var currentContentLength = 0
+    /// 保持中の章の本文ハッシュ。転送で内容が変わったかの判定に使う(変わっていなければ組み直さない)
+    private var currentContentHash = 0
+    /// 発話中に保持中の章の内容更新が届いた印。発話中の差し替えは音が途切れるので、停止時まで保留する
+    private var needsChapterReloadAfterSpeech = false
     private var lastPositionSaveDate = Date(timeIntervalSince1970: 0)
     // 現在のブロック列に焼き込まれているデフォルト話者の rate/volume。
     // 発話中の速度・音量変更を「新しい値 ÷ 焼き込み値」の倍率で反映するために覚えておく
@@ -67,6 +71,43 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     private override init() {
         super.init()
         speaker.delegate = self
+        // 保持している小説のバルク/manifest が届いたら、章の内容を読み直す
+        // (iPhone 側の内容だけの更新で、表示と発話が食い違ったまま残らないように)
+        NotificationCenter.default.addObserver(forName: NovelStorage.didUpdateNotification, object: nil, queue: .main) { [weak self] notification in
+            self?.handleStoredNovelUpdate(notification)
+        }
+    }
+
+    /// 保持中の小説の本文が転送されてきた時の読み直し。
+    /// 発話中は停止時まで保留する(発話ブロックの差し替えは音が途切れる+位置の対応も揺れるため)
+    private func handleStoredNovelUpdate(_ notification: Notification) {
+        guard !novelID.isEmpty,
+              notification.userInfo?["novelID"] as? String == novelID else { return }
+        // 章数(転送済み範囲)は常に追従させる
+        chapterCount = NovelStorage.storedChapterCount(novelID: novelID)
+        // 保持中の章を含まないバルクの到着なら本文の読み直しは不要
+        if let bulkChapter = notification.userInfo?["bulkChapter"] as? Int,
+           bulkChapter != NovelStorage.bulkChapter(for: chapterNumber) {
+            return
+        }
+        if isPlaying {
+            needsChapterReloadAfterSpeech = true
+            return
+        }
+        reloadCurrentChapterIfContentChanged()
+    }
+
+    /// 保持中の章を読み直す(内容が実際に変わっている時だけ。位置は保存済みの読み上げ位置を保つ)
+    private func reloadCurrentChapterIfContentChanged() {
+        needsChapterReloadAfterSpeech = false
+        guard !novelID.isEmpty, chapterNumber > 0,
+              let story = NovelStorage.chapter(novelID: novelID, chapter: chapterNumber),
+              story.content.hashValue != currentContentHash else { return }
+        // StopSpeech 後の speaker.currentLocation は当てにしない(停止処理で動きうる)ので、
+        // 直前に保存された読み上げ位置を優先する
+        let stored = WatchReadingPositionStore.load(novelID: novelID)
+        let location = (stored?.chapter == chapterNumber ? stored?.location : nil) ?? speaker.currentLocation
+        _ = applyChapter(chapterNumber, location: location)
     }
 
     // MARK: - 小説のオープン
@@ -137,8 +178,10 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
     /// 指定章の本文をブロック分割して発話対象にする(発話は開始しない)
     private func applyChapter(_ chapter: Int, location: Int) -> Bool {
         guard let story = NovelStorage.chapter(novelID: novelID, chapter: chapter) else { return false }
+        needsChapterReloadAfterSpeech = false  // 新しく読み込むので保留中の読み直しは不要になる
         chapterNumber = chapter
         chapterSubtitle = story.subtitle
+        currentContentHash = story.content.hashValue
         currentContentLength = story.content.unicodeScalars.count
         speaker.StopSpeech()
         let blocks = Self.buildBlocks(content: story.content)
@@ -419,6 +462,10 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
             speaker.StopSpeech()
             deactivateAudioSession()
         }
+        // 発話中に届いていた内容更新があれば、止まったこのタイミングで読み直す
+        if needsChapterReloadAfterSpeech {
+            reloadCurrentChapterIfContentChanged()
+        }
     }
 
     func togglePlayPause() {
@@ -521,6 +568,10 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         announceSpeaker().speak(text: NSLocalizedString("Watch_SpeechPlayer_SpeechStoppedByEnd", comment: "読み上げが最後に達しました。")) { [weak self] in
             guard let self = self, !self.isPlaying else { return }
             self.deactivateAudioSession()
+        }
+        // 発話中に届いていた内容更新があれば、止まったこのタイミングで読み直す
+        if needsChapterReloadAfterSpeech {
+            reloadCurrentChapterIfContentChanged()
         }
     }
 

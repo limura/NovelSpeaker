@@ -38,6 +38,14 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @Published var storedTitles: [String: String] = [:]
     /// 特急転送を依頼中の小説ID(受信完了で消える)
     @Published var transferRequestedNovelIDs: Set<String> = []
+    /// 転送の進捗(novelID → 受信済み/今回送られるバルク数)。バルクの metadata から数える。
+    /// 最初のバルクが届くまでは entry が無い(進捗不明のままスピナーだけ出す)
+    @Published var transferProgress: [String: TransferProgress] = [:]
+
+    struct TransferProgress: Equatable {
+        let received: Int
+        let total: Int
+    }
     /// Watch で最後に再生した日時(novelID → Date)。キャッシュ整理の並び順に使う
     @Published var lastPlayedDates: [String: Date] = PhoneSessionManager.loadLastPlayedDates()
     /// iPhone 側の読み上げ位置(本文ページの購読中に届く)。表示文字ベースの位置
@@ -278,6 +286,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     func requestTransfer(novelID: String, quiet: Bool = false) {
         DispatchQueue.main.async {
             self.transferRequestedNovelIDs.insert(novelID)
+            self.transferProgress.removeValue(forKey: novelID)  // 前回の依頼の進捗を持ち越さない
         }
         // 手持ちバルクの指紋を添えて、iPhone 側に「変わったバルクだけ」を送らせる(差分転送)
         let args: [String: Any] = [
@@ -293,6 +302,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         // スピナーが回りっぱなしにならないよう、5分で依頼中表示を諦める
         DispatchQueue.main.asyncAfter(deadline: .now() + 300) {
             self.transferRequestedNovelIDs.remove(novelID)
+            self.transferProgress.removeValue(forKey: novelID)
         }
     }
 
@@ -522,6 +532,14 @@ extension PhoneSessionManager: WCSessionDelegate {
                 try NovelStorage.storeBulk(fileURL: file.fileURL, novelID: novelID,
                                            bulkChapter: bulkChapter, fingerprint: fingerprint)
                 notificationUserInfo["bulkChapter"] = bulkChapter
+                // 「転送中 (n/m)」の進捗。到着順は保証しないので受信済み数は単調増加にする
+                if let queueIndex = file.metadata?[WatchNovelBulkFile.queueIndexKey] as? Int,
+                   let queueTotal = file.metadata?[WatchNovelBulkFile.queueTotalKey] as? Int, queueTotal > 0 {
+                    DispatchQueue.main.async {
+                        let received = max(self.transferProgress[novelID]?.received ?? 0, queueIndex + 1)
+                        self.transferProgress[novelID] = TransferProgress(received: received, total: queueTotal)
+                    }
+                }
             } else {
                 try NovelStorage.storeManifest(fileURL: file.fileURL, novelID: novelID)
             }
@@ -530,6 +548,7 @@ extension PhoneSessionManager: WCSessionDelegate {
             if NovelStorage.isComplete(novelID: novelID) {
                 DispatchQueue.main.async {
                     self.transferRequestedNovelIDs.remove(novelID)
+                    self.transferProgress.removeValue(forKey: novelID)
                 }
             }
             refreshStoredNovels()
@@ -542,6 +561,7 @@ extension PhoneSessionManager: WCSessionDelegate {
             DispatchQueue.main.async {
                 self.lastErrorMessage = String(format: NSLocalizedString("Watch_Session_SaveBodyFailed", comment: "本文の保存に失敗しました: %@"), error.localizedDescription)
                 self.transferRequestedNovelIDs.remove(novelID)
+                self.transferProgress.removeValue(forKey: novelID)
             }
         }
     }

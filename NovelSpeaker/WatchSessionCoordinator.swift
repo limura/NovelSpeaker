@@ -846,9 +846,11 @@ class WatchSessionCoordinator: NSObject {
                       let fingerprint = metadata[WatchNovelBulkFile.fingerprintKey] as? String else { return nil }
                 return "\(outstandingNovelID)#\(fingerprint)"
             })
+            // 実際に送るバルクを確定してから積む(何個目/全何個 の進捗情報を metadata に載せるため)
+            let sendList = bulks.filter { $0.data != nil && !outstanding.contains("\(novelID)#\($0.fingerprint)") }
             var queuedCount = 0
-            for bulk in bulks {
-                guard let data = bulk.data, !outstanding.contains("\(novelID)#\(bulk.fingerprint)") else { continue }
+            for (queueIndex, bulk) in sendList.enumerated() {
+                guard let data = bulk.data else { continue }
                 let fileURL = FileManager.default.temporaryDirectory
                     .appendingPathComponent("WatchNovelBulk-\(UUID().uuidString).bin")
                 do {
@@ -862,6 +864,8 @@ class WatchSessionCoordinator: NSObject {
                     WatchNovelBulkFile.novelIDKey: novelID,
                     WatchNovelBulkFile.bulkChapterKey: bulk.chapter,
                     WatchNovelBulkFile.fingerprintKey: bulk.fingerprint,
+                    WatchNovelBulkFile.queueIndexKey: queueIndex,
+                    WatchNovelBulkFile.queueTotalKey: sendList.count,
                 ])
                 queuedCount += 1
             }

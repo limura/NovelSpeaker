@@ -269,9 +269,16 @@ struct TextPageView: View {
             HStack(spacing: 6) {
                 ProgressView()
                     .frame(width: 12, height: 12)
-                Text(NSLocalizedString("Watch_TextPage_Transferring", comment: "iPhoneから転送中…"))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                // 最初のバルクが届くと「(n/m)」の進捗が出る(バルクの metadata から数えている)
+                if let progress = session.transferProgress[novelID] {
+                    Text(String(format: NSLocalizedString("Watch_TextPage_TransferringProgress", comment: "iPhoneから転送中… (%1$d/%2$d)"), progress.received, progress.total))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text(NSLocalizedString("Watch_TextPage_Transferring", comment: "iPhoneから転送中…"))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(.vertical, 4)
         } else {

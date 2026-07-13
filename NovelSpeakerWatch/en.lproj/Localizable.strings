@@ -78,6 +78,7 @@
 "Watch_TextPage_ChapterNotTransferred" = "This chapter (Ch. %d) has not been transferred to the Watch yet.";
 "Watch_TextPage_TransferNow" = "Sync This Novel's Text";
 "Watch_TextPage_Transferring" = "Transferring from iPhone…";
+"Watch_TextPage_TransferringProgress" = "Transferring from iPhone… (%1$d/%2$d)";
 "Watch_TextPage_PrevChapter" = "◀ Previous";
 "Watch_TextPage_NextChapter" = "Next ▶";
 "Watch_TextPage_CannotSeekWhilePhonePlaying" = "You can't set the position while the iPhone is speaking. Pause it first, then try again.";
