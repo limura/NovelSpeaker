@@ -9,9 +9,10 @@
 //  ② openAppWhenRun = true: Watch アプリが前面に起動するか(「単体モードで再生開始」ボタンの経路)
 //  ③ AudioPlaybackIntent: 実行プロセイスと、そこから音(AVSpeechSynthesizer)が出せるか
 //
-//  このファイルは Watch アプリと Widget Extension の両方のターゲットに入れる。
-//  (AudioPlaybackIntent 等は「システムがアプリ側プロセスで intent を実行する」建て付けなので、
-//   intent の型が両方に存在する必要がある。Apple のサンプルも共有コードに置く構成)
+//  このファイルは Widget Extension ターゲット【のみ】に入れる。
+//  最初はアプリ本体にも入れていたが、同じ intent がアプリ側のメタデータにも登録されると
+//  システムがアプリ側で実行しようとして「ボタンを押すとアプリが起動するだけ」になった
+//  (実機で確認)。ウィジェットのボタン用 intent は拡張側だけに置くのが正しい。
 //
 //  対話型ウィジェット(Button(intent:))は watchOS 11+ で、Smart Stack と一部の大型
 //  コンプリケーションのみ。文字盤の通常コンプリケーションはタップ=アプリ起動のまま。
@@ -196,13 +197,13 @@ struct SpikeComplicationView: View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
                 Button(intent: SpikePhoneToggleIntent()) {
-                    Text("①").font(.caption)
+                    Text("①").font(.caption).frame(maxWidth: .infinity)
                 }
                 Button(intent: SpikeOpenAppIntent()) {
-                    Text("②").font(.caption)
+                    Text("②").font(.caption).frame(maxWidth: .infinity)
                 }
                 Button(intent: SpikeAudioIntent()) {
-                    Text("③").font(.caption)
+                    Text("③").font(.caption).frame(maxWidth: .infinity)
                 }
             }
             .buttonStyle(.bordered)

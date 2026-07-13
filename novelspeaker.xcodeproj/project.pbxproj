@@ -220,7 +220,6 @@
 		553136DC99A7C65535AA3DCB /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320ED5957BE18A57C229BABE /* WatchMessage.swift */; };
 		56DE1C4F53CDCE01000533AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFD5476A36FAD6CD441DBF86 /* Assets.xcassets */; };
 		56F2236BDCBC70F86153D390 /* NovelSpeakerWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */; };
-		AB12CD34EF56AB12CD34EF01 /* WatchWidgetInteractiveSpike.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12CD34EF56AB12CD34EF03 /* WatchWidgetInteractiveSpike.swift */; };
 		AB12CD34EF56AB12CD34EF02 /* WatchWidgetInteractiveSpike.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12CD34EF56AB12CD34EF03 /* WatchWidgetInteractiveSpike.swift */; };
 		630CBEF68D26A0F0E98C83A4 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
 		643AF738328D8F71DCC7C396 /* IOSSpeechCoreShims.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5305C5CDBD0A0B66521EDD19 /* IOSSpeechCoreShims.swift */; };
@@ -1542,7 +1541,6 @@
 				03769EE92DAF16F7AE4552B4 /* WatchSpeechPlayer.swift in Sources */,
 				80E7D1AD02DF683B7B721DD1 /* WatchComplicationData.swift in Sources */,
 				701F2368A47FB44C1488A3E3 /* WatchComplicationUpdater.swift in Sources */,
-				AB12CD34EF56AB12CD34EF01 /* WatchWidgetInteractiveSpike.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
