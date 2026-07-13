@@ -23,6 +23,8 @@ import SwiftUI
 struct NovelSpeakerWatchWidgetBundle: WidgetBundle {
     var body: some Widget {
         LauncherComplication()
+        // 対話型コンプリケーション(v2)の調査スパイク。★調査が終わったら撤去する★
+        SpikeComplication()
     }
 }
 
