@@ -3,3 +3,11 @@
 "Watch_Widget_AppName" = "NovelSpeaker";
 "Watch_Widget_TapToOpen" = "Tap to Open";
 "Watch_Widget_Description" = "Shows the progress of the novel you are reading. Tap to open NovelSpeaker.";
+
+/* Action complications (phase 1) */
+"Watch_Widget_PlayToggle_Name" = "NovelSpeaker Play/Pause";
+"Watch_Widget_PlayToggle_Desc" = "Tap to open NovelSpeaker and toggle play/pause.";
+"Watch_Widget_TextPage_Name" = "NovelSpeaker Text";
+"Watch_Widget_TextPage_Desc" = "Tap to open the text page in NovelSpeaker.";
+"Watch_Widget_CheckUpdates_Name" = "NovelSpeaker Check Updates";
+"Watch_Widget_CheckUpdates_Desc" = "Tap to open NovelSpeaker and check all novels for updates.";

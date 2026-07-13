@@ -3,3 +3,11 @@
 "Watch_Widget_AppName" = "ことせかい";
 "Watch_Widget_TapToOpen" = "タップして開く";
 "Watch_Widget_Description" = "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。";
+
+/* 操作系コンプリケーション(第1弾) */
+"Watch_Widget_PlayToggle_Name" = "ことせかい 再生・停止";
+"Watch_Widget_PlayToggle_Desc" = "タップで ことせかい を開き、再生/一時停止を切り替えます。";
+"Watch_Widget_TextPage_Name" = "ことせかい 本文";
+"Watch_Widget_TextPage_Desc" = "タップで ことせかい の本文ページを開きます。";
+"Watch_Widget_CheckUpdates_Name" = "ことせかい 更新確認";
+"Watch_Widget_CheckUpdates_Desc" = "タップで ことせかい を開き、すべての小説の更新を確認します。";

@@ -18,12 +18,27 @@ import Foundation
 import AVFoundation
 import Combine
 import WatchConnectivity
+import WidgetKit
 
 final class WatchSpeechPlayer: NSObject, ObservableObject {
     static let shared = WatchSpeechPlayer()
 
-    /// 再生画面の発話元として Watch 単体再生が選ばれているか
-    @Published var isSelectedAsSource = false
+    /// 再生画面の発話元として Watch 単体再生が選ばれているか。
+    /// App Group に永続化して、次回起動時の復元(ウィジェットの再生トグルが単体再生に効くように)と
+    /// ウィジェット側の現在の発話元表示に使う
+    @Published var isSelectedAsSource = false {
+        didSet {
+            guard oldValue != isSelectedAsSource else { return }
+            UserDefaults(suiteName: WatchComplicationData.appGroupID)?
+                .set(isSelectedAsSource, forKey: Self.isSelectedAsSourceKey)
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+    }
+
+    /// isSelectedAsSource の App Group 永続化キー
+    private static let isSelectedAsSourceKey = "WatchIsSelectedAsSource"
+    /// 起動後に単体モードの復元を試みたか(多重復元の防止)
+    private var didRestoreStandaloneSelection = false
     @Published var isPlaying = false
     /// 再生開始処理中(タップから発話準備が整うまで)。初回は設定同期+オーディオ確立で
     /// 数秒〜数十秒かかることがあるので、再生ボタンをスピナーにして再タップも無視する
@@ -75,6 +90,40 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         // (iPhone 側の内容だけの更新で、表示と発話が食い違ったまま残らないように)
         NotificationCenter.default.addObserver(forName: NovelStorage.didUpdateNotification, object: nil, queue: .main) { [weak self] notification in
             self?.handleStoredNovelUpdate(notification)
+        }
+        // 前回「Watch単体モード」を選んだまま終了していたら、その小説を開き直して復元する。
+        // 初期化フェーズを避けるため次のランループで(起動をブロックしない)
+        DispatchQueue.main.async { [weak self] in
+            self?.restoreStandaloneSelectionIfNeeded()
+        }
+    }
+
+    // MARK: - ウィジェット(コンプリケーション)からの操作
+
+    /// ウィジェットの「再生・一時停止」トグルから(アプリ起動後に)呼ばれる。
+    /// 単体モードなら Watch 単体再生をトグル、そうでなければ iPhone へトグルコマンドを送る。
+    /// 起動直後で復元が済んでいない場合に備え、ここでも復元を試みる(冪等)
+    func toggleForWidgetLaunch() {
+        restoreStandaloneSelectionIfNeeded()
+        if isSelectedAsSource {
+            togglePlayPause()
+        } else {
+            PhoneSessionManager.shared.send(.togglePlayPause)
+        }
+    }
+
+    /// 永続化された発話元が Watch 単体だったら、最後に単体再生した小説を開き直して復元する。
+    /// 復元対象が無ければ(小説が削除された等)単体モード自体を解除する。起動時と、
+    /// ウィジェット起動時のトグル直前に呼ばれる(多重実行は didRestore フラグで防ぐ)
+    private func restoreStandaloneSelectionIfNeeded() {
+        guard !didRestoreStandaloneSelection else { return }
+        didRestoreStandaloneSelection = true
+        guard UserDefaults(suiteName: WatchComplicationData.appGroupID)?
+                .bool(forKey: Self.isSelectedAsSourceKey) == true else { return }
+        if let latest = WatchReadingPositionStore.latest(), open(novelID: latest.novelID) {
+            isSelectedAsSource = true
+        } else {
+            isSelectedAsSource = false
         }
     }
 

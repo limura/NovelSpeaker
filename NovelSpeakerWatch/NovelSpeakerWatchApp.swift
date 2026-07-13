@@ -64,6 +64,28 @@ struct WatchRootView: View {
             }
             Button(NSLocalizedString("Watch_Cancel", comment: "キャンセル"), role: .cancel) {}
         }
+        // コンプリケーション(ウィジェット)のタップで届くディープリンクを処理する。
+        // ウィジェット拡張ではアプリの機能を実行できないので、操作はここ(アプリ本体)で行う
+        .onOpenURL { url in
+            handleWidgetURL(url)
+        }
+    }
+
+    /// ウィジェットからのディープリンク(WatchWidgetAction)を実行する
+    private func handleWidgetURL(_ url: URL) {
+        guard let action = WatchWidgetAction(url: url) else { return }
+        switch action {
+        case .togglePlayPause:
+            // 再生コントロール画面を出して、現在の発話元(iPhone/Watch単体)の再生をトグルする
+            tabSelection = 1
+            player.toggleForWidgetLaunch()
+        case .openTextPage:
+            tabSelection = 2
+        case .checkUpdatesAll:
+            // 更新確認は本棚に「同期中…」等が出るので本棚を表示してから依頼する
+            tabSelection = 0
+            session.send(.checkUpdatesAll)
+        }
     }
 
     private var isErrorPresented: Binding<Bool> {

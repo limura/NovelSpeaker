@@ -23,8 +23,10 @@ import SwiftUI
 struct NovelSpeakerWatchWidgetBundle: WidgetBundle {
     var body: some Widget {
         LauncherComplication()
-        // 対話型コンプリケーション(v2)の調査スパイク。★調査が終わったら撤去する★
-        SpikeComplication()
+        // 操作系(第1弾): タップで widgetURL からアプリを起動して操作する circular 3種
+        PlayPauseComplication()
+        TextPageComplication()
+        CheckUpdatesComplication()
     }
 }
 
@@ -52,7 +54,7 @@ struct LauncherProvider: TimelineProvider {
 /// ブランドのグリフ。カラー文字盤(fullColor)ではアプリアイコン(橙背景+白グリフ)を
 /// 円形にして出し、単色系の文字盤では透過テンプレートの白グリフを出す
 /// (単色系にカラーアイコンを渡すと脱色されて灰色の塗り潰し円になるため)
-private struct BrandGlyph: View {
+struct BrandGlyph: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
