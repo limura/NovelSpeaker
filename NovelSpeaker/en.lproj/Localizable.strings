@@ -1138,6 +1138,9 @@
 "WatchSessionCoordinator_ErrorNoPreviousChapter" = "There is no previous chapter";
 "WatchSessionCoordinator_ErrorNovelNotFound" = "The novel was not found";
 
+// Debug menu in the Settings tab (Apple Watch session diagnostics)
+"SettingsViewController_WatchSessionDiagnostics" = "Apple Watch session diagnostics";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.

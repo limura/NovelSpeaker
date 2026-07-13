@@ -36,6 +36,7 @@
 "Watch_Bookshelf_UnknownWriter" = "(unknown name)";
 "Watch_Bookshelf_SelfMadeNovel" = "Self-made novel";
 "Watch_Bookshelf_Syncing" = "Syncing with iPhone…";
+"Watch_Bookshelf_TagOrderNotice" = "\"Tag name order\" is selected on the iPhone, but it is not supported on the Watch, so novels are shown in title order.";
 "Watch_Bucket_UpTo1DayAgo" = "Up to one day ago";
 "Watch_Bucket_UpTo7DayAgo" = "Up to 7 days ago";
 "Watch_Bucket_UpTo30DayAgo" = "Up to 30 days ago";
@@ -89,6 +90,8 @@
 "Watch_Utility_LikeOnDone" = "Added to Favorites";
 "Watch_Utility_LikeOffDone" = "Removed from Favorites";
 "Watch_Utility_TransferHint" = "To choose novels to transfer to the Watch, swipe a novel to the left in the bookshelf, or use the settings of NovelSpeaker on the iPhone.";
+"Watch_Utility_ConnectionDiagnostics" = "Connection Diagnostics (Debug)";
+"Watch_Utility_HideDebugMenu" = "Hide Debug Menu";
 
 /* Texts on Watch (cache management) */
 "Watch_Cache_Empty" = "No transferred novels. You can transfer them from the bookshelf.";

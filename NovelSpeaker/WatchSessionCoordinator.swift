@@ -28,6 +28,59 @@ class WatchSessionCoordinator: NSObject {
     /// applicationContext に載せる小説一覧の上限(サイズ制限対策)
     static let novelListLimit = 300
 
+    // MARK: - 接続診断の記録(設定タブのデバッグメニュー「Apple Watch連携の診断情報」用)
+    // Watch と半接続(isWatchAppInstalled=false / WCErrorDomain 7006 等)になると Xcode からも
+    // 観測しづらいことが多いので、アプリ内から確認できるように主要イベントの時刻を残しておく。
+    // デバッグ表示専用の best-effort な記録なのでスレッド保護はしない
+    private var lastCommandReceivedDate: Date?
+    private var lastCommandReceivedName: String?
+    private var lastWatchContextReceivedDate: Date?
+    private var lastContextPushSuccessDate: Date?
+    private var lastContextPushErrorDate: Date?
+    private var lastContextPushErrorMessage: String?
+    private var lastFileTransferFinishDate: Date?
+    private var lastFileTransferFinishDescription: String?
+
+    /// Apple Watch 連携の状態レポート。設定タブのデバッグメニューから表示・コピーする
+    func diagnosticsReport() -> String {
+        guard WCSession.isSupported() else { return "WCSession: not supported" }
+        let session = WCSession.default
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd HH:mm:ss"
+        func dateText(_ date: Date?) -> String {
+            guard let date = date else { return "-" }
+            return formatter.string(from: date)
+        }
+        let activationStateName: String
+        switch session.activationState {
+        case .activated: activationStateName = "activated"
+        case .inactive: activationStateName = "inactive"
+        case .notActivated: activationStateName = "notActivated"
+        @unknown default: activationStateName = "unknown(\(session.activationState.rawValue))"
+        }
+        var lines: [String] = []
+        lines.append("== WCSession (iPhone側) ==")
+        lines.append("activationState: \(activationStateName)")
+        lines.append("isPaired: \(session.isPaired)")
+        lines.append("isWatchAppInstalled: \(session.isWatchAppInstalled)")
+        lines.append("isReachable: \(session.isReachable)")
+        lines.append("isComplicationEnabled: \(session.isComplicationEnabled)")
+        lines.append("未完了のファイル転送: \(session.outstandingFileTransfers.count)件")
+        lines.append("Watchからの受信済みcontext: \(session.receivedApplicationContext.isEmpty ? "なし" : "あり")")
+        lines.append("")
+        lines.append("== 最終イベント ==")
+        lines.append("context送信成功: \(dateText(lastContextPushSuccessDate))")
+        if let errorDate = lastContextPushErrorDate {
+            lines.append("context送信失敗: \(dateText(errorDate)) \(lastContextPushErrorMessage ?? "")")
+        }
+        lines.append("Watchからのコマンド受信: \(dateText(lastCommandReceivedDate)) \(lastCommandReceivedName ?? "")")
+        lines.append("Watchからのcontext受信: \(dateText(lastWatchContextReceivedDate))")
+        lines.append("ファイル転送完了: \(dateText(lastFileTransferFinishDate)) \(lastFileTransferFinishDescription ?? "")")
+        lines.append("")
+        lines.append("isWatchAppInstalled が false のまま届かない場合は、iPhone の Watch アプリで ことせかい が「インストール済み」欄に居るかを確認してください(「利用可能なAPP」側に落ちていたら、Watch側のことせかいを削除して Watch アプリから再インストールすると直ることが多いです)。")
+        return lines.joined(separator: "\n")
+    }
+
     private static let watchStoredNovelIDsKey = "WatchSessionCoordinator_WatchStoredNovelIDs"
 
     /// Watch 側に本文が転送されている小説の novelID 集合。
@@ -231,6 +284,7 @@ class WatchSessionCoordinator: NSObject {
                 // 指紋は「送信に成功した時だけ」保存する。失敗時に保存すると
                 // 以後同じ内容が dedup されて二度と送られなくなる
                 lastContextFingerprint = fingerprint
+                lastContextPushSuccessDate = Date()
                 contextPushCount += 1
                 if limit < novelList.count {
                     print("WatchSessionCoordinator: pushContext #\(contextPushCount) (小説一覧を\(limit)件に削減して送信)")
@@ -239,6 +293,8 @@ class WatchSessionCoordinator: NSObject {
                 }
                 return
             } catch {
+                lastContextPushErrorDate = Date()
+                lastContextPushErrorMessage = "\(error)"
                 print("WatchSessionCoordinator: updateApplicationContext error (novelList=\(limit)件): \(error)")
             }
         }
@@ -327,10 +383,12 @@ class WatchSessionCoordinator: NSObject {
     }
 
     /// iPhone の並び順のグループ種別。Watch はこれを見て「iPhoneと同じ」表示のフォルダ分けを再現する。
-    /// タグ名順(タグ情報が Watch に無い)と Apple Watch 転送状況別(iPhone 側の転送対象設定が必要)は
-    /// 再現できないので flat 扱い
+    /// タグ名順はタグ情報が Watch に無く再現できないので、専用値 "keywordTag" を送って
+    /// Watch 側に「非対応のため小説名順で表示」の案内を出させる(並び自体は小説名降順で送っている)
     private static func groupingKind(sortType: NarouContentSortType) -> String {
         switch sortType {
+        case .KeywordTag:
+            return "keywordTag"
         case .SelfCreatedFolder:
             return "folder"
         case .Writer:
@@ -436,6 +494,8 @@ class WatchSessionCoordinator: NSObject {
             replyHandler?([WatchMessage.Reply.ok: false, WatchMessage.Reply.errorMessage: NSLocalizedString("WatchSessionCoordinator_ErrorUnknownCommand", comment: "対応していない操作です。iPhone側の ことせかい が古い可能性があります。")])
             return
         }
+        lastCommandReceivedDate = Date()
+        lastCommandReceivedName = commandString
         // syncSpeechSettings は返信の形が特殊(settingsUpToDate)なので独立して処理する。
         // Watch が発話直前に「手元の発話設定の指紋」を送ってくるので、最新なら即返信、
         // 古ければ transferFile を積んでから返信する(Watch 側はファイル到着を少しだけ待つ)
@@ -1036,6 +1096,7 @@ extension WatchSessionCoordinator: WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        lastWatchContextReceivedDate = Date()
         // Watch 側から「Watch に本文がある小説の一覧」が送られてくる
         if let storedNovelIDs = applicationContext[WatchMessage.Context.watchStoredNovelIDs] as? [String] {
             UserDefaults.standard.set(storedNovelIDs, forKey: WatchSessionCoordinator.watchStoredNovelIDsKey)
@@ -1122,6 +1183,10 @@ extension WatchSessionCoordinator: WCSessionDelegate {
 
     func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: Error?) {
         try? FileManager.default.removeItem(at: fileTransfer.file.fileURL)
+        // 診断用の記録(発話設定・小説一覧・本文バルク/manifest のどれも metadata の "type" に種別が入る)
+        let transferType = fileTransfer.file.metadata?[WatchNovelBulkFile.transferTypeKey] as? String ?? "unknown"
+        lastFileTransferFinishDate = Date()
+        lastFileTransferFinishDescription = error == nil ? "\(transferType) 成功" : "\(transferType) 失敗: \(error!.localizedDescription)"
         if let error = error {
             print("WatchSessionCoordinator: transferFile 失敗: \(error)")
             // 発話設定・小説一覧の転送に失敗した場合は「送信済み」の指紋を消して、次の機会に再送させる

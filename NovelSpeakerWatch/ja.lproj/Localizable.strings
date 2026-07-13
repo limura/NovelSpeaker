@@ -36,6 +36,7 @@
 "Watch_Bookshelf_UnknownWriter" = "(作者名不明)";
 "Watch_Bookshelf_SelfMadeNovel" = "自作小説";
 "Watch_Bookshelf_Syncing" = "iPhoneと同期中…";
+"Watch_Bookshelf_TagOrderNotice" = "iPhone側で「タグ名順」が選択されていますが、Watchでは非対応のため小説名順で表示しています。";
 "Watch_Bucket_UpTo1DayAgo" = "1日前まで";
 "Watch_Bucket_UpTo7DayAgo" = "7日前まで";
 "Watch_Bucket_UpTo30DayAgo" = "30日前まで";
@@ -89,6 +90,8 @@
 "Watch_Utility_LikeOnDone" = "お気に入りにしました";
 "Watch_Utility_LikeOffDone" = "お気に入りを解除しました";
 "Watch_Utility_TransferHint" = "Watchへ転送する小説の選択は、本棚で小説を左にスワイプするか、iPhoneの ことせかい の設定から行えます。";
+"Watch_Utility_ConnectionDiagnostics" = "接続診断(デバッグ)";
+"Watch_Utility_HideDebugMenu" = "デバッグメニューを隠す";
 
 /* Watch内の本文(キャッシュ管理) */
 "Watch_Cache_Empty" = "転送済みの小説はありません。本棚から転送できます。";

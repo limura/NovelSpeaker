@@ -1949,6 +1949,24 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             section
             <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingsViewController_WatchSessionDiagnostics", comment: "Apple Watch連携の診断情報")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                DispatchQueue.main.async {
+                    let report = WatchSessionCoordinator.shared.diagnosticsReport()
+                    NiftyUtility.EasyDialogBuilder(self)
+                        .textView(content: report, heightMultiplier: 0.6)
+                        .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_CopyLogButtonTitle", comment: "このログをコピーする")) { (dialog) in
+                            UIPasteboard.general.setValue(report, forPasteboardType: "public.text")
+                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
+                        }
+                        .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
+                        }.build().show()
+                }
+            })
+            section
+            <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0

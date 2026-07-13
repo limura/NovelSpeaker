@@ -1127,6 +1127,9 @@
 "WatchSessionCoordinator_ErrorNoPreviousChapter" = "前の章はありません";
 "WatchSessionCoordinator_ErrorNovelNotFound" = "小説が見つかりません";
 
+// 設定タブのデバッグメニュー(Apple Watch連携の診断)
+"SettingsViewController_WatchSessionDiagnostics" = "Apple Watch連携の診断情報";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.1
 
 - 歯抜け小説の更新確認/補完DL時に、手元にある章を無駄に再取得していた問題を修正

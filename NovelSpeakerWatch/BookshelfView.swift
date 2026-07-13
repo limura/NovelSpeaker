@@ -8,8 +8,9 @@
 //
 //  並び順は左上のボタンから選べる(Watch ローカル設定。iPhone へは書き戻さない)。
 //  選択肢と表示(フォルダ分けの有無・フォルダ内の順)は iPhone の本棚と同じ挙動に揃える。
-//  iPhone にあって Watch に無いのは「タグ名順」(タグ情報が未同期)と
-//  「Apple Watch転送状況別」(iPhone 側の転送対象設定が必要)の2つ。
+//  iPhone にあって Watch に無いのは「タグ名順」(タグ情報が未同期。20万行規模になり得るため
+//  同期は見送り)。iPhone がタグ名順の時は grouping "keywordTag" が届くので、
+//  「iPhoneと同じ」では小説名順で表示しつつ非対応の案内を出す。
 //  「iPhoneと同じ」は iPhone の現在の並び順(グループ分け込み)をそのまま再現する。
 //
 
@@ -91,6 +92,13 @@ struct BookshelfView: View {
         return WatchBookshelfSortType(rawValue: sortTypeRawValue) ?? .phoneOrder
     }
 
+    /// iPhone の並び順が Watch 非対応(タグ名順)の時に「iPhoneと同じ」表示で出す案内。
+    /// この場合 iPhone からは小説名降順(=小説名順と同じ)の平坦な一覧が届いている
+    private var phoneOrderFallbackNotice: String? {
+        guard sortType == .phoneOrder, session.phoneSortGrouping == "keywordTag" else { return nil }
+        return NSLocalizedString("Watch_Bookshelf_TagOrderNotice", comment: "iPhone側で「タグ名順」が選択されていますが、Watchでは非対応のため小説名順で表示しています。")
+    }
+
     /// 順番選択の並び。iPhone の順番選択と同じく表示文字列の昇順にする
     /// (「iPhoneと同じ」だけは iPhone に無い項目なので先頭に固定)
     private var sortDialogOptions: [WatchBookshelfSortType] {
@@ -102,7 +110,7 @@ struct BookshelfView: View {
     var body: some View {
         Group {
             if displayGroups.isEmpty {
-                BookshelfNovelList(novels: displayNovels, tabSelection: $tabSelection, showSyncingRow: session.isNovelListSyncing)
+                BookshelfNovelList(novels: displayNovels, tabSelection: $tabSelection, showSyncingRow: session.isNovelListSyncing, headerNotice: phoneOrderFallbackNotice)
             } else {
                 groupList
             }
@@ -486,6 +494,8 @@ struct BookshelfNovelList: View {
     @Binding var tabSelection: Int
     /// 小説一覧の同期中表示を出すか(本棚のルートでだけ true)
     var showSyncingRow: Bool = false
+    /// 一覧の先頭に出す案内(iPhone の並び順が Watch 非対応の時など)。本棚のルートでだけ使う
+    var headerNotice: String? = nil
     @State private var dialogNovel: WatchNovelSummary?
 
     var body: some View {
@@ -521,6 +531,11 @@ struct BookshelfNovelList: View {
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
+            }
+            if let headerNotice = headerNotice {
+                Text(headerNotice)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
             }
             if novels.isEmpty {
                 Text(NSLocalizedString("Watch_Bookshelf_EmptyMessage", comment: "iPhoneの ことせかい を一度起動すると、本棚がここに表示されます。"))

@@ -7,11 +7,15 @@
 
 import SwiftUI
 import AVFoundation
+import WatchConnectivity
 
 struct UtilityView: View {
     @ObservedObject private var session = PhoneSessionManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var feedbackMessage: String?
+    /// 隠しデバッグメニューの表示フラグ。末尾の案内文を10回タップすると ON になり、以後永続する
+    @AppStorage("WatchDebugMenuEnabled") private var isDebugMenuEnabled = false
+    @State private var debugUnlockTapCount = 0
 
     var body: some View {
         NavigationStack {
@@ -80,6 +84,30 @@ struct UtilityView: View {
                 Text(NSLocalizedString("Watch_Utility_TransferHint", comment: "Watchへ転送する小説の選択は、本棚で小説を左にスワイプするか、iPhoneの ことせかい の設定から行えます。"))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
+                    // この案内文を10回タップすると隠しデバッグメニューが出る
+                    //(iPhone 側の「ルビはルビだけ読む」10回トグルと同じ作法)
+                    .onTapGesture {
+                        guard !isDebugMenuEnabled else { return }
+                        debugUnlockTapCount += 1
+                        if debugUnlockTapCount >= 10 {
+                            isDebugMenuEnabled = true
+                        }
+                    }
+            }
+            if isDebugMenuEnabled {
+                Section {
+                    NavigationLink {
+                        WatchConnectionDiagnosticsView()
+                    } label: {
+                        Label(NSLocalizedString("Watch_Utility_ConnectionDiagnostics", comment: "接続診断(デバッグ)"), systemImage: "stethoscope")
+                    }
+                    Button {
+                        isDebugMenuEnabled = false
+                        debugUnlockTapCount = 0
+                    } label: {
+                        Label(NSLocalizedString("Watch_Utility_HideDebugMenu", comment: "デバッグメニューを隠す"), systemImage: "eye.slash")
+                    }
+                }
             }
         }
         .navigationTitle(NSLocalizedString("Watch_Utility_Title", comment: "便利機能"))
@@ -88,6 +116,80 @@ struct UtilityView: View {
     private var currentNovelIsLiked: Bool {
         guard let novelID = session.playState?.novelID else { return false }
         return session.novels.first(where: { $0.novelID == novelID })?.isLiked ?? false
+    }
+}
+
+/// WCSession の接続診断(隠しデバッグメニュー)。Series 4 で観測された「半接続」状態
+/// (iPhone側 isWatchAppInstalled=false / WCErrorDomain 7006 等)の再現時は Xcode からも
+/// 観測しづらいため、Watch 単体でセッション状態と最終送受信時刻を確認できるようにする。
+/// デバッグ用画面なので行の文言はローカライズしない(ログ文字列と同じ扱い)
+struct WatchConnectionDiagnosticsView: View {
+    @State private var now = Date()
+    private let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        let session = WCSession.default
+        List {
+            Section("WCSession") {
+                row("activationState", activationStateName(session.activationState))
+                row("isReachable", "\(session.isReachable)")
+                row("isCompanionAppInstalled", "\(session.isCompanionAppInstalled)")
+                row("受信済みcontext", session.receivedApplicationContext.isEmpty ? "なし" : "あり")
+            }
+            Section("最終イベント") {
+                row("context受信", dateText(PhoneSessionManager.shared.lastContextReceivedDate))
+                row("ファイル受信", dateText(PhoneSessionManager.shared.lastFileReceivedDate),
+                    detail: PhoneSessionManager.shared.lastFileReceivedDescription)
+                row("コマンド送信", dateText(PhoneSessionManager.shared.lastCommandSentDate),
+                    detail: PhoneSessionManager.shared.lastCommandSentDescription)
+            }
+            Section("データ") {
+                row("本棚の冊数", "\(PhoneSessionManager.shared.novels.count)")
+                row("転送済み小説", "\(PhoneSessionManager.shared.storedNovelIDs.count)")
+            }
+        }
+        .navigationTitle(NSLocalizedString("Watch_Utility_ConnectionDiagnostics", comment: "接続診断"))
+        .onReceive(timer) { now = $0 }
+    }
+
+    private func row(_ label: String, _ value: String, detail: String? = nil) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.footnote)
+            if let detail = detail, !detail.isEmpty {
+                Text(detail)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+            }
+        }
+    }
+
+    /// 「HH:mm:ss (n秒前)」表記。タイマーで body が毎秒再評価されるので相対表記も進む
+    private func dateText(_ date: Date?) -> String {
+        guard let date = date else { return "-" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        let seconds = Int(now.timeIntervalSince(date))
+        if seconds < 60 {
+            return "\(formatter.string(from: date)) (\(max(0, seconds))秒前)"
+        }
+        if seconds < 3600 {
+            return "\(formatter.string(from: date)) (\(seconds / 60)分前)"
+        }
+        return formatter.string(from: date)
+    }
+
+    private func activationStateName(_ state: WCSessionActivationState) -> String {
+        switch state {
+        case .activated: return "activated"
+        case .inactive: return "inactive"
+        case .notActivated: return "notActivated"
+        @unknown default: return "unknown(\(state.rawValue))"
+        }
     }
 }
 

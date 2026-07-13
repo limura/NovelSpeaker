@@ -68,6 +68,16 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     /// 本文ページが購読を望んでいるか(reachable 復帰時の再購読に使う)
     private var wantsReadingPointSubscription = false
 
+    // MARK: - 接続診断の記録(便利機能の隠しデバッグメニュー「接続診断」用)
+    // 半接続状態(WCErrorDomain 7006 等)の再現時は Xcode からも観測しづらいので、
+    // 主要イベントの時刻を残して Watch 単体で確認できるようにする。
+    // デバッグ表示専用の best-effort な記録(@Published にはせず、診断画面側がタイマーで読む)
+    private(set) var lastContextReceivedDate: Date?
+    private(set) var lastFileReceivedDate: Date?
+    private(set) var lastFileReceivedDescription: String?
+    private(set) var lastCommandSentDate: Date?
+    private(set) var lastCommandSentDescription: String?
+
     private override init() {
         super.init()
         refreshStoredNovels()
@@ -189,6 +199,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                     self.applyPlayStateIfNewer(state)
                 }
                 let ok = reply[WatchMessage.Reply.ok] as? Bool ?? false
+                self.lastCommandSentDate = Date()
+                self.lastCommandSentDescription = "\(command.rawValue) ok=\(ok)"
                 if !ok && !quiet {
                     self.lastErrorMessage = reply[WatchMessage.Reply.errorMessage] as? String ?? NSLocalizedString("Watch_Session_CommandFailed", comment: "操作に失敗しました")
                 }
@@ -202,6 +214,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                 return
             }
             DispatchQueue.main.async {
+                self.lastCommandSentDate = Date()
+                self.lastCommandSentDescription = "\(command.rawValue) 失敗: \(error.localizedDescription)"
                 if !quiet {
                     self.isSending = false
                     self.lastErrorMessage = NSLocalizedString("Watch_Session_NotReachable", comment: "iPhoneと通信できません。iPhoneを再起動した後は、一度ロック解除が必要です。")
@@ -408,10 +422,19 @@ extension PhoneSessionManager: WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        DispatchQueue.main.async {
+            self.lastContextReceivedDate = Date()
+        }
         applyContext(applicationContext)
     }
 
     func session(_ session: WCSession, didReceive file: WCSessionFile) {
+        // 診断用の記録(発話設定・小説一覧・本文バルク/manifest のどれも metadata の "type" に種別が入る)
+        let receivedType = file.metadata?[WatchNovelBulkFile.transferTypeKey] as? String ?? "unknown"
+        DispatchQueue.main.async {
+            self.lastFileReceivedDate = Date()
+            self.lastFileReceivedDescription = receivedType
+        }
         // Watch 単体再生用の発話設定ファイル
         if (file.metadata?[WatchSpeechSettings.transferTypeKey] as? String) == WatchSpeechSettings.transferTypeValue {
             do {
