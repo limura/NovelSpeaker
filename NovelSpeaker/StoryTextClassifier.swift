@@ -208,12 +208,15 @@ class CombinedSpeechBlock: Identifiable {
         return true
     }
 
-    // VOICEVOX専用。後続ピースが delay(「間の設定」由来のポーズ)を持っている場合でも、
+    // 後続ピースが delay(「間の設定」由来のポーズ)を持っている場合でも、
     // それを「このブロックの最後のピース」として吸収し、delay はブロック全体の後ろの間として
     // 引き継いでブロックを閉じる(この後は何も追加できない、呼び出し側で閉じること)。
     // delay は元々「そのピースを読み終えた後の間」なので、末尾ピースとして取り込む分には
     // 意味が変わらない。これにより読み替え(mod)で切れたピースが、後続の delay 付きピースへ
-    // 連結できずに単独ブロックとして孤立し、VOICEVOX で不自然な間が入る問題を防ぐ。
+    // 連結できずに単独ブロックとして孤立し、句読点以外の場所(直前の読み替えヒット位置)で
+    // ブロックが分断される問題を防ぐ。
+    // (元々は VOICEVOX の不自然な間対策として VOICEVOX 専用だったが、AVSpeechSynthesizer でも
+    //  同じ分断が起きていた(特に watchOS でブロック境界の無音が耳につく)ため全エンジンに適用)
     // 話者設定(pitch/rate/volume/voiceIdentifier/type)が一致し、かつ自身がまだ delay を
     // 持っていない場合のみ吸収する。
     func AbsorbTrailingDelayBlock(block:SpeechBlockInfo) -> Bool {
@@ -223,8 +226,7 @@ class CombinedSpeechBlock: Identifiable {
         func checkDoubleEqual(a:Double, b:Double) -> Bool {
             return fabs(a - b) < Double.ulpOfOne
         }
-        guard type == "VOICEVOX"
-            && checkDoubleEqual(a: 0.0, b: self.delay) // 自身が既に delay を持つ = 既に閉じている
+        guard checkDoubleEqual(a: 0.0, b: self.delay) // 自身が既に delay を持つ = 既に閉じている
             && block.delay > 0.0 // 吸収対象は delay を持つピースだけ(delay=0 は通常の Add で連結される)
             && checkFloatEqual(a: pitch, b: block.pitch)
             && checkFloatEqual(a: rate, b: block.rate)
@@ -525,12 +527,14 @@ class StoryTextClassifier {
                     currentDisplayTextCount = blockDisplayTextCount
                     continue
                 }
-                // VOICEVOX: 後続ピースが「間の設定」由来の delay を持っていても、同一話者なら
+                // 後続ピースが「間の設定」由来の delay を持っていても、同一話者なら
                 // このブロックの末尾ピースとして吸収してブロックを閉じる。読み替え(mod)で切れた
                 // 直前ピースが delay 付きピースへ連結できずに孤立するのを防ぎ、句読点(delayの付く
-                // 位置)まで一つの発話単位にまとめる。AVSpeechSynthesizer では従来通り分割したままにする
-                //(標準辞書の同一文字列mod等、既存のブロック分割挙動を変えないため)。
-                if isVoicevox && block.delay > 0.0 && current.AbsorbTrailingDelayBlock(block: block) {
+                // 位置)まで一つの発話単位にまとめる。
+                // 元々は VOICEVOX 限定だった(AVSpeechSynthesizer の既存分割挙動を守るため)が、
+                // AVSpeechSynthesizer でも読み替えヒット位置でブロックが分断されて
+                // 語の途中で発話が途切れる問題(特に watchOS で顕著)があったため全エンジンに適用する。
+                if block.delay > 0.0 && current.AbsorbTrailingDelayBlock(block: block) {
                     result.append(current)
                     currentBlock = nil
                     currentDisplayTextCount = 0
