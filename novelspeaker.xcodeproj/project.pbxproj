@@ -223,6 +223,9 @@
 		C0DE10000000000000000002 /* WatchWidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000001 /* WatchWidgetURL.swift */; };
 		C0DE10000000000000000003 /* WatchWidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000001 /* WatchWidgetURL.swift */; };
 		C0DE10000000000000000012 /* WatchActionComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000011 /* WatchActionComplications.swift */; };
+		C0DE10000000000000000022 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
+		C0DE10000000000000000023 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
+		C0DE10000000000000000032 /* PlayNovelComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000031 /* PlayNovelComplication.swift */; };
 		630CBEF68D26A0F0E98C83A4 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
 		643AF738328D8F71DCC7C396 /* IOSSpeechCoreShims.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5305C5CDBD0A0B66521EDD19 /* IOSSpeechCoreShims.swift */; };
 		67B43BB0FC18A7B3AB5B64B6 /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
@@ -598,6 +601,8 @@
 		58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NovelSpeakerWatchWidget.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000001 /* WatchWidgetURL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchWidgetURL.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000011 /* WatchActionComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchActionComplications.swift; sourceTree = "<group>"; };
+		C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchNovelSummaryStore.swift; sourceTree = "<group>"; };
+		C0DE10000000000000000031 /* PlayNovelComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayNovelComplication.swift; sourceTree = "<group>"; };
 		5AF22ADCC56BF76579F8F345 /* VoicevoxCore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCore.swift; sourceTree = "<group>"; };
 		5B20E49D521B34FB248A1E17 /* WatchSpeechPlayer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSpeechPlayer.swift; sourceTree = "<group>"; };
 		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1050,6 +1055,7 @@
 				B183A0FEE977129AFD5FBAB5 /* WatchSpeechSettings.swift */,
 				B63C772BD7864F00126B3F3A /* WatchComplicationData.swift */,
 				C0DE10000000000000000001 /* WatchWidgetURL.swift */,
+				C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */,
 			);
 			path = WatchShared;
 			sourceTree = "<group>";
@@ -1138,6 +1144,7 @@
 			children = (
 				58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */,
 				C0DE10000000000000000011 /* WatchActionComplications.swift */,
+				C0DE10000000000000000031 /* PlayNovelComplication.swift */,
 				BFD5476A36FAD6CD441DBF86 /* Assets.xcassets */,
 				4F7DBAD3B7D83A3215CEB69C /* Info.plist */,
 				59911E29481854DA0556D093 /* Localizable.strings */,
@@ -1546,6 +1553,7 @@
 				80E7D1AD02DF683B7B721DD1 /* WatchComplicationData.swift in Sources */,
 				701F2368A47FB44C1488A3E3 /* WatchComplicationUpdater.swift in Sources */,
 				C0DE10000000000000000002 /* WatchWidgetURL.swift in Sources */,
+				C0DE10000000000000000022 /* WatchNovelSummaryStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1695,6 +1703,8 @@
 				BC86FC28B8282BBC71B60037 /* WatchComplicationData.swift in Sources */,
 				C0DE10000000000000000003 /* WatchWidgetURL.swift in Sources */,
 				C0DE10000000000000000012 /* WatchActionComplications.swift in Sources */,
+				C0DE10000000000000000023 /* WatchNovelSummaryStore.swift in Sources */,
+				C0DE10000000000000000032 /* PlayNovelComplication.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

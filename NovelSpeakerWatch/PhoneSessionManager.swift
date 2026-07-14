@@ -12,6 +12,7 @@ import Foundation
 import WatchConnectivity
 import Combine
 import Compression
+import WidgetKit
 
 final class PhoneSessionManager: NSObject, ObservableObject {
     static let shared = PhoneSessionManager()
@@ -20,6 +21,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @Published var novels: [WatchNovelSummary] = [] {
         didSet {
             novelsByID = Dictionary(novels.map { ($0.novelID, $0) }, uniquingKeysWith: { first, _ in first })
+            updateWidgetNovelSummaries()
         }
     }
     /// novelID → 最新の summary。NavigationLink で push 済みの一覧(push 時のスナップショット)でも
@@ -115,8 +117,38 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                 self.storedChapterCounts = counts
                 self.storedTitles = titles
                 self.storedNovelIDs = Set(counts.keys)
+                self.updateWidgetNovelSummaries()
                 self.pushWatchContext()
             }
+        }
+    }
+
+    /// 設定可能ウィジェット(「この小説を再生」)の小説選択肢・読了ゲージ用の要約(App Group)を
+    /// 更新する。Watch に転送済みの小説ぶんを書く(ウィジェットで選べる＝Watch に載っている小説)。
+    /// 内容が変わった時だけウィジェットを再読込する
+    private func updateWidgetNovelSummaries() {
+        let transferred = storedChapterCounts
+        // 転送済みが空でも、直前まで有った物を消すために一度は空で保存させる
+        guard !transferred.isEmpty || !WatchNovelSummaryStore.load().isEmpty else { return }
+        let summaries: [WatchWidgetNovelSummary] = transferred.keys.compactMap { novelID in
+            let title = novelsByID[novelID]?.title ?? storedTitles[novelID] ?? ""
+            guard !title.isEmpty else { return nil }
+            let chapterCount = max(novelsByID[novelID]?.chapterCount ?? 0, transferred[novelID] ?? 0)
+            var progress = 0.0
+            if let s = novelsByID[novelID] {
+                let inChapter = s.readingChapterContentCount > 0
+                    ? Double(s.readingChapterReadingPoint) / Double(s.readingChapterContentCount) : 0
+                progress = WatchNovelSummaryStore.overallProgress(
+                    chapterNumber: s.readingChapterNumber, chapterCount: chapterCount, inChapter: inChapter)
+            }
+            // 進捗の微小変化での再読込を避けるため 1% 単位に丸める
+            progress = (progress * 100).rounded() / 100
+            return WatchWidgetNovelSummary(novelID: novelID, title: title,
+                                           chapterCount: chapterCount, overallProgress: progress)
+        }
+        .sorted { $0.title < $1.title }
+        if WatchNovelSummaryStore.save(summaries) {
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
 

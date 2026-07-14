@@ -27,6 +27,8 @@ struct NovelSpeakerWatchWidgetBundle: WidgetBundle {
         PlayPauseComplication()
         TextPageComplication()
         CheckUpdatesComplication()
+        // 第2弾: 設定可能ウィジェット「この小説を再生」(corner / rectangular)
+        PlayNovelComplication()
     }
 }
 

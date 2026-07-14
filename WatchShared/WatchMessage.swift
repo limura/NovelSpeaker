@@ -23,6 +23,8 @@ enum WatchMessage {
         case nextChapter
         /// 指定小説を開く(args: novelID)。開くだけで再生はしない
         case openNovel
+        /// 指定小説を開いて再生を開始する(args: novelID)。ウィジェット「この小説を再生」用
+        case playNovel
         // 便利機能
         case checkUpdatesAll
         case checkUpdates      // args: novelID

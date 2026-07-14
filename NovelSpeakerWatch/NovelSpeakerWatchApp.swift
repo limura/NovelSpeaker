@@ -85,6 +85,10 @@ struct WatchRootView: View {
             // 更新確認は本棚に「同期中…」等が出るので本棚を表示してから依頼する
             tabSelection = 0
             session.send(.checkUpdatesAll)
+        case .playNovel(let novelID):
+            // 指定小説を現在の発話元で再生する。再生コントロール画面を表示
+            tabSelection = 1
+            player.playNovelFromWidget(novelID: novelID)
         }
     }
 

@@ -24,15 +24,19 @@ enum WatchWidgetAction: Equatable {
     case openTextPage
     /// すべての小説の更新を確認する(iPhone 側で更新チェック)
     case checkUpdatesAll
+    /// 指定した小説を再生する(設定可能ウィジェット「この小説を再生」)。現在の発話元で再生する
+    case playNovel(novelID: String)
 
     /// 独自 URL スキーム(ウィジェット→アプリのディープリンク専用)
     static let scheme = "novelspeakerwatch"
+    private static let novelIDQueryName = "novelID"
 
     private var host: String {
         switch self {
         case .togglePlayPause: return "toggle"
         case .openTextPage:    return "textPage"
         case .checkUpdatesAll: return "checkUpdates"
+        case .playNovel:       return "play"
         }
     }
 
@@ -40,7 +44,10 @@ enum WatchWidgetAction: Equatable {
         var components = URLComponents()
         components.scheme = WatchWidgetAction.scheme
         components.host = host
-        // host だけの単純な URL なので生成に失敗することはない
+        if case .playNovel(let novelID) = self {
+            components.queryItems = [URLQueryItem(name: WatchWidgetAction.novelIDQueryName, value: novelID)]
+        }
+        // host だけ(または host+novelID)の単純な URL なので生成に失敗することはない
         return components.url ?? URL(string: "\(WatchWidgetAction.scheme)://\(host)")!
     }
 
@@ -50,6 +57,12 @@ enum WatchWidgetAction: Equatable {
         case "toggle":       self = .togglePlayPause
         case "textPage":     self = .openTextPage
         case "checkUpdates": self = .checkUpdatesAll
+        case "play":
+            guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                  let novelID = components.queryItems?
+                    .first(where: { $0.name == WatchWidgetAction.novelIDQueryName })?.value,
+                  !novelID.isEmpty else { return nil }
+            self = .playNovel(novelID: novelID)
         default:             return nil
         }
     }

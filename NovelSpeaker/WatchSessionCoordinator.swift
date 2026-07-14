@@ -611,7 +611,13 @@ class WatchSessionCoordinator: NSObject {
                 completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorNovelIDMissing", comment: "novelID がありません")))
                 return
             }
-            openNovel(novelID: novelID, completion: completion)
+            openNovel(novelID: novelID, thenPlay: false, completion: completion)
+        case .playNovel:
+            guard let novelID = message[WatchMessage.Arg.novelID] as? String else {
+                completion((false, NSLocalizedString("WatchSessionCoordinator_ErrorNovelIDMissing", comment: "novelID がありません")))
+                return
+            }
+            openNovel(novelID: novelID, thenPlay: true, completion: completion)
         case .checkUpdatesAll:
             let novelIDArray = RealmUtil.RealmBlock { realm -> [String] in
                 guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else { return [] }
@@ -769,7 +775,9 @@ class WatchSessionCoordinator: NSObject {
         }
     }
 
-    private func openNovel(novelID: String, completion: @escaping ((ok: Bool, errorMessage: String?)) -> Void) {
+    /// 指定小説を StorySpeaker にセットする(thenPlay=true なら続けて再生も開始する)。
+    /// 再生は「その小説の栞の続きから」。ウィジェット「この小説を再生」が thenPlay=true で使う
+    private func openNovel(novelID: String, thenPlay: Bool, completion: @escaping ((ok: Bool, errorMessage: String?)) -> Void) {
         let story = RealmUtil.RealmBlock { realm -> Story? in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return nil }
             let chapterNumber = novel.readingChapterNumber ?? 1
@@ -783,7 +791,13 @@ class WatchSessionCoordinator: NSObject {
         // でないと返信に切替前の小説の状態が載ってしまう
         StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true) { _ in
             DispatchQueue.main.async {
-                completion((true, nil))
+                if thenPlay, !StorySpeaker.shared.isPlayng {
+                    // SetStory 後に停止中なら再生を開始する(トグルで開始→settle 後に状態返信)
+                    RealmUtil.RealmBlock { _ in StorySpeaker.shared.togglePlayPauseEvent() }
+                    self.completeAfterSettle(completion)
+                } else {
+                    completion((true, nil))
+                }
             }
         }
     }

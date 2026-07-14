@@ -112,6 +112,22 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         }
     }
 
+    /// ウィジェット「この小説を再生」から(アプリ起動後に)呼ばれる。指定小説を現在の発話元で再生する。
+    /// - Watch 単体モード: その小説を開いて単体再生を開始(未転送ならエラー)
+    /// - iPhone: iPhone へ「その小説を開いて再生」コマンドを送る(現在の発話元に従う)
+    func playNovelFromWidget(novelID: String) {
+        restoreStandaloneSelectionIfNeeded()
+        if isSelectedAsSource {
+            guard open(novelID: novelID) else {
+                reportError(NSLocalizedString("Watch_Player_BodyNotTransferred", comment: "この小説の本文がWatchに転送されていません。本棚の小説をタップして転送してから、もう一度お試しください。"))
+                return
+            }
+            play()
+        } else {
+            PhoneSessionManager.shared.send(.playNovel, args: [WatchMessage.Arg.novelID: novelID])
+        }
+    }
+
     /// 永続化された発話元が Watch 単体だったら、最後に単体再生した小説を開き直して復元する。
     /// 復元対象が無ければ(小説が削除された等)単体モード自体を解除する。起動時と、
     /// ウィジェット起動時のトグル直前に呼ばれる(多重実行は didRestore フラグで防ぐ)

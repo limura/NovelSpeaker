@@ -11,3 +11,28 @@
 "Watch_Widget_TextPage_Desc" = "Tap to open the text page in NovelSpeaker.";
 "Watch_Widget_CheckUpdates_Name" = "NovelSpeaker Check Updates";
 "Watch_Widget_CheckUpdates_Desc" = "Tap to open NovelSpeaker and check all novels for updates.";
+
+/* Configurable "Play This Novel" widget (phase 2) */
+"Watch_Widget_PlayNovel_Name" = "Play This Novel";
+"Watch_Widget_PlayNovel_Desc" = "Plays the chosen novel. Long-press to pick the novel, icon and color.";
+"Watch_Widget_PlayNovel_Unset" = "Choose a novel";
+"Watch_Widget_PlayNovel_TapToConfigure" = "Long-press to choose a novel";
+
+/* Configuration UI labels (AppIntents display strings are Japanese literals; these are the English overrides) */
+"この小説を再生" = "Play This Novel";
+"指定した小説を、現在の発話元(iPhone/Watch単体)で再生します。" = "Plays the chosen novel on the current output (iPhone or Watch standalone).";
+"小説" = "Novel";
+"アイコン" = "Icon";
+"色" = "Color";
+"再生(▶)" = "Play (▶)";
+"本" = "Book";
+"しおり" = "Bookmark";
+"ヘッドフォン" = "Headphones";
+"星" = "Star";
+"きらめき" = "Sparkles";
+"オレンジ" = "Orange";
+"赤" = "Red";
+"紫" = "Purple";
+"青" = "Blue";
+"ティール" = "Teal";
+"緑" = "Green";
