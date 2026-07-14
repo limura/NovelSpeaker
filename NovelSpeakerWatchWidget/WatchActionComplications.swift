@@ -12,8 +12,11 @@
 //  - 本文ページ(book.fill):     本文ページを開く
 //  - 更新確認(arrow.clockwise): すべての小説の更新を確認する
 //
-//  いずれも ことせかい のグリフに操作を表す SF Symbol バッジを重ねた見た目。
-//  複数を文字盤に並べても区別できるよう、バッジで機能を示す。
+//  見た目: ことせかい のグリフを少し小さくして左上に寄せ、右下に機能を表す SF Symbol を
+//  少し重ねて置く(グリフ下側の白くゴチャついた部分と機能アイコンが重ならないようにして、
+//  単色文字盤でも機能アイコンが埋もれないようにする)。
+//  さらに widgetLabel に「対象小説名(再生・本文) / アプリ名(更新確認)」を出して、
+//  何のウィジェットかが文字でも分かるようにする(対応文字盤では曲線ラベルとして出る)。
 //
 
 import WidgetKit
@@ -21,22 +24,31 @@ import SwiftUI
 
 struct ActionComplicationEntry: TimelineEntry {
     let date: Date
+    /// 対象小説のタイトル(再生トグル/本文の widgetLabel 用。無ければアプリ名にフォールバック)
+    let novelTitle: String?
 }
 
-/// 表示内容は固定(タップでアプリを起動するだけ)なので、単一エントリ・自動更新なし
+/// 表示内容は「今読んでいる小説名」くらいなので、App Group から読んだ単一エントリ・自動更新なし
+/// (小説・章が変わった時は Watch アプリ側が reloadAllTimelines する)
 struct ActionComplicationProvider: TimelineProvider {
     func placeholder(in context: Context) -> ActionComplicationEntry {
-        ActionComplicationEntry(date: Date())
+        ActionComplicationEntry(date: Date(), novelTitle: nil)
     }
     func getSnapshot(in context: Context, completion: @escaping (ActionComplicationEntry) -> Void) {
-        completion(ActionComplicationEntry(date: Date()))
+        completion(currentEntry())
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<ActionComplicationEntry>) -> Void) {
-        completion(Timeline(entries: [ActionComplicationEntry(date: Date())], policy: .never))
+        completion(Timeline(entries: [currentEntry()], policy: .never))
+    }
+
+    private func currentEntry() -> ActionComplicationEntry {
+        let data = WatchComplicationData.load()
+        let title = (data?.hasNovel == true) ? data?.title : nil
+        return ActionComplicationEntry(date: Date(), novelTitle: title)
     }
 }
 
-/// ことせかいのグリフに、操作を表す SF Symbol バッジを右下に重ねた circular 表示
+/// ことせかいのグリフ(左上・やや小さめ)に、操作を表す SF Symbol バッジ(右下)を重ねた circular 表示
 struct ActionGlyphView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     let badgeSystemName: String
@@ -44,15 +56,19 @@ struct ActionGlyphView: View {
     var body: some View {
         GeometryReader { geo in
             let side = min(geo.size.width, geo.size.height)
-            ZStack(alignment: .bottomTrailing) {
+            ZStack {
+                // ことせかいグリフを 2/3 弱に縮めて左上へ寄せる(下側のゴチャつきを機能アイコンから外す)
                 BrandGlyph()
-                    .frame(width: side, height: side)
+                    .frame(width: side * 0.60, height: side * 0.60)
+                    .offset(x: -side * 0.12, y: -side * 0.12)
+                // 機能アイコンを右下に。グリフに少しだけ重なるサイズ・位置
                 Image(systemName: badgeSystemName)
-                    .font(.system(size: side * 0.34, weight: .bold))
+                    .font(.system(size: side * 0.30, weight: .bold))
                     .foregroundStyle(badgeForeground)
-                    .padding(side * 0.07)
+                    .frame(width: side * 0.48, height: side * 0.48)
                     .background(Circle().fill(badgeBackground))
-                    .overlay(Circle().stroke(badgeStroke, lineWidth: max(1, side * 0.03)))
+                    .overlay(Circle().stroke(badgeStroke, lineWidth: max(1, side * 0.035)))
+                    .offset(x: side * 0.16, y: side * 0.16)
             }
             .frame(width: side, height: side)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -72,16 +88,28 @@ struct ActionGlyphView: View {
     }
 }
 
-/// グリフ+バッジ表示に widgetURL を付けた circular コンプリケーションの中身
+/// グリフ+バッジ表示に widgetLabel と widgetURL を付けた circular コンプリケーションの中身
 struct ActionComplicationView: View {
+    let entry: ActionComplicationEntry
     let badgeSystemName: String
     let action: WatchWidgetAction
+    /// widgetLabel に小説タイトルを出すか(更新確認はアプリ名固定なので false)
+    let usesNovelTitleLabel: Bool
 
     var body: some View {
         ActionGlyphView(badgeSystemName: badgeSystemName)
             .padding(2)
             .containerBackground(for: .widget) { Color.clear }
+            .widgetLabel { Text(labelText) }
             .widgetURL(action.url)
+    }
+
+    private var labelText: String {
+        let appName = NSLocalizedString("Watch_Widget_AppName", comment: "ことせかい")
+        if usesNovelTitleLabel, let title = entry.novelTitle, !title.isEmpty {
+            return title
+        }
+        return appName
     }
 }
 
@@ -90,8 +118,9 @@ struct ActionComplicationView: View {
 struct PlayPauseComplication: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.playToggle",
-                            provider: ActionComplicationProvider()) { _ in
-            ActionComplicationView(badgeSystemName: "playpause.fill", action: .togglePlayPause)
+                            provider: ActionComplicationProvider()) { entry in
+            ActionComplicationView(entry: entry, badgeSystemName: "playpause.fill",
+                                   action: .togglePlayPause, usesNovelTitleLabel: true)
         }
         .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayToggle_Name", comment: "再生・一時停止"))
         .description(NSLocalizedString("Watch_Widget_PlayToggle_Desc", comment: "タップで ことせかい を開き、再生/一時停止を切り替えます。"))
@@ -102,8 +131,9 @@ struct PlayPauseComplication: Widget {
 struct TextPageComplication: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.textPage",
-                            provider: ActionComplicationProvider()) { _ in
-            ActionComplicationView(badgeSystemName: "book.fill", action: .openTextPage)
+                            provider: ActionComplicationProvider()) { entry in
+            ActionComplicationView(entry: entry, badgeSystemName: "book.fill",
+                                   action: .openTextPage, usesNovelTitleLabel: true)
         }
         .configurationDisplayName(NSLocalizedString("Watch_Widget_TextPage_Name", comment: "本文ページ"))
         .description(NSLocalizedString("Watch_Widget_TextPage_Desc", comment: "タップで ことせかい の本文ページを開きます。"))
@@ -114,8 +144,9 @@ struct TextPageComplication: Widget {
 struct CheckUpdatesComplication: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.checkUpdates",
-                            provider: ActionComplicationProvider()) { _ in
-            ActionComplicationView(badgeSystemName: "arrow.clockwise", action: .checkUpdatesAll)
+                            provider: ActionComplicationProvider()) { entry in
+            ActionComplicationView(entry: entry, badgeSystemName: "arrow.clockwise",
+                                   action: .checkUpdatesAll, usesNovelTitleLabel: false)
         }
         .configurationDisplayName(NSLocalizedString("Watch_Widget_CheckUpdates_Name", comment: "更新確認"))
         .description(NSLocalizedString("Watch_Widget_CheckUpdates_Desc", comment: "タップで ことせかい を開き、すべての小説の更新を確認します。"))
@@ -126,17 +157,17 @@ struct CheckUpdatesComplication: Widget {
 #Preview("PlayToggle", as: .accessoryCircular) {
     PlayPauseComplication()
 } timeline: {
-    ActionComplicationEntry(date: .now)
+    ActionComplicationEntry(date: .now, novelTitle: "転生したらスライムだった件")
 }
 
 #Preview("TextPage", as: .accessoryCircular) {
     TextPageComplication()
 } timeline: {
-    ActionComplicationEntry(date: .now)
+    ActionComplicationEntry(date: .now, novelTitle: "転生したらスライムだった件")
 }
 
 #Preview("CheckUpdates", as: .accessoryCircular) {
     CheckUpdatesComplication()
 } timeline: {
-    ActionComplicationEntry(date: .now)
+    ActionComplicationEntry(date: .now, novelTitle: nil)
 }
