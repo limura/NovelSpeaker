@@ -182,26 +182,24 @@ struct PlayNovelComplicationView: View {
         case .accessoryRectangular:
             rectangular
         default:
-            Image(systemName: entry.iconSystemName).foregroundStyle(iconTint ?? .primary)
+            ActionGlyphView(badgeSystemName: entry.iconSystemName, badgeColor: entry.tint)
         }
     }
 
-    // 角: 選択アイコンを角に、小説名を縁の曲線ラベルに
+    // 角: ことせかい+選択アイコンの合成を角に、小説名を縁の曲線ラベルに
+    // (合成なので角では機能アイコンは小さめだが、circular と見た目を揃える)
     @ViewBuilder
     private var corner: some View {
-        Image(systemName: entry.iconSystemName)
-            .font(.title2)
-            .foregroundStyle(iconTint ?? .primary)
+        ActionGlyphView(badgeSystemName: entry.iconSystemName, badgeColor: entry.tint)
             .widgetLabel { Text(entry.title ?? appName) }
     }
 
-    // 長方形: [アイコン] 小説名 + 読了ゲージ(小説未選択なら促し文)
+    // 長方形: [ことせかい+選択アイコンの合成] 小説名 + 読了ゲージ(小説未選択なら促し文)
     @ViewBuilder
     private var rectangular: some View {
         HStack(spacing: 7) {
-            Image(systemName: entry.iconSystemName)
-                .font(.title3)
-                .foregroundStyle(iconTint ?? .primary)
+            ActionGlyphView(badgeSystemName: entry.iconSystemName, badgeColor: entry.tint)
+                .frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 2) {
                 Text(displayTitle)
                     .font(.headline)

@@ -48,10 +48,13 @@ struct ActionComplicationProvider: TimelineProvider {
     }
 }
 
-/// ことせかいのグリフ(左上・やや小さめ)に、操作を表す SF Symbol バッジ(右下)を重ねた circular 表示
+/// ことせかいのグリフ(左上・やや小さめ)に、操作を表す SF Symbol バッジ(右下)を重ねた表示。
+/// circular / corner / rectangular で共用する。
+/// badgeColor は fullColor 文字盤でのバッジ地色(「この小説を再生」の色選択に使う)。
 struct ActionGlyphView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     let badgeSystemName: String
+    var badgeColor: Color = .orange
 
     var body: some View {
         GeometryReader { geo in
@@ -61,13 +64,7 @@ struct ActionGlyphView: View {
                 BrandGlyph()
                     .frame(width: side * 0.60, height: side * 0.60)
                     .offset(x: -side * 0.12, y: -side * 0.12)
-                // 機能アイコンを右下に。グリフに少しだけ重なるサイズ・位置
-                Image(systemName: badgeSystemName)
-                    .font(.system(size: side * 0.30, weight: .bold))
-                    .foregroundStyle(badgeForeground)
-                    .frame(width: side * 0.48, height: side * 0.48)
-                    .background(Circle().fill(badgeBackground))
-                    .overlay(Circle().stroke(badgeStroke, lineWidth: max(1, side * 0.035)))
+                badge(side: side)
                     .offset(x: side * 0.16, y: side * 0.16)
             }
             .frame(width: side, height: side)
@@ -75,16 +72,21 @@ struct ActionGlyphView: View {
         }
     }
 
-    // fullColor(カラー文字盤)はオレンジ地×白でアプリアイコンと調和させ、
-    // 単色系(accented/vibrant)は塗り分けが効かないのでバッジも単色でまとめる
-    private var badgeForeground: some ShapeStyle {
-        renderingMode == .fullColor ? AnyShapeStyle(.white) : AnyShapeStyle(.black)
-    }
-    private var badgeBackground: some ShapeStyle {
-        renderingMode == .fullColor ? AnyShapeStyle(.orange) : AnyShapeStyle(.primary)
-    }
-    private var badgeStroke: some ShapeStyle {
-        renderingMode == .fullColor ? AnyShapeStyle(.white.opacity(0.9)) : AnyShapeStyle(.clear)
+    // 機能アイコン。地の丸だけを widgetAccentable にして「アクセント側グループ」に入れ、
+    // 記号(白)とグリフ(白)は既定グループのままにする。こうすると単色文字盤でも
+    // 地の丸だけがアクセント色になり、白い記号が潰れず読める(白丸化バグの対策)。
+    // fullColor 文字盤では地の丸=選択色(既定オレンジ)×白記号。
+    @ViewBuilder
+    private func badge(side: CGFloat) -> some View {
+        ZStack {
+            Circle()
+                .fill(renderingMode == .fullColor ? AnyShapeStyle(badgeColor) : AnyShapeStyle(.primary))
+                .widgetAccentable()
+            Image(systemName: badgeSystemName)
+                .font(.system(size: side * 0.30, weight: .bold))
+                .foregroundStyle(.white)
+        }
+        .frame(width: side * 0.48, height: side * 0.48)
     }
 }
 
@@ -124,7 +126,7 @@ struct PlayPauseComplication: Widget {
         }
         .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayToggle_Name", comment: "再生・一時停止"))
         .description(NSLocalizedString("Watch_Widget_PlayToggle_Desc", comment: "タップで ことせかい を開き、再生/一時停止を切り替えます。"))
-        .supportedFamilies([.accessoryCircular])
+        .supportedFamilies([.accessoryCircular, .accessoryCorner])
     }
 }
 
@@ -137,7 +139,7 @@ struct TextPageComplication: Widget {
         }
         .configurationDisplayName(NSLocalizedString("Watch_Widget_TextPage_Name", comment: "本文ページ"))
         .description(NSLocalizedString("Watch_Widget_TextPage_Desc", comment: "タップで ことせかい の本文ページを開きます。"))
-        .supportedFamilies([.accessoryCircular])
+        .supportedFamilies([.accessoryCircular, .accessoryCorner])
     }
 }
 
@@ -150,7 +152,7 @@ struct CheckUpdatesComplication: Widget {
         }
         .configurationDisplayName(NSLocalizedString("Watch_Widget_CheckUpdates_Name", comment: "更新確認"))
         .description(NSLocalizedString("Watch_Widget_CheckUpdates_Desc", comment: "タップで ことせかい を開き、すべての小説の更新を確認します。"))
-        .supportedFamilies([.accessoryCircular])
+        .supportedFamilies([.accessoryCircular, .accessoryCorner])
     }
 }
 

@@ -122,16 +122,17 @@ struct LauncherComplicationView: View {
         }
     }
 
-    // 角: スタックテキスト型(HIG の Corner「スタックテキスト」)。
-    // 角本体に大きく「章/総章」(見切れにくい短い値)、縁に沿った小さい widgetLabel に小説名。
-    // 小説名を角本体に入れると長すぎて極小フォントで潰れるため、短い進捗を大きく出す。
-    // 小説が未選択なら「テキスト画像」型: アイコン + 「ことせかい」
+    // 角: ことせかいグリフを角本体に、縁に沿った widgetLabel に読了ゲージ(曲線ゲージ)を出す。
+    // 進捗が無ければ widgetLabel は小説名(未選択ならアプリ名)にフォールバック
     @ViewBuilder
     private var corner: some View {
-        if let reading = reading, !reading.chapterFraction.isEmpty {
-            Text(reading.chapterFraction)
-                .widgetCurvesContent()
-                .widgetLabel { Text(reading.title) }
+        if let reading = reading, reading.chapterCount > 0 {
+            BrandGlyph()
+                .padding(2)
+                .widgetLabel {
+                    Gauge(value: reading.overallProgress) { EmptyView() }
+                        .gaugeStyle(.accessoryLinearCapacity)
+                }
         } else if let reading = reading {
             BrandGlyph().padding(2).widgetLabel { Text(reading.title) }
         } else {
