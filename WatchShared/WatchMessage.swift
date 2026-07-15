@@ -17,6 +17,9 @@ enum WatchMessage {
     enum Command: String {
         // 再生操作(iPhone 側 StorySpeaker への遠隔操作)
         case togglePlayPause
+        /// 再生の開始のみ(既に再生中なら何もしない)。ウィジェット「iPhoneで再生」用
+        /// (トグルだと再生中に押した時に止めてしまうため別コマンド)
+        case startSpeech
         case skipBackward
         case skipForward
         case previousChapter

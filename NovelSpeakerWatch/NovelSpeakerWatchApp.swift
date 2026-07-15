@@ -89,6 +89,12 @@ struct WatchRootView: View {
             // 指定小説を現在の発話元で再生する。再生コントロール画面を表示
             tabSelection = 1
             player.playNovelFromWidget(novelID: novelID)
+        case .playOnWatch:
+            tabSelection = 1
+            player.playOnWatchFromWidget()
+        case .playOnPhone:
+            tabSelection = 1
+            player.playOnPhoneFromWidget()
         }
     }
 

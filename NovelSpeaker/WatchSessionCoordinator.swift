@@ -502,7 +502,7 @@ class WatchSessionCoordinator: NSObject {
 
     /// 実行前に StorySpeaker へ小説がセットされている必要があるコマンド
     private static let commandsNeedingStory: Set<WatchMessage.Command> = [
-        .togglePlayPause, .skipBackward, .skipForward, .previousChapter, .nextChapter,
+        .togglePlayPause, .startSpeech, .skipBackward, .skipForward, .previousChapter, .nextChapter,
     ]
 
     private func handleCommand(message: [String: Any], replyHandler: (([String: Any]) -> Void)?) {
@@ -596,6 +596,14 @@ class WatchSessionCoordinator: NSObject {
                 } else {
                     StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "Watchからの再生・停止.\(#function)", isNeedRepeatSpeech: true)
                 }
+            }
+            completeAfterSettle(completion)
+        case .startSpeech:
+            // 「再生開始のみ」(ウィジェット「iPhoneで再生」用)。既に再生中なら何もしない。
+            // isNeedRepeatSpeech: true の理由は togglePlayPause の項と同じ
+            RealmUtil.RealmBlock { realm in
+                guard !StorySpeaker.shared.isPlayng else { return }
+                StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "Watchからの再生開始.\(#function)", isNeedRepeatSpeech: true)
             }
             completeAfterSettle(completion)
         case .skipBackward:

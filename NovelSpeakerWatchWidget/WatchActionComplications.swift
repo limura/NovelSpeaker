@@ -85,15 +85,20 @@ struct ActionGlyphView: View {
     @Environment(\.widgetFamily) private var family
     let badgeSystemName: String
     var badgeColor: Color = .orange
+    /// nil なら ことせかい のグリフをベースにする。SF Symbol 名を指定するとそれをベースにする
+    /// (「Watchで再生」「iPhoneで再生」が applewatch / iphone を使う。これらの制限付きシンボルは
+    ///  Apple 製品そのものを指す用途なら使用可)
+    var baseSystemName: String? = nil
 
     var body: some View {
         GeometryReader { geo in
             let side = min(geo.size.width, geo.size.height)
             ZStack {
-                // ことせかいグリフを 2/3 弱に縮めて左上へ寄せる(下側のゴチャつきを機能アイコンから外す)。
-                // バッジと重なる部分はグリフ側をくり抜いて、バッジ(特に corner のリング)が
-                // グリフの白い部分に重ならず暗い文字盤地の上に乗るようにする
-                BrandGlyph()
+                // ベース(ことせかいグリフ等)を 2/3 弱に縮めて左上へ寄せる
+                // (下側のゴチャつきを機能アイコンから外す)。
+                // バッジと重なる部分はベース側をくり抜いて、バッジ(特に corner のリング)が
+                // ベースの白い部分に重ならず暗い文字盤地の上に乗るようにする
+                base(side: side)
                     .frame(width: side * 0.60, height: side * 0.60)
                     .mask {
                         Rectangle()
@@ -113,6 +118,20 @@ struct ActionGlyphView: View {
             }
             .frame(width: side, height: side)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    // ベース。ことせかいグリフ、または指定の SF Symbol(fullColor では ことせかい ぽいオレンジ、
+    // 単色系では白のテンプレート。BrandGlyph の出し分けと同じ考え方)
+    @ViewBuilder
+    private func base(side: CGFloat) -> some View {
+        if let baseSystemName = baseSystemName {
+            Image(systemName: baseSystemName)
+                .font(.system(size: side * 0.48, weight: .medium))
+                .foregroundStyle(renderingMode == .fullColor ? AnyShapeStyle(.orange) : AnyShapeStyle(.white))
+                .minimumScaleFactor(0.5)
+        } else {
+            BrandGlyph()
         }
     }
 
@@ -148,9 +167,11 @@ struct ActionComplicationView: View {
     let action: WatchWidgetAction
     /// widgetLabel に小説タイトルを出すか(更新確認はアプリ名固定なので false)
     let usesNovelTitleLabel: Bool
+    /// ベースを SF Symbol にする場合に指定(「Watchで再生」「iPhoneで再生」)
+    var baseSystemName: String? = nil
 
     var body: some View {
-        ActionGlyphView(badgeSystemName: badgeSystemName, badgeColor: entry.tint)
+        ActionGlyphView(badgeSystemName: badgeSystemName, badgeColor: entry.tint, baseSystemName: baseSystemName)
             .padding(2)
             .containerBackground(for: .widget) { Color.clear }
             .widgetLabel { Text(labelText) }
@@ -207,6 +228,191 @@ struct CheckUpdatesComplication: Widget {
         .configurationDisplayName(NSLocalizedString("Watch_Widget_CheckUpdates_Name", comment: "更新確認"))
         .description(NSLocalizedString("Watch_Widget_CheckUpdates_Desc", comment: "タップで ことせかい を開き、すべての小説の更新を確認します。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner])
+    }
+}
+
+/// Watch 単体再生モードに切り替えて再生を開始する。ベース=applewatch シンボル+▶バッジ。
+/// (applewatch/iphone は制限付きシンボルだが「Apple 製品そのものを指す」用途なので使用可)
+struct PlayOnWatchComplication: Widget {
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.playOnWatch",
+                               intent: ActionColorConfigurationIntent.self,
+                               provider: ActionComplicationProvider(recommendationNameKey: "Watch_Widget_PlayOnWatch_Name")) { entry in
+            ActionComplicationView(entry: entry, badgeSystemName: "play.fill",
+                                   action: .playOnWatch, usesNovelTitleLabel: true,
+                                   baseSystemName: "applewatch")
+        }
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayOnWatch_Name", comment: "ことせかい Watchで再生"))
+        .description(NSLocalizedString("Watch_Widget_PlayOnWatch_Desc", comment: "タップで ことせかい を開き、Watch単体再生に切り替えて再生を開始します。"))
+        .supportedFamilies([.accessoryCircular, .accessoryCorner])
+    }
+}
+
+/// iPhone での再生に切り替えて再生を開始する。ベース=iphone シンボル+▶バッジ
+struct PlayOnPhoneComplication: Widget {
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.playOnPhone",
+                               intent: ActionColorConfigurationIntent.self,
+                               provider: ActionComplicationProvider(recommendationNameKey: "Watch_Widget_PlayOnPhone_Name")) { entry in
+            ActionComplicationView(entry: entry, badgeSystemName: "play.fill",
+                                   action: .playOnPhone, usesNovelTitleLabel: true,
+                                   baseSystemName: "iphone")
+        }
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayOnPhone_Name", comment: "ことせかい iPhoneで再生"))
+        .description(NSLocalizedString("Watch_Widget_PlayOnPhone_Desc", comment: "タップで ことせかい を開き、iPhoneでの再生に切り替えて再生を開始します。"))
+        .supportedFamilies([.accessoryCircular, .accessoryCorner])
+    }
+}
+
+// MARK: - アクション3枠(AccessoryWidgetGroup, watchOS 11+)
+
+/// 3枠に置ける操作の種類
+enum ActionSlotKind: String, AppEnum {
+    case playToggle, playOnWatch, playOnPhone, textPage, checkUpdates, playNovel
+
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "操作")
+    static var caseDisplayRepresentations: [ActionSlotKind: DisplayRepresentation] = [
+        .playToggle:   DisplayRepresentation(title: "再生・停止"),
+        .playOnWatch:  DisplayRepresentation(title: "Watchで再生"),
+        .playOnPhone:  DisplayRepresentation(title: "iPhoneで再生"),
+        .textPage:     DisplayRepresentation(title: "本文ページ"),
+        .checkUpdates: DisplayRepresentation(title: "更新確認"),
+        .playNovel:    DisplayRepresentation(title: "この小説を再生"),
+    ]
+
+    var badgeSystemName: String {
+        switch self {
+        case .playToggle:   return "playpause.fill"
+        case .playOnWatch:  return "play.fill"
+        case .playOnPhone:  return "play.fill"
+        case .textPage:     return "book.fill"
+        case .checkUpdates: return "arrow.clockwise"
+        case .playNovel:    return "play.fill"
+        }
+    }
+
+    var baseSystemName: String? {
+        switch self {
+        case .playOnWatch: return "applewatch"
+        case .playOnPhone: return "iphone"
+        default:           return nil
+        }
+    }
+
+    /// この枠のディープリンク(novelID は playNovel の時だけ使う)
+    func url(novelID: String?) -> URL? {
+        switch self {
+        case .playToggle:   return WatchWidgetAction.togglePlayPause.url
+        case .playOnWatch:  return WatchWidgetAction.playOnWatch.url
+        case .playOnPhone:  return WatchWidgetAction.playOnPhone.url
+        case .textPage:     return WatchWidgetAction.openTextPage.url
+        case .checkUpdates: return WatchWidgetAction.checkUpdatesAll.url
+        case .playNovel:
+            guard let novelID = novelID, !novelID.isEmpty else { return nil }
+            return WatchWidgetAction.playNovel(novelID: novelID).url
+        }
+    }
+}
+
+/// アクション3枠の設定。「小説」は「この小説を再生」を選んだ枠でだけ使われる
+struct ActionGroupConfigurationIntent: WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "3つの操作"
+    static var description = IntentDescription("3つの枠に置く操作を選べます。「小説」は「この小説を再生」を選んだ枠でだけ使われます。")
+
+    @Parameter(title: "左の操作", default: .playToggle)
+    var slot1: ActionSlotKind
+    @Parameter(title: "左の小説")
+    var novel1: PlayNovelChoice?
+
+    @Parameter(title: "中央の操作", default: .playOnWatch)
+    var slot2: ActionSlotKind
+    @Parameter(title: "中央の小説")
+    var novel2: PlayNovelChoice?
+
+    @Parameter(title: "右の操作", default: .checkUpdates)
+    var slot3: ActionSlotKind
+    @Parameter(title: "右の小説")
+    var novel3: PlayNovelChoice?
+}
+
+struct ActionGroupEntry: TimelineEntry {
+    struct Slot {
+        let kind: ActionSlotKind
+        let novelID: String?
+    }
+    let date: Date
+    let slots: [Slot]
+}
+
+struct ActionGroupProvider: AppIntentTimelineProvider {
+    func placeholder(in context: Context) -> ActionGroupEntry {
+        ActionGroupEntry(date: Date(), slots: [
+            .init(kind: .playToggle, novelID: nil),
+            .init(kind: .playOnWatch, novelID: nil),
+            .init(kind: .checkUpdates, novelID: nil),
+        ])
+    }
+    func snapshot(for configuration: ActionGroupConfigurationIntent, in context: Context) async -> ActionGroupEntry {
+        return entry(for: configuration)
+    }
+    func timeline(for configuration: ActionGroupConfigurationIntent, in context: Context) async -> Timeline<ActionGroupEntry> {
+        return Timeline(entries: [entry(for: configuration)], policy: .never)
+    }
+
+    func recommendations() -> [AppIntentRecommendation<ActionGroupConfigurationIntent>] {
+        if #available(watchOS 26.0, *) {
+            // watchOS 26 の文字盤は空だと「設定可能なエントリ」が出る(他ウィジェットと同じ)
+            return []
+        }
+        // 旧 watchOS では既定構成のプリセットを1つ返す
+        return [AppIntentRecommendation(intent: ActionGroupConfigurationIntent(),
+                                        description: Text(NSLocalizedString("Watch_Widget_ActionGroup_Name", comment: "ことせかい 3つの操作")))]
+    }
+
+    private func entry(for configuration: ActionGroupConfigurationIntent) -> ActionGroupEntry {
+        return ActionGroupEntry(date: Date(), slots: [
+            .init(kind: configuration.slot1, novelID: configuration.novel1?.id),
+            .init(kind: configuration.slot2, novelID: configuration.novel2?.id),
+            .init(kind: configuration.slot3, novelID: configuration.novel3?.id),
+        ])
+    }
+}
+
+@available(watchOS 11.0, *)
+struct ActionGroupComplicationView: View {
+    let entry: ActionGroupEntry
+
+    var body: some View {
+        AccessoryWidgetGroup(label: {
+            Text(NSLocalizedString("Watch_Widget_AppName", comment: "ことせかい"))
+        }, content: {
+            slotView(entry.slots[0])
+            slotView(entry.slots[1])
+            slotView(entry.slots[2])
+        })
+        .containerBackground(for: .widget) { Color.clear }
+    }
+
+    // 各枠は単機能ウィジェットと同じ合成アイコン。タップは枠ごとの widgetURL で分ける
+    @ViewBuilder
+    private func slotView(_ slot: ActionGroupEntry.Slot) -> some View {
+        ActionGlyphView(badgeSystemName: slot.kind.badgeSystemName,
+                        baseSystemName: slot.kind.baseSystemName)
+            .widgetURL(slot.kind.url(novelID: slot.novelID))
+    }
+}
+
+@available(watchOS 11.0, *)
+struct ActionGroupComplication: Widget {
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.actionGroup",
+                               intent: ActionGroupConfigurationIntent.self,
+                               provider: ActionGroupProvider()) { entry in
+            ActionGroupComplicationView(entry: entry)
+        }
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_ActionGroup_Name", comment: "ことせかい 3つの操作"))
+        .description(NSLocalizedString("Watch_Widget_ActionGroup_Desc", comment: "選んだ3つの操作を並べて置けます。"))
+        .supportedFamilies([.accessoryRectangular])
     }
 }
 

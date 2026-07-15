@@ -26,6 +26,10 @@ enum WatchWidgetAction: Equatable {
     case checkUpdatesAll
     /// 指定した小説を再生する(設定可能ウィジェット「この小説を再生」)。現在の発話元で再生する
     case playNovel(novelID: String)
+    /// Watch 単体再生モードに切り替えて再生を開始する
+    case playOnWatch
+    /// iPhone での再生に切り替えて再生を開始する
+    case playOnPhone
 
     /// 独自 URL スキーム(ウィジェット→アプリのディープリンク専用)
     static let scheme = "novelspeakerwatch"
@@ -37,6 +41,8 @@ enum WatchWidgetAction: Equatable {
         case .openTextPage:    return "textPage"
         case .checkUpdatesAll: return "checkUpdates"
         case .playNovel:       return "play"
+        case .playOnWatch:     return "playWatch"
+        case .playOnPhone:     return "playPhone"
         }
     }
 
@@ -63,6 +69,8 @@ enum WatchWidgetAction: Equatable {
                     .first(where: { $0.name == WatchWidgetAction.novelIDQueryName })?.value,
                   !novelID.isEmpty else { return nil }
             self = .playNovel(novelID: novelID)
+        case "playWatch":    self = .playOnWatch
+        case "playPhone":    self = .playOnPhone
         default:             return nil
         }
     }

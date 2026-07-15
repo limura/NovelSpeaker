@@ -128,6 +128,46 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         }
     }
 
+    /// ウィジェット「Watchで再生」から(アプリ起動後に)呼ばれる。
+    /// Watch 単体モードに切り替えて再生を開始する(PlayerView の発話元切替と同じ手順)。
+    /// 対象小説は「iPhone の現在の小説 → 単体で開いている小説 → 最後に単体再生した小説」の順
+    func playOnWatchFromWidget() {
+        restoreStandaloneSelectionIfNeeded()
+        if !isSelectedAsSource {
+            let state = PhoneSessionManager.shared.playState
+            var target = state?.novelID ?? ""
+            if target.isEmpty { target = novelID }
+            if target.isEmpty { target = WatchReadingPositionStore.latest()?.novelID ?? "" }
+            guard !target.isEmpty else {
+                reportError(NSLocalizedString("Watch_Player_NoNovelSelected_ChooseFromBookshelf", comment: "小説が選ばれていません。本棚から小説を選んでください。"))
+                return
+            }
+            guard open(novelID: target, fallbackTitle: state?.title ?? "") else {
+                reportError(NSLocalizedString("Watch_Player_BodyNotTransferred", comment: "この小説の本文がWatchに転送されていません。本棚の小説をタップして転送してから、もう一度お試しください。"))
+                return
+            }
+            // iPhone 側で再生中なら止めてから引き継ぐ(二重読み上げ防止。PlayerView と同じ)
+            if state?.isPlaying == true {
+                PhoneSessionManager.shared.send(.togglePlayPause, quiet: true)
+            }
+            isSelectedAsSource = true
+            refreshComplication()
+        }
+        if !isPlaying { play() }
+    }
+
+    /// ウィジェット「iPhoneで再生」から(アプリ起動後に)呼ばれる。
+    /// iPhone での再生に切り替えて再生を開始する(iPhone 側が既に再生中なら何もしない)
+    func playOnPhoneFromWidget() {
+        restoreStandaloneSelectionIfNeeded()
+        if isSelectedAsSource {
+            if isPlaying { stop() }
+            isSelectedAsSource = false
+        }
+        // トグルではなく「再生開始のみ」の専用コマンド(再生中に押しても止めない)
+        PhoneSessionManager.shared.send(.startSpeech)
+    }
+
     /// 永続化された発話元が Watch 単体だったら、最後に単体再生した小説を開き直して復元する。
     /// 復元対象が無ければ(小説が削除された等)単体モード自体を解除する。起動時と、
     /// ウィジェット起動時のトグル直前に呼ばれる(多重実行は didRestore フラグで防ぐ)

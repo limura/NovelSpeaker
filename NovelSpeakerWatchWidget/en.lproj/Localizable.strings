@@ -17,6 +17,16 @@
 "Watch_Widget_PlayNovel_Desc" = "Plays the chosen novel. Novel choices are listed by most recently read.";
 "Watch_Widget_PlayNovel_Unset" = "Choose a novel";
 "Watch_Widget_PlayNovel_RecommendFormat" = "Play novel: %@";
+
+/* One-shot widgets that switch the playback source and start playing */
+"Watch_Widget_PlayOnWatch_Name" = "NovelSpeaker Play on Watch";
+"Watch_Widget_PlayOnWatch_Desc" = "Tap to open NovelSpeaker, switch to Watch standalone playback and start playing.";
+"Watch_Widget_PlayOnPhone_Name" = "NovelSpeaker Play on iPhone";
+"Watch_Widget_PlayOnPhone_Desc" = "Tap to open NovelSpeaker, switch to iPhone playback and start playing.";
+
+/* Action group (AccessoryWidgetGroup) */
+"Watch_Widget_ActionGroup_Name" = "NovelSpeaker 3 Actions";
+"Watch_Widget_ActionGroup_Desc" = "Place three actions of your choice side by side.";
 "Watch_Widget_PlayNovel_TapToConfigure" = "Long-press to choose a novel";
 
 /* Configuration UI labels (AppIntents display strings are Japanese literals; these are the English overrides) */
@@ -24,6 +34,20 @@
 "指定した小説を、現在の発話元(iPhone/Watch単体)で再生します。" = "Plays the chosen novel on the current output (iPhone or Watch standalone).";
 "色の設定" = "Color Setting";
 "機能アイコンの色を選べます。" = "Choose the color of the function icon.";
+"操作" = "Action";
+"再生・停止" = "Play/Pause";
+"Watchで再生" = "Play on Watch";
+"iPhoneで再生" = "Play on iPhone";
+"本文ページ" = "Text Page";
+"更新確認" = "Check Updates";
+"3つの操作" = "3 Actions";
+"3つの枠に置く操作を選べます。「小説」は「この小説を再生」を選んだ枠でだけ使われます。" = "Choose the action for each of the three slots. The novel setting is used only for slots set to Play This Novel.";
+"左の操作" = "Left action";
+"左の小説" = "Left novel";
+"中央の操作" = "Center action";
+"中央の小説" = "Center novel";
+"右の操作" = "Right action";
+"右の小説" = "Right novel";
 "小説" = "Novel";
 "アイコン" = "Icon";
 "色" = "Color";

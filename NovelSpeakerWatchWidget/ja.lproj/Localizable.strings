@@ -17,4 +17,14 @@
 "Watch_Widget_PlayNovel_Desc" = "指定した小説を再生します。小説の候補は最近読んだ順に並びます。";
 "Watch_Widget_PlayNovel_Unset" = "小説を選択";
 "Watch_Widget_PlayNovel_RecommendFormat" = "小説を再生: %@";
+
+/* 発話元を切り替えて再生を開始するワンショット */
+"Watch_Widget_PlayOnWatch_Name" = "ことせかい Watchで再生";
+"Watch_Widget_PlayOnWatch_Desc" = "タップで ことせかい を開き、Watch単体再生に切り替えて再生を開始します。";
+"Watch_Widget_PlayOnPhone_Name" = "ことせかい iPhoneで再生";
+"Watch_Widget_PlayOnPhone_Desc" = "タップで ことせかい を開き、iPhoneでの再生に切り替えて再生を開始します。";
+
+/* アクション3枠(AccessoryWidgetGroup) */
+"Watch_Widget_ActionGroup_Name" = "ことせかい 3つの操作";
+"Watch_Widget_ActionGroup_Desc" = "選んだ3つの操作を並べて置けます。";
 "Watch_Widget_PlayNovel_TapToConfigure" = "長押しで小説を選択";

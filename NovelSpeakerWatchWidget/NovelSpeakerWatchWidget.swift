@@ -23,12 +23,19 @@ import SwiftUI
 struct NovelSpeakerWatchWidgetBundle: WidgetBundle {
     var body: some Widget {
         LauncherComplication()
-        // 操作系(第1弾): タップで widgetURL からアプリを起動して操作する circular 3種
+        // 操作系(第1弾): タップで widgetURL からアプリを起動して操作する(circular / corner)
         PlayPauseComplication()
         TextPageComplication()
         CheckUpdatesComplication()
-        // 第2弾: 設定可能ウィジェット「この小説を再生」(corner / rectangular)
+        // 第2弾: 設定可能ウィジェット「この小説を再生」(circular / corner / rectangular)
         PlayNovelComplication()
+        // 発話元を切り替えて再生を開始するワンショット(circular / corner)
+        PlayOnWatchComplication()
+        PlayOnPhoneComplication()
+        // アクション3枠(rectangular)。AccessoryWidgetGroup は watchOS 11+
+        if #available(watchOS 11.0, *) {
+            ActionGroupComplication()
+        }
     }
 }
 
