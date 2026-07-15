@@ -14,13 +14,15 @@
 
 /* Configurable "Play This Novel" widget (phase 2) */
 "Watch_Widget_PlayNovel_Name" = "Play This Novel";
-"Watch_Widget_PlayNovel_Desc" = "Plays the chosen novel. Long-press to pick the novel, icon and color.";
+"Watch_Widget_PlayNovel_Desc" = "Plays the chosen novel. Novel choices are listed by most recently read.";
 "Watch_Widget_PlayNovel_Unset" = "Choose a novel";
 "Watch_Widget_PlayNovel_TapToConfigure" = "Long-press to choose a novel";
 
 /* Configuration UI labels (AppIntents display strings are Japanese literals; these are the English overrides) */
 "この小説を再生" = "Play This Novel";
 "指定した小説を、現在の発話元(iPhone/Watch単体)で再生します。" = "Plays the chosen novel on the current output (iPhone or Watch standalone).";
+"色の設定" = "Color Setting";
+"機能アイコンの色を選べます。" = "Choose the color of the function icon.";
 "小説" = "Novel";
 "アイコン" = "Icon";
 "色" = "Color";

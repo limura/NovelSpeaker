@@ -21,30 +21,59 @@
 
 import WidgetKit
 import SwiftUI
+import AppIntents
+
+/// 操作系コンプリケーションの設定(機能アイコンの色)。
+/// 色が変わるだけでカラー文字盤での複数配置時の視認性が格段に上がるため選べるようにする。
+/// 実行用の intent ではない(操作は widgetURL)。色の enum は「この小説を再生」と共用
+struct ActionColorConfigurationIntent: WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "色の設定"
+    static var description = IntentDescription("機能アイコンの色を選べます。")
+
+    @Parameter(title: "色", default: .orange)
+    var color: PlayNovelWidgetColor
+}
 
 struct ActionComplicationEntry: TimelineEntry {
     let date: Date
     /// 対象小説のタイトル(再生トグル/本文の widgetLabel 用。無ければアプリ名にフォールバック)
     let novelTitle: String?
+    /// 機能アイコンの地色(fullColor 文字盤でのみ効く)
+    let tint: Color
 }
 
 /// 表示内容は「今読んでいる小説名」くらいなので、App Group から読んだ単一エントリ・自動更新なし
 /// (小説・章が変わった時は Watch アプリ側が reloadAllTimelines する)
-struct ActionComplicationProvider: TimelineProvider {
+struct ActionComplicationProvider: AppIntentTimelineProvider {
+    /// 文字盤の一覧に出すプリセット名(NSLocalizedString のキー。各ウィジェットの表示名)
+    let recommendationNameKey: String
+
     func placeholder(in context: Context) -> ActionComplicationEntry {
-        ActionComplicationEntry(date: Date(), novelTitle: nil)
+        ActionComplicationEntry(date: Date(), novelTitle: nil, tint: .orange)
     }
-    func getSnapshot(in context: Context, completion: @escaping (ActionComplicationEntry) -> Void) {
-        completion(currentEntry())
+    func snapshot(for configuration: ActionColorConfigurationIntent, in context: Context) async -> ActionComplicationEntry {
+        return currentEntry(configuration: configuration)
     }
-    func getTimeline(in context: Context, completion: @escaping (Timeline<ActionComplicationEntry>) -> Void) {
-        completion(Timeline(entries: [currentEntry()], policy: .never))
+    func timeline(for configuration: ActionColorConfigurationIntent, in context: Context) async -> Timeline<ActionComplicationEntry> {
+        return Timeline(entries: [currentEntry(configuration: configuration)], policy: .never)
     }
 
-    private func currentEntry() -> ActionComplicationEntry {
+    func recommendations() -> [AppIntentRecommendation<ActionColorConfigurationIntent>] {
+        if #available(watchOS 26.0, *) {
+            // watchOS 26 の文字盤は recommendations が空だと「設定可能なエントリ」を1つ出し、
+            // 追加時に設定 UI(色)が開く(「この小説を再生」で実機確認した挙動)。
+            // プリセットを返すと固定の色しか選べなくなるため、空を返して設定 UI に任せる
+            return []
+        }
+        // 旧 watchOS の文字盤には設定 UI が無いため、既定色のプリセットを1つ返す
+        return [AppIntentRecommendation(intent: ActionColorConfigurationIntent(),
+                                        description: Text(NSLocalizedString(recommendationNameKey, comment: "")))]
+    }
+
+    private func currentEntry(configuration: ActionColorConfigurationIntent) -> ActionComplicationEntry {
         let data = WatchComplicationData.load()
         let title = (data?.hasNovel == true) ? data?.title : nil
-        return ActionComplicationEntry(date: Date(), novelTitle: title)
+        return ActionComplicationEntry(date: Date(), novelTitle: title, tint: configuration.color.color)
     }
 }
 
@@ -121,7 +150,7 @@ struct ActionComplicationView: View {
     let usesNovelTitleLabel: Bool
 
     var body: some View {
-        ActionGlyphView(badgeSystemName: badgeSystemName)
+        ActionGlyphView(badgeSystemName: badgeSystemName, badgeColor: entry.tint)
             .padding(2)
             .containerBackground(for: .widget) { Color.clear }
             .widgetLabel { Text(labelText) }
@@ -141,8 +170,9 @@ struct ActionComplicationView: View {
 
 struct PlayPauseComplication: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.playToggle",
-                            provider: ActionComplicationProvider()) { entry in
+        AppIntentConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.playToggle",
+                               intent: ActionColorConfigurationIntent.self,
+                               provider: ActionComplicationProvider(recommendationNameKey: "Watch_Widget_PlayToggle_Name")) { entry in
             ActionComplicationView(entry: entry, badgeSystemName: "playpause.fill",
                                    action: .togglePlayPause, usesNovelTitleLabel: true)
         }
@@ -154,8 +184,9 @@ struct PlayPauseComplication: Widget {
 
 struct TextPageComplication: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.textPage",
-                            provider: ActionComplicationProvider()) { entry in
+        AppIntentConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.textPage",
+                               intent: ActionColorConfigurationIntent.self,
+                               provider: ActionComplicationProvider(recommendationNameKey: "Watch_Widget_TextPage_Name")) { entry in
             ActionComplicationView(entry: entry, badgeSystemName: "book.fill",
                                    action: .openTextPage, usesNovelTitleLabel: true)
         }
@@ -167,8 +198,9 @@ struct TextPageComplication: Widget {
 
 struct CheckUpdatesComplication: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.checkUpdates",
-                            provider: ActionComplicationProvider()) { entry in
+        AppIntentConfiguration(kind: "com.limuraproducts.novelspeaker.watchkitapp.checkUpdates",
+                               intent: ActionColorConfigurationIntent.self,
+                               provider: ActionComplicationProvider(recommendationNameKey: "Watch_Widget_CheckUpdates_Name")) { entry in
             ActionComplicationView(entry: entry, badgeSystemName: "arrow.clockwise",
                                    action: .checkUpdatesAll, usesNovelTitleLabel: false)
         }
@@ -181,17 +213,17 @@ struct CheckUpdatesComplication: Widget {
 #Preview("PlayToggle", as: .accessoryCircular) {
     PlayPauseComplication()
 } timeline: {
-    ActionComplicationEntry(date: .now, novelTitle: "転生したらスライムだった件")
+    ActionComplicationEntry(date: .now, novelTitle: "転生したらスライムだった件", tint: .orange)
 }
 
 #Preview("TextPage", as: .accessoryCircular) {
     TextPageComplication()
 } timeline: {
-    ActionComplicationEntry(date: .now, novelTitle: "転生したらスライムだった件")
+    ActionComplicationEntry(date: .now, novelTitle: "転生したらスライムだった件", tint: .teal)
 }
 
 #Preview("CheckUpdates", as: .accessoryCircular) {
     CheckUpdatesComplication()
 } timeline: {
-    ActionComplicationEntry(date: .now, novelTitle: nil)
+    ActionComplicationEntry(date: .now, novelTitle: nil, tint: .purple)
 }

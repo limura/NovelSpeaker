@@ -14,6 +14,6 @@
 
 /* 設定可能ウィジェット「この小説を再生」(第2弾) */
 "Watch_Widget_PlayNovel_Name" = "この小説を再生";
-"Watch_Widget_PlayNovel_Desc" = "指定した小説を再生します。長押しで小説・アイコン・色を選べます。";
+"Watch_Widget_PlayNovel_Desc" = "指定した小説を再生します。小説の候補は最近読んだ順に並びます。";
 "Watch_Widget_PlayNovel_Unset" = "小説を選択";
 "Watch_Widget_PlayNovel_TapToConfigure" = "長押しで小説を選択";

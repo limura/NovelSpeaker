@@ -141,11 +141,18 @@ struct PlayNovelProvider: AppIntentTimelineProvider {
     // Watch に転送済みの小説1冊につき1プリセットを返す(アイコン・色は既定値。
     // 文字盤ではプリセット選択のみで、アイコン等の変更は Smart Stack 側の編集で行う)
     func recommendations() -> [AppIntentRecommendation<PlayNovelConfigurationIntent>] {
-        // 一覧が長くなりすぎないよう上限を設ける。ストアの並びは Watch アプリ側が
-        // 「最近読んだ/再生した順」で書いているので、先頭=よく聴いている小説になる
+        if #available(watchOS 26.0, *) {
+            // watchOS 26 の文字盤は recommendations が空だと「設定可能なエントリ」を1つ出し、
+            // 追加時に設定 UI(小説・アイコン・色)が開く(実機で確認した挙動)。
+            // プリセットを返すと逆に固定のアイコン・色しか選べなくなるため、空を返して設定 UI に任せる
+            return []
+        }
+        // 旧 watchOS の文字盤には設定 UI が無いため、プリセットを返す(これしか一覧に並ばない)。
+        // ストアの並びは Watch アプリ側が「最近読んだ/再生した順」で書いているので、
+        // 先頭=よく聴いている小説になる。一覧が長くなりすぎないよう上限を設ける
         let summaries = WatchNovelSummaryStore.load()
         if summaries.isEmpty {
-            // 転送済み小説がまだ無くても(または要約ストア未生成でも)、ウィジェット自体は
+            // 候補がまだ無くても(または要約ストア未生成でも)、ウィジェット自体は
             // 一覧に見えるように未設定のプリセットを1つ返す(タップはアプリ起動になるだけ)
             let intent = PlayNovelConfigurationIntent()
             return [AppIntentRecommendation(intent: intent, description: Text(NSLocalizedString("Watch_Widget_PlayNovel_Unset", comment: "小説を選択")))]

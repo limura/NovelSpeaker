@@ -124,13 +124,22 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     }
 
     /// 設定可能ウィジェット(「この小説を再生」)の小説選択肢・読了ゲージ用の要約(App Group)を
-    /// 更新する。Watch に転送済みの小説ぶんを書く(ウィジェットで選べる＝Watch に載っている小説)。
-    /// 内容が変わった時だけウィジェットを再読込する
+    /// 更新する。内容が変わった時だけウィジェットを再読込する。
+    /// 候補 = 「Watch に本文転送済みの小説」+「最近読んだ順の上位(未転送でも)」。
+    /// 未転送の小説も候補に入れるのは、Watch を iPhone のリモコンとしてだけ使う人でも
+    /// ウィジェットからその小説を再生できるようにするため(単体モードで押した場合は
+    /// 「本文が転送されていません」のエラーになるだけ)。全冊(数千冊)を入れると
+    /// 選択 UI が使い物にならないので、未転送ぶんは最近読んだ上位に絞る
     private func updateWidgetNovelSummaries() {
         let transferred = storedChapterCounts
-        // 転送済みが空でも、直前まで有った物を消すために一度は空で保存させる
-        guard !transferred.isEmpty || !WatchNovelSummaryStore.load().isEmpty else { return }
-        let summaries: [WatchWidgetNovelSummary] = transferred.keys.compactMap { novelID in
+        var candidateIDs = Set(transferred.keys)
+        let recentLimit = 30
+        for novel in novels.sorted(by: { $0.lastReadDate > $1.lastReadDate }).prefix(recentLimit) {
+            candidateIDs.insert(novel.novelID)
+        }
+        // 候補が空でも、直前まで有った物を消すために一度は空で保存させる
+        guard !candidateIDs.isEmpty || !WatchNovelSummaryStore.load().isEmpty else { return }
+        let summaries: [WatchWidgetNovelSummary] = candidateIDs.compactMap { novelID in
             let title = novelsByID[novelID]?.title ?? storedTitles[novelID] ?? ""
             guard !title.isEmpty else { return nil }
             let chapterCount = max(novelsByID[novelID]?.chapterCount ?? 0, transferred[novelID] ?? 0)
