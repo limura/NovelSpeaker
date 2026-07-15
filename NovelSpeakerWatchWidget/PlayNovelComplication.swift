@@ -6,8 +6,10 @@
 //  ユーザが「小説」と「アイコン・色」を選んで配置し、タップするとその小説を
 //  現在の発話元(iPhone/Watch単体)で再生する(widgetURL でアプリを起動)。
 //
-//  - 小説の選択肢は App Group の要約ストア(WatchNovelSummaryStore)= Watch に転送済みの小説から。
-//  - families: corner(選択アイコン+曲線ラベルの小説名) / rectangular(アイコン+小説名+読了ゲージ)。
+//  - 小説の選択肢は App Group の要約ストア(WatchNovelSummaryStore)から
+//    (Watch に転送済みの小説 + 最近読んだ順の上位)。
+//  - families: circular(合成アイコン+曲線ラベルの小説名) /
+//    corner(合成アイコン+曲線ラベルの小説名) / rectangular(合成アイコン+小説名+読了ゲージ)。
 //  - 設定 UI は WidgetConfigurationIntent(AppIntents)で出す。設定用 intent は「選択肢の供給」と
 //    「設定の保持」に使うだけで、実行は widgetURL 経由なので調査スパイクの落とし穴には掛からない。
 //
@@ -202,6 +204,8 @@ struct PlayNovelComplicationView: View {
     @ViewBuilder
     private var content: some View {
         switch family {
+        case .accessoryCircular:
+            circular
         case .accessoryCorner:
             corner
         case .accessoryRectangular:
@@ -209,6 +213,14 @@ struct PlayNovelComplicationView: View {
         default:
             ActionGlyphView(badgeSystemName: entry.iconSystemName, badgeColor: entry.tint)
         }
+    }
+
+    // 円形: ことせかい+選択アイコンの合成。小説名は widgetLabel(対応文字盤では曲線ラベル)に
+    @ViewBuilder
+    private var circular: some View {
+        ActionGlyphView(badgeSystemName: entry.iconSystemName, badgeColor: entry.tint)
+            .padding(2)
+            .widgetLabel { Text(entry.title ?? appName) }
     }
 
     // 角: ことせかい+選択アイコンの合成を角に、小説名を縁の曲線ラベルに
@@ -257,8 +269,15 @@ struct PlayNovelComplication: Widget {
         }
         .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayNovel_Name", comment: "この小説を再生"))
         .description(NSLocalizedString("Watch_Widget_PlayNovel_Desc", comment: "指定した小説を再生します。"))
-        .supportedFamilies([.accessoryCorner, .accessoryRectangular])
+        .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular])
     }
+}
+
+#Preview("Circular", as: .accessoryCircular) {
+    PlayNovelComplication()
+} timeline: {
+    PlayNovelEntry(date: .now, novelID: "sample", title: "転生したらスライムだった件",
+                   progress: 0.4, iconSystemName: "play.fill", tint: .blue)
 }
 
 #Preview("Rectangular", as: .accessoryRectangular) {
