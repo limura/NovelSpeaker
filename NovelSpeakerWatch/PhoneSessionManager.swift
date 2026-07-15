@@ -146,7 +146,19 @@ final class PhoneSessionManager: NSObject, ObservableObject {
             return WatchWidgetNovelSummary(novelID: novelID, title: title,
                                            chapterCount: chapterCount, overallProgress: progress)
         }
-        .sorted { $0.title < $1.title }
+        // 「最近読んだ/再生した順」に並べる(同時刻はタイトル順)。文字盤の一覧に出る
+        // 「この小説を再生」のプリセットは先頭から数冊しか出せないので、
+        // よく聴いている小説が先頭に来るようにする
+        .sorted { a, b in
+            func recency(_ novelID: String) -> Date {
+                return max(novelsByID[novelID]?.lastReadDate ?? Date(timeIntervalSince1970: 0),
+                           lastPlayedDates[novelID] ?? Date(timeIntervalSince1970: 0))
+            }
+            let aDate = recency(a.novelID)
+            let bDate = recency(b.novelID)
+            if aDate != bDate { return aDate > bDate }
+            return a.title < b.title
+        }
         if WatchNovelSummaryStore.save(summaries) {
             WidgetCenter.shared.reloadAllTimelines()
             // 文字盤の一覧に出る「この小説を再生」のプリセット(recommendations)も作り直させる
@@ -422,6 +434,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         lastPlayedDates[novelID] = Date()
         UserDefaults.standard.set(lastPlayedDates.mapValues { $0.timeIntervalSince1970 },
                                   forKey: PhoneSessionManager.lastPlayedDatesKey)
+        // 「この小説を再生」プリセットの並び(最近再生した順)にも反映する(変化時のみ保存される)
+        updateWidgetNovelSummaries()
     }
 
     // MARK: - 孤児キャッシュの掃除

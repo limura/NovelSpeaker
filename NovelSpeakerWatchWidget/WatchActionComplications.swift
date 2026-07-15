@@ -61,9 +61,23 @@ struct ActionGlyphView: View {
         GeometryReader { geo in
             let side = min(geo.size.width, geo.size.height)
             ZStack {
-                // ことせかいグリフを 2/3 弱に縮めて左上へ寄せる(下側のゴチャつきを機能アイコンから外す)
+                // ことせかいグリフを 2/3 弱に縮めて左上へ寄せる(下側のゴチャつきを機能アイコンから外す)。
+                // バッジと重なる部分はグリフ側をくり抜いて、バッジ(特に corner のリング)が
+                // グリフの白い部分に重ならず暗い文字盤地の上に乗るようにする
                 BrandGlyph()
                     .frame(width: side * 0.60, height: side * 0.60)
+                    .mask {
+                        Rectangle()
+                            .overlay(
+                                // バッジ(直径0.48)より一回り大きい穴。グリフ中心(0.38,0.38)から見た
+                                // バッジ中心(0.66,0.66)の相対位置 = (0.28,0.28)
+                                Circle()
+                                    .frame(width: side * 0.52, height: side * 0.52)
+                                    .offset(x: side * 0.28, y: side * 0.28)
+                                    .blendMode(.destinationOut)
+                            )
+                            .compositingGroup()
+                    }
                     .offset(x: -side * 0.12, y: -side * 0.12)
                 badge(side: side)
                     .offset(x: side * 0.16, y: side * 0.16)
