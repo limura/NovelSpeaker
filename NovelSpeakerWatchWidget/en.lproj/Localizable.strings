@@ -41,13 +41,10 @@
 "本文ページ" = "Text Page";
 "更新確認" = "Check Updates";
 "3つの操作" = "3 Actions";
-"3つの枠に置く操作を選べます。「小説」は「この小説を再生」を選んだ枠でだけ使われます。" = "Choose the action for each of the three slots. The novel setting is used only for slots set to Play This Novel.";
+"3つの枠に置く操作を選べます。" = "Choose the action for each of the three slots.";
 "左の操作" = "Left action";
-"左の小説" = "Left novel";
 "中央の操作" = "Center action";
-"中央の小説" = "Center novel";
 "右の操作" = "Right action";
-"右の小説" = "Right novel";
 "小説" = "Novel";
 "アイコン" = "Icon";
 "色" = "Color";

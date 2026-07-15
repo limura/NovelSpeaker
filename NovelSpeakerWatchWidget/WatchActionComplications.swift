@@ -266,9 +266,11 @@ struct PlayOnPhoneComplication: Widget {
 
 // MARK: - アクション3枠(AccessoryWidgetGroup, watchOS 11+)
 
-/// 3枠に置ける操作の種類
+/// 3枠に置ける操作の種類。
+/// 「この小説を再生」は入れない: 小説の選択パラメータが「小説が不要な操作」を選んだ枠にも
+/// 表示されて混乱する(実機で確認)ため、小説の選択が要らない操作だけに絞る
 enum ActionSlotKind: String, AppEnum {
-    case playToggle, playOnWatch, playOnPhone, textPage, checkUpdates, playNovel
+    case playToggle, playOnWatch, playOnPhone, textPage, checkUpdates
 
     static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "操作")
     static var caseDisplayRepresentations: [ActionSlotKind: DisplayRepresentation] = [
@@ -277,7 +279,6 @@ enum ActionSlotKind: String, AppEnum {
         .playOnPhone:  DisplayRepresentation(title: "iPhoneで再生"),
         .textPage:     DisplayRepresentation(title: "本文ページ"),
         .checkUpdates: DisplayRepresentation(title: "更新確認"),
-        .playNovel:    DisplayRepresentation(title: "この小説を再生"),
     ]
 
     var badgeSystemName: String {
@@ -287,7 +288,6 @@ enum ActionSlotKind: String, AppEnum {
         case .playOnPhone:  return "play.fill"
         case .textPage:     return "book.fill"
         case .checkUpdates: return "arrow.clockwise"
-        case .playNovel:    return "play.fill"
         }
     }
 
@@ -299,58 +299,41 @@ enum ActionSlotKind: String, AppEnum {
         }
     }
 
-    /// この枠のディープリンク(novelID は playNovel の時だけ使う)
-    func url(novelID: String?) -> URL? {
+    /// この枠のディープリンク
+    var url: URL {
         switch self {
         case .playToggle:   return WatchWidgetAction.togglePlayPause.url
         case .playOnWatch:  return WatchWidgetAction.playOnWatch.url
         case .playOnPhone:  return WatchWidgetAction.playOnPhone.url
         case .textPage:     return WatchWidgetAction.openTextPage.url
         case .checkUpdates: return WatchWidgetAction.checkUpdatesAll.url
-        case .playNovel:
-            guard let novelID = novelID, !novelID.isEmpty else { return nil }
-            return WatchWidgetAction.playNovel(novelID: novelID).url
         }
     }
 }
 
-/// アクション3枠の設定。「小説」は「この小説を再生」を選んだ枠でだけ使われる
+/// アクション3枠の設定
 struct ActionGroupConfigurationIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "3つの操作"
-    static var description = IntentDescription("3つの枠に置く操作を選べます。「小説」は「この小説を再生」を選んだ枠でだけ使われます。")
+    static var description = IntentDescription("3つの枠に置く操作を選べます。")
 
     @Parameter(title: "左の操作", default: .playToggle)
     var slot1: ActionSlotKind
-    @Parameter(title: "左の小説")
-    var novel1: PlayNovelChoice?
 
     @Parameter(title: "中央の操作", default: .playOnWatch)
     var slot2: ActionSlotKind
-    @Parameter(title: "中央の小説")
-    var novel2: PlayNovelChoice?
 
     @Parameter(title: "右の操作", default: .checkUpdates)
     var slot3: ActionSlotKind
-    @Parameter(title: "右の小説")
-    var novel3: PlayNovelChoice?
 }
 
 struct ActionGroupEntry: TimelineEntry {
-    struct Slot {
-        let kind: ActionSlotKind
-        let novelID: String?
-    }
     let date: Date
-    let slots: [Slot]
+    let slots: [ActionSlotKind]
 }
 
 struct ActionGroupProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> ActionGroupEntry {
-        ActionGroupEntry(date: Date(), slots: [
-            .init(kind: .playToggle, novelID: nil),
-            .init(kind: .playOnWatch, novelID: nil),
-            .init(kind: .checkUpdates, novelID: nil),
-        ])
+        ActionGroupEntry(date: Date(), slots: [.playToggle, .playOnWatch, .checkUpdates])
     }
     func snapshot(for configuration: ActionGroupConfigurationIntent, in context: Context) async -> ActionGroupEntry {
         return entry(for: configuration)
@@ -370,11 +353,7 @@ struct ActionGroupProvider: AppIntentTimelineProvider {
     }
 
     private func entry(for configuration: ActionGroupConfigurationIntent) -> ActionGroupEntry {
-        return ActionGroupEntry(date: Date(), slots: [
-            .init(kind: configuration.slot1, novelID: configuration.novel1?.id),
-            .init(kind: configuration.slot2, novelID: configuration.novel2?.id),
-            .init(kind: configuration.slot3, novelID: configuration.novel3?.id),
-        ])
+        return ActionGroupEntry(date: Date(), slots: [configuration.slot1, configuration.slot2, configuration.slot3])
     }
 }
 
@@ -393,12 +372,15 @@ struct ActionGroupComplicationView: View {
         .containerBackground(for: .widget) { Color.clear }
     }
 
-    // 各枠は単機能ウィジェットと同じ合成アイコン。タップは枠ごとの widgetURL で分ける
+    // 各枠は単機能ウィジェットと同じ合成アイコン。
+    // タップ先は枠ごとの Link で分ける(widgetURL は1ウィジェットに1つだけサポートで、
+    // 複数付けると挙動が未定義=全部最初の URL になる。実機で確認済み)
     @ViewBuilder
-    private func slotView(_ slot: ActionGroupEntry.Slot) -> some View {
-        ActionGlyphView(badgeSystemName: slot.kind.badgeSystemName,
-                        baseSystemName: slot.kind.baseSystemName)
-            .widgetURL(slot.kind.url(novelID: slot.novelID))
+    private func slotView(_ slot: ActionSlotKind) -> some View {
+        Link(destination: slot.url) {
+            ActionGlyphView(badgeSystemName: slot.badgeSystemName,
+                            baseSystemName: slot.baseSystemName)
+        }
     }
 }
 
