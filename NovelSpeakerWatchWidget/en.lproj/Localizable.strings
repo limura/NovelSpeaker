@@ -16,6 +16,7 @@
 "Watch_Widget_PlayNovel_Name" = "Play This Novel";
 "Watch_Widget_PlayNovel_Desc" = "Plays the chosen novel. Novel choices are listed by most recently read.";
 "Watch_Widget_PlayNovel_Unset" = "Choose a novel";
+"Watch_Widget_PlayNovel_RecommendFormat" = "Play novel: %@";
 "Watch_Widget_PlayNovel_TapToConfigure" = "Long-press to choose a novel";
 
 /* Configuration UI labels (AppIntents display strings are Japanese literals; these are the English overrides) */

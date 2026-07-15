@@ -157,10 +157,12 @@ struct PlayNovelProvider: AppIntentTimelineProvider {
             let intent = PlayNovelConfigurationIntent()
             return [AppIntentRecommendation(intent: intent, description: Text(NSLocalizedString("Watch_Widget_PlayNovel_Unset", comment: "小説を選択")))]
         }
+        // 小説名だけだと何をするものか分からないので「小説を再生: 小説名」の形で出す
+        let labelFormat = NSLocalizedString("Watch_Widget_PlayNovel_RecommendFormat", comment: "小説を再生: %@")
         return summaries.prefix(10).map { summary in
             let intent = PlayNovelConfigurationIntent()
             intent.novel = PlayNovelChoice(id: summary.novelID, title: summary.title)
-            return AppIntentRecommendation(intent: intent, description: Text(summary.title))
+            return AppIntentRecommendation(intent: intent, description: Text(String(format: labelFormat, summary.title)))
         }
     }
 
