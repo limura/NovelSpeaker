@@ -136,9 +136,17 @@ struct PlayNovelProvider: AppIntentTimelineProvider {
         return Timeline(entries: [entry(for: configuration)], policy: .never)
     }
 
-    // watchOS では実装が必須(ギャラリーの推奨候補。小説はユーザが選ぶので候補は出さない)
+    // 文字盤のコンプリケーション一覧には、設定可能ウィジェットはここで返す「プリセット」しか
+    // 並ばない(空配列だと文字盤には一切出ない。Smart Stack は長押し編集で設定できるので出る)。
+    // Watch に転送済みの小説1冊につき1プリセットを返す(アイコン・色は既定値。
+    // 文字盤ではプリセット選択のみで、アイコン等の変更は Smart Stack 側の編集で行う)
     func recommendations() -> [AppIntentRecommendation<PlayNovelConfigurationIntent>] {
-        return []
+        // 一覧が長くなりすぎないよう上限を設ける(タイトル順で先頭から)
+        return WatchNovelSummaryStore.load().prefix(10).map { summary in
+            let intent = PlayNovelConfigurationIntent()
+            intent.novel = PlayNovelChoice(id: summary.novelID, title: summary.title)
+            return AppIntentRecommendation(intent: intent, description: Text(summary.title))
+        }
     }
 
     private func entry(for configuration: PlayNovelConfigurationIntent) -> PlayNovelEntry {

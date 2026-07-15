@@ -53,6 +53,7 @@ struct ActionComplicationProvider: TimelineProvider {
 /// badgeColor は fullColor 文字盤でのバッジ地色(「この小説を再生」の色選択に使う)。
 struct ActionGlyphView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.widgetFamily) private var family
     let badgeSystemName: String
     var badgeColor: Color = .orange
 
@@ -72,16 +73,23 @@ struct ActionGlyphView: View {
         }
     }
 
-    // 機能アイコン。地の丸だけを widgetAccentable にして「アクセント側グループ」に入れ、
-    // 記号(白)とグリフ(白)は既定グループのままにする。こうすると単色文字盤でも
-    // 地の丸だけがアクセント色になり、白い記号が潰れず読める(白丸化バグの対策)。
-    // fullColor 文字盤では地の丸=選択色(既定オレンジ)×白記号。
+    // 機能アイコン。
+    // - fullColor 文字盤: 地の丸=選択色(既定オレンジ)×白記号。
+    // - 単色系(circular/rectangular): 地の丸だけを widgetAccentable で「アクセント側グループ」に
+    //   入れ、記号(白)とグリフ(白)は既定グループのまま。地の丸だけアクセント色になり白記号が読める。
+    // - 単色系の corner: corner はアクセントグループの塗り分けが効かず、塗り丸だと丸も記号も
+    //   白に潰れて「白い丸」になる(実機で確認)。塗り丸をやめて「白リング+白記号」にし、
+    //   暗い文字盤背景を地として読ませる
     @ViewBuilder
     private func badge(side: CGFloat) -> some View {
         ZStack {
-            Circle()
-                .fill(renderingMode == .fullColor ? AnyShapeStyle(badgeColor) : AnyShapeStyle(.primary))
-                .widgetAccentable()
+            if renderingMode == .fullColor {
+                Circle().fill(badgeColor)
+            } else if family == .accessoryCorner {
+                Circle().stroke(.white, lineWidth: max(1, side * 0.035))
+            } else {
+                Circle().fill(.primary).widgetAccentable()
+            }
             Image(systemName: badgeSystemName)
                 .font(.system(size: side * 0.30, weight: .bold))
                 .foregroundStyle(.white)

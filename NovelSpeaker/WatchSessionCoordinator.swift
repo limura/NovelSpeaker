@@ -586,7 +586,17 @@ class WatchSessionCoordinator: NSObject {
     private func executeCommand(_ command: WatchMessage.Command, message: [String: Any], completion: @escaping ((ok: Bool, errorMessage: String?)) -> Void) {
         switch command {
         case .togglePlayPause:
-            RealmUtil.RealmBlock { _ in StorySpeaker.shared.togglePlayPauseEvent() }
+            // togglePlayPauseEvent() は使わない: あれは isNeedRepeatSpeech の「現在値」を引き継ぐため、
+            // Watch からの背面起動などで一度も UI の再生ボタンを押していないと false のままになり、
+            // 章末で次章へ進まず「読み上げが最後に達しました」で止まってしまう。
+            // Watch の再生ボタンは UI の再生ボタンと同じ「連続再生の開始」なので true を明示する
+            RealmUtil.RealmBlock { realm in
+                if StorySpeaker.shared.isPlayng {
+                    StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: true)
+                } else {
+                    StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "Watchからの再生・停止.\(#function)", isNeedRepeatSpeech: true)
+                }
+            }
             completeAfterSettle(completion)
         case .skipBackward:
             if StorySpeaker.shared.isPlayng {
@@ -792,8 +802,11 @@ class WatchSessionCoordinator: NSObject {
         StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true) { _ in
             DispatchQueue.main.async {
                 if thenPlay, !StorySpeaker.shared.isPlayng {
-                    // SetStory 後に停止中なら再生を開始する(トグルで開始→settle 後に状態返信)
-                    RealmUtil.RealmBlock { _ in StorySpeaker.shared.togglePlayPauseEvent() }
+                    // SetStory 後に停止中なら再生を開始する。UI の再生ボタンと同じ「連続再生」として
+                    // 開始する(isNeedRepeatSpeech: true。false だと章末で次章へ進まない。toggle の項参照)
+                    RealmUtil.RealmBlock { realm in
+                        StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "Watchウィジェット「この小説を再生」.\(#function)", isNeedRepeatSpeech: true)
+                    }
                     self.completeAfterSettle(completion)
                 } else {
                     completion((true, nil))

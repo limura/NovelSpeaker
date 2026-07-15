@@ -149,6 +149,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         .sorted { $0.title < $1.title }
         if WatchNovelSummaryStore.save(summaries) {
             WidgetCenter.shared.reloadAllTimelines()
+            // 文字盤の一覧に出る「この小説を再生」のプリセット(recommendations)も作り直させる
+            WidgetCenter.shared.invalidateConfigurationRecommendations()
         }
     }
 
