@@ -21,6 +21,10 @@ class PhoneWidgetDataUpdater {
 
     private static var observerTokens: [NotificationToken] = []
     private static var debounceWorkItem: DispatchWorkItem?
+    /// SetStory の入口で先取りした「これから読む小説」。
+    /// currentReadingNovelID の本書き込み(SetStory 完了後)が追いつくまでの間、
+    /// ランチャー表示にはこちらを優先して使う(main thread からのみ触る)
+    private static var upcomingReadingNovelID: String?
 
     /// Realm の変更を監視して共有ストアを追従させる(runPostLaunch から一度だけ呼ぶ)。
     /// 一発のトリガ(起動時・バックグラウンド移行時)だけだと、
@@ -33,6 +37,14 @@ class PhoneWidgetDataUpdater {
     static func startObserving() {
         DispatchQueue.main.async {
             guard observerTokens.isEmpty else { return }
+            // コントロールセンター/ロック画面下部角のコントロールは OS 側が登録を
+            // キャッシュするため、アプリ更新でコントロールの見た目や分岐を変えても
+            // 反映されないことがある。起動のたびに再読込を頼んでおく
+            #if !targetEnvironment(macCatalyst)
+            if #available(iOS 18.0, *) {
+                ControlCenter.shared.reloadAllControls()
+            }
+            #endif
             RealmUtil.RealmBlock { realm in
                 // currentReadingNovelID の切り替わり(小説を開いた等)
                 if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
@@ -49,6 +61,17 @@ class PhoneWidgetDataUpdater {
                     })
                 }
             }
+        }
+    }
+
+    /// SetStory 直後(重い処理の完了前)の先取り通知(StorySpeaker.SetStory から呼ばれる)。
+    /// アプリがまだ前面にいるうちに即時反映しておくことで、直後にホーム画面へ
+    /// 戻られてもウィジェットが新しい小説になっているようにする
+    static func noteReadingNovel(novelID: String) {
+        DispatchQueue.main.async {
+            guard upcomingReadingNovelID != novelID else { return }
+            upcomingReadingNovelID = novelID
+            update()
         }
     }
 
@@ -77,6 +100,20 @@ class PhoneWidgetDataUpdater {
 
     /// 今読んでいる小説(前回読んでいた小説)。読了進捗は栞の位置から計算する
     private static func currentReadingState(realm: Realm) -> PhoneWidgetReadingState? {
+        // SetStory の先取り通知があればそちらを優先する。
+        // 本書き込み(currentReadingNovelID)が追いついたら先取りは解除する
+        if let upcoming = upcomingReadingNovelID {
+            if RealmGlobalState.GetInstanceWith(realm: realm)?.currentReadingNovelID == upcoming {
+                upcomingReadingNovelID = nil
+            } else if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: upcoming) {
+                return PhoneWidgetReadingState(
+                    novelID: upcoming,
+                    title: novel.title,
+                    chapterNumber: novel.readingChapterNumber ?? 1,
+                    chapterCount: novel.lastChapterNumber ?? 0,
+                    overallProgress: roundedProgress(novel: novel))
+            }
+        }
         guard let story = RealmGlobalState.GetLastReadStory(realm: realm) else { return nil }
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: story.storyID)
         guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return nil }

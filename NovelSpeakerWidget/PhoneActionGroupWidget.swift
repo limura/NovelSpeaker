@@ -25,22 +25,43 @@ struct PhoneActionGroupConfigurationIntent: WidgetConfigurationIntent {
     @Parameter(title: "小説1")
     var novel1: PhonePlayNovelChoice?
 
+    @Parameter(title: "小説1のアイコン", default: .play)
+    var icon1: PhonePlayNovelWidgetIcon
+
+    @Parameter(title: "小説1の色", default: .blue)
+    var color1: PhonePlayNovelWidgetColor
+
     @Parameter(title: "小説2")
     var novel2: PhonePlayNovelChoice?
+
+    @Parameter(title: "小説2のアイコン", default: .play)
+    var icon2: PhonePlayNovelWidgetIcon
+
+    @Parameter(title: "小説2の色", default: .green)
+    var color2: PhonePlayNovelWidgetColor
+}
+
+struct PhoneActionGroupSlot {
+    let novelID: String?
+    let title: String?
+    let iconSystemName: String
+    let tint: Color
 }
 
 struct PhoneActionGroupEntry: TimelineEntry {
     let date: Date
-    let novel1ID: String?
-    let novel1Title: String?
-    let novel2ID: String?
-    let novel2Title: String?
+    let slot1: PhoneActionGroupSlot
+    let slot2: PhoneActionGroupSlot
     var isPreview: Bool = false
 }
 
 struct PhoneActionGroupProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> PhoneActionGroupEntry {
-        PhoneActionGroupEntry(date: Date(), novel1ID: nil, novel1Title: nil, novel2ID: nil, novel2Title: nil, isPreview: true)
+        PhoneActionGroupEntry(
+            date: Date(),
+            slot1: PhoneActionGroupSlot(novelID: nil, title: nil, iconSystemName: "play.fill", tint: .blue),
+            slot2: PhoneActionGroupSlot(novelID: nil, title: nil, iconSystemName: "play.fill", tint: .green),
+            isPreview: true)
     }
 
     func snapshot(for configuration: PhoneActionGroupConfigurationIntent, in context: Context) async -> PhoneActionGroupEntry {
@@ -52,12 +73,19 @@ struct PhoneActionGroupProvider: AppIntentTimelineProvider {
     }
 
     private func entry(for configuration: PhoneActionGroupConfigurationIntent, isPreview: Bool) -> PhoneActionGroupEntry {
-        PhoneActionGroupEntry(
+        // タイトルは共有ストアの最新値を優先(タイトル変更に追従させる)
+        func slot(novel: PhonePlayNovelChoice?, icon: PhonePlayNovelWidgetIcon, color: PhonePlayNovelWidgetColor) -> PhoneActionGroupSlot {
+            let summary = novel.flatMap { PhoneWidgetDataStore.summary(novelID: $0.id) }
+            return PhoneActionGroupSlot(
+                novelID: novel?.id,
+                title: summary?.title ?? novel?.title,
+                iconSystemName: icon.systemName,
+                tint: color.color)
+        }
+        return PhoneActionGroupEntry(
             date: Date(),
-            novel1ID: configuration.novel1?.id,
-            novel1Title: configuration.novel1?.title,
-            novel2ID: configuration.novel2?.id,
-            novel2Title: configuration.novel2?.title,
+            slot1: slot(novel: configuration.novel1, icon: configuration.icon1, color: configuration.color1),
+            slot2: slot(novel: configuration.novel2, icon: configuration.icon2, color: configuration.color2),
             isPreview: isPreview)
     }
 }
@@ -65,41 +93,63 @@ struct PhoneActionGroupProvider: AppIntentTimelineProvider {
 struct PhoneActionGroupWidgetView: View {
     let entry: PhoneActionGroupEntry
 
+    private var appName: String { NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい") }
+
     var body: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 10) {
+        VStack(spacing: 6) {
+            HStack(alignment: .top, spacing: 8) {
                 // 再生・停止
-                Button(intent: PhoneSpeechToggleIntent()) {
-                    PhoneActionGlyphView(badgeSystemName: "playpause.fill", badgeColor: .orange)
+                cell(caption: NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止")) {
+                    Button(intent: PhoneSpeechToggleIntent()) {
+                        PhoneActionGlyphView(badgeSystemName: "playpause.fill", badgeColor: .orange)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
                 // アプリの起動
-                Button(intent: PhoneOpenAppIntent()) {
-                    PhoneBrandGlyph()
+                cell(caption: appName) {
+                    Button(intent: PhoneOpenAppIntent()) {
+                        PhoneBrandGlyph()
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
-            HStack(spacing: 10) {
-                // 小説1・小説2(色で区別する。未選択の間は歯車で「要設定」を示す)
-                novelSlot(novelID: entry.novel1ID, title: entry.novel1Title, tint: .blue)
-                novelSlot(novelID: entry.novel2ID, title: entry.novel2Title, tint: .green)
+            HStack(alignment: .top, spacing: 8) {
+                novelSlot(entry.slot1)
+                novelSlot(entry.slot2)
             }
         }
         .containerBackground(for: .widget) { Color.clear }
     }
 
+    // アイコン+小さいラベルの1枠。ラベルは見切れてもよいので小説名を出す
     @ViewBuilder
-    private func novelSlot(novelID: String?, title: String?, tint: Color) -> some View {
-        if let novelID = novelID {
-            Button(intent: PhonePlayNovelIntent(novelID: novelID)) {
-                PhoneActionGlyphView(badgeSystemName: "play.fill", badgeColor: tint)
+    private func cell(caption: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(spacing: 2) {
+            content()
+                .frame(width: 42, height: 42)
+            Text(caption)
+                .font(.system(size: 9))
+                .lineLimit(1)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private func novelSlot(_ slot: PhoneActionGroupSlot) -> some View {
+        if let novelID = slot.novelID {
+            cell(caption: slot.title ?? "") {
+                Button(intent: PhonePlayNovelIntent(novelID: novelID)) {
+                    PhoneActionGlyphView(badgeSystemName: slot.iconSystemName, badgeColor: slot.tint)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(title ?? "")
         } else {
             // 未選択。タップはボタンにせず通常のアプリ起動にしておく
-            // (ギャラリーのプレビューでは機能の見本として再生アイコンを出す)
-            PhoneActionGlyphView(badgeSystemName: entry.isPreview ? "play.fill" : "gearshape.fill", badgeColor: tint)
+            // (ギャラリーのプレビューでは機能の見本として選択アイコンを出す)
+            cell(caption: NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択")) {
+                PhoneActionGlyphView(badgeSystemName: entry.isPreview ? slot.iconSystemName : "gearshape.fill", badgeColor: slot.tint)
+            }
         }
     }
 }

@@ -288,6 +288,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
     func SetStory(story:Story, withUpdateReadDate:Bool, completion:((_ story:Story)->Void)? = nil) {
+        #if !os(watchOS)
+        // iPhone側ウィジェット(ランチャー)のための先取り通知。
+        // currentReadingNovelID の書き込みは SetStory の重い非同期処理の完了後なので、
+        // 「小説を開いてすぐホーム画面へ」だと書き込みが間に合わず、バックグラウンドからの
+        // ウィジェット再読込は OS に間引かれて前の小説のまま残ることがある。
+        // 読書対象が変わることが確定したこの時点で先にウィジェット側へ知らせておく
+        if withUpdateReadDate {
+            PhoneWidgetDataUpdater.noteReadingNovel(novelID: story.novelID)
+        }
+        #endif
         EnqueueSetStory(story: story, withUpdateReadDate: withUpdateReadDate, completion: completion)
     }
     
