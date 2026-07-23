@@ -320,7 +320,9 @@ struct PhonePlayToggleControl: ControlWidget {
                 Label {
                     Text("再生または停止")
                 } icon: {
-                    Image(systemName: "playpause.fill")
+                    // ことせかいグリフ+⏯の合成をカスタムシンボルとして生成したもの
+                    // (くり抜きは SF Symbol の消去レイヤーで実現)
+                    Image("NovelSpeakerGlyphPlayPause")
                 }
             }
         }

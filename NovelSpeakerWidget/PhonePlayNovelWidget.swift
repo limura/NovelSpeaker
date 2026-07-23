@@ -302,13 +302,17 @@ struct PhonePlayNovelControl: ControlWidget {
         AppIntentControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playNovel",
                                       provider: PhonePlayNovelControlValueProvider()) { value in
             // 未選択のまま押した場合は PhonePlayNovelIntent 側で何もしない。
-            // 未選択の間は歯車アイコンで「要設定」を示す(コントロールは単色テンプレート
-            // 描画なので、ウィジェットのような合成アイコンは使えない)
+            // 未選択の間は歯車アイコンで「要設定」を示す。選択済みは
+            // ことせかいグリフ+▶の合成カスタムシンボル
             ControlWidgetButton(action: PhonePlayNovelIntent(novelID: value.novelID ?? "")) {
                 Label {
                     Text(value.title ?? NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択"))
                 } icon: {
-                    Image(systemName: value.novelID == nil ? "gearshape.fill" : "play.fill")
+                    if value.novelID == nil {
+                        Image(systemName: "gearshape.fill")
+                    } else {
+                        Image("NovelSpeakerGlyphPlay")
+                    }
                 }
             }
         }
