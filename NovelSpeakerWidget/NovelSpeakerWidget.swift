@@ -33,14 +33,17 @@ struct NovelSpeakerPhoneWidgetBundle: WidgetBundle {
 @available(iOSApplicationExtension 18.0, *)
 struct PhoneLauncherControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.launcher") {
+        // kind とシンボル名は v1(...control.launcher / LauncherSymbol)から改名している。
+        // iOS がコントロールの見た目とシンボルを登録キー・アセット名でキャッシュするらしく、
+        // 同名のまま中身を差し替えても端末側で反映されなかったため(再起動でも消えない。2026-07 実機)
+        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.openApp") {
             ControlWidgetButton(action: PhoneOpenAppIntent()) {
                 Label {
                     Text("アプリの起動")
                 } icon: {
                     // コントロールのアイコンは SF Symbol しか描画されない(PNG は「？」になる)ため、
-                    // 元 SVG から起こしたカスタムシンボル(LauncherSymbol.symbolset)を使う
-                    Image("LauncherSymbol")
+                    // 元 SVG から起こしたカスタムシンボル(NovelSpeakerGlyph.symbolset)を使う
+                    Image("NovelSpeakerGlyph")
                 }
             }
         }
