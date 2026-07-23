@@ -242,16 +242,12 @@ struct PlayNovelComplicationView: View {
                     .font(.headline)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+                // 小説が未選択の間はタイトル行の「小説を選択」だけを出す
+                // (操作手順の案内は編集方法が文字盤/Smart Stackで違い正確に書けないので出さない)
                 if entry.novelID != nil {
                     Gauge(value: entry.progress) { EmptyView() }
                         .gaugeStyle(.accessoryLinearCapacity)
                         .tint(iconTint)
-                } else {
-                    Text(NSLocalizedString("Watch_Widget_PlayNovel_TapToConfigure", comment: "長押しで小説を選択"))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
                 }
             }
             Spacer(minLength: 0)

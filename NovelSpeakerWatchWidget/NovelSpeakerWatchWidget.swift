@@ -189,7 +189,7 @@ struct LauncherComplication: Widget {
                             provider: LauncherProvider()) { entry in
             LauncherComplicationView(entry: entry)
         }
-        .configurationDisplayName(NSLocalizedString("Watch_Widget_AppName", comment: "ことせかい"))
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_Launcher_Name", comment: "Watchアプリの起動"))
         .description(NSLocalizedString("Watch_Widget_Description", comment: "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular])
     }
