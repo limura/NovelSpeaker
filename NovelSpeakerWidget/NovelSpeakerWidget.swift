@@ -37,7 +37,7 @@ struct PhoneLauncherControl: ControlWidget {
         // iOS がコントロールの見た目とシンボルを登録キー・アセット名でキャッシュするらしく、
         // 同名のまま中身を差し替えても端末側で反映されなかったため(再起動でも消えない。2026-07 実機)。
         // "2" はコントロール一覧の絵を作り直させるための世代バンプ(playToggle2 のコメント参照)
-        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.openApp2") {
+        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.openApp3") {
             ControlWidgetButton(action: PhoneOpenAppIntent()) {
                 Label {
                     Text("アプリの起動")
@@ -319,14 +319,14 @@ struct PhonePlayToggleControl: ControlWidget {
         // kind の "2" は世代番号。コントロール一覧(カスタマイズUI)の絵は
         // 「kind が初めて登場した時」に一度だけ描画され、以後は再インストールや
         // 再起動でも更新されない(実機確認)ため、アイコンを変えたら kind をバンプする
-        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playToggle2") {
+        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playToggle3") {
             ControlWidgetButton(action: PhoneSpeechToggleIntent()) {
                 Label {
                     Text("再生または停止")
                 } icon: {
                     // ことせかいグリフ+⏯の合成をカスタムシンボルとして生成したもの
                     // (くり抜きは SF Symbol の消去レイヤーで実現)
-                    Image("NovelSpeakerGlyphPlayPause2")
+                    Image("NovelSpeakerGlyphPlayPause3")
                 }
             }
         }
