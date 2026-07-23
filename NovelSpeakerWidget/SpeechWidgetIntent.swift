@@ -28,3 +28,34 @@ struct PhoneSpeechToggleIntent: AudioPlaybackIntent {
         #endif
     }
 }
+
+/// 「指定小説の再生を開始」ウィジェットのタップ用 intent。
+/// ウィジェットの設定(小説・アイコン・色)は別の WidgetConfigurationIntent が持ち、
+/// こちらはタップされた時に対象の novelID を運ぶだけ。ユーザが Shortcuts から
+/// novelID を手入力しても意味が無いので isDiscoverable は切っておく
+@available(iOS 17.0, *)
+struct PhonePlayNovelIntent: AudioPlaybackIntent {
+    static var title: LocalizedStringResource = "指定小説の再生を開始"
+    static var description = IntentDescription("指定した小説の読み上げを、ことせかい を開かずに開始します。")
+    static var isDiscoverable: Bool = false
+
+    @Parameter(title: "novelID")
+    var novelID: String?
+
+    init() {}
+    init(novelID: String) {
+        self.novelID = novelID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if NOVELSPEAKER_WIDGET_EXTENSION
+        // PhoneSpeechToggleIntent と同じ理由のダミー
+        return .result()
+        #else
+        if let novelID = novelID, !novelID.isEmpty {
+            await WidgetPlaybackHandler.playNovelFromWidget(novelID: novelID)
+        }
+        return .result()
+        #endif
+    }
+}

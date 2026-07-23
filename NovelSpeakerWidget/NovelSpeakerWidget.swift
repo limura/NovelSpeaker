@@ -14,10 +14,194 @@ import AppIntents
 @main
 struct NovelSpeakerPhoneWidgetBundle: WidgetBundle {
     var body: some Widget {
+        PhoneLauncherWidget()
         PhonePlayToggleWidget()
+        PhonePlayNovelWidget()
         // コントロールセンターの ControlWidget は iOS 18+
         if #available(iOSApplicationExtension 18.0, *) {
             PhonePlayToggleControl()
+        }
+    }
+}
+
+/// ブランドのグリフ。フルカラー(ホーム画面等)ではアプリアイコン(橙背景+白グリフ)を
+/// 円形にして出し、単色系(ロック画面の accented 等)では透過テンプレートの白グリフを出す
+/// (Watch 版 BrandGlyph と同じ出し分け)
+struct PhoneBrandGlyph: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    var body: some View {
+        if renderingMode == .fullColor {
+            Image("LauncherIconColor")
+                .resizable()
+                .scaledToFit()
+                .clipShape(Circle())
+        } else {
+            Image("LauncherGlyph")
+                .resizable()
+                .scaledToFit()
+        }
+    }
+}
+
+/// ことせかいグリフ+機能アイコンの合成(Watch 版 ActionGlyphView の iOS 版。corner が無いぶん単純)。
+/// ベースを左上に寄せ、バッジと重なる部分はくり抜いて、バッジが読めるようにする
+struct PhoneActionGlyphView: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    let badgeSystemName: String
+    var badgeColor: Color = .orange
+
+    var body: some View {
+        GeometryReader { geo in
+            let side = min(geo.size.width, geo.size.height)
+            ZStack {
+                PhoneBrandGlyph()
+                    .frame(width: side * 0.60, height: side * 0.60)
+                    .mask {
+                        Rectangle()
+                            .overlay(
+                                // バッジ(直径0.48)より一回り大きい穴。グリフ中心(0.38,0.38)から見た
+                                // バッジ中心(0.66,0.66)の相対位置 = (0.28,0.28)
+                                Circle()
+                                    .frame(width: side * 0.52, height: side * 0.52)
+                                    .offset(x: side * 0.28, y: side * 0.28)
+                                    .blendMode(.destinationOut)
+                            )
+                            .compositingGroup()
+                    }
+                    .offset(x: -side * 0.12, y: -side * 0.12)
+                badge(side: side)
+                    .offset(x: side * 0.16, y: side * 0.16)
+            }
+            .frame(width: side, height: side)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    // 機能アイコン。フルカラー: 地の丸=選択色×白記号。
+    // 単色系(ロック画面): 地の丸だけを widgetAccentable でアクセント側に入れ、白記号を読ませる
+    @ViewBuilder
+    private func badge(side: CGFloat) -> some View {
+        ZStack {
+            if renderingMode == .fullColor {
+                Circle().fill(badgeColor)
+            } else {
+                Circle().fill(.primary).widgetAccentable()
+            }
+            Image(systemName: badgeSystemName)
+                .font(.system(size: side * 0.30, weight: .bold))
+                .foregroundStyle(.white)
+        }
+        .frame(width: side * 0.48, height: side * 0.48)
+    }
+}
+
+// MARK: - アプリの起動(ランチャー)
+
+struct PhoneLauncherEntry: TimelineEntry {
+    let date: Date
+    let state: PhoneWidgetReadingState?
+}
+
+struct PhoneLauncherProvider: TimelineProvider {
+    func placeholder(in context: Context) -> PhoneLauncherEntry {
+        PhoneLauncherEntry(date: Date(), state: nil)
+    }
+    func getSnapshot(in context: Context, completion: @escaping (PhoneLauncherEntry) -> Void) {
+        completion(PhoneLauncherEntry(date: Date(), state: PhoneWidgetDataStore.loadReadingState()))
+    }
+    func getTimeline(in context: Context, completion: @escaping (Timeline<PhoneLauncherEntry>) -> Void) {
+        // 更新はアプリ側の WidgetCenter.reloadAllTimelines で駆動するので、固定1エントリ・自動更新なし
+        completion(Timeline(entries: [PhoneLauncherEntry(date: Date(), state: PhoneWidgetDataStore.loadReadingState())], policy: .never))
+    }
+}
+
+/// 「アプリの起動」。今読んでいる小説と進捗を表示し、タップで ことせかい を開く
+/// (intent を持たないのでタップは普通にアプリ起動になる)
+struct PhoneLauncherWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "com.limuraproducts.novelspeaker.widget.launcher", provider: PhoneLauncherProvider()) { entry in
+            PhoneLauncherWidgetView(entry: entry)
+        }
+        .configurationDisplayName(NSLocalizedString("Phone_Widget_Launcher_Name", comment: "アプリの起動"))
+        .description(NSLocalizedString("Phone_Widget_Launcher_Desc", comment: "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。"))
+        .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
+    }
+}
+
+struct PhoneLauncherWidgetView: View {
+    @Environment(\.widgetFamily) private var family
+    let entry: PhoneLauncherEntry
+
+    private var reading: PhoneWidgetReadingState? {
+        guard let state = entry.state, state.chapterCount > 0 else { return nil }
+        return state
+    }
+
+    var body: some View {
+        content
+            .containerBackground(for: .widget) { Color.clear }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch family {
+        case .accessoryCircular:
+            // 円形: 読了ゲージのリング + 中央にグリフ(Watch 版 circular と同じ見た目)
+            if let reading = reading {
+                ZStack {
+                    Circle().stroke(.tertiary, lineWidth: 3)
+                    Circle()
+                        .trim(from: 0, to: max(0.01, reading.overallProgress))
+                        .stroke(.primary, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                    PhoneBrandGlyph().padding(7)
+                }
+                .padding(1)
+            } else {
+                PhoneBrandGlyph().padding(2)
+            }
+        case .accessoryRectangular:
+            // 横長: 小説名 + 章/総章 + ゲージバー
+            if let reading = reading {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(reading.title)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Text(reading.chapterFraction)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Gauge(value: reading.overallProgress) { EmptyView() }
+                        .gaugeStyle(.accessoryLinearCapacity)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            } else {
+                HStack(spacing: 8) {
+                    PhoneBrandGlyph().frame(width: 28, height: 28)
+                    Text(NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
+                        .font(.headline)
+                    Spacer(minLength: 0)
+                }
+            }
+        default:
+            // ホーム画面(systemSmall): アイコン + 小説名 + ゲージバー
+            VStack(spacing: 8) {
+                PhoneBrandGlyph().frame(width: 52, height: 52)
+                if let reading = reading {
+                    Text(reading.title)
+                        .font(.caption)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.8)
+                    Gauge(value: reading.overallProgress) { EmptyView() }
+                        .gaugeStyle(.accessoryLinearCapacity)
+                        .tint(.orange)
+                } else {
+                    Text(NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
+                        .font(.caption)
+                }
+            }
         }
     }
 }

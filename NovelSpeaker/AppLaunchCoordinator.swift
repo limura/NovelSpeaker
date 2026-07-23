@@ -44,6 +44,7 @@ final class AppLaunchCoordinator: NSObject {
         NovelSpeakerUtility.SetInitialAvailableMemory()
         NovelSpeakerUtility.StartPrivacyTrackingBlockRuleListRefreshTimerIfNeeded()
         WatchSessionCoordinator.shared.start()
+        PhoneWidgetDataUpdater.update()
         if !NiftyUtility.isTesting() {
             Task {
                 await VoicevoxCore.setUpFromBundleIfNeeded()
