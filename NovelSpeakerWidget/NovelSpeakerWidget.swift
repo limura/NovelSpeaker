@@ -17,10 +17,32 @@ struct NovelSpeakerPhoneWidgetBundle: WidgetBundle {
         PhoneLauncherWidget()
         PhonePlayToggleWidget()
         PhonePlayNovelWidget()
-        // コントロールセンターの ControlWidget は iOS 18+
+        // ControlWidget(コントロールセンター+ロック画面下部の角スロット)は iOS 18+
         if #available(iOSApplicationExtension 18.0, *) {
             PhonePlayToggleControl()
+            PhoneLauncherControl()
+            PhonePlayNovelControl()
         }
+    }
+}
+
+/// コントロールセンター/ロック画面下部の角に置ける「アプリの起動」ボタン(iOS 18+)。
+/// ロック画面下部の角スロットには ControlWidget しか置けないため、
+/// ウィジェット版ランチャーとは別にこれを用意する
+@available(iOSApplicationExtension 18.0, *)
+struct PhoneLauncherControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.launcher") {
+            ControlWidgetButton(action: PhoneOpenAppIntent()) {
+                Label {
+                    Text("アプリの起動")
+                } icon: {
+                    Image(systemName: "book.fill")
+                }
+            }
+        }
+        .displayName("アプリの起動")
+        .description("ことせかい を開きます。")
     }
 }
 
@@ -79,14 +101,16 @@ struct PhoneActionGlyphView: View {
     }
 
     // 機能アイコン。フルカラー: 地の丸=選択色×白記号。
-    // 単色系(ロック画面): 地の丸だけを widgetAccentable でアクセント側に入れ、白記号を読ませる
+    // 単色系(ロック画面の accented 等): iOS ではアクセントグループの塗り分けをしても
+    // 全部白に潰れて「白い丸」になる(実機で確認。watchOS の corner と同じ現象)ので、
+    // watch 版 corner と同じ「白リング+白記号」にして、暗い背景を地として読ませる
     @ViewBuilder
     private func badge(side: CGFloat) -> some View {
         ZStack {
             if renderingMode == .fullColor {
                 Circle().fill(badgeColor)
             } else {
-                Circle().fill(.primary).widgetAccentable()
+                Circle().stroke(.white, lineWidth: max(1, side * 0.035))
             }
             Image(systemName: badgeSystemName)
                 .font(.system(size: side * 0.30, weight: .bold))

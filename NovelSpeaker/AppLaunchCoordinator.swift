@@ -44,6 +44,7 @@ final class AppLaunchCoordinator: NSObject {
         NovelSpeakerUtility.SetInitialAvailableMemory()
         NovelSpeakerUtility.StartPrivacyTrackingBlockRuleListRefreshTimerIfNeeded()
         WatchSessionCoordinator.shared.start()
+        PhoneWidgetDataUpdater.startObserving()
         PhoneWidgetDataUpdater.update()
         if !NiftyUtility.isTesting() {
             Task {

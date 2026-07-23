@@ -29,6 +29,19 @@ struct PhoneSpeechToggleIntent: AudioPlaybackIntent {
     }
 }
 
+/// ロック画面下部の角やコントロールセンターの「アプリの起動」コントロール用。
+/// openAppWhenRun でアプリを開くだけ(iOS では有効。watchOS では無視されたのと違う)
+@available(iOS 17.0, *)
+struct PhoneOpenAppIntent: AppIntent {
+    static var title: LocalizedStringResource = "アプリの起動"
+    static var description = IntentDescription("ことせかい を開きます。")
+    static var openAppWhenRun: Bool = true
+
+    func perform() async throws -> some IntentResult {
+        return .result()
+    }
+}
+
 /// 「指定小説の再生を開始」ウィジェットのタップ用 intent。
 /// ウィジェットの設定(小説・アイコン・色)は別の WidgetConfigurationIntent が持ち、
 /// こちらはタップされた時に対象の novelID を運ぶだけ。ユーザが Shortcuts から

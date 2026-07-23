@@ -146,7 +146,9 @@ struct PhonePlayNovelProvider: AppIntentTimelineProvider {
             novelID: novelID,
             title: summary?.title ?? configuration.novel?.title,
             progress: summary?.overallProgress ?? 0,
-            iconSystemName: configuration.icon.systemName,
+            // 小説が未選択の間は歯車バッジにして「要設定」であることを見た目でも示す
+            // (円形ウィジェットは文字が出せないのでこれが唯一の手掛かりになる)
+            iconSystemName: novelID == nil ? "gearshape.fill" : configuration.icon.systemName,
             tint: configuration.color.color)
     }
 }
@@ -200,6 +202,12 @@ struct PhonePlayNovelWidgetView: View {
                         Gauge(value: entry.progress) { EmptyView() }
                             .gaugeStyle(.accessoryLinearCapacity)
                             .tint(iconTint)
+                    } else {
+                        Text(NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", comment: "長押しなどの編集で小説を選択"))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
                     }
                 }
                 Spacer(minLength: 0)
@@ -207,18 +215,26 @@ struct PhonePlayNovelWidgetView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         default:
             // ホーム画面(systemSmall): 合成アイコン + 小説名 + 読了ゲージ
+            // (未選択の間は選択手順の案内を出す)
             VStack(spacing: 8) {
                 PhoneActionGlyphView(badgeSystemName: entry.iconSystemName, badgeColor: entry.tint)
                     .frame(width: 56, height: 56)
-                Text(displayTitle)
-                    .font(.caption)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.8)
                 if entry.novelID != nil {
+                    Text(displayTitle)
+                        .font(.caption)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.8)
                     Gauge(value: entry.progress) { EmptyView() }
                         .gaugeStyle(.accessoryLinearCapacity)
                         .tint(iconTint)
+                } else {
+                    Text(NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", comment: "長押しなどの編集で小説を選択"))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.8)
                 }
             }
         }
@@ -235,5 +251,52 @@ struct PhonePlayNovelWidget: Widget {
         .configurationDisplayName(NSLocalizedString("Phone_Widget_PlayNovel_Name", comment: "指定小説の再生を開始"))
         .description(NSLocalizedString("Phone_Widget_PlayNovel_Desc", comment: "指定した小説の読み上げを、ことせかい を開かずに開始します。小説の候補は最近読んだ順に並びます。"))
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
+    }
+}
+
+// MARK: - コントロール版(iOS 18+。コントロールセンター+ロック画面下部の角スロット)
+
+/// コントロールの設定 intent(小説の選択のみ。アイコン・色はコントロールでは選べない)
+@available(iOSApplicationExtension 18.0, *)
+struct PhonePlayNovelControlIntent: ControlConfigurationIntent {
+    static var title: LocalizedStringResource = "指定小説の再生を開始"
+    static var description = IntentDescription("指定した小説の読み上げを、ことせかい を開かずに開始します。")
+
+    @Parameter(title: "小説")
+    var novel: PhonePlayNovelChoice?
+}
+
+@available(iOSApplicationExtension 18.0, *)
+struct PhonePlayNovelControlValue {
+    var novelID: String?
+    var title: String?
+}
+
+@available(iOSApplicationExtension 18.0, *)
+struct PhonePlayNovelControlValueProvider: AppIntentControlValueProvider {
+    func previewValue(configuration: PhonePlayNovelControlIntent) -> PhonePlayNovelControlValue {
+        PhonePlayNovelControlValue(novelID: configuration.novel?.id, title: configuration.novel?.title)
+    }
+    func currentValue(configuration: PhonePlayNovelControlIntent) async throws -> PhonePlayNovelControlValue {
+        PhonePlayNovelControlValue(novelID: configuration.novel?.id, title: configuration.novel?.title)
+    }
+}
+
+@available(iOSApplicationExtension 18.0, *)
+struct PhonePlayNovelControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        AppIntentControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playNovel",
+                                      provider: PhonePlayNovelControlValueProvider()) { value in
+            // 未選択のまま押した場合は PhonePlayNovelIntent 側で何もしない
+            ControlWidgetButton(action: PhonePlayNovelIntent(novelID: value.novelID ?? "")) {
+                Label {
+                    Text(value.title ?? NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択"))
+                } icon: {
+                    Image(systemName: "play.fill")
+                }
+            }
+        }
+        .displayName("指定小説の再生を開始")
+        .description("指定した小説の読み上げを、ことせかい を開かずに開始します。")
     }
 }

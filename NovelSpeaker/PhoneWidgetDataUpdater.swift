@@ -19,6 +19,49 @@ class PhoneWidgetDataUpdater {
     /// 設定可能ウィジェットの小説候補数。多すぎても選択 UI が長くなるだけなので上位のみ
     static let novelSummaryLimit = 30
 
+    private static var observerTokens: [NotificationToken] = []
+    private static var debounceWorkItem: DispatchWorkItem?
+
+    /// Realm の変更を監視して共有ストアを追従させる(runPostLaunch から一度だけ呼ぶ)。
+    /// 一発のトリガ(起動時・バックグラウンド移行時)だけだと、
+    /// - 小説を開いた直後にホームへ戻る: currentReadingNovelID の更新は SetStory の
+    ///   重い非同期処理の完了後なので、didEnterBackground 時点ではまだ前の小説のまま
+    /// - ウィジェット操作だけで発話→停止: 栞の保存は StopSpeech の後から非同期に走る
+    /// といった「書き込みがトリガより後に来る」ケースを取りこぼすため、
+    /// 書き込みそのもの(RealmGlobalState / RealmNovel の変更)を監視する。
+    /// 再計算は軽い(上位30件+skip-if-equal)のでデバウンスは短めでよい
+    static func startObserving() {
+        DispatchQueue.main.async {
+            guard observerTokens.isEmpty else { return }
+            RealmUtil.RealmBlock { realm in
+                // currentReadingNovelID の切り替わり(小説を開いた等)
+                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                    observerTokens.append(globalState.observe { _ in
+                        updateSoon()
+                    })
+                }
+                // 栞(読了位置・lastReadDate)や小説の追加・削除
+                if let novels = RealmNovel.GetAllObjectsWith(realm: realm) {
+                    observerTokens.append(novels.observe { changes in
+                        guard case .update(_, let deletions, let insertions, let modifications) = changes,
+                              !(deletions.isEmpty && insertions.isEmpty && modifications.isEmpty) else { return }
+                        updateSoon()
+                    })
+                }
+            }
+        }
+    }
+
+    /// 変更の連打(発話中の栞保存や iCloud 同期のバースト)をまとめるためのデバウンス
+    private static func updateSoon() {
+        debounceWorkItem?.cancel()
+        let work = DispatchWorkItem {
+            update()
+        }
+        debounceWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: work)
+    }
+
     static func update() {
         DispatchQueue.main.async {
             var changed = false
