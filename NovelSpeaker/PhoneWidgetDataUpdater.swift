@@ -91,6 +91,7 @@ class PhoneWidgetDataUpdater {
             RealmUtil.RealmBlock { realm in
                 changed = PhoneWidgetDataStore.saveReadingState(currentReadingState(realm: realm)) || changed
                 changed = PhoneWidgetDataStore.saveSummaries(currentSummaries(realm: realm)) || changed
+                changed = PhoneWidgetDataStore.saveBookshelfStats(currentBookshelfStats(realm: realm)) || changed
             }
             if changed {
                 WidgetCenter.shared.reloadAllTimelines()
@@ -139,6 +140,18 @@ class PhoneWidgetDataUpdater {
                 overallProgress: roundedProgress(novel: novel)))
         }
         return result
+    }
+
+    /// 本棚の統計(ランチャーの統計行用)。
+    /// 「更新あり」は本棚の NEW バッジ(RealmNovel.isNewFlug)と同じ日付比較。
+    /// 日付プロパティ同士の比較は Realm のクエリで完結するので件数が多くても軽い
+    private static func currentBookshelfStats(realm: Realm) -> PhoneWidgetBookshelfStats {
+        guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else {
+            return PhoneWidgetBookshelfStats(novelCount: 0, newArrivalCount: 0)
+        }
+        return PhoneWidgetBookshelfStats(
+            novelCount: novels.count,
+            newArrivalCount: novels.filter("lastDownloadDate > lastReadDate").count)
     }
 
     /// 全体の読了進捗。細かすぎる差分で毎回「変化あり」にならないよう 1% 単位に丸める

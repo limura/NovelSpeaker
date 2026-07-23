@@ -8,12 +8,15 @@
 /* Launcher */
 "Phone_Widget_Launcher_Name" = "Open App";
 "Phone_Widget_Launcher_Desc" = "Shows the progress of the novel you are reading. Tap to open NovelSpeaker.";
+"Phone_Widget_Launcher_OpenApp" = "Open App";
+"Phone_Widget_Launcher_Stats_Format" = "%1$d novels, %2$d updated";
 
 /* Configurable "Play Selected Novel" widget */
 "Phone_Widget_PlayNovel_Name" = "Start Playing Selected Novel";
 "Phone_Widget_PlayNovel_Desc" = "Starts playing the chosen novel without opening NovelSpeaker. Novel choices are listed by most recently read.";
 "Phone_Widget_PlayNovel_Unset" = "Choose a novel";
 "Phone_Widget_PlayNovel_UnsetHint" = "Edit the widget to choose a novel";
+"Phone_Widget_PlayNovel_TapHint" = "Tap to start playing";
 
 /* 4-slot action widget */
 "Phone_Widget_ActionGroup_Name" = "Combined Actions";

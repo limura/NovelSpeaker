@@ -27,6 +27,49 @@ struct NovelSpeakerPhoneWidgetBundle: WidgetBundle {
     }
 }
 
+/// テーマカラー背景の試作フラグ(第9弾)。
+/// true にすると、ホーム画面ウィジェット(フルカラー表示時)の背景をアプリアイコンと同じ
+/// 橙→赤のグラデーションにし、前景(グリフ・文字・ゲージ)を白系に切り替える。
+/// 見た目の判断用に1行で戻せるよう、分岐は全てこのフラグを参照する。
+/// なお iOS 18 のティント(色合い調整)モードでは背景はシステムが暗い素材に
+/// 置き換えるため、この背景が見えるのは通常モードのみ
+enum PhoneWidgetTheme {
+    static let brandBackgroundEnabled = true
+
+    /// アプリアイコンから実測した色(上: 橙, 下: 赤)
+    static let gradientTop = Color(red: 252 / 255, green: 176 / 255, blue: 69 / 255)
+    static let gradientBottom = Color(red: 253 / 255, green: 49 / 255, blue: 34 / 255)
+    /// ダークテーマ用に暗く沈めたもの
+    static let gradientTopDark = Color(red: 118 / 255, green: 78 / 255, blue: 28 / 255)
+    static let gradientBottomDark = Color(red: 116 / 255, green: 22 / 255, blue: 15 / 255)
+}
+
+/// ホーム画面ウィジェット共通の containerBackground。
+/// テーマカラー背景が有効かつフルカラー表示の時だけグラデーションを敷く
+/// (ロック画面等の単色系は renderingMode が accented/vibrant なので対象外)
+private struct PhoneWidgetContainerBackground: ViewModifier {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content.containerBackground(for: .widget) {
+            if PhoneWidgetTheme.brandBackgroundEnabled && renderingMode == .fullColor {
+                LinearGradient(
+                    colors: colorScheme == .dark
+                        ? [PhoneWidgetTheme.gradientTopDark, PhoneWidgetTheme.gradientBottomDark]
+                        : [PhoneWidgetTheme.gradientTop, PhoneWidgetTheme.gradientBottom],
+                    startPoint: .top, endPoint: .bottom)
+            } else {
+                Color.clear
+            }
+        }
+    }
+}
+
+extension View {
+    func phoneWidgetContainerBackground() -> some View { modifier(PhoneWidgetContainerBackground()) }
+}
+
 /// コントロールセンター/ロック画面下部の角に置ける「アプリの起動」ボタン(iOS 18+)。
 /// ロック画面下部の角スロットには ControlWidget しか置けないため、
 /// ウィジェット版ランチャーとは別にこれを用意する
@@ -60,13 +103,21 @@ struct PhoneLauncherControl: ControlWidget {
 /// (Watch 版 BrandGlyph と同じ出し分け)
 struct PhoneBrandGlyph: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
+    /// テーマカラー背景の上ではアイコン円盤(橙背景)が背景に溶けるので、
+    /// フルカラーでも白のテンプレートグリフを使う
+    var forceTemplate: Bool = false
 
     var body: some View {
-        if renderingMode == .fullColor {
+        if renderingMode == .fullColor && !forceTemplate {
             Image("LauncherIconColor")
                 .resizable()
                 .scaledToFit()
                 .clipShape(Circle())
+        } else if renderingMode == .fullColor {
+            Image("LauncherGlyph")
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(.white)
         } else {
             Image("LauncherGlyph")
                 .resizable()
@@ -81,12 +132,15 @@ struct PhoneActionGlyphView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     let badgeSystemName: String
     var badgeColor: Color = .orange
+    /// テーマカラー背景の上に置く時 true。グリフは白テンプレート、
+    /// バッジは白丸+選択色の記号(色付き丸だと橙系が背景に溶けるため)にする
+    var brandStyle: Bool = false
 
     var body: some View {
         GeometryReader { geo in
             let side = min(geo.size.width, geo.size.height)
             ZStack {
-                PhoneBrandGlyph()
+                PhoneBrandGlyph(forceTemplate: brandStyle)
                     .frame(width: side * 0.60, height: side * 0.60)
                     .mask {
                         Rectangle()
@@ -116,14 +170,23 @@ struct PhoneActionGlyphView: View {
     @ViewBuilder
     private func badge(side: CGFloat) -> some View {
         ZStack {
-            if renderingMode == .fullColor {
+            if renderingMode == .fullColor && brandStyle {
+                // テーマカラー背景の上: 白丸+選択色の記号
+                Circle().fill(.white)
+                Image(systemName: badgeSystemName)
+                    .font(.system(size: side * 0.30, weight: .bold))
+                    .foregroundStyle(badgeColor)
+            } else if renderingMode == .fullColor {
                 Circle().fill(badgeColor)
+                Image(systemName: badgeSystemName)
+                    .font(.system(size: side * 0.30, weight: .bold))
+                    .foregroundStyle(.white)
             } else {
                 Circle().stroke(.white, lineWidth: max(1, side * 0.035))
+                Image(systemName: badgeSystemName)
+                    .font(.system(size: side * 0.30, weight: .bold))
+                    .foregroundStyle(.white)
             }
-            Image(systemName: badgeSystemName)
-                .font(.system(size: side * 0.30, weight: .bold))
-                .foregroundStyle(.white)
         }
         .frame(width: side * 0.48, height: side * 0.48)
     }
@@ -134,18 +197,24 @@ struct PhoneActionGlyphView: View {
 struct PhoneLauncherEntry: TimelineEntry {
     let date: Date
     let state: PhoneWidgetReadingState?
+    var stats: PhoneWidgetBookshelfStats? = nil
 }
 
 struct PhoneLauncherProvider: TimelineProvider {
+    private func currentEntry() -> PhoneLauncherEntry {
+        PhoneLauncherEntry(date: Date(),
+                           state: PhoneWidgetDataStore.loadReadingState(),
+                           stats: PhoneWidgetDataStore.loadBookshelfStats())
+    }
     func placeholder(in context: Context) -> PhoneLauncherEntry {
         PhoneLauncherEntry(date: Date(), state: nil)
     }
     func getSnapshot(in context: Context, completion: @escaping (PhoneLauncherEntry) -> Void) {
-        completion(PhoneLauncherEntry(date: Date(), state: PhoneWidgetDataStore.loadReadingState()))
+        completion(currentEntry())
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<PhoneLauncherEntry>) -> Void) {
         // 更新はアプリ側の WidgetCenter.reloadAllTimelines で駆動するので、固定1エントリ・自動更新なし
-        completion(Timeline(entries: [PhoneLauncherEntry(date: Date(), state: PhoneWidgetDataStore.loadReadingState())], policy: .never))
+        completion(Timeline(entries: [currentEntry()], policy: .never))
     }
 }
 
@@ -164,6 +233,7 @@ struct PhoneLauncherWidget: Widget {
 
 struct PhoneLauncherWidgetView: View {
     @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: PhoneLauncherEntry
 
     private var reading: PhoneWidgetReadingState? {
@@ -171,9 +241,14 @@ struct PhoneLauncherWidgetView: View {
         return state
     }
 
+    // テーマカラー背景の上に描いているか(ホーム画面のフルカラー表示時のみ)
+    private var brandBG: Bool { PhoneWidgetTheme.brandBackgroundEnabled && renderingMode == .fullColor }
+    private var primaryStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
+    private var subtleStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
+
     var body: some View {
         content
-            .containerBackground(for: .widget) { Color.clear }
+            .phoneWidgetContainerBackground()
     }
 
     @ViewBuilder
@@ -218,48 +293,53 @@ struct PhoneLauncherWidgetView: View {
                 }
             }
         default:
-            // ホーム画面(systemSmall): アイコン + 小説名 + ゲージバー
-            VStack(spacing: 8) {
-                PhoneBrandGlyph().frame(width: 52, height: 52)
+            // ホーム画面(systemSmall): アイコン + 小説名 + ゲージバー + 本棚統計 + 「アプリを開く」。
+            // アイコンタップと違って「開いた後に見えるもの」が先に見えているのが存在価値なので、
+            // 空きスペースには本棚の統計を出し、末尾に開く動作であることを明示する
+            VStack(spacing: 5) {
+                PhoneBrandGlyph(forceTemplate: brandBG).frame(width: 40, height: 40)
                 if let reading = reading {
                     Text(reading.title)
                         .font(.caption)
+                        .foregroundStyle(primaryStyle)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
                         .minimumScaleFactor(0.8)
                     Gauge(value: reading.overallProgress) { EmptyView() }
                         .gaugeStyle(.accessoryLinearCapacity)
-                        .tint(.orange)
+                        .tint(brandBG ? .white : .orange)
                 } else {
                     Text(NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
                         .font(.caption)
+                        .foregroundStyle(primaryStyle)
                 }
+                Spacer(minLength: 0)
+                if let stats = entry.stats {
+                    Text(String(format: NSLocalizedString("Phone_Widget_Launcher_Stats_Format", comment: "本棚 %1$d冊・更新あり %2$d冊"), stats.novelCount, stats.newArrivalCount))
+                        .font(.caption2)
+                        .foregroundStyle(subtleStyle)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                HStack(spacing: 3) {
+                    Text(NSLocalizedString("Phone_Widget_Launcher_OpenApp", comment: "アプリを開く"))
+                    Image(systemName: "arrow.up.forward.app")
+                }
+                .font(.caption2)
+                .foregroundStyle(subtleStyle)
             }
         }
     }
 }
 
-struct PhoneWidgetEntry: TimelineEntry {
-    let date: Date
-}
-
-/// 表示は静的(再生中かどうかは表示しない)なので、固定1エントリ・自動更新なし
-struct PhoneWidgetStaticProvider: TimelineProvider {
-    func placeholder(in context: Context) -> PhoneWidgetEntry { PhoneWidgetEntry(date: Date()) }
-    func getSnapshot(in context: Context, completion: @escaping (PhoneWidgetEntry) -> Void) {
-        completion(PhoneWidgetEntry(date: Date()))
-    }
-    func getTimeline(in context: Context, completion: @escaping (Timeline<PhoneWidgetEntry>) -> Void) {
-        completion(Timeline(entries: [PhoneWidgetEntry(date: Date())], policy: .never))
-    }
-}
-
 /// 「再生・停止」(ホーム画面 systemSmall + ロック画面 accessoryCircular/Rectangular)。
-/// ボタン全面が intent なので、タップしてもアプリは開かない
+/// ボタン全面が intent なので、タップしてもアプリは開かない。
+/// 「何が再生・停止されるのか」が見えるよう、対象の小説(=今読んでいる小説)を
+/// ランチャーと同じ共有ストア経由で表示する
 struct PhonePlayToggleWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "com.limuraproducts.novelspeaker.widget.playToggle", provider: PhoneWidgetStaticProvider()) { _ in
-            PhonePlayToggleWidgetView()
+        StaticConfiguration(kind: "com.limuraproducts.novelspeaker.widget.playToggle", provider: PhoneLauncherProvider()) { entry in
+            PhonePlayToggleWidgetView(entry: entry)
         }
         .configurationDisplayName(NSLocalizedString("Phone_Widget_PlayToggle_Name", comment: "再生または停止"))
         .description(NSLocalizedString("Phone_Widget_PlayToggle_Desc", comment: "ことせかい を開かずに、読み上げの再生・停止をします。"))
@@ -269,13 +349,24 @@ struct PhonePlayToggleWidget: Widget {
 
 struct PhonePlayToggleWidgetView: View {
     @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    let entry: PhoneLauncherEntry
+
+    private var reading: PhoneWidgetReadingState? {
+        guard let state = entry.state, state.chapterCount > 0 else { return nil }
+        return state
+    }
+
+    private var brandBG: Bool { PhoneWidgetTheme.brandBackgroundEnabled && renderingMode == .fullColor }
+    private var primaryStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
+    private var subtleStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
 
     var body: some View {
         Button(intent: PhoneSpeechToggleIntent()) {
             content
         }
         .buttonStyle(.plain)
-        .containerBackground(for: .widget) { Color.clear }
+        .phoneWidgetContainerBackground()
     }
 
     @ViewBuilder
@@ -287,13 +378,15 @@ struct PhonePlayToggleWidgetView: View {
             PhoneActionGlyphView(badgeSystemName: "playpause.fill")
                 .padding(2)
         case .accessoryRectangular:
-            // ロック画面(横長): [合成アイコン] アプリ名 + 操作名
+            // ロック画面(横長): [合成アイコン] 対象の小説名(無ければアプリ名) + 操作名
             HStack(spacing: 8) {
                 PhoneActionGlyphView(badgeSystemName: "playpause.fill")
                     .frame(width: 30, height: 30)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
+                    Text(reading?.title ?? NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
                         .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                     Text(NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -301,12 +394,25 @@ struct PhonePlayToggleWidgetView: View {
                 Spacer(minLength: 0)
             }
         default:
-            // ホーム画面(systemSmall): 合成アイコン + 操作名
-            VStack(spacing: 8) {
-                PhoneActionGlyphView(badgeSystemName: "playpause.fill")
-                    .frame(width: 56, height: 56)
+            // ホーム画面(systemSmall): 合成アイコン + 対象の小説名 + ゲージ + 操作名
+            VStack(spacing: 5) {
+                PhoneActionGlyphView(badgeSystemName: "playpause.fill", brandStyle: brandBG)
+                    .frame(width: 46, height: 46)
+                if let reading = reading {
+                    Text(reading.title)
+                        .font(.caption)
+                        .foregroundStyle(primaryStyle)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.8)
+                    Gauge(value: reading.overallProgress) { EmptyView() }
+                        .gaugeStyle(.accessoryLinearCapacity)
+                        .tint(brandBG ? .white : .orange)
+                    Spacer(minLength: 0)
+                }
                 Text(NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止"))
-                    .font(.caption)
+                    .font(.caption2)
+                    .foregroundStyle(subtleStyle)
             }
         }
     }

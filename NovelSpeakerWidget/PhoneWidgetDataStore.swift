@@ -26,6 +26,13 @@ struct PhoneWidgetReadingState: Codable, Equatable {
     var chapterFraction: String { "\(chapterNumber)/\(chapterCount)" }
 }
 
+/// 本棚の統計(ランチャーの統計行用)
+struct PhoneWidgetBookshelfStats: Codable, Equatable {
+    var novelCount: Int
+    /// 「更新あり」(本棚の NEW バッジと同じ、最終取得が最終読書より新しい)の冊数
+    var newArrivalCount: Int
+}
+
 /// 設定可能ウィジェット(「指定小説の再生を開始」)の小説選択肢1件分
 struct PhoneWidgetNovelSummary: Codable, Equatable, Identifiable {
     var novelID: String
@@ -41,6 +48,7 @@ enum PhoneWidgetDataStore {
     static let appGroupID = "group.com.limuraproducts.novelspeaker"
     private static let readingStateKey = "PhoneWidgetReadingState"
     private static let summariesKey = "PhoneWidgetNovelSummaries"
+    private static let bookshelfStatsKey = "PhoneWidgetBookshelfStats"
 
     static func loadReadingState() -> PhoneWidgetReadingState? {
         guard let defaults = UserDefaults(suiteName: appGroupID),
@@ -59,6 +67,25 @@ enum PhoneWidgetDataStore {
             defaults.set(data, forKey: readingStateKey)
         } else {
             defaults.removeObject(forKey: readingStateKey)
+        }
+        return true
+    }
+
+    static func loadBookshelfStats() -> PhoneWidgetBookshelfStats? {
+        guard let defaults = UserDefaults(suiteName: appGroupID),
+              let data = defaults.data(forKey: bookshelfStatsKey),
+              let value = try? JSONDecoder().decode(PhoneWidgetBookshelfStats.self, from: data) else { return nil }
+        return value
+    }
+
+    @discardableResult
+    static func saveBookshelfStats(_ stats: PhoneWidgetBookshelfStats?) -> Bool {
+        guard let defaults = UserDefaults(suiteName: appGroupID) else { return false }
+        if loadBookshelfStats() == stats { return false }
+        if let stats = stats, let data = try? JSONEncoder().encode(stats) {
+            defaults.set(data, forKey: bookshelfStatsKey)
+        } else {
+            defaults.removeObject(forKey: bookshelfStatsKey)
         }
         return true
     }
