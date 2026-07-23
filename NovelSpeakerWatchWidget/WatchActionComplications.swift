@@ -142,6 +142,10 @@ struct ActionGlyphView: View {
     // - 単色系の corner: corner はアクセントグループの塗り分けが効かず、塗り丸だと丸も記号も
     //   白に潰れて「白い丸」になる(実機で確認)。塗り丸をやめて「白リング+白記号」にし、
     //   暗い文字盤背景を地として読ませる
+    // ⏯は他の記号より横に広く、0.30倍だとバッジの円をはみ出すのでこの記号だけ小さく描く
+    // (iPhone 版 PhoneActionGlyphView と同じ調整)
+    private var badgeFontScale: CGFloat { badgeSystemName == "playpause.fill" ? 0.24 : 0.30 }
+
     @ViewBuilder
     private func badge(side: CGFloat) -> some View {
         ZStack {
@@ -153,7 +157,7 @@ struct ActionGlyphView: View {
                 Circle().fill(.primary).widgetAccentable()
             }
             Image(systemName: badgeSystemName)
-                .font(.system(size: side * 0.30, weight: .bold))
+                .font(.system(size: side * badgeFontScale, weight: .bold))
                 .foregroundStyle(.white)
         }
         .frame(width: side * 0.48, height: side * 0.48)

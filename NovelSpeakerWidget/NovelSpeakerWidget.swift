@@ -36,12 +36,27 @@ struct NovelSpeakerPhoneWidgetBundle: WidgetBundle {
 enum PhoneWidgetTheme {
     static let brandBackgroundEnabled = true
 
-    /// アプリアイコンから実測した色(上: 橙, 下: 赤)
-    static let gradientTop = Color(red: 252 / 255, green: 176 / 255, blue: 69 / 255)
-    static let gradientBottom = Color(red: 253 / 255, green: 49 / 255, blue: 34 / 255)
-    /// ダークテーマ用に暗く沈めたもの
+    /// ライトテーマ: アプリアイコンの橙→赤を白側に寄せた淡いグラデーション。
+    /// (アイコンの絵は白い部分の面積が大きく全体は白っぽく見えるので、
+    /// 背景全面に元の色を敷くと濃く見えすぎる、という実機フィードバックによる)
+    /// 淡い背景に白文字は読めないので、ライト時の前景は通常の黒系のまま使う
+    static let gradientTop = Color(red: 255 / 255, green: 233 / 255, blue: 198 / 255)
+    static let gradientBottom = Color(red: 255 / 255, green: 202 / 255, blue: 190 / 255)
+    /// ダークテーマ: アイコンの色を暗く沈めたもの(前景は白系)
     static let gradientTopDark = Color(red: 118 / 255, green: 78 / 255, blue: 28 / 255)
     static let gradientBottomDark = Color(red: 116 / 255, green: 22 / 255, blue: 15 / 255)
+
+    /// 前景を白系(白グリフ・白文字)に切り替えるか。
+    /// テーマカラー背景が濃いのはダークテーマの時だけなので、ライトは通常の前景のまま
+    static func usesWhiteForeground(renderingMode: WidgetRenderingMode, colorScheme: ColorScheme) -> Bool {
+        return brandBackgroundEnabled && renderingMode == .fullColor && colorScheme == .dark
+    }
+
+    /// 「再生・停止」の固定バッジ色。ユーザが選んだ色ではないので、
+    /// ダークの白前景時は鮮やかなオレンジだと浮く→背景と同系の暗い赤に馴染ませる
+    static func playToggleBadgeColor(whiteForeground: Bool) -> Color {
+        return whiteForeground ? gradientBottomDark : .orange
+    }
 }
 
 /// ホーム画面ウィジェット共通の containerBackground。
@@ -136,6 +151,9 @@ struct PhoneActionGlyphView: View {
     /// バッジは白丸+選択色の記号(色付き丸だと橙系が背景に溶けるため)にする
     var brandStyle: Bool = false
 
+    // ⏯は他の記号より横に広く、0.30倍だとバッジの円をはみ出すのでこの記号だけ小さく描く
+    private var badgeFontScale: CGFloat { badgeSystemName == "playpause.fill" ? 0.24 : 0.30 }
+
     var body: some View {
         GeometryReader { geo in
             let side = min(geo.size.width, geo.size.height)
@@ -171,20 +189,20 @@ struct PhoneActionGlyphView: View {
     private func badge(side: CGFloat) -> some View {
         ZStack {
             if renderingMode == .fullColor && brandStyle {
-                // テーマカラー背景の上: 白丸+選択色の記号
+                // 濃いテーマカラー背景の上: 白丸+選択色の記号
                 Circle().fill(.white)
                 Image(systemName: badgeSystemName)
-                    .font(.system(size: side * 0.30, weight: .bold))
+                    .font(.system(size: side * badgeFontScale, weight: .bold))
                     .foregroundStyle(badgeColor)
             } else if renderingMode == .fullColor {
                 Circle().fill(badgeColor)
                 Image(systemName: badgeSystemName)
-                    .font(.system(size: side * 0.30, weight: .bold))
+                    .font(.system(size: side * badgeFontScale, weight: .bold))
                     .foregroundStyle(.white)
             } else {
                 Circle().stroke(.white, lineWidth: max(1, side * 0.035))
                 Image(systemName: badgeSystemName)
-                    .font(.system(size: side * 0.30, weight: .bold))
+                    .font(.system(size: side * badgeFontScale, weight: .bold))
                     .foregroundStyle(.white)
             }
         }
@@ -234,6 +252,7 @@ struct PhoneLauncherWidget: Widget {
 struct PhoneLauncherWidgetView: View {
     @Environment(\.widgetFamily) private var family
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorScheme) private var colorScheme
     let entry: PhoneLauncherEntry
 
     private var reading: PhoneWidgetReadingState? {
@@ -241,10 +260,10 @@ struct PhoneLauncherWidgetView: View {
         return state
     }
 
-    // テーマカラー背景の上に描いているか(ホーム画面のフルカラー表示時のみ)
-    private var brandBG: Bool { PhoneWidgetTheme.brandBackgroundEnabled && renderingMode == .fullColor }
-    private var primaryStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
-    private var subtleStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
+    // 濃いテーマカラー背景(ダーク)の上に描いているか。ライトの淡い背景では通常の前景を使う
+    private var whiteFG: Bool { PhoneWidgetTheme.usesWhiteForeground(renderingMode: renderingMode, colorScheme: colorScheme) }
+    private var primaryStyle: AnyShapeStyle { whiteFG ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
+    private var subtleStyle: AnyShapeStyle { whiteFG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
 
     var body: some View {
         content
@@ -297,7 +316,7 @@ struct PhoneLauncherWidgetView: View {
             // アイコンタップと違って「開いた後に見えるもの」が先に見えているのが存在価値なので、
             // 空きスペースには本棚の統計を出し、末尾に開く動作であることを明示する
             VStack(spacing: 5) {
-                PhoneBrandGlyph(forceTemplate: brandBG).frame(width: 40, height: 40)
+                PhoneBrandGlyph(forceTemplate: whiteFG).frame(width: 40, height: 40)
                 if let reading = reading {
                     Text(reading.title)
                         .font(.caption)
@@ -307,7 +326,7 @@ struct PhoneLauncherWidgetView: View {
                         .minimumScaleFactor(0.8)
                     Gauge(value: reading.overallProgress) { EmptyView() }
                         .gaugeStyle(.accessoryLinearCapacity)
-                        .tint(brandBG ? .white : .orange)
+                        .tint(whiteFG ? .white : .orange)
                 } else {
                     Text(NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
                         .font(.caption)
@@ -350,6 +369,7 @@ struct PhonePlayToggleWidget: Widget {
 struct PhonePlayToggleWidgetView: View {
     @Environment(\.widgetFamily) private var family
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorScheme) private var colorScheme
     let entry: PhoneLauncherEntry
 
     private var reading: PhoneWidgetReadingState? {
@@ -357,9 +377,9 @@ struct PhonePlayToggleWidgetView: View {
         return state
     }
 
-    private var brandBG: Bool { PhoneWidgetTheme.brandBackgroundEnabled && renderingMode == .fullColor }
-    private var primaryStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
-    private var subtleStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
+    private var whiteFG: Bool { PhoneWidgetTheme.usesWhiteForeground(renderingMode: renderingMode, colorScheme: colorScheme) }
+    private var primaryStyle: AnyShapeStyle { whiteFG ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
+    private var subtleStyle: AnyShapeStyle { whiteFG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
 
     var body: some View {
         Button(intent: PhoneSpeechToggleIntent()) {
@@ -396,7 +416,9 @@ struct PhonePlayToggleWidgetView: View {
         default:
             // ホーム画面(systemSmall): 合成アイコン + 対象の小説名 + ゲージ + 操作名
             VStack(spacing: 5) {
-                PhoneActionGlyphView(badgeSystemName: "playpause.fill", brandStyle: brandBG)
+                PhoneActionGlyphView(badgeSystemName: "playpause.fill",
+                                     badgeColor: PhoneWidgetTheme.playToggleBadgeColor(whiteForeground: whiteFG),
+                                     brandStyle: whiteFG)
                     .frame(width: 46, height: 46)
                 if let reading = reading {
                     Text(reading.title)
@@ -407,7 +429,7 @@ struct PhonePlayToggleWidgetView: View {
                         .minimumScaleFactor(0.8)
                     Gauge(value: reading.overallProgress) { EmptyView() }
                         .gaugeStyle(.accessoryLinearCapacity)
-                        .tint(brandBG ? .white : .orange)
+                        .tint(whiteFG ? .white : .orange)
                     Spacer(minLength: 0)
                 }
                 Text(NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止"))
@@ -422,17 +444,18 @@ struct PhonePlayToggleWidgetView: View {
 @available(iOSApplicationExtension 18.0, *)
 struct PhonePlayToggleControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        // kind の "2" は世代番号。コントロール一覧(カスタマイズUI)の絵は
+        // kind の数字は世代番号。コントロール一覧(カスタマイズUI)の絵は
         // 「kind が初めて登場した時」に一度だけ描画され、以後は再インストールや
-        // 再起動でも更新されない(実機確認)ため、アイコンを変えたら kind をバンプする
-        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playToggle3") {
+        // 再起動でも更新されない(実機確認)ため、アイコンを変えたら kind をバンプする。
+        // 世代4 = ⏯バッジを0.8倍に縮小(円からのはみ出し対策)
+        StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playToggle4") {
             ControlWidgetButton(action: PhoneSpeechToggleIntent()) {
                 Label {
                     Text("再生または停止")
                 } icon: {
                     // ことせかいグリフ+⏯の合成をカスタムシンボルとして生成したもの
                     // (くり抜きは SF Symbol の消去レイヤーで実現)
-                    Image("NovelSpeakerGlyphPlayPause3")
+                    Image("NovelSpeakerGlyphPlayPause4")
                 }
             }
         }

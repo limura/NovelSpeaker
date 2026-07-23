@@ -55,9 +55,9 @@ PUBLIC "-//W3C//DTD SVG 1.1//EN"
    <path class="monochrome-1 multicolor-1:tintColor hierarchical-1:primary" d="M118.232 -8.264C118.232 14.513 99.768 32.976 76.991 32.976C54.214 32.976 35.751 14.513 35.751 -8.264C35.751 -31.041 54.214 -49.506 76.991 -49.506C99.768 -49.506 118.232 -31.041 118.232 -8.264Z"/>
    <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M115.060 -8.264C115.060 12.760 98.016 29.804 76.991 29.804C55.966 29.804 38.923 12.760 38.923 -8.264C38.923 -29.289 55.966 -46.333 76.991 -46.333C98.016 -46.333 115.060 -29.289 115.060 -8.264Z"/>
    <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M109.667 -8.264C109.667 -26.310 95.037 -40.940 76.991 -40.940C58.945 -40.940 44.316 -26.310 44.316 -8.264C44.316 9.782 58.945 24.410 76.991 24.410C95.037 24.410 109.667 9.782 109.667 -8.264Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M56.211 -21.112L77.942 -8.264L56.211 4.584Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M83.970 -21.112L90.316 -21.112L90.316 4.584L83.970 4.584Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M93.805 -21.112L100.150 -21.112L100.150 4.584L93.805 4.584Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M60.368 -18.543L77.752 -8.264L60.368 2.014Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M82.574 -18.543L87.651 -18.543L87.651 2.014L82.574 2.014Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M90.443 -18.543L95.517 -18.543L95.517 2.014L90.443 2.014Z"/>
   </g>
   <g id="Regular-S" transform="matrix(1 0 0 1 1399.814 696.0)">
    <path class="monochrome-0 multicolor-0:tintColor hierarchical-0:primary" d="M69.073 -30.094C67.111 -30.094 65.521 -31.719 65.521 -33.723L65.521 -58.568C65.521 -67.768 62.063 -76.420 55.783 -82.932C49.520 -89.427 41.201 -93.003 32.363 -93.003C14.077 -93.003 -0.797 -77.556 -0.797 -58.568L-0.797 -33.723C-0.797 -31.719 -2.388 -30.094 -4.350 -30.094C-6.312 -30.094 -7.902 -31.719 -7.902 -33.723L-7.902 -58.568C-7.902 -81.559 10.161 -100.263 32.363 -100.263C43.119 -100.263 53.236 -95.917 60.847 -88.025C68.442 -80.148 72.626 -69.686 72.626 -58.568L72.626 -33.723C72.626 -31.719 71.036 -30.094 69.073 -30.094Z"/>
@@ -69,9 +69,9 @@ PUBLIC "-//W3C//DTD SVG 1.1//EN"
    <path class="monochrome-1 multicolor-1:tintColor hierarchical-1:primary" d="M118.232 -8.264C118.232 14.513 99.768 32.976 76.991 32.976C54.214 32.976 35.751 14.513 35.751 -8.264C35.751 -31.041 54.214 -49.506 76.991 -49.506C99.768 -49.506 118.232 -31.041 118.232 -8.264Z"/>
    <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M115.060 -8.264C115.060 12.760 98.016 29.804 76.991 29.804C55.966 29.804 38.923 12.760 38.923 -8.264C38.923 -29.289 55.966 -46.333 76.991 -46.333C98.016 -46.333 115.060 -29.289 115.060 -8.264Z"/>
    <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M109.667 -8.264C109.667 -26.310 95.037 -40.940 76.991 -40.940C58.945 -40.940 44.316 -26.310 44.316 -8.264C44.316 9.782 58.945 24.410 76.991 24.410C95.037 24.410 109.667 9.782 109.667 -8.264Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M56.211 -21.112L77.942 -8.264L56.211 4.584Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M83.970 -21.112L90.316 -21.112L90.316 4.584L83.970 4.584Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M93.805 -21.112L100.150 -21.112L100.150 4.584L93.805 4.584Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M60.368 -18.543L77.752 -8.264L60.368 2.014Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M82.574 -18.543L87.651 -18.543L87.651 2.014L82.574 2.014Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M90.443 -18.543L95.517 -18.543L95.517 2.014L90.443 2.014Z"/>
   </g>
   <g id="Black-S" transform="matrix(1 0 0 1 2883.374 696.0)">
    <path class="monochrome-0 multicolor-0:tintColor hierarchical-0:primary" d="M69.073 -30.094C67.111 -30.094 65.521 -31.719 65.521 -33.723L65.521 -58.568C65.521 -67.768 62.063 -76.420 55.783 -82.932C49.520 -89.427 41.201 -93.003 32.363 -93.003C14.077 -93.003 -0.797 -77.556 -0.797 -58.568L-0.797 -33.723C-0.797 -31.719 -2.388 -30.094 -4.350 -30.094C-6.312 -30.094 -7.902 -31.719 -7.902 -33.723L-7.902 -58.568C-7.902 -81.559 10.161 -100.263 32.363 -100.263C43.119 -100.263 53.236 -95.917 60.847 -88.025C68.442 -80.148 72.626 -69.686 72.626 -58.568L72.626 -33.723C72.626 -31.719 71.036 -30.094 69.073 -30.094Z"/>
@@ -83,9 +83,9 @@ PUBLIC "-//W3C//DTD SVG 1.1//EN"
    <path class="monochrome-1 multicolor-1:tintColor hierarchical-1:primary" d="M118.232 -8.264C118.232 14.513 99.768 32.976 76.991 32.976C54.214 32.976 35.751 14.513 35.751 -8.264C35.751 -31.041 54.214 -49.506 76.991 -49.506C99.768 -49.506 118.232 -31.041 118.232 -8.264Z"/>
    <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M115.060 -8.264C115.060 12.760 98.016 29.804 76.991 29.804C55.966 29.804 38.923 12.760 38.923 -8.264C38.923 -29.289 55.966 -46.333 76.991 -46.333C98.016 -46.333 115.060 -29.289 115.060 -8.264Z"/>
    <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M109.667 -8.264C109.667 -26.310 95.037 -40.940 76.991 -40.940C58.945 -40.940 44.316 -26.310 44.316 -8.264C44.316 9.782 58.945 24.410 76.991 24.410C95.037 24.410 109.667 9.782 109.667 -8.264Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M56.211 -21.112L77.942 -8.264L56.211 4.584Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M83.970 -21.112L90.316 -21.112L90.316 4.584L83.970 4.584Z"/>
-   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M93.805 -21.112L100.150 -21.112L100.150 4.584L93.805 4.584Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M60.368 -18.543L77.752 -8.264L60.368 2.014Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M82.574 -18.543L87.651 -18.543L87.651 2.014L82.574 2.014Z"/>
+   <path class="monochrome-2 multicolor-2:tintColor hierarchical-2:primary" d="M90.443 -18.543L95.517 -18.543L95.517 2.014L90.443 2.014Z"/>
   </g>
  </g>
 </svg>

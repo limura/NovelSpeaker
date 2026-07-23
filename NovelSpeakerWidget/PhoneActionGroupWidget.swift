@@ -92,12 +92,13 @@ struct PhoneActionGroupProvider: AppIntentTimelineProvider {
 
 struct PhoneActionGroupWidgetView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorScheme) private var colorScheme
     let entry: PhoneActionGroupEntry
 
     private var appName: String { NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい") }
 
-    private var brandBG: Bool { PhoneWidgetTheme.brandBackgroundEnabled && renderingMode == .fullColor }
-    private var subtleStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
+    private var whiteFG: Bool { PhoneWidgetTheme.usesWhiteForeground(renderingMode: renderingMode, colorScheme: colorScheme) }
+    private var subtleStyle: AnyShapeStyle { whiteFG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
 
     var body: some View {
         VStack(spacing: 6) {
@@ -105,14 +106,16 @@ struct PhoneActionGroupWidgetView: View {
                 // 再生・停止
                 cell(caption: NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止")) {
                     Button(intent: PhoneSpeechToggleIntent()) {
-                        PhoneActionGlyphView(badgeSystemName: "playpause.fill", badgeColor: .orange, brandStyle: brandBG)
+                        PhoneActionGlyphView(badgeSystemName: "playpause.fill",
+                                             badgeColor: PhoneWidgetTheme.playToggleBadgeColor(whiteForeground: whiteFG),
+                                             brandStyle: whiteFG)
                     }
                     .buttonStyle(.plain)
                 }
                 // アプリの起動
                 cell(caption: appName) {
                     Button(intent: PhoneOpenAppIntent()) {
-                        PhoneBrandGlyph(forceTemplate: brandBG)
+                        PhoneBrandGlyph(forceTemplate: whiteFG)
                     }
                     .buttonStyle(.plain)
                 }
@@ -144,7 +147,7 @@ struct PhoneActionGroupWidgetView: View {
         if let novelID = slot.novelID {
             cell(caption: slot.title ?? "") {
                 Button(intent: PhonePlayNovelIntent(novelID: novelID)) {
-                    PhoneActionGlyphView(badgeSystemName: slot.iconSystemName, badgeColor: slot.tint, brandStyle: brandBG)
+                    PhoneActionGlyphView(badgeSystemName: slot.iconSystemName, badgeColor: slot.tint, brandStyle: whiteFG)
                 }
                 .buttonStyle(.plain)
             }
@@ -152,7 +155,7 @@ struct PhoneActionGroupWidgetView: View {
             // 未選択。タップはボタンにせず通常のアプリ起動にしておく
             // (ギャラリーのプレビューでは機能の見本として選択アイコンを出す)
             cell(caption: NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択")) {
-                PhoneActionGlyphView(badgeSystemName: entry.isPreview ? slot.iconSystemName : "gearshape.fill", badgeColor: slot.tint, brandStyle: brandBG)
+                PhoneActionGlyphView(badgeSystemName: entry.isPreview ? slot.iconSystemName : "gearshape.fill", badgeColor: slot.tint, brandStyle: whiteFG)
             }
         }
     }

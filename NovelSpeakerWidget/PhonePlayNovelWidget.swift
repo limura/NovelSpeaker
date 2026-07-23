@@ -164,6 +164,7 @@ struct PhonePlayNovelProvider: AppIntentTimelineProvider {
 struct PhonePlayNovelWidgetView: View {
     @Environment(\.widgetFamily) private var family
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorScheme) private var colorScheme
     let entry: PhonePlayNovelEntry
 
     // 未選択時の1行目。ギャラリーのプレビューでは機能名を出し、
@@ -179,9 +180,9 @@ struct PhonePlayNovelWidgetView: View {
     // 単色系(ロック画面)では色分けが効かないのでシステムに任せ、フルカラーのみ選択色を適用する
     private var iconTint: Color? { renderingMode == .fullColor ? entry.tint : nil }
 
-    private var brandBG: Bool { PhoneWidgetTheme.brandBackgroundEnabled && renderingMode == .fullColor }
-    private var primaryStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
-    private var subtleStyle: AnyShapeStyle { brandBG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
+    private var whiteFG: Bool { PhoneWidgetTheme.usesWhiteForeground(renderingMode: renderingMode, colorScheme: colorScheme) }
+    private var primaryStyle: AnyShapeStyle { whiteFG ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
+    private var subtleStyle: AnyShapeStyle { whiteFG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
 
     var body: some View {
         // 小説が選択済みならタップでその場再生(アプリは開かない)。
@@ -236,7 +237,7 @@ struct PhonePlayNovelWidgetView: View {
             // (未選択の間は選択手順の案内を出す)。
             // 「再生・停止」と違いトグルではないことが分かるよう、末尾に動作を明示する
             VStack(spacing: 5) {
-                PhoneActionGlyphView(badgeSystemName: entry.iconSystemName, badgeColor: entry.tint, brandStyle: brandBG)
+                PhoneActionGlyphView(badgeSystemName: entry.iconSystemName, badgeColor: entry.tint, brandStyle: whiteFG)
                     .frame(width: 46, height: 46)
                 if entry.novelID != nil {
                     Text(displayTitle)
@@ -247,7 +248,7 @@ struct PhonePlayNovelWidgetView: View {
                         .minimumScaleFactor(0.8)
                     Gauge(value: entry.progress) { EmptyView() }
                         .gaugeStyle(.accessoryLinearCapacity)
-                        .tint(brandBG ? .white : iconTint)
+                        .tint(whiteFG ? .white : iconTint)
                     Spacer(minLength: 0)
                     Text(NSLocalizedString("Phone_Widget_PlayNovel_TapHint", comment: "タップで再生を開始"))
                         .font(.caption2)
