@@ -1,0 +1,10 @@
+/* iPhone-side widget extension localization (English) */
+
+"Phone_Widget_AppName" = "NovelSpeaker";
+"Phone_Widget_PlayToggle_Name" = "Play or Pause";
+"Phone_Widget_PlayToggle_Short" = "Play/Pause";
+"Phone_Widget_PlayToggle_Desc" = "Starts or stops speech without opening NovelSpeaker.";
+
+/* AppIntents / ControlWidget 由来の文字列は日本語リテラルがそのままキーになる */
+"再生または停止" = "Play or Pause";
+"ことせかい を開かずに、読み上げの再生・停止をします。" = "Starts or stops speech without opening NovelSpeaker.";

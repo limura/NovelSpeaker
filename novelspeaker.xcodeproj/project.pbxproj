@@ -222,6 +222,12 @@
 		56F2236BDCBC70F86153D390 /* NovelSpeakerWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */; };
 		C0DE10000000000000000002 /* WatchWidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000001 /* WatchWidgetURL.swift */; };
 		C0DE10000000000000000003 /* WatchWidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000001 /* WatchWidgetURL.swift */; };
+		C0DE20000000000000000011 /* SpeechWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000001 /* SpeechWidgetIntent.swift */; };
+		C0DE20000000000000000012 /* SpeechWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000001 /* SpeechWidgetIntent.swift */; };
+		C0DE20000000000000000013 /* NovelSpeakerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000002 /* NovelSpeakerWidget.swift */; };
+		C0DE20000000000000000014 /* WidgetPlaybackHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */; };
+		C0DE20000000000000000015 /* NovelSpeakerWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C0DE20000000000000000016 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* Localizable.strings */; };
 		C0DE10000000000000000012 /* WatchActionComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000011 /* WatchActionComplications.swift */; };
 		C0DE10000000000000000022 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
 		C0DE10000000000000000023 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
@@ -237,7 +243,7 @@
 		794F67E40BB94B0666745B8E /* WatchTextSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8A7FEB0C160633879907522 /* WatchTextSettings.swift */; };
 		80E7D1AD02DF683B7B721DD1 /* WatchComplicationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63C772BD7864F00126B3F3A /* WatchComplicationData.swift */; };
 		8225071A2C9D55E0C3B8F200 /* WatchSpeechSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B183A0FEE977129AFD5FBAB5 /* WatchSpeechSettings.swift */; };
-		85A13C6F8460D9FC4DA64CD8 /* NovelSpeakerWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = BBFF504221254797802A0F4C /* NovelSpeakerWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		85A13C6F8460D9FC4DA64CD8 /* NovelSpeakerWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = BBFF504221254797802A0F4C /* NovelSpeakerWatch.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		87CCA2A6DB47F899A780A0C5 /* VoicevoxRealDeviceReproTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F6EF1A8BBF240BAB0BA02D /* VoicevoxRealDeviceReproTest.swift */; };
 		8CC1B5ACF8E4D1F21B79627E /* VoicevoxSpeakerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9D18F682E6D582893D3B026 /* VoicevoxSpeakerTest.swift */; };
 		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
@@ -286,6 +292,13 @@
 			remoteGlobalIDString = 400C3487E660013CB5F95922;
 			remoteInfo = NovelSpeakerWatchWidgetExtension;
 		};
+		C0DE20000000000000000037 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C0DE20000000000000000030;
+			remoteInfo = NovelSpeakerWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -307,6 +320,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				21BBC11828DC994A00DB4C3B /* ShareExtension.appex in Embed App Extensions */,
+				C0DE20000000000000000015 /* NovelSpeakerWidgetExtension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -600,6 +614,13 @@
 		55E7B603DAF58E2B3172040E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS11.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NovelSpeakerWatchWidget.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000001 /* WatchWidgetURL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchWidgetURL.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000001 /* SpeechWidgetIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechWidgetIntent.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000002 /* NovelSpeakerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NovelSpeakerWidget.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000003 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetPlaybackHandler.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000007 /* ja */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0DE20000000000000000008 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C0DE10000000000000000011 /* WatchActionComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchActionComplications.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchNovelSummaryStore.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000031 /* PlayNovelComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayNovelComplication.swift; sourceTree = "<group>"; };
@@ -703,6 +724,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				766FBA81870E4A7AEC43DF33 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0DE20000000000000000033 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -925,6 +953,7 @@
 				F77309E24963F7BDD39778CF /* NovelSpeakerWatch */,
 				30CD47F867E015250A5B61F9 /* WatchShared */,
 				EAEDD3ECF086E17B254743A3 /* NovelSpeakerWatchWidget */,
+				C0DE20000000000000000020 /* NovelSpeakerWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -936,6 +965,7 @@
 				21BBC10E28DC994900DB4C3B /* ShareExtension.appex */,
 				BBFF504221254797802A0F4C /* NovelSpeakerWatch.app */,
 				6E4A0478584A794080C4D53E /* NovelSpeakerWatchWidgetExtension.appex */,
+				C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1001,6 +1031,7 @@
 				5AF22ADCC56BF76579F8F345 /* VoicevoxCore.swift */,
 				16E06129237E488639738552 /* VoicevoxSpeaker.swift */,
 				86DEB6F3AC6354016F30B111 /* WatchSessionCoordinator.swift */,
+				C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -1180,6 +1211,17 @@
 			path = NovelSpeakerWatch;
 			sourceTree = "<group>";
 		};
+		C0DE20000000000000000020 /* NovelSpeakerWidget */ = {
+			isa = PBXGroup;
+			children = (
+				C0DE20000000000000000002 /* NovelSpeakerWidget.swift */,
+				C0DE20000000000000000001 /* SpeechWidgetIntent.swift */,
+				C0DE20000000000000000003 /* Info.plist */,
+				C0DE20000000000000000006 /* Localizable.strings */,
+			);
+			path = NovelSpeakerWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1218,6 +1260,7 @@
 			dependencies = (
 				21BBC11728DC994A00DB4C3B /* PBXTargetDependency */,
 				CF8A14472BFE7CFFC8883BA5 /* PBXTargetDependency */,
+				C0DE20000000000000000038 /* PBXTargetDependency */,
 			);
 			name = NovelSpeaker;
 			productName = NovelSpeaker;
@@ -1279,6 +1322,23 @@
 			productReference = BBFF504221254797802A0F4C /* NovelSpeakerWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C0DE20000000000000000030 /* NovelSpeakerWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0DE20000000000000000031 /* Build configuration list for PBXNativeTarget "NovelSpeakerWidgetExtension" */;
+			buildPhases = (
+				C0DE20000000000000000032 /* Sources */,
+				C0DE20000000000000000033 /* Frameworks */,
+				C0DE20000000000000000034 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NovelSpeakerWidgetExtension;
+			productName = NovelSpeakerWidgetExtension;
+			productReference = C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1339,6 +1399,7 @@
 				21BBC10D28DC994900DB4C3B /* ShareExtension */,
 				6493B253C863CD70E0C6D660 /* NovelSpeakerWatch */,
 				400C3487E660013CB5F95922 /* NovelSpeakerWatchWidgetExtension */,
+				C0DE20000000000000000030 /* NovelSpeakerWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -1451,6 +1512,14 @@
 			files = (
 				2B48E2CE4104C207F9CAD615 /* Assets.xcassets in Resources */,
 				43747EECC994CA2F0E09D887 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0DE20000000000000000034 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0DE20000000000000000016 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1569,6 +1638,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE20000000000000000011 /* SpeechWidgetIntent.swift in Sources */,
+				C0DE20000000000000000014 /* WidgetPlaybackHandler.swift in Sources */,
 				2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */,
 				2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */,
 				216741A3204421F1008A578D /* BugReportViewController.swift in Sources */,
@@ -1708,6 +1779,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C0DE20000000000000000032 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0DE20000000000000000013 /* NovelSpeakerWidget.swift in Sources */,
+				C0DE20000000000000000012 /* SpeechWidgetIntent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1730,8 +1810,16 @@
 		CF8A14472BFE7CFFC8883BA5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = NovelSpeakerWatch;
+			platformFilter = ios;
 			target = 6493B253C863CD70E0C6D660 /* NovelSpeakerWatch */;
 			targetProxy = 40DE585928E5AC06AE43D94C /* PBXContainerItemProxy */;
+		};
+		C0DE20000000000000000038 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NovelSpeakerWidgetExtension;
+			platformFilter = ios;
+			target = C0DE20000000000000000030 /* NovelSpeakerWidgetExtension */;
+			targetProxy = C0DE20000000000000000037 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1837,6 +1925,15 @@
 			children = (
 				9D1F29DF1B7FA5B4102C34EE /* ja */,
 				F0AC332161B66971D522ECA3 /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		C0DE20000000000000000006 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C0DE20000000000000000007 /* ja */,
+				C0DE20000000000000000008 /* en */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -2353,6 +2450,67 @@
 			};
 			name = Release;
 		};
+		C0DE20000000000000000035 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2.12.4;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NovelSpeakerWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ことせかい";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.12.1;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG NOVELSPEAKER_WIDGET_EXTENSION";
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C0DE20000000000000000036 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2.12.4;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NovelSpeakerWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ことせかい";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.12.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = NOVELSPEAKER_WIDGET_EXTENSION;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2406,6 +2564,15 @@
 			buildConfigurations = (
 				E7F1EE2D21FC1DA58208BC11 /* Release */,
 				A2CE57BBF4848B07E8DB07F8 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0DE20000000000000000031 /* Build configuration list for PBXNativeTarget "NovelSpeakerWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0DE20000000000000000035 /* Debug */,
+				C0DE20000000000000000036 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

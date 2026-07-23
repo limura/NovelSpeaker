@@ -1141,6 +1141,10 @@
 // Debug menu in the Settings tab (Apple Watch session diagnostics)
 "SettingsViewController_WatchSessionDiagnostics" = "Apple Watch session diagnostics";
 
+// iPhone-side widget intents (SpeechWidgetIntent). AppIntents strings are keyed by their Japanese literals.
+"再生または停止" = "Play or Pause";
+"ことせかい を開かずに、読み上げの再生・停止をします。" = "Starts or stops speech without opening NovelSpeaker.";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.

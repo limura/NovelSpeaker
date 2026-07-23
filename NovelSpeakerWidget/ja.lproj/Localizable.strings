@@ -1,0 +1,6 @@
+/* iPhone側ウィジェット(Widget Extension)のローカライズ(日本語) */
+
+"Phone_Widget_AppName" = "ことせかい";
+"Phone_Widget_PlayToggle_Name" = "再生または停止";
+"Phone_Widget_PlayToggle_Short" = "再生・停止";
+"Phone_Widget_PlayToggle_Desc" = "ことせかい を開かずに、読み上げの再生・停止をします。";
