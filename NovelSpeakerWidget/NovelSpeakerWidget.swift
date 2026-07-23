@@ -38,8 +38,9 @@ struct PhoneLauncherControl: ControlWidget {
                 Label {
                     Text("アプリの起動")
                 } icon: {
-                    // コントロールは単色テンプレート描画なので、ことせかいの透過グリフを使う
-                    Image("LauncherGlyph")
+                    // コントロールのアイコンは SF Symbol しか描画されない(PNG は「？」になる)ため、
+                    // 元 SVG から起こしたカスタムシンボル(LauncherSymbol.symbolset)を使う
+                    Image("LauncherSymbol")
                 }
             }
         }
@@ -273,19 +274,17 @@ struct PhonePlayToggleWidgetView: View {
 
     @ViewBuilder
     private var content: some View {
+        // どのファミリーも ことせかいグリフ+⏯の合成アイコン(「指定小説の再生を開始」と同じ流儀)
         switch family {
         case .accessoryCircular:
-            // ロック画面(円形): 記号だけ
-            ZStack {
-                Circle().fill(.quaternary)
-                Image(systemName: "playpause.fill")
-                    .font(.title3)
-            }
+            // ロック画面(円形): 合成アイコンだけ
+            PhoneActionGlyphView(badgeSystemName: "playpause.fill")
+                .padding(2)
         case .accessoryRectangular:
-            // ロック画面(横長): アプリ名 + 操作名
+            // ロック画面(横長): [合成アイコン] アプリ名 + 操作名
             HStack(spacing: 8) {
-                Image(systemName: "playpause.fill")
-                    .font(.title3)
+                PhoneActionGlyphView(badgeSystemName: "playpause.fill")
+                    .frame(width: 30, height: 30)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
                         .font(.headline)
@@ -296,15 +295,10 @@ struct PhonePlayToggleWidgetView: View {
                 Spacer(minLength: 0)
             }
         default:
-            // ホーム画面(systemSmall): 橙の円 + 白の再生・停止記号(Watch の操作系と同じ配色)
+            // ホーム画面(systemSmall): 合成アイコン + 操作名
             VStack(spacing: 8) {
-                ZStack {
-                    Circle().fill(Color.orange)
-                    Image(systemName: "playpause.fill")
-                        .font(.title)
-                        .foregroundStyle(.white)
-                }
-                .frame(width: 56, height: 56)
+                PhoneActionGlyphView(badgeSystemName: "playpause.fill")
+                    .frame(width: 56, height: 56)
                 Text(NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止"))
                     .font(.caption)
             }
