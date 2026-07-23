@@ -299,7 +299,8 @@ struct PhonePlayNovelControlValueProvider: AppIntentControlValueProvider {
 @available(iOSApplicationExtension 18.0, *)
 struct PhonePlayNovelControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        AppIntentControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playNovel",
+        // kind の "2" は世代番号(コントロール一覧の絵の作り直し用。NovelSpeakerWidget.swift 参照)
+        AppIntentControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playNovel2",
                                       provider: PhonePlayNovelControlValueProvider()) { value in
             // 未選択のまま押した場合は PhonePlayNovelIntent 側で何もしない。
             // 未選択の間は歯車アイコンで「要設定」を示す。選択済みは
@@ -311,7 +312,7 @@ struct PhonePlayNovelControl: ControlWidget {
                     if value.novelID == nil {
                         Image(systemName: "gearshape.fill")
                     } else {
-                        Image("NovelSpeakerGlyphPlay")
+                        Image("NovelSpeakerGlyphPlay2")
                     }
                 }
             }
