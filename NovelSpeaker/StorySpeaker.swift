@@ -541,6 +541,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     globalState.currentReadingNovelID = novelID
                 }
             }
+            #if !os(watchOS)
+            // iPhone側ウィジェット(ランチャーの小説名・進捗)を追従させる。
+            // Realm 観測だけだと、この書き込みがバックグラウンド移行後に完了した場合などに
+            // 取りこぼすことがあるので、書き込み元からも直接更新を叩いておく
+            PhoneWidgetDataUpdater.updateSoon()
+            #endif
         }
     }
     

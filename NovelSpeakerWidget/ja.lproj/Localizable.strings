@@ -13,4 +13,8 @@
 "Phone_Widget_PlayNovel_Name" = "指定小説の再生を開始";
 "Phone_Widget_PlayNovel_Desc" = "指定した小説の読み上げを、ことせかい を開かずに開始します。小説の候補は最近読んだ順に並びます。";
 "Phone_Widget_PlayNovel_Unset" = "小説を選択";
-"Phone_Widget_PlayNovel_UnsetHint" = "長押しなどの編集で小説を選択してください";
+"Phone_Widget_PlayNovel_UnsetHint" = "ウィジェットの編集で小説を選択してください";
+
+/* 4枠アクションウィジェット */
+"Phone_Widget_ActionGroup_Name" = "操作をまとめて配置";
+"Phone_Widget_ActionGroup_Desc" = "再生・停止、アプリの起動、選んだ小説2冊の再生開始を1つのウィジェットに並べます。";

@@ -120,24 +120,28 @@ struct PhonePlayNovelEntry: TimelineEntry {
     let progress: Double
     let iconSystemName: String
     let tint: Color
+    /// ウィジェット追加画面(ギャラリー)のプレビューかどうか。
+    /// プレビューでは「未設定」ではなく機能の見本として表示する
+    var isPreview: Bool = false
 }
 
 struct PhonePlayNovelProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> PhonePlayNovelEntry {
         PhonePlayNovelEntry(date: Date(), novelID: nil, title: nil, progress: 0,
-                            iconSystemName: PhonePlayNovelWidgetIcon.play.systemName, tint: .orange)
+                            iconSystemName: PhonePlayNovelWidgetIcon.play.systemName, tint: .orange,
+                            isPreview: true)
     }
 
     func snapshot(for configuration: PhonePlayNovelConfigurationIntent, in context: Context) async -> PhonePlayNovelEntry {
-        return entry(for: configuration)
+        return entry(for: configuration, isPreview: context.isPreview)
     }
 
     func timeline(for configuration: PhonePlayNovelConfigurationIntent, in context: Context) async -> Timeline<PhonePlayNovelEntry> {
         // 更新はアプリ側の WidgetCenter.reloadAllTimelines で駆動するので固定1エントリ
-        return Timeline(entries: [entry(for: configuration)], policy: .never)
+        return Timeline(entries: [entry(for: configuration, isPreview: false)], policy: .never)
     }
 
-    private func entry(for configuration: PhonePlayNovelConfigurationIntent) -> PhonePlayNovelEntry {
+    private func entry(for configuration: PhonePlayNovelConfigurationIntent, isPreview: Bool) -> PhonePlayNovelEntry {
         let novelID = configuration.novel?.id
         // 選択済みの小説の最新情報(タイトル・読了進捗)は共有ストアから引き直す
         let summary = novelID.flatMap { PhoneWidgetDataStore.summary(novelID: $0) }
@@ -147,9 +151,11 @@ struct PhonePlayNovelProvider: AppIntentTimelineProvider {
             title: summary?.title ?? configuration.novel?.title,
             progress: summary?.overallProgress ?? 0,
             // 小説が未選択の間は歯車バッジにして「要設定」であることを見た目でも示す
-            // (円形ウィジェットは文字が出せないのでこれが唯一の手掛かりになる)
-            iconSystemName: novelID == nil ? "gearshape.fill" : configuration.icon.systemName,
-            tint: configuration.color.color)
+            // (円形ウィジェットは文字が出せないのでこれが唯一の手掛かりになる)。
+            // ギャラリーのプレビューは「未設定」ではなく機能の見本なので通常のアイコンで出す
+            iconSystemName: (novelID == nil && !isPreview) ? "gearshape.fill" : configuration.icon.systemName,
+            tint: configuration.color.color,
+            isPreview: isPreview)
     }
 }
 
@@ -160,7 +166,15 @@ struct PhonePlayNovelWidgetView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: PhonePlayNovelEntry
 
-    private var displayTitle: String { entry.title ?? NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択") }
+    // 未選択時の1行目。ギャラリーのプレビューでは機能名を出し、
+    // 実際に置かれた未設定ウィジェットでは「小説を選択」を出す
+    private var displayTitle: String {
+        if let title = entry.title { return title }
+        if entry.isPreview {
+            return NSLocalizedString("Phone_Widget_PlayNovel_Name", comment: "指定小説の再生を開始")
+        }
+        return NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択")
+    }
 
     // 単色系(ロック画面)では色分けが効かないのでシステムに任せ、フルカラーのみ選択色を適用する
     private var iconTint: Color? { renderingMode == .fullColor ? entry.tint : nil }
@@ -287,12 +301,14 @@ struct PhonePlayNovelControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         AppIntentControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playNovel",
                                       provider: PhonePlayNovelControlValueProvider()) { value in
-            // 未選択のまま押した場合は PhonePlayNovelIntent 側で何もしない
+            // 未選択のまま押した場合は PhonePlayNovelIntent 側で何もしない。
+            // 未選択の間は歯車アイコンで「要設定」を示す(コントロールは単色テンプレート
+            // 描画なので、ウィジェットのような合成アイコンは使えない)
             ControlWidgetButton(action: PhonePlayNovelIntent(novelID: value.novelID ?? "")) {
                 Label {
                     Text(value.title ?? NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択"))
                 } icon: {
-                    Image(systemName: "play.fill")
+                    Image(systemName: value.novelID == nil ? "gearshape.fill" : "play.fill")
                 }
             }
         }

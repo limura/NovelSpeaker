@@ -233,6 +233,7 @@
 		C0DE20000000000000000053 /* PhonePlayNovelWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */; };
 		C0DE20000000000000000054 /* PhoneWidgetDataUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */; };
 		C0DE20000000000000000055 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000044 /* Assets.xcassets */; };
+		C0DE20000000000000000056 /* PhoneActionGroupWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */; };
 		C0DE10000000000000000012 /* WatchActionComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000011 /* WatchActionComplications.swift */; };
 		C0DE10000000000000000022 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
 		C0DE10000000000000000023 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
@@ -631,6 +632,7 @@
 		C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneWidgetDataUpdater.swift; sourceTree = "<group>"; };
 		C0DE20000000000000000044 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C0DE20000000000000000045 /* NovelSpeakerWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerWidget.entitlements; sourceTree = "<group>"; };
+		C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneActionGroupWidget.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000011 /* WatchActionComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchActionComplications.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchNovelSummaryStore.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000031 /* PlayNovelComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayNovelComplication.swift; sourceTree = "<group>"; };
@@ -1227,6 +1229,7 @@
 			children = (
 				C0DE20000000000000000002 /* NovelSpeakerWidget.swift */,
 				C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */,
+				C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */,
 				C0DE20000000000000000001 /* SpeechWidgetIntent.swift */,
 				C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */,
 				C0DE20000000000000000044 /* Assets.xcassets */,
@@ -1803,6 +1806,7 @@
 			files = (
 				C0DE20000000000000000013 /* NovelSpeakerWidget.swift in Sources */,
 				C0DE20000000000000000053 /* PhonePlayNovelWidget.swift in Sources */,
+				C0DE20000000000000000056 /* PhoneActionGroupWidget.swift in Sources */,
 				C0DE20000000000000000012 /* SpeechWidgetIntent.swift in Sources */,
 				C0DE20000000000000000052 /* PhoneWidgetDataStore.swift in Sources */,
 			);

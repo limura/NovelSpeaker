@@ -53,7 +53,7 @@ class PhoneWidgetDataUpdater {
     }
 
     /// 変更の連打(発話中の栞保存や iCloud 同期のバースト)をまとめるためのデバウンス
-    private static func updateSoon() {
+    static func updateSoon() {
         debounceWorkItem?.cancel()
         let work = DispatchWorkItem {
             update()

@@ -13,7 +13,11 @@
 "Phone_Widget_PlayNovel_Name" = "Start Playing Selected Novel";
 "Phone_Widget_PlayNovel_Desc" = "Starts playing the chosen novel without opening NovelSpeaker. Novel choices are listed by most recently read.";
 "Phone_Widget_PlayNovel_Unset" = "Choose a novel";
-"Phone_Widget_PlayNovel_UnsetHint" = "Long-press (edit widget) to choose a novel";
+"Phone_Widget_PlayNovel_UnsetHint" = "Edit the widget to choose a novel";
+
+/* 4-slot action widget */
+"Phone_Widget_ActionGroup_Name" = "Combined Actions";
+"Phone_Widget_ActionGroup_Desc" = "Places play/pause, open app, and two chosen novels in a single widget.";
 
 /* AppIntents / ControlWidget 由来の文字列は日本語リテラルがそのままキーになる */
 "再生または停止" = "Play or Pause";
@@ -22,6 +26,10 @@
 "指定した小説の読み上げを、ことせかい を開かずに開始します。" = "Starts playing the chosen novel without opening NovelSpeaker.";
 "アプリの起動" = "Open App";
 "ことせかい を開きます。" = "Opens NovelSpeaker.";
+"操作をまとめて配置" = "Combined Actions";
+"再生・停止、アプリの起動、小説2冊の再生開始を1つのウィジェットに並べます。" = "Places play/pause, open app, and two chosen novels in a single widget.";
+"小説1" = "Novel 1";
+"小説2" = "Novel 2";
 "小説" = "Novel";
 "アイコン" = "Icon";
 "色" = "Color";

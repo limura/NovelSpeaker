@@ -56,6 +56,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             RealmUtil.CloudPull()
         }
         WebSpeechViewController.instance?.RedisplayWebView()
+        // バックグラウンド中に完了した栞・小説切替の書き込みを取りこぼしていても
+        // ここで追いつく(デバウンス発火前にサスペンドした場合など)
+        PhoneWidgetDataUpdater.update()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

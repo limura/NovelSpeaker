@@ -17,6 +17,7 @@ struct NovelSpeakerPhoneWidgetBundle: WidgetBundle {
         PhoneLauncherWidget()
         PhonePlayToggleWidget()
         PhonePlayNovelWidget()
+        PhoneActionGroupWidget()
         // ControlWidget(コントロールセンター+ロック画面下部の角スロット)は iOS 18+
         if #available(iOSApplicationExtension 18.0, *) {
             PhonePlayToggleControl()
@@ -37,7 +38,8 @@ struct PhoneLauncherControl: ControlWidget {
                 Label {
                     Text("アプリの起動")
                 } icon: {
-                    Image(systemName: "book.fill")
+                    // コントロールは単色テンプレート描画なので、ことせかいの透過グリフを使う
+                    Image("LauncherGlyph")
                 }
             }
         }
