@@ -42,8 +42,10 @@ struct PhoneLauncherControl: ControlWidget {
                     Text("アプリの起動")
                 } icon: {
                     // コントロールのアイコンは SF Symbol しか描画されない(PNG は「？」になる)ため、
-                    // 元 SVG から起こしたカスタムシンボル(NovelSpeakerGlyph.symbolset)を使う
-                    Image("NovelSpeakerGlyph")
+                    // 元 SVG から起こしたカスタムシンボルを使う。
+                    // シンボルは端末側でアセット名キャッシュされるため、形を変えるたびに名前を
+                    // バンプする(現行: NovelSpeakerGlyph2 = 向き正規化+1.25倍)
+                    Image("NovelSpeakerGlyph2")
                 }
             }
         }
