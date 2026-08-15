@@ -180,7 +180,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         // 空回りしないよう AVSpeechSynthesizer(既定話者)へフォールバックさせる。
         #if !targetEnvironment(macCatalyst) && !os(watchOS)
         if type == "VOICEVOX" {
-            let styleId = UInt32(voiceIdentifier ?? "") ?? 0
+            let styleId = VoicevoxCore.styleId(fromVoiceIdentifier: voiceIdentifier)
             let cacheKey = "VOICEVOX:\(styleId)"
             if let speaker = speakerCache[cacheKey] { return speaker }
             let speaker = VoicevoxSpeaker(styleId: styleId)

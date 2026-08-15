@@ -335,6 +335,24 @@ actor VoicevoxCore {
         }
     }
 
+    /// 話者設定の voiceIdentifier から VOICEVOX の styleId を求める。
+    ///
+    /// 再生側(MultiVoiceSpeaker)は数値に変換できない場合 0 にフォールバックするのに対し、
+    /// 先行合成側は「変換できないブロックを読み飛ばす」という非対称な実装になっており、
+    /// 実機で以下の不具合を起こしていた:
+    ///   - type=="VOICEVOX" なのに voiceIdentifier が AVSpeech の音声ID
+    ///     (例: com.apple.ttsbundle.siri_O-ren_ja-JP_premium)のままになっている話者設定だと、
+    ///     再生側は styleId=0 で合成する一方、先行合成側はそのブロックを一切合成しない。
+    ///   - その結果、地の文のブロックが必ずキャッシュMISSになり(実機で MISS内訳=未予約14/16)、
+    ///     再生の度にその場で合成して10秒以上の無音になる。
+    ///   - さらに「未再生の貯金」の計算でも同じ理由で読み飛ばしていたため、
+    ///     実際には合成されていないのに貯金が十分あるように見えていた。
+    /// キャッシュのキーは (styleId, text) なので、両者の解釈が一致しない限り
+    /// 先行合成は永久に無駄撃ちになる。必ずここを通す事。
+    static func styleId(fromVoiceIdentifier voiceIdentifier: String?) -> UInt32 {
+        return UInt32(voiceIdentifier ?? "") ?? 0
+    }
+
     private static func prefetchKey(text: String, styleId: UInt32) -> String {
         return "\(styleId)::\(text)"
     }
@@ -613,6 +631,11 @@ final class VoicevoxCore {
     /// ログ用(スタブ側は合成しないので常に 0)。
     func cachedAudioSecondsForLogging() -> Double { return 0 }
     func cachedWavByteCount(text: String, styleId: UInt32) -> Int? { return nil }
+
+    /// 実装側と同じ導出(再生側と先行合成側で解釈が食い違わないようにするため)。
+    static func styleId(fromVoiceIdentifier voiceIdentifier: String?) -> UInt32 {
+        return UInt32(voiceIdentifier ?? "") ?? 0
+    }
 
     static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
     static var configuredCPUNumThreads: UInt16 {

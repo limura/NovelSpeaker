@@ -21,7 +21,11 @@ class VoicevoxPrefetchLeadTest: XCTestCase {
     }
 
     private func makeBlock(text: String, type: String = "VOICEVOX", styleId: UInt32 = 3) -> CombinedSpeechBlock {
-        let info = SpeechBlockInfo(speechText: text, displayText: text, voiceIdentifier: "\(styleId)", locale: "ja-JP", pitch: 1, rate: 1, volume: 1, delay: 0, isMod: false, type: type)
+        return makeBlockWithVoiceIdentifier(text: text, type: type, voiceIdentifier: "\(styleId)")
+    }
+
+    private func makeBlockWithVoiceIdentifier(text: String, type: String = "VOICEVOX", voiceIdentifier: String?) -> CombinedSpeechBlock {
+        let info = SpeechBlockInfo(speechText: text, displayText: text, voiceIdentifier: voiceIdentifier, locale: "ja-JP", pitch: 1, rate: 1, volume: 1, delay: 0, isMod: false, type: type)
         return CombinedSpeechBlock(block: info)
     }
 
@@ -105,6 +109,39 @@ class VoicevoxPrefetchLeadTest: XCTestCase {
             return self.wavBytes(seconds: 10)
         }
         XCTAssertEqual(lead, 0.0, accuracy: 0.0001, "最終ブロックより先は無いので0秒")
+    }
+
+    // 再生側は voiceIdentifier が数値でない場合 styleId=0 にフォールバックするのに対し、
+    // 先行合成/貯金の計算側は「変換できないブロックを読み飛ばす」という非対称な実装に
+    // なっており、実機で以下の不具合を起こしていた:
+    //   type=="VOICEVOX" なのに voiceIdentifier が AVSpeech の音声ID のままの話者設定だと、
+    //   地の文のブロックが一切先行合成されず、必ずキャッシュMISSして10秒以上の無音になる。
+    //   さらに貯金の計算でも読み飛ばすため、合成されていないのに貯金が十分あるように見えた
+    //   (実機で 未再生の貯金=81秒 なのに 再生時HIT率=30% / MISS内訳=未予約14件)。
+    // 両者が同じ導出(VoicevoxCore.styleId(fromVoiceIdentifier:))を使う事を保証する。
+    func testNonNumericVoiceIdentifierFallsBackToStyleZeroConsistently() {
+        XCTAssertEqual(VoicevoxCore.styleId(fromVoiceIdentifier: "com.apple.ttsbundle.siri_O-ren_ja-JP_premium"), 0)
+        XCTAssertEqual(VoicevoxCore.styleId(fromVoiceIdentifier: nil), 0)
+        XCTAssertEqual(VoicevoxCore.styleId(fromVoiceIdentifier: ""), 0)
+        XCTAssertEqual(VoicevoxCore.styleId(fromVoiceIdentifier: "8"), 8)
+    }
+
+    // voiceIdentifier が数値でないVOICEVOXブロックは「読み飛ばす」のではなく、
+    // styleId=0 のブロックとして貯金の対象に数えられなければならない
+    // (読み飛ばすと、未合成なのに貯金があるように見えてしまう)。
+    func testNonNumericVoiceIdentifierBlockIsNotSkippedInLead() {
+        let blocks = [
+            makeBlock(text: "再生中"),
+            makeBlockWithVoiceIdentifier(text: "地の文", voiceIdentifier: "com.apple.ttsbundle.siri_O-ren_ja-JP_premium"),
+            makeBlock(text: "会話文"),
+        ]
+        // 地の文(styleId=0)は未合成、会話文(styleId=3)は合成済み、という実機の状況。
+        let lead = SpeechBlockSpeaker.contiguousPrefetchedLeadSeconds(blocks: blocks, fromIndex: 1) { text, styleId in
+            if text == "会話文" && styleId == 3 { return self.wavBytes(seconds: 30) }
+            return nil
+        }
+        XCTAssertEqual(lead, 0.0, accuracy: 0.01,
+                       "未合成の地の文で打ち切られるべき。読み飛ばして会話文の30秒を数えてはいけない")
     }
 
     // 走査数の上限を超えて延々と数え続けない事。

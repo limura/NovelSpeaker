@@ -287,12 +287,15 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             && (accumulated < parameters.targetCharacterCount || prefetchedBlockCount < parameters.minimumBlockCount) {
             let block = speechBlockArray[index]
             scanned += 1
-            guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else {
+            guard block.type == "VOICEVOX" else {
                 // VOICEVOX以外のブロックは先読み対象では無いが、この先にVOICEVOXブロックが
                 // 無いとは限らないので、打ち切らずに読み飛ばして探索を続ける。
                 index += 1
                 continue
             }
+            // styleId は再生側と同じ導出を使う(食い違うとキャッシュのキーが一致せず、
+            // 先行合成が全て無駄撃ちになる)。
+            let styleId = VoicevoxCore.styleId(fromVoiceIdentifier: block.voiceIdentifier)
             let text = block.speechText
             // enqueueSpeechBlock() 側の「空白のみ/発話しうる文字が無いテキストはVOICEVOXに
             // 渡さない」判定と同じ基準で、先読みも同様にスキップする(実機でこのガードの
@@ -318,7 +321,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         while index < speechBlockArray.count {
             let block = speechBlockArray[index]
             index += 1
-            guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else { continue }
+            guard block.type == "VOICEVOX" else { continue }
+            let styleId = VoicevoxCore.styleId(fromVoiceIdentifier: block.voiceIdentifier)
             let text = block.speechText
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || Self.hasNoSpeakableCharacter(text) { continue }
             if VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId) == nil {
@@ -356,7 +360,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             scanned += 1
             // VOICEVOX以外のブロック(AVSpeech等)は先行合成の対象ではないので、
             // 貯金の切れ目とは見なさずに読み飛ばす。
-            guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else { continue }
+            guard block.type == "VOICEVOX" else { continue }
+            let styleId = VoicevoxCore.styleId(fromVoiceIdentifier: block.voiceIdentifier)
             let text = block.speechText
             // 合成に出さないテキスト(空白のみ等)も切れ目ではない。
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || hasNoSpeakableCharacter(text) { continue }
