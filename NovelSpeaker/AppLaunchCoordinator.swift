@@ -46,6 +46,9 @@ final class AppLaunchCoordinator: NSObject {
         WatchSessionCoordinator.shared.start()
         PhoneWidgetDataUpdater.startObserving()
         PhoneWidgetDataUpdater.update()
+        // バックグラウンド再生時の CPU 上限(60秒平均80%)超過によるプロセス強制終了を避けるため、
+        // アプリ状態・電源状態の監視を開始する(VoicevoxPrefetchThrottle 参照)。
+        VoicevoxPrefetchThrottleMonitor.shared.start()
         if !NiftyUtility.isTesting() {
             Task {
                 await VoicevoxCore.setUpFromBundleIfNeeded()

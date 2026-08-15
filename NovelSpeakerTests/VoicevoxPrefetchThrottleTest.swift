@@ -1,0 +1,56 @@
+//
+//  VoicevoxPrefetchThrottleTest.swift
+//  NovelSpeakerTests
+//
+//  バックグラウンド再生中に iOS の CPU 上限(60秒平均80%)で強制終了された
+//  (cpu_resource_fatal / "Action taken: Process killed")件への対策である、
+//  先行合成の絞り込みポリシーのテスト。
+//
+
+import XCTest
+@testable import NovelSpeaker
+
+class VoicevoxPrefetchThrottleTest: XCTestCase {
+
+    private let normal = VoicevoxPrefetchThrottlePolicy.normal
+    private let throttled = VoicevoxPrefetchThrottlePolicy.throttled
+
+    // 前景では従来どおりの積極的な先読みを維持する(このCPU上限は背面のみ対象のため)。
+    func testForegroundIsNotThrottled() {
+        for onExternalPower in [true, false] {
+            for lowPower in [true, false] {
+                let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: false, isOnExternalPower: onExternalPower, isLowPowerModeEnabled: lowPower)
+                XCTAssertEqual(p, normal, "前景では絞らないはず (power=\(onExternalPower) lowPower=\(lowPower))")
+            }
+        }
+    }
+
+    // 実機で落ちた条件そのもの: 背面 + バッテリー駆動 → 絞る。
+    func testBackgroundOnBatteryIsThrottled() {
+        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false)
+        XCTAssertEqual(p, throttled, "背面+バッテリーでは絞るはず")
+    }
+
+    // 実機で落ちなかった条件: 背面でも AC 接続中は CPU 上限が適用されないので絞らない。
+    func testBackgroundOnExternalPowerIsNotThrottled() {
+        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isOnExternalPower: true, isLowPowerModeEnabled: false)
+        XCTAssertEqual(p, normal, "背面でも充電中は絞らないはず")
+    }
+
+    // 低電力モードでは CPU クロックが落ちて追いつけなくなるので、充電中でも絞る。
+    func testLowPowerModeIsThrottledEvenOnExternalPower() {
+        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isOnExternalPower: true, isLowPowerModeEnabled: true)
+        XCTAssertEqual(p, throttled, "低電力モードでは充電中でも絞るはず")
+    }
+
+    // 絞った側が本当に「より控えめ」になっている事(定数を後から触った時の保険)。
+    func testThrottledParametersAreStrictlySmaller() {
+        XCTAssertLessThan(throttled.maxBlockCountToQueue, normal.maxBlockCountToQueue)
+        XCTAssertLessThan(throttled.targetCharacterCount, normal.targetCharacterCount)
+        XCTAssertLessThanOrEqual(throttled.minimumBlockCount, normal.minimumBlockCount)
+        XCTAssertLessThan(throttled.maxBlocksToScan, normal.maxBlocksToScan)
+        // 再生中ブロックの「次の1つ」は必ず合成しておきたいので、0 にはしない。
+        XCTAssertGreaterThanOrEqual(throttled.maxBlockCountToQueue, 1)
+        XCTAssertGreaterThanOrEqual(throttled.minimumBlockCount, 1)
+    }
+}

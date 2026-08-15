@@ -250,13 +250,17 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     //  トータルの先読み量を伸ばせる)
     private var nextPrefetchScanIndex = 0
     private func refillVoicevoxPrefetchIfNeeded() {
+        // バックグラウンド かつ バッテリー駆動の時は、iOS の「60秒平均 CPU 80%」上限で
+        // プロセスが強制終了されるため、先読みを最小限に絞る(VoicevoxPrefetchThrottle 参照)。
+        // 前景・充電中は従来どおりの積極的な先読みのまま。
+        let parameters = VoicevoxPrefetchThrottleMonitor.shared.currentParameters
         var accumulated = 0
         var prefetchedBlockCount = 0
         var index = max(currentSpeechBlockIndex + 1, nextPrefetchScanIndex)
         var scanned = 0
-        while index < speechBlockArray.count && scanned < voicevoxPrefetchMaxBlocksToScan
-            && prefetchedBlockCount < voicevoxPrefetchMaxBlockCountToQueue
-            && (accumulated < voicevoxPrefetchTargetCharacterCount || prefetchedBlockCount < voicevoxPrefetchMinimumBlockCount) {
+        while index < speechBlockArray.count && scanned < parameters.maxBlocksToScan
+            && prefetchedBlockCount < parameters.maxBlockCountToQueue
+            && (accumulated < parameters.targetCharacterCount || prefetchedBlockCount < parameters.minimumBlockCount) {
             let block = speechBlockArray[index]
             scanned += 1
             guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else {

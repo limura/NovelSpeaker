@@ -10,7 +10,6 @@
 		00AD409A746B0F07C88B8A0D /* VoicevoxCoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F380DAEC93EA2F37A0EF6D /* VoicevoxCoreTest.swift */; };
 		03769EE92DAF16F7AE4552B4 /* WatchSpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B20E49D521B34FB248A1E17 /* WatchSpeechPlayer.swift */; };
 		0613A55AAEA3E316EF451788 /* VoicevoxBlockSplitReproTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F2CDCDF8C81C79ACE6686E /* VoicevoxBlockSplitReproTest.swift */; };
-		A15BD0C4E7F2A9310DDE41AA /* AVSpeechModDelayBlockSplitTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15BD0C4E7F2A9310DDE41AB /* AVSpeechModDelayBlockSplitTest.swift */; };
 		0BBBDA569CD9452EA6E2C410 /* PhoneSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF2F640224389D5D9030AD1 /* PhoneSessionManager.swift */; };
 		0FF8C389ACCE44ABDE66303F /* UtilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B1FE1F7B8340C5E2BF6AFE /* UtilityView.swift */; };
 		119ACBD4F7305BE226154931 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55E7B603DAF58E2B3172040E /* Foundation.framework */; };
@@ -220,24 +219,6 @@
 		553136DC99A7C65535AA3DCB /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320ED5957BE18A57C229BABE /* WatchMessage.swift */; };
 		56DE1C4F53CDCE01000533AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFD5476A36FAD6CD441DBF86 /* Assets.xcassets */; };
 		56F2236BDCBC70F86153D390 /* NovelSpeakerWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */; };
-		C0DE10000000000000000002 /* WatchWidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000001 /* WatchWidgetURL.swift */; };
-		C0DE10000000000000000003 /* WatchWidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000001 /* WatchWidgetURL.swift */; };
-		C0DE20000000000000000011 /* SpeechWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000001 /* SpeechWidgetIntent.swift */; };
-		C0DE20000000000000000012 /* SpeechWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000001 /* SpeechWidgetIntent.swift */; };
-		C0DE20000000000000000013 /* NovelSpeakerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000002 /* NovelSpeakerWidget.swift */; };
-		C0DE20000000000000000014 /* WidgetPlaybackHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */; };
-		C0DE20000000000000000015 /* NovelSpeakerWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		C0DE20000000000000000016 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* Localizable.strings */; };
-		C0DE20000000000000000051 /* PhoneWidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */; };
-		C0DE20000000000000000052 /* PhoneWidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */; };
-		C0DE20000000000000000053 /* PhonePlayNovelWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */; };
-		C0DE20000000000000000054 /* PhoneWidgetDataUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */; };
-		C0DE20000000000000000055 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000044 /* Assets.xcassets */; };
-		C0DE20000000000000000056 /* PhoneActionGroupWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */; };
-		C0DE10000000000000000012 /* WatchActionComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000011 /* WatchActionComplications.swift */; };
-		C0DE10000000000000000022 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
-		C0DE10000000000000000023 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
-		C0DE10000000000000000032 /* PlayNovelComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000031 /* PlayNovelComplication.swift */; };
 		630CBEF68D26A0F0E98C83A4 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
 		643AF738328D8F71DCC7C396 /* IOSSpeechCoreShims.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5305C5CDBD0A0B66521EDD19 /* IOSSpeechCoreShims.swift */; };
 		67B43BB0FC18A7B3AB5B64B6 /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
@@ -252,12 +233,33 @@
 		85A13C6F8460D9FC4DA64CD8 /* NovelSpeakerWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = BBFF504221254797802A0F4C /* NovelSpeakerWatch.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		87CCA2A6DB47F899A780A0C5 /* VoicevoxRealDeviceReproTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F6EF1A8BBF240BAB0BA02D /* VoicevoxRealDeviceReproTest.swift */; };
 		8CC1B5ACF8E4D1F21B79627E /* VoicevoxSpeakerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9D18F682E6D582893D3B026 /* VoicevoxSpeakerTest.swift */; };
+		A15BD0C4E7F2A9310DDE41AA /* AVSpeechModDelayBlockSplitTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15BD0C4E7F2A9310DDE41AB /* AVSpeechModDelayBlockSplitTest.swift */; };
 		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
+		ABB3BD15F8A34D4D9C0A7AE9 /* VoicevoxPrefetchThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */; };
 		AD09DC8C14D0EC0D547F99D5 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		AED424F441112BFA57EC12F4 /* WatchSpeechSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B183A0FEE977129AFD5FBAB5 /* WatchSpeechSettings.swift */; };
 		B62CE9CB1A11475BCDD7AFDA /* voicevox_onnxruntime.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; platformFilter = ios; };
 		B7AD5FDF47A17A848982B113 /* voicevox_onnxruntime.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; };
+		B8775A68DCE0CF19D6174BD8 /* VoicevoxPrefetchThrottleTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3ED71F9D6BC0F10D8A1784 /* VoicevoxPrefetchThrottleTest.swift */; };
 		BC86FC28B8282BBC71B60037 /* WatchComplicationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63C772BD7864F00126B3F3A /* WatchComplicationData.swift */; };
+		C0DE10000000000000000002 /* WatchWidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000001 /* WatchWidgetURL.swift */; };
+		C0DE10000000000000000003 /* WatchWidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000001 /* WatchWidgetURL.swift */; };
+		C0DE10000000000000000012 /* WatchActionComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000011 /* WatchActionComplications.swift */; };
+		C0DE10000000000000000022 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
+		C0DE10000000000000000023 /* WatchNovelSummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */; };
+		C0DE10000000000000000032 /* PlayNovelComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE10000000000000000031 /* PlayNovelComplication.swift */; };
+		C0DE20000000000000000011 /* SpeechWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000001 /* SpeechWidgetIntent.swift */; };
+		C0DE20000000000000000012 /* SpeechWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000001 /* SpeechWidgetIntent.swift */; };
+		C0DE20000000000000000013 /* NovelSpeakerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000002 /* NovelSpeakerWidget.swift */; };
+		C0DE20000000000000000014 /* WidgetPlaybackHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */; };
+		C0DE20000000000000000015 /* NovelSpeakerWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C0DE20000000000000000016 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* Localizable.strings */; };
+		C0DE20000000000000000051 /* PhoneWidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */; };
+		C0DE20000000000000000052 /* PhoneWidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */; };
+		C0DE20000000000000000053 /* PhonePlayNovelWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */; };
+		C0DE20000000000000000054 /* PhoneWidgetDataUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */; };
+		C0DE20000000000000000055 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000044 /* Assets.xcassets */; };
+		C0DE20000000000000000056 /* PhoneActionGroupWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */; };
 		C2A2E6FEDE90E092AEFFFD65 /* VoicevoxPrefetchTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062FAB1C5C7A8DFB5D0EC781 /* VoicevoxPrefetchTest.swift */; };
 		D063461FC62C10956C8B3C2F /* voicevox_onnxruntime.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; platformFilter = ios; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeaderOnCopy, ); }; };
 		D4BAC0A2E6713DF29423991C /* NovelSpeakerWatchWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6E4A0478584A794080C4D53E /* NovelSpeakerWatchWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -267,6 +269,7 @@
 		E2820FFFB99FF91B3E84EEEE /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0164B2D4D5F2582B7B2AC42F /* PlayerView.swift */; };
 		EDCE1E5BF83AE2A0DC0DF058 /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320ED5957BE18A57C229BABE /* WatchMessage.swift */; };
 		EFF55EB7A13C30102D5FDCFE /* NovelSpeakerWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB3010D5FCE0D2459A82D57 /* NovelSpeakerWatchApp.swift */; };
+		FC5D9F103C975C9375485032 /* VoicevoxPrefetchThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -362,7 +365,6 @@
 		076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; sourceTree = "<group>"; };
 		0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; sourceTree = "<group>"; };
 		13F2CDCDF8C81C79ACE6686E /* VoicevoxBlockSplitReproTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxBlockSplitReproTest.swift; sourceTree = "<group>"; };
-		A15BD0C4E7F2A9310DDE41AB /* AVSpeechModDelayBlockSplitTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AVSpeechModDelayBlockSplitTest.swift; sourceTree = "<group>"; };
 		16E06129237E488639738552 /* VoicevoxSpeaker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxSpeaker.swift; sourceTree = "<group>"; };
 		21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaxWidthButton.swift; sourceTree = "<group>"; };
 		21038DD62F6FF0010072B3B9 /* AppLaunchCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLaunchCoordinator.swift; sourceTree = "<group>"; };
@@ -615,27 +617,11 @@
 		470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		472A1C58C9BB83466543CE75 /* NiftyUtilityRubyTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NiftyUtilityRubyTest.swift; sourceTree = "<group>"; };
 		4C2B2CD3363998B01E4E4027 /* StoryTextClassifierVoicevoxTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoryTextClassifierVoicevoxTest.swift; sourceTree = "<group>"; };
+		4C3ED71F9D6BC0F10D8A1784 /* VoicevoxPrefetchThrottleTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxPrefetchThrottleTest.swift; sourceTree = "<group>"; };
 		4F7DBAD3B7D83A3215CEB69C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5305C5CDBD0A0B66521EDD19 /* IOSSpeechCoreShims.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IOSSpeechCoreShims.swift; sourceTree = "<group>"; };
 		55E7B603DAF58E2B3172040E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS11.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		58E627E198A17E9CC0484BDE /* NovelSpeakerWatchWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NovelSpeakerWatchWidget.swift; sourceTree = "<group>"; };
-		C0DE10000000000000000001 /* WatchWidgetURL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchWidgetURL.swift; sourceTree = "<group>"; };
-		C0DE20000000000000000001 /* SpeechWidgetIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechWidgetIntent.swift; sourceTree = "<group>"; };
-		C0DE20000000000000000002 /* NovelSpeakerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NovelSpeakerWidget.swift; sourceTree = "<group>"; };
-		C0DE20000000000000000003 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetPlaybackHandler.swift; sourceTree = "<group>"; };
-		C0DE20000000000000000007 /* ja */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
-		C0DE20000000000000000008 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneWidgetDataStore.swift; sourceTree = "<group>"; };
-		C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhonePlayNovelWidget.swift; sourceTree = "<group>"; };
-		C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneWidgetDataUpdater.swift; sourceTree = "<group>"; };
-		C0DE20000000000000000044 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C0DE20000000000000000045 /* NovelSpeakerWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerWidget.entitlements; sourceTree = "<group>"; };
-		C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneActionGroupWidget.swift; sourceTree = "<group>"; };
-		C0DE10000000000000000011 /* WatchActionComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchActionComplications.swift; sourceTree = "<group>"; };
-		C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchNovelSummaryStore.swift; sourceTree = "<group>"; };
-		C0DE10000000000000000031 /* PlayNovelComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayNovelComplication.swift; sourceTree = "<group>"; };
 		5AF22ADCC56BF76579F8F345 /* VoicevoxCore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCore.swift; sourceTree = "<group>"; };
 		5B20E49D521B34FB248A1E17 /* WatchSpeechPlayer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSpeechPlayer.swift; sourceTree = "<group>"; };
 		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -654,6 +640,7 @@
 		96B1FE1F7B8340C5E2BF6AFE /* UtilityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UtilityView.swift; sourceTree = "<group>"; };
 		97242EA9E9218DC1412D42B8 /* WatchComplicationUpdater.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchComplicationUpdater.swift; sourceTree = "<group>"; };
 		9D1F29DF1B7FA5B4102C34EE /* ja */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A15BD0C4E7F2A9310DDE41AB /* AVSpeechModDelayBlockSplitTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AVSpeechModDelayBlockSplitTest.swift; sourceTree = "<group>"; };
 		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9D18F682E6D582893D3B026 /* VoicevoxSpeakerTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxSpeakerTest.swift; sourceTree = "<group>"; };
 		AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -667,7 +654,25 @@
 		BC4F649680AEFB331B10BC87 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.release.xcconfig"; sourceTree = "<group>"; };
 		BFD5476A36FAD6CD441DBF86 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C0DE10000000000000000001 /* WatchWidgetURL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchWidgetURL.swift; sourceTree = "<group>"; };
+		C0DE10000000000000000011 /* WatchActionComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchActionComplications.swift; sourceTree = "<group>"; };
+		C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchNovelSummaryStore.swift; sourceTree = "<group>"; };
+		C0DE10000000000000000031 /* PlayNovelComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayNovelComplication.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000001 /* SpeechWidgetIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechWidgetIntent.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000002 /* NovelSpeakerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NovelSpeakerWidget.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000003 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetPlaybackHandler.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000007 /* ja */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0DE20000000000000000008 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneWidgetDataStore.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhonePlayNovelWidget.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneWidgetDataUpdater.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000044 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C0DE20000000000000000045 /* NovelSpeakerWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerWidget.entitlements; sourceTree = "<group>"; };
+		C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneActionGroupWidget.swift; sourceTree = "<group>"; };
 		C2F380DAEC93EA2F37A0EF6D /* VoicevoxCoreTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCoreTest.swift; sourceTree = "<group>"; };
+		C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxPrefetchThrottle.swift; sourceTree = "<group>"; };
 		C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; sourceTree = "<group>"; };
 		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
 		E2EEF718C98FE410CD831ECB /* Pods-NovelSpeakerWatchApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp/Pods-NovelSpeakerWatchApp.release.xcconfig"; sourceTree = "<group>"; };
@@ -1045,6 +1050,7 @@
 				86DEB6F3AC6354016F30B111 /* WatchSessionCoordinator.swift */,
 				C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */,
 				C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */,
+				C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -1079,6 +1085,7 @@
 				472A1C58C9BB83466543CE75 /* NiftyUtilityRubyTest.swift */,
 				13F2CDCDF8C81C79ACE6686E /* VoicevoxBlockSplitReproTest.swift */,
 				A15BD0C4E7F2A9310DDE41AB /* AVSpeechModDelayBlockSplitTest.swift */,
+				4C3ED71F9D6BC0F10D8A1784 /* VoicevoxPrefetchThrottleTest.swift */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1175,6 +1182,22 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		C0DE20000000000000000020 /* NovelSpeakerWidget */ = {
+			isa = PBXGroup;
+			children = (
+				C0DE20000000000000000002 /* NovelSpeakerWidget.swift */,
+				C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */,
+				C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */,
+				C0DE20000000000000000001 /* SpeechWidgetIntent.swift */,
+				C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */,
+				C0DE20000000000000000044 /* Assets.xcassets */,
+				C0DE20000000000000000003 /* Info.plist */,
+				C0DE20000000000000000045 /* NovelSpeakerWidget.entitlements */,
+				C0DE20000000000000000006 /* Localizable.strings */,
+			);
+			path = NovelSpeakerWidget;
+			sourceTree = "<group>";
+		};
 		E6CB5609430E1B352BE6BE60 /* watchOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -1222,22 +1245,6 @@
 				DD14CAE2CFE5EE392C56AF56 /* Localizable.strings */,
 			);
 			path = NovelSpeakerWatch;
-			sourceTree = "<group>";
-		};
-		C0DE20000000000000000020 /* NovelSpeakerWidget */ = {
-			isa = PBXGroup;
-			children = (
-				C0DE20000000000000000002 /* NovelSpeakerWidget.swift */,
-				C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */,
-				C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */,
-				C0DE20000000000000000001 /* SpeechWidgetIntent.swift */,
-				C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */,
-				C0DE20000000000000000044 /* Assets.xcassets */,
-				C0DE20000000000000000003 /* Info.plist */,
-				C0DE20000000000000000045 /* NovelSpeakerWidget.entitlements */,
-				C0DE20000000000000000006 /* Localizable.strings */,
-			);
-			path = NovelSpeakerWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1397,7 +1404,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "NovelSpeaker" */;
+			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -1524,21 +1531,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D52E0FE1F05CAE5386AF4CEC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2B48E2CE4104C207F9CAD615 /* Assets.xcassets in Resources */,
-				43747EECC994CA2F0E09D887 /* Localizable.strings in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C0DE20000000000000000034 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				C0DE20000000000000000055 /* Assets.xcassets in Resources */,
 				C0DE20000000000000000016 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D52E0FE1F05CAE5386AF4CEC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B48E2CE4104C207F9CAD615 /* Assets.xcassets in Resources */,
+				43747EECC994CA2F0E09D887 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1642,6 +1649,7 @@
 				701F2368A47FB44C1488A3E3 /* WatchComplicationUpdater.swift in Sources */,
 				C0DE10000000000000000002 /* WatchWidgetURL.swift in Sources */,
 				C0DE10000000000000000022 /* WatchNovelSummaryStore.swift in Sources */,
+				ABB3BD15F8A34D4D9C0A7AE9 /* VoicevoxPrefetchThrottle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1763,6 +1771,7 @@
 				EDCE1E5BF83AE2A0DC0DF058 /* WatchMessage.swift in Sources */,
 				52C4EB6B45D5A6AB28D271B6 /* WatchSessionCoordinator.swift in Sources */,
 				AED424F441112BFA57EC12F4 /* WatchSpeechSettings.swift in Sources */,
+				FC5D9F103C975C9375485032 /* VoicevoxPrefetchThrottle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1784,6 +1793,7 @@
 				2F633CC42C4298E9922FAE1A /* NiftyUtilityRubyTest.swift in Sources */,
 				0613A55AAEA3E316EF451788 /* VoicevoxBlockSplitReproTest.swift in Sources */,
 				A15BD0C4E7F2A9310DDE41AA /* AVSpeechModDelayBlockSplitTest.swift in Sources */,
+				B8775A68DCE0CF19D6174BD8 /* VoicevoxPrefetchThrottleTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1831,19 +1841,19 @@
 			target = 400C3487E660013CB5F95922 /* NovelSpeakerWatchWidgetExtension */;
 			targetProxy = BB2256A0A784E52AD7D8F8DB /* PBXContainerItemProxy */;
 		};
-		CF8A14472BFE7CFFC8883BA5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = NovelSpeakerWatch;
-			platformFilter = ios;
-			target = 6493B253C863CD70E0C6D660 /* NovelSpeakerWatch */;
-			targetProxy = 40DE585928E5AC06AE43D94C /* PBXContainerItemProxy */;
-		};
 		C0DE20000000000000000038 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = NovelSpeakerWidgetExtension;
 			platformFilter = ios;
 			target = C0DE20000000000000000030 /* NovelSpeakerWidgetExtension */;
 			targetProxy = C0DE20000000000000000037 /* PBXContainerItemProxy */;
+		};
+		CF8A14472BFE7CFFC8883BA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NovelSpeakerWatch;
+			platformFilter = ios;
+			target = 6493B253C863CD70E0C6D660 /* NovelSpeakerWatch */;
+			targetProxy = 40DE585928E5AC06AE43D94C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2414,66 +2424,6 @@
 			};
 			name = Debug;
 		};
-		CFD0ED5643B745333F597D3E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
-				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWatch/NovelSpeakerWatch.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.12.4;
-				DEVELOPMENT_TEAM = 4KZE8276ZF;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = NovelSpeakerWatch/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 2.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Debug;
-		};
-		E7F1EE2D21FC1DA58208BC11 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
-				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWatchWidget/NovelSpeakerWatchWidget.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.12.4;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 4KZE8276ZF;
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NovelSpeakerWatchWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "ことせかい";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 2.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.watchkitapp.widget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Release;
-		};
 		C0DE20000000000000000035 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2537,6 +2487,66 @@
 			};
 			name = Release;
 		};
+		CFD0ED5643B745333F597D3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWatch/NovelSpeakerWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2.12.4;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NovelSpeakerWatch/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.12.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		E7F1EE2D21FC1DA58208BC11 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWatchWidget/NovelSpeakerWatchWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2.12.4;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NovelSpeakerWatchWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ことせかい";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.12.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.watchkitapp.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2549,7 +2559,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "NovelSpeaker" */ = {
+		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21F054F91917E0F200CC6BA9 /* Debug */,
@@ -2585,20 +2595,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E39CBE144CE3A79F82A7F8CC /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchWidgetExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E7F1EE2D21FC1DA58208BC11 /* Release */,
-				A2CE57BBF4848B07E8DB07F8 /* Debug */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		C0DE20000000000000000031 /* Build configuration list for PBXNativeTarget "NovelSpeakerWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0DE20000000000000000035 /* Debug */,
 				C0DE20000000000000000036 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E39CBE144CE3A79F82A7F8CC /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7F1EE2D21FC1DA58208BC11 /* Release */,
+				A2CE57BBF4848B07E8DB07F8 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
