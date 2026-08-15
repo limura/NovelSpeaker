@@ -140,6 +140,9 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         }
 
         timePitch.rate = Self.timePitchRate(fromUtteranceRate: m_Rate)
+        // 「必要CPU率 = 再生速度倍率 × RTF」なので、実測ログに再生速度も残しておく
+        // (VOICEVOX は常に1倍速で合成し、速度はこの timePitch.rate で変えている)。
+        VoicevoxPerformanceMonitor.shared.updatePlaybackRate(Double(timePitch.rate))
         timePitch.pitch = Self.timePitchCents(fromPitchMultiplier: m_Pitch)
         playerNode.volume = max(0.0, min(1.0, m_Volume))
 

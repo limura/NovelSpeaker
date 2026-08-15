@@ -297,8 +297,19 @@ actor VoicevoxCore {
         var outputWavLength: UInt = 0
         var outputWav: UnsafeMutablePointer<UInt8>?
         let options = voicevox_make_default_tts_options()
+        // 実性能(RTF)計測のため、実際の合成呼び出しの前後で CPU 時間と実時間を挟む。
+        // ここは先行合成・その場合成の両方が通る唯一の絞り点なので、計測点として適切。
+        let cpuBefore = ProcessCPUClock.totalCPUSeconds()
+        let wallBefore = Date()
         let result = text.withCString { cString in
             voicevox_synthesizer_tts(synthesizer, cString, styleId, options, &outputWavLength, &outputWav)
+        }
+        let wallSeconds = Date().timeIntervalSince(wallBefore)
+        let cpuSeconds: Double?
+        if let cpuBefore = cpuBefore, let cpuAfter = ProcessCPUClock.totalCPUSeconds() {
+            cpuSeconds = cpuAfter - cpuBefore
+        } else {
+            cpuSeconds = nil
         }
         guard result == VOICEVOX_RESULT_OK, let wav = outputWav else {
             throw VoicevoxCoreError.core(result)
@@ -309,7 +320,22 @@ actor VoicevoxCore {
         guard data.count > 44, data.prefix(4).elementsEqual("RIFF".utf8) else {
             throw VoicevoxCoreError.invalidWav
         }
+        if let cpuSeconds = cpuSeconds {
+            VoicevoxPerformanceMonitor.shared.recordSynthesis(wavByteCount: data.count, cpuSeconds: cpuSeconds, wallSeconds: wallSeconds, styleId: styleId)
+        }
         return data
+    }
+
+    /// ログ用: 現在キャッシュ(先行合成済み)として持っている音声の合計秒数。
+    /// 「あとどれだけ貯金があるか」を実機ログで見るために使う。
+    nonisolated func cachedAudioSecondsForLogging() -> Double {
+        cacheLock.lock()
+        let bytes = prefetchedWavTotalBytesUnsafe
+        let count = prefetchedWavUnsafe.count
+        cacheLock.unlock()
+        // 各エントリに WAV ヘッダ分が含まれるので、その分を差し引いてから秒数換算する。
+        let payloadBytes = max(0, bytes - count * VoicevoxPerformanceMonitor.wavHeaderByteCount)
+        return Double(payloadBytes) / (VoicevoxPerformanceMonitor.outputSampleRate * VoicevoxPerformanceMonitor.outputBytesPerFrame)
     }
 
     // ログ用に先頭数文字だけ見えるようにする(全文は長すぎて読みにくいため)。
@@ -504,6 +530,9 @@ final class VoicevoxCore {
     func scheduleCancelPendingPrefetch() {}
 
     func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool { return false }
+
+    /// ログ用(スタブ側は合成しないので常に 0)。
+    func cachedAudioSecondsForLogging() -> Double { return 0 }
 }
 
 #endif
