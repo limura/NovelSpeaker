@@ -172,6 +172,14 @@ struct PlaybackGapAccumulator {
     private(set) var cacheHitCount: Int = 0
     private(set) var cacheMissCount: Int = 0
     private(set) var totalMissWaitSeconds: Double = 0
+    /// MISS のうち「先行合成に予約はされていたが間に合わなかった」件数(= 時間の問題)。
+    private(set) var missQueuedCount: Int = 0
+    /// MISS のうち「そもそも先行合成に予約されていなかった」件数(= 取りこぼしの不具合)。
+    private(set) var missNotQueuedCount: Int = 0
+
+    mutating func addMissCause(wasQueuedForPrefetch: Bool) {
+        if wasQueuedForPrefetch { missQueuedCount += 1 } else { missNotQueuedCount += 1 }
+    }
 
     /// 1ブロックぶんの音声を実際に鳴らした実時間(倍速適用後)。
     mutating func addPlayback(wallSeconds: Double) {
@@ -320,6 +328,13 @@ final class VoicevoxPerformanceMonitor {
         }
     }
 
+    /// キャッシュMISS の原因(予約済みで未完了か、そもそも未予約か)を記録する。
+    func recordPlaybackCacheMiss(wasQueuedForPrefetch: Bool) {
+        lock.lock()
+        gaps.addMissCause(wasQueuedForPrefetch: wasQueuedForPrefetch)
+        lock.unlock()
+    }
+
     /// 再生のために合成を要求した結果(先行合成が間に合っていたか)を記録する。
     func recordPlaybackSynthesisRequest(wasCacheHit: Bool, waitSeconds: Double) {
         lock.lock()
@@ -433,6 +448,9 @@ final class VoicevoxPerformanceMonitor {
             if let missWait = snapshotGaps.averageMissWaitSeconds {
                 fields.append("MISS平均待ち=\(String(format: "%.2f", missWait))秒")
             }
+            // MISS の内訳。予約済みなら「間に合わなかった」= 時間の問題、
+            // 未予約なら「先読みが取りこぼした」= ロジックの不具合。
+            fields.append("MISS内訳=予約済\(snapshotGaps.missQueuedCount)/未予約\(snapshotGaps.missNotQueuedCount)")
         }
         fields.append("未再生の貯金=\(String(format: "%.1f", currentLead))秒")
         fields.append("キャッシュ計=\(String(format: "%.1f", VoicevoxCore.shared.cachedAudioSecondsForLogging()))秒")

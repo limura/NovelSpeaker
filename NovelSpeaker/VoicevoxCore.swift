@@ -435,10 +435,20 @@ actor VoicevoxCore {
         // 主因になっていた。再生は先行合成より優先されるべきなので、該当タスクを
         // キャンセルしてこの場で合成する。既に actor に入れている以上、実行中だった
         // 先行合成は完了済みなので、ここでの合成は待たされない。
+        // MISS の原因を判別するための記録。
+        //  - 予約済み(pending)   … 先行合成に出してはいたが間に合わなかった = 時間の問題。
+        //                          先読みの深さ/優先度で対処する。
+        //  - 未予約(not queued) … そもそも先行合成の対象から漏れていた = 取りこぼしの不具合。
+        // 実機で「貯金は156秒あるのに再生時HIT率は48.9%」という食い違いが出ており、
+        // どちらなのかで対処が全く変わるため、ここで確定させる。
+        let wasQueued = pendingPrefetchTasks[key] != nil
+        VoicevoxPerformanceMonitor.shared.recordPlaybackCacheMiss(wasQueuedForPrefetch: wasQueued)
         if let pendingTask = pendingPrefetchTasks[key] {
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成を追い越して合成] styleId=\(styleId) text=\"\(snippet)\"")
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:予約済みだが未完了→追い越して合成] styleId=\(styleId) text=\"\(snippet)\"")
             pendingTask.cancel()
             pendingPrefetchTasks.removeValue(forKey: key)
+        } else {
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:先行合成に未予約] styleId=\(styleId) text=\"\(snippet)\"")
         }
         // 待っている間に先行合成が完了していた可能性があるので、合成前にもう一度確認する。
         if let cached = peekCache(key: key) {

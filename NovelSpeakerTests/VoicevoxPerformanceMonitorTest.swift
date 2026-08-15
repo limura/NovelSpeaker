@@ -221,3 +221,23 @@ class VoicevoxPlaybackGapTest: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(acc.silenceRatio), 0.5, accuracy: 0.0001)
     }
 }
+
+// MISS の内訳(予約済みで未完了 / そもそも未予約)の集計。
+// 「貯金は156秒あるのに再生時HIT率は48.9%」という食い違いの原因を
+// 「時間の問題」と「先読みの取りこぼし」のどちらかに確定させるための指標。
+extension VoicevoxPlaybackGapTest {
+    func testMissCauseBreakdown() {
+        var acc = PlaybackGapAccumulator()
+        acc.addMissCause(wasQueuedForPrefetch: true)
+        acc.addMissCause(wasQueuedForPrefetch: true)
+        acc.addMissCause(wasQueuedForPrefetch: false)
+        XCTAssertEqual(acc.missQueuedCount, 2, "予約済みだが間に合わなかった件数")
+        XCTAssertEqual(acc.missNotQueuedCount, 1, "そもそも予約されていなかった件数")
+    }
+
+    func testMissCauseStartsEmpty() {
+        let acc = PlaybackGapAccumulator()
+        XCTAssertEqual(acc.missQueuedCount, 0)
+        XCTAssertEqual(acc.missNotQueuedCount, 0)
+    }
+}
