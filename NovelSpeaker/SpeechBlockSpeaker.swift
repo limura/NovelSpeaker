@@ -283,6 +283,57 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             index += 1
         }
         nextPrefetchScanIndex = index
+        updateUnplayedPrefetchLeadForLogging()
+    }
+
+    /// 「あと何秒ぶん、合成済みの音声が手元にあるか(未再生ぶんだけ)」を数える。
+    ///
+    /// 先行合成キャッシュは再生済みのブロックも(会話文の相槌等の使い回しのために)
+    /// 保持し続けるので、キャッシュ全体のバイト数を秒に換算した値は「貯金」より
+    /// 大きく出てしまう(実機ログで162秒と出ていたが、実際の先行量はもっと小さい)。
+    /// 実際に効くのは「次のブロックから連続して合成済みである区間」で、途中に
+    /// 未合成のブロックが1つでもあればそこで再生は止まる(=そこまでが貯金)。
+    /// ディスクキャッシュを何秒ぶん用意すべきかの設計判断に直結する数値なので、
+    /// 連続区間だけを数える。
+    ///
+    /// - Parameters:
+    ///   - cachedByteCountProvider: (speechText, styleId) -> 合成済みならWAVバイト数 / 未合成ならnil
+    static func contiguousPrefetchedLeadSeconds(
+        blocks: [CombinedSpeechBlock],
+        fromIndex: Int,
+        maxScanCount: Int = 200,
+        cachedByteCountProvider: (String, UInt32) -> Int?
+    ) -> Double {
+        var seconds = 0.0
+        var index = max(0, fromIndex)
+        var scanned = 0
+        while index < blocks.count && scanned < maxScanCount {
+            let block = blocks[index]
+            index += 1
+            scanned += 1
+            // VOICEVOX以外のブロック(AVSpeech等)は先行合成の対象ではないので、
+            // 貯金の切れ目とは見なさずに読み飛ばす。
+            guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else { continue }
+            let text = block.speechText
+            // 合成に出さないテキスト(空白のみ等)も切れ目ではない。
+            if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || hasNoSpeakableCharacter(text) { continue }
+            guard let byteCount = cachedByteCountProvider(text, styleId) else {
+                // ここで再生が止まるので、貯金はここまで。
+                break
+            }
+            seconds += VoicevoxPerformanceMonitor.audioSeconds(wavByteCount: byteCount)
+        }
+        return seconds
+    }
+
+    private func updateUnplayedPrefetchLeadForLogging() {
+        let seconds = Self.contiguousPrefetchedLeadSeconds(
+            blocks: speechBlockArray,
+            fromIndex: currentSpeechBlockIndex + 1
+        ) { text, styleId in
+            VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId)
+        }
+        VoicevoxPerformanceMonitor.shared.updateUnplayedLeadSeconds(seconds)
     }
 
     // 空白・改行・句読点・記号以外の文字(=実際にVOICEVOXが発話しうる文字)が

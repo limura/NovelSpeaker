@@ -175,6 +175,9 @@ final class VoicevoxPerformanceMonitor {
     private var lastPersistedAt: Double = 0
     /// 現在の再生速度倍率(VoicevoxSpeaker が設定時に教えてくれる)。
     private var playbackRate: Double = 1.0
+    /// 未再生の「貯金」秒数(SpeechBlockSpeaker が先読み更新時に教えてくれる)。
+    /// キャッシュ全体の秒数と違い、再生済みのぶんを含まない実際の余裕。
+    private var unplayedLeadSeconds: Double = 0
     /// ログが出過ぎないように、最短でもこの間隔をあける。
     private let logIntervalSeconds: Double = 10.0
     /// アプリ内ログ(設定画面から見られる方)へ残す間隔。
@@ -191,6 +194,14 @@ final class VoicevoxPerformanceMonitor {
     func updatePlaybackRate(_ rate: Double) {
         lock.lock()
         playbackRate = rate
+        lock.unlock()
+    }
+
+    /// 未再生の貯金(合成済みで、まだ再生していない音声の秒数)を記録する。
+    /// ディスクキャッシュを何秒ぶん用意すべきかの判断に直結する数値。
+    func updateUnplayedLeadSeconds(_ seconds: Double) {
+        lock.lock()
+        unplayedLeadSeconds = seconds
         lock.unlock()
     }
 
@@ -231,6 +242,7 @@ final class VoicevoxPerformanceMonitor {
         if shouldPersist { lastPersistedAt = now }
         let snapshotRTF = rtf
         let currentPlaybackRate = playbackRate
+        let currentLead = unplayedLeadSeconds
         lock.unlock()
         guard shouldLog else { return }
 
@@ -274,7 +286,9 @@ final class VoicevoxPerformanceMonitor {
         }
         fields.append("合成回数=\(snapshotRTF.sampleCount)")
         fields.append("生成音声計=\(String(format: "%.1f", snapshotRTF.totalAudioSeconds))秒")
-        fields.append("合成済み貯金=\(String(format: "%.1f", VoicevoxCore.shared.cachedAudioSecondsForLogging()))秒")
+        // 実際の余裕(未再生ぶんだけ)と、キャッシュ全体(再生済みも含む)を区別して出す。
+        fields.append("未再生の貯金=\(String(format: "%.1f", currentLead))秒")
+        fields.append("キャッシュ計=\(String(format: "%.1f", VoicevoxCore.shared.cachedAudioSecondsForLogging()))秒")
 
         let line = fields.joined(separator: " ")
         NSLog("NovelSpeaker.VoicevoxPerf: [\(VoicevoxCore.logTimestamp())] [状況] \(line)")

@@ -131,6 +131,12 @@ actor VoicevoxCore {
         }
     }
 
+    /// 指定テキストが先行合成済みなら、その WAV のバイト数を返す(未合成なら nil)。
+    /// 「未再生の貯金が何秒あるか」を数えるために使う。actorへ入らず参照できる。
+    nonisolated func cachedWavByteCount(text: String, styleId: UInt32) -> Int? {
+        return peekCache(key: Self.prefetchKey(text: text, styleId: styleId))?.count
+    }
+
     nonisolated private func clearCache() {
         cacheLock.lock()
         defer { cacheLock.unlock() }
@@ -578,6 +584,7 @@ final class VoicevoxCore {
 
     /// ログ用(スタブ側は合成しないので常に 0)。
     func cachedAudioSecondsForLogging() -> Double { return 0 }
+    func cachedWavByteCount(text: String, styleId: UInt32) -> Int? { return nil }
 
     static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
     static var configuredCPUNumThreads: UInt16 {
