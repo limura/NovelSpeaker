@@ -248,6 +248,16 @@ final class VoicevoxPerformanceMonitor {
     private var unplayedLeadSeconds: Double = 0
     /// 再生の途切れ(意図しない無音)の集計。
     private var gaps = PlaybackGapAccumulator()
+    /// 直前に「音を鳴らし終えた」時刻と、その時点で予定されていた「間の設定」の秒数。
+    ///
+    /// これは話者(VoicevoxSpeakerインスタンス)ごとではなく **アプリ全体で1つ** でなければ
+    /// ならない。会話文で話者が変わると別インスタンスが鳴るため、インスタンスごとに
+    /// 持つと「他の話者が喋っている間ずっと、この話者の無音」として二重計上され、
+    /// 実測で経過時間(約400秒)より長い無音(631秒)が計上される・最大無音が170秒になる、
+    /// といった明らかに誤った値が出る。発話自体は MultiVoiceSpeaker が直列化しているので、
+    /// グローバルに1つ持つのが正しい。
+    private var lastPlaybackEndedAt: Date? = nil
+    private var lastIntentionalDelay: TimeInterval = 0
     /// ログが出過ぎないように、最短でもこの間隔をあける。
     private let logIntervalSeconds: Double = 10.0
     /// アプリ内ログ(設定画面から見られる方)へ残す間隔。
@@ -274,9 +284,33 @@ final class VoicevoxPerformanceMonitor {
         lock.unlock()
     }
 
-    /// ブロック間にできた「意図しない無音」を記録する(「間の設定」ぶんは除いた値を渡す)。
-    func recordPlaybackGap(seconds: Double) {
+    /// あるブロックの音声を鳴らし終えた事を記録する(次に音が出るまでが無音になる)。
+    /// - Parameter intentionalDelay: この後に入る「間の設定」由来の意図的なポーズ秒数。
+    func notePlaybackEnded(intentionalDelay: TimeInterval) {
         lock.lock()
+        lastPlaybackEndedAt = Date()
+        lastIntentionalDelay = intentionalDelay
+        lock.unlock()
+    }
+
+    /// ユーザー操作による停止/一時停止など、無音として数えるべきでない中断を記録する。
+    func notePlaybackInterrupted() {
+        lock.lock()
+        lastPlaybackEndedAt = nil
+        lastIntentionalDelay = 0
+        lock.unlock()
+    }
+
+    /// これから音を鳴らす事を記録し、直前の再生終了からの間隔を「意図しない無音」として数える。
+    func notePlaybackStarting() {
+        lock.lock()
+        guard let endedAt = lastPlaybackEndedAt else {
+            lock.unlock()
+            return
+        }
+        let seconds = Date().timeIntervalSince(endedAt) - lastIntentionalDelay
+        lastPlaybackEndedAt = nil
+        lastIntentionalDelay = 0
         gaps.addGap(seconds: seconds)
         let total = gaps.totalGapSeconds
         let count = gaps.gapCount
@@ -422,6 +456,8 @@ final class VoicevoxPerformanceMonitor {
         dutyWindow = CPUDutyWindow(windowSeconds: Self.osBackgroundCPUWindowSeconds)
         rtf = RTFAccumulator()
         gaps = PlaybackGapAccumulator()
+        lastPlaybackEndedAt = nil
+        lastIntentionalDelay = 0
         lastLoggedAt = 0
         lock.unlock()
     }

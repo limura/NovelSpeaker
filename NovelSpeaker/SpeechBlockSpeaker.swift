@@ -267,6 +267,15 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId)
         }
         VoicevoxPerformanceMonitor.shared.updateUnplayedLeadSeconds(currentLead)
+        // 貯金の量に関わらず、「次に再生するブロック」だけは必ず先行合成しておく。
+        //
+        // nextPrefetchScanIndex は前進のみで、貯金の上限で打ち切った回の分だけ
+        // 走査開始位置が現在位置から離れていく。その結果、貯金としては十分あるのに
+        // 「直近の1つ」だけが未合成、という状態が起こり得る。この1つを取りこぼすと
+        // 再生側がその場で合成する事になり、実行中の先行合成の完了待ちと合わせて
+        // 10秒以上の無音になる(実機で 再生時HIT率38.7% / MISS平均待ち11.5秒 として観測)。
+        // ここだけは上限より優先して確保する。
+        prefetchImmediateNextBlockIfNeeded()
         if currentLead >= parameters.targetLeadSeconds { return }
         var accumulated = 0
         var prefetchedBlockCount = 0
@@ -297,6 +306,25 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             index += 1
         }
         nextPrefetchScanIndex = index
+    }
+
+    /// 次に再生するVOICEVOXブロックが未合成なら、それだけを最優先で先行合成に出す。
+    /// 貯金の上限とは無関係に必ず確保する(取りこぼすと再生が止まるため)。
+    private func prefetchImmediateNextBlockIfNeeded() {
+        var index = currentSpeechBlockIndex + 1
+        // 直後に発話しないブロック(他エンジン・空白のみ)は読み飛ばして、
+        // 「次に実際にVOICEVOXで鳴らすブロック」を探す。
+        while index < speechBlockArray.count {
+            let block = speechBlockArray[index]
+            index += 1
+            guard block.type == "VOICEVOX", let styleId = UInt32(block.voiceIdentifier ?? "") else { continue }
+            let text = block.speechText
+            if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || Self.hasNoSpeakableCharacter(text) { continue }
+            if VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId) == nil {
+                VoicevoxCore.shared.schedulePrefetch(text: text, styleId: styleId)
+            }
+            return
+        }
     }
 
     /// 「あと何秒ぶん、合成済みの音声が手元にあるか(未再生ぶんだけ)」を数える。

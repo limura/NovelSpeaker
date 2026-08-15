@@ -44,11 +44,6 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     // performSpeech で true、再生完了/停止で false にする。
     private var m_IsUtteranceActive: Bool = false
 
-    // 直前のブロックの音声を鳴らし終えた時刻と、その時点で適用予定だった「間の設定」の秒数。
-    // 次のブロックが鳴り始めるまでの差分から「意図しない無音」を割り出すために使う
-    // (実機で、貯金が108秒あるのに再生できていた時間が半分しかない事が判明したため)。
-    private var m_LastPlaybackEndedAt: Date? = nil
-    private var m_LastIntentionalDelay: TimeInterval = 0
 
     // 現在再生中(または直前に再生した)テキスト。finishSpeak の speechString に使う。
     private var currentSpeechText: String = ""
@@ -152,14 +147,9 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         timePitch.pitch = Self.timePitchCents(fromPitchMultiplier: m_Pitch)
         playerNode.volume = max(0.0, min(1.0, m_Volume))
 
-        // 直前のブロックを鳴らし終えてから、ここで実際に音が出るまでの時間が
-        // 「意図しない無音」。「間の設定」による意図的なポーズはその分を差し引く。
-        if let endedAt = m_LastPlaybackEndedAt {
-            let elapsed = Date().timeIntervalSince(endedAt)
-            VoicevoxPerformanceMonitor.shared.recordPlaybackGap(seconds: elapsed - m_LastIntentionalDelay)
-            m_LastPlaybackEndedAt = nil
-            m_LastIntentionalDelay = 0
-        }
+        // 直前に鳴らし終えてから、ここで実際に音が出るまでが「意図しない無音」。
+        // 話者をまたいでも正しく測れるよう、起点は Monitor 側でグローバルに管理している。
+        VoicevoxPerformanceMonitor.shared.notePlaybackStarting()
         // このブロックを鳴らすのにかかる実時間(倍速適用後)。無音率の分母になる。
         let playbackRate = max(0.0001, Double(timePitch.rate))
         VoicevoxPerformanceMonitor.shared.recordPlayback(
@@ -176,8 +166,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                 self.stopProgressReporting()
                 let delaySeconds = max(0.0, self.m_Delay)
                 // 次のブロックが鳴り始めるまでの間隔を測るための基準点。
-                self.m_LastPlaybackEndedAt = Date()
-                self.m_LastIntentionalDelay = delaySeconds
+                VoicevoxPerformanceMonitor.shared.notePlaybackEnded(intentionalDelay: delaySeconds)
                 DispatchQueue.main.asyncAfter(deadline: .now() + delaySeconds) {
                     guard myGeneration == self.generation else { return }
                     self.m_Delegate?.finishSpeak(isCancel: false, speechString: text)
@@ -265,8 +254,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         m_IsPaused = false
         m_IsUtteranceActive = false
         // ユーザー操作による停止は「意図しない無音」ではないので、計測の基準点を捨てる。
-        m_LastPlaybackEndedAt = nil
-        m_LastIntentionalDelay = 0
+        VoicevoxPerformanceMonitor.shared.notePlaybackInterrupted()
         stopProgressReporting()
         playerNode.stop()
         let text = currentSpeechText
@@ -286,8 +274,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     func Pause() {
         m_IsPaused = true
         // 一時停止中は「意図しない無音」ではないので、計測の基準点を捨てる。
-        m_LastPlaybackEndedAt = nil
-        m_LastIntentionalDelay = 0
+        VoicevoxPerformanceMonitor.shared.notePlaybackInterrupted()
         stopProgressReporting()
         playerNode.pause()
     }
