@@ -314,6 +314,30 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
 
     /// 次に再生するVOICEVOXブロックが未合成なら、それだけを最優先で先行合成に出す。
     /// 貯金の上限とは無関係に必ず確保する(取りこぼすと再生が止まるため)。
+    /// ブロックがどう分割されたかを、実際の文字列としてアプリ内ログへ残す。
+    ///
+    /// 分割位置の不自然さ(「一応志望」|「校のＡ判定にはぎりぎり…」のような語の途中での
+    /// 分断)は、無音や不自然な読みとしてしか気付けず確認しづらいため、分割結果そのものを
+    /// 目視できるようにする。各ブロックの先頭・末尾を出すので、境界が語の途中かどうかが分かる。
+    static func dumpSpeechBlocksForDiagnostics(blockArray:[CombinedSpeechBlock]) {
+        guard blockArray.isEmpty == false else { return }
+        let maxBlockCount = 80
+        var lines: [String] = []
+        for (index, block) in blockArray.prefix(maxBlockCount).enumerated() {
+            let display = block.displayText
+            let head = String(display.prefix(24))
+            let tail = display.count > 24 ? " … " + String(display.suffix(12)) : ""
+            lines.append("  [\(index)] \(display.count)文字 voice=\(block.voiceIdentifier ?? "nil") type=\(block.type)\n      \(escapeForLog(head))\(escapeForLog(tail))")
+        }
+        if blockArray.count > maxBlockCount {
+            lines.append("  …(以下 \(blockArray.count - maxBlockCount) ブロック省略)")
+        }
+        let body = "[ブロック分割] 全\(blockArray.count)ブロック\n" + lines.joined(separator: "\n")
+        DispatchQueue.global(qos: .utility).async {
+            AppInformationLogger.AddLog(message: body, isForDebug: true)
+        }
+    }
+
     /// 直近確保を最後に行ったブロック番号。willSpeakRange は 0.1 秒毎に来るため、
     /// 同じブロックに対して何十回も予約要求を投げないようにする(実機ログで
     /// 同一ブロックへの「直近確保」が0.1秒おきに36回並んでいた)。
@@ -526,6 +550,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
         nextPrefetchScanIndex = 0
+        lastImmediateEnsuredBlockIndex = -1
+        Self.dumpSpeechBlocksForDiagnostics(blockArray: blockArray)
         // 本文が丸ごと差し替わったので、それまでのVOICEVOX先行合成キャッシュは無意味になる。
         VoicevoxCore.shared.schedulePrefetchCacheClear()
 
