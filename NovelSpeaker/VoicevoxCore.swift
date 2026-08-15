@@ -412,6 +412,7 @@ actor VoicevoxCore {
         if let cached = peekCache(key: key) {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュHIT] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
             VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
+            VoicevoxPerformanceMonitor.shared.recordEvent("再生HIT style=\(styleId) \"\(Self.logSnippet(text))\"")
             return cached
         }
         // ここに来た = 再生が必要な時点で先行合成が間に合っていなかった。
@@ -443,6 +444,7 @@ actor VoicevoxCore {
         // どちらなのかで対処が全く変わるため、ここで確定させる。
         let wasQueued = pendingPrefetchTasks[key] != nil
         VoicevoxPerformanceMonitor.shared.recordPlaybackCacheMiss(wasQueuedForPrefetch: wasQueued)
+        VoicevoxPerformanceMonitor.shared.recordEvent("再生MISS(\(wasQueued ? "予約済" : "未予約")) style=\(styleId) \"\(snippet)\"")
         if let pendingTask = pendingPrefetchTasks[key] {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:予約済みだが未完了→追い越して合成] styleId=\(styleId) text=\"\(snippet)\"")
             pendingTask.cancel()
@@ -469,6 +471,7 @@ actor VoicevoxCore {
         if peekCache(key: key) != nil || pendingPrefetchTasks[key] != nil { return }
         let snippet = Self.logSnippet(text)
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
+        VoicevoxPerformanceMonitor.shared.recordEvent("先読み予約 style=\(styleId) \"\(snippet)\"")
         let scheduledAt = Date()
         // 前段のタスクを明示的に待ってから自分の合成に入る事で、投入順=実行順を保証する
         // (優先度は変わらず低めにして、synthesize()側からの割り込み・優先度エスカレーションの
@@ -482,18 +485,21 @@ actor VoicevoxCore {
             // 停止後も延々と(実機で16分=983秒の先行合成完了ログを確認)直列に合成され続け、
             // CPU/電池を浪費し、合成結果を保持してメモリも増え続けてしまう。
             if Task.isCancelled {
+                VoicevoxPerformanceMonitor.shared.recordEvent("先読みキャンセル style=\(styleId) \"\(snippet)\"")
                 await self.dropPendingPrefetch(key: key)
                 return
             }
             do {
                 let data = try await self.performSynthesize(text: text, styleId: styleId)
                 NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(scheduledAt)))秒] styleId=\(styleId) text=\"\(snippet)\"")
+                VoicevoxPerformanceMonitor.shared.recordEvent("先読み完了 \(String(format: "%.1f", Date().timeIntervalSince(scheduledAt)))秒 style=\(styleId) \"\(snippet)\"")
                 await self.storePrefetched(key: key, data: data)
             } catch {
                 AppInformationLogger.AddLog(message: "VoicevoxCore: prefetch failed: \(error.localizedDescription)", appendix: [
                     "text": text,
                     "styleId": "\(styleId)",
                 ], isForDebug: true)
+                VoicevoxPerformanceMonitor.shared.recordEvent("先読み失敗 style=\(styleId) \"\(snippet)\" \(error.localizedDescription)")
                 await self.dropPendingPrefetch(key: key)
             }
         }

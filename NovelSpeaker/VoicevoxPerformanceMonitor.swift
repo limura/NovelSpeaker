@@ -266,6 +266,15 @@ final class VoicevoxPerformanceMonitor {
     /// グローバルに1つ持つのが正しい。
     private var lastPlaybackEndedAt: Date? = nil
     private var lastIntentionalDelay: TimeInterval = 0
+    /// 直近の出来事(先行合成の開始/完了・発話発注・HIT/MISS)の記録。
+    /// 無音が起きた瞬間の前後で「先行合成が何をしていたか」を後から追うためのもの。
+    /// NSLog だけだと Console.app 経由でしか読めず、実機を無接続で測る今回の運用では
+    /// 回収できないため、長い無音を検出した時にまとめてアプリ内ログへ吐き出す。
+    private var eventRing: [(at: Date, text: String)] = []
+    private let eventRingCapacity = 40
+    /// トレースを吐き出す無音の長さのしきい値と、吐き出し過ぎを防ぐ間隔。
+    private let traceDumpGapThreshold: Double = 3.0
+    private var lastTraceDumpAt: Date? = nil
     /// ログが出過ぎないように、最短でもこの間隔をあける。
     private let logIntervalSeconds: Double = 10.0
     /// アプリ内ログ(設定画面から見られる方)へ残す間隔。
@@ -289,6 +298,16 @@ final class VoicevoxPerformanceMonitor {
     func recordPlayback(wallSeconds: Double) {
         lock.lock()
         gaps.addPlayback(wallSeconds: wallSeconds)
+        lock.unlock()
+    }
+
+    /// 出来事を記録する(無音時のトレース用)。
+    func recordEvent(_ text: String) {
+        lock.lock()
+        eventRing.append((at: Date(), text: text))
+        if eventRing.count > eventRingCapacity {
+            eventRing.removeFirst(eventRing.count - eventRingCapacity)
+        }
         lock.unlock()
     }
 
@@ -325,6 +344,33 @@ final class VoicevoxPerformanceMonitor {
         lock.unlock()
         if seconds >= 0.5 {
             NSLog("NovelSpeaker.VoicevoxPerf: [\(VoicevoxCore.logTimestamp())] [無音検出] \(String(format: "%.2f", seconds))秒 (通算 \(String(format: "%.1f", total))秒 / \(count)回)")
+        }
+        if seconds >= traceDumpGapThreshold {
+            dumpTraceIfNeeded(gapSeconds: seconds)
+        }
+    }
+
+    /// 長い無音が起きた時に、その直前までの出来事をアプリ内ログへ1件としてまとめて残す。
+    /// (1回の無音につき1エントリ。連続して出し過ぎないよう間隔を空ける)
+    private func dumpTraceIfNeeded(gapSeconds: Double) {
+        let now = Date()
+        lock.lock()
+        if let last = lastTraceDumpAt, now.timeIntervalSince(last) < 20 {
+            lock.unlock()
+            return
+        }
+        lastTraceDumpAt = now
+        let events = eventRing
+        lock.unlock()
+        guard let first = events.first?.at else { return }
+        var lines: [String] = []
+        for event in events {
+            let offset = event.at.timeIntervalSince(first)
+            lines.append(String(format: "  +%.2f %@", offset, event.text))
+        }
+        let body = "[VOICEVOX無音トレース] " + String(format: "%.2f", gapSeconds) + "秒の無音。直前の出来事:\n" + lines.joined(separator: "\n")
+        persistQueue.async {
+            AppInformationLogger.AddLog(message: body, isForDebug: true)
         }
     }
 

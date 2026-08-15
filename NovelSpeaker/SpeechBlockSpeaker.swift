@@ -202,6 +202,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // VoicevoxCoreの先行合成ログ(絶対時刻付き)と突き合わせて「どこで無音になったか」を
         // 追えるように、実際に発話を発注した瞬間も同じ絶対時刻フォーマットでログする。
         NSLog("NovelSpeaker.SpeechBlockSpeaker: [\(VoicevoxCore.logTimestamp())] [発話発注] blockIndex=\(currentSpeechBlockIndex) type=\(block.type) text=\"\(Self.escapeForLog(speechText))\"")
+        VoicevoxPerformanceMonitor.shared.recordEvent("発話発注 block=\(currentSpeechBlockIndex) voice=\(block.voiceIdentifier ?? "nil") \"\(String(Self.escapeForLog(speechText).prefix(16)))\"")
         let effectiveRate = min(max(block.rate * rateMultiplier, AVSpeechUtteranceMinimumSpeechRate), AVSpeechUtteranceMaximumSpeechRate)
         let effectiveVolume = min(max(block.volume * volumeMultiplier, 0.0), 1.0)
         speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: effectiveRate, volume: effectiveVolume, delay: block.delay)
@@ -321,6 +322,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             let text = block.speechText
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || Self.hasNoSpeakableCharacter(text) { continue }
             if VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId) == nil {
+                VoicevoxPerformanceMonitor.shared.recordEvent("直近確保 block=\(index - 1) style=\(styleId)")
                 VoicevoxCore.shared.schedulePrefetch(text: text, styleId: styleId)
             }
             return
