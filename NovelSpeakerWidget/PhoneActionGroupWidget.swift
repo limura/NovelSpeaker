@@ -106,9 +106,7 @@ struct PhoneActionGroupWidgetView: View {
                 // 再生・停止
                 cell(caption: NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止")) {
                     Button(intent: PhoneSpeechToggleIntent()) {
-                        PhoneActionGlyphView(badgeSystemName: "playpause.fill",
-                                             badgeColor: PhoneWidgetTheme.playToggleBadgeColor(whiteForeground: whiteFG),
-                                             brandStyle: whiteFG)
+                        PhoneActionGlyphView(badgeSystemName: "playpause.fill", badgeColor: .orange, brandStyle: whiteFG)
                     }
                     .buttonStyle(.plain)
                 }

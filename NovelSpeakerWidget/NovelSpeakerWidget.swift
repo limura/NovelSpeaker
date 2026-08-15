@@ -40,8 +40,8 @@ enum PhoneWidgetTheme {
     /// (アイコンの絵は白い部分の面積が大きく全体は白っぽく見えるので、
     /// 背景全面に元の色を敷くと濃く見えすぎる、という実機フィードバックによる)
     /// 淡い背景に白文字は読めないので、ライト時の前景は通常の黒系のまま使う
-    static let gradientTop = Color(red: 255 / 255, green: 233 / 255, blue: 198 / 255)
-    static let gradientBottom = Color(red: 255 / 255, green: 202 / 255, blue: 190 / 255)
+    static let gradientTop = Color(red: 254 / 255, green: 219 / 255, blue: 166 / 255)
+    static let gradientBottom = Color(red: 254 / 255, green: 164 / 255, blue: 151 / 255)
     /// ダークテーマ: アイコンの色を暗く沈めたもの(前景は白系)
     static let gradientTopDark = Color(red: 118 / 255, green: 78 / 255, blue: 28 / 255)
     static let gradientBottomDark = Color(red: 116 / 255, green: 22 / 255, blue: 15 / 255)
@@ -52,11 +52,6 @@ enum PhoneWidgetTheme {
         return brandBackgroundEnabled && renderingMode == .fullColor && colorScheme == .dark
     }
 
-    /// 「再生・停止」の固定バッジ色。ユーザが選んだ色ではないので、
-    /// ダークの白前景時は鮮やかなオレンジだと浮く→背景と同系の暗い赤に馴染ませる
-    static func playToggleBadgeColor(whiteForeground: Bool) -> Color {
-        return whiteForeground ? gradientBottomDark : .orange
-    }
 }
 
 /// ホーム画面ウィジェット共通の containerBackground。
@@ -147,8 +142,10 @@ struct PhoneActionGlyphView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     let badgeSystemName: String
     var badgeColor: Color = .orange
-    /// テーマカラー背景の上に置く時 true。グリフは白テンプレート、
-    /// バッジは白丸+選択色の記号(色付き丸だと橙系が背景に溶けるため)にする
+    /// 濃いテーマカラー背景(ダーク)の上に置く時 true。グリフを白テンプレートにする
+    /// (橙円盤だと背景に溶けるため)。バッジは常に色付き丸+白記号
+    /// (当初はダーク時に白丸+色記号にしたが、「色が抜けて見える」との実機
+    /// フィードバックで、ライトと同じ塗りつぶしに統一した)
     var brandStyle: Bool = false
 
     // ⏯は他の記号より横に広く、0.30倍だとバッジの円をはみ出すのでこの記号だけ小さく描く
@@ -188,23 +185,14 @@ struct PhoneActionGlyphView: View {
     @ViewBuilder
     private func badge(side: CGFloat) -> some View {
         ZStack {
-            if renderingMode == .fullColor && brandStyle {
-                // 濃いテーマカラー背景の上: 白丸+選択色の記号
-                Circle().fill(.white)
-                Image(systemName: badgeSystemName)
-                    .font(.system(size: side * badgeFontScale, weight: .bold))
-                    .foregroundStyle(badgeColor)
-            } else if renderingMode == .fullColor {
+            if renderingMode == .fullColor {
                 Circle().fill(badgeColor)
-                Image(systemName: badgeSystemName)
-                    .font(.system(size: side * badgeFontScale, weight: .bold))
-                    .foregroundStyle(.white)
             } else {
                 Circle().stroke(.white, lineWidth: max(1, side * 0.035))
-                Image(systemName: badgeSystemName)
-                    .font(.system(size: side * badgeFontScale, weight: .bold))
-                    .foregroundStyle(.white)
             }
+            Image(systemName: badgeSystemName)
+                .font(.system(size: side * badgeFontScale, weight: .bold))
+                .foregroundStyle(.white)
         }
         .frame(width: side * 0.48, height: side * 0.48)
     }
@@ -416,9 +404,7 @@ struct PhonePlayToggleWidgetView: View {
         default:
             // ホーム画面(systemSmall): 合成アイコン + 対象の小説名 + ゲージ + 操作名
             VStack(spacing: 5) {
-                PhoneActionGlyphView(badgeSystemName: "playpause.fill",
-                                     badgeColor: PhoneWidgetTheme.playToggleBadgeColor(whiteForeground: whiteFG),
-                                     brandStyle: whiteFG)
+                PhoneActionGlyphView(badgeSystemName: "playpause.fill", brandStyle: whiteFG)
                     .frame(width: 46, height: 46)
                 if let reading = reading {
                     Text(reading.title)

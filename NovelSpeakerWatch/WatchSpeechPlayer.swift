@@ -1048,10 +1048,18 @@ enum WatchSpeechSettingsStorage {
             .appendingPathComponent("SpeechSettings.json")
     }
 
+    /// cache と設定ファイルの排他。store は WCSession のデリゲートスレッド、
+    /// current は本文準備の背面キューや発話経路など複数スレッドから呼ばれるため、
+    /// 無同期だと転送中の受信(store)と読み出し(current)が競合して
+    /// EXC_BAD_ACCESS になる(2026-07 実機)。ファイルの差し替えも同じロックに
+    /// 入れて、差し替え瞬間の読み込みが既定値をキャッシュしてしまうのも防ぐ
+    private static let cacheLock = NSLock()
     private static var cache: WatchSpeechSettings?
 
     static func store(receivedFileURL: URL, fingerprint: String?) throws {
         let destination = fileURL
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
         try? FileManager.default.removeItem(at: destination)
         try FileManager.default.moveItem(at: receivedFileURL, to: destination)
         cache = nil
@@ -1068,6 +1076,8 @@ enum WatchSpeechSettingsStorage {
 
     /// 保存済みの発話設定。まだ届いていなければ既定値(標準話者・読み替え無し)
     static func current() -> WatchSpeechSettings {
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
         if let cache = cache { return cache }
         if let data = try? Data(contentsOf: fileURL),
            let settings = try? JSONDecoder().decode(WatchSpeechSettings.self, from: data) {
