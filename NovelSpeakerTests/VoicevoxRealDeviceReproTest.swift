@@ -103,7 +103,7 @@ class VoicevoxRealDeviceReproTest: XCTestCase {
                 index += 1
                 continue
             }
-            VoicevoxCore.shared.schedulePrefetch(text: text, styleId: styleId)
+            VoicevoxCore.shared.schedulePrefetch(blockIndex: index, text: text, styleId: styleId)
             accumulated += text.count
             prefetchedBlockCount += 1
             index += 1

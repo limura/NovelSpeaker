@@ -145,16 +145,24 @@ actor VoicevoxCore {
         prefetchedWavTotalBytesUnsafe = 0
     }
 
-    private var pendingPrefetchTasks: [String: Task<Void, Never>] = [:]
-    // 先行合成タスクを投入順(=実際に必要になる順)通りに直列実行させるための鎖。
-    // 単純に Task(priority: .utility) を並べて投げるだけだと、同一優先度のTaskがどの順で
-    // actorに入るかはSwift concurrency のスケジューラ任せで、投入順が保証されない
-    // (実機ログで、後から予約したはずの短いブロックより先に予約した別ブロックの方が
-    //  何十秒も遅れて完了する、という順序の入れ替わりを確認した)。ここでは新しいタスクが
-    // 「前のタスクの完了を待ってから」実際の合成に入るようにする事で、投入順=実行順を保証する。
-    private var prefetchTailTask: Task<Void, Never>?
+    // 先行合成の待ち行列(「次に何を合成すべきか」の帳簿)。
+    // actor の外(ロックのみ)で完結するので、合成中(1本12秒前後のC呼び出しの最中)でも
+    // 予約・優先度変更・キャンセルが待たされずに反映される。詳細は VoicevoxSynthesisQueue.swift 参照。
+    // 生成時に自分自身のキャッシュ参照を渡す必要があるため、init 内で組み立てる
+    // (VoicevoxCore は shared のみのシングルトンなので、この暗黙アンラップは安全)。
+    nonisolated(unsafe) private var synthesisQueueStorage: VoicevoxSynthesisQueue!
+    nonisolated var synthesisQueue: VoicevoxSynthesisQueue { return synthesisQueueStorage }
 
-    private init() {}
+    // ワーカー(待ち行列から1件ずつ取り出して合成するループ)の起動状態。
+    // actor へ入らずに判定したいので専用ロックで守る。
+    private let workerLock = NSLock()
+    nonisolated(unsafe) private var isWorkerRunningUnsafe = false
+
+    private init() {
+        synthesisQueueStorage = VoicevoxSynthesisQueue(capacity: Self.maxPendingPrefetchCount) { [unowned self] text, styleId in
+            return self.peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil
+        }
+    }
 
     var isSetUp: Bool {
         return synthesizer != nil
@@ -445,28 +453,21 @@ actor VoicevoxCore {
     /// actor状態を扱うため、ここは(nonisolatedにせず)actor隔離のままにしておく。
     private func synthesizeSlowPath(text: String, styleId: UInt32, key: String) async throws -> Data {
         let snippet = Self.logSnippet(text)
-        // 先行合成タスクの完了は「待たない」。
-        //
-        // 以前はここで await pendingTask.value していたが、先行合成タスクは実行順を保証する
-        // ために直列の鎖(prefetchTailTask)になっており、鎖の途中のタスクを待つ事は
-        // 「そのタスクより前に積まれた全ての先行合成の完了を待つ」事を意味していた。
-        // 実機ではこれが再生時の平均15秒の待ち(= そのまま無音)になり、無音率74.8%の
-        // 主因になっていた。再生は先行合成より優先されるべきなので、該当タスクを
-        // キャンセルしてこの場で合成する。既に actor に入れている以上、実行中だった
-        // 先行合成は完了済みなので、ここでの合成は待たされない。
+        // 待機中の予約は取り消して(横取りして)この場で合成する。ワーカーが後から
+        // 同じ物を重ねて合成しないようにするため。
+        // 既に合成中(このメソッドが actor に入れた時点で、そのC呼び出しは完了している)
+        // だった場合は、下のキャッシュ再確認で拾える。
         // MISS の原因を判別するための記録。
         //  - 予約済み(pending)   … 先行合成に出してはいたが間に合わなかった = 時間の問題。
         //                          先読みの深さ/優先度で対処する。
         //  - 未予約(not queued) … そもそも先行合成の対象から漏れていた = 取りこぼしの不具合。
         // 実機で「貯金は156秒あるのに再生時HIT率は48.9%」という食い違いが出ており、
         // どちらなのかで対処が全く変わるため、ここで確定させる。
-        let wasQueued = pendingPrefetchTasks[key] != nil
+        let wasQueued = synthesisQueue.claimForImmediateSynthesis(text: text, styleId: styleId)
         VoicevoxPerformanceMonitor.shared.recordPlaybackCacheMiss(wasQueuedForPrefetch: wasQueued)
         VoicevoxPerformanceMonitor.shared.recordEvent("再生MISS(\(wasQueued ? "予約済" : "未予約")) style=\(styleId) \"\(snippet)\"")
-        if let pendingTask = pendingPrefetchTasks[key] {
+        if wasQueued {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:予約済みだが未完了→追い越して合成] styleId=\(styleId) text=\"\(snippet)\"")
-            pendingTask.cancel()
-            pendingPrefetchTasks.removeValue(forKey: key)
         } else {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:先行合成に未予約] styleId=\(styleId) text=\"\(snippet)\"")
         }
@@ -481,123 +482,115 @@ actor VoicevoxCore {
         return data
     }
 
-    /// 現在再生中のブロックより先のブロックを、実際に必要になる前にバックグラウンドで合成しておく。
-    /// 二重起動(既にキャッシュ済み/進行中)は無視するので、何度呼んでも安全。
-    /// 失敗しても黙って諦める(実際に必要になった時に synthesize() がその場で合成し直す)。
-    /// 未完了のまま溜めておける先行合成の本数。
+    /// 待機中の先行合成として溜めておける本数。
     ///
-    /// 先行合成は投入順の直列鎖で実行されるため、積み過ぎると鎖の後ろに回った物ほど
-    /// 完了までの時間が伸びる。実機では一度に30件以上が積まれ、予約から完了まで
-    /// 218秒かかる状態になっていた(その間ずっと「未再生の貯金=0秒」で無音)。
-    /// 積むより先に手前から順に完成させる方が、再生には遥かに有利。
-    private let maxPendingPrefetchCount = 3
+    /// 積み過ぎると、手前のブロックが後ろのバックログに埋もれて完了までの時間が伸びる。
+    /// 実機では一度に30件以上が積まれ、予約から完了まで218秒かかる状態になっていた
+    /// (その間ずっと「未再生の貯金=0秒」で無音)。積むより先に手前から順に
+    /// 完成させる方が、再生には遥かに有利。
+    private static let maxPendingPrefetchCount = 4
 
-    func prefetch(text: String, styleId: UInt32, isUrgent: Bool = false) {
-        let key = Self.prefetchKey(text: text, styleId: styleId)
-        if peekCache(key: key) != nil || pendingPrefetchTasks[key] != nil { return }
-        if !isUrgent && pendingPrefetchTasks.count >= maxPendingPrefetchCount { return }
+    /// 現在再生中のブロック位置を待ち行列に伝える。
+    /// これより手前の(追い越された)予約は捨てられ、次に合成すべき対象が入れ替わる。
+    /// actor へ入らないので、合成中でも即座に反映される。
+    nonisolated func notePlaybackBlockIndex(_ index: Int) {
+        synthesisQueue.setPlaybackIndex(index)
+    }
+
+    /// 現在再生中のブロックより先のブロックを、実際に必要になる前に合成しておく。
+    /// blockIndex が小さい(=再生順で手前の)ものほど優先して合成される。
+    /// 二重予約(既にキャッシュ済み/予約済み/合成中)は無視するので、何度呼んでも安全。
+    /// 失敗しても黙って諦める(実際に必要になった時に synthesize() がその場で合成し直す)。
+    ///
+    /// あえて nonisolated: 「予約を積む」だけの帳簿処理が、実行中の合成(1本12秒前後の
+    /// 同期的なC呼び出し)の完了待ちに巻き込まれないようにするため。以前は actor 隔離の
+    /// prefetch() だったせいで、予約が登録されるまで実機で19秒かかっていた。
+    nonisolated func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) {
+        guard synthesisQueue.enqueue(blockIndex: blockIndex, text: text, styleId: styleId) else { return }
         let snippet = Self.logSnippet(text)
-        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
-        VoicevoxPerformanceMonitor.shared.recordEvent("先読み予約 style=\(styleId) \"\(snippet)\"")
-        let scheduledAt = Date()
-        // 前段のタスクを明示的に待ってから自分の合成に入る事で、投入順=実行順を保証する
-        // (優先度は変わらず低めにして、synthesize()側からの割り込み・優先度エスカレーションの
-        // 余地は残す)。
-        // 「次に再生するブロック」(isUrgent)は直列鎖に並ばせない。
-        // 鎖は投入順を保証するためのものだが、最後尾に並べると既に積まれている
-        // (もっと先の)先行合成を全部待つ事になり、実機では200秒級のバックログの
-        // 後ろに回されて必ず間に合わなかった。鎖を通さなければ、actorが空き次第
-        // (実行中のC呼び出しが終わり次第)すぐ合成に入れる。
-        //
-        // なお以前はここで cancelPendingPrefetch() して鎖を作り直していたが、
-        // それだと「今まさに再生しようとしているブロック」の予約まで巻き込んで
-        // 消してしまい(実機トレースで、発話発注と同時に直近確保が走り、その
-        // ブロック自身の予約が消えて 再生MISS(未予約) になる現象を確認)、
-        // 逆に無音を増やしていた。他の予約は消さない。
-        let previousTail = isUrgent ? nil : prefetchTailTask
-        let newTask = Task(priority: isUrgent ? .userInitiated : .utility) { [weak self] in
-            await previousTail?.value
+        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成予約] block=\(blockIndex) styleId=\(styleId) text=\"\(snippet)\"")
+        VoicevoxPerformanceMonitor.shared.recordEvent("先読み予約 block=\(blockIndex) style=\(styleId) \"\(snippet)\"")
+        startWorkerIfNeeded()
+    }
+
+    /// 待ち行列から1件ずつ取り出して合成し続けるワーカーを、走っていなければ起動する。
+    /// 同時に走るのは常に1本(voicevox のC呼び出しは actor で直列化されるため、
+    /// 複数走らせても速くならず、CPU上限に近づくだけ)。
+    nonisolated private func startWorkerIfNeeded() {
+        workerLock.lock()
+        if isWorkerRunningUnsafe {
+            workerLock.unlock()
+            return
+        }
+        isWorkerRunningUnsafe = true
+        workerLock.unlock()
+
+        Task(priority: .utility) { [weak self] in
             guard let self = self else { return }
-            // 読み上げ停止等でキャンセルされていたら、実際の合成(重いC呼び出し)には入らず即終了する。
-            // これをしないと、長時間再生で本の残り全ブロックが先読みキューに積まれたまま、
-            // 停止後も延々と(実機で16分=983秒の先行合成完了ログを確認)直列に合成され続け、
-            // CPU/電池を浪費し、合成結果を保持してメモリも増え続けてしまう。
-            if Task.isCancelled {
-                VoicevoxPerformanceMonitor.shared.recordEvent("先読みキャンセル style=\(styleId) \"\(snippet)\"")
-                await self.dropPendingPrefetch(key: key)
-                return
+            while let request = self.synthesisQueue.takeNext() {
+                await self.runSynthesis(request)
             }
-            do {
-                let data = try await self.performSynthesize(text: text, styleId: styleId)
-                NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(scheduledAt)))秒] styleId=\(styleId) text=\"\(snippet)\"")
-                VoicevoxPerformanceMonitor.shared.recordEvent("先読み完了 \(String(format: "%.1f", Date().timeIntervalSince(scheduledAt)))秒 style=\(styleId) \"\(snippet)\"")
-                await self.storePrefetched(key: key, data: data)
-            } catch {
-                AppInformationLogger.AddLog(message: "VoicevoxCore: prefetch failed: \(error.localizedDescription)", appendix: [
-                    "text": text,
-                    "styleId": "\(styleId)",
-                ], isForDebug: true)
-                VoicevoxPerformanceMonitor.shared.recordEvent("先読み失敗 style=\(styleId) \"\(snippet)\" \(error.localizedDescription)")
-                await self.dropPendingPrefetch(key: key)
+            self.workerLock.lock()
+            self.isWorkerRunningUnsafe = false
+            self.workerLock.unlock()
+            // 終了を決めた直後に積まれた分を取り零さないよう、もう一度だけ確認する。
+            if self.synthesisQueue.pendingCount > 0 {
+                self.startWorkerIfNeeded()
             }
         }
-        pendingPrefetchTasks[key] = newTask
-        // 鎖の末尾は通常の先読みだけで進める(urgentを末尾にすると、以降の
-        // 通常の先読みがurgentの完了を待つ事になり、意味が薄れる)。
-        if !isUrgent {
-            prefetchTailTask = newTask
+    }
+
+    /// 待ち行列から取り出した1件を実際に合成する(ここだけが actor 隔離 = 直列実行)。
+    private func runSynthesis(_ request: VoicevoxSynthesisQueue.Request) async {
+        let snippet = Self.logSnippet(request.text)
+        // 順番待ちの間に読み上げが停止/シークされていたら、重いC呼び出しには入らず捨てる。
+        // これをしないと、停止後も延々と(実機で16分=983秒の先行合成完了ログを確認)
+        // 合成され続け、CPU/電池を浪費してしまう。
+        if synthesisQueue.isStale(request) {
+            VoicevoxPerformanceMonitor.shared.recordEvent("先読みキャンセル style=\(request.styleId) \"\(snippet)\"")
+            synthesisQueue.complete(request)
+            return
         }
+        let startedAt = Date()
+        do {
+            let data = try performSynthesize(text: request.text, styleId: request.styleId)
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(startedAt)))秒] styleId=\(request.styleId) text=\"\(snippet)\"")
+            VoicevoxPerformanceMonitor.shared.recordEvent("先読み完了 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))秒 style=\(request.styleId) \"\(snippet)\"")
+            storeCache(key: Self.prefetchKey(text: request.text, styleId: request.styleId), data: data)
+        } catch {
+            AppInformationLogger.AddLog(message: "VoicevoxCore: prefetch failed: \(error.localizedDescription)", appendix: [
+                "text": request.text,
+                "styleId": "\(request.styleId)",
+            ], isForDebug: true)
+            VoicevoxPerformanceMonitor.shared.recordEvent("先読み失敗 style=\(request.styleId) \"\(snippet)\" \(error.localizedDescription)")
+        }
+        synthesisQueue.complete(request)
     }
 
-    private func storePrefetched(key: String, data: Data) {
-        pendingPrefetchTasks[key] = nil
-        storeCache(key: key, data: data)
-    }
-
-    private func dropPendingPrefetch(key: String) {
-        pendingPrefetchTasks[key] = nil
-    }
-
-    /// 未着手/進行中の先行合成タスク(バックログ)を全てキャンセルする。
+    /// 待機中の先行合成を全て破棄する。
     /// 完成済みのキャッシュ(prefetchedWav)は残すので、停止→同じ位置から再開した時に
     /// 直近の先読み結果は再利用できる。読み上げ停止時に呼ぶ想定。
     /// (実際に走っているC呼び出し1本はプリエンプトできないが、その1本が終われば
-    ///  後続はキャンセル判定で即抜けるので、バックログは速やかに解消される)
-    func cancelPendingPrefetch() {
-        for task in pendingPrefetchTasks.values {
-            task.cancel()
-        }
-        pendingPrefetchTasks.removeAll()
-        prefetchTailTask?.cancel()
-        prefetchTailTask = nil
+    ///  後続は isStale 判定で即抜けるので、バックログは速やかに解消される)
+    nonisolated func cancelPendingPrefetch() {
+        synthesisQueue.cancelAll()
     }
 
-    /// 先行合成キャッシュを全て破棄し、進行中のバックログもキャンセルする
+    /// 先行合成キャッシュを全て破棄し、待機中の先行合成もキャンセルする
     /// (新しい本文の読み込み・シーク等でこれまでの先読み内容が無意味になった時に呼ぶ)。
-    func clearPrefetchCache() {
+    nonisolated func clearPrefetchCache() {
         cancelPendingPrefetch()
         clearCache()
     }
 
-    /// SpeechBlockSpeaker 等、actorの外(メインスレッド)から気軽に先行合成を蹴るための入り口。
-    /// 「次に再生するブロック」用。積まれている先行合成より優先して合成させる。
-    nonisolated func schedulePrefetchUrgent(text: String, styleId: UInt32) {
-        Task(priority: .userInitiated) { await self.prefetch(text: text, styleId: styleId, isUrgent: true) }
-    }
-
-    nonisolated func schedulePrefetch(text: String, styleId: UInt32) {
-        Task { await self.prefetch(text: text, styleId: styleId) }
-    }
-
-    /// SpeechBlockSpeaker 等、actorの外から気軽にキャッシュをクリアするための入り口。
+    // 旧APIの名残。呼び出し側は actor の外から直接呼べるようになったので、
+    // Task で包む必要はもう無い(名前だけ残して移行の差分を小さくしている)。
     nonisolated func schedulePrefetchCacheClear() {
-        Task { await self.clearPrefetchCache() }
+        clearPrefetchCache()
     }
 
-    /// SpeechBlockSpeaker 等、actorの外(読み上げ停止時等)から、完成済みキャッシュは残しつつ
-    /// 先読みのバックログだけを止めるための入り口。
     nonisolated func scheduleCancelPendingPrefetch() {
-        Task { await self.cancelPendingPrefetch() }
+        cancelPendingPrefetch()
     }
 
     // テスト専用: 指定テキストが先行合成キャッシュに乗っているかどうか(進行中/未着手は含まない)。
@@ -651,8 +644,8 @@ final class VoicevoxCore {
         throw VoicevoxCoreError.notSetUp
     }
 
-    func schedulePrefetch(text: String, styleId: UInt32) {}
-    func schedulePrefetchUrgent(text: String, styleId: UInt32) {}
+    func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) {}
+    func notePlaybackBlockIndex(_ index: Int) {}
     func schedulePrefetchCacheClear() {}
     func scheduleCancelPendingPrefetch() {}
 

@@ -255,6 +255,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // プロセスが強制終了されるため、先読みを最小限に絞る(VoicevoxPrefetchThrottle 参照)。
         // 前景・充電中は従来どおりの積極的な先読みのまま。
         let parameters = VoicevoxPrefetchThrottleMonitor.shared.currentParameters
+        // 現在の再生位置を待ち行列に伝える。追い越された(もう再生されない)予約は捨てられ、
+        // 合成中でも即座に「次に合成すべき対象」が入れ替わる。
+        VoicevoxCore.shared.notePlaybackBlockIndex(currentSpeechBlockIndex)
         // 既にどれだけ「未再生の貯金」があるかを見て、足りているなら合成しない。
         // 1回あたりのブロック数を絞るだけでは、nextPrefetchScanIndex が呼び出しを跨いで
         // 前進する分、総量に歯止めが掛からず先行合成が CPU を焼き続ける。実機ではこれが
@@ -304,7 +307,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
                 index += 1
                 continue
             }
-            VoicevoxCore.shared.schedulePrefetch(text: text, styleId: styleId)
+            VoicevoxCore.shared.schedulePrefetch(blockIndex: index, text: text, styleId: styleId)
             accumulated += text.count
             prefetchedBlockCount += 1
             index += 1
@@ -359,8 +362,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
                 if lastImmediateEnsuredBlockIndex != blockIndex {
                     lastImmediateEnsuredBlockIndex = blockIndex
                     VoicevoxPerformanceMonitor.shared.recordEvent("直近確保 block=\(blockIndex) style=\(styleId)")
-                    // 積まれている(もっと先の)先行合成より優先させる。
-                    VoicevoxCore.shared.schedulePrefetchUrgent(text: text, styleId: styleId)
+                    // 待ち行列は再生順で手前のものほど優先するので、積まれている
+                    // (もっと先の)先行合成より自動的に先に合成される。
+                    VoicevoxCore.shared.schedulePrefetch(blockIndex: blockIndex, text: text, styleId: styleId)
                 }
             } else {
                 lastImmediateEnsuredBlockIndex = blockIndex
