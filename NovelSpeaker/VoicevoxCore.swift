@@ -495,15 +495,7 @@ actor VoicevoxCore {
     func prefetch(text: String, styleId: UInt32, isUrgent: Bool = false) {
         let key = Self.prefetchKey(text: text, styleId: styleId)
         if peekCache(key: key) != nil || pendingPrefetchTasks[key] != nil { return }
-        if isUrgent {
-            // 「次に再生するブロック」は、既に積まれている(もっと先の)先行合成より
-            // 優先しなければならない。直列鎖の最後尾に並べると、実機で観測されたように
-            // 200秒級のバックログの後ろに回されて必ず間に合わなくなる。
-            // 未完了の予約を破棄して鎖を作り直し、このブロックを先頭に置く。
-            cancelPendingPrefetch()
-        } else if pendingPrefetchTasks.count >= maxPendingPrefetchCount {
-            return
-        }
+        if !isUrgent && pendingPrefetchTasks.count >= maxPendingPrefetchCount { return }
         let snippet = Self.logSnippet(text)
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
         VoicevoxPerformanceMonitor.shared.recordEvent("先読み予約 style=\(styleId) \"\(snippet)\"")
@@ -511,8 +503,19 @@ actor VoicevoxCore {
         // 前段のタスクを明示的に待ってから自分の合成に入る事で、投入順=実行順を保証する
         // (優先度は変わらず低めにして、synthesize()側からの割り込み・優先度エスカレーションの
         // 余地は残す)。
-        let previousTail = prefetchTailTask
-        let newTask = Task(priority: .utility) { [weak self] in
+        // 「次に再生するブロック」(isUrgent)は直列鎖に並ばせない。
+        // 鎖は投入順を保証するためのものだが、最後尾に並べると既に積まれている
+        // (もっと先の)先行合成を全部待つ事になり、実機では200秒級のバックログの
+        // 後ろに回されて必ず間に合わなかった。鎖を通さなければ、actorが空き次第
+        // (実行中のC呼び出しが終わり次第)すぐ合成に入れる。
+        //
+        // なお以前はここで cancelPendingPrefetch() して鎖を作り直していたが、
+        // それだと「今まさに再生しようとしているブロック」の予約まで巻き込んで
+        // 消してしまい(実機トレースで、発話発注と同時に直近確保が走り、その
+        // ブロック自身の予約が消えて 再生MISS(未予約) になる現象を確認)、
+        // 逆に無音を増やしていた。他の予約は消さない。
+        let previousTail = isUrgent ? nil : prefetchTailTask
+        let newTask = Task(priority: isUrgent ? .userInitiated : .utility) { [weak self] in
             await previousTail?.value
             guard let self = self else { return }
             // 読み上げ停止等でキャンセルされていたら、実際の合成(重いC呼び出し)には入らず即終了する。
@@ -539,7 +542,11 @@ actor VoicevoxCore {
             }
         }
         pendingPrefetchTasks[key] = newTask
-        prefetchTailTask = newTask
+        // 鎖の末尾は通常の先読みだけで進める(urgentを末尾にすると、以降の
+        // 通常の先読みがurgentの完了を待つ事になり、意味が薄れる)。
+        if !isUrgent {
+            prefetchTailTask = newTask
+        }
     }
 
     private func storePrefetched(key: String, data: Data) {

@@ -459,6 +459,21 @@ class StoryTextClassifier {
     // 読み替え(mod)で表示文字列と発話文字列が異なるピースは、分割位置の対応関係を
     // 安全に保てないため分割しない(読み替え結果は通常短い単語なので実害はない)。
     private static let voicevoxPieceSplitBoundaryCharacters: Set<Character> = ["。", "、", "！", "？", "!", "?", "\n", "．", "，", " ", "　"]
+    // ハード上限に達した時、ブロックは「読み替え(mod)で区切られたピース」単位でしか
+    // 閉じられない。そのため上限に達した瞬間がたまたま読み替え境界だと、
+    // 「一応志望」|「校のＡ判定にはぎりぎり…」のように語の途中で閉じてしまい、
+    // 実機で不自然な発話として確認された(「彼」|「らの学力は決して低くない」等)。
+    // そこで、上限に達しても句読点等で終わっていなければ、この絶対上限までは
+    // 追加を続けて自然な切れ目を待つ。合成1回あたりの入力が大きくなり過ぎると
+    // メモリ(ONNXのアリーナ)も増えるため、待つ幅は限定する。
+    private static let voicevoxAbsoluteMaxLetterCount = 160
+
+    /// 句読点等、そこで区切っても不自然にならない文字で終わっているか。
+    private static func endsWithSplitBoundary(_ text:String) -> Bool {
+        guard let last = text.last else { return false }
+        return voicevoxPieceSplitBoundaryCharacters.contains(last)
+    }
+
     private static func splitOversizedVoicevoxPieceIfNeeded(block:SpeechBlockInfo) -> [SpeechBlockInfo] {
         guard block.type == "VOICEVOX",
               block.displayText.count > voicevoxHardCapLetterCount,
@@ -515,7 +530,12 @@ class StoryTextClassifier {
             }
             if let current = currentBlock {
                 let combinedCount = currentDisplayTextCount + blockDisplayTextCount
-                let forceCloseForVoicevoxCap = isVoicevox && combinedCount >= voicevoxHardCapLetterCount
+                // 上限に達していても、語の途中(=句読点等で終わっていない)なら
+                // 絶対上限まではもう少しだけ伸ばして自然な切れ目で閉じる。
+                let forceCloseForVoicevoxCap = isVoicevox
+                    && combinedCount >= voicevoxHardCapLetterCount
+                    && (Self.endsWithSplitBoundary(current.displayText)
+                        || combinedCount >= voicevoxAbsoluteMaxLetterCount)
                 if forceCloseForVoicevoxCap {
                     // ハード上限に達する場合は、このピースを「足してから閉じる」のではなく
                     // 「足さずに閉じて、このピースから新しいブロックを始める」。

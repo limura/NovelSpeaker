@@ -19,14 +19,32 @@ class StoryTextClassifierVoicevoxTest: XCTestCase {
 
     // 区切り文字が一切無い(hasValidSuffixが常にfalseの)長文でも、VOICEVOXブロックは
     // ハード上限(120字)を超えて連結され続けない事を確認する。
+    // 句読点が一切無い場合でも、絶対上限で必ず区切られる事(メモリ保護)。
     func testVoicevoxBlocksAreCappedEvenWithoutValidSuffix() {
         let piece = "あいうえおかきくけこ" // 10文字、句読点なし
-        let blocks = Array(repeating: makeBlock(text: piece, type: "VOICEVOX"), count: 20) // 計200文字
+        let blocks = Array(repeating: makeBlock(text: piece, type: "VOICEVOX"), count: 30) // 計300文字
         let combined = StoryTextClassifier.ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: blocks, moreSplitMinimumLetterCount: 200, splitTargetLastLetters: [])
         XCTAssertGreaterThan(combined.count, 1, "区切りが無くてもVOICEVOXは複数ブロックに分かれるべき")
         for block in combined {
-            XCTAssertLessThanOrEqual(block.displayText.count, 120, "VOICEVOXブロックはハード上限を超えてはいけない")
+            // 句読点で終われない場合は絶対上限まで伸ばすが、そこは必ず超えない。
+            XCTAssertLessThanOrEqual(block.displayText.count, 160, "VOICEVOXブロックは絶対上限を超えてはいけない")
         }
+    }
+
+    // ハード上限に達しても、語の途中(句読点等で終わっていない)ならもう少し伸ばして
+    // 自然な切れ目で閉じる。実機で「一応志望」|「校のＡ判定にはぎりぎり…」や
+    // 「彼」|「らの学力は決して低くない」のように語の途中で分断され、
+    // 不自然な発話になっていたための対処。
+    func testVoicevoxBlockPrefersPunctuationBoundaryOverHardCap() {
+        // 10文字のピースを並べ、120文字を超えた直後ではなく「。」で終わる位置で閉じさせる。
+        var pieces = Array(repeating: makeBlock(text: "あいうえおかきくけこ", type: "VOICEVOX"), count: 13) // 130文字
+        pieces.append(makeBlock(text: "さしすせそ。", type: "VOICEVOX")) // ここで自然に閉じられる
+        pieces.append(contentsOf: Array(repeating: makeBlock(text: "たちつてとなにぬねの", type: "VOICEVOX"), count: 3))
+        let combined = StoryTextClassifier.ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: pieces, moreSplitMinimumLetterCount: 200, splitTargetLastLetters: [])
+        let first = try! XCTUnwrap(combined.first)
+        XCTAssertTrue(first.displayText.hasSuffix("。"),
+                      "上限を少し超えてでも句読点で閉じるべき。実際の末尾: \(String(first.displayText.suffix(8)))")
+        XCTAssertLessThanOrEqual(first.displayText.count, 160, "絶対上限は超えない")
     }
 
     // 同じ入力でも AVSpeechSynthesizer 側は既存動作のまま
