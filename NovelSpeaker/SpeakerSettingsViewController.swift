@@ -44,6 +44,37 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
     }
 
     // VoicevoxCore.cachedStyles が(非同期セットアップ完了後に)更新された事を受けて、
+    /// VOICEVOX話者設定の voiceIdentifier が「実在する styleId」になっている事を保証する。
+    ///
+    /// エンジン種別を AVSpeechSynthesizer から VOICEVOX に切り替えた時、従来は
+    /// setting.type しか書いていなかったため、voiceIdentifier が
+    /// AVSpeech の音声ID(例: com.apple.ttsbundle.siri_O-ren_ja-JP_premium)のまま残っていた。
+    /// スタイル選択行は保存値が無効だと「表示だけ」一覧の先頭にフォールバックし保存はしないため、
+    /// 画面上は正しい話者に見えるのに実際の保存値は無効、という状態になっていた。
+    /// この状態だと再生側は styleId=0 にフォールバックして意図しない話者で読み上げ、
+    /// さらに先行合成との間でキーが食い違って地の文が常に無音になる原因にもなっていた。
+    /// 無効なら一覧の先頭のスタイルを実際に保存して、表示と保存値を一致させる。
+    @discardableResult
+    private func ensureValidVoicevoxStyleId(targetID: String) -> String? {
+        let options = SpeakerSettingsViewController.voicevoxStyleOptionLabels()
+        guard let fallbackLabel = options.first,
+              let fallbackStyleId = SpeakerSettingsViewController.voicevoxStyleId(forLabel: fallbackLabel) else { return nil }
+        var resultLabel: String? = nil
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else { return }
+            if let styleId = UInt32(setting.voiceIdentifier),
+               let label = SpeakerSettingsViewController.voicevoxStyleLabel(for: styleId) {
+                resultLabel = label
+                return
+            }
+            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                setting.voiceIdentifier = String(fallbackStyleId)
+            }
+            resultLabel = fallbackLabel
+        }
+        return resultLabel
+    }
+
     // 画面上の全VOICEVOXスタイル選択行のoptionsを最新化する。
     func refreshAllVoicevoxStyleRows() {
         #if targetEnvironment(macCatalyst)
@@ -367,6 +398,15 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                     setting.type = type
                 }
             }
+            if type == "VOICEVOX" {
+                // 従来はここで type しか書いていなかったため、voiceIdentifier が
+                // AVSpeech の音声IDのまま残り、再生時に styleId=0 へフォールバックしていた。
+                // 有効な styleId を確定させ、スタイル選択行の表示とも一致させる。
+                if let label = self.ensureValidVoicevoxStyleId(targetID: targetID),
+                   let styleRow = self.form.rowBy(tag: "VoicevoxStyleAlertRow-\(targetID)") as? AlertRow<String> {
+                    styleRow.value = label
+                }
+            }
             for tag in ["LanguageAlertRow-\(targetID)", "VoiceIdentifierAlertRow-\(targetID)", "VoicevoxStyleAlertRow-\(targetID)"] {
                 if let row = self.form.rowBy(tag: tag) {
                     row.evaluateHidden()
@@ -484,6 +524,10 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         let currentStyleId = UInt32(currentSetting.voiceIdentifier)
         if let currentStyleId = currentStyleId, let label = SpeakerSettingsViewController.voicevoxStyleLabel(for: currentStyleId) {
             voicevoxStyleRow.value = label
+        }else if currentSetting.type == "VOICEVOX" {
+            // 表示だけフォールバックして保存しないと、画面と実際の保存値が食い違う。
+            // 既に壊れている設定(旧版で type だけ切り替えられたもの)はここで直す。
+            voicevoxStyleRow.value = self.ensureValidVoicevoxStyleId(targetID: targetID) ?? voicevoxStyleOptions.first ?? ""
         }else{
             voicevoxStyleRow.value = voicevoxStyleOptions.first ?? ""
         }
