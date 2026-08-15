@@ -254,6 +254,20 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // プロセスが強制終了されるため、先読みを最小限に絞る(VoicevoxPrefetchThrottle 参照)。
         // 前景・充電中は従来どおりの積極的な先読みのまま。
         let parameters = VoicevoxPrefetchThrottleMonitor.shared.currentParameters
+        // 既にどれだけ「未再生の貯金」があるかを見て、足りているなら合成しない。
+        // 1回あたりのブロック数を絞るだけでは、nextPrefetchScanIndex が呼び出しを跨いで
+        // 前進する分、総量に歯止めが掛からず先行合成が CPU を焼き続ける。実機ではこれが
+        // 「CPU率が100.8%に張り付いて背面CPU上限で強制終了される」事と、
+        // 「再生に必要な合成が先行合成の待ち行列に並ばされ平均15秒待たされる(無音率74.8%)」
+        // 事の共通の原因だった。貯金が足りている間は止めて CPU を空ける。
+        let currentLead = Self.contiguousPrefetchedLeadSeconds(
+            blocks: speechBlockArray,
+            fromIndex: currentSpeechBlockIndex + 1
+        ) { text, styleId in
+            VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId)
+        }
+        VoicevoxPerformanceMonitor.shared.updateUnplayedLeadSeconds(currentLead)
+        if currentLead >= parameters.targetLeadSeconds { return }
         var accumulated = 0
         var prefetchedBlockCount = 0
         var index = max(currentSpeechBlockIndex + 1, nextPrefetchScanIndex)
@@ -283,7 +297,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             index += 1
         }
         nextPrefetchScanIndex = index
-        updateUnplayedPrefetchLeadForLogging()
     }
 
     /// 「あと何秒ぶん、合成済みの音声が手元にあるか(未再生ぶんだけ)」を数える。
@@ -326,15 +339,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         return seconds
     }
 
-    private func updateUnplayedPrefetchLeadForLogging() {
-        let seconds = Self.contiguousPrefetchedLeadSeconds(
-            blocks: speechBlockArray,
-            fromIndex: currentSpeechBlockIndex + 1
-        ) { text, styleId in
-            VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId)
-        }
-        VoicevoxPerformanceMonitor.shared.updateUnplayedLeadSeconds(seconds)
-    }
 
     // 空白・改行・句読点・記号以外の文字(=実際にVOICEVOXが発話しうる文字)が
     // 1つも含まれていないかどうかを判定する。

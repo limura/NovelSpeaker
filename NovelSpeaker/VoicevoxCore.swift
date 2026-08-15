@@ -426,17 +426,23 @@ actor VoicevoxCore {
     /// actor状態を扱うため、ここは(nonisolatedにせず)actor隔離のままにしておく。
     private func synthesizeSlowPath(text: String, styleId: UInt32, key: String) async throws -> Data {
         let snippet = Self.logSnippet(text)
-        // 既に先行合成が進行中なら、二重に合成せずその完了を待つ。
+        // 先行合成タスクの完了は「待たない」。
+        //
+        // 以前はここで await pendingTask.value していたが、先行合成タスクは実行順を保証する
+        // ために直列の鎖(prefetchTailTask)になっており、鎖の途中のタスクを待つ事は
+        // 「そのタスクより前に積まれた全ての先行合成の完了を待つ」事を意味していた。
+        // 実機ではこれが再生時の平均15秒の待ち(= そのまま無音)になり、無音率74.8%の
+        // 主因になっていた。再生は先行合成より優先されるべきなので、該当タスクを
+        // キャンセルしてこの場で合成する。既に actor に入れている以上、実行中だった
+        // 先行合成は完了済みなので、ここでの合成は待たされない。
         if let pendingTask = pendingPrefetchTasks[key] {
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成待ち] styleId=\(styleId) text=\"\(snippet)\"")
-            let waitStart = Date()
-            await pendingTask.value
-            let waited = Date().timeIntervalSince(waitStart)
-            if let cached = peekCache(key: key) {
-                NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成待ち完了 \(String(format: "%.2f", waited))秒] styleId=\(styleId) text=\"\(snippet)\"")
-                return cached
-            }
-            // 先行合成が失敗していた場合はここに落ちてくるので、その場で合成し直す。
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成を追い越して合成] styleId=\(styleId) text=\"\(snippet)\"")
+            pendingTask.cancel()
+            pendingPrefetchTasks.removeValue(forKey: key)
+        }
+        // 待っている間に先行合成が完了していた可能性があるので、合成前にもう一度確認する。
+        if let cached = peekCache(key: key) {
+            return cached
         }
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュMISS・その場合成開始] styleId=\(styleId) text=\"\(snippet)\"")
         let synthStart = Date()

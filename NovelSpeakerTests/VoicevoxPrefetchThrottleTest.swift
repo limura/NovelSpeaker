@@ -53,4 +53,15 @@ class VoicevoxPrefetchThrottleTest: XCTestCase {
         XCTAssertGreaterThanOrEqual(throttled.maxBlockCountToQueue, 1)
         XCTAssertGreaterThanOrEqual(throttled.minimumBlockCount, 1)
     }
+
+    // 総リード量の上限。これが効かないと、1回あたりのブロック数を絞っても
+    // 先行合成が延々と CPU を焼き続け、(a)背面CPU上限で強制終了され、
+    // (b)再生に必要な合成が待ち行列に並ばされて無音になる、の両方が起きる。
+    func testTargetLeadSecondsIsBoundedAndSmallerWhenThrottled() {
+        XCTAssertGreaterThan(throttled.targetLeadSeconds, 0, "背面でも次のブロックぶんは貯める")
+        XCTAssertLessThan(throttled.targetLeadSeconds, normal.targetLeadSeconds,
+                          "背面バッテリー時の方が貯金の上限は小さいはず")
+        // 前景/充電中でも無制限にはしない(メモリとキャッシュ容量の都合)。
+        XCTAssertLessThanOrEqual(normal.targetLeadSeconds, 600)
+    }
 }

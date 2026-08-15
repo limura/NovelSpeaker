@@ -45,6 +45,16 @@ struct VoicevoxPrefetchParameters: Equatable {
     let maxBlockCountToQueue: Int
     /// 先読み対象を探すために走査するブロック数の上限。
     let maxBlocksToScan: Int
+    /// 「未再生の貯金」がこの秒数に達したら、それ以上は先行合成しない。
+    ///
+    /// これが無いと、1回の呼び出しあたりのブロック数を絞っても
+    /// (nextPrefetchScanIndex が呼び出しを跨いで前進するため)総量に歯止めが掛からず、
+    /// 先行合成が CPU を延々と焼き続ける。実機ではこれが
+    ///  - CPU率が 100.8% に張り付いたまま下がらない(→ 背面CPU上限で強制終了)
+    ///  - 再生に必要な合成が先行合成の待ち行列に並ばされ平均15秒待たされる(→ 無音率74.8%)
+    /// の両方の原因になっていた。貯金が足りている間は合成を止める事で、CPUを空けて
+    /// 再生側の要求を即座に処理できるようにする。
+    let targetLeadSeconds: Double
 }
 
 /// アプリ状態・電源状態から先行合成パラメータを決める純粋なポリシー(UIKit非依存でテスト可能)。
@@ -54,7 +64,10 @@ enum VoicevoxPrefetchThrottlePolicy {
         targetCharacterCount: 300,
         minimumBlockCount: 3,
         maxBlockCountToQueue: 8,
-        maxBlocksToScan: 40
+        maxBlocksToScan: 40,
+        // 前景/充電中は CPU 上限が無いので、貯金は多めに持ってよい
+        // (背面に移った後の余裕になる)。
+        targetLeadSeconds: 300
     )
 
     /// 背面かつバッテリー駆動時の絞り込み設定。
@@ -64,7 +77,9 @@ enum VoicevoxPrefetchThrottlePolicy {
         targetCharacterCount: 60,
         minimumBlockCount: 1,
         maxBlockCountToQueue: 1,
-        maxBlocksToScan: 12
+        maxBlocksToScan: 12,
+        // 背面バッテリー時は、これだけ貯まったら合成を止めて CPU を空ける。
+        targetLeadSeconds: 60
     )
 
     /// - Parameters:
@@ -143,6 +158,13 @@ final class VoicevoxPrefetchThrottleMonitor {
         lock.unlock()
         if changed {
             NSLog("NovelSpeaker.VoicevoxPrefetchThrottle: [\(VoicevoxCore.logTimestamp())] isBackground=\(newValue) parameters=\(currentParameters)")
+            if newValue {
+                // 前景では上限が緩いため、背面に入る時点で大量の先行合成が積まれている事がある。
+                // 積まれたタスクは背面に入っても走り続けて CPU を焼き、背面CPU上限による
+                // 強制終了の原因になるので、未実行分はここで破棄する
+                // (完了済みのキャッシュ=貯金はそのまま残る)。
+                VoicevoxCore.shared.scheduleCancelPendingPrefetch()
+            }
         }
     }
 
