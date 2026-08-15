@@ -1,0 +1,62 @@
+/* Complication (Widget Extension) localization (English) */
+
+"Watch_Widget_AppName" = "NovelSpeaker";
+"Watch_Widget_TapToOpen" = "Tap to Open";
+"Watch_Widget_Launcher_Name" = "Open Watch App";
+"Watch_Widget_Description" = "Shows the progress of the novel you are reading. Tap to open NovelSpeaker.";
+
+/* Action complications (phase 1) */
+"Watch_Widget_PlayToggle_Name" = "Play or Pause";
+"Watch_Widget_PlayToggle_Desc" = "Tap to open NovelSpeaker and toggle play/pause.";
+"Watch_Widget_TextPage_Name" = "Text Page on Watch";
+"Watch_Widget_TextPage_Desc" = "Tap to open the text page in NovelSpeaker.";
+"Watch_Widget_CheckUpdates_Name" = "Check All Novels for Updates";
+"Watch_Widget_CheckUpdates_Desc" = "Tap to open NovelSpeaker and check all novels for updates.";
+
+/* Configurable "Play This Novel" widget (phase 2) */
+"Watch_Widget_PlayNovel_Name" = "Play Selected Novel";
+"Watch_Widget_PlayNovel_Desc" = "Plays the chosen novel. Novel choices are listed by most recently read.";
+"Watch_Widget_PlayNovel_Unset" = "Choose a novel";
+"Watch_Widget_PlayNovel_RecommendFormat" = "Play novel: %@";
+
+/* One-shot widgets that switch the playback source and start playing */
+"Watch_Widget_PlayOnWatch_Name" = "Start Playing on Watch";
+"Watch_Widget_PlayOnWatch_Desc" = "Tap to open NovelSpeaker, switch to Watch standalone playback and start playing.";
+"Watch_Widget_PlayOnPhone_Name" = "Start Playing on iPhone";
+"Watch_Widget_PlayOnPhone_Desc" = "Tap to open NovelSpeaker, switch to iPhone playback and start playing.";
+
+/* Action group (AccessoryWidgetGroup) */
+"Watch_Widget_ActionGroup_Name" = "Set Up 3 Actions";
+"Watch_Widget_ActionGroup_Desc" = "Place three actions of your choice side by side.";
+
+/* Configuration UI labels (AppIntents display strings are Japanese literals; these are the English overrides) */
+"この小説を再生" = "Play This Novel";
+"指定した小説を、現在の発話元(iPhone/Watch単体)で再生します。" = "Plays the chosen novel on the current output (iPhone or Watch standalone).";
+"色の設定" = "Color Setting";
+"機能アイコンの色を選べます。" = "Choose the color of the function icon.";
+"操作" = "Action";
+"再生・停止" = "Play/Pause";
+"Watchで再生" = "Play on Watch";
+"iPhoneで再生" = "Play on iPhone";
+"本文ページ" = "Text Page";
+"更新確認" = "Check Updates";
+"3つの操作" = "3 Actions";
+"3つの枠に置く操作を選べます。" = "Choose the action for each of the three slots.";
+"左の操作" = "Left action";
+"中央の操作" = "Center action";
+"右の操作" = "Right action";
+"小説" = "Novel";
+"アイコン" = "Icon";
+"色" = "Color";
+"再生(▶)" = "Play (▶)";
+"本" = "Book";
+"しおり" = "Bookmark";
+"ヘッドフォン" = "Headphones";
+"星" = "Star";
+"きらめき" = "Sparkles";
+"オレンジ" = "Orange";
+"赤" = "Red";
+"紫" = "Purple";
+"青" = "Blue";
+"ティール" = "Teal";
+"緑" = "Green";

@@ -2939,7 +2939,7 @@ class NovelSpeakerUtility: NSObject {
     }
     // ReepatSpeechLoopType が .normal でない場合に対象となる RepeatSpeechType のリスト
     static func GetAllRepeatSpeechLoopTargetRepeatSpeechType() -> [RepeatSpeechType] {
-        return [.GoToNextLikeNovel, .GoToNextSameWebsiteNovel, .GoToNextSameWriterNovel, .GoToNextSelectedFolderdNovel]
+        return [.GoToNextLikeNovel, .GoToNextSameWebsiteNovel, .GoToNextSameWriterNovel, .GoToNextSameFolderdNovel, .GoToNextSelectedFolderdNovel]
     }
 
     /// 保存されているStoryを調べて、chapterNumber が 1 から順についている事を確認しつつ、

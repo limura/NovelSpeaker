@@ -43,6 +43,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         GlobalDataSingleton.getInstance()?.saveContext()
         RealmUtil.SetCheckCloudDataIsValidInterrupt(isInterrupt: true)
         NovelDownloadQueue.shared.scheduleBackgroundProcess()
+        // ホーム画面に戻る=ウィジェットが見える直前なので、進捗表示などを更新しておく
+        PhoneWidgetDataUpdater.update()
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
@@ -54,6 +56,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             RealmUtil.CloudPull()
         }
         WebSpeechViewController.instance?.RedisplayWebView()
+        // バックグラウンド中に完了した栞・小説切替の書き込みを取りこぼしていても
+        // ここで追いつく(デバウンス発火前にサスペンドした場合など)
+        PhoneWidgetDataUpdater.update()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

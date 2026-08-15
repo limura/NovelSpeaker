@@ -789,6 +789,32 @@
 "BookShelfTreeViewController_MultiSelectFloatingViewController_SelectFunctionButtonLabel" = "操作▼";
 "BookShelfTreeViewController_MultiSelectFloatingViewController_BackNormalModeButtonLabel" = "＜ 戻る";
 "BookShelfRATreeViewController_SortTypePageCount" = "ページ数順";
+"BookShelfRATreeViewController_SortTypeLastReadDateWithFolder" = "小説を開いた日時順(フォルダ分類版)";
+"BookShelfRATreeViewController_SortTypeUnreadChapterCount" = "未読章数別";
+"BookShelfRATreeViewController_SortTypeAppleWatchTransferState" = "Apple Watch転送状況別";
+"BookShelfRATreeViewController_UnreadBucket_100Plus" = "未読 100章以上";
+"BookShelfRATreeViewController_UnreadBucket_10To99" = "未読 10〜99章";
+"BookShelfRATreeViewController_UnreadBucket_1To9" = "未読 1〜9章";
+"BookShelfRATreeViewController_UnreadBucket_CaughtUp" = "追いついている";
+"BookShelfRATreeViewController_WatchBucket_Transferred" = "Apple Watchに転送済み";
+"BookShelfRATreeViewController_WatchBucket_NotTransferred" = "未転送";
+"BookShelfTreeViewController_checkboxselected_SendToAppleWatch" = "Apple Watchへ転送";
+"BookShelfTreeViewController_checkboxselected_SendToAppleWatch_QueuedFormat" = "%d冊の小説をApple Watchへの転送キューに追加しました。Watch側への反映には少し時間がかかることがあります。";
+"BookShelfTreeViewController_checkboxselected_SendToAppleWatch_Failed" = "Apple Watchへ転送できませんでした。Apple Watch側のことせかいを一度起動してから、もう一度お試しください。";
+"BookShelfTreeViewController_FilterButton_AccessibilityLabel" = "絞り込み";
+"BookShelfTreeViewController_FilterPopup_Title" = "絞り込み";
+"BookShelfTreeViewController_FilterPopup_NoSelection" = "指定なし";
+"BookShelfTreeViewController_FilterPopup_Unread" = "未読";
+"BookShelfTreeViewController_FilterPopup_UnreadHasUnread" = "未読あり";
+"BookShelfTreeViewController_FilterPopup_UnreadCaughtUp" = "未読なし";
+"BookShelfTreeViewController_FilterPopup_LikedOnly" = "お気に入りのみ";
+"BookShelfTreeViewController_FilterPopup_WatchTransferred" = "転送済み";
+"BookShelfTreeViewController_FilterPopup_WatchNotTransferredSegment" = "未転送";
+"BookShelfTreeViewController_FilterPopup_WatchNotTransferred" = "Watch未転送";
+"BookShelfTreeViewController_FilterPopup_CountFormat" = "対象: %d冊";
+"BookShelfTreeViewController_FilterPopup_Apply" = "適用";
+"BookShelfTreeViewController_FilterPopup_Clear" = "絞り込みを解除";
+"BookShelfTreeViewController_FilterPopup_SummaryPrefix" = "絞り込み: ";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";
@@ -1089,6 +1115,20 @@
 "ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (空であるべきだが抽出された)";
 "SettingsTableViewController_ScrapeInspectButtonTitle" = "今すぐ全サイトを検査する";
 "SettingsTableViewController_ScrapeInspectProgressMessage" = "検査中…\n(しばらくお待ちください)";
+
+// Apple Watch 連携(WatchSessionCoordinator)が Watch へ返すエラー文言
+"WatchSessionCoordinator_ErrorUnknownCommand" = "対応していない操作です。iPhone側の ことせかい が古い可能性があります。";
+"WatchSessionCoordinator_ErrorSpeechSettingsEncodeFailed" = "発話設定の生成に失敗しました";
+"WatchSessionCoordinator_ErrorNoNovelSelected" = "小説が選ばれていません";
+"WatchSessionCoordinator_ErrorNovelIDMissing" = "novelID がありません";
+"WatchSessionCoordinator_ErrorInvalidArguments" = "引数が不正です";
+"WatchSessionCoordinator_ErrorWatchAppNotInstalled" = "Watchアプリが未インストール扱いになっています。Watch側の ことせかい を一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。";
+"WatchSessionCoordinator_ErrorNoNextChapter" = "次の章はありません";
+"WatchSessionCoordinator_ErrorNoPreviousChapter" = "前の章はありません";
+"WatchSessionCoordinator_ErrorNovelNotFound" = "小説が見つかりません";
+
+// 設定タブのデバッグメニュー(Apple Watch連携の診断)
+"SettingsViewController_WatchSessionDiagnostics" = "Apple Watch連携の診断情報";
 
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.1
 

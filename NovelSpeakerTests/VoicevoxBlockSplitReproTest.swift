@@ -214,10 +214,12 @@ class VoicevoxBlockSplitReproTest: XCTestCase {
         // 読み上げテキスト自体は読み替えが効いていること(全エンジン対象modなので)。
         XCTAssertEqual(voicevox.map { $0.speechText }.joined(), "投資には、カネに糸目をつけずに株を買った。")
 
-        // AVSpeechSynthesizer 側は従来通り分割を維持(この最適化は VOICEVOX 専用)。
+        // AVSpeechSynthesizer 側も同様に融合する(元々は VOICEVOX 専用だったが、
+        // AVSpeechSynthesizer でも読み替えヒット位置での分断が起きていたため全エンジンに適用した。
+        // 詳細は AVSpeechModDelayBlockSplitTest を参照)。
         let avSpeech = categorize(engine: "AVSpeechSynthesizer", text: text, mods: mods, waitConfigList: wait)
-        XCTAssertTrue(avSpeech.contains { $0.displayText == "金に糸目" },
-                      "AVSpeechSynthesizer では従来通り「金に糸目」が独立ブロックのままであるべき: \(avSpeech.map { $0.displayText })")
+        XCTAssertTrue(avSpeech.contains { $0.displayText == "金に糸目をつけずに株を買った。" },
+                      "AVSpeechSynthesizer でも「金に糸目」以降が句読点まで1ブロックに融合するはず: \(avSpeech.map { $0.displayText })")
     }
 
     // wait config が無い場合は元々1ブロックにまとまる(この最適化で挙動が変わらないことの確認)。

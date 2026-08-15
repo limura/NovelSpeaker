@@ -7,11 +7,18 @@
 //
 
 import Foundation
+import AVFoundation
 
 class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     let speaker = MultiVoiceSpeaker()
-    
+
     var speechBlockArray:[CombinedSpeechBlock] = []
+    // 発話中の速度・音量変更(次のブロックから適用)用の倍率。
+    // block には話者設定の値が焼き込まれているので、設定変更を発話中に反映したい時は
+    // ここに「新しい値 ÷ 焼き込み時の値」を入れる(enqueue 時に block の値へ掛ける)。
+    // ブロック列が組み直される時(setSpeechBlockArray)は最新の設定で焼き直されるので 1.0 に戻す。
+    var rateMultiplier: Float = 1.0
+    var volumeMultiplier: Float = 1.0
     var currentSpeechBlockIndex:Int = 0
     var delegate:SpeakRangeDelegate? = nil
     var m_IsSpeaking = false
@@ -195,7 +202,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // VoicevoxCoreの先行合成ログ(絶対時刻付き)と突き合わせて「どこで無音になったか」を
         // 追えるように、実際に発話を発注した瞬間も同じ絶対時刻フォーマットでログする。
         NSLog("NovelSpeaker.SpeechBlockSpeaker: [\(VoicevoxCore.logTimestamp())] [発話発注] blockIndex=\(currentSpeechBlockIndex) type=\(block.type) text=\"\(Self.escapeForLog(speechText))\"")
-        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
+        let effectiveRate = min(max(block.rate * rateMultiplier, AVSpeechUtteranceMinimumSpeechRate), AVSpeechUtteranceMaximumSpeechRate)
+        let effectiveVolume = min(max(block.volume * volumeMultiplier, 0.0), 1.0)
+        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: effectiveRate, volume: effectiveVolume, delay: block.delay)
         //print("Speech: \(speechText)")
         scheduleWedgeWatch(blockIndex: currentSpeechBlockIndex, willSpeakRangeCountAtSpeak: willSpeakRangeCallCount, speechTextCount: speechText.unicodeScalars.count, speechText: speechText, type: block.type, generation: generation)
         refillVoicevoxPrefetchIfNeeded()
@@ -308,7 +317,15 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // 実機計測では立ち上がりは iPhone 6s Plus でも最大 ~0.5秒(音声生成自体の遅さは
     // isSpeaking=true 中なので synthActive 判定で守られ、ここでは無視できる)。
     // その約3倍のマージンとして 1.5秒 とする。
+    // watchOS は willSpeakRange デリゲートを実装していない(実装すると synth が約40MB余計に
+    // 使うため)ので progressed 判定が常に false になり、blockMoved と synthActive だけが頼りになる。
+    // Series 4 実機では「didFinish の配送遅れ」「発話立ち上がりの遅さ」が 1.5秒 を超える事があり、
+    // 誤検出→同じブロックの二度読みが起きたため、大きめの値にする(検出後の再確認も併用。下記)
+    #if os(watchOS)
+    private let wedgeDetectTimeout:TimeInterval = 6.0
+    #else
     private let wedgeDetectTimeout:TimeInterval = 1.5
+    #endif
     private func scheduleWedgeWatch(blockIndex:Int, willSpeakRangeCountAtSpeak:Int, speechTextCount:Int, speechText:String, type:String, generation:Int) {
         if speechTextCount <= 0 { return } // 空発話はすぐ終わるので対象外
         // この固着検出は AVSpeechSynthesizer 固有の「speak が無音で飲まれて二度とコールバックが
@@ -319,27 +336,41 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // (前回試行のVOICEVOX合成がactor上でまだ実行中のまま次々新しい合成を投げてしまい)
         // メモリ/CPUを急激に消費してしまうため、VOICEVOXのブロックはこの監視の対象外とする。
         if type == "VOICEVOX" { return }
-        // premium/enhanced 音声の起動レイテンシを考慮して長めに待つ。
-        DispatchQueue.main.asyncAfter(deadline: .now() + wedgeDetectTimeout) { [weak self] in
-            guard let self = self else { return }
-            // 停止/次の speak で世代が変わっていたら、この watcher はもう現役ではないので何もしない
-            //(「停止→同じブロックで再生し直し」をまたいだ誤回復を防ぐ)。
-            if self.speakGeneration != generation { return }
+        // 停止/次の speak で世代が変わっていたら、この watcher はもう現役ではない
+        //(「停止→同じブロックで再生し直し」をまたいだ誤回復を防ぐ)。
+        func isStillWedged(_ self: SpeechBlockSpeaker) -> Bool {
+            if self.speakGeneration != generation { return false }
             let progressed = self.willSpeakRangeCallCount != willSpeakRangeCountAtSpeak
             let blockMoved = self.currentSpeechBlockIndex != blockIndex
             let synthActive = self.isAnySynthesizerActive
-            if self.m_IsSpeaking == true && progressed == false && blockMoved == false && synthActive == false {
-                let message = "synth wedge疑い: speakしたが\(self.wedgeDetectTimeout)秒間発話が始まらずsynthもidle blockIndex=\(blockIndex) len=\(speechTextCount) text=\"\(Self.escapeForLog(speechText))\""
-                NSLog("NovelSpeaker.SynthWedge: ⚠️ \(message)")
-                AppInformationLogger.AddLog(message: message, appendix: [
-                    "blockIndex": "\(blockIndex)",
-                    "speechTextCount": "\(speechTextCount)",
-                    "willSpeakRangeCallCount": "\(self.willSpeakRangeCallCount)",
-                    "isSpeakingBySynthesizerState": "\(self.isSpeakingBySynthesizerState)",
-                    "isPausedBySynthesizerState": "\(self.isPausedBySynthesizerState)",
-                ], isForDebug: true)
-                self.recoverFromWedge(blockIndex: blockIndex)
+            return self.m_IsSpeaking == true && progressed == false && blockMoved == false && synthActive == false
+        }
+        func logAndRecover(_ self: SpeechBlockSpeaker) {
+            let message = "synth wedge疑い: speakしたが\(self.wedgeDetectTimeout)秒間発話が始まらずsynthもidle blockIndex=\(blockIndex) len=\(speechTextCount) text=\"\(Self.escapeForLog(speechText))\""
+            NSLog("NovelSpeaker.SynthWedge: ⚠️ \(message)")
+            AppInformationLogger.AddLog(message: message, appendix: [
+                "blockIndex": "\(blockIndex)",
+                "speechTextCount": "\(speechTextCount)",
+                "willSpeakRangeCallCount": "\(self.willSpeakRangeCallCount)",
+                "isSpeakingBySynthesizerState": "\(self.isSpeakingBySynthesizerState)",
+                "isPausedBySynthesizerState": "\(self.isPausedBySynthesizerState)",
+            ], isForDebug: true)
+            self.recoverFromWedge(blockIndex: blockIndex)
+        }
+        // premium/enhanced 音声の起動レイテンシを考慮して長めに待つ。
+        DispatchQueue.main.asyncAfter(deadline: .now() + wedgeDetectTimeout) { [weak self] in
+            guard let self = self, isStillWedged(self) else { return }
+            #if os(watchOS)
+            // watchOS は progressed 判定が効かない(willSpeakRange 未実装)ため、
+            // 「didFinish の配送が遅れているだけ」でも上の条件が成立しうる。
+            // 1秒おいてもう一度確認し、まだ動いていない時だけ回復する(誤検出の二度読み防止)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                guard let self = self, isStillWedged(self) else { return }
+                logAndRecover(self)
             }
+            #else
+            logAndRecover(self)
+            #endif
         }
     }
 
@@ -380,6 +411,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     
     func setSpeechBlockArray(blockArray:[CombinedSpeechBlock]) {
         speechBlockArray = blockArray
+        // 新しいブロック列は最新の話者設定で焼き込まれているので、発話中変更用の倍率は戻す
+        rateMultiplier = 1.0
+        volumeMultiplier = 1.0
         currentDisplayStringOffset = 0
         currentSpeechBlockIndex = 0
         currentSpeakingLocation = 0
@@ -407,8 +441,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func SetTextWitoutSettings(content:String) {
-        let dummySpeaker = RealmSpeakerSetting()
-        let blockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: [], moreSplitMinimumLetterCount: 99999, defaultSpeaker: SpeakerSetting(from: dummySpeaker), sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
+        let dummySpeaker = SpeakerSetting() // 既定値は RealmSpeakerSetting の既定値と同じ
+        let blockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: [], moreSplitMinimumLetterCount: 99999, defaultSpeaker: dummySpeaker, sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
         setSpeechBlockArray(blockArray: blockArray)
     }
     
@@ -422,6 +456,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         setSpeechBlockArray(blockArray: blockArray)
     }
     
+    #if !os(watchOS)
     func SetStory(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
         let blockArray = StoryTextClassifier.CategorizeStoryText(story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
         setSpeechBlockArray(blockArray: blockArray)
@@ -430,6 +465,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     func SetStory(story:Story) {
         SetStory(story: story, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max)
     }
+    #endif
     
     func StartSpeech() {
         if m_IsSpeaking == true { return }

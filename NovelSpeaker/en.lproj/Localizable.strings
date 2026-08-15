@@ -797,6 +797,32 @@
 "BookShelfTreeViewController_MultiSelectFloatingViewController_SelectFunctionButtonLabel" = "Actions ▼";
 "BookShelfTreeViewController_MultiSelectFloatingViewController_BackNormalModeButtonLabel" = "< Back";
 "BookShelfRATreeViewController_SortTypePageCount" = "Page count order";
+"BookShelfRATreeViewController_SortTypeLastReadDateWithFolder" = "Last read date (with folders)";
+"BookShelfRATreeViewController_SortTypeUnreadChapterCount" = "Unread chapter count";
+"BookShelfRATreeViewController_SortTypeAppleWatchTransferState" = "Apple Watch transfer state";
+"BookShelfRATreeViewController_UnreadBucket_100Plus" = "100+ chapters unread";
+"BookShelfRATreeViewController_UnreadBucket_10To99" = "10-99 chapters unread";
+"BookShelfRATreeViewController_UnreadBucket_1To9" = "1-9 chapters unread";
+"BookShelfRATreeViewController_UnreadBucket_CaughtUp" = "Caught up";
+"BookShelfRATreeViewController_WatchBucket_Transferred" = "Transferred to Apple Watch";
+"BookShelfRATreeViewController_WatchBucket_NotTransferred" = "Not transferred";
+"BookShelfTreeViewController_checkboxselected_SendToAppleWatch" = "Send to Apple Watch";
+"BookShelfTreeViewController_checkboxselected_SendToAppleWatch_QueuedFormat" = "Queued %d novels for transfer to Apple Watch. It may take a while to appear on the Watch.";
+"BookShelfTreeViewController_checkboxselected_SendToAppleWatch_Failed" = "Could not transfer to Apple Watch. Please open KotoSekai on your Apple Watch once, then try again.";
+"BookShelfTreeViewController_FilterButton_AccessibilityLabel" = "Filter";
+"BookShelfTreeViewController_FilterPopup_Title" = "Filter";
+"BookShelfTreeViewController_FilterPopup_NoSelection" = "Any";
+"BookShelfTreeViewController_FilterPopup_Unread" = "Unread";
+"BookShelfTreeViewController_FilterPopup_UnreadHasUnread" = "Has unread";
+"BookShelfTreeViewController_FilterPopup_UnreadCaughtUp" = "Caught up";
+"BookShelfTreeViewController_FilterPopup_LikedOnly" = "Favorites only";
+"BookShelfTreeViewController_FilterPopup_WatchTransferred" = "Transferred";
+"BookShelfTreeViewController_FilterPopup_WatchNotTransferredSegment" = "Not transferred";
+"BookShelfTreeViewController_FilterPopup_WatchNotTransferred" = "Not on Watch";
+"BookShelfTreeViewController_FilterPopup_CountFormat" = "Matches: %d novels";
+"BookShelfTreeViewController_FilterPopup_Apply" = "Apply";
+"BookShelfTreeViewController_FilterPopup_Clear" = "Clear filter";
+"BookShelfTreeViewController_FilterPopup_SummaryPrefix" = "Filter: ";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
@@ -1100,6 +1126,28 @@
 "ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (should be empty but was extracted)";
 "SettingsTableViewController_ScrapeInspectButtonTitle" = "Inspect all sites now";
 "SettingsTableViewController_ScrapeInspectProgressMessage" = "Inspecting…\n(Please wait a moment)";
+
+// Error messages that the Apple Watch integration (WatchSessionCoordinator) returns to the Watch
+"WatchSessionCoordinator_ErrorUnknownCommand" = "Unsupported operation. NovelSpeaker on the iPhone may be out of date.";
+"WatchSessionCoordinator_ErrorSpeechSettingsEncodeFailed" = "Failed to generate the speech settings";
+"WatchSessionCoordinator_ErrorNoNovelSelected" = "No novel is selected";
+"WatchSessionCoordinator_ErrorNovelIDMissing" = "novelID is missing";
+"WatchSessionCoordinator_ErrorInvalidArguments" = "Invalid arguments";
+"WatchSessionCoordinator_ErrorWatchAppNotInstalled" = "The Watch app is being treated as not installed. Deleting NovelSpeaker on the Watch side and reinstalling it from \"Available Apps\" in the Watch app on the iPhone may fix this.";
+"WatchSessionCoordinator_ErrorNoNextChapter" = "There is no next chapter";
+"WatchSessionCoordinator_ErrorNoPreviousChapter" = "There is no previous chapter";
+"WatchSessionCoordinator_ErrorNovelNotFound" = "The novel was not found";
+
+// Debug menu in the Settings tab (Apple Watch session diagnostics)
+"SettingsViewController_WatchSessionDiagnostics" = "Apple Watch session diagnostics";
+
+// iPhone-side widget intents (SpeechWidgetIntent). AppIntents strings are keyed by their Japanese literals.
+"再生または停止" = "Play or Pause";
+"ことせかい を開かずに、読み上げの再生・停止をします。" = "Starts or stops speech without opening NovelSpeaker.";
+"指定小説の再生を開始" = "Start Playing Selected Novel";
+"指定した小説の読み上げを、ことせかい を開かずに開始します。" = "Starts playing the chosen novel without opening NovelSpeaker.";
+"アプリの起動" = "Open App";
+"ことせかい を開きます。" = "Opens NovelSpeaker.";
 
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 

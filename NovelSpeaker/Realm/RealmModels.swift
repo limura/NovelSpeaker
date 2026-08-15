@@ -2919,6 +2919,10 @@ extension HTTPCookie {
     case WebSite = 9
     case CreatedDate = 10
     case PageCount = 11
+    // rawValue は RealmGlobalState.bookShelfSortType として永続化されるため、既存の値は変えずに末尾に追加する
+    case LastReadDateWithFolder = 12
+    case UnreadChapterCount = 13
+    case AppleWatchTransferState = 14
 }
 
 /// 繰り返し再生の対象タイプ

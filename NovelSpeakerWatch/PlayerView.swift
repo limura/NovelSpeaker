@@ -1,0 +1,286 @@
+//
+//  PlayerView.swift
+//  NovelSpeakerWatch
+//
+//  ①再生画面(ルート)。再生中アプリ準拠 + 章移動ボタンを章ラベルの左右に常設。
+//  時計は OS が右上に描画するため、メニューボタンは空いている左上に置く。
+//  タイトル下のソースバッジをタップすると「iPhoneで聴く/Watchで聴く(単体再生)」を切り替えられる。
+//
+
+import SwiftUI
+import AVFoundation
+
+struct PlayerView: View {
+    @ObservedObject private var session = PhoneSessionManager.shared
+    @ObservedObject private var player = WatchSpeechPlayer.shared
+    @State private var isUtilityPresented = false
+    @State private var isSourceDialogPresented = false
+
+    /// 発話元として Watch 単体再生が選ばれているか
+    private var isWatchSource: Bool { player.isSelectedAsSource }
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(titleLabel)
+                .font(.headline)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            // ソースバッジ = 発話元セレクタ。タップで iPhone/Watch を切り替える
+            Button {
+                isSourceDialogPresented = true
+            } label: {
+                statusBadge
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(NSLocalizedString("Watch_AX_SourceBadgeHint", comment: "読み上げ先(iPhone/Watch)を切り替えます"))
+
+            HStack(spacing: 8) {
+                chapterButton(systemName: "backward.end",
+                              accessibilityLabel: NSLocalizedString("Watch_AX_PrevChapter", comment: "前の章へ")) {
+                    if isWatchSource {
+                        player.moveChapter(offset: -1)
+                    } else {
+                        session.send(.previousChapter)
+                    }
+                }
+                Text(chapterLabel)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .frame(maxWidth: .infinity)
+                chapterButton(systemName: "forward.end",
+                              accessibilityLabel: NSLocalizedString("Watch_AX_NextChapter", comment: "次の章へ")) {
+                    if isWatchSource {
+                        player.moveChapter(offset: 1)
+                    } else {
+                        session.send(.nextChapter)
+                    }
+                }
+            }
+            .padding(.horizontal, 6)
+
+            Spacer(minLength: 2)
+
+            // 少し戻る/進むは誤タップ防止のため再生停止ボタンから左右いっぱいに離す
+            HStack(spacing: 0) {
+                Button {
+                    if isWatchSource {
+                        player.skip(by: -WatchSpeechPlayer.skipLength)
+                    } else {
+                        session.send(.skipBackward)
+                    }
+                } label: {
+                    Image(systemName: "gobackward")
+                        .font(.system(size: 18))
+                        .frame(width: 36, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(NSLocalizedString("Watch_AX_SkipBackward", comment: "少し戻る"))
+
+                Spacer(minLength: 8)
+
+                Button {
+                    if isWatchSource {
+                        player.togglePlayPause()
+                    } else {
+                        session.send(.togglePlayPause)
+                    }
+                } label: {
+                    if isWatchSource && player.isStartingPlayback {
+                        // 単体再生の開始処理中(初回は数十秒かかることがある)。押せたことが分かるように
+                        ProgressView()
+                            .frame(width: 44, height: 44)
+                    } else {
+                        Image(systemName: isPlayingNow ? "pause.circle.fill" : "play.circle.fill")
+                            .font(.system(size: 44))
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(isWatchSource && player.isStartingPlayback)
+                .accessibilityLabel(isPlayingNow
+                    ? NSLocalizedString("Watch_AX_Pause", comment: "一時停止")
+                    : NSLocalizedString("Watch_AX_Play", comment: "再生"))
+
+                Spacer(minLength: 8)
+
+                Button {
+                    if isWatchSource {
+                        player.skip(by: WatchSpeechPlayer.skipLength)
+                    } else {
+                        session.send(.skipForward)
+                    }
+                } label: {
+                    Image(systemName: "goforward")
+                        .font(.system(size: 18))
+                        .frame(width: 36, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(NSLocalizedString("Watch_AX_SkipForward", comment: "少し進む"))
+            }
+            .padding(.horizontal, 2)
+
+            Spacer(minLength: 0)
+        }
+        // 上段は右側に OS の時計が出るので、その左側の空きにメニューを置く
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    isUtilityPresented = true
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
+                .accessibilityLabel(NSLocalizedString("Watch_AX_Menu", comment: "メニュー"))
+            }
+        }
+        .sheet(isPresented: $isUtilityPresented) {
+            UtilityView()
+        }
+        .confirmationDialog(NSLocalizedString("Watch_Player_SourceDialog_Title", comment: "どこで読み上げますか？"), isPresented: $isSourceDialogPresented) {
+            Button {
+                selectPhoneSource()
+            } label: {
+                Label(NSLocalizedString("Watch_Player_SourcePhone", comment: "iPhoneで聴く"), systemImage: isWatchSource ? "iphone" : "checkmark")
+            }
+            Button {
+                selectWatchSource()
+            } label: {
+                Label(NSLocalizedString("Watch_Player_SourceWatch", comment: "Watchで聴く(単体再生)"), systemImage: isWatchSource ? "checkmark" : "applewatch")
+            }
+            Button(NSLocalizedString("Watch_Cancel", comment: "キャンセル"), role: .cancel) {}
+        } message: {
+            Text(NSLocalizedString("Watch_Player_SourceDialog_Message", comment: "Watch単体再生は、転送済みの本文をWatchのスピーカーやイヤホンで読み上げます(iPhoneが無くても動きます)"))
+        }
+        // エラーのアラート表示はルート(WatchRootView)で行う
+        .onAppear {
+            if !isWatchSource {
+                session.send(.requestStatus)
+            }
+        }
+    }
+
+    // MARK: - 発話元の切り替え
+
+    private func selectWatchSource() {
+        if isWatchSource { return }
+        let targetNovelID = session.playState?.novelID ?? ""
+        guard !targetNovelID.isEmpty else {
+            session.lastErrorMessage = NSLocalizedString("Watch_Player_NoNovelSelected_ChooseFromBookshelf", comment: "小説が選ばれていません。本棚から小説を選んでください。")
+            return
+        }
+        guard player.open(novelID: targetNovelID, fallbackTitle: session.playState?.title ?? "") else {
+            session.lastErrorMessage = NSLocalizedString("Watch_Player_BodyNotTransferred", comment: "この小説の本文がWatchに転送されていません。本棚の小説をタップして転送してから、もう一度お試しください。")
+            return
+        }
+        // iPhone 側で再生中なら止めてから引き継ぐ(二重読み上げ防止)
+        if session.playState?.isPlaying == true {
+            session.send(.togglePlayPause, quiet: true)
+        }
+        player.isSelectedAsSource = true
+        player.refreshComplication()
+        warnIfNoBluetoothOutput()
+    }
+
+    /// Watch のスピーカーでの読み上げ(longFormAudio)は対応していない機種があるため、
+    /// Bluetooth のイヤホン等が繋がっていない場合は単体モード選択の時点で知らせておく。
+    /// モード自体は設定できる(後から接続してもよいし、対応機種ならスピーカーで再生できる)
+    private func warnIfNoBluetoothOutput() {
+        guard !UserDefaults.standard.bool(forKey: WatchSpeechPlayer.suppressNoBluetoothWarningKey) else { return }
+        let audioSession = AVAudioSession.sharedInstance()
+        // 出力先の判定が実際の再生と同じ条件になるよう、再生時と同じカテゴリを先に設定しておく
+        try? audioSession.setCategory(.playback, mode: .spokenAudio, policy: .longFormAudio, options: [])
+        let bluetoothPorts: [AVAudioSession.Port] = [.bluetoothA2DP, .bluetoothHFP, .bluetoothLE]
+        let hasBluetoothOutput = audioSession.currentRoute.outputs.contains { bluetoothPorts.contains($0.portType) }
+        if !hasBluetoothOutput {
+            player.isNoBluetoothWarningPresented = true
+        }
+    }
+
+    private func selectPhoneSource() {
+        if !isWatchSource { return }
+        if player.isPlaying {
+            player.stop()
+        }
+        player.isSelectedAsSource = false
+        session.send(.requestStatus, quiet: true)
+    }
+
+    // MARK: - 表示
+
+    private var isPlayingNow: Bool {
+        return isWatchSource ? player.isPlaying : (session.playState?.isPlaying == true)
+    }
+
+    private var titleLabel: String {
+        let noNovel = NSLocalizedString("Watch_NoNovelSelected", comment: "小説が選ばれていません")
+        if isWatchSource {
+            return player.title.isEmpty ? noNovel : player.title
+        }
+        return session.playState?.title.isEmpty == false ? session.playState!.title : noNovel
+    }
+
+    private func chapterButton(systemName: String, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 11))
+                .frame(width: 30, height: 22)
+                .background(.white.opacity(0.15))
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var chapterLabel: String {
+        let progressFormat = NSLocalizedString("Watch_Player_ChapterProgress", comment: "%1$d/%2$d章 · %3$d%%")
+        if isWatchSource {
+            guard !player.novelID.isEmpty else { return "-" }
+            return String(format: progressFormat, player.chapterNumber, player.chapterCount, Int(player.progress * 100))
+        }
+        guard let state = session.playState, !state.novelID.isEmpty else { return "-" }
+        if state.chapterCount > 0 {
+            return String(format: progressFormat, state.chapterNumber, state.chapterCount, Int(state.progress * 100))
+        }
+        return String(format: NSLocalizedString("Watch_Player_ChapterOnly", comment: "第%d章"), state.chapterNumber)
+    }
+
+    @ViewBuilder private var statusBadge: some View {
+        if isWatchSource {
+            if player.isPlaying {
+                badge(text: NSLocalizedString("Watch_Player_Badge_PlayingOnWatch", comment: "Watchで再生中"), color: .purple)
+            } else {
+                badge(text: NSLocalizedString("Watch_Player_Badge_WatchStandaloneMode", comment: "Watch単体モード"), color: .purple)
+            }
+        } else if session.isSending {
+            HStack(spacing: 4) {
+                ProgressView()
+                    .frame(width: 12, height: 12)
+                Text(NSLocalizedString("Watch_Player_Badge_Connecting", comment: "接続中…"))
+                    .font(.system(size: 11))
+            }
+            .frame(height: 16)
+        } else if session.playState?.isPlaying == true {
+            badge(text: NSLocalizedString("Watch_Player_Badge_PlayingOnPhone", comment: "iPhoneで再生中"), color: .green)
+        } else if session.isReachable {
+            badge(text: NSLocalizedString("Watch_Player_Badge_PhoneConnected", comment: "iPhone接続中"), color: .teal)
+        } else {
+            badge(text: NSLocalizedString("Watch_Player_Badge_PhoneNotConnected", comment: "iPhone未接続"), color: .orange)
+        }
+    }
+
+    private func badge(text: String, color: Color) -> some View {
+        HStack(spacing: 2) {
+            Text(text)
+                .font(.system(size: 11))
+            Image(systemName: "chevron.up.chevron.down")
+                .font(.system(size: 8))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 1)
+        .background(color.opacity(0.25))
+        .clipShape(Capsule())
+        .frame(height: 16)
+    }
+}

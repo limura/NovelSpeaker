@@ -1,0 +1,54 @@
+/* iPhone-side widget extension localization (English) */
+
+"Phone_Widget_AppName" = "NovelSpeaker";
+"Phone_Widget_PlayToggle_Name" = "Play or Pause";
+"Phone_Widget_PlayToggle_Short" = "Play/Pause";
+"Phone_Widget_PlayToggle_Desc" = "Starts or stops speech without opening NovelSpeaker.";
+
+/* Launcher */
+"Phone_Widget_Launcher_Name" = "Open App";
+"Phone_Widget_Launcher_Desc" = "Shows the progress of the novel you are reading. Tap to open NovelSpeaker.";
+"Phone_Widget_Launcher_OpenApp" = "Open App";
+"Phone_Widget_Launcher_Stats_Format" = "%1$d novels, %2$d updated";
+
+/* Configurable "Play Selected Novel" widget */
+"Phone_Widget_PlayNovel_Name" = "Start Playing Selected Novel";
+"Phone_Widget_PlayNovel_Desc" = "Starts playing the chosen novel without opening NovelSpeaker. Novel choices are listed by most recently read.";
+"Phone_Widget_PlayNovel_Unset" = "Choose a novel";
+"Phone_Widget_PlayNovel_UnsetHint" = "Edit the widget to choose a novel";
+"Phone_Widget_PlayNovel_TapHint" = "Tap to start playing";
+
+/* 4-slot action widget */
+"Phone_Widget_ActionGroup_Name" = "Combined Actions";
+"Phone_Widget_ActionGroup_Desc" = "Places play/pause, open app, and two chosen novels in a single widget.";
+
+/* AppIntents / ControlWidget 由来の文字列は日本語リテラルがそのままキーになる */
+"再生または停止" = "Play or Pause";
+"ことせかい を開かずに、読み上げの再生・停止をします。" = "Starts or stops speech without opening NovelSpeaker.";
+"指定小説の再生を開始" = "Start Playing Selected Novel";
+"指定した小説の読み上げを、ことせかい を開かずに開始します。" = "Starts playing the chosen novel without opening NovelSpeaker.";
+"アプリの起動" = "Open App";
+"ことせかい を開きます。" = "Opens NovelSpeaker.";
+"操作をまとめて配置" = "Combined Actions";
+"再生・停止、アプリの起動、小説2冊の再生開始を1つのウィジェットに並べます。" = "Places play/pause, open app, and two chosen novels in a single widget.";
+"小説1" = "Novel 1";
+"小説2" = "Novel 2";
+"小説1のアイコン" = "Icon for Novel 1";
+"小説1の色" = "Color for Novel 1";
+"小説2のアイコン" = "Icon for Novel 2";
+"小説2の色" = "Color for Novel 2";
+"小説" = "Novel";
+"アイコン" = "Icon";
+"色" = "Color";
+"再生(▶)" = "Play (▶)";
+"本" = "Book";
+"しおり" = "Bookmark";
+"ヘッドフォン" = "Headphones";
+"星" = "Star";
+"きらめき" = "Sparkles";
+"オレンジ" = "Orange";
+"赤" = "Red";
+"紫" = "Purple";
+"青" = "Blue";
+"ティール" = "Teal";
+"緑" = "Green";

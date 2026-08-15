@@ -35,23 +35,6 @@ target 'NovelSpeaker' do
     # Pods for testing
   end
 
-  target 'NovelSpeakerWatchApp' do
-    platform :watchos, '7.3'
-    use_frameworks!
-  end
-  target 'NovelSpeakerWatchApp WatchKit App' do
-    platform :watchos, '7.3'
-    use_frameworks!
-  end
-  target 'NovelSpeakerWatchApp WatchKit Extension' do
-    platform :watchos, '7.3'
-    use_frameworks!
-    pod 'SSZipArchive'
-    pod 'IceCream'
-    pod 'Kanna'
-    pod 'DataCompression'
-  end
-
 end
 
 #target 'NovelSpeakerURLDownloadExtension' do

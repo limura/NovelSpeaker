@@ -14,7 +14,7 @@
 //
 
 import Foundation
-#if !targetEnvironment(macCatalyst)
+#if !targetEnvironment(macCatalyst) && !os(watchOS)
 import voicevox_core
 #endif
 
@@ -26,7 +26,7 @@ struct VoicevoxStyle {
     let vvmPath: String
 }
 
-#if !targetEnvironment(macCatalyst)
+#if !targetEnvironment(macCatalyst) && !os(watchOS)
 
 enum VoicevoxCoreError: LocalizedError {
     case core(VoicevoxResultCode)
@@ -454,9 +454,9 @@ actor VoicevoxCore {
     }
 }
 
-#else // targetEnvironment(macCatalyst)
+#else // targetEnvironment(macCatalyst) || os(watchOS)
 
-// Mac Catalyst 用スタブ。実装本体と同じ公開サーフェスを提供しつつ、
+// Mac Catalyst / watchOS 用スタブ。実装本体と同じ公開サーフェスを提供しつつ、
 // isAvailableOnThisOS = false によって VOICEVOX 機能全体を「常に利用不可」にする。
 // これにより VoicevoxSpeaker / SpeechBlockSpeaker / SpeakerSettingsViewController 等の
 // 呼び出し側は #if を書かずにそのままコンパイルできる。

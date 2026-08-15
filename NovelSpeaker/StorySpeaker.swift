@@ -175,9 +175,33 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func ApplyStoryToSpeaker(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, readLocation:Int) {
         speaker.SetStory(story: story, withMoreSplitTargets:withMoreSplitTargets, moreSplitMinimumLetterCount:moreSplitMinimumLetterCount)
+        recordBakedDefaultSpeakerConfig()
         observeSpeechConfig(novelID: story.novelID)
         speaker.SetSpeechLocation(location: readLocation)
         self.isNeedApplySpeechConfigs = false
+    }
+
+    // Watch からの速度・音量変更を「次のブロックから」反映するために、
+    // 現在のブロック列に焼き込まれているデフォルト話者の rate/volume を覚えておく
+    // (倍率 = 新しい値 ÷ 焼き込み値 を SpeechBlockSpeaker に渡すため)
+    private var bakedDefaultSpeakerRate: Float = AVSpeechUtteranceDefaultSpeechRate
+    private var bakedDefaultSpeakerVolume: Float = 1.0
+
+    private func recordBakedDefaultSpeakerConfig() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let speakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) else { return }
+            bakedDefaultSpeakerRate = speakerSetting.rate
+            bakedDefaultSpeakerVolume = speakerSetting.volume
+        }
+    }
+
+    /// デフォルト話者の速度・音量の変更を、発話中のブロック列にも(次のブロックから)反映する。
+    /// Realm 側の保存は呼び出し元が行う想定(保存だけだと反映は次の StartSpeech になるため、
+    /// 発話中の変更用にこちらも呼ぶ)。ブロック列が組み直されると倍率は自動で 1.0 に戻り、
+    /// その時には新しい設定値が焼き込まれているので二重適用にはならない。
+    func applyLiveDefaultSpeakerConfig(rate: Float, volume: Float) {
+        speaker.rateMultiplier = rate / max(0.01, bakedDefaultSpeakerRate)
+        speaker.volumeMultiplier = volume / max(0.01, bakedDefaultSpeakerVolume)
     }
     
     func ApplyDefaultSpeakerSettingToAnnounceSpeaker() {
@@ -264,6 +288,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
     func SetStory(story:Story, withUpdateReadDate:Bool, completion:((_ story:Story)->Void)? = nil) {
+        #if !os(watchOS)
+        // iPhone側ウィジェット(ランチャー)のための先取り通知。
+        // currentReadingNovelID の書き込みは SetStory の重い非同期処理の完了後なので、
+        // 「小説を開いてすぐホーム画面へ」だと書き込みが間に合わず、バックグラウンドからの
+        // ウィジェット再読込は OS に間引かれて前の小説のまま残ることがある。
+        // 読書対象が変わることが確定したこの時点で先にウィジェット側へ知らせておく
+        if withUpdateReadDate {
+            PhoneWidgetDataUpdater.noteReadingNovel(novelID: story.novelID)
+        }
+        #endif
         EnqueueSetStory(story: story, withUpdateReadDate: withUpdateReadDate, completion: completion)
     }
     
@@ -517,6 +551,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     globalState.currentReadingNovelID = novelID
                 }
             }
+            #if !os(watchOS)
+            // iPhone側ウィジェット(ランチャーの小説名・進捗)を追従させる。
+            // Realm 観測だけだと、この書き込みがバックグラウンド移行後に完了した場合などに
+            // 取りこぼすことがあるので、書き込み元からも直接更新を叩いておく
+            PhoneWidgetDataUpdater.updateSoon()
+            #endif
         }
     }
     
@@ -1448,6 +1488,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.AnnounceSpeech(text: announceText, completion: block)
         }
         
+        /// 候補の小説の中から、本文が読める(消えていない)最初のものとその再生開始章を返す。
+        /// 本文が消えている小説がお気に入り等に混ざっていても、そこで止まらず次の候補へ飛ばすための物
+        func firstSpeechableNovelStory(realm:Realm, novelArray:[RealmNovel]) -> (novel:RealmNovel, story:Story)? {
+            for novel in novelArray {
+                guard let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1),
+                      story.content.count > 0 else { continue }
+                return (novel, story)
+            }
+            return nil
+        }
+
         func speechNextNovelWith(realm:Realm, title:String, story:Story) {
             self.StopSpeech(realm: realm, stopAudioSession:false)
             AnnounceAndDoNext(realm: realm, announceText: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), title)) {
@@ -1506,7 +1557,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     if self.isNeedRepeatSpeech, let repeatSpeechType = repeatSpeechType {
                         if globalState?.repeatSpeechLoopType == .noCheckReadingPoint && NovelSpeakerUtility.GetAllRepeatSpeechLoopTargetRepeatSpeechType().contains(repeatSpeechType) {
                             func runNextSpeechLoop(novelIDArray:[String]) -> Bool {
-                                if let currentIndex = novelIDArray.firstIndex(of: novelID), let nextNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelIDArray[(currentIndex + 1) % novelIDArray.count]), let firstStory = nextNovel.firstChapterWith(realm: realm) {
+                                guard let currentIndex = novelIDArray.firstIndex(of: novelID) else { return false }
+                                // 本文が消えている小説が混ざっていても止まらないよう、本文が読める小説まで順に飛ばす
+                                for offset in 1...novelIDArray.count {
+                                    guard let nextNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelIDArray[(currentIndex + offset) % novelIDArray.count]),
+                                          let firstStory = nextNovel.firstChapterWith(realm: realm),
+                                          firstStory.content.count > 0 else { continue }
                                     RealmUtil.WriteWith(realm: realm) { (realm) in
                                         firstStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                                     }
@@ -1518,6 +1574,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                             if repeatSpeechType == .GoToNextLikeNovel
                                , let novelLikeOrder = RealmGlobalState.GetInstanceWith(realm: realm)?.novelLikeOrder, runNextSpeechLoop(novelIDArray: Array(novelLikeOrder)) {
                                 return
+                            }else if repeatSpeechType == .GoToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Folder) {
+                                for folder in folderArray {
+                                    if runNextSpeechLoop(novelIDArray: Array(folder.targetNovelIDArray)) {
+                                        return
+                                    }
+                                }
+                                // 所属フォルダのどれにも次の小説が見つからなければ下の「読み上げが最後に達しました」へ
                             }else if repeatSpeechType == .GoToNextSelectedFolderdNovel, let nextFolderName = self.targetFolderNameForGoToNextSelectedFolderdNovel, let nextNovelIDArray = RealmNovelTag.SearchWith(realm: realm, name: nextFolderName, type: RealmNovelTag.TagType.Folder)?.targetNovelIDArray, runNextSpeechLoop(novelIDArray: Array(nextNovelIDArray)) {
                                 return
                             }else if repeatSpeechType == .GoToNextSameWriterNovel, let currentNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID),
@@ -1565,9 +1628,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                              let novelLikeOrder = RealmGlobalState.GetInstanceWith(realm: realm)?.novelLikeOrder,
                              let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: {novelLikeOrder.index(of: $0.novelID) ?? 0 < novelLikeOrder.index(of: $1.novelID) ?? 0})
                              .filter({novelLikeOrder.contains($0.novelID) && $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}),
-                             let novel = filterdNovelArray.first,
-                             let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) {
-                            speechNextNovelWith(realm: realm, title: novel.title, story: story)
+                             let next = firstSpeechableNovelStory(realm: realm, novelArray: filterdNovelArray) {
+                            speechNextNovelWith(realm: realm, title: next.novel.title, story: next.story)
                             return
                         }else if repeatSpeechType == .GoToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Folder) {
                             for folder in folderArray {
@@ -1608,9 +1670,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         }else if repeatSpeechType == .GoToNextSameWriterNovel, let currentNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID),
                                  let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: { $0.title < $1.title })
                                     .filter({$0.novelID != novelID && $0.writer == currentNovel.writer && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}),
-                             let novel = filterdNovelArray.first,
-                             let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) {
-                            speechNextNovelWith(realm: realm, title: novel.title, story: story)
+                             let next = firstSpeechableNovelStory(realm: realm, novelArray: filterdNovelArray) {
+                            speechNextNovelWith(realm: realm, title: next.novel.title, story: next.story)
                             return
                         }else if repeatSpeechType == .GoToNextSameWebsiteNovel, let currentNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let currentWebSite = currentNovel.type == .UserCreated ? "" : URL(string: novelID)?.host,
                                  let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: { $0.title < $1.title })
@@ -1620,9 +1681,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                         webSite == currentWebSite &&
                                         ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)
                                     }),
-                             let novel = filterdNovelArray.first,
-                             let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) {
-                            speechNextNovelWith(realm: realm, title: novel.title, story: story)
+                             let next = firstSpeechableNovelStory(realm: realm, novelArray: filterdNovelArray) {
+                            speechNextNovelWith(realm: realm, title: next.novel.title, story: next.story)
                             return
                         }
                     }

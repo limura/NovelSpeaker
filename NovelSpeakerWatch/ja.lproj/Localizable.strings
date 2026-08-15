@@ -1,0 +1,176 @@
+/* Watch アプリのローカライズ(日本語)。キーは Watch_<View>_<用途> で揃える */
+
+/* 共通 */
+"Watch_Cancel" = "キャンセル";
+"Watch_NoNovelSelected" = "小説が選ばれていません";
+"Watch_ErrorAlert_Title" = "操作できませんでした";
+"Watch_InfoAlert_Title" = "お知らせ";
+
+/* 本棚 */
+"Watch_Bookshelf_Title" = "本棚";
+"Watch_Bookshelf_EmptyMessage" = "iPhoneの ことせかい を一度起動すると、本棚がここに表示されます。";
+"Watch_Bookshelf_GoToPlayer" = "再生画面へ移動";
+"Watch_Bookshelf_TransferUpdates" = "更新分を転送 (%1$d→%2$d章)";
+"Watch_Bookshelf_TransferBody" = "本文をWatchへ転送";
+"Watch_Bookshelf_UpdatedOnPhone" = "この小説はiPhone側で更新されています。";
+"Watch_Bookshelf_NotTransferred" = "この小説の本文はまだWatchにありません。";
+"Watch_Bookshelf_ChapterProgress" = "%1$d/%2$d章";
+"Watch_Bookshelf_Sort_Title" = "順番";
+"Watch_BookshelfSort_PhoneOrder" = "iPhoneと同じ";
+"Watch_BookshelfSort_Writer" = "作者名順";
+"Watch_BookshelfSort_TitleOrder" = "小説名順";
+"Watch_BookshelfSort_Updated" = "最終ダウンロード日時順";
+"Watch_BookshelfSort_Folder" = "自作フォルダ順";
+"Watch_BookshelfSort_UpdatedWithFolder" = "最終ダウンロード日時順(フォルダ分類版)";
+"Watch_BookshelfSort_LastRead" = "小説を開いた日時順";
+"Watch_BookshelfSort_LikeLevel" = "お気に入り順";
+"Watch_BookshelfSort_WebSite" = "Webサイト順";
+"Watch_BookshelfSort_CreatedDate" = "本棚登録順";
+"Watch_BookshelfSort_PageCount" = "ページ数順";
+"Watch_BookshelfSort_LastReadWithFolder" = "小説を開いた日時順(フォルダ分類版)";
+"Watch_BookshelfSort_UnreadChapterCount" = "未読章数別";
+"Watch_BookshelfSort_WatchTransferState" = "Apple Watch転送状況別";
+"Watch_WatchBucket_Transferred" = "Apple Watchに転送済み";
+"Watch_WatchBucket_NotTransferred" = "未転送";
+"Watch_Bookshelf_Uncategorized" = "(未分類)";
+"Watch_Bookshelf_UnknownWriter" = "(作者名不明)";
+"Watch_Bookshelf_SelfMadeNovel" = "自作小説";
+"Watch_Bookshelf_Syncing" = "iPhoneと同期中…";
+"Watch_Bookshelf_TagOrderNotice" = "iPhone側で「タグ名順」が選択されていますが、Watchでは非対応のため小説名順で表示しています。";
+"Watch_Bucket_UpTo1DayAgo" = "1日前まで";
+"Watch_Bucket_UpTo7DayAgo" = "7日前まで";
+"Watch_Bucket_UpTo30DayAgo" = "30日前まで";
+"Watch_Bucket_UpTo6MonthsAgo" = "6ヶ月前まで";
+"Watch_Bucket_UpTo1YearAgo" = "1年前まで";
+"Watch_Bucket_BeforeThat" = "それ以前";
+"Watch_UnreadBucket_100Plus" = "未読 100章以上";
+"Watch_UnreadBucket_10To99" = "未読 10〜99章";
+"Watch_UnreadBucket_1To9" = "未読 1〜9章";
+"Watch_UnreadBucket_CaughtUp" = "追いついている";
+
+/* iPhone との通信 */
+"Watch_Session_CommandFailed" = "操作に失敗しました";
+"Watch_Session_NotReachable" = "iPhoneと通信できません。iPhoneを再起動した後は、一度ロック解除が必要です。";
+"Watch_Session_SaveBodyFailed" = "本文の保存に失敗しました: %@";
+
+/* 再生画面 */
+"Watch_Player_SourceDialog_Title" = "どこで読み上げますか？";
+"Watch_Player_SourceDialog_Message" = "Watch単体再生は、転送済みの本文をWatchのスピーカーやイヤホンで読み上げます(iPhoneが無くても動きます)";
+"Watch_Player_SourcePhone" = "iPhoneで聴く";
+"Watch_Player_SourceWatch" = "Watchで聴く(単体再生)";
+"Watch_Player_NoNovelSelected_ChooseFromBookshelf" = "小説が選ばれていません。本棚から小説を選んでください。";
+"Watch_Player_BodyNotTransferred" = "この小説の本文がWatchに転送されていません。本棚の小説をタップして転送してから、もう一度お試しください。";
+"Watch_Player_ChapterProgress" = "%1$d/%2$d章 · %3$d%%";
+"Watch_Player_ChapterOnly" = "第%d章";
+"Watch_Player_Badge_PlayingOnWatch" = "Watchで再生中";
+"Watch_Player_Badge_WatchStandaloneMode" = "Watch単体モード";
+"Watch_Player_Badge_Connecting" = "接続中…";
+"Watch_Player_Badge_PlayingOnPhone" = "iPhoneで再生中";
+"Watch_Player_Badge_PhoneConnected" = "iPhone接続中";
+"Watch_Player_Badge_PhoneNotConnected" = "iPhone未接続";
+"Watch_Player_SelectFolder_Title" = "続けて再生するフォルダを選択";
+"Watch_Player_NoBluetoothWarning" = "Bluetoothのイヤホン等が接続されていません。スピーカーでの読み上げに対応していない機種では、再生を始める時にBluetooth機器の接続が必要です。";
+"Watch_Player_NoBluetoothWarning_DontShowAgain" = "今後表示しない";
+
+/* 本文ページ */
+"Watch_TextPage_Title" = "本文";
+"Watch_TextPage_NovelNotTransferred" = "「%@」の本文はまだWatchに転送されていません。";
+"Watch_TextPage_ChapterNotTransferred" = "この章(%d章)はまだWatchに転送されていません。";
+"Watch_TextPage_TransferNow" = "この小説の本文を同期";
+"Watch_TextPage_Transferring" = "iPhoneから転送中…";
+"Watch_TextPage_TransferringProgress" = "iPhoneから転送中… (%1$d/%2$d)";
+"Watch_TextPage_PrevChapter" = "◀ 前の章";
+"Watch_TextPage_NextChapter" = "次の章へ ▶";
+"Watch_TextPage_CannotSeekWhilePhonePlaying" = "iPhoneで再生中は位置を指定できません。一時停止してからやり直してください。";
+
+/* 便利機能 */
+"Watch_Utility_Title" = "便利機能";
+"Watch_Utility_StoredTexts" = "Watchに転送済みの本文";
+"Watch_Utility_CheckUpdatesAll" = "全小説の更新確認";
+"Watch_Utility_CheckUpdatesAllStarted" = "全小説の更新確認を開始しました";
+"Watch_Utility_LikeOn" = "お気に入りにする";
+"Watch_Utility_LikeOff" = "お気に入りを解除";
+"Watch_Utility_LikeOnDone" = "お気に入りにしました";
+"Watch_Utility_LikeOffDone" = "お気に入りを解除しました";
+"Watch_Utility_TransferHint" = "Watchへ転送する小説の選択は、本棚で小説を左にスワイプするか、iPhoneの ことせかい の設定から行えます。";
+"Watch_Utility_ConnectionDiagnostics" = "接続診断(デバッグ)";
+"Watch_Utility_HideDebugMenu" = "デバッグメニューを隠す";
+
+/* Watch内の本文(キャッシュ管理) */
+"Watch_Cache_Empty" = "転送済みの小説はありません。本棚から転送できます。";
+"Watch_Cache_DeleteSelected" = "選択した%d件の本文をWatchから削除";
+"Watch_Cache_Select" = "選択";
+"Watch_Cache_Done" = "完了";
+"Watch_Cache_Retransfer" = "本文を転送し直す";
+"Watch_Cache_RemoveFromWatch" = "Watchから削除";
+"Watch_Cache_ChapterCount" = "%d章";
+"Watch_Cache_Detail_NeverPlayed" = "%@ · Watchで未再生";
+"Watch_Cache_Detail_PlayedToday" = "%@ · 今日再生";
+"Watch_Cache_Detail_PlayedDaysAgo" = "%1$@ · %2$d日前に再生";
+
+/* 本文の表示設定 */
+"Watch_TextSettings_Title" = "本文の表示";
+"Watch_TextSettings_SampleText" = "メロスは激怒した。";
+"Watch_TextSettings_FontSize" = "文字サイズ";
+"Watch_TextSettings_TextColor" = "文字色";
+"Watch_TextSettings_BackgroundColor" = "背景色";
+
+/* Watch 単体再生 */
+"Watch_SpeechPlayer_AudioSetupFailed" = "オーディオ設定に失敗しました: %@";
+"Watch_SpeechPlayer_AudioRouteFailed" = "オーディオ出力先に接続できませんでした。%@";
+"Watch_SpeechPlayer_SpeechStoppedByEnd" = "読み上げが最後に達しました。";
+"Watch_SpeechPlayer_SpeechNextNovelFormat" = "読み上げが最後に達したため、次に %@ を再生します。";
+"Watch_SpeechPlayer_RewindFirstStory" = "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。";
+
+/* 発話の速度・音量 */
+"Watch_SpeechConfig_Title" = "速度と音量";
+"Watch_SpeechConfig_Rate" = "速度";
+"Watch_SpeechConfig_Volume" = "音量";
+"Watch_SpeechConfig_Note" = "変更は iPhone の標準の話者設定に保存されます。発話中の変更は次の文から反映されます。";
+
+/* 連続再生(再生が末尾に達した時の動作) */
+"Watch_RepeatConfig_Title" = "連続再生";
+"Watch_RepeatConfig_TypeTitle" = "再生が末尾に達した時の動作";
+"Watch_RepeatConfig_LoopTitle" = "次の小説の選択方式";
+"Watch_RepeatConfig_Note" = "Watch単体モードでの連続再生の対象になるのは、Watchに転送済みの小説だけです。変更は iPhone の設定に保存されます。";
+"Watch_RepeatType_NoRepeat" = "そのまま停止する";
+"Watch_RepeatType_RewindToFirstStory" = "最初の章から再生し直す";
+"Watch_RepeatType_RewindToThisStory" = "現在の章を再生し直す";
+"Watch_RepeatType_GoToNextLikeNovel" = "別のお気に入り小説を再生";
+"Watch_RepeatType_GoToNextSameFolderdNovel" = "同じフォルダの別の小説を再生";
+"Watch_RepeatType_GoToNextSelectedFolderdNovel" = "指定フォルダの別の小説を再生";
+"Watch_RepeatType_GoToNextSameWriterNovel" = "同じ作者の別の小説を再生";
+"Watch_RepeatType_GoToNextSameWebsiteNovel" = "同じWebサイトの別の小説を再生";
+"Watch_RepeatLoop_Normal" = "未読分の続きから再生";
+"Watch_RepeatLoop_NoCheckReadingPoint" = "順に1ページ目から再生";
+
+/* VoiceOver 用ラベル */
+"Watch_AX_Menu" = "メニュー";
+"Watch_AX_PrevChapter" = "前の章へ";
+"Watch_AX_NextChapter" = "次の章へ";
+"Watch_AX_SkipBackward" = "少し戻る";
+"Watch_AX_SkipForward" = "少し進む";
+"Watch_AX_Play" = "再生";
+"Watch_AX_Pause" = "一時停止";
+"Watch_AX_SourceBadgeHint" = "読み上げ先(iPhoneまたはWatch)を切り替えます";
+"Watch_AX_TextSettings" = "本文の表示設定";
+"Watch_AX_Liked" = "お気に入り";
+"Watch_AX_TransferState_Complete" = "転送済み";
+"Watch_AX_TransferState_Partial" = "iPhone側で更新あり";
+"Watch_AX_TransferState_Requested" = "転送依頼中";
+"Watch_AX_TransferState_None" = "未転送";
+"Watch_AX_SeekHere" = "ここから読み上げ";
+"Watch_AX_SortOrder" = "順番";
+"Watch_AX_ScrollToTop" = "一番上へ";
+
+/* 色名(表示設定の色ボタンの VoiceOver 用) */
+"Watch_Color_white" = "白";
+"Watch_Color_lightGray" = "明るい灰色";
+"Watch_Color_yellow" = "黄色";
+"Watch_Color_orange" = "オレンジ";
+"Watch_Color_green" = "緑";
+"Watch_Color_cyan" = "シアン";
+"Watch_Color_black" = "黒";
+"Watch_Color_darkGray" = "暗い灰色";
+"Watch_Color_navy" = "紺色";
+"Watch_Color_sepia" = "セピア";
