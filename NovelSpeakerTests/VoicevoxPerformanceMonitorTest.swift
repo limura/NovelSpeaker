@@ -144,3 +144,80 @@ class VoicevoxPerformanceMonitorTest: XCTestCase {
         XCTAssertLessThan(second - first, 60, "この程度の計算で60秒もかかるはずがない(単位換算の誤りを検出)")
     }
 }
+
+// MARK: - PlaybackGapAccumulator
+// 「未再生の貯金が108秒あるのに、再生できていた時間は全体の約半分だった」という
+// 実機の観測を受けて追加した、再生の途切れ(意図しない無音)の集計テスト。
+class VoicevoxPlaybackGapTest: XCTestCase {
+
+    // 実機で観測された状況の再現: 再生248秒に対し無音254秒 → 無音率が約50%と出る事。
+    func testSilenceRatioReproducesObservedHalfSilence() {
+        var acc = PlaybackGapAccumulator()
+        acc.addPlayback(wallSeconds: 248)
+        acc.addGap(seconds: 254)
+        let ratio = try! XCTUnwrap(acc.silenceRatio)
+        XCTAssertEqual(ratio, 0.506, accuracy: 0.01, "発話していたはずの時間の約半分が無音、と出るはず")
+    }
+
+    func testSilenceRatioIsZeroWhenNoGaps() {
+        var acc = PlaybackGapAccumulator()
+        acc.addPlayback(wallSeconds: 100)
+        XCTAssertEqual(try XCTUnwrap(acc.silenceRatio), 0.0, accuracy: 0.0001)
+    }
+
+    func testSilenceRatioIsNilWithoutAnyData() {
+        let acc = PlaybackGapAccumulator()
+        XCTAssertNil(acc.silenceRatio)
+        XCTAssertNil(acc.cacheHitRatio)
+        XCTAssertNil(acc.averageGapSeconds)
+        XCTAssertNil(acc.averageMissWaitSeconds)
+    }
+
+    // 「間の設定」を差し引いた結果が0以下になる場合は無音として数えない
+    // (意図的なポーズを無音率に混ぜない)。
+    func testNonPositiveGapsAreIgnored() {
+        var acc = PlaybackGapAccumulator()
+        acc.addPlayback(wallSeconds: 10)
+        acc.addGap(seconds: 0)
+        acc.addGap(seconds: -0.3)
+        XCTAssertEqual(acc.gapCount, 0, "0以下の値は無音として数えない")
+        XCTAssertEqual(try XCTUnwrap(acc.silenceRatio), 0.0, accuracy: 0.0001)
+    }
+
+    func testGapStatistics() {
+        var acc = PlaybackGapAccumulator()
+        acc.addGap(seconds: 1.0)
+        acc.addGap(seconds: 3.0)
+        acc.addGap(seconds: 2.0)
+        XCTAssertEqual(acc.gapCount, 3)
+        XCTAssertEqual(acc.totalGapSeconds, 6.0, accuracy: 0.0001)
+        XCTAssertEqual(acc.maxGapSeconds, 3.0, accuracy: 0.0001)
+        XCTAssertEqual(try XCTUnwrap(acc.averageGapSeconds), 2.0, accuracy: 0.0001)
+    }
+
+    // 先行合成が間に合っていたかの割合と、MISS時の平均待ち時間。
+    // MISSが無音の主因なのか、それとも別の要因なのかを切り分けるための指標。
+    func testCacheHitRatioAndMissWait() {
+        var acc = PlaybackGapAccumulator()
+        acc.addSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
+        acc.addSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
+        acc.addSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
+        acc.addSynthesisRequest(wasCacheHit: false, waitSeconds: 2.0)
+        XCTAssertEqual(try XCTUnwrap(acc.cacheHitRatio), 0.75, accuracy: 0.0001)
+        XCTAssertEqual(try XCTUnwrap(acc.averageMissWaitSeconds), 2.0, accuracy: 0.0001)
+        XCTAssertEqual(acc.cacheMissCount, 1)
+    }
+
+    // HIT率が100%なのに無音率が高い、という状態を表現できる事。
+    // (これが観測されたら「合成は間に合っているのに再生側で落としている」証拠になる)
+    func testFullCacheHitWithHighSilenceIsRepresentable() {
+        var acc = PlaybackGapAccumulator()
+        for _ in 0..<10 {
+            acc.addSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
+            acc.addPlayback(wallSeconds: 5)
+            acc.addGap(seconds: 5)
+        }
+        XCTAssertEqual(try XCTUnwrap(acc.cacheHitRatio), 1.0, accuracy: 0.0001)
+        XCTAssertEqual(try XCTUnwrap(acc.silenceRatio), 0.5, accuracy: 0.0001)
+    }
+}

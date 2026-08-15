@@ -411,9 +411,15 @@ actor VoicevoxCore {
         let key = Self.prefetchKey(text: text, styleId: styleId)
         if let cached = peekCache(key: key) {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュHIT] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
+            VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
             return cached
         }
-        return try await synthesizeSlowPath(text: text, styleId: styleId, key: key)
+        // ここに来た = 再生が必要な時点で先行合成が間に合っていなかった。
+        // その待ち時間がそのまま無音の長さになるので、回数と待ち時間を記録する。
+        let missStart = Date()
+        let data = try await synthesizeSlowPath(text: text, styleId: styleId, key: key)
+        VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: false, waitSeconds: Date().timeIntervalSince(missStart))
+        return data
     }
 
     /// cache MISS 時の低速パス。pendingPrefetchTasks の確認・performSynthesize の呼び出しは

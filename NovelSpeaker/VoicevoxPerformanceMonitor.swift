@@ -155,6 +155,74 @@ struct RTFAccumulator {
     }
 }
 
+/// 再生の「途切れ」を数える集計(純粋ロジック・テスト可能)。
+///
+/// 実機の測定で、未再生の貯金が108秒もあるのに再生できていた時間が全体の約半分しか
+/// 無い、という結果が出た。合成が間に合っていないのであれば貯金は減るはずで、
+/// 貯金が増え続けているのに無音がある以上、原因は合成速度ではなく再生側にある。
+/// ここでは「発話しているつもりなのに音が出ていない時間」を直接数えて、
+/// 再生パイプラインの取りこぼしを定量化する。
+///
+/// なお「間の設定」による意図的なポーズは無音として数えない(それは仕様どおりの間なので)。
+struct PlaybackGapAccumulator {
+    private(set) var totalPlaybackWallSeconds: Double = 0
+    private(set) var totalGapSeconds: Double = 0
+    private(set) var gapCount: Int = 0
+    private(set) var maxGapSeconds: Double = 0
+    private(set) var cacheHitCount: Int = 0
+    private(set) var cacheMissCount: Int = 0
+    private(set) var totalMissWaitSeconds: Double = 0
+
+    /// 1ブロックぶんの音声を実際に鳴らした実時間(倍速適用後)。
+    mutating func addPlayback(wallSeconds: Double) {
+        guard wallSeconds > 0 else { return }
+        totalPlaybackWallSeconds += wallSeconds
+    }
+
+    /// ブロックとブロックの間にできた「意図しない無音」の秒数。
+    mutating func addGap(seconds: Double) {
+        guard seconds > 0 else { return }
+        totalGapSeconds += seconds
+        gapCount += 1
+        maxGapSeconds = max(maxGapSeconds, seconds)
+    }
+
+    /// 再生のために合成を要求した時の結果(先行合成が間に合っていたか)。
+    mutating func addSynthesisRequest(wasCacheHit: Bool, waitSeconds: Double) {
+        if wasCacheHit {
+            cacheHitCount += 1
+        } else {
+            cacheMissCount += 1
+            totalMissWaitSeconds += max(0, waitSeconds)
+        }
+    }
+
+    /// 発話していたはずの時間のうち、無音だった割合。これが本丸の指標。
+    var silenceRatio: Double? {
+        let total = totalPlaybackWallSeconds + totalGapSeconds
+        guard total > 0 else { return nil }
+        return totalGapSeconds / total
+    }
+
+    /// 再生時に先行合成が間に合っていた割合。
+    var cacheHitRatio: Double? {
+        let total = cacheHitCount + cacheMissCount
+        guard total > 0 else { return nil }
+        return Double(cacheHitCount) / Double(total)
+    }
+
+    var averageGapSeconds: Double? {
+        guard gapCount > 0 else { return nil }
+        return totalGapSeconds / Double(gapCount)
+    }
+
+    /// キャッシュMISS1回あたりの平均待ち時間(MISSが無音の主因かどうかの判別に使う)。
+    var averageMissWaitSeconds: Double? {
+        guard cacheMissCount > 0 else { return nil }
+        return totalMissWaitSeconds / Double(cacheMissCount)
+    }
+}
+
 /// 実測値を集めてログに出す本体。
 final class VoicevoxPerformanceMonitor {
     static let shared = VoicevoxPerformanceMonitor()
@@ -178,6 +246,8 @@ final class VoicevoxPerformanceMonitor {
     /// 未再生の「貯金」秒数(SpeechBlockSpeaker が先読み更新時に教えてくれる)。
     /// キャッシュ全体の秒数と違い、再生済みのぶんを含まない実際の余裕。
     private var unplayedLeadSeconds: Double = 0
+    /// 再生の途切れ(意図しない無音)の集計。
+    private var gaps = PlaybackGapAccumulator()
     /// ログが出過ぎないように、最短でもこの間隔をあける。
     private let logIntervalSeconds: Double = 10.0
     /// アプリ内ログ(設定画面から見られる方)へ残す間隔。
@@ -194,6 +264,32 @@ final class VoicevoxPerformanceMonitor {
     func updatePlaybackRate(_ rate: Double) {
         lock.lock()
         playbackRate = rate
+        lock.unlock()
+    }
+
+    /// 1ブロックぶんの音声を実際に鳴らした実時間(倍速適用後)を記録する。
+    func recordPlayback(wallSeconds: Double) {
+        lock.lock()
+        gaps.addPlayback(wallSeconds: wallSeconds)
+        lock.unlock()
+    }
+
+    /// ブロック間にできた「意図しない無音」を記録する(「間の設定」ぶんは除いた値を渡す)。
+    func recordPlaybackGap(seconds: Double) {
+        lock.lock()
+        gaps.addGap(seconds: seconds)
+        let total = gaps.totalGapSeconds
+        let count = gaps.gapCount
+        lock.unlock()
+        if seconds >= 0.5 {
+            NSLog("NovelSpeaker.VoicevoxPerf: [\(VoicevoxCore.logTimestamp())] [無音検出] \(String(format: "%.2f", seconds))秒 (通算 \(String(format: "%.1f", total))秒 / \(count)回)")
+        }
+    }
+
+    /// 再生のために合成を要求した結果(先行合成が間に合っていたか)を記録する。
+    func recordPlaybackSynthesisRequest(wasCacheHit: Bool, waitSeconds: Double) {
+        lock.lock()
+        gaps.addSynthesisRequest(wasCacheHit: wasCacheHit, waitSeconds: waitSeconds)
         lock.unlock()
     }
 
@@ -243,6 +339,7 @@ final class VoicevoxPerformanceMonitor {
         let snapshotRTF = rtf
         let currentPlaybackRate = playbackRate
         let currentLead = unplayedLeadSeconds
+        let snapshotGaps = gaps
         lock.unlock()
         guard shouldLog else { return }
 
@@ -287,6 +384,22 @@ final class VoicevoxPerformanceMonitor {
         fields.append("合成回数=\(snapshotRTF.sampleCount)")
         fields.append("生成音声計=\(String(format: "%.1f", snapshotRTF.totalAudioSeconds))秒")
         // 実際の余裕(未再生ぶんだけ)と、キャッシュ全体(再生済みも含む)を区別して出す。
+        // 「発話しているつもりなのに音が出ていない時間」の割合。合成速度とは別の、
+        // 再生パイプライン由来の取りこぼしを見るための本丸の指標。
+        if let silence = snapshotGaps.silenceRatio {
+            fields.append("無音率=\(String(format: "%.1f", silence * 100))%")
+            fields.append("無音計=\(String(format: "%.1f", snapshotGaps.totalGapSeconds))秒/\(snapshotGaps.gapCount)回")
+            if let average = snapshotGaps.averageGapSeconds {
+                fields.append("平均無音=\(String(format: "%.2f", average))秒")
+            }
+            fields.append("最大無音=\(String(format: "%.2f", snapshotGaps.maxGapSeconds))秒")
+        }
+        if let hitRatio = snapshotGaps.cacheHitRatio {
+            fields.append("再生時HIT率=\(String(format: "%.1f", hitRatio * 100))%(\(snapshotGaps.cacheHitCount)/\(snapshotGaps.cacheHitCount + snapshotGaps.cacheMissCount))")
+            if let missWait = snapshotGaps.averageMissWaitSeconds {
+                fields.append("MISS平均待ち=\(String(format: "%.2f", missWait))秒")
+            }
+        }
         fields.append("未再生の貯金=\(String(format: "%.1f", currentLead))秒")
         fields.append("キャッシュ計=\(String(format: "%.1f", VoicevoxCore.shared.cachedAudioSecondsForLogging()))秒")
 
@@ -308,6 +421,7 @@ final class VoicevoxPerformanceMonitor {
         lock.lock()
         dutyWindow = CPUDutyWindow(windowSeconds: Self.osBackgroundCPUWindowSeconds)
         rtf = RTFAccumulator()
+        gaps = PlaybackGapAccumulator()
         lastLoggedAt = 0
         lock.unlock()
     }
