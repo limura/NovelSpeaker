@@ -86,3 +86,37 @@ class VoicevoxPrefetchTest: XCTestCase {
         XCTAssertTrue(doneAfterCancel, "cancelPendingPrefetch() 後も完成済みキャッシュは残るべき")
     }
 }
+
+// 先行合成は投入順の直列鎖で実行されるため、積み過ぎると鎖の後ろに回った物ほど
+// 完了が遅れる。実機では一度に30件以上積まれ、予約から完了まで218秒かかる状態になり、
+// その間ずっと「未再生の貯金=0秒」で無音になっていた。
+// 「次に再生するブロック」は積まれている先行合成より優先されなければならない。
+extension VoicevoxPrefetchTest {
+    func testUrgentPrefetchIsNotStarvedByBacklog() async throws {
+        try XCTSkipUnless(VoicevoxCore.isAvailableOnThisOS, "VOICEVOXが利用できない環境")
+        await VoicevoxCore.setUpFromBundleIfNeeded()
+        let isSetUp = await VoicevoxCore.shared.isSetUp
+        try XCTSkipUnless(isSetUp, "VOICEVOXのセットアップができない環境")
+
+        VoicevoxCore.shared.schedulePrefetchCacheClear()
+        // 先に「もっと先のブロック」を沢山積む(実機で起きていたバックログ)。
+        for i in 0..<10 {
+            VoicevoxCore.shared.schedulePrefetch(text: "これは先の方のブロック\(i)です。", styleId: 3)
+        }
+        // その後で「次に再生するブロック」を最優先で要求する。
+        let urgentText = "これは今すぐ必要なブロックです。"
+        VoicevoxCore.shared.schedulePrefetchUrgent(text: urgentText, styleId: 3)
+
+        // バックログ全部の完了を待たずに、優先ぶんが先に用意される事。
+        let deadline = Date().addingTimeInterval(60)
+        var isReady = false
+        while Date() < deadline {
+            if VoicevoxCore.shared.cachedWavByteCount(text: urgentText, styleId: 3) != nil {
+                isReady = true
+                break
+            }
+            try await Task.sleep(nanoseconds: 200_000_000)
+        }
+        XCTAssertTrue(isReady, "最優先で要求したブロックが、積まれた先行合成に埋もれて完成しない")
+    }
+}

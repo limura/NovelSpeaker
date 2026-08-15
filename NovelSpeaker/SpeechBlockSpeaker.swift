@@ -314,6 +314,11 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
 
     /// 次に再生するVOICEVOXブロックが未合成なら、それだけを最優先で先行合成に出す。
     /// 貯金の上限とは無関係に必ず確保する(取りこぼすと再生が止まるため)。
+    /// 直近確保を最後に行ったブロック番号。willSpeakRange は 0.1 秒毎に来るため、
+    /// 同じブロックに対して何十回も予約要求を投げないようにする(実機ログで
+    /// 同一ブロックへの「直近確保」が0.1秒おきに36回並んでいた)。
+    private var lastImmediateEnsuredBlockIndex: Int = -1
+
     private func prefetchImmediateNextBlockIfNeeded() {
         var index = currentSpeechBlockIndex + 1
         // 直後に発話しないブロック(他エンジン・空白のみ)は読み飛ばして、
@@ -325,9 +330,16 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             let styleId = VoicevoxCore.styleId(fromVoiceIdentifier: block.voiceIdentifier)
             let text = block.speechText
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || Self.hasNoSpeakableCharacter(text) { continue }
+            let blockIndex = index - 1
             if VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId) == nil {
-                VoicevoxPerformanceMonitor.shared.recordEvent("直近確保 block=\(index - 1) style=\(styleId)")
-                VoicevoxCore.shared.schedulePrefetch(text: text, styleId: styleId)
+                if lastImmediateEnsuredBlockIndex != blockIndex {
+                    lastImmediateEnsuredBlockIndex = blockIndex
+                    VoicevoxPerformanceMonitor.shared.recordEvent("直近確保 block=\(blockIndex) style=\(styleId)")
+                    // 積まれている(もっと先の)先行合成より優先させる。
+                    VoicevoxCore.shared.schedulePrefetchUrgent(text: text, styleId: styleId)
+                }
+            } else {
+                lastImmediateEnsuredBlockIndex = blockIndex
             }
             return
         }

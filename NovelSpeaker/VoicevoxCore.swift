@@ -484,9 +484,26 @@ actor VoicevoxCore {
     /// 現在再生中のブロックより先のブロックを、実際に必要になる前にバックグラウンドで合成しておく。
     /// 二重起動(既にキャッシュ済み/進行中)は無視するので、何度呼んでも安全。
     /// 失敗しても黙って諦める(実際に必要になった時に synthesize() がその場で合成し直す)。
-    func prefetch(text: String, styleId: UInt32) {
+    /// 未完了のまま溜めておける先行合成の本数。
+    ///
+    /// 先行合成は投入順の直列鎖で実行されるため、積み過ぎると鎖の後ろに回った物ほど
+    /// 完了までの時間が伸びる。実機では一度に30件以上が積まれ、予約から完了まで
+    /// 218秒かかる状態になっていた(その間ずっと「未再生の貯金=0秒」で無音)。
+    /// 積むより先に手前から順に完成させる方が、再生には遥かに有利。
+    private let maxPendingPrefetchCount = 3
+
+    func prefetch(text: String, styleId: UInt32, isUrgent: Bool = false) {
         let key = Self.prefetchKey(text: text, styleId: styleId)
         if peekCache(key: key) != nil || pendingPrefetchTasks[key] != nil { return }
+        if isUrgent {
+            // 「次に再生するブロック」は、既に積まれている(もっと先の)先行合成より
+            // 優先しなければならない。直列鎖の最後尾に並べると、実機で観測されたように
+            // 200秒級のバックログの後ろに回されて必ず間に合わなくなる。
+            // 未完了の予約を破棄して鎖を作り直し、このブロックを先頭に置く。
+            cancelPendingPrefetch()
+        } else if pendingPrefetchTasks.count >= maxPendingPrefetchCount {
+            return
+        }
         let snippet = Self.logSnippet(text)
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成開始] styleId=\(styleId) text=\"\(snippet)\"")
         VoicevoxPerformanceMonitor.shared.recordEvent("先読み予約 style=\(styleId) \"\(snippet)\"")
@@ -556,6 +573,11 @@ actor VoicevoxCore {
     }
 
     /// SpeechBlockSpeaker 等、actorの外(メインスレッド)から気軽に先行合成を蹴るための入り口。
+    /// 「次に再生するブロック」用。積まれている先行合成より優先して合成させる。
+    nonisolated func schedulePrefetchUrgent(text: String, styleId: UInt32) {
+        Task(priority: .userInitiated) { await self.prefetch(text: text, styleId: styleId, isUrgent: true) }
+    }
+
     nonisolated func schedulePrefetch(text: String, styleId: UInt32) {
         Task { await self.prefetch(text: text, styleId: styleId) }
     }
@@ -623,6 +645,7 @@ final class VoicevoxCore {
     }
 
     func schedulePrefetch(text: String, styleId: UInt32) {}
+    func schedulePrefetchUrgent(text: String, styleId: UInt32) {}
     func schedulePrefetchCacheClear() {}
     func scheduleCancelPendingPrefetch() {}
 
