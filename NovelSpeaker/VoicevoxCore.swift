@@ -197,19 +197,50 @@ actor VoicevoxCore {
             }
             openJTalk = jtalkNotNil
 
-            var options = voicevox_make_default_initialize_options()
-            options.acceleration_mode = VOICEVOX_ACCELERATION_MODE_CPU
-            options.cpu_num_threads = 0 // 環境に合わせて自動
-
-            var synth: OpaquePointer?
-            let synthResult = voicevox_synthesizer_new(ortNotNil, jtalkNotNil, options, &synth)
-            guard synthResult == VOICEVOX_RESULT_OK, let synthNotNil = synth else {
-                throw VoicevoxCoreError.core(synthResult)
-            }
-            synthesizer = synthNotNil
+            try createSynthesizer(onnxruntime: ortNotNil, openJTalk: jtalkNotNil)
         }
 
         try reloadStyleCatalog(voiceModelDirectoryPaths: voiceModelDirectoryPaths)
+    }
+
+    /// 現在の設定値(cpu_num_threads)で synthesizer を作る。
+    private func createSynthesizer(onnxruntime: OpaquePointer, openJTalk: OpaquePointer) throws {
+        var options = voicevox_make_default_initialize_options()
+        options.acceleration_mode = VOICEVOX_ACCELERATION_MODE_CPU
+        // 0 = 環境に合わせて自動(= 全コアを使う)。
+        // 自動のままだと ONNX が全コアでスレッドを回し、実機ログで CPU 率が 200〜290% まで
+        // 上がる事を確認している。バックグラウンドの CPU 上限(60秒平均80%)超過による
+        // 強制終了を避けられるかを実測するため、ここを可変にしている。
+        options.cpu_num_threads = Self.configuredCPUNumThreads
+
+        var synth: OpaquePointer?
+        let synthResult = voicevox_synthesizer_new(onnxruntime, openJTalk, options, &synth)
+        guard synthResult == VOICEVOX_RESULT_OK, let synthNotNil = synth else {
+            throw VoicevoxCoreError.core(synthResult)
+        }
+        synthesizer = synthNotNil
+        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [synthesizer生成] cpu_num_threads=\(Self.configuredCPUNumThreads)")
+    }
+
+    /// cpu_num_threads を変更して synthesizer を作り直す。
+    /// スレッド数は synthesizer の生成時オプションなので、変更には作り直しが必要。
+    /// 比較計測を公平にするため、合成済みキャッシュと性能集計もリセットする。
+    func reconfigureCPUNumThreads(_ threads: UInt16) throws {
+        Self.configuredCPUNumThreads = threads
+        cancelPendingPrefetch()
+        clearCache()
+        guard let ort = onnxruntime, let jtalk = openJTalk else {
+            // まだ setUp されていない場合は、設定だけ保存しておけば次の setUp で反映される。
+            return
+        }
+        if let existing = synthesizer {
+            voicevox_synthesizer_delete(existing)
+            synthesizer = nil
+        }
+        // 音声モデルは synthesizer に紐づいてロードされているので、読み直しが必要。
+        loadedVvmPaths.removeAll()
+        try createSynthesizer(onnxruntime: ort, openJTalk: jtalk)
+        VoicevoxPerformanceMonitor.shared.resetForTesting()
     }
 
     /// 指定ディレクトリ群にある *.vvm を全部 open→メタ取得→close して話者カタログを作り直す。
@@ -282,6 +313,20 @@ actor VoicevoxCore {
             throw VoicevoxCoreError.core(loadResult)
         }
         loadedVvmPaths.insert(style.vvmPath)
+    }
+
+    /// ONNX に渡す CPU スレッド数(0 = 自動 = 全コア)。
+    /// バックグラウンドの CPU 上限超過による強制終了を避けられるかの実測用に可変にしている。
+    /// synthesizer 生成時オプションなので、変更を反映するには reconfigureCPUNumThreads() を使う。
+    static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
+    static var configuredCPUNumThreads: UInt16 {
+        get {
+            // 未設定(キー無し)なら従来どおり 0(自動)。
+            return UInt16(clamping: UserDefaults.standard.integer(forKey: cpuNumThreadsUserDefaultsKey))
+        }
+        set {
+            UserDefaults.standard.set(Int(newValue), forKey: cpuNumThreadsUserDefaultsKey)
+        }
     }
 
     private static func prefetchKey(text: String, styleId: UInt32) -> String {
@@ -533,6 +578,15 @@ final class VoicevoxCore {
 
     /// ログ用(スタブ側は合成しないので常に 0)。
     func cachedAudioSecondsForLogging() -> Double { return 0 }
+
+    static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
+    static var configuredCPUNumThreads: UInt16 {
+        get { return UInt16(clamping: UserDefaults.standard.integer(forKey: cpuNumThreadsUserDefaultsKey)) }
+        set { UserDefaults.standard.set(Int(newValue), forKey: cpuNumThreadsUserDefaultsKey) }
+    }
+    func reconfigureCPUNumThreads(_ threads: UInt16) throws {
+        Self.configuredCPUNumThreads = threads
+    }
 }
 
 #endif

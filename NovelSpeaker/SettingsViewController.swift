@@ -1995,6 +1995,35 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         }.build().show()
                 }
             })
+            // VOICEVOX の合成に使う CPU スレッド数(計測用)。
+            // 自動(=全コア)だと ONNX が CPU を 200〜290% 使い、バックグラウンドの
+            // CPU 上限(60秒平均80%)超過でプロセスが強制終了される事を実機で確認したため、
+            // どの設定なら生き残れるかを実測できるようにしている。
+            if VoicevoxCore.isAvailableOnThisOS {
+                section
+                <<< PickerInputRow<String>() {
+                    $0.title = NSLocalizedString("SettingsViewController_VoicevoxCPUNumThreads", comment: "VOICEVOXの合成に使うCPUスレッド数")
+                    $0.options = ["自動", "1", "2", "3", "4"]
+                    let current = VoicevoxCore.configuredCPUNumThreads
+                    $0.value = current == 0 ? "自動" : "\(current)"
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ row in
+                    let threads: UInt16
+                    if let value = row.value, value != "自動", let parsed = UInt16(value) {
+                        threads = parsed
+                    } else {
+                        threads = 0
+                    }
+                    Task {
+                        do {
+                            try await VoicevoxCore.shared.reconfigureCPUNumThreads(threads)
+                            AppInformationLogger.AddLog(message: "[VOICEVOX性能] スレッド数を \(threads == 0 ? "自動" : "\(threads)") に変更しました(合成キャッシュと集計をリセット)", isForDebug: true)
+                        } catch {
+                            AppInformationLogger.AddLog(message: "[VOICEVOX性能] スレッド数の変更に失敗: \(error.localizedDescription)", isForDebug: true)
+                        }
+                    }
+                })
+            }
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AppInformation_IncludeForDebug_OutputByJSON", comment:"アプリ内エラーのお知らせをJSONで取り出す")
