@@ -172,10 +172,18 @@ final class VoicevoxPerformanceMonitor {
     private var dutyWindow = CPUDutyWindow(windowSeconds: osBackgroundCPUWindowSeconds)
     private var rtf = RTFAccumulator()
     private var lastLoggedAt: Double = 0
+    private var lastPersistedAt: Double = 0
     /// 現在の再生速度倍率(VoicevoxSpeaker が設定時に教えてくれる)。
     private var playbackRate: Double = 1.0
     /// ログが出過ぎないように、最短でもこの間隔をあける。
     private let logIntervalSeconds: Double = 10.0
+    /// アプリ内ログ(設定画面から見られる方)へ残す間隔。
+    /// AppInformationLogger.AddLog は呼び出しスレッドで UserDefaults の
+    /// 配列全体(最大1000件)を読み書きする同期処理なので、合成スレッドを塞がないよう
+    /// NSLog より粗い間隔にし、かつ書き込み自体は別キューに逃がす。
+    private let persistIntervalSeconds: Double = 30.0
+    /// アプリ内ログへの書き込みを合成スレッドから追い出すための専用キュー。
+    private let persistQueue = DispatchQueue(label: "NovelSpeaker.VoicevoxPerf.persist", qos: .utility)
 
     private init() {}
 
@@ -219,6 +227,8 @@ final class VoicevoxPerformanceMonitor {
         let spanned = dutyWindow.spannedSeconds
         let shouldLog = force || (now - lastLoggedAt) >= logIntervalSeconds
         if shouldLog { lastLoggedAt = now }
+        let shouldPersist = shouldLog && ((now - lastPersistedAt) >= persistIntervalSeconds)
+        if shouldPersist { lastPersistedAt = now }
         let snapshotRTF = rtf
         let currentPlaybackRate = playbackRate
         lock.unlock()
@@ -263,7 +273,17 @@ final class VoicevoxPerformanceMonitor {
         fields.append("生成音声計=\(String(format: "%.1f", snapshotRTF.totalAudioSeconds))秒")
         fields.append("合成済み貯金=\(String(format: "%.1f", VoicevoxCore.shared.cachedAudioSecondsForLogging()))秒")
 
-        NSLog("NovelSpeaker.VoicevoxPerf: [\(VoicevoxCore.logTimestamp())] [状況] \(fields.joined(separator: " "))")
+        let line = fields.joined(separator: " ")
+        NSLog("NovelSpeaker.VoicevoxPerf: [\(VoicevoxCore.logTimestamp())] [状況] \(line)")
+
+        // Mac に繋がずに実機で測れるよう、アプリ内ログ(設定→「アプリ内エラーのお知らせ
+        // (デバッグ用も含む)」から閲覧・コピーできる)にも残す。USB接続すると AC 給電になり
+        // そもそもバックグラウンドCPU上限が適用されなくなるため、無線/非接続で測れる事が重要。
+        if shouldPersist {
+            persistQueue.async {
+                AppInformationLogger.AddLog(message: "[VOICEVOX性能] \(line)", isForDebug: true)
+            }
+        }
     }
 
     /// テスト用に集計をリセットする。
