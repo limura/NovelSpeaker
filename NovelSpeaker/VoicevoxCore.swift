@@ -92,57 +92,27 @@ actor VoicevoxCore {
     // 段落の先行合成が終わるまでHITログすら出ない」という現象として確認した
     // (キャッシュそのものは十分前に用意できていたのに、参照するための「actorの順番待ち」
     //  だけで無音になっていた)。読み出しをロックだけで完結させる事で、この種の待ちを無くす。
-    private let cacheLock = NSLock()
-    nonisolated(unsafe) private var prefetchedWavUnsafe: [String: Data] = [:]
-    // 際限なく貯め込み続けないよう、挿入順で古いものから追い出す上限を設ける
-    // (会話文の相槌等の短い文字列が主な再利用対象なので、これだけあれば十分実用になる)。
-    private let prefetchedWavCapacity = 64
-    // WAVは 24kHz/mono/16bit なので1秒あたり約48KB、長いブロックだと1本で数MBになる。
-    // エントリ数だけの上限だと最悪数十〜100MB級まで太り得るため、合計バイト数でも制限する
-    // (超えたら古い物から追い出す。読み上げ済みの過去のWAVを持ち続けるよりも、
-    //  直近の使い回し(会話文の相槌等)が効けば十分)。
-    private let prefetchedWavTotalByteLimit = 16 * 1024 * 1024
-    nonisolated(unsafe) private var prefetchedWavOrderUnsafe: [String] = []
-    nonisolated(unsafe) private var prefetchedWavTotalBytesUnsafe = 0
+    // 追い出しの順序が要点なので、実体は VoicevoxWavCache に切り出してある。
+    // 会話文の相槌等の短い文字列が再利用されるので、エントリ数は多めに持つ。
+    nonisolated let wavCache = VoicevoxWavCache(entryCapacity: 64, totalByteLimit: 16 * 1024 * 1024)
 
     // actorへ入らずに(=今actorが何をしていても待たされずに)呼べるよう、あえて nonisolated。
     nonisolated private func peekCache(key: String) -> Data? {
-        cacheLock.lock()
-        defer { cacheLock.unlock() }
-        return prefetchedWavUnsafe[key]
+        return wavCache.peek(key: key)
     }
 
     nonisolated private func storeCache(key: String, data: Data) {
-        cacheLock.lock()
-        defer { cacheLock.unlock() }
-        if let oldData = prefetchedWavUnsafe[key] {
-            prefetchedWavTotalBytesUnsafe -= oldData.count
-        } else {
-            prefetchedWavOrderUnsafe.append(key)
-        }
-        prefetchedWavUnsafe[key] = data
-        prefetchedWavTotalBytesUnsafe += data.count
-        while prefetchedWavOrderUnsafe.count > prefetchedWavCapacity
-            || (prefetchedWavTotalBytesUnsafe > prefetchedWavTotalByteLimit && prefetchedWavOrderUnsafe.count > 1) {
-            let oldestKey = prefetchedWavOrderUnsafe.removeFirst()
-            if let removed = prefetchedWavUnsafe.removeValue(forKey: oldestKey) {
-                prefetchedWavTotalBytesUnsafe -= removed.count
-            }
-        }
+        wavCache.store(key: key, data: data)
     }
 
     /// 指定テキストが先行合成済みなら、その WAV のバイト数を返す(未合成なら nil)。
     /// 「未再生の貯金が何秒あるか」を数えるために使う。actorへ入らず参照できる。
     nonisolated func cachedWavByteCount(text: String, styleId: UInt32) -> Int? {
-        return peekCache(key: Self.prefetchKey(text: text, styleId: styleId))?.count
+        return wavCache.byteCount(key: Self.prefetchKey(text: text, styleId: styleId))
     }
 
     nonisolated private func clearCache() {
-        cacheLock.lock()
-        defer { cacheLock.unlock() }
-        prefetchedWavUnsafe.removeAll()
-        prefetchedWavOrderUnsafe.removeAll()
-        prefetchedWavTotalBytesUnsafe = 0
+        wavCache.clear()
     }
 
     // 先行合成の待ち行列(「次に何を合成すべきか」の帳簿)。
@@ -482,13 +452,7 @@ actor VoicevoxCore {
     /// ログ用: 現在キャッシュ(先行合成済み)として持っている音声の合計秒数。
     /// 「あとどれだけ貯金があるか」を実機ログで見るために使う。
     nonisolated func cachedAudioSecondsForLogging() -> Double {
-        cacheLock.lock()
-        let bytes = prefetchedWavTotalBytesUnsafe
-        let count = prefetchedWavUnsafe.count
-        cacheLock.unlock()
-        // 各エントリに WAV ヘッダ分が含まれるので、その分を差し引いてから秒数換算する。
-        let payloadBytes = max(0, bytes - count * VoicevoxPerformanceMonitor.wavHeaderByteCount)
-        return Double(payloadBytes) / (VoicevoxPerformanceMonitor.outputSampleRate * VoicevoxPerformanceMonitor.outputBytesPerFrame)
+        return wavCache.totalAudioSeconds()
     }
 
     // ログ用に先頭数文字だけ見えるようにする(全文は長すぎて読みにくいため)。
@@ -512,6 +476,10 @@ actor VoicevoxCore {
     nonisolated func synthesize(text: String, styleId: UInt32) async throws -> Data {
         let key = Self.prefetchKey(text: text, styleId: styleId)
         if let cached = peekCache(key: key) {
+            // 再生に使い終わった事を記録する。キャッシュが上限に達した時、
+            // これが付いている物から先に捨てる(付いていない=まだ再生していない物を
+            // 捨てると、用意できていたのに再生直前で消える事になる)。
+            wavCache.markPlayed(key: key)
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュHIT] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
             VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
             VoicevoxPerformanceMonitor.shared.recordEvent("再生HIT style=\(styleId) \"\(Self.logSnippet(text))\"")
