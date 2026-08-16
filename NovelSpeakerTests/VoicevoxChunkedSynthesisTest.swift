@@ -128,6 +128,56 @@ class VoicevoxChunkBalanceTest: XCTestCase {
     }
 }
 
+// 区切り文字が上限までに現れない場合の扱い。
+//
+// ぶつ切りにすると発音そのものが変わってしまう(実機で「安全係数(1.25倍)を掛」と
+// 「けた上で〜」に分かれ、「をかけ」「けたうえで」と読まれた)。繋ぎ目の無音を削るような
+// 緩和もできないので、まずは上限を伸ばして区切り文字を探す。
+// ただし無制限には伸ばせない(合成の入力が長いと ONNX Runtime が確保する内部メモリが
+// 増えて戻らなくなる。ブロック自体の上限も160文字)。伸ばしても見つからなければ諦めて切る。
+class VoicevoxChunkBoundarySearchTest: XCTestCase {
+
+    // 上限を少し超えた所に区切り文字があるなら、そこまで伸ばして区切る事。
+    func testExtendsBeyondTheLimitToFindAPunctuation() {
+        // 上限20文字。20文字の位置は語の途中で、25文字目に「、」がある。
+        let text = "安全係数を掛けた上でどの実測値も下回らないように、上側へ倒しているので余裕があります。"
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 20, minimumCharacterCount: 1)
+        let first = try! XCTUnwrap(chunks.first)
+        XCTAssertTrue(first.hasSuffix("、"), "上限を伸ばしてでも区切り文字で切るべき。実際: \(first)")
+        XCTAssertEqual(chunks.joined(), text)
+    }
+
+    // 伸ばす幅には上限があり、それを超えてまでは探さない事
+    // (合成の入力が長くなり過ぎるとメモリを圧迫するため)。
+    func testDoesNotExtendBeyondTheHardMaximum() {
+        // 区切り文字が遥か先にしか無い文。
+        let text = String(repeating: "あ", count: 300) + "。"
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 20, minimumCharacterCount: 1, hardMaxCharacterCount: 60)
+        for chunk in chunks {
+            XCTAssertLessThanOrEqual(chunk.count, 60, "伸ばす上限を超えてはいけない")
+        }
+        XCTAssertEqual(chunks.joined(), text)
+    }
+
+    // 伸ばしても区切り文字が無ければ、諦めてぶつ切りにする(予算超過で殺される方が困る)。
+    func testFallsBackToHardCutWhenNoPunctuationEvenAfterExtending() {
+        let text = String(repeating: "あ", count: 100)
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 20, minimumCharacterCount: 1, hardMaxCharacterCount: 40)
+        XCTAssertGreaterThan(chunks.count, 1)
+        for chunk in chunks {
+            XCTAssertLessThanOrEqual(chunk.count, 40)
+        }
+        XCTAssertEqual(chunks.joined(), text)
+    }
+
+    // 上限内に区切り文字があるなら、伸ばさずにそこで切る事(伸ばすのは最後の手段)。
+    func testDoesNotExtendWhenAPunctuationIsWithinTheLimit() {
+        let text = "あいうえお、かきくけこさしすせそたちつてとなにぬねの。はひふへほ"
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 20, minimumCharacterCount: 1)
+        XCTAssertEqual(chunks.first, "あいうえお、", "上限内の区切り文字を使うべき")
+    }
+}
+
 class VoicevoxWavJoinerTest: XCTestCase {
 
     private let sampleRate = 24000

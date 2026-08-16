@@ -34,10 +34,22 @@ enum VoicevoxTextChunker {
     /// 収まらないとしてもここより細かくはしない(収まらない分は待って対処する)。
     static let defaultMinimumCharacterCount = 40
 
+    /// 区切り文字を探して上限を伸ばしてよい限界。
+    ///
+    /// 上限までに区切り文字が無い時にぶつ切りにすると、発音そのものが変わってしまう
+    /// (実機で「安全係数(1.25倍)を掛」と「けた上で〜」に分かれ、「をかけ」「けたうえで」と
+    ///  読まれた)。繋ぎ目の無音を削るような緩和も効かないので、まずは上限を伸ばして探す。
+    /// ただし無制限には伸ばせない。合成の入力が長いと ONNX Runtime がその入力サイズに応じた
+    /// 内部メモリを確保して解放しないため、メモリが増えて戻らなくなる
+    /// (StoryTextClassifier 側でブロック自体を160文字までに抑えているのと同じ理由)。
+    static let defaultHardMaxCharacterCount = 160
+
     /// テキストを、各断片が maxCharacterCount 以下になるように句読点で分割する。
     /// 上限に収まっているなら分割しない(そのまま1つで返す)。
-    /// - Parameter minimumCharacterCount: これ以上細かくは分割しない長さ。
-    static func split(text: String, maxCharacterCount: Int, minimumCharacterCount: Int = defaultMinimumCharacterCount) -> [String] {
+    /// - Parameters:
+    ///   - minimumCharacterCount: これ以上細かくは分割しない長さ。
+    ///   - hardMaxCharacterCount: 区切り文字を探して上限を伸ばしてよい限界。
+    static func split(text: String, maxCharacterCount: Int, minimumCharacterCount: Int = defaultMinimumCharacterCount, hardMaxCharacterCount: Int = defaultHardMaxCharacterCount) -> [String] {
         if text.isEmpty { return [] }
         let limit = max(1, max(maxCharacterCount, minimumCharacterCount))
         if text.count <= limit { return [text] }
@@ -58,12 +70,28 @@ enum VoicevoxTextChunker {
             // 上限の範囲内で一番後ろにある区切り文字の直後で切る(できるだけ長く取り、
             // 繋ぎ目の数を減らす)。一つも無ければ諦めて上限位置でぶつ切りにする。
             var cutIndex = windowEnd
+            var foundBoundary = false
             var searchIndex = window.endIndex
             while searchIndex > window.startIndex {
                 searchIndex = window.index(before: searchIndex)
                 if boundaryCharacters.contains(window[searchIndex]) {
                     cutIndex = window.index(after: searchIndex)
+                    foundBoundary = true
                     break
+                }
+            }
+            if foundBoundary == false {
+                // 上限までに区切り文字が無かった。ぶつ切りは発音が変わってしまうので、
+                // 限界まで伸ばして区切り文字を探す。見つからなければ諦めて上限位置で切る。
+                let extendedEndOffset = min(remaining.count, max(balancedLimit, hardMaxCharacterCount))
+                let extendedEnd = remaining.index(remaining.startIndex, offsetBy: extendedEndOffset)
+                var extendedSearchIndex = windowEnd
+                while extendedSearchIndex < extendedEnd {
+                    if boundaryCharacters.contains(remaining[extendedSearchIndex]) {
+                        cutIndex = remaining.index(after: extendedSearchIndex)
+                        break
+                    }
+                    extendedSearchIndex = remaining.index(after: extendedSearchIndex)
                 }
             }
             result.append(String(remaining[remaining.startIndex..<cutIndex]))
