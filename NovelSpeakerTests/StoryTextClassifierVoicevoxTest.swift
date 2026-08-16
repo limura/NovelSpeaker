@@ -47,6 +47,60 @@ class StoryTextClassifierVoicevoxTest: XCTestCase {
         XCTAssertLessThanOrEqual(first.displayText.count, 160, "絶対上限は超えない")
     }
 
+    // 絶対上限まで待っても自然な切れ目が来ない原因が「次のピースが長い」場合、
+    // そのピースの先頭にある句読点までだけを取り込んでブロックを閉じる。
+    //
+    // 実機で観測された例:
+    //   [17] 148文字 …「全国模試でも常に順位三桁」
+    //   [18]  57文字 「を叩きだしており、目指す大学の…」
+    // 148文字の時点では絶対上限(160)に達していないので閉じないが、次のピースを丸ごと
+    // 足すと160を超えるため、語の途中(「順位三桁」|「を叩きだしており、」)で分断されていた。
+    // 「を叩きだしており、」までなら157文字で収まるので、そこまで取り込んで閉じたい。
+    func testVoicevoxBlockAbsorbsLeadingFragmentUpToPunctuationInsteadOfCuttingMidWord() {
+        var pieces = Array(repeating: makeBlock(text: "あいうえおかきくけこ", type: "VOICEVOX"), count: 14) // 140文字、句読点なし
+        pieces.append(makeBlock(text: "さしすせそ", type: "VOICEVOX")) // 計145文字、まだ語の途中
+        // 丸ごと足すと絶対上限(160)を超える長いピース。先頭に「、」がある。
+        pieces.append(makeBlock(text: "をたたきだしており、めざすだいがくのごうかくりつはずっと", type: "VOICEVOX"))
+        let combined = StoryTextClassifier.ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: pieces, moreSplitMinimumLetterCount: 200, splitTargetLastLetters: [])
+        let first = try! XCTUnwrap(combined.first)
+        XCTAssertTrue(first.displayText.hasSuffix("、"),
+                      "次のピースの「、」までを取り込んで閉じるべき。実際の末尾: \(String(first.displayText.suffix(12)))")
+        XCTAssertLessThanOrEqual(first.displayText.count, 160, "絶対上限は超えない")
+        // 取り込んだ残りは失われず、次のブロックの先頭になる事。
+        let second = try! XCTUnwrap(combined.dropFirst().first)
+        XCTAssertTrue(second.displayText.hasPrefix("めざすだいがく"),
+                      "残りが次のブロックの先頭になるべき。実際: \(String(second.displayText.prefix(12)))")
+        // 全体の文字列が欠けたり重複したりしていない事。
+        let joined = combined.map { $0.displayText }.joined()
+        XCTAssertEqual(joined, pieces.map { $0.displayText }.joined(), "分割で文字列が失われてはいけない")
+    }
+
+    // 先頭の句読点までを取り込んでも絶対上限を超えてしまう場合は、無理に取り込まない。
+    func testVoicevoxBlockDoesNotAbsorbFragmentThatWouldExceedTheAbsoluteMax() {
+        var pieces = Array(repeating: makeBlock(text: "あいうえおかきくけこ", type: "VOICEVOX"), count: 15) // 150文字
+        // 「、」が遠すぎて、取り込むと160を超えてしまうピース。
+        pieces.append(makeBlock(text: "あいうえおかきくけこさしすせそ、たちつてと", type: "VOICEVOX"))
+        let combined = StoryTextClassifier.ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: pieces, moreSplitMinimumLetterCount: 200, splitTargetLastLetters: [])
+        for block in combined {
+            XCTAssertLessThanOrEqual(block.displayText.count, 160, "絶対上限は超えない")
+        }
+        let joined = combined.map { $0.displayText }.joined()
+        XCTAssertEqual(joined, pieces.map { $0.displayText }.joined(), "分割で文字列が失われてはいけない")
+    }
+
+    // 読み替え(mod)で表示文字列と発話文字列が異なるピースは、分割位置の対応関係を
+    // 安全に保てないので取り込み分割の対象にしない(既存の分割処理と同じ方針)。
+    func testModPieceIsNotSplitForAbsorption() {
+        var pieces = Array(repeating: makeBlock(text: "あいうえおかきくけこ", type: "VOICEVOX"), count: 15) // 150文字
+        pieces.append(SpeechBlockInfo(speechText: "カネにいとめ、をつけずに", displayText: "金に糸目、をつけずに", voiceIdentifier: "1", locale: "ja-JP", pitch: 1, rate: 1, volume: 1, delay: 0, isMod: true, type: "VOICEVOX"))
+        let combined = StoryTextClassifier.ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: pieces, moreSplitMinimumLetterCount: 200, splitTargetLastLetters: [])
+        // mod ピースは丸ごとのまま次のブロックへ回る(途中で切られない)。
+        XCTAssertTrue(combined.contains { $0.displayText.contains("金に糸目、をつけずに") },
+                      "modピースは分割されずにそのまま残るべき")
+        XCTAssertTrue(combined.contains { $0.speechText.contains("カネにいとめ、をつけずに") },
+                      "modピースの発話文字列も保たれるべき")
+    }
+
     // 同じ入力でも AVSpeechSynthesizer 側は既存動作のまま
     // (区切りが無ければ1ブロックに巨大化してもよい)である事を確認する。回帰防止。
     func testAVSpeechBlocksKeepExistingUnboundedBehavior() {

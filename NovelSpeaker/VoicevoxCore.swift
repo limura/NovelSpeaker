@@ -505,12 +505,15 @@ actor VoicevoxCore {
     /// あえて nonisolated: 「予約を積む」だけの帳簿処理が、実行中の合成(1本12秒前後の
     /// 同期的なC呼び出し)の完了待ちに巻き込まれないようにするため。以前は actor 隔離の
     /// prefetch() だったせいで、予約が登録されるまで実機で19秒かかっていた。
-    nonisolated func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) {
-        guard synthesisQueue.enqueue(blockIndex: blockIndex, text: text, styleId: styleId) else { return }
+    /// - Returns: 実際に予約が積まれたら true(既にキャッシュ済み/予約済み/上限で弾かれたら false)。
+    @discardableResult
+    nonisolated func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) -> Bool {
+        guard synthesisQueue.enqueue(blockIndex: blockIndex, text: text, styleId: styleId) else { return false }
         let snippet = Self.logSnippet(text)
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成予約] block=\(blockIndex) styleId=\(styleId) text=\"\(snippet)\"")
         VoicevoxPerformanceMonitor.shared.recordEvent("先読み予約 block=\(blockIndex) style=\(styleId) \"\(snippet)\"")
         startWorkerIfNeeded()
+        return true
     }
 
     /// 待ち行列から1件ずつ取り出して合成し続けるワーカーを、走っていなければ起動する。
@@ -644,7 +647,8 @@ final class VoicevoxCore {
         throw VoicevoxCoreError.notSetUp
     }
 
-    func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) {}
+    @discardableResult
+    func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) -> Bool { return false }
     func notePlaybackBlockIndex(_ index: Int) {}
     func schedulePrefetchCacheClear() {}
     func scheduleCancelPendingPrefetch() {}

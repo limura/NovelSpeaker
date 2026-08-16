@@ -474,6 +474,42 @@ class StoryTextClassifier {
         return voicevoxPieceSplitBoundaryCharacters.contains(last)
     }
 
+    /// 絶対上限に達してしまう時に、次のピースの「最初の区切り文字まで」だけを切り出す。
+    ///
+    /// 上限に達しても句読点等で終わっていなければ絶対上限まで待つ、という仕組みだけでは、
+    /// 次のピース自体が長い場合に「丸ごと足すと上限超過 → 足さずに閉じる」となり、結局
+    /// 語の途中で分断されてしまう(実機で 148文字「…常に順位三桁」|「を叩きだしており、…」)。
+    /// 先頭の「、」までなら収まるので、そこだけ取り込んで自然な位置で閉じる。
+    ///
+    /// 読み替え(mod)で表示文字列と発話文字列が異なるピースは、分割位置の対応関係を
+    /// 安全に保てないため対象外(splitOversizedVoicevoxPieceIfNeeded と同じ方針)。
+    /// - Parameter maxHeadLetterCount: 切り出してよい先頭部分の最大文字数
+    /// - Returns: (先頭部分, 残り)。切り出せない場合は nil。
+    private static func splitLeadingFragmentUpToBoundary(block:SpeechBlockInfo, maxHeadLetterCount:Int) -> (SpeechBlockInfo, SpeechBlockInfo)? {
+        guard maxHeadLetterCount > 0,
+              block.isMod == false,
+              block.displayText == block.speechText else { return nil }
+        let text = block.displayText
+        guard text.count > maxHeadLetterCount else { return nil }
+        let windowEnd = text.index(text.startIndex, offsetBy: maxHeadLetterCount)
+        var cutIndex:String.Index? = nil
+        var searchIndex = text.startIndex
+        while searchIndex < windowEnd {
+            if voicevoxPieceSplitBoundaryCharacters.contains(text[searchIndex]) {
+                cutIndex = text.index(after: searchIndex)
+                break
+            }
+            searchIndex = text.index(after: searchIndex)
+        }
+        guard let cutIndex = cutIndex, cutIndex < text.endIndex else { return nil }
+        let head = String(text[text.startIndex..<cutIndex])
+        let tail = String(text[cutIndex...])
+        // delay(ピースを読み終えた後の間)は最後のピースにだけ残す。
+        let headBlock = SpeechBlockInfo(speechText: head, displayText: head, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: 0, isMod: false, type: block.type)
+        let tailBlock = SpeechBlockInfo(speechText: tail, displayText: tail, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay, isMod: false, type: block.type)
+        return (headBlock, tailBlock)
+    }
+
     private static func splitOversizedVoicevoxPieceIfNeeded(block:SpeechBlockInfo) -> [SpeechBlockInfo] {
         guard block.type == "VOICEVOX",
               block.displayText.count > voicevoxHardCapLetterCount,
@@ -536,6 +572,17 @@ class StoryTextClassifier {
                     && combinedCount >= voicevoxHardCapLetterCount
                     && (Self.endsWithSplitBoundary(current.displayText)
                         || combinedCount >= voicevoxAbsoluteMaxLetterCount)
+                // 語の途中で閉じるしかない状況(絶対上限に達したのに句読点等で終わっていない)なら、
+                // 次のピースの先頭にある句読点までだけを取り込んでから閉じる。
+                if forceCloseForVoicevoxCap,
+                   Self.endsWithSplitBoundary(current.displayText) == false,
+                   let (head, tail) = Self.splitLeadingFragmentUpToBoundary(block: block, maxHeadLetterCount: voicevoxAbsoluteMaxLetterCount - currentDisplayTextCount),
+                   current.Add(block: head) {
+                    result.append(current)
+                    currentBlock = CombinedSpeechBlock(block: tail)
+                    currentDisplayTextCount = tail.displayText.count
+                    continue
+                }
                 if forceCloseForVoicevoxCap {
                     // ハード上限に達する場合は、このピースを「足してから閉じる」のではなく
                     // 「足さずに閉じて、このピースから新しいブロックを始める」。

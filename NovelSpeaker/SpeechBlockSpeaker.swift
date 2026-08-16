@@ -242,14 +242,13 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // 挟まる他エンジンのブロックでは先読みを打ち切らず、飛び越えてその先のVOICEVOXブロックも
     // 探しにいく(ただし際限なく本文全体を舐めないよう、走査するブロック数には上限を設ける)。
     private let voicevoxPrefetchMaxBlocksToScan = 40
-    // 「現在のブロックの直後から毎回スキャンし直す」だけだと、1回の呼び出しで予約できる本数を
-    // 抑えた分だけ先読みの深さも短いままになってしまう。長いブロックを再生している間は
-    // (合成側にとって)実質アイドルな時間があるので、その間も willSpeakRange の度に
-    // refillVoicevoxPrefetchIfNeeded() が呼ばれる事を利用し、前回スキャンを打ち切った続きから
-    // 少しずつ予約を伸ばしていけるように、次にスキャンを始めるべき位置を覚えておく。
-    // (「一度に大量予約しない」という上限は保ったまま、複数回の呼び出しを跨いで
-    //  トータルの先読み量を伸ばせる)
-    private var nextPrefetchScanIndex = 0
+    // 以前は「前回スキャンを打ち切った続きから」予約を伸ばすために走査開始位置を
+    // 覚えていた(nextPrefetchScanIndex)。しかし待ち行列が満杯で予約を弾かれても
+    // 走査位置だけは前進するため、呼び出しを重ねるうちに開始位置が現在位置から
+    // 際限なく離れていき、実機では block=58 / 133 / 221 といった遥か先のブロックを
+    // 合成していた(その間、次に再生するブロックは未合成で無音)。
+    // 待ち行列側が重複・上限・優先順位を全て面倒見るようになったので、
+    // 毎回「現在位置の直後から」走査すれば良い。
     private func refillVoicevoxPrefetchIfNeeded() {
         // バックグラウンド かつ バッテリー駆動の時は、iOS の「60秒平均 CPU 80%」上限で
         // プロセスが強制終了されるため、先読みを最小限に絞る(VoicevoxPrefetchThrottle 参照)。
@@ -259,8 +258,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // 合成中でも即座に「次に合成すべき対象」が入れ替わる。
         VoicevoxCore.shared.notePlaybackBlockIndex(currentSpeechBlockIndex)
         // 既にどれだけ「未再生の貯金」があるかを見て、足りているなら合成しない。
-        // 1回あたりのブロック数を絞るだけでは、nextPrefetchScanIndex が呼び出しを跨いで
-        // 前進する分、総量に歯止めが掛からず先行合成が CPU を焼き続ける。実機ではこれが
+        // 1回あたりのブロック数を絞るだけでは、呼び出しの度に少しずつ予約が積み増され、
+        // 総量に歯止めが掛からず先行合成が CPU を焼き続ける。実機ではこれが
         // 「CPU率が100.8%に張り付いて背面CPU上限で強制終了される」事と、
         // 「再生に必要な合成が先行合成の待ち行列に並ばされ平均15秒待たされる(無音率74.8%)」
         // 事の共通の原因だった。貯金が足りている間は止めて CPU を空ける。
@@ -273,9 +272,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         VoicevoxPerformanceMonitor.shared.updateUnplayedLeadSeconds(currentLead)
         // 貯金の量に関わらず、「次に再生するブロック」だけは必ず先行合成しておく。
         //
-        // nextPrefetchScanIndex は前進のみで、貯金の上限で打ち切った回の分だけ
-        // 走査開始位置が現在位置から離れていく。その結果、貯金としては十分あるのに
-        // 「直近の1つ」だけが未合成、という状態が起こり得る。この1つを取りこぼすと
+        // 貯金の上限で走査を打ち切った回でも、「直近の1つ」だけが未合成という状態は
+        // 起こり得る(貯金の計算対象は次のブロック以降の連続区間なので、
+        // 他エンジンのブロックを挟むと数え方がずれる)。この1つを取りこぼすと
         // 再生側がその場で合成する事になり、実行中の先行合成の完了待ちと合わせて
         // 10秒以上の無音になる(実機で 再生時HIT率38.7% / MISS平均待ち11.5秒 として観測)。
         // ここだけは上限より優先して確保する。
@@ -283,7 +282,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         if currentLead >= parameters.targetLeadSeconds { return }
         var accumulated = 0
         var prefetchedBlockCount = 0
-        var index = max(currentSpeechBlockIndex + 1, nextPrefetchScanIndex)
+        var index = currentSpeechBlockIndex + 1
         var scanned = 0
         while index < speechBlockArray.count && scanned < parameters.maxBlocksToScan
             && prefetchedBlockCount < parameters.maxBlockCountToQueue
@@ -307,12 +306,15 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
                 index += 1
                 continue
             }
-            VoicevoxCore.shared.schedulePrefetch(blockIndex: index, text: text, styleId: styleId)
+            // 既にキャッシュ済み/予約済みのブロックは弾かれる。弾かれた分を
+            // 「予約した本数」に数えると、実際には1件も積めていないのに上限に達したと
+            // 誤認して走査を打ち切ってしまうので、実際に積めた物だけを数える。
+            if VoicevoxCore.shared.schedulePrefetch(blockIndex: index, text: text, styleId: styleId) {
+                prefetchedBlockCount += 1
+            }
             accumulated += text.count
-            prefetchedBlockCount += 1
             index += 1
         }
-        nextPrefetchScanIndex = index
     }
 
     /// 次に再生するVOICEVOXブロックが未合成なら、それだけを最優先で先行合成に出す。
@@ -553,7 +555,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         currentSpeakingLocation = 0
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
-        nextPrefetchScanIndex = 0
         lastImmediateEnsuredBlockIndex = -1
         Self.dumpSpeechBlocksForDiagnostics(blockArray: blockArray)
         // 本文が丸ごと差し替わったので、それまでのVOICEVOX先行合成キャッシュは無意味になる。
@@ -683,7 +684,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             currentSpeakingLocation = location
             // シーク後は先読みスキャン位置も新しい再生位置基準に戻す
             //(古い位置基準のままだと、後方シーク時に近傍のブロックが先読みされなくなる)。
-            nextPrefetchScanIndex = currentSpeechBlockIndex
             //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex), currentBlockSpeechOffset: \(currentBlockSpeechOffset)")
             return true
         }
@@ -712,7 +712,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             index -= 1
         }
         currentSpeakingLocation = currentDisplayStringOffset
-        nextPrefetchScanIndex = currentSpeechBlockIndex
         print("SetSpeechBlockIndex(\(index)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
         return true
     }
