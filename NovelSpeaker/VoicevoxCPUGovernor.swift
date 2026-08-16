@@ -25,9 +25,21 @@ import Foundation
 
 final class VoicevoxCPUGovernor {
 
+    /// 実際に行われた合成1本ぶんの CPU 使用。
+    ///
+    /// 合成は CPU を占有し続けるので、40秒かかった合成は「終了時刻の40秒前から終了時刻まで」を
+    /// 占めていた事になる。これを終了時刻の一点で使ったものとして数えると、実際には空いている
+    /// 窓を埋まっていると誤認して必要以上に待ってしまう(実機で CPU 率が20%前後にしかならず、
+    /// 上限80%に対して予算を大きく余らせる原因になっていた)。区間として扱う。
     private struct UsageRecord {
-        let time: Double
+        let endTime: Double
         let cpuSeconds: Double
+        var startTime: Double { return endTime - cpuSeconds }
+
+        /// 指定区間と重なっている CPU 秒。
+        func overlap(from: Double, to: Double) -> Double {
+            return max(0, min(endTime, to) - max(startTime, from))
+        }
     }
 
     private let lock = NSLock()
@@ -72,8 +84,8 @@ final class VoicevoxCPUGovernor {
     func recordSynthesis(cpuSeconds: Double, characterCount: Int, at now: Double) {
         lock.lock()
         defer { lock.unlock() }
-        usageRecords.append(UsageRecord(time: now, cpuSeconds: cpuSeconds))
-        usageRecords.removeAll { $0.time <= now - windowSeconds }
+        usageRecords.append(UsageRecord(endTime: now, cpuSeconds: cpuSeconds))
+        usageRecords.removeAll { $0.endTime <= now - windowSeconds }
         if characterCount > 0 && cpuSeconds > 0 {
             costSamples.append(CostSample(characterCount: characterCount, cpuSeconds: cpuSeconds))
             if costSamples.count > costSampleCapacity {
@@ -154,19 +166,22 @@ final class VoicevoxCPUGovernor {
         if estimate > budget { return .infinity }
 
         lock.lock()
-        let records = usageRecords.filter { $0.time > now - windowSeconds }.sorted { $0.time < $1.time }
+        let records = usageRecords
         lock.unlock()
 
-        var used = records.reduce(0.0) { $0 + $1.cpuSeconds }
-        if used + estimate <= budget { return 0 }
-        // 古い記録から順に窓の外へ出していき、収まるようになる時刻を求める。
-        for record in records {
-            used -= record.cpuSeconds
-            if used + estimate <= budget {
-                return max(0, record.time + windowSeconds - now)
-            }
+        // 判定するのは「この合成が終わる瞬間」の60秒窓。合成中ずっと CPU を使い続けるので、
+        // 終了時点が最も窓の中身が多くなる。d 秒後に始めるとすると、
+        // 窓は [now + d + estimate - windowSeconds, now + d + estimate]。
+        // その窓に入る過去の使用量 + 自分の見積り が予算に収まる最小の d を探す。
+        var d = 0.0
+        while d <= windowSeconds * 2 {
+            let windowEnd = now + d + estimate
+            let windowStart = windowEnd - windowSeconds
+            let used = records.reduce(0.0) { $0 + $1.overlap(from: windowStart, to: windowEnd) }
+            if used + estimate <= budget { return d }
+            d += 1
         }
-        return 0
+        return .infinity
     }
 
     /// 読み上げ停止やスタイル変更等で集計をやり直す時に使う。

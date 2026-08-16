@@ -33,17 +33,34 @@ class VoicevoxCPUGovernorTest: XCTestCase {
         XCTAssertEqual(wait, 0, accuracy: 0.001, "窓の中に何も無いなら即座に合成してよい")
     }
 
-    // 直前に使い切っていたら、古い記録が60秒窓から出るまで待たされる事。
+    // 直前に使い切っていたら、窓に空きができるまで待たされる事。
     // これが無いと、合成が終わった直後に次の合成へ突入して上限を超える。
-    func testWaitsUntilOldUsageLeavesTheWindow() {
+    //
+    // 待ち時間は「合成が終わる時点の60秒窓」で判定する。
+    // 合成は CPU を占有し続けるので、40秒の合成は「終了時刻の40秒前から現在まで」を
+    // 占めている。これを終了時刻の一点で使ったものとして数えると、実際には空いている
+    // 窓を埋まっていると誤認して、必要以上に待ってしまう(実機で CPU 率が20%前後に
+    // しかならず、上限80%に対して予算を大きく余らせる原因になっていた)。
+    func testWaitsUntilThereIsRoomInTheWindowAtCompletionTime() {
         let governor = makeGovernor()
         governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: 0)
-        // t=100 の時点で 40秒ぶん使った(窓には40秒ぶんある)。
+        // t=100 に終わった 40秒の合成 = 区間 [60, 100] を占めていた。
         governor.recordSynthesis(cpuSeconds: 40, characterCount: 400, at: 100)
-        // 予算は 0.8 × 60 = 48秒。あと 100文字(=10秒)積むと 50秒で超える。
+        // 予算は 0.8 × 60 = 48秒。次の合成(100文字=10秒)が終わる時点の窓に、
+        // 古い区間が38秒までしか入らなければよい。
         let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 100)
-        // t=160 に 40秒ぶんが窓から出るので、そこまで待てばよい。
-        XCTAssertEqual(wait, 60, accuracy: 0.001, "古い使用量が窓から出るまで待つべき")
+        XCTAssertEqual(wait, 12, accuracy: 1.0, "窓に空きができるまでの分だけ待つべき(丸ごと60秒ではない)")
+    }
+
+    // 合成の所要時間ぶん、実際に占有している区間として数える事の確認。
+    // 60秒窓に対して45秒の合成を繰り返す場合、終わった直後にもう一度始められるはずはないが、
+    // 「終了から60秒」も待つ必要はない。
+    func testLongSynthesisIsCountedAsAnIntervalNotAPoint() {
+        let governor = makeGovernor()
+        governor.recordSynthesis(cpuSeconds: 40, characterCount: 400, at: 100)
+        let wait = governor.waitSeconds(forCharacterCount: 400, limitRatio: 0.8, at: 100)
+        XCTAssertGreaterThan(wait, 0, "直後には始められない")
+        XCTAssertLessThan(wait, 60, "終了から丸ごと60秒待つ必要は無い")
     }
 
     // 窓から出た使用量は勘定に入らない事。

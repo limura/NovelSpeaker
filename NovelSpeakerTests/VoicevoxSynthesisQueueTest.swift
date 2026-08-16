@@ -189,8 +189,8 @@ class VoicevoxSynthesisQueueTest: XCTestCase {
     func testClaimRemovesPendingSoTheWorkerDoesNotDuplicateIt() {
         let queue = makeQueue()
         queue.enqueue(blockIndex: 5, text: "今すぐ要る", styleId: 3)
-        XCTAssertTrue(queue.claimForImmediateSynthesis(text: "今すぐ要る", styleId: 3),
-                      "待機中だった事が分かるはず")
+        XCTAssertEqual(queue.claimForImmediateSynthesis(text: "今すぐ要る", styleId: 3), .pending,
+                       "待機中だった事が分かるはず")
         XCTAssertEqual(queue.pendingCount, 0)
         XCTAssertNil(queue.takeNext(), "ワーカーが同じ物を重ねて合成してはいけない")
     }
@@ -199,7 +199,18 @@ class VoicevoxSynthesisQueueTest: XCTestCase {
     // (先行合成の取りこぼしなのか、単に間に合わなかっただけなのかの切り分けに使う)。
     func testClaimReportsWhenItWasNotQueued() {
         let queue = makeQueue()
-        XCTAssertFalse(queue.claimForImmediateSynthesis(text: "未予約", styleId: 3))
+        XCTAssertEqual(queue.claimForImmediateSynthesis(text: "未予約", styleId: 3), .notQueued)
+    }
+
+    // 合成中の物を横取りしようとした時は「合成中」と分かる事。
+    // ここで自分でも合成すると同じ物を二重に合成してしまい、CPU予算を食い合って
+    // どちらも進まなくなる(実機で1ブロックに4分以上かかる原因になっていた)。
+    func testClaimReportsInFlightSoTheCallerCanWaitInsteadOfDuplicating() {
+        let queue = makeQueue()
+        queue.enqueue(blockIndex: 1, text: "合成中", styleId: 3)
+        _ = queue.takeNext()
+        XCTAssertEqual(queue.claimForImmediateSynthesis(text: "合成中", styleId: 3), .inFlight)
+        XCTAssertTrue(queue.isInFlight(text: "合成中", styleId: 3), "横取りしても合成中のままであるべき")
     }
 
     // ロックで守られている事の最低限の確認(複数スレッドから同時に叩いても壊れない)。

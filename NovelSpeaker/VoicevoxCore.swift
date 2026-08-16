@@ -530,9 +530,21 @@ actor VoicevoxCore {
         //  - 未予約(not queued) … そもそも先行合成の対象から漏れていた = 取りこぼしの不具合。
         // 実機で「貯金は156秒あるのに再生時HIT率は48.9%」という食い違いが出ており、
         // どちらなのかで対処が全く変わるため、ここで確定させる。
-        let wasQueued = synthesisQueue.claimForImmediateSynthesis(text: text, styleId: styleId)
+        let claim = synthesisQueue.claimForImmediateSynthesis(text: text, styleId: styleId)
+        let wasQueued = claim != .notQueued
         VoicevoxPerformanceMonitor.shared.recordPlaybackCacheMiss(wasQueuedForPrefetch: wasQueued)
         VoicevoxPerformanceMonitor.shared.recordEvent("再生MISS(\(wasQueued ? "予約済" : "未予約")) style=\(styleId) \"\(snippet)\"")
+        if claim == .inFlight {
+            // ワーカーが今まさに同じ物を合成している。ここで自分でも合成すると
+            // 同じ物を二重に合成して CPU 予算を食い合い、どちらも進まなくなる
+            // (実機で同じブロックの「分割合成」が二重に走り、1ブロックに4分以上かかっていた)。
+            // 完成を待つ方が速い。
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:先行合成が実行中→その完成を待つ] styleId=\(styleId) text=\"\(snippet)\"")
+            VoicevoxPerformanceMonitor.shared.recordEvent("先行合成の完成待ち style=\(styleId) \"\(snippet)\"")
+            if let data = await waitForInFlightSynthesis(key: key) {
+                return data
+            }
+        }
         if wasQueued {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:予約済みだが未完了→追い越して合成] styleId=\(styleId) text=\"\(snippet)\"")
         } else {
@@ -614,6 +626,22 @@ actor VoicevoxCore {
             }
         }
     }
+
+    /// 先行合成のワーカーが実行中の合成の完成を待つ。
+    /// `await` の間 actor は空くので、ワーカー側の合成はその間に進む。
+    /// - Returns: 完成した音声。時間内に完成しなければ nil(呼び出し側が自分で合成する)。
+    private func waitForInFlightSynthesis(key: String) async -> Data? {
+        let deadline = Date().addingTimeInterval(Self.inFlightWaitTimeoutSeconds)
+        while Date() < deadline {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            if let cached = peekCache(key: key) { return cached }
+            // ワーカーが失敗・キャンセル等で降りた場合は待っても無駄なので抜ける。
+            if synthesisQueue.isInFlight(key: key) == false { return peekCache(key: key) }
+        }
+        return nil
+    }
+    /// 先行合成の完成を待つ上限。分割合成だと1ブロックに数分かかる事があるので長めに取る。
+    private static let inFlightWaitTimeoutSeconds = 300.0
 
     /// CPU予算を守りながら1ブロックぶんを合成する。
     ///

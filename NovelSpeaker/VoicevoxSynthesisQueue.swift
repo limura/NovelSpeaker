@@ -119,17 +119,29 @@ final class VoicevoxSynthesisQueue {
         }
     }
 
+    enum ClaimResult {
+        /// そもそも先行合成の対象から漏れていた(取りこぼしの不具合)。
+        case notQueued
+        /// 待機中だった。予約は取り消したので、呼び出し側がその場で合成してよい。
+        case pending
+        /// ワーカーが今まさに合成中。呼び出し側は自分で合成せず、その完成を待つべき。
+        case inFlight
+    }
+
     /// 再生側が cache MISS した時に、待機中の同じ予約を取り消して自分でその場合成するための入り口。
     /// ワーカーが同じ物を重ねて合成しないようにする。
-    /// - Returns: 待機中の予約があった(=先行合成には出ていたが間に合わなかった)なら true。
-    ///            false なら、そもそも先行合成の対象から漏れていた(取りこぼしの不具合)。
+    ///
+    /// 合成中(inFlight)だった場合に呼び出し側が自分でも合成すると、同じ物を二重に合成して
+    /// CPU 予算を食い合い、どちらも進まなくなる(実機で、同じブロックに対する
+    /// 「分割合成」が二重に走り、互いの予算待ちで1ブロックに4分以上かかっていた)。
     @discardableResult
-    func claimForImmediateSynthesis(text: String, styleId: UInt32) -> Bool {
+    func claimForImmediateSynthesis(text: String, styleId: UInt32) -> ClaimResult {
         let key = Self.key(text: text, styleId: styleId)
         lock.lock()
         defer { lock.unlock() }
-        if pending.removeValue(forKey: key) != nil { return true }
-        return inFlight[key] != nil
+        if inFlight[key] != nil { return .inFlight }
+        if pending.removeValue(forKey: key) != nil { return .pending }
+        return .notQueued
     }
 
     /// 待機中の予約を全て破棄する(読み上げ停止・シーク等)。
@@ -160,6 +172,12 @@ final class VoicevoxSynthesisQueue {
         lock.lock()
         defer { lock.unlock() }
         return pending[key] != nil
+    }
+
+    func isInFlight(key: String) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return inFlight[key] != nil
     }
 
     func isInFlight(text: String, styleId: UInt32) -> Bool {
