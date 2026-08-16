@@ -47,13 +47,32 @@ struct VoicevoxCacheGenerationProgress {
 /// 再生位置から先に、どれだけ音声が貯まっているか。
 enum VoicevoxCacheLead {
 
-    /// この秒数を下回っていたら、再生中でも生成を続ける。
+    /// この分数を下回っていたら、再生中でも生成を続ける。
     ///
     /// キャッシュから再生している間は合成の CPU がゼロなので、80% の予算が丸ごと空く。
     /// 生成には最良の条件で、ここで作っておかないと、キャッシュを使い切った瞬間から
     /// 無音だらけの実時間合成に戻ってしまう。
     /// 一方で十分に貯まっているなら、聴き終わらないかもしれない分を作るのは電池の無駄。
-    static let keepGeneratingBelowSeconds: Double = 15 * 60
+    ///
+    /// 適切な値は「どのくらい先まで聴き続けるか」「端末がどれだけ速いか」で変わり、
+    /// 手元の実測だけで決め打ちできる自信が無いので設定から変えられるようにしてある。
+    /// 0 にすると「再生中は生成しない」になる。
+    static let defaultKeepGeneratingBelowMinutes = 15
+    static let keepGeneratingBelowMinutesUserDefaultsKey = "NovelSpeaker.Voicevox.diskCacheKeepGeneratingBelowMinutes"
+
+    static var keepGeneratingBelowMinutes: Int {
+        get {
+            guard let stored = UserDefaults.standard.object(forKey: keepGeneratingBelowMinutesUserDefaultsKey) as? Int else {
+                return defaultKeepGeneratingBelowMinutes
+            }
+            return max(0, stored)
+        }
+        set { UserDefaults.standard.set(max(0, newValue), forKey: keepGeneratingBelowMinutesUserDefaultsKey) }
+    }
+
+    static var keepGeneratingBelowSeconds: Double {
+        return Double(keepGeneratingBelowMinutes) * 60
+    }
 
     /// 再生位置から先の、**途切れずに繋がっている**キャッシュの秒数。
     /// 穴の向こうに何時間分あっても、穴に当たった時点で無音になるので数えない。
@@ -67,8 +86,12 @@ enum VoicevoxCacheLead {
         return total
     }
 
+    static func shouldKeepGenerating(contiguousLeadSeconds: Double, thresholdSeconds: Double) -> Bool {
+        return contiguousLeadSeconds < thresholdSeconds
+    }
+
     static func shouldKeepGenerating(contiguousLeadSeconds: Double) -> Bool {
-        return contiguousLeadSeconds < keepGeneratingBelowSeconds
+        return shouldKeepGenerating(contiguousLeadSeconds: contiguousLeadSeconds, thresholdSeconds: keepGeneratingBelowSeconds)
     }
 }
 

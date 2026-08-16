@@ -88,6 +88,55 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
 
+    /// ディスクキャッシュに貯める音声の圧縮に、実機でどれだけ時間がかかるかを測る(デバッグ用)。
+    ///
+    /// 合成 1秒ぶんに対して圧縮が何%かが分かれば、「圧縮するくらいなら生で置く」を
+    /// 検討すべきかどうかが決まる。Mac では 0.2% 以下だったが、遅い端末では違うかもしれない。
+    private func measureVoicevoxCompressionCost() {
+        let text = Self.voicevoxComparisonText
+        let styleId = VoicevoxCore.cachedStyles.first?.styleId ?? 0
+        Task {
+            do {
+                await VoicevoxCore.setUpFromBundleIfNeeded()
+                let synthesisStart = Date()
+                let wav = try await VoicevoxCore.shared.debugSynthesize(text: text, styleId: styleId, splitCharacterCount: nil, trimJoinSilence: false)
+                let synthesisSeconds = Date().timeIntervalSince(synthesisStart)
+                let audioSeconds = VoicevoxAudioCompressor.durationSeconds(wav: wav)
+
+                // 1回だけだと初回のコーデック初期化が乗るので、3回測って平均を取る。
+                var encodeSeconds = 0.0
+                var encodedByteCount = 0
+                for _ in 0..<3 {
+                    let start = Date()
+                    let encoded = try VoicevoxAudioCompressor.encode(wav: wav)
+                    encodeSeconds += Date().timeIntervalSince(start)
+                    encodedByteCount = encoded.count
+                }
+                encodeSeconds /= 3
+
+                let ratio = synthesisSeconds > 0 ? encodeSeconds / synthesisSeconds * 100 : 0
+                AppInformationLogger.AddLog(message:
+                    "[VOICEVOX圧縮計測] 音声\(String(format: "%.1f", audioSeconds))秒 "
+                    + "合成\(String(format: "%.2f", synthesisSeconds))秒 "
+                    + "圧縮\(String(format: "%.0f", encodeSeconds * 1000))ms(合成の\(String(format: "%.2f", ratio))%) "
+                    + "\(wav.count / 1024)KB→\(encodedByteCount / 1024)KB "
+                    + "スレッド数=\(VoicevoxCore.threadCountDescription(VoicevoxCore.activeCPUNumThreads))",
+                    isForDebug: true)
+                await MainActor.run {
+                    NiftyUtility.EasyDialogOneButton(
+                        viewController: self,
+                        title: "圧縮の所要時間",
+                        message: "音声\(String(format: "%.1f", audioSeconds))秒ぶん\n合成: \(String(format: "%.2f", synthesisSeconds))秒\n圧縮: \(String(format: "%.0f", encodeSeconds * 1000))ms (合成の\(String(format: "%.2f", ratio))%)\n容量: \(wav.count / 1024)KB → \(encodedByteCount / 1024)KB",
+                        buttonTitle: nil, buttonAction: nil)
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogOneButton(viewController: self, title: "計測に失敗しました", message: error.localizedDescription, buttonTitle: nil, buttonAction: nil)
+                }
+            }
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         BehaviorLogger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
@@ -2136,6 +2185,27 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     $0.cell.textLabel?.numberOfLines = 0
                 }.onCellSelection({ [weak self] _, _ in
                     self?.playVoicevoxSplitComparison(splitCharacterCount: Self.voicevoxComparisonSplitLength, trimJoinSilence: false, label: "③分割のみ")
+                })
+                // ディスクキャッシュに貯める音声は AAC に圧縮する(生の1/10になる)。
+                // 手元(Mac)では 5秒の音声で 22ms と合成の 0.2% 以下だったが、
+                // 遅い端末でも本当に誤差なのかを実機で確かめられるようにしておく。
+                <<< ButtonRow() {
+                    $0.title = "VOICEVOX 音声圧縮の所要時間を測る"
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ [weak self] _, _ in
+                    self?.measureVoicevoxCompressionCost()
+                })
+                // 再生中に「この先の貯金」がこの時間を切っていたら生成を続ける。
+                // 適切な値は聴き方と端末の速さで変わるので、固定値にはしない。
+                <<< StepperRow() {
+                    $0.title = "再生中に生成を続ける貯金の下限(分・0で続けない)"
+                    $0.value = Double(VoicevoxCacheLead.keepGeneratingBelowMinutes)
+                    $0.cell.stepper.minimumValue = 0
+                    $0.cell.stepper.maximumValue = 180
+                    $0.cell.stepper.stepValue = 5
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ row in
+                    VoicevoxCacheLead.keepGeneratingBelowMinutes = Int(row.value ?? 15)
                 })
             }
             section

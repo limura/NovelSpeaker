@@ -94,6 +94,35 @@ class VoicevoxCacheLeadTest: XCTestCase {
         XCTAssertTrue(VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: threshold - 1))
         XCTAssertFalse(VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: threshold + 1))
     }
+
+    // 閾値は設定から変えられる事。
+    // 適切な値は「どのくらい先まで聴き続けるか」「端末の速さ」で変わるので、
+    // 実測だけで決め打ちにはできない。
+    func testThresholdIsConfigurable() {
+        let key = VoicevoxCacheLead.keepGeneratingBelowMinutesUserDefaultsKey
+        let original = UserDefaults.standard.object(forKey: key)
+        defer {
+            if let original = original { UserDefaults.standard.set(original, forKey: key) }
+            else { UserDefaults.standard.removeObject(forKey: key) }
+        }
+
+        UserDefaults.standard.removeObject(forKey: key)
+        XCTAssertEqual(VoicevoxCacheLead.keepGeneratingBelowMinutes, VoicevoxCacheLead.defaultKeepGeneratingBelowMinutes)
+
+        VoicevoxCacheLead.keepGeneratingBelowMinutes = 30
+        XCTAssertEqual(VoicevoxCacheLead.keepGeneratingBelowSeconds, 1800, accuracy: 0.01)
+        XCTAssertTrue(VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: 1200))
+
+        // 0 にすると「再生中は生成しない」になる事。
+        VoicevoxCacheLead.keepGeneratingBelowMinutes = 0
+        XCTAssertFalse(VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: 0))
+    }
+
+    // 明示的に閾値を渡す形でも動く事(設定に触らずに判断を組み立てられる)。
+    func testExplicitThreshold() {
+        XCTAssertTrue(VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: 10, thresholdSeconds: 60))
+        XCTAssertFalse(VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: 100, thresholdSeconds: 60))
+    }
 }
 
 class VoicevoxCacheGenerationStateTest: XCTestCase {
