@@ -43,14 +43,20 @@ class VoicevoxPrefetchThrottleTest: XCTestCase {
         XCTAssertEqual(p, throttled, "低電力モードでは充電中でも絞るはず")
     }
 
-    // 絞った側が本当に「より控えめ」になっている事(定数を後から触った時の保険)。
-    func testThrottledParametersAreStrictlySmaller() {
-        XCTAssertLessThan(throttled.maxBlockCountToQueue, normal.maxBlockCountToQueue)
-        XCTAssertLessThan(throttled.targetCharacterCount, normal.targetCharacterCount)
+    // 絞った側が前景側を上回らない事(定数を後から触った時の保険)。
+    //
+    // かつては「背面では厳しく絞る」のが CPU 上限対策の主役だったが、現在は
+    // VoicevoxCPUGovernor が合成の直前に予算を見て待たせる方式になっている。
+    // ここで絞り過ぎるとむしろ有害で、予約が尽きてワーカーが手空きになり、
+    // 予算が余っているのに合成が止まってしまう(実機で確認)。
+    // そのため「厳密に小さい」ではなく「上回らない」を保証する。
+    func testThrottledParametersAreNotLargerThanNormal() {
+        XCTAssertLessThanOrEqual(throttled.maxBlockCountToQueue, normal.maxBlockCountToQueue)
+        XCTAssertLessThanOrEqual(throttled.targetCharacterCount, normal.targetCharacterCount)
         XCTAssertLessThanOrEqual(throttled.minimumBlockCount, normal.minimumBlockCount)
-        XCTAssertLessThan(throttled.maxBlocksToScan, normal.maxBlocksToScan)
-        // 再生中ブロックの「次の1つ」は必ず合成しておきたいので、0 にはしない。
-        XCTAssertGreaterThanOrEqual(throttled.maxBlockCountToQueue, 1)
+        XCTAssertLessThanOrEqual(throttled.maxBlocksToScan, normal.maxBlocksToScan)
+        // 予約が尽きるとワーカーが手空きになるので、次の1つだけ、では足りない。
+        XCTAssertGreaterThanOrEqual(throttled.maxBlockCountToQueue, 2)
         XCTAssertGreaterThanOrEqual(throttled.minimumBlockCount, 1)
     }
 

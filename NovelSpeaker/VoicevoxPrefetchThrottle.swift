@@ -70,16 +70,23 @@ enum VoicevoxPrefetchThrottlePolicy {
         targetLeadSeconds: 300
     )
 
-    /// 背面かつバッテリー駆動時の絞り込み設定。
-    /// 「再生中のブロックの次の1つ」だけを合成しておく所まで落とし、
-    /// 再生ペースを大きく追い越して CPU を焼き続けないようにする。
+    /// 背面かつバッテリー駆動時の設定。
+    ///
+    /// 元々はここで「次の1つだけ」まで絞る事が CPU 上限対策の主役だったが、
+    /// 現在は VoicevoxCPUGovernor が合成の直前に予算を見て待たせるので、
+    /// CPU を抑える役目はそちらが持っている。ここで絞り過ぎると逆効果になる:
+    /// 先行合成の予約は発話の進行(willSpeakRange)に合わせて補充されるため、
+    /// 長い無音の間は補充が来ない。予約が1件しか無いとワーカーがすぐ手空きになり、
+    /// 予算が余っているのに合成が止まる(実機 iPhone 17 Pro Max で CPU 率が
+    /// 56〜61% にとどまり、無音率が理論値28%に対して42.5%になっていた)。
+    /// 予約はある程度の本数を持たせ、CPU の制御はガバナーに任せる。
     static let throttled = VoicevoxPrefetchParameters(
-        targetCharacterCount: 60,
-        minimumBlockCount: 1,
-        maxBlockCountToQueue: 1,
-        maxBlocksToScan: 12,
-        // 背面バッテリー時は、これだけ貯まったら合成を止めて CPU を空ける。
-        targetLeadSeconds: 60
+        targetCharacterCount: 300,
+        minimumBlockCount: 2,
+        maxBlockCountToQueue: 4,
+        maxBlocksToScan: 40,
+        // 貯金の上限だけは背面で控えめにしておく(合成済みWAVはメモリを食うため)。
+        targetLeadSeconds: 120
     )
 
     /// - Parameters:
