@@ -18,9 +18,14 @@
 //     「中途半端なファイルが1つ余分にある」以上の壊れ方をしない。
 //   - **鍵は内容アドレス方式**(styleId と読み上げ文字列から決まる)。
 //     読み替え辞書を変更しても、変わったブロックだけが作り直しになる。
-//   - **小説ごとのディレクトリ**。管理画面での「この小説だけ削除」と集計が
-//     ディレクトリ操作だけで成立する。
+//   - **小説ごと・話ごとのディレクトリ**。
+//       `<小説の鍵>/<話番号>/<ブロックの鍵>_<ミリ秒>.m4a`
+//     話ごとに掘るのは、1ディレクトリのファイル数を数十に抑えるためだけでなく、
+//     「20話目の何%まで作れたか」がそのディレクトリを数えるだけで求まるため。
 //   - 保存先は Application Support(Caches は OS に勝手に消される)+ バックアップ除外。
+//   - **端末ローカル限定**。他端末では話者(VVM)がダウンロードされているとは限らず、
+//     読み替え辞書も同じとは限らないので、共有しても使えない。
+//     よって Realm には持たせない(バックアップ/同期/コピーの並行リストが増えるため)。
 //
 
 import Foundation
@@ -33,23 +38,39 @@ struct VoicevoxDiskCacheSummary: Equatable {
     let byteCount: Int
 
     static let empty = VoicevoxDiskCacheSummary(entryCount: 0, audioSeconds: 0, byteCount: 0)
+
+    static func + (lhs: VoicevoxDiskCacheSummary, rhs: VoicevoxDiskCacheSummary) -> VoicevoxDiskCacheSummary {
+        return VoicevoxDiskCacheSummary(
+            entryCount: lhs.entryCount + rhs.entryCount,
+            audioSeconds: lhs.audioSeconds + rhs.audioSeconds,
+            byteCount: lhs.byteCount + rhs.byteCount
+        )
+    }
 }
 
 final class VoicevoxDiskCacheStore {
 
     static let shared = VoicevoxDiskCacheStore(rootDirectory: VoicevoxDiskCacheStore.defaultRootDirectory())
 
-    /// 保存する音声のファイル拡張子。生の WAV は 1秒あたり約48KB(20分で57MB)あるので、
-    /// AAC に圧縮して置く(20分で約5MB)。
+    /// 保存する音声のファイル拡張子。生の WAV は 1秒あたり約48KB(1時間で約170MB)あるので、
+    /// AAC に圧縮して置く(1時間で約15MB)。
     static let fileExtension = "m4a"
+
+    /// 小説ディレクトリに置く、小説IDを書いた印。
+    ///
+    /// ディレクトリ名は小説IDのハッシュなので元に戻せない。管理画面で
+    /// 「どの小説のキャッシュか」を出すためにこれを読む。
+    /// 失われても音声そのものは無事で、「不明な小説」として削除だけはできる
+    /// (索引と違って、壊れても整合性を取り直す必要が無い)。
+    private static let novelIDMarkerFileName = "novelID.txt"
 
     private let rootDirectory: URL
     private let fileManager = FileManager.default
     private let lock = NSLock()
 
-    /// ディレクトリの内容をメモリ上に写したもの(小説ディレクトリ名 → 鍵 → 実体)。
-    /// 索引「ファイル」ではないので壊れる心配は無く、初回参照時にディレクトリを
-    /// 1回読むだけで作れる。有無の判定を毎回 readdir せずに済ませるためのもの。
+    /// ディレクトリの内容をメモリ上に写したもの(話ディレクトリのパス → 鍵 → 実体)。
+    /// 索引「ファイル」ではないので壊れる心配は無く、初回参照時に readdir 1回で作れる。
+    /// 「もう作ってあるか」の判定を毎回ディレクトリを読まずに済ませるためのもの。
     private var listings: [String: [String: Entry]] = [:]
 
     private struct Entry {
@@ -86,12 +107,21 @@ final class VoicevoxDiskCacheStore {
         return sha256Hex(novelID)
     }
 
+    // MARK: - 場所
+
+    private func novelDirectory(novelID: String) -> URL {
+        return rootDirectory.appendingPathComponent(Self.directoryName(novelID: novelID), isDirectory: true)
+    }
+
+    private func chapterDirectory(novelID: String, chapterNumber: Int) -> URL {
+        return novelDirectory(novelID: novelID).appendingPathComponent("\(chapterNumber)", isDirectory: true)
+    }
+
     // MARK: - 保存と取り出し
 
-    func store(novelID: String, key: String, data: Data, durationSeconds: Double) throws {
-        let directoryName = Self.directoryName(novelID: novelID)
-        let directory = rootDirectory.appendingPathComponent(directoryName, isDirectory: true)
-        try prepareDirectories(novelDirectory: directory)
+    func store(novelID: String, chapterNumber: Int, key: String, data: Data, durationSeconds: Double) throws {
+        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
+        try prepareDirectories(novelID: novelID, chapterDirectory: directory)
 
         let milliseconds = max(0, Int((durationSeconds * 1000).rounded()))
         let fileName = "\(key)_\(milliseconds).\(Self.fileExtension)"
@@ -106,60 +136,85 @@ final class VoicevoxDiskCacheStore {
         try fileManager.moveItem(at: temporary, to: destination)
 
         lock.lock()
-        var listing = listings[directoryName] ?? loadListingUnsafe(directoryName: directoryName, directory: directory)
-        // 同じ鍵で長さの違う古いファイルが残っていたら消す(上書きではなく別名になるため)。
+        var listing = listingUnsafe(directory: directory)
+        // 同じ鍵で長さの違う古いファイルが残っていたら消す(名前が変わるので上書きにならない)。
         if let old = listing[key], old.fileName != fileName {
             try? fileManager.removeItem(at: directory.appendingPathComponent(old.fileName))
         }
         listing[key] = Entry(fileName: fileName, byteCount: data.count, durationSeconds: Double(milliseconds) / 1000)
-        listings[directoryName] = listing
+        listings[directory.path] = listing
         lock.unlock()
     }
 
-    func load(novelID: String, key: String) -> Data? {
-        guard let (directory, entry) = entryFor(novelID: novelID, key: key) else { return nil }
+    func load(novelID: String, chapterNumber: Int, key: String) -> Data? {
+        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
+        guard let entry = entry(directory: directory, key: key) else { return nil }
         return try? Data(contentsOf: directory.appendingPathComponent(entry.fileName))
     }
 
     /// 中身を読まずに有無だけを判定する(生成の再開時に「どこまで作れているか」を数えるため)。
-    func contains(novelID: String, key: String) -> Bool {
-        return entryFor(novelID: novelID, key: key) != nil
+    func contains(novelID: String, chapterNumber: Int, key: String) -> Bool {
+        return entry(directory: chapterDirectory(novelID: novelID, chapterNumber: chapterNumber), key: key) != nil
     }
 
-    private func entryFor(novelID: String, key: String) -> (URL, Entry)? {
-        let directoryName = Self.directoryName(novelID: novelID)
-        let directory = rootDirectory.appendingPathComponent(directoryName, isDirectory: true)
+    /// 保存してある音声の長さ。中身を読まずに求まる(ファイル名に入っているため)。
+    /// 「この先どれだけ再生ぶんが貯まっているか」の計算に使う。
+    func durationSeconds(novelID: String, chapterNumber: Int, key: String) -> Double? {
+        return entry(directory: chapterDirectory(novelID: novelID, chapterNumber: chapterNumber), key: key)?.durationSeconds
+    }
+
+    private func entry(directory: URL, key: String) -> Entry? {
         lock.lock()
         defer { lock.unlock() }
-        let listing = listings[directoryName] ?? loadListingUnsafe(directoryName: directoryName, directory: directory)
-        guard let entry = listing[key] else { return nil }
-        return (directory, entry)
+        return listingUnsafe(directory: directory)[key]
     }
 
     // MARK: - 集計
 
-    func summary(novelID: String) -> VoicevoxDiskCacheSummary {
-        let directoryName = Self.directoryName(novelID: novelID)
-        let directory = rootDirectory.appendingPathComponent(directoryName, isDirectory: true)
+    func summary(novelID: String, chapterNumber: Int) -> VoicevoxDiskCacheSummary {
+        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
         lock.lock()
-        let listing = listings[directoryName] ?? loadListingUnsafe(directoryName: directoryName, directory: directory)
+        let listing = listingUnsafe(directory: directory)
         lock.unlock()
         return Self.summarize(listing.values)
     }
 
+    func summary(novelID: String) -> VoicevoxDiskCacheSummary {
+        var total = VoicevoxDiskCacheSummary.empty
+        for chapterNumber in chapterNumbers(novelID: novelID) {
+            total = total + summary(novelID: novelID, chapterNumber: chapterNumber)
+        }
+        return total
+    }
+
     func totalSummary() -> VoicevoxDiskCacheSummary {
-        guard let directoryNames = try? fileManager.contentsOfDirectory(atPath: rootDirectory.path) else {
-            return .empty
+        var total = VoicevoxDiskCacheSummary.empty
+        for novelID in cachedNovelIDs() {
+            total = total + summary(novelID: novelID)
         }
-        var entries: [Entry] = []
-        for directoryName in directoryNames {
-            let directory = rootDirectory.appendingPathComponent(directoryName, isDirectory: true)
-            lock.lock()
-            let listing = listings[directoryName] ?? loadListingUnsafe(directoryName: directoryName, directory: directory)
-            lock.unlock()
-            entries.append(contentsOf: listing.values)
+        return total
+    }
+
+    /// キャッシュを持っている話の番号(小さい順)。
+    func chapterNumbers(novelID: String) -> [Int] {
+        let directory = novelDirectory(novelID: novelID)
+        guard let names = try? fileManager.contentsOfDirectory(atPath: directory.path) else { return [] }
+        return names.compactMap { Int($0) }.sorted()
+    }
+
+    /// キャッシュを持っている小説のID(管理画面用)。
+    /// ディレクトリ名はハッシュで元に戻せないので、置いてある印から読む。
+    func cachedNovelIDs() -> [String] {
+        guard let names = try? fileManager.contentsOfDirectory(atPath: rootDirectory.path) else { return [] }
+        var result: [String] = []
+        for name in names {
+            let markerURL = rootDirectory.appendingPathComponent(name, isDirectory: true)
+                .appendingPathComponent(Self.novelIDMarkerFileName)
+            guard let data = try? Data(contentsOf: markerURL),
+                  let novelID = String(data: data, encoding: .utf8) else { continue }
+            result.append(novelID)
         }
-        return Self.summarize(entries)
+        return result
     }
 
     private static func summarize<S: Sequence>(_ entries: S) -> VoicevoxDiskCacheSummary where S.Element == Entry {
@@ -177,11 +232,15 @@ final class VoicevoxDiskCacheStore {
     // MARK: - 削除
 
     func remove(novelID: String) {
-        let directoryName = Self.directoryName(novelID: novelID)
-        try? fileManager.removeItem(at: rootDirectory.appendingPathComponent(directoryName, isDirectory: true))
-        lock.lock()
-        listings[directoryName] = [:]
-        lock.unlock()
+        let directory = novelDirectory(novelID: novelID)
+        try? fileManager.removeItem(at: directory)
+        forgetListings(under: directory)
+    }
+
+    func remove(novelID: String, chapterNumber: Int) {
+        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
+        try? fileManager.removeItem(at: directory)
+        forgetListings(under: directory)
     }
 
     func removeAll() {
@@ -194,26 +253,33 @@ final class VoicevoxDiskCacheStore {
     /// 残す鍵の一覧に無いものを消す。
     /// 読み替え辞書の変更等で内容が変わった時に使う。作り直しには数十分かかるので、
     /// 全消しではなく「変わった分だけ」を消せる必要がある。
-    func removeEntries(novelID: String, notIn keysToKeep: Set<String>) {
-        let directoryName = Self.directoryName(novelID: novelID)
-        let directory = rootDirectory.appendingPathComponent(directoryName, isDirectory: true)
+    func removeEntries(novelID: String, chapterNumber: Int, notIn keysToKeep: Set<String>) {
+        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
         lock.lock()
-        var listing = listings[directoryName] ?? loadListingUnsafe(directoryName: directoryName, directory: directory)
+        var listing = listingUnsafe(directory: directory)
         for (key, entry) in listing where keysToKeep.contains(key) == false {
             try? fileManager.removeItem(at: directory.appendingPathComponent(entry.fileName))
             listing.removeValue(forKey: key)
         }
-        listings[directoryName] = listing
+        listings[directory.path] = listing
+        lock.unlock()
+    }
+
+    private func forgetListings(under directory: URL) {
+        lock.lock()
+        for path in listings.keys where path == directory.path || path.hasPrefix(directory.path + "/") {
+            listings.removeValue(forKey: path)
+        }
         lock.unlock()
     }
 
     // MARK: - ディレクトリ
 
-    private func prepareDirectories(novelDirectory: URL) throws {
+    private func prepareDirectories(novelID: String, chapterDirectory: URL) throws {
         if fileManager.fileExists(atPath: rootDirectory.path) == false {
             try fileManager.createDirectory(at: rootDirectory, withIntermediateDirectories: true)
         }
-        // 合成し直せる物であり1作品で数十MBになるため、バックアップには含めない。
+        // 合成し直せる物であり1作品で数百MBになるため、バックアップには含めない。
         // (含めると利用者のバックアップ容量を無断で食い潰す事になる)
         var root = rootDirectory
         if (try? root.resourceValues(forKeys: [.isExcludedFromBackupKey]))?.isExcludedFromBackup != true {
@@ -221,23 +287,28 @@ final class VoicevoxDiskCacheStore {
             values.isExcludedFromBackup = true
             try? root.setResourceValues(values)
         }
-        if fileManager.fileExists(atPath: novelDirectory.path) == false {
-            try fileManager.createDirectory(at: novelDirectory, withIntermediateDirectories: true)
+        if fileManager.fileExists(atPath: chapterDirectory.path) == false {
+            try fileManager.createDirectory(at: chapterDirectory, withIntermediateDirectories: true)
+        }
+        let markerURL = novelDirectory(novelID: novelID).appendingPathComponent(Self.novelIDMarkerFileName)
+        if fileManager.fileExists(atPath: markerURL.path) == false {
+            try? Data(novelID.utf8).write(to: markerURL, options: .atomic)
         }
     }
 
     /// ディレクトリを1回読んで、鍵→実体の対応を作る。lock は呼び出し側で取っている前提。
-    @discardableResult
-    private func loadListingUnsafe(directoryName: String, directory: URL) -> [String: Entry] {
+    private func listingUnsafe(directory: URL) -> [String: Entry] {
+        if let cached = listings[directory.path] { return cached }
         var listing: [String: Entry] = [:]
         if let names = try? fileManager.contentsOfDirectory(atPath: directory.path) {
             for name in names {
-                guard let entry = Self.parse(fileName: name) else { continue }
-                let byteCount = (try? fileManager.attributesOfItem(atPath: directory.appendingPathComponent(name).path)[.size] as? Int) ?? nil
-                listing[entry.key] = Entry(fileName: name, byteCount: byteCount ?? 0, durationSeconds: entry.durationSeconds)
+                guard let parsed = Self.parse(fileName: name) else { continue }
+                let attributes = try? fileManager.attributesOfItem(atPath: directory.appendingPathComponent(name).path)
+                let byteCount = (attributes?[.size] as? NSNumber)?.intValue ?? 0
+                listing[parsed.key] = Entry(fileName: name, byteCount: byteCount, durationSeconds: parsed.durationSeconds)
             }
         }
-        listings[directoryName] = listing
+        listings[directory.path] = listing
         return listing
     }
 
