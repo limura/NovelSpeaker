@@ -270,6 +270,12 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId)
         }
         VoicevoxPerformanceMonitor.shared.updateUnplayedLeadSeconds(currentLead)
+        #if !os(watchOS)
+        // 貯めてある音声が心細くなってきたら、読み上げの裏で作り足す。
+        // キャッシュから再生している間は合成のCPUがゼロなので、ここが最も作りやすい。
+        // (内部で間引くので、毎回呼んで構わない)
+        VoicevoxCacheAutoGeneration.shared.evaluateIfNeeded()
+        #endif
         // 貯金の量に関わらず、「次に再生するブロック」だけは必ず先行合成しておく。
         //
         // 貯金の上限で走査を打ち切った回でも、「直近の1つ」だけが未合成という状態は

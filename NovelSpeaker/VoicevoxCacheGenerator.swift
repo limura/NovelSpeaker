@@ -29,6 +29,14 @@ final class VoicevoxCacheGenerator {
     /// 長編を丸ごと作ると数百MB〜数GBになるので、端末を埋め尽くす前に止める必要がある。
     static let minimumFreeBytes: Int64 = 500 * 1024 * 1024
 
+    /// 誰が始めた生成か。止め方と、途中で待つ条件が変わる。
+    enum Mode {
+        /// 利用者が明示的に始めた(端末を放置しておく前提)。
+        case manual
+        /// 読み上げ中に、貯金が心細いので自動で作り足している。
+        case followingPlayback
+    }
+
     enum StopReason {
         case finished
         case stoppedByUser
@@ -52,6 +60,7 @@ final class VoicevoxCacheGenerator {
     private let lock = NSLock()
     private var task: Task<Void, Never>?
     private var runningNovelIDUnsafe: String?
+    private var runningModeUnsafe: Mode = .manual
     private var progressUnsafe: VoicevoxCacheGenerationProgress?
     private var lastStopReasonUnsafe: StopReason?
     /// 進捗表示を組み立てる時に使う、生成中ずっと変わらない情報。
@@ -66,6 +75,11 @@ final class VoicevoxCacheGenerator {
 
     var isRunning: Bool { return runningNovelID != nil }
 
+    var runningMode: Mode {
+        lock.lock(); defer { lock.unlock() }
+        return runningModeUnsafe
+    }
+
     var progress: VoicevoxCacheGenerationProgress? {
         lock.lock(); defer { lock.unlock() }
         return progressUnsafe
@@ -78,16 +92,23 @@ final class VoicevoxCacheGenerator {
 
     // MARK: - 開始と停止
 
-    func start(novelID: String) {
+    func start(novelID: String, mode: Mode = .manual) {
         stop()
         VoicevoxCacheGenerationState.shared.setEnabled(true, novelID: novelID)
         lock.lock()
         runningNovelIDUnsafe = novelID
+        runningModeUnsafe = mode
         lastStopReasonUnsafe = nil
         lock.unlock()
-        // 「放置しておけば作れている」ためには画面を消させない。
-        // 消えると背面に落ち、スレッド数が1に絞られて生成が何倍も遅くなる。
-        setIdleTimerDisabled(true)
+        if mode == .manual {
+            // 「放置しておけば作れている」ためには画面を消させない。
+            // 消えると背面に落ち、スレッド数が1に絞られて生成が何倍も遅くなる。
+            //
+            // 読み上げ中の自動生成では触らない。画面を点けっぱなしにするかどうかは
+            // 読み上げ側の設定(isNeedDisableIdleTimerWhenSpeechTime)が決めている事なので、
+            // ここで横から書き換えるべきではない。
+            setIdleTimerDisabled(true)
+        }
         ActivityIndicatorManager.enable(id: Self.activityIndicatorID)
 
         // 最初の1ブロックが出来るまで進捗が空だと、押した直後に
@@ -107,22 +128,31 @@ final class VoicevoxCacheGenerator {
         task?.cancel()
         task = nil
         let wasRunning = runningNovelID != nil
+        let wasManual = runningMode == .manual
         lock.lock()
         runningNovelIDUnsafe = nil
         lock.unlock()
         if wasRunning {
-            setIdleTimerDisabled(false)
+            if wasManual { setIdleTimerDisabled(false) }
             ActivityIndicatorManager.disable(id: Self.activityIndicatorID)
             notifyProgressChanged()
         }
     }
 
+    /// 読み上げに追従して自動で走っている分だけを止める。
+    /// 利用者が明示的に始めた生成は、読み上げを止めても続ける。
+    func stopIfFollowingPlayback() {
+        guard runningNovelID != nil, runningMode == .followingPlayback else { return }
+        stop()
+    }
+
     private func finish(reason: StopReason) {
+        let wasManual = runningMode == .manual
         lock.lock()
         runningNovelIDUnsafe = nil
         lastStopReasonUnsafe = reason
         lock.unlock()
-        setIdleTimerDisabled(false)
+        if wasManual { setIdleTimerDisabled(false) }
         ActivityIndicatorManager.disable(id: Self.activityIndicatorID)
         AppInformationLogger.AddLog(message: "[VOICEVOX音声生成] \(reason.message)", isForDebug: true)
         notifyProgressChanged()
@@ -177,7 +207,7 @@ final class VoicevoxCacheGenerator {
 
                 // 画面が消えないようにし続ける。読み上げの停止処理などが
                 // isIdleTimerDisabled を false に戻す事があるため、都度入れ直す。
-                setIdleTimerDisabled(true)
+                if runningMode == .manual { setIdleTimerDisabled(true) }
 
                 if VoicevoxDiskCacheStore.shared.contains(novelID: novelID, chapterNumber: chapterNumber, key: target.key) {
                     generatedCount += 1
@@ -223,9 +253,14 @@ final class VoicevoxCacheGenerator {
     ///    利用者が明示的に始めた生成を勝手に終わらせはせず、確認が終われば自分で再開する。
     private func waitWhilePaused(novelID: String, story: Story, generatedCount: Int, totalCount: Int) async {
         var didPause = false
+        // 読み上げに追従した自動生成は、背面でこそ効かせたい
+        //(背面バッテリー再生こそが、キャッシュが無いと無音だらけになる状況そのもの)。
+        // CPU の使い過ぎは CPUガバナーとスレッド数の自動切り替えが抑えるので、
+        // ここで止める必要は無い。
+        let pausesInBackground = (runningMode == .manual)
         while true {
             if Task.isCancelled { return }
-            let isBackground = VoicevoxPrefetchThrottleMonitor.shared.isBackground
+            let isBackground = pausesInBackground && VoicevoxPrefetchThrottleMonitor.shared.isBackground
             let isDownloading = NovelDownloadQueue.shared.GetCurrentDownloadCount() > 0
             if isBackground == false && isDownloading == false { break }
             updateProgress(novelID: novelID, story: story, generatedCount: generatedCount, totalCount: totalCount,

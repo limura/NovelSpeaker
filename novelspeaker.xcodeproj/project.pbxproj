@@ -296,6 +296,8 @@
 		D70A66842ADA72D4A78A0B8C /* VoicevoxCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF22ADCC56BF76579F8F345 /* VoicevoxCore.swift */; };
 		D9A2CDCE2FE45C9D525EC442 /* 0.vvm in Resources */ = {isa = PBXBuildFile; fileRef = 7D361F044DB34565EE692F3A /* 0.vvm */; platformFilter = ios; };
 		DB2361CE5C59A20FDA4A0EBF /* VoicevoxSynthesisQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A37EE6BCDC13FCBB27851C4B /* VoicevoxSynthesisQueue.swift */; };
+		DCA91F6657AEDEB5C4677DC8 /* VoicevoxCacheAutoGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE496F7C7C71EF42457B67EA /* VoicevoxCacheAutoGeneration.swift */; };
+		DF097CB24FD5A48F36EB42B0 /* VoicevoxCacheAutoGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE496F7C7C71EF42457B67EA /* VoicevoxCacheAutoGeneration.swift */; };
 		DFE97F3FDB82EADD76524F7A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 59911E29481854DA0556D093 /* Localizable.strings */; };
 		E2820FFFB99FF91B3E84EEEE /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0164B2D4D5F2582B7B2AC42F /* PlayerView.swift */; };
 		EDCE1E5BF83AE2A0DC0DF058 /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320ED5957BE18A57C229BABE /* WatchMessage.swift */; };
@@ -696,6 +698,7 @@
 		A9D18F682E6D582893D3B026 /* VoicevoxSpeakerTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxSpeakerTest.swift; sourceTree = "<group>"; };
 		AA4FABCD53A3B98B302E42AA /* VoicevoxChunkedSynthesisTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxChunkedSynthesisTest.swift; sourceTree = "<group>"; };
 		ABCF24D73C74368B17895F2E /* VoicevoxCacheDeleteDialog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheDeleteDialog.swift; sourceTree = "<group>"; };
+		AE496F7C7C71EF42457B67EA /* VoicevoxCacheAutoGeneration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheAutoGeneration.swift; sourceTree = "<group>"; };
 		AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF64DABA0B88B85E7F1DE40E /* Pods-NovelSpeakerWatchApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp/Pods-NovelSpeakerWatchApp.debug.xcconfig"; sourceTree = "<group>"; };
 		B183A0FEE977129AFD5FBAB5 /* WatchSpeechSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSpeechSettings.swift; sourceTree = "<group>"; };
@@ -1123,6 +1126,7 @@
 				B4A83DEE9D4BBB50A38A451A /* VoicevoxCacheGeneration.swift */,
 				12B6227F06B7AAEC764DB9E4 /* VoicevoxCacheBlockSource.swift */,
 				34A12B27DB5A5C4AC39AF8AD /* VoicevoxCacheGenerator.swift */,
+				AE496F7C7C71EF42457B67EA /* VoicevoxCacheAutoGeneration.swift */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -1747,6 +1751,7 @@
 				53CD3F95C7E880E84509FF20 /* VoicevoxCacheGeneration.swift in Sources */,
 				57EFB35BEE54C9698736622B /* VoicevoxCacheBlockSource.swift in Sources */,
 				81C657D5D94A38D041636BAD /* VoicevoxCacheGenerator.swift in Sources */,
+				DCA91F6657AEDEB5C4677DC8 /* VoicevoxCacheAutoGeneration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1883,6 +1888,7 @@
 				5159CB020B6E9E171E9E1C0C /* VoicevoxCacheManageViewController.swift in Sources */,
 				0AE09F109E912FE290DF0BF5 /* VoicevoxCacheGenerationDialog.swift in Sources */,
 				F4F20978301EF3B5C6FFBB46 /* VoicevoxCacheDeleteDialog.swift in Sources */,
+				DF097CB24FD5A48F36EB42B0 /* VoicevoxCacheAutoGeneration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

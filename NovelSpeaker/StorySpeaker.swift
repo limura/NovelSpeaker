@@ -836,6 +836,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         ])
         #if !os(watchOS)
         UIApplication.shared.isIdleTimerDisabled = false
+        // 読み上げに追従して自動で走っていた生成も止める
+        //(利用者が明示的に始めた生成は、読み上げを止めても続ける)。
+        VoicevoxCacheAutoGeneration.shared.playbackDidStop()
         #endif
         if stopAudioSession {
             self.StopAudioSession()
