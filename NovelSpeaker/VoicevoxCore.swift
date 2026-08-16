@@ -129,9 +129,16 @@ actor VoicevoxCore {
     struct DiskCacheContext {
         let novelID: String
         let chapterNumber: Int
+
         /// ディスクへ書き足してよいか(利用者がその小説でキャッシュ生成を有効にしている時だけ true)。
         /// 普通に聴いているだけで断りなくストレージを使い始めない、という線引き。
-        let isWritable: Bool
+        ///
+        /// ここは保持せず、その都度調べる。読み上げ中の小説について後から生成を
+        /// 有効にする(詳細画面から「生成する」を押す)事があり、作った時点の値を
+        /// 覚えていると、その回の読み上げでは一切ディスクに積まれなくなる。
+        var isWritable: Bool {
+            return VoicevoxCacheGenerationState.shared.isEnabled(novelID: novelID)
+        }
     }
 
     private let diskCacheContextLock = NSLock()
@@ -145,16 +152,7 @@ actor VoicevoxCore {
 
     /// 今どの小説のどの話を読んでいるかを教える(nil で解除)。
     nonisolated func setDiskCacheContext(novelID: String?, chapterNumber: Int) {
-        let context: DiskCacheContext?
-        if let novelID = novelID {
-            context = DiskCacheContext(
-                novelID: novelID,
-                chapterNumber: chapterNumber,
-                isWritable: VoicevoxCacheGenerationState.shared.isEnabled(novelID: novelID)
-            )
-        } else {
-            context = nil
-        }
+        let context: DiskCacheContext? = novelID.map { DiskCacheContext(novelID: $0, chapterNumber: chapterNumber) }
         diskCacheContextLock.lock()
         diskCacheContextUnsafe = context
         diskCacheContextLock.unlock()
