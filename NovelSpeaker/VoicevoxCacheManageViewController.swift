@@ -72,6 +72,52 @@ class VoicevoxCacheManageViewController: FormViewController {
         return "\(title)\n\(Self.sizeText(summary))"
     }
 
+    /// 削除の選択肢を出す。
+    ///
+    /// 「もう聴いた所は要らない」は普通に起きるが、それを説明するのが難しい。
+    /// ページ番号(利用者が普段見ている物)で言い切る事で分かるようにする:
+    ///   「今読んでいる15ページ目より前」を消す、という言い方にする。
+    private func presentDeleteDialog(novelID: String, title: String, summary: VoicevoxDiskCacheSummary) {
+        let readingChapterNumber = RealmUtil.RealmBlock { (realm) -> Int? in
+            return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.readingChapterNumber
+        }
+        var builder = NiftyUtility.EasyDialogBuilder(self)
+            .title(title: "作成済みの音声を削除")
+            .label(text: "「\(title)」\n現在 \(Self.sizeText(summary))", textAlignment: .left)
+
+        // 読み終わった所より前だけを消す(そこに実際に音声がある時だけ出す)。
+        if let readingChapterNumber = readingChapterNumber {
+            let listened = VoicevoxDiskCacheStore.shared.summary(novelID: novelID, beforeChapterNumber: readingChapterNumber)
+            if listened.entryCount > 0 {
+                builder = builder.addButton(title: "読み終わった分だけ削除\n(\(readingChapterNumber)ページ目より前の \(Self.sizeText(listened)))", callback: { [weak self] dialog in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false) {
+                            VoicevoxDiskCacheStore.shared.removeChapters(novelID: novelID, beforeChapterNumber: readingChapterNumber)
+                            self?.reload()
+                        }
+                    }
+                })
+            }
+        }
+
+        builder = builder.addButton(title: "この小説の音声を全て削除", callback: { [weak self] dialog in
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false) {
+                    if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
+                        VoicevoxCacheGenerator.shared.stop()
+                    }
+                    VoicevoxDiskCacheStore.shared.remove(novelID: novelID)
+                    VoicevoxCacheGenerationState.shared.setEnabled(false, novelID: novelID)
+                    self?.reload()
+                }
+            }
+        })
+        builder = builder.addButton(title: NSLocalizedString("Cancel_button", comment: "キャンセル"), callback: { dialog in
+            DispatchQueue.main.async { dialog.dismiss(animated: true) }
+        })
+        builder.build().show()
+    }
+
     private func reload() {
         form.removeAll()
         createCells()
@@ -131,21 +177,7 @@ class VoicevoxCacheManageViewController: FormViewController {
                 }
             }.onCellSelection({ [weak self] _, _ in
                 guard let self = self else { return }
-                _ = NiftyUtility.EasyDialogTwoButton(
-                    viewController: self,
-                    title: "作成済みの音声を削除",
-                    message: "「\(title)」の音声(\(Self.sizeText(entry.summary)))を削除します。\n\n削除しても本文は消えません。もう一度作り直す事もできます。",
-                    button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
-                    button1Action: nil,
-                    button2Title: NSLocalizedString("OK_button", comment: "OK"),
-                    button2Action: {
-                        if VoicevoxCacheGenerator.shared.runningNovelID == entry.novelID {
-                            VoicevoxCacheGenerator.shared.stop()
-                        }
-                        VoicevoxDiskCacheStore.shared.remove(novelID: entry.novelID)
-                        VoicevoxCacheGenerationState.shared.setEnabled(false, novelID: entry.novelID)
-                        DispatchQueue.main.async { self.reload() }
-                    })
+                self.presentDeleteDialog(novelID: entry.novelID, title: title, summary: entry.summary)
             })
         }
         form +++ novelSection

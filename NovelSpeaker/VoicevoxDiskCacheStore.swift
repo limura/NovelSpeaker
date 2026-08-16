@@ -187,6 +187,23 @@ final class VoicevoxDiskCacheStore {
         return total
     }
 
+    /// 指定ページより前(そのページ自身は含まない)に貯まっている分。
+    /// 「もう聴き終わった所を消す」時に、消える量を先に見せるために使う。
+    func summary(novelID: String, beforeChapterNumber: Int) -> VoicevoxDiskCacheSummary {
+        var total = VoicevoxDiskCacheSummary.empty
+        for chapterNumber in chapterNumbers(novelID: novelID) where chapterNumber < beforeChapterNumber {
+            total = total + summary(novelID: novelID, chapterNumber: chapterNumber)
+        }
+        return total
+    }
+
+    /// 指定ページより前(そのページ自身は含まない)を消す。
+    func removeChapters(novelID: String, beforeChapterNumber: Int) {
+        for chapterNumber in chapterNumbers(novelID: novelID) where chapterNumber < beforeChapterNumber {
+            remove(novelID: novelID, chapterNumber: chapterNumber)
+        }
+    }
+
     func totalSummary() -> VoicevoxDiskCacheSummary {
         var total = VoicevoxDiskCacheSummary.empty
         for novelID in cachedNovelIDs() {

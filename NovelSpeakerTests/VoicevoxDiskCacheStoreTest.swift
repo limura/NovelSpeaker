@@ -188,6 +188,17 @@ class VoicevoxDiskCacheStoreTest: XCTestCase {
         XCTAssertEqual(store.summary(novelID: "novel-A", chapterNumber: 2).entryCount, 1)
     }
 
+    // 「もう聴き終わった所だけ消す」ができる事。
+    // 1作品が数百MBになるので、全部消すか残すかの二択だと使いづらい。
+    func testRemoveChaptersBeforeGivenNumber() throws {
+        for chapterNumber in [1, 5, 10, 15] {
+            try store.store(novelID: "novel-A", chapterNumber: chapterNumber, key: "aaaa", data: makeData(bytes: 100), durationSeconds: 10)
+        }
+        XCTAssertEqual(store.summary(novelID: "novel-A", beforeChapterNumber: 10).entryCount, 2, "1話と5話が対象")
+        store.removeChapters(novelID: "novel-A", beforeChapterNumber: 10)
+        XCTAssertEqual(store.chapterNumbers(novelID: "novel-A"), [10, 15], "読んでいるページとその先は残す")
+    }
+
     func testRemoveAllRemovesEverything() throws {
         try store.store(novelID: "novel-A", chapterNumber: 1, key: "aaaa", data: makeData(bytes: 100), durationSeconds: 10)
         try store.store(novelID: "novel-B", chapterNumber: 1, key: "bbbb", data: makeData(bytes: 100), durationSeconds: 20)
