@@ -23,9 +23,32 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     // 聞き比べ用の音声プレイヤー。再生中に解放されないよう保持しておく。
     private static var voicevoxComparisonPlayer: AVAudioPlayer? = nil
-    /// 聞き比べに使う文。句読点を挟んだ普通の地の文で、20文字区切りだと
+    /// 聞き比べに使う文の既定値。句読点を挟んだ普通の地の文で、20文字区切りだと
     /// 「、」「。」の位置で3〜4個に分かれる長さにしてある。
-    private static let voicevoxComparisonText = "むかしむかしあるところに、おじいさんとおばあさんが住んでいました。おじいさんは山へ芝刈りに、おばあさんは川へ洗濯に行きました。"
+    private static let voicevoxComparisonDefaultText = "むかしむかしあるところに、おじいさんとおばあさんが住んでいました。おじいさんは山へ芝刈りに、おばあさんは川へ洗濯に行きました。"
+    private static let voicevoxComparisonTextUserDefaultsKey = "NovelSpeaker.Voicevox.debugComparisonText"
+    /// 聞き比べに使う文。どういう文だと繋ぎ目が気になるのかは文次第なので、
+    /// 実際に気になった文をそのまま貼って試せるようにしてある。
+    static var voicevoxComparisonText: String {
+        get {
+            let stored = UserDefaults.standard.string(forKey: voicevoxComparisonTextUserDefaultsKey) ?? ""
+            return stored.isEmpty ? voicevoxComparisonDefaultText : stored
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: voicevoxComparisonTextUserDefaultsKey)
+        }
+    }
+    /// 聞き比べで分割する長さ。既定は20文字だが、貼った文に合わせて変えられるようにしておく。
+    private static let voicevoxComparisonSplitLengthUserDefaultsKey = "NovelSpeaker.Voicevox.debugComparisonSplitLength"
+    static var voicevoxComparisonSplitLength: Int {
+        get {
+            let stored = UserDefaults.standard.integer(forKey: voicevoxComparisonSplitLengthUserDefaultsKey)
+            return stored > 0 ? stored : 20
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: voicevoxComparisonSplitLengthUserDefaultsKey)
+        }
+    }
 
     /// 同じ文を「一度に合成したもの」「分割して繋いだもの」で聞き比べる(デバッグ用)。
     private func playVoicevoxSplitComparison(splitCharacterCount: Int?, trimJoinSilence: Bool, label: String) {
@@ -35,6 +58,17 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             do {
                 await VoicevoxCore.setUpFromBundleIfNeeded()
                 let data = try await VoicevoxCore.shared.debugSynthesize(text: text, styleId: styleId, splitCharacterCount: splitCharacterCount, trimJoinSilence: trimJoinSilence)
+                // ②と③の秒数の差が、繋ぎ目から削った無音の合計。
+                // 「違いが分からない」時に、削る処理が効いていないのか、
+                // そもそも削るべき無音が無いのかを切り分けるために出しておく。
+                let seconds: Double
+                if let parsed = VoicevoxWavJoiner.parse(wav: data), parsed.sampleRate > 0 {
+                    seconds = Double(parsed.payload.count / 2) / Double(parsed.sampleRate)
+                } else {
+                    seconds = 0
+                }
+                let chunks = splitCharacterCount.map { VoicevoxTextChunker.split(text: text, maxCharacterCount: $0, minimumCharacterCount: 1) } ?? [text]
+                AppInformationLogger.AddLog(message: "[VOICEVOX聞き比べ] \(label) 長さ=\(String(format: "%.3f", seconds))秒 分割=\(chunks.count)個 \(chunks.map { "\($0.count)文字" }.joined(separator: "/"))", isForDebug: true)
                 await MainActor.run {
                     do {
                         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
@@ -2069,17 +2103,34 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }.onCellSelection({ [weak self] _, _ in
                     self?.playVoicevoxSplitComparison(splitCharacterCount: nil, trimJoinSilence: false, label: "①分割なし(通常)")
                 })
+                <<< TextAreaRow() {
+                    $0.placeholder = "聞き比べに使う文(空にすると既定の文に戻ります)"
+                    $0.value = Self.voicevoxComparisonText
+                    $0.textAreaHeight = .dynamic(initialTextViewHeight: 88)
+                }.onChange({ row in
+                    Self.voicevoxComparisonText = row.value ?? ""
+                })
+                <<< StepperRow() {
+                    $0.title = "聞き比べの分割長(文字)"
+                    $0.value = Double(Self.voicevoxComparisonSplitLength)
+                    $0.cell.stepper.minimumValue = 5
+                    $0.cell.stepper.maximumValue = 120
+                    $0.cell.stepper.stepValue = 5
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ row in
+                    Self.voicevoxComparisonSplitLength = Int(row.value ?? 20)
+                })
                 <<< ButtonRow() {
                     $0.title = "VOICEVOX 分割の聞き比べ: ②分割して繋ぐ(無音を削る)"
                     $0.cell.textLabel?.numberOfLines = 0
                 }.onCellSelection({ [weak self] _, _ in
-                    self?.playVoicevoxSplitComparison(splitCharacterCount: 20, trimJoinSilence: true, label: "②分割+無音削り")
+                    self?.playVoicevoxSplitComparison(splitCharacterCount: Self.voicevoxComparisonSplitLength, trimJoinSilence: true, label: "②分割+無音削り")
                 })
                 <<< ButtonRow() {
                     $0.title = "VOICEVOX 分割の聞き比べ: ③分割して繋ぐ(無音を削らない)"
                     $0.cell.textLabel?.numberOfLines = 0
                 }.onCellSelection({ [weak self] _, _ in
-                    self?.playVoicevoxSplitComparison(splitCharacterCount: 20, trimJoinSilence: false, label: "③分割のみ")
+                    self?.playVoicevoxSplitComparison(splitCharacterCount: Self.voicevoxComparisonSplitLength, trimJoinSilence: false, label: "③分割のみ")
                 })
             }
             section

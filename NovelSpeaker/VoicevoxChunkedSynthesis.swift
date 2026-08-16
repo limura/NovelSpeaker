@@ -42,10 +42,18 @@ enum VoicevoxTextChunker {
         let limit = max(1, max(maxCharacterCount, minimumCharacterCount))
         if text.count <= limit { return [text] }
 
+        // 予算に収まる範囲で最も少ない個数に分け、その個数で長さを揃える。
+        // 合成の固定費は断片の長さに関係なく毎回かかるので、個数が少ないほど、
+        // また極端に短い断片が無いほど有利になる
+        // (上限一杯で切っていくと末尾だけ数文字、という分け方になり、その数文字にも
+        //  丸ごと固定費がかかってしまう)。
+        let pieceCount = Int((Double(text.count) / Double(limit)).rounded(.up))
+        let balancedLimit = max(1, Int((Double(text.count) / Double(pieceCount)).rounded(.up)))
+
         var result: [String] = []
         var remaining = Substring(text)
-        while remaining.count > limit {
-            let windowEnd = remaining.index(remaining.startIndex, offsetBy: limit)
+        while remaining.count > balancedLimit {
+            let windowEnd = remaining.index(remaining.startIndex, offsetBy: balancedLimit)
             let window = remaining[remaining.startIndex..<windowEnd]
             // 上限の範囲内で一番後ろにある区切り文字の直後で切る(できるだけ長く取り、
             // 繋ぎ目の数を減らす)。一つも無ければ諦めて上限位置でぶつ切りにする。

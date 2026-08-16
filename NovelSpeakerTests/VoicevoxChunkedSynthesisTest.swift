@@ -100,6 +100,34 @@ class VoicevoxTextChunkerTest: XCTestCase {
     }
 }
 
+// 合成には文字数に依らない固定費(実測: iPhone SE2 低電力で20秒前後)があるため、
+// 同じ CPU 時間を使うなら「大きく1本」の方が作れる音声は多くなる。
+//   40文字×1本 (20秒 + 10秒) → 音声 約5.7秒
+//  112文字×1本 (20秒 + 28秒) → 音声 約16秒
+// したがって分割は「予算に収まる範囲で最も少ない個数」にしなければならない。
+class VoicevoxChunkBalanceTest: XCTestCase {
+
+    // 予算に収まる範囲で、できるだけ少ない個数に分ける事。
+    func testSplitsIntoTheFewestPiecesThatFit() {
+        let text = String(repeating: "あいうえおかきくけこ、", count: 12) // 132文字
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 64)
+        XCTAssertEqual(chunks.count, 3, "132文字が64文字に収まる最小個数(3個)で分かれるべき")
+        for chunk in chunks {
+            XCTAssertLessThanOrEqual(chunk.count, 64)
+        }
+        XCTAssertEqual(chunks.joined(), text)
+    }
+
+    // 個数が同じなら、長さを揃えて末尾だけ極端に短くならないようにする事
+    // (短い断片でも固定費は丸ごとかかるため、極端に短い断片は純粋な損になる)。
+    func testBalancesChunkLengthsInsteadOfLeavingATinyTail() {
+        let text = String(repeating: "あいうえおかきくけこ、", count: 12) // 132文字
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 64)
+        let shortest = chunks.map { $0.count }.min() ?? 0
+        XCTAssertGreaterThan(shortest, 20, "末尾だけ極端に短い断片を作ってはいけない: \(chunks.map { $0.count })")
+    }
+}
+
 class VoicevoxWavJoinerTest: XCTestCase {
 
     private let sampleRate = 24000

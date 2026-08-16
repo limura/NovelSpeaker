@@ -157,10 +157,18 @@ actor VoicevoxCore {
     // 60秒平均80%の上限を超えるか」を見積もって判断する(詳細は VoicevoxCPUGovernor.swift)。
     nonisolated let cpuGovernor = VoicevoxCPUGovernor()
 
-    /// 先行合成に許す CPU 予算の割合。再生に必要な合成の分を空けておくため、
-    /// OSの上限(80%)よりかなり手前で止める。
-    private static let prefetchCPULimitRatio = 0.55
-    /// 再生に必要な(その場の)合成に許す割合。こちらは止めると無音が伸びるので上限寄り。
+    /// 合成に使ってよい CPU 予算の割合(OSの上限は80%)。
+    ///
+    /// 以前は先行合成 0.55 / 再生 0.75 と分けていたが、iPhone SE2 では
+    /// 実測の CPU 率が 14〜46% にしかならず、上限に対して予算を大きく余らせていた。
+    /// 合成には文字数に依らない固定費(SE2 低電力で20秒前後)があるため、
+    /// 予算を小さく取ると分割が細かくなり、固定費を何度も払う羽目になって
+    /// 同じ CPU 時間あたりに作れる音声が減る(40文字×1本で音声5.7秒に対し、
+    /// 112文字×1本なら16秒)。予算は上限のすぐ手前まで使い切る方が有利。
+    ///
+    /// 先行合成と再生の優先順位は、この割合ではなく
+    /// 「再生に必要な合成が進行中の間は先行合成を待たせる」仕組みで付ける。
+    private static let prefetchCPULimitRatio = 0.75
     private static let playbackCPULimitRatio = 0.75
     /// OSの判定窓と同じ長さ。これ以上待っても窓の中身は減らない。
     private static let cpuWindowSeconds = 60.0
@@ -646,8 +654,9 @@ actor VoicevoxCore {
     private func waitForCPUBudget(text: String, styleId: UInt32, limitRatio: Double) async {
         // 待っている間 actor は空くので、その隙に別の合成(再生側の要求等)が走って
         // 予算を使っている事がある。起きた後にもう一度確かめる。
-        // ただし待ち続けて再生が完全に止まる方が困るので、確認の回数は限る。
-        let maxWaitCount = 3
+        // ただし待ち続けて再生が完全に止まる方が困るので、確認は1回だけにする
+        // (実機で 60秒待機が3回続き、1ブロックに3分以上かかる事があった)。
+        let maxWaitCount = 2
         for _ in 0..<maxWaitCount {
             let waitSeconds = governorWaitSeconds(text: text, limitRatio: limitRatio)
             if waitSeconds <= 0 { return }
