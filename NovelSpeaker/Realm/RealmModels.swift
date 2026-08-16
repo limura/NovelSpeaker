@@ -2631,6 +2631,7 @@ enum SpeechViewButtonTypes:String, Codable {
     case showTableOfContents = "showTableOfContents"
     case searchByText = "searchByText"
     case addPageToOtherNovel = "addPageToOtherNovel"
+    case voicevoxCacheGeneration = "voicevoxCacheGeneration"
 }
 
 struct SpeechViewButtonSetting: Codable {
@@ -2639,6 +2640,7 @@ struct SpeechViewButtonSetting: Codable {
     
     static let defaultSetting:[SpeechViewButtonSetting] = [
         SpeechViewButtonSetting(type: .addPageToOtherNovel, isOn: false),
+        SpeechViewButtonSetting(type: .voicevoxCacheGeneration, isOn: false),
         SpeechViewButtonSetting(type: .showTableOfContents, isOn: false),
         SpeechViewButtonSetting(type: .skipBackward, isOn: false),
         SpeechViewButtonSetting(type: .skipForward, isOn: false),

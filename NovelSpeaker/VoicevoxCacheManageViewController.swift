@@ -17,12 +17,59 @@ class VoicevoxCacheManageViewController: FormViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "作成済みのVOICEVOX音声"
+        // 生成中はこの画面の数字が増えていくので、進捗に合わせて更新する。
+        NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange), name: VoicevoxCacheGenerator.progressDidChangeNotification, object: nil)
         createCells()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         reload()
+    }
+
+    /// 生成中の行だけを書き換える。
+    /// 画面ごと作り直すと、スクロール位置が飛んだり操作中の指が外れたりするため。
+    @objc private func progressDidChange() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard let novelID = VoicevoxCacheGenerator.shared.runningNovelID else {
+                // 生成が終わった時は、並び順(容量の大きい順)も変わるので作り直す。
+                self.reload()
+                return
+            }
+            guard let row = self.form.rowBy(tag: Self.rowTag(novelID: novelID)) as? ButtonRow else {
+                self.reload()
+                return
+            }
+            row.title = self.rowTitle(novelID: novelID)
+            row.updateCell()
+            // 行数が変わっても高さは自動では再計算されないので、明示的に組み直す
+            //(これが無いと1行に潰れて末尾が「…」で切れる)。
+            self.tableView.beginUpdates()
+            self.tableView.endUpdates()
+            if let summaryRow = self.form.rowBy(tag: Self.totalRowTag) as? LabelRow {
+                summaryRow.title = Self.sizeText(VoicevoxDiskCacheStore.shared.totalSummary())
+                summaryRow.updateCell()
+            }
+        }
+    }
+
+    private static let totalRowTag = "VoicevoxCacheTotalRow"
+    private static func rowTag(novelID: String) -> String { return "VoicevoxCacheNovelRow-\(novelID)" }
+
+    /// 生成中の小説は、それと分かるように出す。
+    private func rowTitle(novelID: String) -> String {
+        let summary = VoicevoxDiskCacheStore.shared.summary(novelID: novelID)
+        let title = Self.novelTitle(novelID: novelID)
+        if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
+            let progress = VoicevoxCacheGenerator.shared.progress?.description ?? ""
+            return "▶ 生成中: \(title)\n\(Self.sizeText(summary))" + (progress.isEmpty ? "" : "\n\(progress)")
+        }
+        return "\(title)\n\(Self.sizeText(summary))"
     }
 
     private func reload() {
@@ -45,7 +92,7 @@ class VoicevoxCacheManageViewController: FormViewController {
     private func createCells() {
         let total = VoicevoxDiskCacheStore.shared.totalSummary()
         let summarySection = Section("合計")
-        summarySection <<< LabelRow() {
+        summarySection <<< LabelRow(Self.totalRowTag) {
             $0.title = Self.sizeText(total)
             $0.cell.textLabel?.numberOfLines = 0
         }
@@ -74,10 +121,14 @@ class VoicevoxCacheManageViewController: FormViewController {
             .sorted(by: { $0.summary.byteCount > $1.summary.byteCount })
         for entry in entries {
             let title = Self.novelTitle(novelID: entry.novelID)
-            novelSection <<< ButtonRow() {
-                $0.title = "\(title)\n\(Self.sizeText(entry.summary))"
+            let isGenerating = VoicevoxCacheGenerator.shared.runningNovelID == entry.novelID
+            novelSection <<< ButtonRow(Self.rowTag(novelID: entry.novelID)) {
+                $0.title = self.rowTitle(novelID: entry.novelID)
                 $0.cell.textLabel?.numberOfLines = 0
                 $0.cell.textLabel?.textAlignment = .left
+                if isGenerating {
+                    $0.cell.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.15)
+                }
             }.onCellSelection({ [weak self] _, _ in
                 guard let self = self else { return }
                 _ = NiftyUtility.EasyDialogTwoButton(

@@ -40,10 +40,45 @@ class VoicevoxCacheGenerationProgressTest: XCTestCase {
             chapterNumber: 20, chapterTitle: "邂逅", generatedBlockCount: 15, totalBlockCount: 30,
             totalAudioSeconds: 3 * 3600 + 12 * 60)
         let text = progress.description
-        XCTAssertTrue(text.contains("20"), "何話目かが分かる事")
-        XCTAssertTrue(text.contains("邂逅"), "話のタイトルが分かる事")
-        XCTAssertTrue(text.contains("50%"), "その話のどこまでかが分かる事")
+        XCTAssertTrue(text.contains("20ページ目"), "何ページ目かが分かる事")
+        XCTAssertTrue(text.contains("邂逅"), "章のタイトルが分かる事")
+        XCTAssertTrue(text.contains("50%"), "そのページのどこまでかが分かる事")
         XCTAssertTrue(text.contains("3時間12分"), "合計で何分ぶんかが分かる事")
+    }
+
+    // 「第2話」のような言い方をしない事。
+    // 実機で『第2話「第1話」の34%』という表示になり(2ページ目の章題が「第1話」だった)、
+    // 何を指しているのか分からなくなった。
+    func testDescriptionDoesNotSayChapterNumberAsStoryNumber() {
+        let progress = VoicevoxCacheGenerationProgress(
+            chapterNumber: 2, chapterTitle: "第1話", generatedBlockCount: 1, totalBlockCount: 3,
+            totalAudioSeconds: 60)
+        XCTAssertFalse(progress.description.contains("第2話"), "章題と紛らわしい「第N話」表記を使わない")
+        XCTAssertTrue(progress.description.contains("2ページ目"))
+    }
+
+    // 途中のページから作り始めた時、最初からそこまで出来ていると誤解させない事。
+    // 「102/1000ページ目」とだけ出ていると、102ページぶん出来ているように読める。
+    func testDescriptionShowsWhereGenerationStarted() {
+        let progress = VoicevoxCacheGenerationProgress(
+            chapterNumber: 102, chapterTitle: "", generatedBlockCount: 1, totalBlockCount: 2,
+            totalAudioSeconds: 60, lastChapterNumber: 1000, startChapterNumber: 100)
+        let text = progress.description
+        XCTAssertTrue(text.contains("102ページ目/全1000ページ"))
+        XCTAssertTrue(text.contains("100ページ目から開始"))
+    }
+
+    // 止まっている時は、その理由が分かる事(「動いていないのでは」と不安にさせない)。
+    func testDescriptionShowsPauseReason() {
+        var progress = VoicevoxCacheGenerationProgress(
+            chapterNumber: 1, chapterTitle: "", generatedBlockCount: 0, totalBlockCount: 10, totalAudioSeconds: 0)
+        XCTAssertNil(progress.pauseReasonText)
+        progress.isPausedByBackground = true
+        XCTAssertNotNil(progress.pauseReasonText)
+        XCTAssertTrue(progress.description.contains("一時停止"))
+        progress.isPausedByBackground = false
+        progress.isPausedByDownload = true
+        XCTAssertTrue(progress.description.contains("更新確認"))
     }
 
     func testDurationTextFormats() {

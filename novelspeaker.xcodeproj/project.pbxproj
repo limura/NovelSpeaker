@@ -13,6 +13,7 @@
 		0613A55AAEA3E316EF451788 /* VoicevoxBlockSplitReproTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F2CDCDF8C81C79ACE6686E /* VoicevoxBlockSplitReproTest.swift */; };
 		08A73FC021BA44FB814310FD /* VoicevoxCacheGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A83DEE9D4BBB50A38A451A /* VoicevoxCacheGeneration.swift */; };
 		095DAF051152FD8D2C41DDBB /* VoicevoxCPUGovernorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CBDB5062E188A966D653F3 /* VoicevoxCPUGovernorTest.swift */; };
+		0AE09F109E912FE290DF0BF5 /* VoicevoxCacheGenerationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A098806FB1DD0B2419C081 /* VoicevoxCacheGenerationDialog.swift */; };
 		0BBBDA569CD9452EA6E2C410 /* PhoneSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF2F640224389D5D9030AD1 /* PhoneSessionManager.swift */; };
 		0ED4D1CDDA5D3A5ACBD2B00C /* VoicevoxCPUGovernor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D03DF00B669D2554B298C2 /* VoicevoxCPUGovernor.swift */; };
 		0FF8C389ACCE44ABDE66303F /* UtilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B1FE1F7B8340C5E2BF6AFE /* UtilityView.swift */; };
@@ -729,6 +730,7 @@
 		C2F380DAEC93EA2F37A0EF6D /* VoicevoxCoreTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCoreTest.swift; sourceTree = "<group>"; };
 		C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxPrefetchThrottle.swift; sourceTree = "<group>"; };
 		C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; sourceTree = "<group>"; };
+		D0A098806FB1DD0B2419C081 /* VoicevoxCacheGenerationDialog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheGenerationDialog.swift; sourceTree = "<group>"; };
 		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
 		E2EEF718C98FE410CD831ECB /* Pods-NovelSpeakerWatchApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp/Pods-NovelSpeakerWatchApp.release.xcconfig"; sourceTree = "<group>"; };
 		E3F6EF1A8BBF240BAB0BA02D /* VoicevoxRealDeviceReproTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxRealDeviceReproTest.swift; sourceTree = "<group>"; };
@@ -1239,6 +1241,7 @@
 				215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */,
 				211B3E952FA0CABF00823EE3 /* NovelImportSettingSwiftUIView.swift */,
 				4DEE51DD7300977AB98FF54D /* VoicevoxCacheManageViewController.swift */,
+				D0A098806FB1DD0B2419C081 /* VoicevoxCacheGenerationDialog.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1875,6 +1878,7 @@
 				401F71BFB7F02656E69D8D7D /* VoicevoxCacheBlockSource.swift in Sources */,
 				BBCE02824330C88950CD5BE1 /* VoicevoxCacheGenerator.swift in Sources */,
 				5159CB020B6E9E171E9E1C0C /* VoicevoxCacheManageViewController.swift in Sources */,
+				0AE09F109E912FE290DF0BF5 /* VoicevoxCacheGenerationDialog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

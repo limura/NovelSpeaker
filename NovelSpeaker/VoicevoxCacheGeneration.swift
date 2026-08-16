@@ -11,7 +11,14 @@ import Foundation
 /// 生成の進み具合。
 ///
 /// 「ここまで作れているなら、このまま持ち出していいかな」を利用者が判断できる事を狙う。
-/// そのため「何ブロック目」ではなく「第20話『邂逅』の50%まで、合計3時間12分」と出す。
+/// そのため「何ブロック目」ではなく、ページ位置と合計時間で出す。
+///
+/// 「第2話」のような言い方は使わない。実機で『第2話「第1話」の34%』という表示になり
+/// (2ページ目の章題が「第1話」だった)、何を指しているのか分からなくなった。
+/// ページ番号は「Nページ目/全Mページ」と明示し、章題は引用符でくくって区別する。
+///
+/// また、開始ページも併記する。100ページ目から作り始めた時に「102/1000ページ目」とだけ
+/// 出ていると、最初の102ページぶんが出来ているように読めてしまうため。
 struct VoicevoxCacheGenerationProgress {
     let chapterNumber: Int
     let chapterTitle: String
@@ -19,6 +26,14 @@ struct VoicevoxCacheGenerationProgress {
     let totalBlockCount: Int
     /// その小説について貯まっている音声の合計秒数。
     let totalAudioSeconds: Double
+    /// 全ページ数(分からなければ nil)。
+    var lastChapterNumber: Int? = nil
+    /// この生成を始めたページ。
+    var startChapterNumber: Int? = nil
+    /// 背面に入って一時停止しているか。
+    var isPausedByBackground: Bool = false
+    /// 小説の更新確認(ダウンロード)中で一時停止しているか。
+    var isPausedByDownload: Bool = false
 
     var chapterPercent: Int {
         // 読み上げる物が無い話(空ページ等)は、作り終えている扱いにする(0除算も避ける)。
@@ -27,9 +42,25 @@ struct VoicevoxCacheGenerationProgress {
         return max(0, min(100, percent))
     }
 
+    var pauseReasonText: String? {
+        if isPausedByBackground { return "画面が消えた(背面にある)ため一時停止中" }
+        if isPausedByDownload { return "小説の更新確認中のため一時停止中" }
+        return nil
+    }
+
     var description: String {
-        let title = chapterTitle.isEmpty ? "" : "「\(chapterTitle)」"
-        return "第\(chapterNumber)話\(title)の\(chapterPercent)%まで生成済み、合計\(Self.durationText(seconds: totalAudioSeconds))"
+        var text = "\(chapterNumber)ページ目"
+        if let last = lastChapterNumber { text += "/全\(last)ページ" }
+        if chapterTitle.isEmpty == false { text += "「\(chapterTitle)」" }
+        text += "の\(chapterPercent)%まで生成"
+        if let start = startChapterNumber {
+            text += "(\(start)ページ目から開始)"
+        }
+        text += "・この小説の合計\(Self.durationText(seconds: totalAudioSeconds))"
+        if let reason = pauseReasonText {
+            text += "\n\(reason)"
+        }
+        return text
     }
 
     static func durationText(seconds: Double) -> String {

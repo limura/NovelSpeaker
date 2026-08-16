@@ -41,21 +41,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
     }
 
     private func toggleVoicevoxCacheGeneration() {
-        if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
-            VoicevoxCacheGenerator.shared.stop()
-            return
-        }
-        let novelID = self.novelID
-        _ = NiftyUtility.EasyDialogTwoButton(
-            viewController: self,
-            title: "VOICEVOX音声の生成",
-            message: "今の読み上げ位置から先の音声を作って端末に貯めます。\n\n作っている間は画面を消さずに置いておいてください(画面が消えると中断します)。\n音声1時間ぶんで約15MBを使います。\n\n作った音声はこの端末でだけ使えます。",
-            button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
-            button1Action: nil,
-            button2Title: "生成を始める",
-            button2Action: {
-                VoicevoxCacheGenerator.shared.start(novelID: novelID)
-            })
+        VoicevoxCacheGenerationDialog.present(on: self, novelID: novelID)
     }
 
     @objc private func voicevoxCacheProgressDidChange() {
@@ -64,6 +50,11 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
             guard let row = self.form.rowBy(tag: Self.voicevoxCacheRowTag) as? ButtonRow else { return }
             row.title = Self.voicevoxCacheRowTitle(novelID: self.novelID)
             row.updateCell()
+            // 行の高さは文字数が変わっても自動では再計算されない。
+            // これをしないと、複数行になった時に1行に潰れて末尾が「…」で切れる
+            //(一度別の画面へ行って戻ると直る、という分かりにくい挙動になる)。
+            self.tableView.beginUpdates()
+            self.tableView.endUpdates()
         }
     }
 

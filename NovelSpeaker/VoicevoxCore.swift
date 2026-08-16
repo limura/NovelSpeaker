@@ -626,6 +626,7 @@ actor VoicevoxCore {
         if let disk = peekDiskCache(text: text, styleId: styleId) {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [ディスクHIT] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
             VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
+            VoicevoxPerformanceMonitor.shared.recordDiskCacheHit()
             VoicevoxPerformanceMonitor.shared.recordEvent("ディスクHIT style=\(styleId) \"\(Self.logSnippet(text))\"")
             return disk
         }

@@ -27,6 +27,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var startStopButton:UIButton? = nil
     var skipBackwardButtonItem:UIButton? = nil
     var skipForwardButtonItem:UIButton? = nil
+    var voicevoxCacheGenerationButtonItem:UIButton? = nil
 
     var novelObserverToken:NotificationToken? = nil
     var novelObserverNovelID:String = ""
@@ -113,6 +114,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
             self.observeStory(storyID: storyID)
             
+            // VOICEVOX音声の生成状態が変わったら、右上のボタンの見た目を切り替える。
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(self.voicevoxCacheProgressDidChange),
+                name: VoicevoxCacheGenerator.progressDidChangeNotification,
+                object: nil
+            )
+
             // VoiceOver の ON/OFF を受け取って右上のボタン配置をゴニョる
             NotificationCenter.default.addObserver(
                 forName: UIAccessibility.voiceOverStatusDidChangeNotification,
@@ -542,6 +551,18 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         action: #selector(self.addPageToOtherNovelButtonClicked(_:)),
                         accessibilityLabel: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
                     )
+                    barButtonArray.append(button)
+                case .voicevoxCacheGeneration:
+                    // 生成中は塗り潰し(v.circle.fill)にして、どの画面からでも
+                    // 「今作っている」事が分かるようにする。
+                    let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID ?? "")
+                    let isGenerating = VoicevoxCacheGenerator.shared.runningNovelID == novelID
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: isGenerating ? "v.circle.fill" : "v.circle"),
+                        action: #selector(self.voicevoxCacheGenerationButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewButtonType_VoicevoxCacheGeneration", comment: "VOICEVOX音声の生成")
+                    )
+                    self.voicevoxCacheGenerationButtonItem = button
                     barButtonArray.append(button)
                 case .speechStop:
                     let image:UIImage?
@@ -1236,6 +1257,22 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     @objc func detailButtonClicked(_ sender: UIBarButtonItem) {
         performSegue(withIdentifier: "NovelDetailViewPushSegue", sender: self)
+    }
+
+    /// VOICEVOX音声の事前生成を、本文画面から始めたり止めたりする。
+    @objc func voicevoxCacheGenerationButtonClicked(_ sender: Any) {
+        guard let storyID = self.storyID else { return }
+        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+        VoicevoxCacheGenerationDialog.present(on: self, novelID: novelID)
+    }
+
+    @objc func voicevoxCacheProgressDidChange() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, let button = self.voicevoxCacheGenerationButtonItem else { return }
+            let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID ?? "")
+            let isGenerating = VoicevoxCacheGenerator.shared.runningNovelID == novelID
+            button.setImage(UIImage(systemName: isGenerating ? "v.circle.fill" : "v.circle"), for: .normal)
+        }
     }
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
         disableCurrentReadingStoryChangeFloatingButton()

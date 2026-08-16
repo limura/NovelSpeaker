@@ -927,6 +927,7 @@
 "SpeechViewButtonType_SkipForward" = "Advance a little (during playback)";
 "SpeechViewButtonType_ShowTableOfContents" = "Table of Contents";
 "SpeechViewButtonType_AddPageToOtherNovel" = "Add this page to another novel";
+"SpeechViewButtonType_VoicevoxCacheGeneration" = "Generate VOICEVOX audio in advance";
 "AddPageToOtherNovel_ConfirmMessage" = "Add this page to \"%@\"?";
 "AddPageToOtherNovel_Success" = "The page was added.";
 "AddPageToOtherNovel_Failure" = "Failed to add the page.";

@@ -176,6 +176,14 @@ struct PlaybackGapAccumulator {
     private(set) var missQueuedCount: Int = 0
     /// MISS のうち「そもそも先行合成に予約されていなかった」件数(= 取りこぼしの不具合)。
     private(set) var missNotQueuedCount: Int = 0
+    /// HIT のうち、事前に作ってディスクに貯めてあった物から返した件数。
+    /// メモリ上の先行合成由来のHITと区別できないと、
+    /// 「ディスクキャッシュが本当に使われているか」が数字で確認できない。
+    private(set) var diskCacheHitCount: Int = 0
+
+    mutating func addDiskCacheHit() {
+        diskCacheHitCount += 1
+    }
 
     mutating func addMissCause(wasQueuedForPrefetch: Bool) {
         if wasQueuedForPrefetch { missQueuedCount += 1 } else { missNotQueuedCount += 1 }
@@ -381,6 +389,13 @@ final class VoicevoxPerformanceMonitor {
         lock.unlock()
     }
 
+    /// 事前に作ってディスクに貯めてあった音声から返せた事を記録する。
+    func recordDiskCacheHit() {
+        lock.lock()
+        gaps.addDiskCacheHit()
+        lock.unlock()
+    }
+
     /// 再生のために合成を要求した結果(先行合成が間に合っていたか)を記録する。
     func recordPlaybackSynthesisRequest(wasCacheHit: Bool, waitSeconds: Double) {
         lock.lock()
@@ -500,6 +515,11 @@ final class VoicevoxPerformanceMonitor {
             // MISS の内訳。予約済みなら「間に合わなかった」= 時間の問題、
             // 未予約なら「先読みが取りこぼした」= ロジックの不具合。
             fields.append("MISS内訳=予約済\(snapshotGaps.missQueuedCount)/未予約\(snapshotGaps.missNotQueuedCount)")
+            // HIT のうち何件が「事前に作ってディスクに貯めてあった物」か。
+            // これが出ていないと、ディスクキャッシュが効いているのかを
+            // 3秒以上の無音が起きた時のトレースでしか確認できない
+            //(効いている時ほど無音が起きないので、確認できない、という事になる)。
+            fields.append("うちディスクHIT=\(snapshotGaps.diskCacheHitCount)件")
         }
         fields.append("未再生の貯金=\(String(format: "%.1f", currentLead))秒")
         fields.append("キャッシュ計=\(String(format: "%.1f", VoicevoxCore.shared.cachedAudioSecondsForLogging()))秒")

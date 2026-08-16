@@ -45,11 +45,18 @@ final class VoicevoxCacheGenerator {
         }
     }
 
+    /// 画面上部の活動インジケータ(小説の更新確認でも使っている物)に出すための識別子。
+    /// どの画面にいても「今CPUを使っている」事が分かるようにする。
+    private static let activityIndicatorID = "VoicevoxCacheGenerator"
+
     private let lock = NSLock()
     private var task: Task<Void, Never>?
     private var runningNovelIDUnsafe: String?
     private var progressUnsafe: VoicevoxCacheGenerationProgress?
     private var lastStopReasonUnsafe: StopReason?
+    /// 進捗表示を組み立てる時に使う、生成中ずっと変わらない情報。
+    private var startChapterNumberUnsafe: Int?
+    private var lastChapterNumberUnsafe: Int?
 
     private init() {}
 
@@ -82,7 +89,13 @@ final class VoicevoxCacheGenerator {
         // 「放置しておけば作れている」ためには画面を消させない。
         // 消えると背面に落ち、スレッド数が1に絞られて生成が何倍も遅くなる。
         setIdleTimerDisabled(true)
-        notifyProgressChanged()
+        ActivityIndicatorManager.enable(id: Self.activityIndicatorID)
+
+        // 最初の1ブロックが出来るまで進捗が空だと、押した直後に
+        // 「生成中」としか出ず「本当に動いているのか」が分からない
+        //(1ブロックに数十秒かかる端末があるので、その間ずっと不安になる)。
+        // 先に 0% の進捗を出しておく。
+        publishInitialProgress(novelID: novelID)
 
         task = Task(priority: .utility) { [weak self] in
             guard let self = self else { return }
@@ -100,6 +113,7 @@ final class VoicevoxCacheGenerator {
         lock.unlock()
         if wasRunning {
             setIdleTimerDisabled(false)
+            ActivityIndicatorManager.disable(id: Self.activityIndicatorID)
             notifyProgressChanged()
         }
     }
@@ -110,6 +124,7 @@ final class VoicevoxCacheGenerator {
         lastStopReasonUnsafe = reason
         lock.unlock()
         setIdleTimerDisabled(false)
+        ActivityIndicatorManager.disable(id: Self.activityIndicatorID)
         AppInformationLogger.AddLog(message: "[VOICEVOX音声生成] \(reason.message)", isForDebug: true)
         notifyProgressChanged()
     }
@@ -135,6 +150,10 @@ final class VoicevoxCacheGenerator {
         guard let lastChapterNumber = Self.lastChapterNumber(novelID: novelID) else {
             return .failed("話数が分かりません")
         }
+        lock.lock()
+        startChapterNumberUnsafe = start.chapterNumber
+        lastChapterNumberUnsafe = lastChapterNumber
+        lock.unlock()
 
         var chapterNumber = start.chapterNumber
         var blockIndex = start.blockIndex
@@ -155,7 +174,7 @@ final class VoicevoxCacheGenerator {
 
             for target in targets where target.blockIndex >= blockIndex {
                 if Task.isCancelled { return .stoppedByUser }
-                await waitWhileBackgrounded()
+                await waitWhilePaused(novelID: novelID, story: story, generatedCount: generatedCount, totalCount: targets.count)
                 if Task.isCancelled { return .stoppedByUser }
 
                 // 画面が消えないようにし続ける。読み上げの停止処理などが
@@ -196,31 +215,80 @@ final class VoicevoxCacheGenerator {
         return .finished
     }
 
-    /// 背面にいる間は生成しない。
+    /// 生成を進めてよくなるまで待つ。止めるのではなく待つのは、
+    /// 「数十分かけて作っている途中で勝手に終わっていた」方が困るため
+    /// (待っている間は理由を進捗に出すので、止まって見えても不安にならない)。
     ///
-    /// 「起動しっぱなしで放置」させる機能なので、背面に落ちた=利用者が別の事を
-    /// 始めた、という事。そのまま作り続けると電池を焼くし、背面のCPU上限で
-    /// 何倍も遅くなる(スレッド数が1に絞られる)ので、前景に戻るまで待つ。
-    private func waitWhileBackgrounded() async {
-        while VoicevoxPrefetchThrottleMonitor.shared.isBackground {
+    ///  - 背面にいる間: 「起動しっぱなしで放置」させる機能なので、背面に落ちた
+    ///    = 利用者が別の事を始めた、という事。そのまま作り続けると電池を焼くし、
+    ///    背面のCPU上限でスレッド数が1に絞られて何倍も遅くなる。
+    ///  - 小説の更新確認(ダウンロード)中: 更新確認自体がかなり重い処理で、
+    ///    同時に走らせると両方が遅くなる。生成は急ぐ物ではないので譲る。
+    ///    利用者が明示的に始めた生成を勝手に終わらせはせず、確認が終われば自分で再開する。
+    private func waitWhilePaused(novelID: String, story: Story, generatedCount: Int, totalCount: Int) async {
+        var didPause = false
+        while true {
             if Task.isCancelled { return }
+            let isBackground = VoicevoxPrefetchThrottleMonitor.shared.isBackground
+            let isDownloading = NovelDownloadQueue.shared.GetCurrentDownloadCount() > 0
+            if isBackground == false && isDownloading == false { break }
+            updateProgress(novelID: novelID, story: story, generatedCount: generatedCount, totalCount: totalCount,
+                           isPausedByBackground: isBackground, isPausedByDownload: isBackground == false && isDownloading)
+            didPause = true
             try? await Task.sleep(nanoseconds: 2_000_000_000)
+        }
+        if didPause {
+            updateProgress(novelID: novelID, story: story, generatedCount: generatedCount, totalCount: totalCount)
         }
     }
 
-    private func updateProgress(novelID: String, story: Story, generatedCount: Int, totalCount: Int) {
+    private func updateProgress(novelID: String, story: Story, generatedCount: Int, totalCount: Int,
+                                isPausedByBackground: Bool = false, isPausedByDownload: Bool = false) {
         let summary = VoicevoxDiskCacheStore.shared.summary(novelID: novelID)
+        lock.lock()
+        let startChapterNumber = startChapterNumberUnsafe
+        let lastChapterNumber = lastChapterNumberUnsafe
+        lock.unlock()
         let progress = VoicevoxCacheGenerationProgress(
             chapterNumber: story.chapterNumber,
             chapterTitle: story.subtitle,
             generatedBlockCount: generatedCount,
             totalBlockCount: totalCount,
-            totalAudioSeconds: summary.audioSeconds
+            totalAudioSeconds: summary.audioSeconds,
+            lastChapterNumber: lastChapterNumber,
+            startChapterNumber: startChapterNumber,
+            isPausedByBackground: isPausedByBackground,
+            isPausedByDownload: isPausedByDownload
         )
         lock.lock()
         progressUnsafe = progress
         lock.unlock()
         notifyProgressChanged()
+    }
+
+    /// 開始直後に出す進捗。
+    /// 最初の1ブロックが出来るまで何も出ないと、押した直後に「本当に動いているのか」が
+    /// 分からない(1ブロックに数十秒かかる端末がある)。
+    private func publishInitialProgress(novelID: String) {
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            guard let self = self else { return }
+            guard let start = self.startPosition(novelID: novelID) else {
+                self.notifyProgressChanged()
+                return
+            }
+            let lastChapterNumber = Self.lastChapterNumber(novelID: novelID)
+            self.lock.lock()
+            self.startChapterNumberUnsafe = start.chapterNumber
+            self.lastChapterNumberUnsafe = lastChapterNumber
+            self.lock.unlock()
+            guard let story = Self.story(novelID: novelID, chapterNumber: start.chapterNumber) else {
+                self.notifyProgressChanged()
+                return
+            }
+            let targets = VoicevoxCacheBlockSource.synthesisTargets(story: story)
+            let generatedCount = targets.filter { $0.blockIndex < start.blockIndex }.count
+            self.updateProgress(novelID: novelID, story: story, generatedCount: generatedCount, totalCount: targets.count)
+        }
     }
 
     // MARK: - 開始位置

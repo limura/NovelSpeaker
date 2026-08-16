@@ -917,6 +917,7 @@
 "SpeechViewButtonType_SkipForward" = "(再生中に)少し進める";
 "SpeechViewButtonType_ShowTableOfContents" = "章リスト(目次)";
 "SpeechViewButtonType_AddPageToOtherNovel" = "他の小説にこのページを追加する";
+"SpeechViewButtonType_VoicevoxCacheGeneration" = "VOICEVOX音声を先に作っておく";
 "AddPageToOtherNovel_ConfirmMessage" = "「%@」にこのページを追加しますか？";
 "AddPageToOtherNovel_Success" = "ページを追加しました。";
 "AddPageToOtherNovel_Failure" = "ページの追加に失敗しました。";

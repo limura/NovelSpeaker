@@ -171,6 +171,17 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                         $0.value = setting.isOn
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
+                case .voicevoxCacheGeneration:
+                    // VOICEVOX 公式のアイコンは薄緑地に「V」なので、
+                    // SF Symbols の v.circle で見た目の対応を取る(公式素材は使わない)。
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("SpeechViewButtonType_VoicevoxCacheGeneration", comment: "VOICEVOX音声の生成")
+                        if #available(iOS 13.0, *) {
+                            $0.cell.imageView?.image = UIImage(systemName: "v.circle")
+                        }
+                        $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
+                    }.onChange({_ in self.saveCurrentSetting()})
                 default:
                     continue
                 }
