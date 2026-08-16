@@ -21,23 +21,28 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
     // MARK: - VOICEVOX 音声の事前生成
 
     static let voicevoxCacheRowTag = "VoicevoxCacheGenerationRow"
+    static let voicevoxCacheDeleteRowTag = "VoicevoxCacheDeleteRow"
 
     /// ボタンの文言。生成中は進捗を、止まっている時は貯まっている量を出す。
     /// 「ここまで作れているなら、このまま持ち出していいか」を判断できる事を狙っている。
     static func voicevoxCacheRowTitle(novelID: String) -> String {
-        let summary = VoicevoxDiskCacheStore.shared.summary(novelID: novelID)
-        let stored = VoicevoxCacheGenerationProgress.durationText(seconds: summary.audioSeconds)
         if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
             if let progress = VoicevoxCacheGenerator.shared.progress {
-                return "VOICEVOX音声を生成中(タップで停止)\n\(progress.description)"
+                return "VOICEVOX音声を生成中(タップで確認/停止)\n\(progress.description)"
             }
-            return "VOICEVOX音声を生成中(タップで停止)"
+            return "VOICEVOX音声を生成中(タップで確認/停止)"
         }
+        let summary = VoicevoxDiskCacheStore.shared.summary(novelID: novelID)
         if summary.entryCount > 0 {
+            let chapterCount = VoicevoxDiskCacheStore.shared.chapterNumbers(novelID: novelID).count
             let megabytes = Double(summary.byteCount) / 1024 / 1024
-            return "VOICEVOX音声を続きから生成する\n現在\(stored)ぶん(\(String(format: "%.0f", megabytes))MB)"
+            // 「続きから」とは言わない。生成は常に今の読み上げ位置から始めて
+            // 作成済みを飛ばしていくので、どこから作られるかは読み上げ位置で決まる。
+            return "VOICEVOX音声を今の読み上げ位置から生成する\n"
+                + VoicevoxCacheGenerationProgress.storedText(chapterCount: chapterCount, audioSeconds: summary.audioSeconds)
+                + "(\(String(format: "%.0f", megabytes))MB)"
         }
-        return "VOICEVOX音声を今の位置から生成する"
+        return "VOICEVOX音声を今の読み上げ位置から生成する"
     }
 
     private func toggleVoicevoxCacheGeneration() {
@@ -529,6 +534,21 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     guard let self = self else { return }
                     self.toggleVoicevoxCacheGeneration()
                 })
+                // 削除の入口が設定タブの管理画面にしか無く、見つけられないという声があったため、
+                // 作ってある時はこの小説の画面からも消せるようにする。
+                if VoicevoxDiskCacheStore.shared.summary(novelID: self.novelID).entryCount > 0 {
+                    actionSection <<< ButtonRow(Self.voicevoxCacheDeleteRowTag) {
+                        $0.title = "作成済みのVOICEVOX音声を削除する"
+                        $0.cell.textLabel?.numberOfLines = 0
+                    }.onCellSelection({ [weak self] _, _ in
+                        guard let self = self else { return }
+                        VoicevoxCacheDeleteDialog.present(on: self, novelID: self.novelID) { [weak self] in
+                            guard let self = self else { return }
+                            self.form.removeAll()
+                            self.createCells()
+                        }
+                    })
+                }
             }
 
             self.form +++ actionSection

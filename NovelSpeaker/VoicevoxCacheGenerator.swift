@@ -55,7 +55,6 @@ final class VoicevoxCacheGenerator {
     private var progressUnsafe: VoicevoxCacheGenerationProgress?
     private var lastStopReasonUnsafe: StopReason?
     /// 進捗表示を組み立てる時に使う、生成中ずっと変わらない情報。
-    private var startChapterNumberUnsafe: Int?
     private var lastChapterNumberUnsafe: Int?
 
     private init() {}
@@ -151,7 +150,6 @@ final class VoicevoxCacheGenerator {
             return .failed("話数が分かりません")
         }
         lock.lock()
-        startChapterNumberUnsafe = start.chapterNumber
         lastChapterNumberUnsafe = lastChapterNumber
         lock.unlock()
 
@@ -204,13 +202,11 @@ final class VoicevoxCacheGenerator {
                 }
 
                 generatedCount += 1
-                VoicevoxCacheGenerationState.shared.setResumePosition(chapterNumber: chapterNumber, blockIndex: target.blockIndex + 1, novelID: novelID)
                 updateProgress(novelID: novelID, story: story, generatedCount: generatedCount, totalCount: targets.count)
             }
 
             chapterNumber += 1
             blockIndex = 0
-            VoicevoxCacheGenerationState.shared.setResumePosition(chapterNumber: chapterNumber, blockIndex: 0, novelID: novelID)
         }
         return .finished
     }
@@ -245,8 +241,8 @@ final class VoicevoxCacheGenerator {
     private func updateProgress(novelID: String, story: Story, generatedCount: Int, totalCount: Int,
                                 isPausedByBackground: Bool = false, isPausedByDownload: Bool = false) {
         let summary = VoicevoxDiskCacheStore.shared.summary(novelID: novelID)
+        let generatedChapterCount = VoicevoxDiskCacheStore.shared.chapterNumbers(novelID: novelID).count
         lock.lock()
-        let startChapterNumber = startChapterNumberUnsafe
         let lastChapterNumber = lastChapterNumberUnsafe
         lock.unlock()
         let progress = VoicevoxCacheGenerationProgress(
@@ -256,7 +252,7 @@ final class VoicevoxCacheGenerator {
             totalBlockCount: totalCount,
             totalAudioSeconds: summary.audioSeconds,
             lastChapterNumber: lastChapterNumber,
-            startChapterNumber: startChapterNumber,
+            generatedChapterCount: generatedChapterCount,
             isPausedByBackground: isPausedByBackground,
             isPausedByDownload: isPausedByDownload
         )
@@ -278,7 +274,6 @@ final class VoicevoxCacheGenerator {
             }
             let lastChapterNumber = Self.lastChapterNumber(novelID: novelID)
             self.lock.lock()
-            self.startChapterNumberUnsafe = start.chapterNumber
             self.lastChapterNumberUnsafe = lastChapterNumber
             self.lock.unlock()
             guard let story = Self.story(novelID: novelID, chapterNumber: start.chapterNumber) else {
@@ -293,11 +288,15 @@ final class VoicevoxCacheGenerator {
 
     // MARK: - 開始位置
 
-    /// 続きから作る。初めてなら「今の再生位置」から。
+    /// **常に「今の読み上げ位置」から**始める。前回の続きからではない。
+    ///
+    /// 前回の到達点から再開すると、読み上げ位置を前に戻してから生成を始めた時に
+    /// 「読んでいる所ではなく、ずっと先の続きが作られる」事になり、期待と食い違う。
+    /// 既に作ってある分は `contains` で即座に飛ばせる(音声を読まずに判定できる)ので、
+    /// 作成済みの範囲を通り抜けるコストはページの分割処理だけで済む。
+    /// これで「読んでいる所から先を埋める」という一貫した意味になり、
+    /// 「どこから作ったか」を覚えておく必要も無くなる。
     private func startPosition(novelID: String) -> VoicevoxCacheGenerationState.Position? {
-        if let resume = VoicevoxCacheGenerationState.shared.resumePosition(novelID: novelID) {
-            return resume
-        }
         return RealmUtil.RealmBlock { (realm) -> VoicevoxCacheGenerationState.Position? in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return nil }
             let chapterNumber = novel.readingChapterNumber ?? 1

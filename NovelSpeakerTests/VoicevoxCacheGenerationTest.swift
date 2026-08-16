@@ -57,15 +57,21 @@ class VoicevoxCacheGenerationProgressTest: XCTestCase {
         XCTAssertTrue(progress.description.contains("2ページ目"))
     }
 
-    // 途中のページから作り始めた時、最初からそこまで出来ていると誤解させない事。
-    // 「102/1000ページ目」とだけ出ていると、102ページぶん出来ているように読める。
-    func testDescriptionShowsWhereGenerationStarted() {
+    // 作ってある範囲が連続であるかのように読める表示をしない事。
+    //
+    // 100〜102ページを作った後で1ページ目に戻って生成を始めると、
+    // 1ページ目付近と100〜102ページの二箇所が出来ている状態になる。
+    // 「Nページ目から102ページ目まで」と読める表示はどう書いても嘘になるので、
+    // 「作成済み何ページ」という、連続性を主張しない言い方にする。
+    func testDescriptionDoesNotImplyContiguousCoverage() {
         let progress = VoicevoxCacheGenerationProgress(
             chapterNumber: 102, chapterTitle: "", generatedBlockCount: 1, totalBlockCount: 2,
-            totalAudioSeconds: 60, lastChapterNumber: 1000, startChapterNumber: 100)
+            totalAudioSeconds: 3 * 3600, lastChapterNumber: 1000, generatedChapterCount: 87)
         let text = progress.description
-        XCTAssertTrue(text.contains("102ページ目/全1000ページ"))
-        XCTAssertTrue(text.contains("100ページ目から開始"))
+        XCTAssertTrue(text.contains("102ページ目/全1000ページ"), "今どこを作っているかは出す")
+        XCTAssertTrue(text.contains("作成済み 87ページ"), "作れている量はページ数で出す")
+        XCTAssertFalse(text.contains("から開始"), "連続範囲を示唆する言い方をしない")
+        XCTAssertFalse(text.contains("まで生成済み"), "連続範囲を示唆する言い方をしない")
     }
 
     // 止まっている時は、その理由が分かる事(「動いていないのでは」と不安にさせない)。
@@ -190,23 +196,6 @@ class VoicevoxCacheGenerationStateTest: XCTestCase {
         XCTAssertFalse(state.isEnabled(novelID: "novel-B"), "他の小説には影響しない事")
         state.setEnabled(false, novelID: "novel-A")
         XCTAssertFalse(state.isEnabled(novelID: "novel-A"))
-    }
-
-    // 中断して再開できる事(数十分かかるので、毎回最初からでは終わらない)。
-    func testResumePositionRoundTrip() {
-        XCTAssertNil(state.resumePosition(novelID: "novel-A"))
-        state.setResumePosition(chapterNumber: 20, blockIndex: 15, novelID: "novel-A")
-        let position = state.resumePosition(novelID: "novel-A")
-        XCTAssertEqual(position?.chapterNumber, 20)
-        XCTAssertEqual(position?.blockIndex, 15)
-    }
-
-    // 生成をやめた時に再開位置も消える事(次に始める時は今の再生位置からになる)。
-    func testDisablingClearsTheResumePosition() {
-        state.setEnabled(true, novelID: "novel-A")
-        state.setResumePosition(chapterNumber: 20, blockIndex: 15, novelID: "novel-A")
-        state.setEnabled(false, novelID: "novel-A")
-        XCTAssertNil(state.resumePosition(novelID: "novel-A"))
     }
 
     // 有効にした小説を一覧できる事(管理画面と、再生時に「ディスクへ書くか」の判定に使う)。

@@ -17,8 +17,11 @@ import Foundation
 /// (2ページ目の章題が「第1話」だった)、何を指しているのか分からなくなった。
 /// ページ番号は「Nページ目/全Mページ」と明示し、章題は引用符でくくって区別する。
 ///
-/// また、開始ページも併記する。100ページ目から作り始めた時に「102/1000ページ目」とだけ
-/// 出ていると、最初の102ページぶんが出来ているように読めてしまうため。
+/// 「Nページ目から開始」という言い方もしない。**作ってある範囲は連続とは限らない**ため。
+/// 100〜102ページを作った後で1ページ目に戻って作り始めると、1ページ目付近と
+/// 100〜102ページの二箇所が出来ている状態になり、「Nページ目から102ページ目まで」と
+/// 読める表示はどう書いても嘘になる。
+/// 代わりに「作成済み87ページ・合計3時間12分」と、連続性を主張しない形で出す。
 struct VoicevoxCacheGenerationProgress {
     let chapterNumber: Int
     let chapterTitle: String
@@ -28,8 +31,8 @@ struct VoicevoxCacheGenerationProgress {
     let totalAudioSeconds: Double
     /// 全ページ数(分からなければ nil)。
     var lastChapterNumber: Int? = nil
-    /// この生成を始めたページ。
-    var startChapterNumber: Int? = nil
+    /// 音声が1つでも作ってあるページの数(連続しているとは限らない)。
+    var generatedChapterCount: Int = 0
     /// 背面に入って一時停止しているか。
     var isPausedByBackground: Bool = false
     /// 小説の更新確認(ダウンロード)中で一時停止しているか。
@@ -52,15 +55,18 @@ struct VoicevoxCacheGenerationProgress {
         var text = "\(chapterNumber)ページ目"
         if let last = lastChapterNumber { text += "/全\(last)ページ" }
         if chapterTitle.isEmpty == false { text += "「\(chapterTitle)」" }
-        text += "の\(chapterPercent)%まで生成"
-        if let start = startChapterNumber {
-            text += "(\(start)ページ目から開始)"
-        }
-        text += "・この小説の合計\(Self.durationText(seconds: totalAudioSeconds))"
+        text += "の\(chapterPercent)%を生成中"
+        text += "\n" + Self.storedText(chapterCount: generatedChapterCount, audioSeconds: totalAudioSeconds)
         if let reason = pauseReasonText {
             text += "\n\(reason)"
         }
         return text
+    }
+
+    /// 作ってある量の言い方。連続性を主張しない
+    /// (「Nページ目まで作成済み」と書くと、その手前が全部あるように読める)。
+    static func storedText(chapterCount: Int, audioSeconds: Double) -> String {
+        return "作成済み \(chapterCount)ページ・合計\(durationText(seconds: audioSeconds))"
     }
 
     static func durationText(seconds: Double) -> String {
@@ -126,15 +132,20 @@ enum VoicevoxCacheLead {
     }
 }
 
-/// どの小説でキャッシュ生成を有効にしているか、どこまで作ったか。
+/// どの小説でキャッシュ生成を有効にしているか。
 ///
 /// Realm ではなく UserDefaults に置く。生成済み音声そのものが端末ローカル限定
 /// (他端末では話者(VVM)が入っているとは限らず、読み替え辞書も同じとは限らない)なので、
 /// 同期する意味が無く、Realm に足すとバックアップ/CloudKit同期/Realm間コピー/件数表示の
 /// 並行リストを全部触る必要が出てしまう。
 /// 失われても「今の再生位置から作り直す」だけで済む情報しか持たせない。
+///
+/// 「どこまで作ったか」は覚えない。生成は常に今の読み上げ位置から始めて、
+/// 既に作ってある分を飛ばしていく形にしたため(読み上げ位置を前に戻してから
+/// 生成を始めた時に、ずっと先の続きが作られてしまうのを避けるため)。
 final class VoicevoxCacheGenerationState {
 
+    /// 生成を始める位置。
     struct Position: Equatable {
         let chapterNumber: Int
         let blockIndex: Int
@@ -143,7 +154,6 @@ final class VoicevoxCacheGenerationState {
     static let shared = VoicevoxCacheGenerationState(userDefaults: UserDefaults.standard)
 
     private static let enabledNovelIDsKey = "NovelSpeaker.Voicevox.diskCacheEnabledNovelIDs"
-    private static let resumePositionKeyPrefix = "NovelSpeaker.Voicevox.diskCacheResume."
 
     private let userDefaults: UserDefaults
     private let lock = NSLock()
@@ -171,26 +181,6 @@ final class VoicevoxCacheGenerationState {
             ids.removeAll(where: { $0 == novelID })
         }
         userDefaults.set(ids, forKey: Self.enabledNovelIDsKey)
-        if enabled == false {
-            // 次に始める時は、その時の再生位置から作り直す。
-            userDefaults.removeObject(forKey: Self.resumePositionKeyPrefix + novelID)
-        }
-        lock.unlock()
-    }
-
-    func resumePosition(novelID: String) -> Position? {
-        lock.lock()
-        defer { lock.unlock() }
-        guard let values = userDefaults.array(forKey: Self.resumePositionKeyPrefix + novelID) as? [Int],
-              values.count == 2 else {
-            return nil
-        }
-        return Position(chapterNumber: values[0], blockIndex: values[1])
-    }
-
-    func setResumePosition(chapterNumber: Int, blockIndex: Int, novelID: String) {
-        lock.lock()
-        userDefaults.set([chapterNumber, blockIndex], forKey: Self.resumePositionKeyPrefix + novelID)
         lock.unlock()
     }
 }
