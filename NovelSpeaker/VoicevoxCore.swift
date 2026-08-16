@@ -153,6 +153,25 @@ actor VoicevoxCore {
     nonisolated(unsafe) private var synthesisQueueStorage: VoicevoxSynthesisQueue!
     nonisolated var synthesisQueue: VoicevoxSynthesisQueue { return synthesisQueueStorage }
 
+    // CPU予算の管理役。背面バッテリー時に、合成を始める前に「この1本を今走らせたら
+    // 60秒平均80%の上限を超えるか」を見積もって判断する(詳細は VoicevoxCPUGovernor.swift)。
+    nonisolated let cpuGovernor = VoicevoxCPUGovernor()
+
+    /// 先行合成に許す CPU 予算の割合。再生に必要な合成の分を空けておくため、
+    /// OSの上限(80%)よりかなり手前で止める。
+    private static let prefetchCPULimitRatio = 0.55
+    /// 再生に必要な(その場の)合成に許す割合。こちらは止めると無音が伸びるので上限寄り。
+    private static let playbackCPULimitRatio = 0.75
+    /// OSの判定窓と同じ長さ。これ以上待っても窓の中身は減らない。
+    private static let cpuWindowSeconds = 60.0
+
+    /// CPU予算的に、この合成を始めてよくなるまであと何秒待つべきか。
+    /// 上限が適用されない状況(前景/充電中)では常に0。
+    nonisolated private func governorWaitSeconds(text: String, limitRatio: Double) -> Double {
+        guard VoicevoxPrefetchThrottleMonitor.shared.isCPULimitApplied else { return 0 }
+        return cpuGovernor.waitSeconds(forCharacterCount: text.count, limitRatio: limitRatio, at: ProcessInfo.processInfo.systemUptime)
+    }
+
     // ワーカー(待ち行列から1件ずつ取り出して合成するループ)の起動状態。
     // actor へ入らずに判定したいので専用ロックで守る。
     private let workerLock = NSLock()
@@ -255,6 +274,8 @@ actor VoicevoxCore {
         loadedVvmPaths.removeAll()
         try createSynthesizer(onnxruntime: ort, openJTalk: jtalk)
         VoicevoxPerformanceMonitor.shared.resetForTesting()
+        // スレッド数が変わると文字数あたりの CPU 秒も変わるので、見積りも作り直す。
+        cpuGovernor.reset()
     }
 
     /// 指定ディレクトリ群にある *.vvm を全部 open→メタ取得→close して話者カタログを作り直す。
@@ -399,6 +420,8 @@ actor VoicevoxCore {
         }
         if let cpuSeconds = cpuSeconds {
             VoicevoxPerformanceMonitor.shared.recordSynthesis(wavByteCount: data.count, cpuSeconds: cpuSeconds, wallSeconds: wallSeconds, styleId: styleId)
+            // 次回以降の見積り材料。同じ文字数でも端末と発熱状態で数倍違うので、実測が要る。
+            cpuGovernor.recordSynthesis(cpuSeconds: cpuSeconds, characterCount: text.count, at: ProcessInfo.processInfo.systemUptime)
         }
         return data
     }
@@ -475,6 +498,20 @@ actor VoicevoxCore {
         if let cached = peekCache(key: key) {
             return cached
         }
+        // 再生に必要な合成でも、CPU予算を超えたまま突入すると強制終了される
+        // (殺されると再生そのものが止まるので、無音より重い)。
+        // 予算が空くまで待ってから合成する。1本で予算を超える場合(SE2の長いブロック等)は
+        // 窓が空くまで待った上で実行する(その1本だけで窓を使い切る形にして、
+        // 上限を超える確率を最小にする)。
+        let budgetWait = governorWaitSeconds(text: text, limitRatio: Self.playbackCPULimitRatio)
+        if budgetWait > 0 {
+            let sleepSeconds = min(budgetWait.isInfinite ? Self.cpuWindowSeconds : budgetWait, Self.cpuWindowSeconds)
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [再生合成をCPU予算で待機 \(String(format: "%.1f", sleepSeconds))秒] styleId=\(styleId) text=\"\(snippet)\"")
+            VoicevoxPerformanceMonitor.shared.recordEvent("再生合成待機 \(String(format: "%.1f", sleepSeconds))秒(CPU予算) style=\(styleId) \"\(snippet)\"")
+            try? await Task.sleep(nanoseconds: UInt64(sleepSeconds * 1_000_000_000))
+            // 待っている間に先行合成が完了していたかもしれない。
+            if let cached = peekCache(key: key) { return cached }
+        }
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュMISS・その場合成開始] styleId=\(styleId) text=\"\(snippet)\"")
         let synthStart = Date()
         let data = try performSynthesize(text: text, styleId: styleId)
@@ -531,6 +568,10 @@ actor VoicevoxCore {
         Task(priority: .utility) { [weak self] in
             guard let self = self else { return }
             while let request = self.synthesisQueue.takeNext() {
+                if await self.waitForCPUBudgetForPrefetch(request) == false {
+                    self.synthesisQueue.complete(request)
+                    continue
+                }
                 await self.runSynthesis(request)
             }
             self.workerLock.lock()
@@ -541,6 +582,28 @@ actor VoicevoxCore {
                 self.startWorkerIfNeeded()
             }
         }
+    }
+
+    /// 先行合成を始めてよいか、CPU予算に空きができるまで待つ。
+    /// - Returns: 合成に進んでよければ true。この1本だけで予算を超えるため背面では
+    ///            実行できない場合や、待っている間にキャンセルされた場合は false。
+    nonisolated private func waitForCPUBudgetForPrefetch(_ request: VoicevoxSynthesisQueue.Request) async -> Bool {
+        let waitSeconds = governorWaitSeconds(text: request.text, limitRatio: Self.prefetchCPULimitRatio)
+        if waitSeconds <= 0 { return true }
+        let snippet = Self.logSnippet(request.text)
+        if waitSeconds.isInfinite {
+            // 1本の合成だけで予算を超える(実測: iPhone SE2 の熱serious で160文字級)。
+            // 待っても状況は変わらないので先行合成としては諦める。実際に再生で必要に
+            // なった時に、再生側の予算(より上限寄り)で改めて判断される。
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先読み断念:CPU予算超過] styleId=\(request.styleId) text=\"\(snippet)\"")
+            VoicevoxPerformanceMonitor.shared.recordEvent("先読み断念(予算超過) style=\(request.styleId) \"\(snippet)\"")
+            return false
+        }
+        let sleepSeconds = min(waitSeconds, Self.cpuWindowSeconds)
+        VoicevoxPerformanceMonitor.shared.recordEvent("先読み待機 \(String(format: "%.1f", sleepSeconds))秒(CPU予算) style=\(request.styleId) \"\(snippet)\"")
+        try? await Task.sleep(nanoseconds: UInt64(sleepSeconds * 1_000_000_000))
+        // 待っている間に停止・シークされていたら合成しない。
+        return synthesisQueue.isStale(request) == false
     }
 
     /// 待ち行列から取り出した1件を実際に合成する(ここだけが actor 隔離 = 直列実行)。

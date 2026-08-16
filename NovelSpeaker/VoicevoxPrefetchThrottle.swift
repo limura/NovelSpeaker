@@ -188,6 +188,14 @@ final class VoicevoxPrefetchThrottleMonitor {
         #endif
     }
 
+    /// iOS の「60秒平均 CPU 80%」上限が適用される状況か
+    /// (背面かつ外部電源に繋がっていない時)。CPU予算による合成の抑制
+    /// (VoicevoxCPUGovernor)を効かせるかどうかの判定に使う。
+    /// 低電力モードはこの上限自体には関係しない(CPUが遅くなるだけ)ので条件に入れない。
+    var isCPULimitApplied: Bool {
+        return isBackground && isOnExternalPower == false
+    }
+
     /// 現在の状況に応じた先行合成パラメータ。
     var currentParameters: VoicevoxPrefetchParameters {
         return VoicevoxPrefetchThrottlePolicy.parameters(
