@@ -85,6 +85,18 @@ final class VoicevoxCPUGovernor {
         return (Double(characterCount) * costPerCharacter + fixedOverheadSeconds) * safetyFactor
     }
 
+    /// 指定した CPU 秒に収まる最大の文字数(1文字未満にはしない)。
+    /// 「どのくらいの長さなら分割せずに合成できるか」の判断に使う。
+    func maxCharacterCount(withinCPUSeconds cpuSeconds: Double) -> Int {
+        lock.lock()
+        let costPerCharacter = costPerCharacterSamples.max() ?? Self.defaultCostPerCharacter
+        lock.unlock()
+        guard costPerCharacter > 0, safetyFactor > 0 else { return Int.max }
+        let available = cpuSeconds / safetyFactor - fixedOverheadSeconds
+        if available <= 0 { return 1 }
+        return max(1, Int(available / costPerCharacter))
+    }
+
     /// この合成を始めてよくなるまで、あと何秒待つべきか。
     /// - Returns: 0 なら今すぐ開始してよい。`.infinity` なら、1本だけで予算を超えるため
     ///            いくら待っても背面では実行できない。
