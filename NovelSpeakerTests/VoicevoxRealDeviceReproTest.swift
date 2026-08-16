@@ -120,10 +120,10 @@ class VoicevoxRealDeviceReproTest: XCTestCase {
         let (narratorStyleId, dialogueStyleId) = try await setUpCoreAndPickStyles()
         // このテストは「先行合成のパイプラインが詰まらない」事を合成待ちの秒数で見るので、
         // 合成そのものの速度が実行環境の設定で変わると判定がぶれる。
-        // アプリの既定は「スレッド数1」(背面のCPU上限で殺されないための安全側の設定)だが、
-        // ここでは母艦の性能を素直に使える「自動(全コア)」に固定して測る。
+        // アプリの既定は「状況に応じて自動」(背面バッテリー時は1スレッドに落ちる)だが、
+        // ここでは母艦の性能を素直に使える「全コア」に固定して測る。
         try await VoicevoxCore.shared.reconfigureCPUNumThreads(0)
-        defer { VoicevoxCore.configuredCPUNumThreads = VoicevoxCore.defaultCPUNumThreads }
+        defer { VoicevoxCore.threadCountMode = .automatic }
         VoicevoxCore.shared.clearPrefetchCache()
 
         let narratorSetting = makeVoicevoxSpeakerSetting(styleId: narratorStyleId)

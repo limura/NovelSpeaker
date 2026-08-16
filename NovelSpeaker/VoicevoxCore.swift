@@ -241,21 +241,22 @@ actor VoicevoxCore {
             }
             openJTalk = jtalkNotNil
 
-            try createSynthesizer(onnxruntime: ortNotNil, openJTalk: jtalkNotNil)
+            try createSynthesizer(onnxruntime: ortNotNil, openJTalk: jtalkNotNil, threadCount: Self.configuredCPUNumThreads)
         }
 
         try reloadStyleCatalog(voiceModelDirectoryPaths: voiceModelDirectoryPaths)
     }
 
-    /// 現在の設定値(cpu_num_threads)で synthesizer を作る。
-    private func createSynthesizer(onnxruntime: OpaquePointer, openJTalk: OpaquePointer) throws {
+    /// 指定されたスレッド数で synthesizer を作る。
+    private func createSynthesizer(onnxruntime: OpaquePointer, openJTalk: OpaquePointer, threadCount: UInt16) throws {
         var options = voicevox_make_default_initialize_options()
         options.acceleration_mode = VOICEVOX_ACCELERATION_MODE_CPU
         // 0 = 環境に合わせて自動(= 全コアを使う)。
-        // 自動のままだと ONNX が全コアでスレッドを回し、実機ログで CPU 率が 200〜290% まで
-        // 上がる事を確認している。バックグラウンドの CPU 上限(60秒平均80%)超過による
-        // 強制終了を避けられるかを実測するため、ここを可変にしている。
-        options.cpu_num_threads = Self.configuredCPUNumThreads
+        // 全コアだと ONNX が CPU を 200〜290% 使うため、背面バッテリー時は
+        // CPU 上限(60秒平均80%)超過で即座に強制終了される。一方で前景/充電中は
+        // その上限が無く、全コアの方が実時間では倍近く速い。
+        // よって固定せず、状況に応じて切り替える(VoicevoxThreadPolicy)。
+        options.cpu_num_threads = threadCount
 
         var synth: OpaquePointer?
         let synthResult = voicevox_synthesizer_new(onnxruntime, openJTalk, options, &synth)
@@ -263,14 +264,16 @@ actor VoicevoxCore {
             throw VoicevoxCoreError.core(synthResult)
         }
         synthesizer = synthNotNil
-        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [synthesizer生成] cpu_num_threads=\(Self.configuredCPUNumThreads)")
+        Self.activeCPUNumThreads = threadCount
+        Self.lastThreadCountChangeDate = Date()
+        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [synthesizer生成] cpu_num_threads=\(threadCount)")
     }
 
-    /// cpu_num_threads を変更して synthesizer を作り直す。
+    /// cpu_num_threads を明示指定して synthesizer を作り直す(計測用)。
     /// スレッド数は synthesizer の生成時オプションなので、変更には作り直しが必要。
     /// 比較計測を公平にするため、合成済みキャッシュと性能集計もリセットする。
     func reconfigureCPUNumThreads(_ threads: UInt16) throws {
-        Self.configuredCPUNumThreads = threads
+        Self.threadCountMode = .fixed(threads)
         cancelPendingPrefetch()
         clearCache()
         guard let ort = onnxruntime, let jtalk = openJTalk else {
@@ -283,7 +286,7 @@ actor VoicevoxCore {
         }
         // 音声モデルは synthesizer に紐づいてロードされているので、読み直しが必要。
         loadedVvmPaths.removeAll()
-        try createSynthesizer(onnxruntime: ort, openJTalk: jtalk)
+        try createSynthesizer(onnxruntime: ort, openJTalk: jtalk, threadCount: threads)
         VoicevoxPerformanceMonitor.shared.resetForTesting()
         // スレッド数が変わると文字数あたりの CPU 秒も変わるので、見積りも作り直す。
         cpuGovernor.reset()
@@ -362,29 +365,76 @@ actor VoicevoxCore {
     }
 
     /// ONNX に渡す CPU スレッド数(0 = 自動 = 全コア)。
-    /// バックグラウンドの CPU 上限超過による強制終了を避けられるかの実測用に可変にしている。
-    /// synthesizer 生成時オプションなので、変更を反映するには reconfigureCPUNumThreads() を使う。
+    /// synthesizer 生成時オプションなので、変更を反映するには synthesizer の作り直しが要る。
+    /// 既定では状況に応じて自動で切り替える(VoicevoxThreadPolicy 参照)。
+    /// この UserDefaults キーが存在する場合のみ、その値で固定する(計測用)。
     static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
-    /// 未設定時の既定値。
-    ///
-    /// 0(自動=全コア)にすると ONNX が全コアでスレッドを回し、実機で CPU 率が
-    /// 200〜290% に達する。背面のCPU上限は「1コア相当の80%」なので、これは即座に
-    /// 強制終了される値になる。実測ではスレッド数1が CPU 率・RTF の両方で最良で、
-    /// スレッドを増やすと発熱で RTF まで悪化した。よって既定は1にする。
-    /// (前景・充電中は上限が無いので全コア使う方が速いが、設定は synthesizer の
-    ///  生成時オプションで途中変更には作り直しが要るため、安全側に倒して固定する)
-    static let defaultCPUNumThreads: UInt16 = 1
 
-    static var configuredCPUNumThreads: UInt16 {
+    /// スレッド数の決め方。未設定なら自動。
+    static var threadCountMode: VoicevoxThreadCountMode {
         get {
             guard let stored = UserDefaults.standard.object(forKey: cpuNumThreadsUserDefaultsKey) as? Int else {
-                return defaultCPUNumThreads
+                return .automatic
             }
-            return UInt16(clamping: stored)
+            return .fixed(UInt16(clamping: stored))
         }
         set {
-            UserDefaults.standard.set(Int(newValue), forKey: cpuNumThreadsUserDefaultsKey)
+            switch newValue {
+            case .automatic:
+                UserDefaults.standard.removeObject(forKey: cpuNumThreadsUserDefaultsKey)
+            case .fixed(let threadCount):
+                UserDefaults.standard.set(Int(threadCount), forKey: cpuNumThreadsUserDefaultsKey)
+            }
         }
+    }
+
+    /// 今の状況で使いたいスレッド数。
+    static var configuredCPUNumThreads: UInt16 {
+        let monitor = VoicevoxPrefetchThrottleMonitor.shared
+        return VoicevoxThreadPolicy.desiredThreadCount(
+            mode: threadCountMode,
+            isBackground: monitor.isBackground,
+            isOnExternalPower: monitor.isOnExternalPower,
+            isLowPowerModeEnabled: ProcessInfo.processInfo.isLowPowerModeEnabled
+        )
+    }
+
+    /// 今の synthesizer を作った時のスレッド数。
+    nonisolated(unsafe) private(set) static var activeCPUNumThreads: UInt16 = 0
+    /// 最後にスレッド数を切り替えた時刻(往復を防ぐための間隔判定に使う)。
+    nonisolated(unsafe) private static var lastThreadCountChangeDate = Date.distantPast
+
+    /// 状況が変わっていればスレッド数を切り替える(synthesizer の作り直しを伴う)。
+    ///
+    /// 合成の直前に毎回呼ぶ。通知(前景/背面・電源)を取り零しても、次の合成で必ず
+    /// 追いつけるようにするため。合成済みキャッシュ(=貯金)は音声データなので
+    /// スレッド数とは無関係。捨てずにそのまま残す。
+    func applyThreadCountIfNeeded() {
+        let desired = Self.configuredCPUNumThreads
+        let elapsed = Date().timeIntervalSince(Self.lastThreadCountChangeDate)
+        guard VoicevoxThreadPolicy.shouldReconfigure(current: Self.activeCPUNumThreads, desired: desired, secondsSinceLastChange: elapsed) else { return }
+        guard let ort = onnxruntime, let jtalk = openJTalk else { return }
+        let previous = Self.activeCPUNumThreads
+        do {
+            if let existing = synthesizer {
+                voicevox_synthesizer_delete(existing)
+                synthesizer = nil
+            }
+            // 音声モデルは synthesizer に紐づいてロードされているので、読み直しが必要。
+            loadedVvmPaths.removeAll()
+            try createSynthesizer(onnxruntime: ort, openJTalk: jtalk, threadCount: desired)
+            // 文字数あたりの CPU 秒はスレッド数で変わるので、見積りは作り直す。
+            // ただし「既に使った CPU」の記録は残す(消すと、直前まで全コアで回していた事を
+            // 忘れて、背面に移った直後の60秒窓で予算超過=強制終了を招く)。
+            cpuGovernor.resetCostModel()
+            VoicevoxPerformanceMonitor.shared.recordEvent("スレッド数変更 \(Self.threadCountDescription(previous))→\(Self.threadCountDescription(desired))")
+        } catch {
+            AppInformationLogger.AddLog(message: "VoicevoxCore: スレッド数の切り替えに失敗: \(error.localizedDescription)", isForDebug: true)
+        }
+    }
+
+    static func threadCountDescription(_ threadCount: UInt16) -> String {
+        return threadCount == 0 ? "自動(全コア)" : "\(threadCount)"
     }
 
     /// 話者設定の voiceIdentifier から VOICEVOX の styleId を求める。
@@ -632,6 +682,11 @@ actor VoicevoxCore {
     ///
     /// `await Task.sleep` で待つ間 actor は空くので、再生側の要求はその間も処理できる。
     private func performSynthesizeWithinBudget(text: String, styleId: UInt32, limitRatio: Double) async throws -> Data {
+        // 前景/背面や電源状態が変わっていれば、ここでスレッド数を合わせる。
+        // 通知を取り零しても、次の合成で必ず追いつけるようにするため
+        // (「前景で再生開始 → ロック → 電源を抜く」で全コアのまま走り続けると
+        //  背面CPU上限で強制終了されるので、取り零しは許容できない)。
+        applyThreadCountIfNeeded()
         let texts = chunkedTextsForBudget(text: text, limitRatio: limitRatio)
         if texts.count > 1 {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [CPU予算のため\(texts.count)分割して合成] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
@@ -731,6 +786,16 @@ actor VoicevoxCore {
         cancelPendingPrefetch()
     }
 
+    /// 前景/背面や電源状態が変わった時に呼ぶ。スレッド数を今の状況に合わせ直す。
+    ///
+    /// 合成の直前にも同じ判定を行っているので、これは「次の合成を待たずに早めに
+    /// 反映する」ためのもの。actor に入るため、実行中の合成が終わるまでは待たされる。
+    nonisolated func scheduleThreadCountUpdate() {
+        Task(priority: .userInitiated) { [weak self] in
+            await self?.applyThreadCountIfNeeded()
+        }
+    }
+
     /// デバッグ用: キャッシュも CPU 予算も通さずに合成する。
     /// 「一度に合成したもの」と「分割して繋いだもの」を聞き比べるための入り口。
     /// - Parameters:
@@ -824,18 +889,39 @@ final class VoicevoxCore {
     }
 
     static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
-    static let defaultCPUNumThreads: UInt16 = 1
-    static var configuredCPUNumThreads: UInt16 {
+    static var threadCountMode: VoicevoxThreadCountMode {
         get {
             guard let stored = UserDefaults.standard.object(forKey: cpuNumThreadsUserDefaultsKey) as? Int else {
-                return defaultCPUNumThreads
+                return .automatic
             }
-            return UInt16(clamping: stored)
+            return .fixed(UInt16(clamping: stored))
         }
-        set { UserDefaults.standard.set(Int(newValue), forKey: cpuNumThreadsUserDefaultsKey) }
+        set {
+            switch newValue {
+            case .automatic:
+                UserDefaults.standard.removeObject(forKey: cpuNumThreadsUserDefaultsKey)
+            case .fixed(let threadCount):
+                UserDefaults.standard.set(Int(threadCount), forKey: cpuNumThreadsUserDefaultsKey)
+            }
+        }
     }
+    static var configuredCPUNumThreads: UInt16 {
+        let monitor = VoicevoxPrefetchThrottleMonitor.shared
+        return VoicevoxThreadPolicy.desiredThreadCount(
+            mode: threadCountMode,
+            isBackground: monitor.isBackground,
+            isOnExternalPower: monitor.isOnExternalPower,
+            isLowPowerModeEnabled: ProcessInfo.processInfo.isLowPowerModeEnabled
+        )
+    }
+    nonisolated(unsafe) private(set) static var activeCPUNumThreads: UInt16 = 0
+    static func threadCountDescription(_ threadCount: UInt16) -> String {
+        return threadCount == 0 ? "自動(全コア)" : "\(threadCount)"
+    }
+    func applyThreadCountIfNeeded() {}
+    func scheduleThreadCountUpdate() {}
     func reconfigureCPUNumThreads(_ threads: UInt16) throws {
-        Self.configuredCPUNumThreads = threads
+        Self.threadCountMode = .fixed(threads)
     }
 }
 

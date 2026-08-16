@@ -2063,28 +2063,33 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             // VOICEVOX の合成に使う CPU スレッド数(計測用)。
-            // 自動(=全コア)だと ONNX が CPU を 200〜290% 使い、バックグラウンドの
-            // CPU 上限(60秒平均80%)超過でプロセスが強制終了される事を実機で確認したため、
-            // どの設定なら生き残れるかを実測できるようにしている。
+            // 既定は「状況に応じて自動」で、背面バッテリー時(=iOSのCPU上限が効く状況)は
+            // 1、前景や充電中は全コア、と切り替える。ここではその自動制御を止めて
+            // 特定の値に固定し、実測で比較できるようにしている。
             if VoicevoxCore.isAvailableOnThisOS {
+                let automaticTitle = "状況に応じて自動"
                 section
                 <<< PickerInputRow<String>() {
                     $0.title = NSLocalizedString("SettingsViewController_VoicevoxCPUNumThreads", comment: "VOICEVOXの合成に使うCPUスレッド数")
-                    $0.options = ["自動", "1", "2", "3", "4"]
-                    let current = VoicevoxCore.configuredCPUNumThreads
-                    $0.value = current == 0 ? "自動" : "\(current)"
+                    $0.options = [automaticTitle, "全コア固定", "1", "2", "3", "4"]
+                    switch VoicevoxCore.threadCountMode {
+                    case .automatic: $0.value = automaticTitle
+                    case .fixed(let threads): $0.value = threads == 0 ? "全コア固定" : "\(threads)"
+                    }
                     $0.cell.textLabel?.numberOfLines = 0
                 }.onChange({ row in
-                    let threads: UInt16
-                    if let value = row.value, value != "自動", let parsed = UInt16(value) {
-                        threads = parsed
-                    } else {
-                        threads = 0
+                    let value = row.value ?? automaticTitle
+                    if value == automaticTitle {
+                        VoicevoxCore.threadCountMode = .automatic
+                        VoicevoxCore.shared.scheduleThreadCountUpdate()
+                        AppInformationLogger.AddLog(message: "[VOICEVOX性能] スレッド数を状況に応じた自動制御にしました", isForDebug: true)
+                        return
                     }
+                    let threads = UInt16(value) ?? 0
                     Task {
                         do {
                             try await VoicevoxCore.shared.reconfigureCPUNumThreads(threads)
-                            AppInformationLogger.AddLog(message: "[VOICEVOX性能] スレッド数を \(threads == 0 ? "自動" : "\(threads)") に変更しました(合成キャッシュと集計をリセット)", isForDebug: true)
+                            AppInformationLogger.AddLog(message: "[VOICEVOX性能] スレッド数を \(VoicevoxCore.threadCountDescription(threads)) に固定しました(合成キャッシュと集計をリセット)", isForDebug: true)
                         } catch {
                             AppInformationLogger.AddLog(message: "[VOICEVOX性能] スレッド数の変更に失敗: \(error.localizedDescription)", isForDebug: true)
                         }

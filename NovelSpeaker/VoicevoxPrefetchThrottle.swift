@@ -150,6 +150,15 @@ final class VoicevoxPrefetchThrottleMonitor {
         notificationCenter.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             self?.setIsBackground(false)
         }
+        // 電源の抜き差しと低電力モードの切り替えでも、使ってよい CPU の量が変わる。
+        // 合成に使うスレッド数はこれらに応じて切り替えるので、通知を拾って早めに反映する
+        // (取り零しても合成の直前に同じ判定をするので、あくまで反映を早めるためのもの)。
+        notificationCenter.addObserver(forName: UIDevice.batteryStateDidChangeNotification, object: nil, queue: .main) { _ in
+            VoicevoxCore.shared.scheduleThreadCountUpdate()
+        }
+        notificationCenter.addObserver(forName: Notification.Name.NSProcessInfoPowerStateDidChange, object: nil, queue: .main) { _ in
+            VoicevoxCore.shared.scheduleThreadCountUpdate()
+        }
         // 電源状態(充電中かどうか)を見るためにバッテリー監視を有効にする。
         DispatchQueue.main.async {
             UIDevice.current.isBatteryMonitoringEnabled = true
@@ -172,6 +181,10 @@ final class VoicevoxPrefetchThrottleMonitor {
                 // (完了済みのキャッシュ=貯金はそのまま残る)。
                 VoicevoxCore.shared.scheduleCancelPendingPrefetch()
             }
+            // 前景=CPU上限なしで全コア、背面バッテリー=1スレッド、と切り替える。
+            // 特に「前景で再生開始 → ロック → 電源を抜く」で全コアのまま走り続けると
+            // 背面CPU上限で強制終了されるので、この向きの反映は急ぐ必要がある。
+            VoicevoxCore.shared.scheduleThreadCountUpdate()
         }
     }
 

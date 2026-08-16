@@ -150,14 +150,16 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     }
 }
 
-// 合成に使う CPU スレッド数の既定値。
+// 合成に使う CPU スレッド数の設定の持ち方。
 //
-// スレッド数は synthesizer の生成時オプションなので、再生の途中では変えられない
-// (変えるには synthesizer の作り直しが必要で、合成済みキャッシュも失う)。
-// つまり「前景では全コア、背面では1スレッド」という切り替えはできず、
-// 最初から安全側に倒しておくしかない。
-// 0(自動=全コア)だと ONNX が全コアでスレッドを回して実機で CPU 率が 200〜290% に達し、
-// 背面のCPU上限(1コア相当の80%)を即座に超えて強制終了される。
+// スレッド数は synthesizer の生成時オプションなので、変えるには作り直しが必要
+// (音声モデルの再ロードを伴う)。それでも固定せず状況に応じて切り替えるのは、
+// 「どちらが得か」が状況で逆転するため:
+//  - 背面バッテリー … CPU上限(1コア相当の80%)が効くので、CPU秒あたりの効率が
+//                     最良のスレッド数1が最良。全コアにしても強制終了されるだけ。
+//  - 前景/充電中   … 上限が無いので、効率は悪くても実時間で倍近く速い全コアが良い
+//                     (1スレッドだと1.45倍速の再生に追いつけない)。
+// 切り替えの判断そのものは VoicevoxThreadPolicyTest で見る。
 class VoicevoxCPUNumThreadsDefaultTest: XCTestCase {
 
     private let key = VoicevoxCore.cpuNumThreadsUserDefaultsKey
@@ -167,18 +169,26 @@ class VoicevoxCPUNumThreadsDefaultTest: XCTestCase {
         super.tearDown()
     }
 
-    // 一度も設定していない状態では 1(自動ではない)である事。
-    func testDefaultIsSingleThreadNotAuto() {
+    // 一度も設定していない状態では「状況に応じて自動」である事。
+    func testDefaultIsAutomaticControl() {
         UserDefaults.standard.removeObject(forKey: key)
-        XCTAssertEqual(VoicevoxCore.configuredCPUNumThreads, 1,
-                       "既定が0(自動=全コア)だと背面で即座に強制終了される")
+        XCTAssertEqual(VoicevoxCore.threadCountMode, .automatic)
     }
 
-    // 明示的に設定した値はそのまま使われる事(計測用に「自動」も選べる)。
-    func testExplicitValueIsRespectedIncludingAuto() {
-        VoicevoxCore.configuredCPUNumThreads = 4
+    // 明示的に設定した値はそのまま使われる事(計測用に「全コア」も選べる)。
+    func testExplicitValueIsRespectedIncludingAllCores() {
+        VoicevoxCore.threadCountMode = .fixed(4)
+        XCTAssertEqual(VoicevoxCore.threadCountMode, .fixed(4))
         XCTAssertEqual(VoicevoxCore.configuredCPUNumThreads, 4)
-        VoicevoxCore.configuredCPUNumThreads = 0
-        XCTAssertEqual(VoicevoxCore.configuredCPUNumThreads, 0, "明示的に選んだ「自動」は尊重する")
+        VoicevoxCore.threadCountMode = .fixed(0)
+        XCTAssertEqual(VoicevoxCore.configuredCPUNumThreads, 0, "明示的に選んだ「全コア」は尊重する")
+    }
+
+    // 自動に戻すと、設定は消えて状況判断に委ねられる事。
+    func testSwitchingBackToAutomaticRemovesTheStoredValue() {
+        VoicevoxCore.threadCountMode = .fixed(2)
+        VoicevoxCore.threadCountMode = .automatic
+        XCTAssertNil(UserDefaults.standard.object(forKey: key))
+        XCTAssertEqual(VoicevoxCore.threadCountMode, .automatic)
     }
 }

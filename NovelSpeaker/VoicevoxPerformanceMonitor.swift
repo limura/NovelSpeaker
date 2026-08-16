@@ -459,9 +459,12 @@ final class VoicevoxPerformanceMonitor {
             fields.append("CPU率=\(String(format: "%.1f", duty * 100))%(直近\(String(format: "%.0f", spanned))秒)")
             fields.append("上限まで=\(String(format: "%+.1f", (Self.osBackgroundCPUDutyLimit - duty) * 100))pt")
         }
-        // どのスレッド数設定での実測値かがログだけで判別できるようにする(比較計測用)。
-        let threads = VoicevoxCore.configuredCPUNumThreads
-        fields.append("スレッド数=\(threads == 0 ? "自動" : "\(threads)")")
+        // どのスレッド数での実測値かがログだけで判別できるようにする(比較計測用)。
+        // 状況に応じて切り替わるので、設定値ではなく「今の synthesizer が使っている値」を出す。
+        fields.append("スレッド数=\(VoicevoxCore.threadCountDescription(VoicevoxCore.activeCPUNumThreads))")
+        if VoicevoxCore.threadCountMode == .automatic {
+            fields.append("スレッド数制御=自動")
+        }
         fields.append("再生速度=\(String(format: "%.2f", currentPlaybackRate))倍")
         if let cpuRTF = snapshotRTF.cpuRTF {
             fields.append("累計RTF=\(String(format: "%.3f", cpuRTF))")

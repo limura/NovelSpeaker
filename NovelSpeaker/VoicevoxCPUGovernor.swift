@@ -191,4 +191,16 @@ final class VoicevoxCPUGovernor {
         usageRecords.removeAll()
         costSamples.removeAll()
     }
+
+    /// 文字数あたりのコストの見積りだけを作り直す(実際に使った CPU の記録は残す)。
+    ///
+    /// スレッド数を切り替えた時に使う。スレッド数が変わると文字数あたりの CPU 秒は
+    /// 変わるので見積りは作り直す必要があるが、**既に使った CPU の記録は消してはいけない**。
+    /// 消すと「直前まで全コアで回していた」事を忘れ、背面に移った直後の60秒窓で
+    /// 予算超過(=強制終了)を招く。前景→背面はまさにその危険な遷移そのもの。
+    func resetCostModel() {
+        lock.lock()
+        defer { lock.unlock() }
+        costSamples.removeAll()
+    }
 }
