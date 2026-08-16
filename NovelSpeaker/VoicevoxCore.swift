@@ -115,6 +115,89 @@ actor VoicevoxCore {
         wavCache.clear()
     }
 
+    // MARK: - ディスクキャッシュ(2層目)
+    //
+    // 参照は メモリ → ディスク → その場で合成 の順に落ちる。
+    // 書き込み先は「その小説でキャッシュ生成が有効か」だけで決まり、モードの切り替えは無い。
+    // (「ディスクを読み切ったらメモリ側に戻す」というような状態遷移を書くと、
+    //  その境界にバグが生まれる。層にしておけば、使い切った後にその場で合成した分も
+    //  そのままディスクへ積み上がり、次に同じ所を聴く時には出来ている)
+    //
+    // どの小説のどの話を再生中かは VoicevoxCore からは分からないので、
+    // 再生側(StorySpeaker)が話を切り替える度にここへ教える。
+
+    struct DiskCacheContext {
+        let novelID: String
+        let chapterNumber: Int
+        /// ディスクへ書き足してよいか(利用者がその小説でキャッシュ生成を有効にしている時だけ true)。
+        /// 普通に聴いているだけで断りなくストレージを使い始めない、という線引き。
+        let isWritable: Bool
+    }
+
+    private let diskCacheContextLock = NSLock()
+    nonisolated(unsafe) private var diskCacheContextUnsafe: DiskCacheContext?
+
+    nonisolated var diskCacheContext: DiskCacheContext? {
+        diskCacheContextLock.lock()
+        defer { diskCacheContextLock.unlock() }
+        return diskCacheContextUnsafe
+    }
+
+    /// 今どの小説のどの話を読んでいるかを教える(nil で解除)。
+    nonisolated func setDiskCacheContext(novelID: String?, chapterNumber: Int) {
+        let context: DiskCacheContext?
+        if let novelID = novelID {
+            context = DiskCacheContext(
+                novelID: novelID,
+                chapterNumber: chapterNumber,
+                isWritable: VoicevoxCacheGenerationState.shared.isEnabled(novelID: novelID)
+            )
+        } else {
+            context = nil
+        }
+        diskCacheContextLock.lock()
+        diskCacheContextUnsafe = context
+        diskCacheContextLock.unlock()
+    }
+
+    /// 既にディスクに作ってあるか(音声そのものは読まない)。
+    nonisolated func isStoredOnDisk(text: String, styleId: UInt32) -> Bool {
+        guard let context = diskCacheContext else { return false }
+        let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
+        return VoicevoxDiskCacheStore.shared.contains(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key)
+    }
+
+    nonisolated private func peekDiskCache(text: String, styleId: UInt32) -> Data? {
+        guard let context = diskCacheContext else { return nil }
+        let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
+        return VoicevoxDiskCacheStore.shared.load(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key)
+    }
+
+    /// 合成できた音声をディスクにも積む(有効な小説の時だけ)。
+    ///
+    /// 圧縮は合成に比べれば誤差(実測: iPhone SE2 で 8.9秒の音声に対し合成24.44秒/圧縮152ms
+    /// = 合成の0.62%)なので、合成の裏で気にせず走らせてよい。
+    /// 呼び出し元(合成の完了直後)を待たせないよう、別タスクへ逃がす。
+    nonisolated func storeToDiskCacheIfNeeded(text: String, styleId: UInt32, wav: Data) {
+        guard let context = diskCacheContext, context.isWritable else { return }
+        let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
+        guard VoicevoxDiskCacheStore.shared.contains(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key) == false else { return }
+        Task(priority: .utility) {
+            do {
+                let encoded = try VoicevoxAudioCompressor.encode(wav: wav)
+                try VoicevoxDiskCacheStore.shared.store(
+                    novelID: context.novelID,
+                    chapterNumber: context.chapterNumber,
+                    key: key,
+                    data: encoded,
+                    durationSeconds: VoicevoxAudioCompressor.durationSeconds(wav: wav)
+                )
+            } catch {
+                AppInformationLogger.AddLog(message: "VoicevoxCore: 音声キャッシュの保存に失敗: \(error.localizedDescription)", isForDebug: true)
+            }
+        }
+    }
+
     // 先行合成の待ち行列(「次に何を合成すべきか」の帳簿)。
     // actor の外(ロックのみ)で完結するので、合成中(1本12秒前後のC呼び出しの最中)でも
     // 予約・優先度変更・キャンセルが待たされずに反映される。詳細は VoicevoxSynthesisQueue.swift 参照。
@@ -190,7 +273,11 @@ actor VoicevoxCore {
 
     private init() {
         synthesisQueueStorage = VoicevoxSynthesisQueue(capacity: Self.maxPendingPrefetchCount) { [unowned self] text, styleId in
-            return self.peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil
+            if self.peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil { return true }
+            // 既にディスクに作ってあるものは合成し直さない。
+            // ここを見ないと、事前生成しておいたのに再生の度に先行合成が走り、
+            // ディスクキャッシュがあってもCPUを使ってしまう。
+            return self.isStoredOnDisk(text: text, styleId: styleId)
         }
     }
 
@@ -535,6 +622,15 @@ actor VoicevoxCore {
             VoicevoxPerformanceMonitor.shared.recordEvent("再生HIT style=\(styleId) \"\(Self.logSnippet(text))\"")
             return cached
         }
+        // メモリに無くても、事前に作ってディスクに貯めてあれば、そこから即座に返せる。
+        // 背面バッテリーでは実時間合成が原理的に不可能(必要CPU率128〜226%に対し使えるのは80%)
+        // なので、無音を無くせるのは実質この経路だけ。
+        if let disk = peekDiskCache(text: text, styleId: styleId) {
+            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [ディスクHIT] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
+            VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
+            VoicevoxPerformanceMonitor.shared.recordEvent("ディスクHIT style=\(styleId) \"\(Self.logSnippet(text))\"")
+            return disk
+        }
         // ここに来た = 再生が必要な時点で先行合成が間に合っていなかった。
         // その待ち時間がそのまま無音の長さになるので、回数と待ち時間を記録する。
         let missStart = Date()
@@ -601,6 +697,9 @@ actor VoicevoxCore {
         // 予算を使ってよいが、上限は守る。
         let data = try await performSynthesizeWithinBudget(text: text, styleId: styleId, limitRatio: Self.playbackCPULimitRatio)
         NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [その場合成完了 \(String(format: "%.2f", Date().timeIntervalSince(synthStart)))秒] styleId=\(styleId) text=\"\(snippet)\"")
+        // キャッシュを使い切った後にその場で合成した分も、そのままディスクへ積み上げる。
+        // (次に同じ所を聴く時には出来ている)
+        storeToDiskCacheIfNeeded(text: text, styleId: styleId, wav: data)
         return data
     }
 
@@ -760,6 +859,7 @@ actor VoicevoxCore {
             NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(startedAt)))秒] styleId=\(request.styleId) text=\"\(snippet)\"")
             VoicevoxPerformanceMonitor.shared.recordEvent("先読み完了 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))秒 style=\(request.styleId) \"\(snippet)\"")
             storeCache(key: Self.prefetchKey(text: request.text, styleId: request.styleId), data: data)
+            storeToDiskCacheIfNeeded(text: request.text, styleId: request.styleId, wav: data)
         } catch {
             AppInformationLogger.AddLog(message: "VoicevoxCore: prefetch failed: \(error.localizedDescription)", appendix: [
                 "text": request.text,
@@ -930,6 +1030,9 @@ final class VoicevoxCore {
     }
     func applyThreadCountIfNeeded() {}
     func scheduleThreadCountUpdate() {}
+    func setDiskCacheContext(novelID: String?, chapterNumber: Int) {}
+    func isStoredOnDisk(text: String, styleId: UInt32) -> Bool { return false }
+    func storeToDiskCacheIfNeeded(text: String, styleId: UInt32, wav: Data) {}
     func reconfigureCPUNumThreads(_ threads: UInt16) throws {
         Self.threadCountMode = .fixed(threads)
     }

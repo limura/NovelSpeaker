@@ -175,6 +175,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func ApplyStoryToSpeaker(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, readLocation:Int) {
         speaker.SetStory(story: story, withMoreSplitTargets:withMoreSplitTargets, moreSplitMinimumLetterCount:moreSplitMinimumLetterCount)
+        // VOICEVOX の音声ディスクキャッシュは小説ごと・話ごとに置いてあるが、
+        // VoicevoxCore からは今どこを読んでいるか分からないので、ここで教える。
+        VoicevoxCore.shared.setDiskCacheContext(novelID: story.novelID, chapterNumber: story.chapterNumber)
         recordBakedDefaultSpeakerConfig()
         observeSpeechConfig(novelID: story.novelID)
         speaker.SetSpeechLocation(location: readLocation)
