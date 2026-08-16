@@ -35,9 +35,14 @@ final class VoicevoxCPUGovernor {
     private let safetyFactor: Double
     private let fixedOverheadSeconds: Double
 
+    private struct CostSample {
+        let characterCount: Int
+        let cpuSeconds: Double
+    }
+
     private var usageRecords: [UsageRecord] = []
-    /// 文字数あたりの CPU 秒の実測。直近のものだけを持ち、その最大値を見積りに使う。
-    private var costPerCharacterSamples: [Double] = []
+    /// 合成の実測(文字数と CPU 秒)。直近のものだけを持つ。
+    private var costSamples: [CostSample] = []
     private let costSampleCapacity = 8
 
     /// 実測がまだ無い間に使う、保守的な既定値(秒/文字)。
@@ -54,7 +59,7 @@ final class VoicevoxCPUGovernor {
     var hasMeasurement: Bool {
         lock.lock()
         defer { lock.unlock() }
-        return costPerCharacterSamples.isEmpty == false
+        return costSamples.isEmpty == false
     }
 
     var recordCountForTesting: Int {
@@ -70,31 +75,74 @@ final class VoicevoxCPUGovernor {
         usageRecords.append(UsageRecord(time: now, cpuSeconds: cpuSeconds))
         usageRecords.removeAll { $0.time <= now - windowSeconds }
         if characterCount > 0 && cpuSeconds > 0 {
-            costPerCharacterSamples.append(cpuSeconds / Double(characterCount))
-            if costPerCharacterSamples.count > costSampleCapacity {
-                costPerCharacterSamples.removeFirst(costPerCharacterSamples.count - costSampleCapacity)
+            costSamples.append(CostSample(characterCount: characterCount, cpuSeconds: cpuSeconds))
+            if costSamples.count > costSampleCapacity {
+                costSamples.removeFirst(costSamples.count - costSampleCapacity)
             }
         }
+    }
+
+    /// 実測から求めた合成コストのモデル `固定費 + 文字あたり単価 × 文字数`。
+    ///
+    /// 合成には文字数に依らない固定費がある(実機の iPhone SE2 低電力では20秒超)。
+    /// 「文字あたり単価」だけで見積もると、短い断片から学習した高い単価が次の分割を
+    /// 更に細かくし、細かくするほど固定費の割合が増える、という悪循環になる
+    /// (実機で102文字が8分割まで細かくなり、1ブロックの発話に5分以上かかった)。
+    /// そのため固定費と単価を分けて推定する。
+    /// サンプルが足りない/文字数の幅が狭い間は、単価だけの保守的な見積りに落とす。
+    private func fittedCost() -> (overhead: Double, perCharacter: Double) {
+        // lock は呼び出し側で取っている前提。
+        guard costSamples.isEmpty == false else {
+            return (fixedOverheadSeconds, Self.defaultCostPerCharacter)
+        }
+        let characterCounts = costSamples.map { Double($0.characterCount) }
+        let minCount = characterCounts.min() ?? 0
+        let maxCount = characterCounts.max() ?? 0
+        var overhead = fixedOverheadSeconds
+        var perCharacter = costSamples.map { $0.cpuSeconds / Double($0.characterCount) }.max() ?? Self.defaultCostPerCharacter
+
+        // 文字数に十分な幅がある時だけ最小二乗で分離する(幅が無いと固定費と単価を分けられない)。
+        if costSamples.count >= 3 && maxCount - minCount >= 20 {
+            let n = Double(costSamples.count)
+            let sumX = characterCounts.reduce(0, +)
+            let sumY = costSamples.reduce(0.0) { $0 + $1.cpuSeconds }
+            let sumXY = zip(characterCounts, costSamples).reduce(0.0) { $0 + $1.0 * $1.1.cpuSeconds }
+            let sumXX = characterCounts.reduce(0.0) { $0 + $1 * $1 }
+            let denominator = n * sumXX - sumX * sumX
+            if denominator != 0 {
+                let slope = (n * sumXY - sumX * sumY) / denominator
+                if slope >= 0 {
+                    perCharacter = slope
+                    overhead = (sumY - slope * sumX) / n
+                }
+            }
+        }
+        overhead = max(0, overhead)
+        // どの実測も下回らないように固定費を持ち上げる。見積りが実測を下回ると、
+        // その差がそのまま CPU 上限の超過(=強制終了)になるため、必ず上側に倒す。
+        let requiredOverhead = costSamples.map { $0.cpuSeconds - perCharacter * Double($0.characterCount) }.max() ?? 0
+        overhead = max(overhead, requiredOverhead)
+        return (overhead, perCharacter)
     }
 
     /// 指定文字数の合成に必要な CPU 秒の見積り(高めに出す)。
     func estimatedCPUSeconds(forCharacterCount characterCount: Int) -> Double {
         lock.lock()
-        let costPerCharacter = costPerCharacterSamples.max() ?? Self.defaultCostPerCharacter
+        let cost = fittedCost()
         lock.unlock()
-        return (Double(characterCount) * costPerCharacter + fixedOverheadSeconds) * safetyFactor
+        return (cost.overhead + Double(characterCount) * cost.perCharacter) * safetyFactor
     }
 
     /// 指定した CPU 秒に収まる最大の文字数(1文字未満にはしない)。
     /// 「どのくらいの長さなら分割せずに合成できるか」の判断に使う。
     func maxCharacterCount(withinCPUSeconds cpuSeconds: Double) -> Int {
         lock.lock()
-        let costPerCharacter = costPerCharacterSamples.max() ?? Self.defaultCostPerCharacter
+        let cost = fittedCost()
         lock.unlock()
-        guard costPerCharacter > 0, safetyFactor > 0 else { return Int.max }
-        let available = cpuSeconds / safetyFactor - fixedOverheadSeconds
+        guard cost.perCharacter > 0, safetyFactor > 0 else { return Int.max }
+        let available = cpuSeconds / safetyFactor - cost.overhead
         if available <= 0 { return 1 }
-        return max(1, Int(available / costPerCharacter))
+        return max(1, Int(available / cost.perCharacter))
     }
 
     /// この合成を始めてよくなるまで、あと何秒待つべきか。
@@ -126,6 +174,6 @@ final class VoicevoxCPUGovernor {
         lock.lock()
         defer { lock.unlock() }
         usageRecords.removeAll()
-        costPerCharacterSamples.removeAll()
+        costSamples.removeAll()
     }
 }

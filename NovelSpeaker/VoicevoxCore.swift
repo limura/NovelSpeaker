@@ -176,6 +176,39 @@ actor VoicevoxCore {
     // actor へ入らずに判定したいので専用ロックで守る。
     private let workerLock = NSLock()
     nonisolated(unsafe) private var isWorkerRunningUnsafe = false
+    /// 再生に必要な(=待たせるとそのまま無音になる)合成が何本進行中か。
+    /// 0より大きい間、先行合成は CPU 予算を使わずに待つ。
+    /// これが無いと、先行合成が予算を使い切っては再生側を待たせる、というのを
+    /// 交互に繰り返して再生が延々と進まなくなる(実機で1ブロックの発話に5分以上)。
+    nonisolated(unsafe) private var pendingPlaybackSynthesisCountUnsafe = 0
+
+    nonisolated private func beginPlaybackSynthesis() {
+        workerLock.lock()
+        pendingPlaybackSynthesisCountUnsafe += 1
+        workerLock.unlock()
+    }
+
+    nonisolated private func endPlaybackSynthesis() {
+        workerLock.lock()
+        pendingPlaybackSynthesisCountUnsafe = max(0, pendingPlaybackSynthesisCountUnsafe - 1)
+        workerLock.unlock()
+    }
+
+    nonisolated private var isPlaybackSynthesisPending: Bool {
+        workerLock.lock()
+        defer { workerLock.unlock() }
+        return pendingPlaybackSynthesisCountUnsafe > 0
+    }
+
+    /// 再生に必要な合成が終わるまで、先行合成は手を出さずに待つ。
+    /// 待ち過ぎて先行合成が完全に止まらないよう、待つ時間には上限を設ける。
+    nonisolated private func waitWhilePlaybackSynthesisIsPending() async {
+        let maxWaitCount = 60
+        for _ in 0..<maxWaitCount {
+            if isPlaybackSynthesisPending == false { return }
+            try? await Task.sleep(nanoseconds: 500_000_000)
+        }
+    }
 
     private init() {
         synthesisQueueStorage = VoicevoxSynthesisQueue(capacity: Self.maxPendingPrefetchCount) { [unowned self] text, styleId in
@@ -475,6 +508,9 @@ actor VoicevoxCore {
     /// cache MISS 時の低速パス。pendingPrefetchTasks の確認・performSynthesize の呼び出しは
     /// actor状態を扱うため、ここは(nonisolatedにせず)actor隔離のままにしておく。
     private func synthesizeSlowPath(text: String, styleId: UInt32, key: String) async throws -> Data {
+        // 先行合成に予算を横取りされないよう、再生側の合成が進行中である事を知らせる。
+        beginPlaybackSynthesis()
+        defer { endPlaybackSynthesis() }
         let snippet = Self.logSnippet(text)
         // 待機中の予約は取り消して(横取りして)この場で合成する。ワーカーが後から
         // 同じ物を重ねて合成しないようにするため。
@@ -557,6 +593,8 @@ actor VoicevoxCore {
         Task(priority: .utility) { [weak self] in
             guard let self = self else { return }
             while let request = self.synthesisQueue.takeNext() {
+                // 再生に必要な合成が待っている間は、先行合成は予算に手を出さない。
+                await self.waitWhilePlaybackSynthesisIsPending()
                 await self.runSynthesis(request)
             }
             self.workerLock.lock()
@@ -676,6 +714,26 @@ actor VoicevoxCore {
         cancelPendingPrefetch()
     }
 
+    /// デバッグ用: キャッシュも CPU 予算も通さずに合成する。
+    /// 「一度に合成したもの」と「分割して繋いだもの」を聞き比べるための入り口。
+    /// - Parameters:
+    ///   - splitCharacterCount: nil なら分割せずに1本で合成する。値があればその長さで分割して繋ぐ。
+    ///   - trimJoinSilence: 分割位置の無音を削るかどうか。
+    func debugSynthesize(text: String, styleId: UInt32, splitCharacterCount: Int?, trimJoinSilence: Bool) throws -> Data {
+        guard let splitCharacterCount = splitCharacterCount else {
+            return try performSynthesize(text: text, styleId: styleId)
+        }
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: splitCharacterCount, minimumCharacterCount: 1)
+        var wavs: [Data] = []
+        for chunk in chunks {
+            wavs.append(try performSynthesize(text: chunk, styleId: styleId))
+        }
+        guard let joined = VoicevoxWavJoiner.join(wavs: wavs, trimJoinSilence: trimJoinSilence) else {
+            throw VoicevoxCoreError.invalidWav
+        }
+        return joined
+    }
+
     // テスト専用: 指定テキストが先行合成キャッシュに乗っているかどうか(進行中/未着手は含まない)。
     nonisolated func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool {
         return peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil
@@ -734,6 +792,10 @@ final class VoicevoxCore {
     func scheduleCancelPendingPrefetch() {}
 
     func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool { return false }
+
+    func debugSynthesize(text: String, styleId: UInt32, splitCharacterCount: Int?, trimJoinSilence: Bool) throws -> Data {
+        throw VoicevoxCoreError.notSetUp
+    }
 
     /// ログ用(スタブ側は合成しないので常に 0)。
     func cachedAudioSecondsForLogging() -> Double { return 0 }

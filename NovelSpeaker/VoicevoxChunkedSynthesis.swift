@@ -25,11 +25,21 @@ enum VoicevoxTextChunker {
     /// StoryTextClassifier のブロック分割と同じ考え方(句読点・改行・空白)。
     static let boundaryCharacters: Set<Character> = ["。", "、", "！", "？", "!", "?", "\n", "．", "，", " ", "　"]
 
+    /// これ以上細かくは分割しない長さ。
+    ///
+    /// 合成には文字数に依らない固定費がある(実機の iPhone SE2 低電力では20秒超)。
+    /// 細かく分けるほど固定費を何度も払う事になり、合計 CPU 時間はむしろ増える。
+    /// 実機では 102文字が8分割、132文字が9分割まで細かくなり、1ブロックの発話に
+    /// 5分以上かかる状態になっていた。分割は「予算に収めるための最後の手段」なので、
+    /// 収まらないとしてもここより細かくはしない(収まらない分は待って対処する)。
+    static let defaultMinimumCharacterCount = 40
+
     /// テキストを、各断片が maxCharacterCount 以下になるように句読点で分割する。
     /// 上限に収まっているなら分割しない(そのまま1つで返す)。
-    static func split(text: String, maxCharacterCount: Int) -> [String] {
+    /// - Parameter minimumCharacterCount: これ以上細かくは分割しない長さ。
+    static func split(text: String, maxCharacterCount: Int, minimumCharacterCount: Int = defaultMinimumCharacterCount) -> [String] {
         if text.isEmpty { return [] }
-        let limit = max(1, maxCharacterCount)
+        let limit = max(1, max(maxCharacterCount, minimumCharacterCount))
         if text.count <= limit { return [text] }
 
         var result: [String] = []
@@ -53,6 +63,35 @@ enum VoicevoxTextChunker {
         }
         if remaining.isEmpty == false {
             result.append(String(remaining))
+        }
+        return mergingWhitespaceOnlyChunks(result)
+    }
+
+    /// 空白・改行だけの断片を隣へ合流させる。
+    /// VOICEVOX は発話しうる文字が無いテキストを渡されると
+    /// 「入力テキストの解析に失敗しました」で合成に失敗するため、単独では出さない。
+    /// (実機の本文が "\n\u{3000}意外な状況で…" のように改行+全角空白で始まっており、
+    ///  上限内の最後の区切り文字が全角空白だったために発生した)
+    private static func mergingWhitespaceOnlyChunks(_ chunks: [String]) -> [String] {
+        var result: [String] = []
+        var carried = ""
+        for chunk in chunks {
+            let merged = carried + chunk
+            if merged.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                // まだ発話しうる文字が無いので、次の断片へ持ち越す。
+                carried = merged
+                continue
+            }
+            carried = ""
+            result.append(merged)
+        }
+        if carried.isEmpty == false {
+            // 末尾が空白だけだった場合は、最後の断片にくっつける(捨てない)。
+            if let last = result.popLast() {
+                result.append(last + carried)
+            } else {
+                result.append(carried)
+            }
         }
         return result
     }
@@ -121,7 +160,9 @@ enum VoicevoxWavJoiner {
         return ParsedWav(sampleRate: sampleRate, channelCount: channelCount, bitsPerSample: bitsPerSample, payload: payload)
     }
 
-    static func join(wavs: [Data]) -> Data? {
+    /// - Parameter trimJoinSilence: 分割位置の無音を削るか。
+    ///   既定は true。false は「削らないとどう聞こえるか」を聞き比べるための debug 用。
+    static func join(wavs: [Data], trimJoinSilence: Bool = true) -> Data? {
         guard wavs.isEmpty == false else { return nil }
         // 1本だけなら一切加工せずそのまま返す(触らないのが最善)。
         if wavs.count == 1 {
@@ -139,8 +180,8 @@ enum VoicevoxWavJoiner {
         var joined = Data()
         for (index, parsed) in parsedList.enumerated() {
             // 自分で作った分割位置(=断片の内側の境界)だけ無音を削る。
-            let trimLeading = index > 0
-            let trimTrailing = index < parsedList.count - 1
+            let trimLeading = trimJoinSilence && index > 0
+            let trimTrailing = trimJoinSilence && index < parsedList.count - 1
             joined.append(trimmedPayload(parsed.payload,
                                          trimLeading: trimLeading,
                                          trimTrailing: trimTrailing,

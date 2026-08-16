@@ -21,6 +21,39 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     var globalDataNotificationToken:NotificationToken? = nil
     
+    // 聞き比べ用の音声プレイヤー。再生中に解放されないよう保持しておく。
+    private static var voicevoxComparisonPlayer: AVAudioPlayer? = nil
+    /// 聞き比べに使う文。句読点を挟んだ普通の地の文で、20文字区切りだと
+    /// 「、」「。」の位置で3〜4個に分かれる長さにしてある。
+    private static let voicevoxComparisonText = "むかしむかしあるところに、おじいさんとおばあさんが住んでいました。おじいさんは山へ芝刈りに、おばあさんは川へ洗濯に行きました。"
+
+    /// 同じ文を「一度に合成したもの」「分割して繋いだもの」で聞き比べる(デバッグ用)。
+    private func playVoicevoxSplitComparison(splitCharacterCount: Int?, trimJoinSilence: Bool, label: String) {
+        let text = Self.voicevoxComparisonText
+        let styleId = VoicevoxCore.cachedStyles.first?.styleId ?? 0
+        Task {
+            do {
+                await VoicevoxCore.setUpFromBundleIfNeeded()
+                let data = try await VoicevoxCore.shared.debugSynthesize(text: text, styleId: styleId, splitCharacterCount: splitCharacterCount, trimJoinSilence: trimJoinSilence)
+                await MainActor.run {
+                    do {
+                        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+                        try AVAudioSession.sharedInstance().setActive(true)
+                        let player = try AVAudioPlayer(data: data)
+                        Self.voicevoxComparisonPlayer = player
+                        player.play()
+                    } catch {
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: "再生できませんでした", message: error.localizedDescription, buttonTitle: nil, buttonAction: nil)
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogOneButton(viewController: self, title: "\(label) の合成に失敗しました", message: error.localizedDescription, buttonTitle: nil, buttonAction: nil)
+                }
+            }
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         BehaviorLogger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
@@ -2022,6 +2055,31 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             AppInformationLogger.AddLog(message: "[VOICEVOX性能] スレッド数の変更に失敗: \(error.localizedDescription)", isForDebug: true)
                         }
                     }
+                })
+            }
+            // VOICEVOX のブロック分割合成の聞き比べ。
+            // 背面の CPU 上限に収めるために長いブロックを句読点で分割して合成し、繋いで
+            // 1本にする事があるが、繋いだものは一度に合成したものと比べて繋ぎ目に
+            // 気になる「間」ができる。実際にどう聞こえるかを確認できるようにしておく。
+            if VoicevoxCore.isAvailableOnThisOS {
+                section
+                <<< ButtonRow() {
+                    $0.title = "VOICEVOX 分割の聞き比べ: ①分割なし(通常)"
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ [weak self] _, _ in
+                    self?.playVoicevoxSplitComparison(splitCharacterCount: nil, trimJoinSilence: false, label: "①分割なし(通常)")
+                })
+                <<< ButtonRow() {
+                    $0.title = "VOICEVOX 分割の聞き比べ: ②分割して繋ぐ(無音を削る)"
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ [weak self] _, _ in
+                    self?.playVoicevoxSplitComparison(splitCharacterCount: 20, trimJoinSilence: true, label: "②分割+無音削り")
+                })
+                <<< ButtonRow() {
+                    $0.title = "VOICEVOX 分割の聞き比べ: ③分割して繋ぐ(無音を削らない)"
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ [weak self] _, _ in
+                    self?.playVoicevoxSplitComparison(splitCharacterCount: 20, trimJoinSilence: false, label: "③分割のみ")
                 })
             }
             section

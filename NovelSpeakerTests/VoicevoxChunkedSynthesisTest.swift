@@ -31,7 +31,7 @@ class VoicevoxTextChunkerTest: XCTestCase {
     // 上限を超えたら句読点で分ける。各断片は上限以下で、繋ぐと元通りになる事。
     func testSplitsAtPunctuationAndPreservesTheWholeText() {
         let text = "むかしむかしあるところに、おじいさんとおばあさんがいました。おじいさんは山へ芝刈りに、おばあさんは川へ洗濯に行きました。"
-        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 30)
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 30, minimumCharacterCount: 1)
         XCTAssertGreaterThan(chunks.count, 1)
         for chunk in chunks {
             XCTAssertLessThanOrEqual(chunk.count, 30, "各断片は上限以下であるべき: \(chunk)")
@@ -42,14 +42,14 @@ class VoicevoxTextChunkerTest: XCTestCase {
     // 上限の範囲内で「一番後ろの句読点」で切る(できるだけ長く=繋ぎ目を少なくする)。
     func testCutsAtTheLastPunctuationWithinTheLimit() {
         let text = "あい、うえお、かきくけこさしすせそたちつてと"
-        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 10)
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 10, minimumCharacterCount: 1)
         XCTAssertEqual(chunks.first, "あい、うえお、", "上限内で最後の「、」で切るべき")
     }
 
     // 句読点が全く無い場合でも、上限を超えたまま返してはいけない(予算を超えて殺される)。
     func testFallsBackToHardCutWhenThereIsNoPunctuation() {
         let text = String(repeating: "あ", count: 50)
-        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 20)
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 20, minimumCharacterCount: 1)
         for chunk in chunks {
             XCTAssertLessThanOrEqual(chunk.count, 20)
         }
@@ -58,13 +58,45 @@ class VoicevoxTextChunkerTest: XCTestCase {
 
     // 上限が極端に小さくても無限ループしない事。
     func testDoesNotLoopForeverWithTinyLimit() {
-        let chunks = VoicevoxTextChunker.split(text: "あいうえお", maxCharacterCount: 1)
+        let chunks = VoicevoxTextChunker.split(text: "あいうえお", maxCharacterCount: 1, minimumCharacterCount: 1)
         XCTAssertEqual(chunks.count, 5)
         XCTAssertEqual(chunks.joined(), "あいうえお")
     }
 
     func testEmptyTextGivesEmptyResult() {
         XCTAssertEqual(VoicevoxTextChunker.split(text: "", maxCharacterCount: 10), [])
+    }
+
+    // 空白・改行だけの断片を作らない事。
+    // 実機で本文が "\n\u{3000}意外な状況で…" のように改行+全角空白で始まっており、
+    // 上限内の最後の区切り文字が全角空白だったために "\n\u{3000}" という断片ができ、
+    // VOICEVOX が「入力テキストの解析に失敗しました」で合成に失敗していた。
+    func testDoesNotProduceWhitespaceOnlyChunk() {
+        let text = "\n\u{3000}意外な状況で顔を合わせた意外なクラスメイトと、しみじみその意外性について語り合う男女。それ自体は珍しい訳ではない。"
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 20, minimumCharacterCount: 1)
+        for chunk in chunks {
+            XCTAssertFalse(chunk.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                           "空白のみの断片を作ってはいけない: \(chunk.debugDescription)")
+        }
+        XCTAssertEqual(chunks.joined(), text)
+    }
+
+    // 細切れにし過ぎない事。
+    // 合成には文字数に依らない固定費(実測: iPhone SE2 低電力で20秒超)があるため、
+    // 細かく分けるほど合計 CPU 時間が増えて逆効果になる。実機では 102文字が8分割、
+    // 132文字が9分割まで細かくなり、1ブロックの発話に5分以上かかっていた。
+    func testDoesNotSplitBelowTheMinimumChunkSize() {
+        let text = String(repeating: "あいうえお、", count: 20) // 120文字
+        // 上限を5文字と指示しても、最小長(40)を下回る細切れにはしない。
+        // 句読点で切る都合上ちょうど40にはならないが、40文字ぶんの窓の中で切るので
+        // 8分割にも9分割にもならない。
+        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: 5, minimumCharacterCount: 40)
+        XCTAssertLessThanOrEqual(chunks.count, 4, "120文字が細切れになってはいけない: \(chunks.count)分割")
+        // 末尾は割り切れない余りなので短くなり得る(最後に一度だけ固定費を余分に払う)。
+        for chunk in chunks.dropLast() {
+            XCTAssertGreaterThanOrEqual(chunk.count, 20, "最小長を大きく下回る断片を作ってはいけない: \(chunk)")
+        }
+        XCTAssertEqual(chunks.joined(), text)
     }
 }
 
@@ -167,6 +199,53 @@ class VoicevoxWavJoinerTest: XCTestCase {
         XCTAssertNil(VoicevoxWavJoiner.parse(wav: Data("RIFF".utf8)))
         XCTAssertNil(VoicevoxWavJoiner.join(wavs: []))
         XCTAssertNil(VoicevoxWavJoiner.join(wavs: [Data("これはWAVではない".utf8)]))
+    }
+}
+
+// 合成コストは「固定費 + 文字数比例」で、固定費が無視できない大きさである事の反映。
+// 実機(iPhone SE2 低電力)の実測: 30文字で26.8秒、132文字で43秒。
+// 単純な「文字あたり」1本で見積もると、短い断片から学習した高い単価が次の分割を
+// 更に細かくし、細かくするほど固定費の割合が増える、という悪循環になっていた
+// (実機で102文字が8分割まで細かくなり、1ブロックの発話に5分以上かかった)。
+class VoicevoxCostModelTest: XCTestCase {
+
+    private func makeGovernor() -> VoicevoxCPUGovernor {
+        return VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.0, fixedOverheadSeconds: 1.0)
+    }
+
+    // 実測から固定費と文字あたりの単価を分けて推定できる事。
+    func testSeparatesFixedOverheadFromPerCharacterCost() {
+        let governor = makeGovernor()
+        // 固定費20秒 + 0.16秒/文字 のつもりの実測を与える。
+        governor.recordSynthesis(cpuSeconds: 24.8, characterCount: 30, at: 0)
+        governor.recordSynthesis(cpuSeconds: 32.8, characterCount: 80, at: 1)
+        governor.recordSynthesis(cpuSeconds: 41.1, characterCount: 132, at: 2)
+        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 30), 24.8, accuracy: 1.5)
+        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 132), 41.1, accuracy: 1.5)
+    }
+
+    // 分割すると合計コストが増える事が見積りに現れる事(=無闇に分割しない根拠になる)。
+    func testSplittingCostsMoreInTotalBecauseOfTheFixedOverhead() {
+        let governor = makeGovernor()
+        governor.recordSynthesis(cpuSeconds: 24.8, characterCount: 30, at: 0)
+        governor.recordSynthesis(cpuSeconds: 32.8, characterCount: 80, at: 1)
+        governor.recordSynthesis(cpuSeconds: 41.1, characterCount: 132, at: 2)
+        let whole = governor.estimatedCPUSeconds(forCharacterCount: 120)
+        let halves = governor.estimatedCPUSeconds(forCharacterCount: 60) * 2
+        XCTAssertGreaterThan(halves, whole, "分割した方が合計コストは大きくなるはず")
+    }
+
+    // 見積りが実測を下回らない事(下回るとそのまま強制終了に繋がる)。
+    func testEstimateNeverFallsBelowAnyMeasurement() {
+        let governor = makeGovernor()
+        let samples: [(Double, Int)] = [(24.8, 30), (60.0, 80), (41.1, 132)] // 80文字だけ極端に重い
+        for (cpu, count) in samples {
+            governor.recordSynthesis(cpuSeconds: cpu, characterCount: count, at: 0)
+        }
+        for (cpu, count) in samples {
+            XCTAssertGreaterThanOrEqual(governor.estimatedCPUSeconds(forCharacterCount: count), cpu,
+                                        "\(count)文字の見積りが実測(\(cpu)秒)を下回ってはいけない")
+        }
     }
 }
 
