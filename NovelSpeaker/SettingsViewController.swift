@@ -1690,6 +1690,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
+            // 事前に作った VOICEVOX 音声の容量確認と削除。
+            // 1作品で数百MB〜数GBになるので、確認して消せる場所が要る。
+            if VoicevoxCore.isAvailableOnThisOS {
+                section
+                <<< ButtonRow() {
+                    $0.title = "作成済みのVOICEVOX音声"
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
+                        return VoicevoxCacheManageViewController()
+                    }), onDismiss: nil)
+                }
+            }
             form +++ section
             section = Section(NSLocalizedString("SettingsViewController_DontUsallyUseSection_Title", comment: "普段は使わない物"))
             section

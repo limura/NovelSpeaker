@@ -18,10 +18,60 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
     var novelObserverToken:NotificationToken? = nil
     var tagObserverToken:NotificationToken? = nil
 
+    // MARK: - VOICEVOX 音声の事前生成
+
+    static let voicevoxCacheRowTag = "VoicevoxCacheGenerationRow"
+
+    /// ボタンの文言。生成中は進捗を、止まっている時は貯まっている量を出す。
+    /// 「ここまで作れているなら、このまま持ち出していいか」を判断できる事を狙っている。
+    static func voicevoxCacheRowTitle(novelID: String) -> String {
+        let summary = VoicevoxDiskCacheStore.shared.summary(novelID: novelID)
+        let stored = VoicevoxCacheGenerationProgress.durationText(seconds: summary.audioSeconds)
+        if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
+            if let progress = VoicevoxCacheGenerator.shared.progress {
+                return "VOICEVOX音声を生成中(タップで停止)\n\(progress.description)"
+            }
+            return "VOICEVOX音声を生成中(タップで停止)"
+        }
+        if summary.entryCount > 0 {
+            let megabytes = Double(summary.byteCount) / 1024 / 1024
+            return "VOICEVOX音声を続きから生成する\n現在\(stored)ぶん(\(String(format: "%.0f", megabytes))MB)"
+        }
+        return "VOICEVOX音声を今の位置から生成する"
+    }
+
+    private func toggleVoicevoxCacheGeneration() {
+        if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
+            VoicevoxCacheGenerator.shared.stop()
+            return
+        }
+        let novelID = self.novelID
+        _ = NiftyUtility.EasyDialogTwoButton(
+            viewController: self,
+            title: "VOICEVOX音声の生成",
+            message: "今の読み上げ位置から先の音声を作って端末に貯めます。\n\n作っている間は画面を消さずに置いておいてください(画面が消えると中断します)。\n音声1時間ぶんで約15MBを使います。\n\n作った音声はこの端末でだけ使えます。",
+            button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
+            button1Action: nil,
+            button2Title: "生成を始める",
+            button2Action: {
+                VoicevoxCacheGenerator.shared.start(novelID: novelID)
+            })
+    }
+
+    @objc private func voicevoxCacheProgressDidChange() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard let row = self.form.rowBy(tag: Self.voicevoxCacheRowTag) as? ButtonRow else { return }
+            row.title = Self.voicevoxCacheRowTitle(novelID: self.novelID)
+            row.updateCell()
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.title = NSLocalizedString("NovelDetailViewController_PageTitle", comment: "小説の詳細")
+        NotificationCenter.default.addObserver(self, selector: #selector(voicevoxCacheProgressDidChange), name: VoicevoxCacheGenerator.progressDidChangeNotification, object: nil)
         createCells()
         observeNovel()
         observeSpeakerSetting()
@@ -475,8 +525,23 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     })
             })
 
+            // VOICEVOX の音声を先に作って端末に貯めておく。
+            //
+            // 背面バッテリー駆動では iOS の CPU 上限(60秒平均で1コア相当の80%)により
+            // 実時間で合成し切れず(実測: iPhone 17 Pro Max で必要CPU率128%、SE2 で226%)、
+            // 読み上げが途切れ途切れになる。事前に作って置いておく以外に手が無い。
+            if VoicevoxCore.isAvailableOnThisOS {
+                actionSection <<< ButtonRow(Self.voicevoxCacheRowTag) {
+                    $0.title = Self.voicevoxCacheRowTitle(novelID: self.novelID)
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ [weak self] _, _ in
+                    guard let self = self else { return }
+                    self.toggleVoicevoxCacheGeneration()
+                })
+            }
+
             self.form +++ actionSection
-            
+
             let settingSection = Section(NSLocalizedString("NovelDetailViewController_SettingSectionTitle", comment: "この小説専用の設定"))
             // isNeedSpeechAfterDelete
             if let speaker = novel.defaultSpeakerWith(realm: realm) {

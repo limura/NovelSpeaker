@@ -842,6 +842,17 @@ actor VoicevoxCore {
         }
     }
 
+    /// 事前生成(ディスクキャッシュ作成)のための合成。
+    ///
+    /// 再生に必要な合成が待っている間は手を出さない(待たせるとそのまま無音になるため)。
+    /// 合成結果をメモリキャッシュには入れない。事前生成は本文を延々と舐めていくので、
+    /// 入れると再生に必要な物を押し出してしまう。作った物はディスクに置かれ、
+    /// 再生時はそちらから読まれる。
+    func synthesizeForDiskCache(text: String, styleId: UInt32) async throws -> Data {
+        await waitWhilePlaybackSynthesisIsPending()
+        return try await performSynthesizeWithinBudget(text: text, styleId: styleId, limitRatio: Self.prefetchCPULimitRatio)
+    }
+
     /// 待ち行列から取り出した1件を実際に合成する(ここだけが actor 隔離 = 直列実行)。
     private func runSynthesis(_ request: VoicevoxSynthesisQueue.Request) async {
         let snippet = Self.logSnippet(request.text)
