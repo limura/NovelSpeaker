@@ -538,32 +538,42 @@ actor VoicevoxCore {
         // ここに来た = 再生が必要な時点で先行合成が間に合っていなかった。
         // その待ち時間がそのまま無音の長さになるので、回数と待ち時間を記録する。
         let missStart = Date()
-        let data = try await synthesizeSlowPath(text: text, styleId: styleId, key: key)
+
+        // MISS の原因判定と「待機中の予約の横取り」は、**actor に入る前**に行う。
+        //  - 予約済み(pending)   … 先行合成に出してはいたが間に合わなかった = 時間の問題。
+        //  - 合成中(inFlight)   … ワーカーが今まさに作っている。完成を待つ方が速い。
+        //  - 未予約(not queued) … そもそも先行合成の対象から漏れていた = 取りこぼしの不具合。
+        // どちらなのかで対処が全く変わるため、ここで確定させる。
+        //
+        // 以前は actor 隔離の中で判定していたが、それだと実行中の合成(1本30秒近い)の
+        // 完了を待たされる間に待ち行列の状態が「合成中」→「完了」へ変わってしまい、
+        // 本当は予約済みだったものが「未予約」として記録されていた
+        // (実機ログで、予約済みの block=9 の合成完了と同時刻に「再生MISS(未予約)」が
+        //  出ており、未予約22件のほとんどがこの誤判定だった)。
+        // 横取りを先に済ませる事で、actor 待ちの間にワーカーが同じ物を始める余地も無くなる。
+        let claim = synthesisQueue.claimForImmediateSynthesis(text: text, styleId: styleId)
+        let wasQueued = claim != .notQueued
+        VoicevoxPerformanceMonitor.shared.recordPlaybackCacheMiss(wasQueuedForPrefetch: wasQueued)
+        VoicevoxPerformanceMonitor.shared.recordEvent("再生MISS(\(wasQueued ? "予約済" : "未予約")) style=\(styleId) \"\(Self.logSnippet(text))\"")
+
+        let data = try await synthesizeSlowPath(text: text, styleId: styleId, key: key, claim: claim)
         VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: false, waitSeconds: Date().timeIntervalSince(missStart))
         return data
     }
 
     /// cache MISS 時の低速パス。pendingPrefetchTasks の確認・performSynthesize の呼び出しは
     /// actor状態を扱うため、ここは(nonisolatedにせず)actor隔離のままにしておく。
-    private func synthesizeSlowPath(text: String, styleId: UInt32, key: String) async throws -> Data {
+    private func synthesizeSlowPath(text: String, styleId: UInt32, key: String, claim: VoicevoxSynthesisQueue.ClaimResult) async throws -> Data {
         // 先行合成に予算を横取りされないよう、再生側の合成が進行中である事を知らせる。
         beginPlaybackSynthesis()
         defer { endPlaybackSynthesis() }
         let snippet = Self.logSnippet(text)
-        // 待機中の予約は取り消して(横取りして)この場で合成する。ワーカーが後から
-        // 同じ物を重ねて合成しないようにするため。
-        // 既に合成中(このメソッドが actor に入れた時点で、そのC呼び出しは完了している)
-        // だった場合は、下のキャッシュ再確認で拾える。
-        // MISS の原因を判別するための記録。
-        //  - 予約済み(pending)   … 先行合成に出してはいたが間に合わなかった = 時間の問題。
-        //                          先読みの深さ/優先度で対処する。
-        //  - 未予約(not queued) … そもそも先行合成の対象から漏れていた = 取りこぼしの不具合。
-        // 実機で「貯金は156秒あるのに再生時HIT率は48.9%」という食い違いが出ており、
-        // どちらなのかで対処が全く変わるため、ここで確定させる。
-        let claim = synthesisQueue.claimForImmediateSynthesis(text: text, styleId: styleId)
+        // actor に入るまでの間に先行合成が完成している事がある(むしろ、実行中だった
+        // 合成の完了を待って actor に入るので、その可能性は高い)。まず確認する。
+        if let cached = peekCache(key: key) {
+            return cached
+        }
         let wasQueued = claim != .notQueued
-        VoicevoxPerformanceMonitor.shared.recordPlaybackCacheMiss(wasQueuedForPrefetch: wasQueued)
-        VoicevoxPerformanceMonitor.shared.recordEvent("再生MISS(\(wasQueued ? "予約済" : "未予約")) style=\(styleId) \"\(snippet)\"")
         if claim == .inFlight {
             // ワーカーが今まさに同じ物を合成している。ここで自分でも合成すると
             // 同じ物を二重に合成して CPU 予算を食い合い、どちらも進まなくなる
