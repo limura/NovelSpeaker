@@ -149,3 +149,36 @@ class VoicevoxCPUGovernorTest: XCTestCase {
         XCTAssertLessThan(governor.recordCountForTesting, 100, "60秒窓を大きく超える記録は保持しない")
     }
 }
+
+// 合成に使う CPU スレッド数の既定値。
+//
+// スレッド数は synthesizer の生成時オプションなので、再生の途中では変えられない
+// (変えるには synthesizer の作り直しが必要で、合成済みキャッシュも失う)。
+// つまり「前景では全コア、背面では1スレッド」という切り替えはできず、
+// 最初から安全側に倒しておくしかない。
+// 0(自動=全コア)だと ONNX が全コアでスレッドを回して実機で CPU 率が 200〜290% に達し、
+// 背面のCPU上限(1コア相当の80%)を即座に超えて強制終了される。
+class VoicevoxCPUNumThreadsDefaultTest: XCTestCase {
+
+    private let key = VoicevoxCore.cpuNumThreadsUserDefaultsKey
+
+    override func tearDown() {
+        UserDefaults.standard.removeObject(forKey: key)
+        super.tearDown()
+    }
+
+    // 一度も設定していない状態では 1(自動ではない)である事。
+    func testDefaultIsSingleThreadNotAuto() {
+        UserDefaults.standard.removeObject(forKey: key)
+        XCTAssertEqual(VoicevoxCore.configuredCPUNumThreads, 1,
+                       "既定が0(自動=全コア)だと背面で即座に強制終了される")
+    }
+
+    // 明示的に設定した値はそのまま使われる事(計測用に「自動」も選べる)。
+    func testExplicitValueIsRespectedIncludingAuto() {
+        VoicevoxCore.configuredCPUNumThreads = 4
+        XCTAssertEqual(VoicevoxCore.configuredCPUNumThreads, 4)
+        VoicevoxCore.configuredCPUNumThreads = 0
+        XCTAssertEqual(VoicevoxCore.configuredCPUNumThreads, 0, "明示的に選んだ「自動」は尊重する")
+    }
+}

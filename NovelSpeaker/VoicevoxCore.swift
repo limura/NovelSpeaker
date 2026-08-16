@@ -395,10 +395,22 @@ actor VoicevoxCore {
     /// バックグラウンドの CPU 上限超過による強制終了を避けられるかの実測用に可変にしている。
     /// synthesizer 生成時オプションなので、変更を反映するには reconfigureCPUNumThreads() を使う。
     static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
+    /// 未設定時の既定値。
+    ///
+    /// 0(自動=全コア)にすると ONNX が全コアでスレッドを回し、実機で CPU 率が
+    /// 200〜290% に達する。背面のCPU上限は「1コア相当の80%」なので、これは即座に
+    /// 強制終了される値になる。実測ではスレッド数1が CPU 率・RTF の両方で最良で、
+    /// スレッドを増やすと発熱で RTF まで悪化した。よって既定は1にする。
+    /// (前景・充電中は上限が無いので全コア使う方が速いが、設定は synthesizer の
+    ///  生成時オプションで途中変更には作り直しが要るため、安全側に倒して固定する)
+    static let defaultCPUNumThreads: UInt16 = 1
+
     static var configuredCPUNumThreads: UInt16 {
         get {
-            // 未設定(キー無し)なら従来どおり 0(自動)。
-            return UInt16(clamping: UserDefaults.standard.integer(forKey: cpuNumThreadsUserDefaultsKey))
+            guard let stored = UserDefaults.standard.object(forKey: cpuNumThreadsUserDefaultsKey) as? Int else {
+                return defaultCPUNumThreads
+            }
+            return UInt16(clamping: stored)
         }
         set {
             UserDefaults.standard.set(Int(newValue), forKey: cpuNumThreadsUserDefaultsKey)
@@ -844,8 +856,14 @@ final class VoicevoxCore {
     }
 
     static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
+    static let defaultCPUNumThreads: UInt16 = 1
     static var configuredCPUNumThreads: UInt16 {
-        get { return UInt16(clamping: UserDefaults.standard.integer(forKey: cpuNumThreadsUserDefaultsKey)) }
+        get {
+            guard let stored = UserDefaults.standard.object(forKey: cpuNumThreadsUserDefaultsKey) as? Int else {
+                return defaultCPUNumThreads
+            }
+            return UInt16(clamping: stored)
+        }
         set { UserDefaults.standard.set(Int(newValue), forKey: cpuNumThreadsUserDefaultsKey) }
     }
     func reconfigureCPUNumThreads(_ threads: UInt16) throws {

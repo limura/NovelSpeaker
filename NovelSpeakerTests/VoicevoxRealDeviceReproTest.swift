@@ -118,7 +118,13 @@ class VoicevoxRealDeviceReproTest: XCTestCase {
     // どこで詰まっているかをここで確認できる。
     func testReproduceRealDeviceStallScenario() async throws {
         let (narratorStyleId, dialogueStyleId) = try await setUpCoreAndPickStyles()
-        await VoicevoxCore.shared.clearPrefetchCache()
+        // このテストは「先行合成のパイプラインが詰まらない」事を合成待ちの秒数で見るので、
+        // 合成そのものの速度が実行環境の設定で変わると判定がぶれる。
+        // アプリの既定は「スレッド数1」(背面のCPU上限で殺されないための安全側の設定)だが、
+        // ここでは母艦の性能を素直に使える「自動(全コア)」に固定して測る。
+        try await VoicevoxCore.shared.reconfigureCPUNumThreads(0)
+        defer { VoicevoxCore.configuredCPUNumThreads = VoicevoxCore.defaultCPUNumThreads }
+        VoicevoxCore.shared.clearPrefetchCache()
 
         let narratorSetting = makeVoicevoxSpeakerSetting(styleId: narratorStyleId)
         let dialogueSetting = makeVoicevoxSpeakerSetting(styleId: dialogueStyleId)
