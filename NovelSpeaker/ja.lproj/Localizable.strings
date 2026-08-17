@@ -1132,6 +1132,10 @@
 "SettingsViewController_WatchSessionDiagnostics" = "Apple Watch連携の診断情報";
 
 "SettingsViewController_VoicevoxCPUNumThreads" = "VOICEVOXの合成に使うCPUスレッド数(計測用)";
+// VOICEVOXの音声モデルが未取得のスタイルを、話者設定の選択行にどう見せるか
+"VoicevoxStyleSelection_NotDownloadedLabelFormat" = "(未取得) %@";
+"VoicevoxStyleSelection_UnknownStyleNameFormat" = "スタイル番号 %u";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.1
 
 - 歯抜け小説の更新確認/補完DL時に、手元にある章を無駄に再取得していた問題を修正

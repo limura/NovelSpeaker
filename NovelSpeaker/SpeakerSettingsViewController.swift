@@ -43,34 +43,55 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         }
     }
 
-    // VoicevoxCore.cachedStyles が(非同期セットアップ完了後に)更新された事を受けて、
-    /// VOICEVOX話者設定の voiceIdentifier が「実在する styleId」になっている事を保証する。
+    /// 今この端末で使えるスタイルの styleId 一覧。
+    static func availableVoicevoxStyleIds() -> Set<UInt32> {
+        return Set(VoicevoxCore.cachedStyles.map { $0.styleId })
+    }
+
+    /// VOICEVOX話者設定の voiceIdentifier を見て、スタイル選択行に表示すべきラベルを返す。
     ///
-    /// エンジン種別を AVSpeechSynthesizer から VOICEVOX に切り替えた時、従来は
-    /// setting.type しか書いていなかったため、voiceIdentifier が
-    /// AVSpeech の音声ID(例: com.apple.ttsbundle.siri_O-ren_ja-JP_premium)のまま残っていた。
-    /// スタイル選択行は保存値が無効だと「表示だけ」一覧の先頭にフォールバックし保存はしないため、
-    /// 画面上は正しい話者に見えるのに実際の保存値は無効、という状態になっていた。
-    /// この状態だと再生側は styleId=0 にフォールバックして意図しない話者で読み上げ、
-    /// さらに先行合成との間でキーが食い違って地の文が常に無音になる原因にもなっていた。
-    /// 無効なら一覧の先頭のスタイルを実際に保存して、表示と保存値を一致させる。
+    /// **未取得なだけの設定は書き換えない。** 音声モデルを消しただけで
+    /// 全ての小説の話者設定が別人に書き換わり、取り直しても戻らない、という
+    /// 取り返しのつかない壊れ方をするため(詳細は VoicevoxStyleSelection.swift)。
+    ///
+    /// 書き換えるのは「styleId ですらない」場合だけ。これは読み上げエンジンを
+    /// AVSpeechSynthesizer から VOICEVOX に切り替えた時、従来 setting.type しか
+    /// 書いていなかったために voiceIdentifier が AVSpeech の音声ID
+    /// (例: com.apple.ttsbundle.siri_O-ren_ja-JP_premium)のまま残る、という残骸で、
+    /// 放っておくと再生側が styleId=0 にフォールバックして意図しない話者で読み上げ、
+    /// 先行合成との間でキーが食い違って地の文が常に無音になる原因にもなる。
     @discardableResult
-    private func ensureValidVoicevoxStyleId(targetID: String) -> String? {
-        let options = SpeakerSettingsViewController.voicevoxStyleOptionLabels()
-        guard let fallbackLabel = options.first,
-              let fallbackStyleId = SpeakerSettingsViewController.voicevoxStyleId(forLabel: fallbackLabel) else { return nil }
+    private func resolveVoicevoxStyleLabel(targetID: String) -> String? {
+        let availableStyleIds = SpeakerSettingsViewController.availableVoicevoxStyleIds()
         var resultLabel: String? = nil
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else { return }
-            if let styleId = UInt32(setting.voiceIdentifier),
-               let label = SpeakerSettingsViewController.voicevoxStyleLabel(for: styleId) {
-                resultLabel = label
-                return
+            let selection = VoicevoxStyleSelectionResolver.resolve(
+                voiceIdentifier: setting.voiceIdentifier, availableStyleIds: availableStyleIds)
+            switch selection {
+            case .available(let styleId):
+                resultLabel = SpeakerSettingsViewController.voicevoxStyleLabel(for: styleId)
+            case .notDownloaded(let styleId):
+                // 保存値には触らない。音声モデルを取り直せば、そのまま元の話者に戻る。
+                resultLabel = VoicevoxStyleSelectionResolver.notDownloadedLabel(
+                    styleId: styleId,
+                    knownName: SpeakerSettingsViewController.voicevoxStyleLabel(for: styleId))
+            case .notAStyleId:
+                // ★VOICEVOX を使う話者設定でない限り、絶対に書き換えない。
+                // AVSpeechSynthesizer の話者設定の voiceIdentifier は音声IDそのものなので、
+                // ここで styleId を書き込むと、選んであった音声が失われる。
+                guard setting.type == "VOICEVOX" else { return }
+                guard let fallbackLabel = SpeakerSettingsViewController.voicevoxStyleOptionLabels().first,
+                      let fallbackStyleId = SpeakerSettingsViewController.voicevoxStyleId(forLabel: fallbackLabel) else {
+                    // 音声モデルを1つも持っていない時は直しようが無いので、何もしない。
+                    // (下手に既定値を書くより、未設定のままにしておく方が害が無い)
+                    return
+                }
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                    setting.voiceIdentifier = String(fallbackStyleId)
+                }
+                resultLabel = fallbackLabel
             }
-            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
-                setting.voiceIdentifier = String(fallbackStyleId)
-            }
-            resultLabel = fallbackLabel
         }
         return resultLabel
     }
@@ -79,15 +100,28 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
     func refreshAllVoicevoxStyleRows() {
         #if targetEnvironment(macCatalyst)
         for row in self.form.rows.compactMap({ $0 as? PushRow<String> }) where row.tag?.hasPrefix("VoicevoxStyleAlertRow-") == true {
-            row.options = SpeakerSettingsViewController.voicevoxStyleOptionLabels()
+            row.options = SpeakerSettingsViewController.voicevoxStyleOptions(keeping: row.value)
             row.updateCell()
         }
         #else
         for row in self.form.rows.compactMap({ $0 as? AlertRow<String> }) where row.tag?.hasPrefix("VoicevoxStyleAlertRow-") == true {
-            row.options = SpeakerSettingsViewController.voicevoxStyleOptionLabels()
+            row.options = SpeakerSettingsViewController.voicevoxStyleOptions(keeping: row.value)
             row.updateCell()
         }
         #endif
+    }
+
+    /// 選択行に並べる選択肢。
+    ///
+    /// 今表示している値が一覧に無い(=未取得のスタイルを指している)場合は、それも先頭に足す。
+    /// 足さないと選択行が空欄に見えて、利用者には「勝手に設定が変わった」と映るため。
+    static func voicevoxStyleOptions(keeping currentLabel: String?) -> [String] {
+        var options = voicevoxStyleOptionLabels()
+        if let currentLabel = currentLabel, currentLabel.isEmpty == false,
+           options.contains(currentLabel) == false {
+            options.insert(currentLabel, at: 0)
+        }
+        return options
     }
 
     static func voicevoxStyleOptionLabels() -> [String] {
@@ -402,8 +436,9 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 // 従来はここで type しか書いていなかったため、voiceIdentifier が
                 // AVSpeech の音声IDのまま残り、再生時に styleId=0 へフォールバックしていた。
                 // 有効な styleId を確定させ、スタイル選択行の表示とも一致させる。
-                if let label = self.ensureValidVoicevoxStyleId(targetID: targetID),
+                if let label = self.resolveVoicevoxStyleLabel(targetID: targetID),
                    let styleRow = self.form.rowBy(tag: "VoicevoxStyleAlertRow-\(targetID)") as? AlertRow<String> {
+                    styleRow.options = SpeakerSettingsViewController.voicevoxStyleOptions(keeping: label)
                     styleRow.value = label
                 }
             }
@@ -519,18 +554,12 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         #endif
         voicevoxStyleRow.title = NSLocalizedString("SpeakSettingsViewController_VoicevoxStyleTitle", comment: "VOICEVOX話者")
         voicevoxStyleRow.selectorTitle = NSLocalizedString("SpeakSettingsViewController_VoicevoxStyleDialogTitle", comment: "VOICEVOXの話者を選択してください")
-        let voicevoxStyleOptions = SpeakerSettingsViewController.voicevoxStyleOptionLabels()
-        voicevoxStyleRow.options = voicevoxStyleOptions
-        let currentStyleId = UInt32(currentSetting.voiceIdentifier)
-        if let currentStyleId = currentStyleId, let label = SpeakerSettingsViewController.voicevoxStyleLabel(for: currentStyleId) {
-            voicevoxStyleRow.value = label
-        }else if currentSetting.type == "VOICEVOX" {
-            // 表示だけフォールバックして保存しないと、画面と実際の保存値が食い違う。
-            // 既に壊れている設定(旧版で type だけ切り替えられたもの)はここで直す。
-            voicevoxStyleRow.value = self.ensureValidVoicevoxStyleId(targetID: targetID) ?? voicevoxStyleOptions.first ?? ""
-        }else{
-            voicevoxStyleRow.value = voicevoxStyleOptions.first ?? ""
-        }
+        // 表示だけフォールバックして保存しないと画面と保存値が食い違うが、
+        // かといって何でも書き換えると未取得のスタイルを指す設定を壊す。
+        // その区別は resolveVoicevoxStyleLabel に閉じ込めてある。
+        let currentLabel = self.resolveVoicevoxStyleLabel(targetID: targetID)
+        voicevoxStyleRow.options = SpeakerSettingsViewController.voicevoxStyleOptions(keeping: currentLabel)
+        voicevoxStyleRow.value = currentLabel ?? SpeakerSettingsViewController.voicevoxStyleOptionLabels().first ?? ""
         voicevoxStyleRow.hidden = Condition.function(["TitleLabelRow-\(targetID)", "EngineTypeAlertRow-\(targetID)"], { (form) -> Bool in
             if self.hideCache[targetID] ?? false { return true }
             return self.currentEngineType(targetID: targetID) != "VOICEVOX"

@@ -1151,6 +1151,10 @@
 "ことせかい を開きます。" = "Opens NovelSpeaker.";
 
 "SettingsViewController_VoicevoxCPUNumThreads" = "CPU threads for VOICEVOX synthesis (for measurement)";
+// How a not-yet-downloaded VOICEVOX style is shown in the speaker setting row
+"VoicevoxStyleSelection_NotDownloadedLabelFormat" = "(not downloaded) %@";
+"VoicevoxStyleSelection_UnknownStyleNameFormat" = "style #%u";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.
