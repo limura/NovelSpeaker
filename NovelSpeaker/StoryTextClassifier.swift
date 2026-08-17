@@ -1098,8 +1098,19 @@ class StoryTextClassifier {
         }
     }
 
+    /// 段階ごとの所要時間をログに出すか(遅い所を実機で特定するため)。
+    nonisolated(unsafe) static var isGatherStorySpeechSettingsProfilingEnabled = false
+
     static func GatherStorySpeechSettings(novelID:String) -> StorySpeechSettings {
         RealmUtil.RealmBlock { (realm) -> StorySpeechSettings in
+            let profiling = isGatherStorySpeechSettingsProfilingEnabled
+            var phaseStart = Date()
+            var phaseLog = ""
+            func recordPhase(_ name:String) {
+                guard profiling else { return }
+                phaseLog += String(format: " %@=%.0fms", name, Date().timeIntervalSince(phaseStart) * 1000)
+                phaseStart = Date()
+            }
             let defaultSpeaker:RealmSpeakerSetting
             if let novelDefaultSpeaker = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.defaultSpeakerWith(realm: realm) {
                 defaultSpeaker = novelDefaultSpeaker
@@ -1109,12 +1120,16 @@ class StoryTextClassifier {
                 defaultSpeaker = RealmSpeakerSetting()
             }
             
+            recordPhase("話者")
+
             let sectionConfigList:[SpeechSectionConfig]
             if let speechSectionConfigDictValues = RealmSpeechSectionConfig.SearchSettingsFor(realm: realm, novelID: novelID) {
                 sectionConfigList = ConvertSpeechSectionConfig(realm: realm, fromArray: Array(speechSectionConfigDictValues), defaultSpeaker: defaultSpeaker)
             }else{
                 sectionConfigList = []
             }
+            recordPhase("会話文")
+
             var waitConfigList:[SpeechWaitConfig] = []
             if let allWaitConfigList = RealmSpeechWaitConfig.GetAllObjectsWith(realm: realm)?.map({ SpeechWaitConfig(from: $0) }) {
                 waitConfigList = Array(allWaitConfigList)
@@ -1138,7 +1153,10 @@ class StoryTextClassifier {
             // URLを読まないようにするなどといった動的に読み替え辞書を生成するのはここでやります。
             // 標準の読み替え辞書由来のエントリは「AVSpeechSynthesizer向け」とみなして印を付ける
             //(VOICEVOX 話者のブロックではこの印の付いた読み替えを適用しない)。
+            recordPhase("間の設定")
+
             let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
+            recordPhase("標準辞書の鍵集合")
             if let modSettingListFromSetting = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: novelID)?.map({ (realmModSetting) -> SpeechModSetting in
                 let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
                 // 標準辞書由来のエントリは AVSpeechSynthesizer 専用として扱う。それ以外(ユーザー追加)は
@@ -1148,6 +1166,7 @@ class StoryTextClassifier {
             }) {
                 speechModSettingList.append(contentsOf: modSettingListFromSetting)
             }
+            recordPhase("読み替え辞書(\(speechModSettingList.count)件)")
             
             var isOverrideRubyEnabled = false
             var notRubyCharactorStringArray = ""
@@ -1173,6 +1192,12 @@ class StoryTextClassifier {
                     isUseRegularExpression: true
                 )
                 speechModSettingList.append(modSetting)
+            }
+            recordPhase("その他")
+            defer {
+                if profiling {
+                    NSLog("NovelSpeaker.GatherSpeechSettings:%@", phaseLog)
+                }
             }
             return StorySpeechSettings(
                 defaultSpeaker: SpeakerSetting(from: defaultSpeaker),

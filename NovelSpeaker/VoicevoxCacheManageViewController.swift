@@ -468,7 +468,10 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         dialog.show()
 
         let scanStart = Date()
+        // 遅い所を実機で特定するため、設定の組み立ての内訳も出す。
+        StoryTextClassifier.isGatherStorySpeechSettingsProfilingEnabled = true
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            defer { StoryTextClassifier.isGatherStorySpeechSettingsProfilingEnabled = false }
             // (小説ID, ページ番号, 残す鍵) を集めながら、消える量を数える。
             var plan: [(novelID: String, chapterNumber: Int, keysToKeep: Set<String>)] = []
             var unused = VoicevoxDiskCacheSummary.empty
