@@ -56,6 +56,37 @@ enum VoicevoxCacheBlockSource {
         return result
     }
 
+    /// 指定したページの本文をまとめて読み出す。
+    ///
+    /// **1ページずつ `RealmStoryBulk.SearchStoryWith()` を呼んではいけない。**
+    /// 本文は100ページ単位の塊(bulk)を zip + JSON で固めた形で保存されており、
+    /// 1ページ読むだけでもその塊を丸ごと展開し直す。塊のキャッシュは既定で無効
+    /// (`isLoadStoryArrayCacheEnabled = false`)で、効くのは「直前と同じ1ページ」だけなので、
+    /// ページを順に舐めると毎回展開が走る。
+    /// 実機では14ページ調べるのに4秒かかっていた(=1ページあたり約0.28秒が全部これ)。
+    /// 塊ごとに1回だけ展開すれば、100ページぶんが1回の展開で手に入る。
+    static func stories(novelID: String, chapterNumbers: [Int]) -> [Int: Story] {
+        let wanted = Set(chapterNumbers)
+        guard wanted.isEmpty == false else { return [:] }
+        return RealmUtil.RealmBlock { (realm) -> [Int: Story] in
+            var result: [Int: Story] = [:]
+            guard let bulkList = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID) else { return result }
+            for bulk in bulkList {
+                autoreleasepool {
+                    // その塊に欲しいページが1つも無いなら、展開せずに飛ばす。
+                    let bulkFirstChapter = bulk.chapterNumber
+                    let bulkLastChapter = bulk.chapterNumber + RealmStoryBulk.bulkCount - 1
+                    guard wanted.contains(where: { $0 >= bulkFirstChapter && $0 <= bulkLastChapter }) else { return }
+                    guard let storyArray = bulk.LoadStoryArray() else { return }
+                    for story in storyArray where wanted.contains(story.chapterNumber) {
+                        result[story.chapterNumber] = story
+                    }
+                }
+            }
+            return result
+        }
+    }
+
     /// 今の設定で、その小説に必要な音声の鍵をページごとに集める。
     ///
     /// 発話設定(話者・読み替え辞書・会話文の話者割り当て等)を変えると、
@@ -64,12 +95,10 @@ enum VoicevoxCacheBlockSource {
     /// 鍵はハッシュだが逆算は要らない。**今の設定で作り直した鍵の集合に無い物**を消せばよい。
     /// - Returns: ページ番号 → そのページで使う鍵の集合。
     static func currentKeysByChapter(novelID: String, chapterNumbers: [Int]) -> [Int: Set<String>] {
+        let storyByChapter = stories(novelID: novelID, chapterNumbers: chapterNumbers)
         var result: [Int: Set<String>] = [:]
         for chapterNumber in chapterNumbers {
-            let story = RealmUtil.RealmBlock { (realm) -> Story? in
-                return RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
-            }
-            guard let story = story else {
+            guard let story = storyByChapter[chapterNumber] else {
                 // 本文が無いページ(削除された等)の音声は、もう使いようが無い。
                 result[chapterNumber] = []
                 continue

@@ -384,27 +384,42 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         return section
     }
 
+    /// 容量の選択肢(MB)。
+    /// StepperRow だと題目と数値が同じ行で重なって読めなくなったので、選択式にする
+    ///(0.5GB刻みで64GBまで押し続ける、という操作もつらい)。
+    private static let totalLimitChoices: [Int] = [0, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]
+    private static let freeSpaceChoices: [Int] = [0, 256, 512, 1024, 2048, 4096, 8192, 16384]
+
+    private static func capacityText(megabytes: Int, zeroText: String) -> String {
+        if megabytes <= 0 { return zeroText }
+        if megabytes >= 1024 {
+            let gigabytes = Double(megabytes) / 1024
+            return gigabytes == gigabytes.rounded() ? "\(Int(gigabytes))GB" : String(format: "%.1fGB", gigabytes)
+        }
+        return "\(megabytes)MB"
+    }
+
     private func limitSection() -> Section {
         let section = Section("使ってよい容量")
-        section <<< StepperRow() {
-            $0.title = "音声の合計の上限(GB・0で無制限)"
-            $0.value = Double(VoicevoxCacheLimits.maximumTotalMegabytes) / 1024
-            $0.cell.stepper.minimumValue = 0
-            $0.cell.stepper.maximumValue = 64
-            $0.cell.stepper.stepValue = 0.5
+        section <<< PickerInputRow<String>() {
+            $0.title = "音声の合計の上限"
+            $0.options = Self.totalLimitChoices.map { Self.capacityText(megabytes: $0, zeroText: "無制限") }
+            $0.value = Self.capacityText(megabytes: VoicevoxCacheLimits.maximumTotalMegabytes, zeroText: "無制限")
             $0.cell.textLabel?.numberOfLines = 0
         }.onChange({ row in
-            VoicevoxCacheLimits.maximumTotalMegabytes = Int((row.value ?? 2) * 1024)
+            guard let value = row.value,
+                  let megabytes = Self.totalLimitChoices.first(where: { Self.capacityText(megabytes: $0, zeroText: "無制限") == value }) else { return }
+            VoicevoxCacheLimits.maximumTotalMegabytes = megabytes
         })
-        section <<< StepperRow() {
-            $0.title = "端末の空き容量がこれを切ったら止める(GB)"
-            $0.value = Double(VoicevoxCacheLimits.minimumFreeMegabytes) / 1024
-            $0.cell.stepper.minimumValue = 0
-            $0.cell.stepper.maximumValue = 32
-            $0.cell.stepper.stepValue = 0.5
+        section <<< PickerInputRow<String>() {
+            $0.title = "空き容量がこれを切ったら止める"
+            $0.options = Self.freeSpaceChoices.map { Self.capacityText(megabytes: $0, zeroText: "止めない") }
+            $0.value = Self.capacityText(megabytes: VoicevoxCacheLimits.minimumFreeMegabytes, zeroText: "止めない")
             $0.cell.textLabel?.numberOfLines = 0
         }.onChange({ row in
-            VoicevoxCacheLimits.minimumFreeMegabytes = Int((row.value ?? 0.5) * 1024)
+            guard let value = row.value,
+                  let megabytes = Self.freeSpaceChoices.first(where: { Self.capacityText(megabytes: $0, zeroText: "止めない") == value }) else { return }
+            VoicevoxCacheLimits.minimumFreeMegabytes = megabytes
         })
         section <<< SwitchRow() {
             $0.title = "読み上げ中に合成した分も貯める"
@@ -439,6 +454,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             .build()
         dialog.show()
 
+        let scanStart = Date()
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             // (小説ID, ページ番号, 残す鍵) を集めながら、消える量を数える。
             var plan: [(novelID: String, chapterNumber: Int, keysToKeep: Set<String>)] = []
@@ -456,6 +472,11 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             }
             let unusedSummary = unused
             let removalPlan = plan
+            // 遅ければ実機で分かるように、掛かった時間を残す。
+            AppInformationLogger.AddLog(message:
+                "[VOICEVOX音声生成] 使われない音声の調査: \(novelIDs.count)作品・\(pageCount)ページを "
+                + String(format: "%.2f", Date().timeIntervalSince(scanStart)) + "秒で確認",
+                isForDebug: true)
             DispatchQueue.main.async {
                 dialog.dismiss(animated: false) {
                     guard let self = self else { return }

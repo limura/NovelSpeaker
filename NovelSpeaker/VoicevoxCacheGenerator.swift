@@ -186,7 +186,7 @@ final class VoicevoxCacheGenerator {
             if Task.isCancelled { return .stoppedByUser }
             if let cause = Self.currentStopCause() { return .limitReached(cause) }
 
-            guard let story = Self.story(novelID: novelID, chapterNumber: chapterNumber) else {
+            guard let story = story(novelID: novelID, chapterNumber: chapterNumber) else {
                 // 未ダウンロードの話などは飛ばす(あとから落とされたら次回作られる)。
                 chapterNumber += 1
                 blockIndex = 0
@@ -307,7 +307,7 @@ final class VoicevoxCacheGenerator {
             self.lock.lock()
             self.lastChapterNumberUnsafe = lastChapterNumber
             self.lock.unlock()
-            guard let story = Self.story(novelID: novelID, chapterNumber: start.chapterNumber) else {
+            guard let story = self.story(novelID: novelID, chapterNumber: start.chapterNumber) else {
                 self.notifyProgressChanged()
                 return
             }
@@ -359,10 +359,26 @@ final class VoicevoxCacheGenerator {
 
     // MARK: - Realm / ディスク
 
-    private static func story(novelID: String, chapterNumber: Int) -> Story? {
-        return RealmUtil.RealmBlock { (realm) -> Story? in
-            return RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
+    /// 本文を塊(bulk)単位で先読みしておくための入れ物。
+    ///
+    /// 本文は100ページ単位で zip + JSON に固めて保存されており、1ページ読むだけでも
+    /// その塊を丸ごと展開し直す(実測で1ページあたり約0.28秒)。ページを順に舐める
+    /// この処理では、既に作ってあるページを飛ばすだけでもその展開が毎回走ってしまい、
+    /// 1000ページの作り直しでは展開だけで5分近くを捨てる事になる。
+    /// 塊ごとに1回だけ読んで持っておく。
+    private var loadedStories: [Int: Story] = [:]
+    private var loadedStoriesNovelID: String?
+
+    private func story(novelID: String, chapterNumber: Int) -> Story? {
+        if loadedStoriesNovelID == novelID, let story = loadedStories[chapterNumber] {
+            return story
         }
+        // その塊(100ページ)ぶんをまとめて読む。
+        let bulkFirstChapter = ((chapterNumber - 1) / RealmStoryBulk.bulkCount) * RealmStoryBulk.bulkCount + 1
+        let chapterNumbers = Array(bulkFirstChapter..<(bulkFirstChapter + RealmStoryBulk.bulkCount))
+        loadedStories = VoicevoxCacheBlockSource.stories(novelID: novelID, chapterNumbers: chapterNumbers)
+        loadedStoriesNovelID = novelID
+        return loadedStories[chapterNumber]
     }
 
     private static func lastChapterNumber(novelID: String) -> Int? {

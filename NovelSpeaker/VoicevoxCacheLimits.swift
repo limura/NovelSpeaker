@@ -37,7 +37,7 @@ enum VoicevoxCacheLimits {
 
     // MARK: - 端末の空き容量の下限
 
-    static let defaultMinimumFreeMegabytes = 500
+    static let defaultMinimumFreeMegabytes = 512
     static let minimumFreeMegabytesUserDefaultsKey = "NovelSpeaker.Voicevox.diskCacheMinimumFreeMegabytes"
 
     static var minimumFreeMegabytes: Int {
