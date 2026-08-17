@@ -22,11 +22,18 @@ readonly ORT_VERSION="1.17.3"
 readonly DICT_VERSION="1.11"
 # テスト専用。アプリ本体には同梱しない(DESIGN_VOICEVOXの音声モデル取得.md §4)
 readonly TEST_VVM="0"
+# コア ${CORE_VERSION} が読める VVM の形式。取得した物がこれでなければ配置しない。
+readonly VVM_FORMAT_VERSION="1"
 
 readonly CORE_URL="https://github.com/VOICEVOX/voicevox_core/releases/download/${CORE_VERSION}/voicevox_core-ios-xcframework-cpu-${CORE_VERSION}.zip"
 readonly ORT_URL="https://github.com/VOICEVOX/onnxruntime-builder/releases/download/voicevox_onnxruntime-${ORT_VERSION}/voicevox_onnxruntime-ios-xcframework-${ORT_VERSION}.zip"
 readonly DICT_URL="https://downloads.sourceforge.net/open-jtalk/open_jtalk_dic_utf_8-${DICT_VERSION}.tar.gz"
-readonly VVM_URL="https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/main/vvms/${TEST_VVM}.vvm"
+# ★VVM は必ずコアと同じバージョンのタグから取る。main を指してはいけない。
+# voicevox_vvm のタグ名はコアのバージョンと一致している(0.16.4 なら 0.16.4)。
+# main は次のコア版に進んでいることがあり、そちらの VVM は形式が変わっていて
+# 古いコアでは読めない(0.17.0 で vvm_format_version が 1→2 になり、
+# 0.16.4 のコアは VOICEVOX_RESULT_INVALID_MODEL_HEADER_ERROR(28) で開けない)。
+readonly VVM_URL="https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/${CORE_VERSION}/vvms/${TEST_VVM}.vvm"
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -219,9 +226,17 @@ fetch_test_vvm() {
         warn "${TEST_VVM}.vvm の取得に失敗しました。VOICEVOXのテストは skip されます"
         return 0
     fi
-    # zip として開けて metas.json が読める事を確かめてから置く(壊れた物を残さない)
+    # zip として開けて metas.json が読める事、かつコアが読める形式である事を
+    # 確かめてから置く(壊れた物・形式違いを残さない)
     if ! unzip -p "${work_dir}/test.vvm" metas.json >/dev/null 2>&1; then
         warn "取得した ${TEST_VVM}.vvm の中身を確認できませんでした。配置しません"
+        return 0
+    fi
+    local format
+    format="$(unzip -p "${work_dir}/test.vvm" manifest.json 2>/dev/null \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("vvm_format_version"))' 2>/dev/null)"
+    if [ "${format}" != "${VVM_FORMAT_VERSION}" ]; then
+        warn "取得した ${TEST_VVM}.vvm の形式が ${format} で、コア ${CORE_VERSION} が読める ${VVM_FORMAT_VERSION} ではありません。配置しません"
         return 0
     fi
     mkdir -p "${VENDOR_DIR}/vvm"
