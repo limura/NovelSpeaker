@@ -216,7 +216,9 @@
 		2B48E2CE4104C207F9CAD615 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7CD5762C06C829E7F1F33CAE /* Assets.xcassets */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
 		2F633CC42C4298E9922FAE1A /* NiftyUtilityRubyTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472A1C58C9BB83466543CE75 /* NiftyUtilityRubyTest.swift */; };
+		321ADBBAAABEDEE89AC7537A /* VoicevoxVoiceModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D01C85A5328E38D4D13EA3 /* VoicevoxVoiceModelCatalog.swift */; };
 		32DBB4BBDB094DAFCFAED8C6 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
+		3AFB85679A2E0E31699D1EB1 /* VoicevoxVoiceModelCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = F47B8C933940FFD0DC596E3F /* VoicevoxVoiceModelCatalog.json */; };
 		3C426D51706ADFD3D604532A /* voicevox_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 651FDED91DB56F790A75C7D5 /* voicevox_core.xcframework */; };
 		3FB899A79417583C301CD155 /* RealmSpeakerSettingDefaultValueTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C8FD3DD06F02430F199EE1 /* RealmSpeakerSettingDefaultValueTest.swift */; };
 		401F71BFB7F02656E69D8D7D /* VoicevoxCacheBlockSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12B6227F06B7AAEC764DB9E4 /* VoicevoxCacheBlockSource.swift */; };
@@ -268,6 +270,7 @@
 		ABB3BD15F8A34D4D9C0A7AE9 /* VoicevoxPrefetchThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */; };
 		AD09DC8C14D0EC0D547F99D5 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		AED424F441112BFA57EC12F4 /* WatchSpeechSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B183A0FEE977129AFD5FBAB5 /* WatchSpeechSettings.swift */; };
+		B05767187581E197D4BC0800 /* VoicevoxVoiceModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D01C85A5328E38D4D13EA3 /* VoicevoxVoiceModelCatalog.swift */; };
 		B556D02EBF654B4E13FBAB78 /* VoicevoxWavCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1322C2A2308E379873B8B4 /* VoicevoxWavCache.swift */; };
 		B62CE9CB1A11475BCDD7AFDA /* voicevox_onnxruntime.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; platformFilter = ios; };
 		B7AD5FDF47A17A848982B113 /* voicevox_onnxruntime.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; };
@@ -308,6 +311,7 @@
 		DF097CB24FD5A48F36EB42B0 /* VoicevoxCacheAutoGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE496F7C7C71EF42457B67EA /* VoicevoxCacheAutoGeneration.swift */; };
 		DFE97F3FDB82EADD76524F7A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 59911E29481854DA0556D093 /* Localizable.strings */; };
 		E2820FFFB99FF91B3E84EEEE /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0164B2D4D5F2582B7B2AC42F /* PlayerView.swift */; };
+		E553CBF804EEAA654BBA68B8 /* VoicevoxVoiceModelCatalogTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D79F5F7738BA23A29226D5 /* VoicevoxVoiceModelCatalogTest.swift */; };
 		EDCE1E5BF83AE2A0DC0DF058 /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320ED5957BE18A57C229BABE /* WatchMessage.swift */; };
 		EFF55EB7A13C30102D5FDCFE /* NovelSpeakerWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB3010D5FCE0D2459A82D57 /* NovelSpeakerWatchApp.swift */; };
 		F1032AA792D5883803B42783 /* VoicevoxDiskCacheStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 381E549D1602390C4166E75B /* VoicevoxDiskCacheStoreTest.swift */; };
@@ -409,6 +413,7 @@
 
 /* Begin PBXFileReference section */
 		0164B2D4D5F2582B7B2AC42F /* PlayerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		02D79F5F7738BA23A29226D5 /* VoicevoxVoiceModelCatalogTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxVoiceModelCatalogTest.swift; sourceTree = "<group>"; };
 		06076A26E3F2A63F31621D0B /* VoicevoxCacheLimitsTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheLimitsTest.swift; sourceTree = "<group>"; };
 		062FAB1C5C7A8DFB5D0EC781 /* VoicevoxPrefetchTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxPrefetchTest.swift; sourceTree = "<group>"; };
 		076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; sourceTree = "<group>"; };
@@ -749,6 +754,7 @@
 		C1BF95C17C6DB7DAF15306D9 /* VoicevoxChunkedSynthesis.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxChunkedSynthesis.swift; sourceTree = "<group>"; };
 		C2F380DAEC93EA2F37A0EF6D /* VoicevoxCoreTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCoreTest.swift; sourceTree = "<group>"; };
 		C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxPrefetchThrottle.swift; sourceTree = "<group>"; };
+		C7D01C85A5328E38D4D13EA3 /* VoicevoxVoiceModelCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxVoiceModelCatalog.swift; sourceTree = "<group>"; };
 		C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; sourceTree = "<group>"; };
 		D0A098806FB1DD0B2419C081 /* VoicevoxCacheGenerationDialog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheGenerationDialog.swift; sourceTree = "<group>"; };
 		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
@@ -759,6 +765,7 @@
 		EBF2F640224389D5D9030AD1 /* PhoneSessionManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneSessionManager.swift; sourceTree = "<group>"; };
 		EED8F3BC23E78F95A64ECBE1 /* GatherStorySpeechSettingsBenchmarkTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GatherStorySpeechSettingsBenchmarkTest.swift; sourceTree = "<group>"; };
 		F0AC332161B66971D522ECA3 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F47B8C933940FFD0DC596E3F /* VoicevoxVoiceModelCatalog.json */ = {isa = PBXFileReference; includeInIndex = 1; path = VoicevoxVoiceModelCatalog.json; sourceTree = "<group>"; };
 		F4C8FD3DD06F02430F199EE1 /* RealmSpeakerSettingDefaultValueTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RealmSpeakerSettingDefaultValueTest.swift; sourceTree = "<group>"; };
 		F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8A7FEB0C160633879907522 /* WatchTextSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchTextSettings.swift; sourceTree = "<group>"; };
@@ -1147,6 +1154,8 @@
 				AE496F7C7C71EF42457B67EA /* VoicevoxCacheAutoGeneration.swift */,
 				D6AFA0E9D0F3FBD892093F10 /* VoicevoxCacheLimits.swift */,
 				C12C975773BB39B575CEC322 /* VoicevoxStyleSelection.swift */,
+				F47B8C933940FFD0DC596E3F /* VoicevoxVoiceModelCatalog.json */,
+				C7D01C85A5328E38D4D13EA3 /* VoicevoxVoiceModelCatalog.swift */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -1199,6 +1208,7 @@
 				EED8F3BC23E78F95A64ECBE1 /* GatherStorySpeechSettingsBenchmarkTest.swift */,
 				F4C8FD3DD06F02430F199EE1 /* RealmSpeakerSettingDefaultValueTest.swift */,
 				701F40D86D1A40FE3E5B0CE0 /* VoicevoxStyleSelectionTest.swift */,
+				02D79F5F7738BA23A29226D5 /* VoicevoxVoiceModelCatalogTest.swift */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1636,6 +1646,7 @@
 				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
 				2040F1799AC29B452C5CE81F /* open_jtalk_dic_utf_8-1.11 in Resources */,
 				D9A2CDCE2FE45C9D525EC442 /* 0.vvm in Resources */,
+				3AFB85679A2E0E31699D1EB1 /* VoicevoxVoiceModelCatalog.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1780,6 +1791,7 @@
 				DCA91F6657AEDEB5C4677DC8 /* VoicevoxCacheAutoGeneration.swift in Sources */,
 				DCAD5465EEE86E8FABA071CB /* VoicevoxCacheLimits.swift in Sources */,
 				7547A873F803D8C8A7AFED9D /* VoicevoxStyleSelection.swift in Sources */,
+				321ADBBAAABEDEE89AC7537A /* VoicevoxVoiceModelCatalog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1919,6 +1931,7 @@
 				DF097CB24FD5A48F36EB42B0 /* VoicevoxCacheAutoGeneration.swift in Sources */,
 				4CBB97C773D7BA547DF82293 /* VoicevoxCacheLimits.swift in Sources */,
 				4A20C65EB91B77B2C21E7F76 /* VoicevoxStyleSelection.swift in Sources */,
+				B05767187581E197D4BC0800 /* VoicevoxVoiceModelCatalog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1958,6 +1971,7 @@
 				D85133A9467B36BBC5D06308 /* GatherStorySpeechSettingsBenchmarkTest.swift in Sources */,
 				3FB899A79417583C301CD155 /* RealmSpeakerSettingDefaultValueTest.swift in Sources */,
 				F60183C8F714C13C70833AF6 /* VoicevoxStyleSelectionTest.swift in Sources */,
+				E553CBF804EEAA654BBA68B8 /* VoicevoxVoiceModelCatalogTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -3715,6 +3715,11 @@ class NovelSpeakerUtility: NSObject {
         var latestVersion:String?
         var novelSpeakerSiteInfoCSVURL:String?
         var privacyTrackingBlockTargetHostArray:[String]?
+        /// VOICEVOX の音声モデル(VVM)カタログの置き場所。
+        /// 実体はアプリにも同梱してあるので、取れなくても VOICEVOX が使えなくなる事は無い。
+        /// VVMが増えた時にアプリ更新を待たせないために、後から差し替えられるようにしてある。
+        /// (SiteInfo CSV と同じく「設定にはURLだけ、量のあるデータは別ファイル」の形)
+        var voicevoxVoiceModelCatalogURL:String?
     }
     private static let novelSpeakerRemoteConfigCacheFileName = "NovelSpeakerRemoteConfigCache"
     private static func CreateDefaultNovelSpeakerRemoteConfig() -> NovelSpeakerRemoteConfig {
