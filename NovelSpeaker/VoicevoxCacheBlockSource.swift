@@ -16,6 +16,8 @@
 import Foundation
 
 #if !os(watchOS)
+import RealmSwift
+
 enum VoicevoxCacheBlockSource {
 
     /// 再生側が実際に使っている分割設定。
@@ -50,6 +52,29 @@ enum VoicevoxCacheBlockSource {
             if hasNoSpeakableCharacter(text) { continue }
             let styleId = VoicevoxCore.styleId(fromVoiceIdentifier: block.voiceIdentifier)
             result.append((index, text, styleId, VoicevoxDiskCacheStore.key(text: text, styleId: styleId)))
+        }
+        return result
+    }
+
+    /// 今の設定で、その小説に必要な音声の鍵をページごとに集める。
+    ///
+    /// 発話設定(話者・読み替え辞書・会話文の話者割り当て等)を変えると、
+    /// 同じ本文でも合成する文字列や話者IDが変わり、鍵が変わる。
+    /// 古い鍵の音声は二度と使われないのに場所だけ取り続けるので、これで洗い出して消す。
+    /// 鍵はハッシュだが逆算は要らない。**今の設定で作り直した鍵の集合に無い物**を消せばよい。
+    /// - Returns: ページ番号 → そのページで使う鍵の集合。
+    static func currentKeysByChapter(novelID: String, chapterNumbers: [Int]) -> [Int: Set<String>] {
+        var result: [Int: Set<String>] = [:]
+        for chapterNumber in chapterNumbers {
+            let story = RealmUtil.RealmBlock { (realm) -> Story? in
+                return RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
+            }
+            guard let story = story else {
+                // 本文が無いページ(削除された等)の音声は、もう使いようが無い。
+                result[chapterNumber] = []
+                continue
+            }
+            result[chapterNumber] = Set(synthesisTargets(story: story).map { $0.key })
         }
         return result
     }

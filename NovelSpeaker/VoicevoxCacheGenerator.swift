@@ -25,10 +25,6 @@ final class VoicevoxCacheGenerator {
     /// 進捗が変わった事を画面へ知らせる。
     static let progressDidChangeNotification = Notification.Name("NovelSpeaker.VoicevoxCacheGenerator.progressDidChange")
 
-    /// 残りディスク容量がこれを下回ったら生成を止める。
-    /// 長編を丸ごと作ると数百MB〜数GBになるので、端末を埋め尽くす前に止める必要がある。
-    static let minimumFreeBytes: Int64 = 500 * 1024 * 1024
-
     /// 誰が始めた生成か。止め方と、途中で待つ条件が変わる。
     enum Mode {
         /// 利用者が明示的に始めた(端末を放置しておく前提)。
@@ -40,14 +36,14 @@ final class VoicevoxCacheGenerator {
     enum StopReason {
         case finished
         case stoppedByUser
-        case diskFull
+        case limitReached(VoicevoxCacheLimits.StopCause)
         case failed(String)
 
         var message: String {
             switch self {
             case .finished: return "最後まで作り終えました"
             case .stoppedByUser: return "生成を止めました"
-            case .diskFull: return "端末の空き容量が少ないため止めました"
+            case .limitReached(let cause): return cause.message
             case .failed(let text): return "生成に失敗したため止めました(\(text))"
             }
         }
@@ -188,7 +184,7 @@ final class VoicevoxCacheGenerator {
 
         while chapterNumber <= lastChapterNumber {
             if Task.isCancelled { return .stoppedByUser }
-            if Self.hasEnoughFreeSpace() == false { return .diskFull }
+            if let cause = Self.currentStopCause() { return .limitReached(cause) }
 
             guard let story = Self.story(novelID: novelID, chapterNumber: chapterNumber) else {
                 // 未ダウンロードの話などは飛ばす(あとから落とされたら次回作られる)。
@@ -213,7 +209,7 @@ final class VoicevoxCacheGenerator {
                     generatedCount += 1
                     continue
                 }
-                if Self.hasEnoughFreeSpace() == false { return .diskFull }
+                if let cause = Self.currentStopCause() { return .limitReached(cause) }
 
                 do {
                     let wav = try await VoicevoxCore.shared.synthesizeForDiskCache(text: target.text, styleId: target.styleId)
@@ -375,8 +371,14 @@ final class VoicevoxCacheGenerator {
         }
     }
 
-    static func hasEnoughFreeSpace() -> Bool {
-        return freeBytes().map { $0 > minimumFreeBytes } ?? true
+    /// 今これ以上作ってよいか(駄目ならその理由)。
+    /// 容量の合計は毎回ディレクトリを読み直すのではなく、保存層が持っている
+    /// 一覧から求まるので、ブロックごとに呼んでも重くない。
+    static func currentStopCause() -> VoicevoxCacheLimits.StopCause? {
+        return VoicevoxCacheLimits.stopCause(
+            usedBytes: Int64(VoicevoxDiskCacheStore.shared.totalSummary().byteCount),
+            freeBytes: freeBytes()
+        )
     }
 
     static func freeBytes() -> Int64? {

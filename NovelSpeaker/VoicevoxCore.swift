@@ -178,6 +178,11 @@ actor VoicevoxCore {
     /// 呼び出し元(合成の完了直後)を待たせないよう、別タスクへ逃がす。
     nonisolated func storeToDiskCacheIfNeeded(text: String, styleId: UInt32, wav: Data) {
         guard let context = diskCacheContext, context.isWritable else { return }
+        // 「読み上げ中に合成した分も貯める」を切っている時は積まない。
+        // 入れっぱなしだと、一度生成を有効にした小説は聴くたびにディスクが増え続ける。
+        guard VoicevoxCacheLimits.storesWhilePlaying || VoicevoxCacheGenerator.shared.runningNovelID == context.novelID else { return }
+        // 上限に達していたら積まない(生成側と同じ線引き)。
+        guard VoicevoxCacheGenerator.currentStopCause() == nil else { return }
         let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
         guard VoicevoxDiskCacheStore.shared.contains(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key) == false else { return }
         Task(priority: .utility) {
