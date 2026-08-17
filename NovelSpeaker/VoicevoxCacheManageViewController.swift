@@ -387,11 +387,24 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     /// 容量の選択肢(MB)。
     /// StepperRow だと題目と数値が同じ行で重なって読めなくなったので、選択式にする
     ///(0.5GB刻みで64GBまで押し続ける、という操作もつらい)。
-    private static let totalLimitChoices: [Int] = [0, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]
-    private static let freeSpaceChoices: [Int] = [0, 256, 512, 1024, 2048, 4096, 8192, 16384]
+    ///
+    /// 上限は 512GB まで用意する。音声1時間ぶんで約15MBなので 512GB は3万時間以上に相当し、
+    /// 「足りない」と言われる事はまず無いはず。
+    /// 空き容量の下限は 4TB まで。Catalyst で Mac 上で動く時は
+    /// 桁違いのストレージが見えるため。
+    private static let totalLimitChoices: [Int] = [
+        0, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288,
+    ]
+    private static let freeSpaceChoices: [Int] = [
+        0, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304,
+    ]
 
     private static func capacityText(megabytes: Int, zeroText: String) -> String {
         if megabytes <= 0 { return zeroText }
+        if megabytes >= 1024 * 1024 {
+            let terabytes = Double(megabytes) / 1024 / 1024
+            return terabytes == terabytes.rounded() ? "\(Int(terabytes))TB" : String(format: "%.1fTB", terabytes)
+        }
         if megabytes >= 1024 {
             let gigabytes = Double(megabytes) / 1024
             return gigabytes == gigabytes.rounded() ? "\(Int(gigabytes))GB" : String(format: "%.1fGB", gigabytes)
@@ -459,9 +472,28 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             // (小説ID, ページ番号, 残す鍵) を集めながら、消える量を数える。
             var plan: [(novelID: String, chapterNumber: Int, keysToKeep: Set<String>)] = []
             var unused = VoicevoxDiskCacheSummary.empty
+            // どこに時間が掛かっているのかを内訳で残す。
+            // 「本文の読み出し」と「ブロック分割」は原因も対処も全く違うので、
+            // 合計だけ見ていても手の打ちようが無い。
+            var loadSeconds = 0.0
+            var splitSeconds = 0.0
             for novelID in novelIDs {
                 let chapterNumbers = VoicevoxDiskCacheStore.shared.chapterNumbers(novelID: novelID)
-                let keysByChapter = VoicevoxCacheBlockSource.currentKeysByChapter(novelID: novelID, chapterNumbers: chapterNumbers)
+                let loadStart = Date()
+                let storyByChapter = VoicevoxCacheBlockSource.stories(novelID: novelID, chapterNumbers: chapterNumbers)
+                loadSeconds += Date().timeIntervalSince(loadStart)
+
+                let splitStart = Date()
+                var keysByChapter: [Int: Set<String>] = [:]
+                for chapterNumber in chapterNumbers {
+                    guard let story = storyByChapter[chapterNumber] else {
+                        keysByChapter[chapterNumber] = []
+                        continue
+                    }
+                    keysByChapter[chapterNumber] = Set(VoicevoxCacheBlockSource.synthesisTargets(story: story).map { $0.key })
+                }
+                splitSeconds += Date().timeIntervalSince(splitStart)
+
                 for chapterNumber in chapterNumbers {
                     let keysToKeep = keysByChapter[chapterNumber] ?? []
                     let chapterUnused = VoicevoxDiskCacheStore.shared.summary(novelID: novelID, chapterNumber: chapterNumber, notIn: keysToKeep)
@@ -475,7 +507,9 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             // 遅ければ実機で分かるように、掛かった時間を残す。
             AppInformationLogger.AddLog(message:
                 "[VOICEVOX音声生成] 使われない音声の調査: \(novelIDs.count)作品・\(pageCount)ページを "
-                + String(format: "%.2f", Date().timeIntervalSince(scanStart)) + "秒で確認",
+                + String(format: "%.2f", Date().timeIntervalSince(scanStart)) + "秒で確認"
+                + "(内訳: 本文読み出し " + String(format: "%.2f", loadSeconds) + "秒 / "
+                + "ブロック分割 " + String(format: "%.2f", splitSeconds) + "秒)",
                 isForDebug: true)
             DispatchQueue.main.async {
                 dialog.dismiss(animated: false) {

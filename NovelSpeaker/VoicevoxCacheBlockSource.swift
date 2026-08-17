@@ -68,14 +68,28 @@ enum VoicevoxCacheBlockSource {
     static func stories(novelID: String, chapterNumbers: [Int]) -> [Int: Story] {
         let wanted = Set(chapterNumbers)
         guard wanted.isEmpty == false else { return [:] }
+        let startedAt = Date()
+        defer {
+            let elapsed = Date().timeIntervalSince(startedAt)
+            if elapsed >= 0.5 {
+                NSLog("NovelSpeaker.VoicevoxCacheBlockSource: 本文読み出し \(String(format: "%.2f", elapsed))秒 (\(wanted.count)ページ)")
+            }
+        }
         return RealmUtil.RealmBlock { (realm) -> [Int: Story] in
             var result: [Int: Story] = [:]
             guard let bulkList = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID) else { return result }
             for bulk in bulkList {
                 autoreleasepool {
                     // その塊に欲しいページが1つも無いなら、展開せずに飛ばす。
-                    let bulkFirstChapter = bulk.chapterNumber
-                    let bulkLastChapter = bulk.chapterNumber + RealmStoryBulk.bulkCount - 1
+                    //
+                    // 塊の chapterNumber は CalcBulkChapterNumber() の値、つまり
+                    // 「(ページ番号-1)/100*100」で 0, 100, 200… となる(先頭ページ番号ではない)。
+                    // ここを先頭ページ番号だと思って 0…99 で判定すると、
+                    // 100ページ目(や200ページ目)だけが塊から漏れる。
+                    // 漏れたページは「本文が無い」扱いになり、
+                    // 「今の設定で使われない音声」として消されてしまう。
+                    let bulkFirstChapter = bulk.chapterNumber + 1
+                    let bulkLastChapter = bulk.chapterNumber + RealmStoryBulk.bulkCount
                     guard wanted.contains(where: { $0 >= bulkFirstChapter && $0 <= bulkLastChapter }) else { return }
                     guard let storyArray = bulk.LoadStoryArray() else { return }
                     for story in storyArray where wanted.contains(story.chapterNumber) {

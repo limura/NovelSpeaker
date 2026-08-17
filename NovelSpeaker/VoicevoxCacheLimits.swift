@@ -92,6 +92,9 @@ enum VoicevoxCacheLimits {
 
         static func megabytesText(_ bytes: Int64) -> String {
             let megabytes = Double(bytes) / 1024 / 1024
+            if megabytes >= 1024 * 1024 {
+                return String(format: "%.1fTB", megabytes / 1024 / 1024)
+            }
             if megabytes >= 1024 {
                 return String(format: "%.1fGB", megabytes / 1024)
             }
