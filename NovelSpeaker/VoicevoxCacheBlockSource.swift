@@ -131,10 +131,12 @@ enum VoicevoxCacheBlockSource {
     /// 古い鍵の音声は二度と使われないのに場所だけ取り続けるので、これで洗い出して消す。
     /// 鍵はハッシュだが逆算は要らない。**今の設定で作り直した鍵の集合に無い物**を消せばよい。
     /// - Returns: ページ番号 → そのページで使う鍵の集合。
-    static func currentKeysByChapter(novelID: String, chapterNumbers: [Int]) -> [Int: Set<String>] {
+    static func currentKeysByChapter(novelID: String, chapterNumbers: [Int], speakerCache: StoryTextClassifier.SpeakerSettingCache = StoryTextClassifier.SpeakerSettingCache()) -> [Int: Set<String>] {
         let storyByChapter = stories(novelID: novelID, chapterNumbers: chapterNumbers)
         // 設定は小説の中では変わらないので1回だけ組み立てる。
-        let settings = StoryTextClassifier.GatherStorySpeechSettings(novelID: novelID)
+        let settings = RealmUtil.RealmBlock { realm in
+            return StoryTextClassifier.GatherStorySpeechSettings(realm: realm, novelID: novelID, speakerCache: speakerCache)
+        }
         var result: [Int: Set<String>] = [:]
         for chapterNumber in chapterNumbers {
             guard let story = storyByChapter[chapterNumber] else {

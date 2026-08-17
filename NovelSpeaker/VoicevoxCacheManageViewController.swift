@@ -481,6 +481,8 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             // 合計だけ見ていても手の打ちようが無い。
             var loadSeconds = 0.0
             var splitSeconds = 0.0
+            // 話者設定の引き直しは実機で1回120ms級。作品ごとにやり直さず全体で使い回す。
+            let speakerCache = StoryTextClassifier.SpeakerSettingCache()
             for novelID in novelIDs {
                 let chapterNumbers = VoicevoxDiskCacheStore.shared.chapterNumbers(novelID: novelID)
                 let loadStart = Date()
@@ -490,7 +492,9 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
                 // 設定の組み立ては小説の中では変わらないので1回だけにする
                 //(ページごとにやり直すと Realm から5000件超の読み替え辞書を読み直す事になる)。
                 let settingsStart = Date()
-                let settings = StoryTextClassifier.GatherStorySpeechSettings(novelID: novelID)
+                let settings = RealmUtil.RealmBlock { realm in
+                    return StoryTextClassifier.GatherStorySpeechSettings(realm: realm, novelID: novelID, speakerCache: speakerCache)
+                }
                 let settingsElapsed = Date().timeIntervalSince(settingsStart)
 
                 let splitStart = Date()

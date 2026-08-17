@@ -93,6 +93,7 @@ final class VoicevoxCacheGenerator {
         // 前回の小説の物が残っていると、鍵が食い違って全部作り直しになる。
         speechSettings = nil
         speechSettingsNovelID = nil
+        speakerCache = StoryTextClassifier.SpeakerSettingCache()
         loadedStories.removeAll()
         loadedStoriesNovelID = nil
         VoicevoxCacheGenerationState.shared.setEnabled(true, novelID: novelID)
@@ -379,10 +380,14 @@ final class VoicevoxCacheGenerator {
     /// ページごとにやり直すと、ページ数に比例して無駄に重くなる。
     private var speechSettings: StoryTextClassifier.StorySpeechSettings?
     private var speechSettingsNovelID: String?
+    private var speakerCache = StoryTextClassifier.SpeakerSettingCache()
 
     private func settings(novelID: String) -> StoryTextClassifier.StorySpeechSettings {
         if speechSettingsNovelID == novelID, let settings = speechSettings { return settings }
-        let settings = StoryTextClassifier.GatherStorySpeechSettings(novelID: novelID)
+        let speakerCache = self.speakerCache
+        let settings = RealmUtil.RealmBlock { realm in
+            return StoryTextClassifier.GatherStorySpeechSettings(realm: realm, novelID: novelID, speakerCache: speakerCache)
+        }
         speechSettings = settings
         speechSettingsNovelID = novelID
         return settings

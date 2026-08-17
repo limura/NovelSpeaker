@@ -425,22 +425,50 @@ class StoryTextClassifier {
     // RealmSpeechSectionConfig を SpeechSectionConfig に変換します。
     // 単に speakerID を RealmSpeakerSetting に変えるだけです。
     // RealmSpeakerSetting を検索する部分はキャッシュを使って無駄に Realm上 での検索を走らせない程度のことはします。
-    static func ConvertSpeechSectionConfig(realm: Realm, fromArray:[RealmSpeechSectionConfig], defaultSpeaker:RealmSpeakerSetting) -> [SpeechSectionConfig] {
-        var speakerIDToSpeakerSettingDictionary:[String:SpeakerSetting] = [:]
+    /// 話者設定の引き直しを、まとめて処理する間だけ覚えておくための入れ物。
+    ///
+    /// 実機の計測で、話者設定を1つ引くのに約120msかかっていた
+    /// (会話文の話者割り当ては2件しか無いのに「会話文の変換」が244ms、
+    ///  小説の既定話者を引く「話者」が126ms、と引いた回数にぴったり比例していた)。
+    /// 作品ごとに引き直すと作品数×120ms×数回になるので、
+    /// 何作品も続けて処理する時は覚えておいて使い回す。
+    /// 覚えるのは Realm オブジェクトではなく写し取った値なので、持ち回っても安全。
+    final class SpeakerSettingCache {
+        private var speakerSettingBySpeakerID:[String:SpeakerSetting?] = [:]
+        private var globalDefaultSpeaker:SpeakerSetting??
+
+        func speakerSetting(realm:Realm, speakerID:String) -> SpeakerSetting? {
+            if let cached = speakerSettingBySpeakerID[speakerID] { return cached }
+            let start = Date()
+            let found = realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", speakerID).first
+            let result = found.map { SpeakerSetting(from: $0) }
+            speakerSettingBySpeakerID[speakerID] = result
+            if StoryTextClassifier.isGatherStorySpeechSettingsProfilingEnabled {
+                NSLog("NovelSpeaker.SpeakerSettingLookup: %.0fms", Date().timeIntervalSince(start) * 1000)
+            }
+            return result
+        }
+
+        func globalStateDefaultSpeakerSetting(realm:Realm) -> SpeakerSetting? {
+            if let cached = globalDefaultSpeaker { return cached }
+            let found = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm)
+            let result = found.map { SpeakerSetting(from: $0) }
+            globalDefaultSpeaker = result
+            return result
+        }
+    }
+
+    static func ConvertSpeechSectionConfig(realm: Realm, fromArray:[RealmSpeechSectionConfig], defaultSpeaker:SpeakerSetting, speakerCache:SpeakerSettingCache) -> [SpeechSectionConfig] {
         var result:[SpeechSectionConfig] = []
         for sectionConfig in fromArray {
-            let speaker:SpeakerSetting
-            if let sectionSpeaker = speakerIDToSpeakerSettingDictionary[sectionConfig.speakerID] {
-                speaker = sectionSpeaker
-            }else if let sectionSpeaker = sectionConfig.speakerWith(realm: realm) {
-                speaker = SpeakerSetting(from: sectionSpeaker)
-                speakerIDToSpeakerSettingDictionary[sectionConfig.speakerID] = speaker
-            }else{
-                speaker = SpeakerSetting(from: defaultSpeaker)
-            }
+            let speaker = speakerCache.speakerSetting(realm: realm, speakerID: sectionConfig.speakerID) ?? defaultSpeaker
             result.append(SpeechSectionConfig(startText: sectionConfig.startText, endText: sectionConfig.endText, speakerSetting: speaker))
         }
         return result
+    }
+
+    static func ConvertSpeechSectionConfig(realm: Realm, fromArray:[RealmSpeechSectionConfig], defaultSpeaker:RealmSpeakerSetting) -> [SpeechSectionConfig] {
+        return ConvertSpeechSectionConfig(realm: realm, fromArray: fromArray, defaultSpeaker: SpeakerSetting(from: defaultSpeaker), speakerCache: SpeakerSettingCache())
     }
     #endif
 
@@ -1122,9 +1150,9 @@ class StoryTextClassifier {
         }
     }
 
-    /// 既に開いてある Realm を使う版。
-    /// 何作品もまとめて処理する時は、Realm を開き直さずにこちらを使う。
-    static func GatherStorySpeechSettings(realm:Realm, novelID:String) -> StorySpeechSettings {
+    /// 既に開いてある Realm と、話者設定の使い回しを渡す版。
+    /// 何作品もまとめて処理する時はこちらを使う(話者の引き直しが作品数ぶん減る)。
+    static func GatherStorySpeechSettings(realm:Realm, novelID:String, speakerCache:SpeakerSettingCache = SpeakerSettingCache()) -> StorySpeechSettings {
         return { () -> StorySpeechSettings in
             let profiling = isGatherStorySpeechSettingsProfilingEnabled
             if profiling && isDataShapeLogged == false {
@@ -1149,13 +1177,17 @@ class StoryTextClassifier {
                 phaseLog += String(format: " %@=%.0fms", name, Date().timeIntervalSince(phaseStart) * 1000)
                 phaseStart = Date()
             }
-            let defaultSpeaker:RealmSpeakerSetting
-            if let novelDefaultSpeaker = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.defaultSpeakerWith(realm: realm) {
+            // 小説の既定話者。話者設定の引き直しは実機で1回120ms級なので、
+            // 覚えておいた物があればそれを使う。
+            let defaultSpeaker:SpeakerSetting
+            let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)
+            if let novelDefaultSpeakerID = novel?.defaultSpeakerID, novelDefaultSpeakerID.count > 0,
+               let novelDefaultSpeaker = speakerCache.speakerSetting(realm: realm, speakerID: novelDefaultSpeakerID) {
                 defaultSpeaker = novelDefaultSpeaker
-            }else if let globalStateDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) {
+            }else if let globalStateDefaultSpeaker = speakerCache.globalStateDefaultSpeakerSetting(realm: realm) {
                 defaultSpeaker = globalStateDefaultSpeaker
             }else{
-                defaultSpeaker = RealmSpeakerSetting()
+                defaultSpeaker = SpeakerSetting(from: RealmSpeakerSetting())
             }
             
             recordPhase("話者")
@@ -1163,7 +1195,7 @@ class StoryTextClassifier {
             let sectionConfigList:[SpeechSectionConfig]
             if let speechSectionConfigDictValues = RealmSpeechSectionConfig.SearchSettingsFor(realm: realm, novelID: novelID) {
                 recordPhase("会話文の検索")
-                sectionConfigList = ConvertSpeechSectionConfig(realm: realm, fromArray: Array(speechSectionConfigDictValues), defaultSpeaker: defaultSpeaker)
+                sectionConfigList = ConvertSpeechSectionConfig(realm: realm, fromArray: Array(speechSectionConfigDictValues), defaultSpeaker: defaultSpeaker, speakerCache: speakerCache)
             }else{
                 sectionConfigList = []
             }
@@ -1239,7 +1271,7 @@ class StoryTextClassifier {
                 }
             }
             return StorySpeechSettings(
-                defaultSpeaker: SpeakerSetting(from: defaultSpeaker),
+                defaultSpeaker: defaultSpeaker,
                 sectionConfigList: sectionConfigList,
                 waitConfigList: waitConfigList,
                 speechModSettingList: speechModSettingList,
