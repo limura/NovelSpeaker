@@ -12,6 +12,19 @@
 - コミットメッセージは日本語で書く。
 - ブランチは普段どおり master に直接コミットする運用。
 
+## clone した直後にすること
+
+- **`scripts/fetch_voicevox_vendor.sh` を実行する。**
+  VOICEVOX 関連の大きなバイナリ（XCFramework / Open JTalk 辞書 / テスト用の `0.vvm`、合わせて約200MB）は
+  git に入れていないため、これを実行しないと VOICEVOX 周りがビルドできない。
+  - VVM を git に入れないのは、入れると ことせかい が VVM の**再配布者**になるため。
+    利用者には公式から直接取得してもらう方針（`DESIGN_VOICEVOXの音声モデル取得.md`）。
+  - 辞書と XCFramework は再配布可能だが、合計145MBあり GitHub の LFS 無料枠（1GB/月）を圧迫するため外した。
+  - 配布物には手を入れないと使えない箇所が2つあり、スクリプトが自動で当てる（消さないこと）:
+    ヘッダの enum 宣言（Swift から列挙型として見えるようにする）と、
+    onnxruntime の `CFBundleIdentifier` のアンダースコア（バンドルIDに使えない）。
+  - `--check` で手元と公式の差だけ調べられる。`0.vvm` が公式より古くなったらここで分かる。
+
 ## ビルド / テスト
 
 - Xcode の **ワークスペース**を使う（`novelspeaker.xcworkspace`）。`.xcodeproj` 単体ではない。

@@ -17,3 +17,6 @@ xcuserdata/
 ## Xcode 8 and earlier
 *.xcscmblueprint
 *.xccheckout
+
+## VOICEVOX 関連(scripts/fetch_voicevox_vendor.sh で取得する)
+NovelSpeaker/Vendor/VoicevoxCore/

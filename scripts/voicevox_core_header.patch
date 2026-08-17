@@ -1,0 +1,63 @@
+--- voicevox_core.h.orig
++++ voicevox_core.h
+@@ -95,7 +95,7 @@
+  *
+  * \orig-impl{VoicevoxAccelerationMode}
+  */
+-enum VoicevoxAccelerationMode
++typedef enum VoicevoxAccelerationMode
+ #ifdef __cplusplus
+   : int32_t
+ #endif // __cplusplus
+@@ -112,17 +112,14 @@
+    * ハードウェアアクセラレーションモードを"GPU"に設定する
+    */
+   VOICEVOX_ACCELERATION_MODE_GPU = 2,
+-};
+-#ifndef __cplusplus
+-typedef int32_t VoicevoxAccelerationMode;
+-#endif // __cplusplus
++} VoicevoxAccelerationMode;
+ 
+ /**
+  * 処理結果を示す結果コード。
+  *
+  * \orig-impl{VoicevoxResultCode,C APIにしか無いものがあることに注意。}
+  */
+-enum VoicevoxResultCode
++typedef enum VoicevoxResultCode
+ #ifdef __cplusplus
+   : int32_t
+ #endif // __cplusplus
+@@ -251,17 +248,14 @@
+    * 楽譜とFrameAudioQueryの組み合わせが不正
+    */
+   VOICEVOX_RESULT_INCOMPATIBLE_QUERIES_ERROR = 35,
+-};
+-#ifndef __cplusplus
+-typedef int32_t VoicevoxResultCode;
+-#endif // __cplusplus
++} VoicevoxResultCode;
+ 
+ /**
+  * ユーザー辞書の単語の種類。
+  *
+  * \orig-impl{VoicevoxUserDictWordType}
+  */
+-enum VoicevoxUserDictWordType
++typedef enum VoicevoxUserDictWordType
+ #ifdef __cplusplus
+   : int32_t
+ #endif // __cplusplus
+@@ -286,10 +280,7 @@
+    * 接尾辞。
+    */
+   VOICEVOX_USER_DICT_WORD_TYPE_SUFFIX = 4,
+-};
+-#ifndef __cplusplus
+-typedef int32_t VoicevoxUserDictWordType;
+-#endif // __cplusplus
++} VoicevoxUserDictWordType;
+ 
+ /**
+  * テキスト解析器としてのOpen JTalk。
