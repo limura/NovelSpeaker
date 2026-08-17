@@ -437,6 +437,60 @@ class StoryTextClassifier {
         private var speakerSettingBySpeakerID:[String:SpeakerSetting?] = [:]
         private var globalDefaultSpeaker:SpeakerSetting??
 
+        /// 全小説向けの読み替え辞書を、並べ替えて索引まで作った状態で覚えておく。
+        ///
+        /// 実機のデータでは読み替え5416件のうち「対象小説の延べ数」が5418、
+        /// つまりほぼ全部が「全小説向け」1件ずつだった。
+        /// これを作品ごとに取り直して並べ替え直すと、作品あたり150ms級を捨てる事になる。
+        /// 全作品で同じ物なので、まとめて処理する間は1回作れば足りる。
+        private var sharedIndexedNonRegexpModArray:[Character:[SpeechModSetting]]?
+        private var sharedRegexpModArray:[SpeechModSetting]?
+        /// その小説だけに設定された読み替え(普通はごく少数)。
+        private var novelSpecificModSettings:[String:[SpeechModSetting]]?
+
+        private func buildModSettingsIfNeeded(realm:Realm) {
+            guard sharedIndexedNonRegexpModArray == nil else { return }
+            let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
+            var shared:[SpeechModSetting] = []
+            var specific:[String:[SpeechModSetting]] = [:]
+            for realmModSetting in realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false") {
+                let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
+                let targetEngines:[String] = defaultSpeechModKeySet.contains(key) ? ["AVSpeechSynthesizer"] : []
+                let setting = SpeechModSetting(from: realmModSetting, targetSpeechEngineTypeArray: targetEngines)
+                if realmModSetting.targetNovelIDArray.contains(RealmSpeechModSetting.anyTarget) {
+                    shared.append(setting)
+                    continue
+                }
+                for targetNovelID in realmModSetting.targetNovelIDArray {
+                    specific[targetNovelID, default: []].append(setting)
+                }
+            }
+            sharedRegexpModArray = shared.filter { $0.isUseRegularExpression }
+            sharedIndexedNonRegexpModArray = StoryTextClassifier.IndexSpeechModArray(
+                sortedSpeechModArray: StoryTextClassifier.UniqSpeechModArray(
+                    speechModArray: StoryTextClassifier.SpeechModArraySort(
+                        speechModArray: shared.filter { $0.isUseRegularExpression == false })))
+            novelSpecificModSettings = specific
+        }
+
+        /// 全小説向けの読み替え(並べ替え・索引済み)。
+        func sharedIndexedNonRegexpSpeechModArray(realm:Realm) -> [Character:[SpeechModSetting]] {
+            buildModSettingsIfNeeded(realm: realm)
+            return sharedIndexedNonRegexpModArray ?? [:]
+        }
+
+        /// 全小説向けの、正規表現の読み替え。
+        func sharedRegexpSpeechModArray(realm:Realm) -> [SpeechModSetting] {
+            buildModSettingsIfNeeded(realm: realm)
+            return sharedRegexpModArray ?? []
+        }
+
+        /// その小説だけに設定された読み替え。
+        func novelSpecificSpeechModArray(realm:Realm, novelID:String) -> [SpeechModSetting] {
+            buildModSettingsIfNeeded(realm: realm)
+            return novelSpecificModSettings?[novelID] ?? []
+        }
+
         func speakerSetting(realm:Realm, speakerID:String) -> SpeakerSetting? {
             if let cached = speakerSettingBySpeakerID[speakerID] { return cached }
             let start = Date()
@@ -1123,18 +1177,28 @@ class StoryTextClassifier {
         let regexpSpeechModArray:[SpeechModSetting]
 
         init(defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], speechModSettingList:[SpeechModSetting], isOverrideRubyEnabled:Bool, notRubyCharactorStringArray:String, isDisableNarouRuby:Bool) {
+            self.init(defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList,
+                      indexedSharedNonRegexpModArray: [:],
+                      additionalModSettingList: speechModSettingList,
+                      isOverrideRubyEnabled: isOverrideRubyEnabled, notRubyCharactorStringArray: notRubyCharactorStringArray, isDisableNarouRuby: isDisableNarouRuby)
+        }
+
+        /// 全小説で共通の読み替えを「並べ替え・索引済み」で受け取る版。
+        /// 何作品も続けて処理する時に、共通部分の作り直しを避けるために使う。
+        init(defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], indexedSharedNonRegexpModArray:[Character:[SpeechModSetting]], additionalModSettingList:[SpeechModSetting], isOverrideRubyEnabled:Bool, notRubyCharactorStringArray:String, isDisableNarouRuby:Bool) {
             self.defaultSpeaker = defaultSpeaker
             self.sectionConfigList = sectionConfigList
             self.waitConfigList = waitConfigList
-            self.speechModSettingList = speechModSettingList
+            self.speechModSettingList = additionalModSettingList
             self.isOverrideRubyEnabled = isOverrideRubyEnabled
             self.notRubyCharactorStringArray = notRubyCharactorStringArray
             self.isDisableNarouRuby = isDisableNarouRuby
-            self.indexedPreSortedSpeechModArray = StoryTextClassifier.IndexSpeechModArray(
-                sortedSpeechModArray: StoryTextClassifier.UniqSpeechModArray(
-                    speechModArray: StoryTextClassifier.SpeechModArraySort(
-                        speechModArray: speechModSettingList.filter { $0.isUseRegularExpression == false })))
-            self.regexpSpeechModArray = speechModSettingList.filter { $0.isUseRegularExpression }
+            // 共通部分の索引に、その小説だけの読み替え(普通は0件)を差し込む。
+            self.indexedPreSortedSpeechModArray = StoryTextClassifier.MergeIntoIndexedSpeechModArray(
+                indexedSharedNonRegexpModArray,
+                sortedContentDependentArray: StoryTextClassifier.SpeechModArraySort(
+                    speechModArray: additionalModSettingList.filter { $0.isUseRegularExpression == false }))
+            self.regexpSpeechModArray = additionalModSettingList.filter { $0.isUseRegularExpression }
         }
     }
 
@@ -1226,18 +1290,13 @@ class StoryTextClassifier {
             //(VOICEVOX 話者のブロックではこの印の付いた読み替えを適用しない)。
             recordPhase("間の設定")
 
-            let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
-            recordPhase("標準辞書の鍵集合")
-            if let modSettingListFromSetting = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: novelID)?.map({ (realmModSetting) -> SpeechModSetting in
-                let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
-                // 標準辞書由来のエントリは AVSpeechSynthesizer 専用として扱う。それ以外(ユーザー追加)は
-                // 空配列=全エンジンに適用。
-                let targetEngines:[String] = defaultSpeechModKeySet.contains(key) ? ["AVSpeechSynthesizer"] : []
-                return SpeechModSetting(from: realmModSetting, targetSpeechEngineTypeArray: targetEngines)
-            }) {
-                speechModSettingList.append(contentsOf: modSettingListFromSetting)
-            }
-            recordPhase("読み替え辞書(\(speechModSettingList.count)件)")
+            // 全小説向けの読み替え(ほぼ全部がこれ)は共通なので、
+            // まとめて処理する間は1回だけ作って使い回す。
+            // その小説だけに設定された物(普通はごく少数)はここで足す。
+            let indexedShared = speakerCache.sharedIndexedNonRegexpSpeechModArray(realm: realm)
+            speechModSettingList.append(contentsOf: speakerCache.sharedRegexpSpeechModArray(realm: realm))
+            speechModSettingList.append(contentsOf: speakerCache.novelSpecificSpeechModArray(realm: realm, novelID: novelID))
+            recordPhase("読み替え辞書(共通\(indexedShared.values.reduce(0) { $0 + $1.count })件+個別\(speechModSettingList.count)件)")
             
             var isOverrideRubyEnabled = false
             var notRubyCharactorStringArray = ""
@@ -1274,7 +1333,8 @@ class StoryTextClassifier {
                 defaultSpeaker: defaultSpeaker,
                 sectionConfigList: sectionConfigList,
                 waitConfigList: waitConfigList,
-                speechModSettingList: speechModSettingList,
+                indexedSharedNonRegexpModArray: indexedShared,
+                additionalModSettingList: speechModSettingList,
                 isOverrideRubyEnabled: isOverrideRubyEnabled,
                 notRubyCharactorStringArray: notRubyCharactorStringArray,
                 isDisableNarouRuby: isDisableNarouRuby
