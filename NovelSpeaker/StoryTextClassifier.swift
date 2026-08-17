@@ -669,6 +669,14 @@ class StoryTextClassifier {
     //
     // また、読み替え辞書の適用もこの文字列の分割時点で行います。
     static func CategorizeStoryText(content:String, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], sortedSpeechModArray:[SpeechModSetting]) -> [CombinedSpeechBlock] {
+        return CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, indexedSpeechModArray: IndexSpeechModArray(sortedSpeechModArray: sortedSpeechModArray))
+    }
+
+    /// 読み替え辞書の索引を外から渡す版。
+    ///
+    /// 索引作り(5000件超)はページごとにやると馬鹿にならないので、
+    /// 何ページも続けて処理する時は作った物を使い回す。
+    static func CategorizeStoryText(content:String, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], indexedSpeechModArray:[Character:[SpeechModSetting]]) -> [CombinedSpeechBlock] {
         guard content.count > 0 else { return [] }
         
         //let startDate = Date()
@@ -696,17 +704,6 @@ class StoryTextClassifier {
                 indexedWaitConfigList[c] = [waitConfig]
             }
         }
-        var indexedSpeechModArray:[Character:[SpeechModSetting]] = [:]
-        for modSetting in sortedSpeechModArray {
-            guard let c = modSetting.before.first else { continue }
-            if var list = indexedSpeechModArray[c] {
-                list.append(modSetting)
-                indexedSpeechModArray[c] = list
-            }else{
-                indexedSpeechModArray[c] = [modSetting]
-            }
-        }
-
         var index = content.startIndex
         var currentTextStartIndex = index
         var currentCharacterTarget = Set<Character>()
@@ -885,18 +882,41 @@ class StoryTextClassifier {
         return result
     }
     
+    /// 読み替え設定を「before の先頭文字」で引けるようにまとめる。
+    /// 渡す配列は並べ替え済みである事が前提(各引き出しの中でも並び順が保たれる)。
+    ///
+    /// 注意: 以前ここは
+    ///   `if var settingArray = result[c] { settingArray.append(setting) }`
+    /// と書かれていて、**コピーに追記して書き戻していなかった**ため、
+    /// 同じ先頭文字を持つ2件目以降が全て捨てられていた。
+    /// (この関数自体はどこからも使われていなかったので実害は出ていなかった)
+    /// `result[c, default: []].append()` なら、その場で書き換わる上に
+    /// 配列の複製も起きない。
     static func IndexSpeechModArray(sortedSpeechModArray:[SpeechModSetting]) -> [Character:[SpeechModSetting]] {
-        var result:[Character:[SpeechModSetting]] = [:];
+        var result:[Character:[SpeechModSetting]] = [:]
         for setting in sortedSpeechModArray {
-            if setting.before.count <= 0 {
-                continue
-            }
-            let c = setting.before[setting.before.startIndex]
-            if var settingArray = result[c] {
-                settingArray.append(setting)
-            }else{
-                result[c] = [setting]
-            }
+            guard let c = setting.before.first else { continue }
+            result[c, default: []].append(setting)
+        }
+        return result
+    }
+
+    /// 索引に、本文ごとに変わる読み替え(正規表現の展開結果やルビ)を差し込む。
+    ///
+    /// 引き出しごとに併合して重複除去する。同じ before は必ず同じ先頭文字なので、
+    /// 引き出し単位で重複除去しても、全体を並べ替えてから重複除去したのと同じ結果になる。
+    /// 触る引き出しだけを作り直すので、辞書全体(5000件超)を毎ページ作り直さずに済む。
+    /// - Parameter sortedContentDependentArray: 並べ替え済みの、本文ごとに変わる読み替え。
+    static func MergeIntoIndexedSpeechModArray(_ indexed:[Character:[SpeechModSetting]], sortedContentDependentArray:[SpeechModSetting]) -> [Character:[SpeechModSetting]] {
+        guard sortedContentDependentArray.isEmpty == false else { return indexed }
+        var addedByCharacter:[Character:[SpeechModSetting]] = [:]
+        for setting in sortedContentDependentArray {
+            guard let c = setting.before.first else { continue }
+            addedByCharacter[c, default: []].append(setting)
+        }
+        var result = indexed
+        for (c, added) in addedByCharacter {
+            result[c] = UniqSpeechModArray(speechModArray: MergeSortedSpeechModArray(indexed[c] ?? [], added))
         }
         return result
     }
@@ -1055,10 +1075,10 @@ class StoryTextClassifier {
         let notRubyCharactorStringArray:String
         let isDisableNarouRuby:Bool
 
-        /// 本文に依らない(正規表現でない)読み替えを、並べ替え済みで持っておく。
-        /// 標準の読み替え辞書だけで5000件超あり、ページごとに並べ替え直すと
-        /// 1ページあたり十数ミリ秒を捨てる事になるため。
-        let preSortedSpeechModArray:[SpeechModSetting]
+        /// 本文に依らない(正規表現でない)読み替えを、並べ替えて索引まで作った状態で持っておく。
+        /// 標準の読み替え辞書だけで5000件超あり、並べ替えも索引作りも本文に依らないのに
+        /// ページごとにやり直すと、ページの長さと関係なく毎回その分を捨てる事になる。
+        let indexedPreSortedSpeechModArray:[Character:[SpeechModSetting]]
         /// 本文ごとに展開が変わる(正規表現の)読み替え。
         let regexpSpeechModArray:[SpeechModSetting]
 
@@ -1070,8 +1090,10 @@ class StoryTextClassifier {
             self.isOverrideRubyEnabled = isOverrideRubyEnabled
             self.notRubyCharactorStringArray = notRubyCharactorStringArray
             self.isDisableNarouRuby = isDisableNarouRuby
-            self.preSortedSpeechModArray = StoryTextClassifier.SpeechModArraySort(
-                speechModArray: speechModSettingList.filter { $0.isUseRegularExpression == false })
+            self.indexedPreSortedSpeechModArray = StoryTextClassifier.IndexSpeechModArray(
+                sortedSpeechModArray: StoryTextClassifier.UniqSpeechModArray(
+                    speechModArray: StoryTextClassifier.SpeechModArraySort(
+                        speechModArray: speechModSettingList.filter { $0.isUseRegularExpression == false })))
             self.regexpSpeechModArray = speechModSettingList.filter { $0.isUseRegularExpression }
         }
     }
@@ -1177,7 +1199,7 @@ class StoryTextClassifier {
         if settings.isOverrideRubyEnabled {
             contentDependent.append(contentsOf: GenerateRubyModString(text: story.content, notRubyString: settings.notRubyCharactorStringArray, isDisableNarouRuby: settings.isDisableNarouRuby))
         }
-        return CategorizeStoryText(content: story.content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: settings.defaultSpeaker, sectionConfigList: settings.sectionConfigList, waitConfigList: settings.waitConfigList, preSortedSpeechModArray: settings.preSortedSpeechModArray, contentDependentSpeechModArray: contentDependent)
+        return CategorizeStoryText(content: story.content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: settings.defaultSpeaker, sectionConfigList: settings.sectionConfigList, waitConfigList: settings.waitConfigList, indexedPreSortedSpeechModArray: settings.indexedPreSortedSpeechModArray, contentDependentSpeechModArray: contentDependent)
     }
 
     static func CategorizeStoryText(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) -> [CombinedSpeechBlock] {
@@ -1221,11 +1243,10 @@ class StoryTextClassifier {
     /// 本文に依らない分を並べ替え済みで受け取る版。
     /// 本文ごとに変わる分(正規表現の展開結果とルビ)だけを並べ替えて併合する。
     /// 結果は上の版と同一になる(StoryTextClassifierSpeechModOrderTest で確認している)。
-    static func CategorizeStoryText(content:String, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], preSortedSpeechModArray:[SpeechModSetting], contentDependentSpeechModArray:[SpeechModSetting]) -> [CombinedSpeechBlock] {
-        let expanded = ExpandSpeechModArray(content: content, speechModArray: contentDependentSpeechModArray)
-        let merged = MergeSortedSpeechModArray(preSortedSpeechModArray, SpeechModArraySort(speechModArray: expanded))
-        let sortedSpeechModArray = UniqSpeechModArray(speechModArray: merged)
+    static func CategorizeStoryText(content:String, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], indexedPreSortedSpeechModArray:[Character:[SpeechModSetting]], contentDependentSpeechModArray:[SpeechModSetting]) -> [CombinedSpeechBlock] {
+        let expanded = SpeechModArraySort(speechModArray: ExpandSpeechModArray(content: content, speechModArray: contentDependentSpeechModArray))
+        let indexed = MergeIntoIndexedSpeechModArray(indexedPreSortedSpeechModArray, sortedContentDependentArray: expanded)
 
-        return CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, sortedSpeechModArray: sortedSpeechModArray)
+        return CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, indexedSpeechModArray: indexed)
     }
 }

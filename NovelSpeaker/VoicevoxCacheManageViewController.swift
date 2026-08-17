@@ -483,19 +483,30 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
                 let storyByChapter = VoicevoxCacheBlockSource.stories(novelID: novelID, chapterNumbers: chapterNumbers)
                 loadSeconds += Date().timeIntervalSince(loadStart)
 
-                let splitStart = Date()
                 // 設定の組み立ては小説の中では変わらないので1回だけにする
                 //(ページごとにやり直すと Realm から5000件超の読み替え辞書を読み直す事になる)。
+                let settingsStart = Date()
                 let settings = StoryTextClassifier.GatherStorySpeechSettings(novelID: novelID)
+                let settingsElapsed = Date().timeIntervalSince(settingsStart)
+
+                let splitStart = Date()
                 var keysByChapter: [Int: Set<String>] = [:]
+                var characterCount = 0
                 for chapterNumber in chapterNumbers {
                     guard let story = storyByChapter[chapterNumber] else {
                         keysByChapter[chapterNumber] = []
                         continue
                     }
+                    characterCount += story.content.count
                     keysByChapter[chapterNumber] = Set(VoicevoxCacheBlockSource.synthesisTargets(story: story, settings: settings).map { $0.key })
                 }
-                splitSeconds += Date().timeIntervalSince(splitStart)
+                let splitElapsed = Date().timeIntervalSince(splitStart)
+                splitSeconds += splitElapsed + settingsElapsed
+                // 小説ごとの内訳。ページ数と文字数が分かれば、
+                // 「ページが長いから遅い」のか「ページ数ぶん重いのか」を切り分けられる。
+                NSLog("NovelSpeaker.VoicevoxCacheScan: %d ページ %d 文字 設定 %.2f秒 分割 %.2f秒 (1ページ %.0fms)",
+                      chapterNumbers.count, characterCount, settingsElapsed, splitElapsed,
+                      chapterNumbers.isEmpty ? 0 : splitElapsed / Double(chapterNumbers.count) * 1000)
 
                 for chapterNumber in chapterNumbers {
                     let keysToKeep = keysByChapter[chapterNumber] ?? []

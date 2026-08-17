@@ -130,20 +130,22 @@ class StoryTextClassifierBenchmarkTest: XCTestCase {
         }
 
         // 8'. 本文に依らない分を先に並べ替えておく版(高速化後の実経路)
-        let nonRegexpSorted = StoryTextClassifier.SpeechModArraySort(
-            speechModArray: defaultModArray.filter { $0.isUseRegularExpression == false })
+        let nonRegexpSorted = StoryTextClassifier.IndexSpeechModArray(
+            sortedSpeechModArray: StoryTextClassifier.UniqSpeechModArray(
+                speechModArray: StoryTextClassifier.SpeechModArraySort(
+                    speechModArray: defaultModArray.filter { $0.isUseRegularExpression == false })))
         let regexpOnly = defaultModArray.filter { $0.isUseRegularExpression }
         _ = measureSeconds("⑤' 先に並べ替えておく版(普通の本文3000字)", iterations: 3) {
             _ = StoryTextClassifier.CategorizeStoryText(
                 content: content, withMoreSplitTargets: splitTargets, moreSplitMinimumLetterCount: 200,
                 defaultSpeaker: narrator, sectionConfigList: sectionConfigList, waitConfigList: [],
-                preSortedSpeechModArray: nonRegexpSorted, contentDependentSpeechModArray: regexpOnly)
+                indexedPreSortedSpeechModArray: nonRegexpSorted, contentDependentSpeechModArray: regexpOnly)
         }
         _ = measureSeconds("⑦' 先に並べ替えておく版(ルビだらけ3000字)", iterations: 3) {
             _ = StoryTextClassifier.CategorizeStoryText(
                 content: ruby, withMoreSplitTargets: splitTargets, moreSplitMinimumLetterCount: 200,
                 defaultSpeaker: narrator, sectionConfigList: sectionConfigList, waitConfigList: [],
-                preSortedSpeechModArray: nonRegexpSorted, contentDependentSpeechModArray: regexpOnly + rubyMods)
+                indexedPreSortedSpeechModArray: nonRegexpSorted, contentDependentSpeechModArray: regexpOnly + rubyMods)
         }
 
         // 8. VOICEVOX とそれ以外で差が出るか(VOICEVOX向けの結合処理を後から足しているため)

@@ -71,13 +71,15 @@ class StoryTextClassifierSpeechModOrderTest: XCTestCase {
             if mod.isUseRegularExpression { return true }
             return additionalMods.contains(where: { extra in extra.before == mod.before && extra.after == mod.after })
         }
-        let preSorted = StoryTextClassifier.SpeechModArraySort(
-            speechModArray: (defaultMods + additionalMods).filter { isContentDependent($0) == false })
+        let preSorted = StoryTextClassifier.IndexSpeechModArray(
+            sortedSpeechModArray: StoryTextClassifier.UniqSpeechModArray(
+                speechModArray: StoryTextClassifier.SpeechModArraySort(
+                    speechModArray: (defaultMods + additionalMods).filter { isContentDependent($0) == false })))
         let contentDependent = (defaultMods + additionalMods).filter { isContentDependent($0) }
         let new = StoryTextClassifier.CategorizeStoryText(
             content: content, withMoreSplitTargets: splitTargets, moreSplitMinimumLetterCount: 200,
             defaultSpeaker: narrator, sectionConfigList: sectionConfigList, waitConfigList: [],
-            preSortedSpeechModArray: preSorted, contentDependentSpeechModArray: contentDependent)
+            indexedPreSortedSpeechModArray: preSorted, contentDependentSpeechModArray: contentDependent)
 
         XCTAssertEqual(old.count, new.count, "ブロックの数が変わっている", file: file, line: line)
         for (index, oldBlock) in old.enumerated() {
