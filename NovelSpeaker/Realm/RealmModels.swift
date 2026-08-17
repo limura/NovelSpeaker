@@ -2462,14 +2462,32 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     ///
     /// この関数は voiceIdentifier の既定値として使われており、**オブジェクトを作るたびに**
     /// 呼ばれる(Realm から取り出す時も呼ばれる)。中で AVSpeechSynthesisVoice.speechVoices() を
-    /// 呼んでおり実機では100ms級なので、結果を覚えて1回だけにする。
-    /// 実行中に音声が増減する事は実質無く、増減しても「新しく作る話者設定の既定値」が
-    /// 少し古いだけで実害が無い。
+    /// 呼んでおり実機では100ms級なので、結果を覚える。
+    ///
+    /// ただし覚えっぱなしにはしない。ことせかい を起動したまま「設定」アプリから
+    /// 音声をダウンロードされると AVSpeechSynthesisVoice.speechVoices() の返す値が変わるため。
+    /// しかも「話者が少ないなら設定アプリから追加してください」と案内しているので、
+    /// 追加した人にこそ反映されない、という事になってしまう。
+    /// 前面に戻ってきた時に捨てる(ClearCachedBestVoiceIdentifier)のに加えて、
+    /// 取りこぼしても困らないよう時間でも切る。
+    private static let bestVoiceIdentifierCacheLifetimeSeconds:TimeInterval = 5 * 60
     nonisolated(unsafe) private static var cachedBestVoiceIdentifier:String? = nil
+    nonisolated(unsafe) private static var cachedBestVoiceIdentifierDate:Date? = nil
+
+    /// 覚えている「既定の音声」を捨てる。前面に戻ってきた時に呼ぶ。
+    static func ClearCachedBestVoiceIdentifier() {
+        cachedBestVoiceIdentifier = nil
+        cachedBestVoiceIdentifierDate = nil
+    }
+
     static func GuessBestVoiceIdentifier() -> String {
-        if let cached = cachedBestVoiceIdentifier { return cached }
+        if let cached = cachedBestVoiceIdentifier, let cachedDate = cachedBestVoiceIdentifierDate,
+           Date().timeIntervalSince(cachedDate) < bestVoiceIdentifierCacheLifetimeSeconds {
+            return cached
+        }
         let result = CalcBestVoiceIdentifier()
         cachedBestVoiceIdentifier = result
+        cachedBestVoiceIdentifierDate = Date()
         return result
     }
 

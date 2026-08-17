@@ -49,6 +49,15 @@ final class AppLaunchCoordinator: NSObject {
         // バックグラウンド再生時の CPU 上限(60秒平均80%)超過によるプロセス強制終了を避けるため、
         // アプリ状態・電源状態の監視を開始する(VoicevoxPrefetchThrottle 参照)。
         VoicevoxPrefetchThrottleMonitor.shared.start()
+        // 「設定」アプリから音声をダウンロードして戻ってきた時に、
+        // 覚えている「既定の音声」を捨てる。
+        // (RealmSpeakerSetting.voiceIdentifier の既定値の計算は重いので覚えているが、
+        //  覚えっぱなしだと、案内どおり音声を追加した人にこそ反映されない事になる)
+        #if !os(watchOS)
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+            RealmSpeakerSetting.ClearCachedBestVoiceIdentifier()
+        }
+        #endif
         if !NiftyUtility.isTesting() {
             Task {
                 await VoicevoxCore.setUpFromBundleIfNeeded()

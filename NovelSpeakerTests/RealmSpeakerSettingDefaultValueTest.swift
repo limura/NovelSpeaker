@@ -50,6 +50,20 @@ class RealmSpeakerSettingDefaultValueTest: XCTestCase {
         XCTAssertLessThan(elapsed, 1.0, "話者設定を作るのが遅い(既定値に重い処理が入っている)")
     }
 
+    // 覚えた値を捨てられる事。
+    //
+    // ことせかい を起動したまま「設定」アプリから音声をダウンロードされると、
+    // 端末に入っている音声の一覧は変わる。しかもアプリ内で
+    // 「話者が少ないなら設定アプリから追加してください」と案内しているので、
+    // 追加した人にこそ反映されない、では困る。
+    // 前面に戻ってきた時に捨てる作りにしてあるので、その口が効く事を確かめる。
+    func testCachedBestVoiceIdentifierCanBeCleared() {
+        let first = RealmSpeakerSetting.GuessBestVoiceIdentifier()
+        RealmSpeakerSetting.ClearCachedBestVoiceIdentifier()
+        // 捨てた後は計算し直す(音声の増減が無ければ同じ値になる)。
+        XCTAssertEqual(RealmSpeakerSetting.GuessBestVoiceIdentifier(), first)
+    }
+
     // 参考: 端末に入っている音声の一覧の取得そのものが、どれだけ掛かるか。
     // ここが遅い端末ほど、覚えておく効果が大きい。
     func testSpeechVoicesCostForReference() {
