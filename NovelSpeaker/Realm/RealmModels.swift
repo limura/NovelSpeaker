@@ -2441,6 +2441,15 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     @objc dynamic var base : Int32 = 1
     @objc dynamic var volume : Float = 1.0
     @objc dynamic var type : String = "AVSpeechSynthesizer"
+    // 注意: ここの既定値は「オブジェクトを1つ作るたび」に評価される。
+    // Realm は保存済みのオブジェクトを取り出す時にも Swift の既定値初期化子を走らせるので、
+    // 重い処理をそのまま書くと、**1件取り出すごとに**その処理が走る事になる。
+    // GuessBestVoiceIdentifier() は中で AVSpeechSynthesisVoice.speechVoices() を呼んでおり、
+    // 実機ではこれが100ms級。実測(iPhone・話者設定はたった4件)で
+    //   realm.objects(RealmSpeakerSetting.self).filter(...).first
+    // 1回に118msかかっており、読み上げ設定の組み立てが1作品0.5秒になる主因だった。
+    // (シミュレータでは入っている音声が少なく速いので気付けなかった)
+    // GuessBestVoiceIdentifier() 側で結果を覚えるようにして、実質1回だけにしてある。
     @objc dynamic var voiceIdentifier : String = GuessBestVoiceIdentifier()
     @objc dynamic var locale : String = Locale.current.identifier.replacingOccurrences(of: "_", with: "-")
     @objc dynamic var createdDate = Date()
@@ -2449,7 +2458,22 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
         return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false")
     }
     
+    /// 端末に入っている音声の一覧を見て、既定の音声を決める。
+    ///
+    /// この関数は voiceIdentifier の既定値として使われており、**オブジェクトを作るたびに**
+    /// 呼ばれる(Realm から取り出す時も呼ばれる)。中で AVSpeechSynthesisVoice.speechVoices() を
+    /// 呼んでおり実機では100ms級なので、結果を覚えて1回だけにする。
+    /// 実行中に音声が増減する事は実質無く、増減しても「新しく作る話者設定の既定値」が
+    /// 少し古いだけで実害が無い。
+    nonisolated(unsafe) private static var cachedBestVoiceIdentifier:String? = nil
     static func GuessBestVoiceIdentifier() -> String {
+        if let cached = cachedBestVoiceIdentifier { return cached }
+        let result = CalcBestVoiceIdentifier()
+        cachedBestVoiceIdentifier = result
+        return result
+    }
+
+    private static func CalcBestVoiceIdentifier() -> String {
         let bestVoiceIdentifier:[String:[String]] = [
             "ja": [
                 "com.apple.ttsbundle.siri_female_ja-JP_premium",
