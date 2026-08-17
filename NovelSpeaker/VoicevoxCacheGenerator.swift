@@ -90,6 +90,11 @@ final class VoicevoxCacheGenerator {
 
     func start(novelID: String, mode: Mode = .manual) {
         stop()
+        // 前回の小説の物が残っていると、鍵が食い違って全部作り直しになる。
+        speechSettings = nil
+        speechSettingsNovelID = nil
+        loadedStories.removeAll()
+        loadedStoriesNovelID = nil
         VoicevoxCacheGenerationState.shared.setEnabled(true, novelID: novelID)
         lock.lock()
         runningNovelIDUnsafe = novelID
@@ -193,7 +198,7 @@ final class VoicevoxCacheGenerator {
                 continue
             }
 
-            let targets = VoicevoxCacheBlockSource.synthesisTargets(story: story)
+            let targets = VoicevoxCacheBlockSource.synthesisTargets(story: story, settings: settings(novelID: novelID))
             var generatedCount = targets.filter { $0.blockIndex < blockIndex }.count
 
             for target in targets where target.blockIndex >= blockIndex {
@@ -311,7 +316,7 @@ final class VoicevoxCacheGenerator {
                 self.notifyProgressChanged()
                 return
             }
-            let targets = VoicevoxCacheBlockSource.synthesisTargets(story: story)
+            let targets = VoicevoxCacheBlockSource.synthesisTargets(story: story, settings: self.settings(novelID: novelID))
             let generatedCount = targets.filter { $0.blockIndex < start.blockIndex }.count
             self.updateProgress(novelID: novelID, story: story, generatedCount: generatedCount, totalCount: targets.count)
         }
@@ -368,6 +373,20 @@ final class VoicevoxCacheGenerator {
     /// 塊ごとに1回だけ読んで持っておく。
     private var loadedStories: [Int: Story] = [:]
     private var loadedStoriesNovelID: String?
+
+    /// 読み上げ設定。小説の中では変わらないのに、組み立てには Realm から
+    /// 5000件超の読み替え辞書を読む必要があり1回で数百ミリ秒かかる。
+    /// ページごとにやり直すと、ページ数に比例して無駄に重くなる。
+    private var speechSettings: StoryTextClassifier.StorySpeechSettings?
+    private var speechSettingsNovelID: String?
+
+    private func settings(novelID: String) -> StoryTextClassifier.StorySpeechSettings {
+        if speechSettingsNovelID == novelID, let settings = speechSettings { return settings }
+        let settings = StoryTextClassifier.GatherStorySpeechSettings(novelID: novelID)
+        speechSettings = settings
+        speechSettingsNovelID = novelID
+        return settings
+    }
 
     private func story(novelID: String, chapterNumber: Int) -> Story? {
         if loadedStoriesNovelID == novelID, let story = loadedStories[chapterNumber] {

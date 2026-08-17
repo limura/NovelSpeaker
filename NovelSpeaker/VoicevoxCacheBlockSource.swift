@@ -38,14 +38,37 @@ enum VoicevoxCacheBlockSource {
         )
     }
 
+    /// 設定を渡してブロック列を得る。何ページも続けて処理する時に使う。
+    ///
+    /// 設定の組み立て(Realm から話者・会話文の話者割り当て・間の設定・読み替え辞書5000件超を
+    /// 読んで変換する)は1回で数百ミリ秒かかる割に小説の中では変わらないので、
+    /// ページごとにやり直すと、ページ数に比例して無駄に重くなる。
+    static func blocks(story: Story, settings: StoryTextClassifier.StorySpeechSettings) -> [CombinedSpeechBlock] {
+        return StoryTextClassifier.CategorizeStoryText(
+            story: story,
+            settings: settings,
+            withMoreSplitTargets: withMoreSplitTargets,
+            moreSplitMinimumLetterCount: moreSplitMinimumLetterCount
+        )
+    }
+
     /// VOICEVOX で合成する必要があるブロックだけを、
     /// (何番目のブロックか, 合成する文字列, 話者ID, ディスクキャッシュの鍵) の形で返す。
     ///
     /// 読み上げるべき文字を含まないブロック(改行や記号だけ等)は、再生時にも合成されず
     /// 読み飛ばされるので、生成対象からも外す(合成しようとしても失敗する)。
     static func synthesisTargets(story: Story) -> [(blockIndex: Int, text: String, styleId: UInt32, key: String)] {
+        return synthesisTargets(blocks: blocks(story: story))
+    }
+
+    /// 設定を使い回す版(何ページも続けて処理する時用)。
+    static func synthesisTargets(story: Story, settings: StoryTextClassifier.StorySpeechSettings) -> [(blockIndex: Int, text: String, styleId: UInt32, key: String)] {
+        return synthesisTargets(blocks: blocks(story: story, settings: settings))
+    }
+
+    private static func synthesisTargets(blocks: [CombinedSpeechBlock]) -> [(blockIndex: Int, text: String, styleId: UInt32, key: String)] {
         var result: [(blockIndex: Int, text: String, styleId: UInt32, key: String)] = []
-        for (index, block) in blocks(story: story).enumerated() {
+        for (index, block) in blocks.enumerated() {
             guard block.type == "VOICEVOX" else { continue }
             let text = block.speechText
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { continue }
@@ -110,6 +133,8 @@ enum VoicevoxCacheBlockSource {
     /// - Returns: ページ番号 → そのページで使う鍵の集合。
     static func currentKeysByChapter(novelID: String, chapterNumbers: [Int]) -> [Int: Set<String>] {
         let storyByChapter = stories(novelID: novelID, chapterNumbers: chapterNumbers)
+        // 設定は小説の中では変わらないので1回だけ組み立てる。
+        let settings = StoryTextClassifier.GatherStorySpeechSettings(novelID: novelID)
         var result: [Int: Set<String>] = [:]
         for chapterNumber in chapterNumbers {
             guard let story = storyByChapter[chapterNumber] else {
@@ -117,7 +142,7 @@ enum VoicevoxCacheBlockSource {
                 result[chapterNumber] = []
                 continue
             }
-            result[chapterNumber] = Set(synthesisTargets(story: story).map { $0.key })
+            result[chapterNumber] = Set(synthesisTargets(story: story, settings: settings).map { $0.key })
         }
         return result
     }

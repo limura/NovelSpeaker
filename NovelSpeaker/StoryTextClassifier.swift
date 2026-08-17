@@ -998,10 +998,31 @@ class StoryTextClassifier {
     
     //
     #if !os(watchOS)
-    static func CategorizeStoryText(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) -> [CombinedSpeechBlock] {
-        RealmUtil.RealmBlock { (realm) -> [CombinedSpeechBlock] in
+
+    /// 1つの小説について、読み上げに使う設定一式。
+    ///
+    /// これを求めるには Realm から話者・会話文の話者割り当て・間の設定・読み替え辞書
+    /// (標準辞書だけで5000件超)を読み出して組み立てる必要があり、**1ページあたり数百ミリ秒**
+    /// かかる。ページごとに毎回作り直すと、本文を舐める処理(音声キャッシュの生成や、
+    /// 使われなくなった音声の調査)がページ数に比例して重くなる。
+    /// 小説の中では変わらない値なので、まとめて処理する側は一度だけ作って使い回す。
+    ///
+    /// ルビ由来の読み替えだけは本文ごとに変わるので、ここには含めずページ単位で足す。
+    struct StorySpeechSettings {
+        let defaultSpeaker:SpeakerSetting
+        let sectionConfigList:[SpeechSectionConfig]
+        let waitConfigList:[SpeechWaitConfig]
+        /// ルビ由来を除いた読み替え設定。
+        let speechModSettingList:[SpeechModSetting]
+        let isOverrideRubyEnabled:Bool
+        let notRubyCharactorStringArray:String
+        let isDisableNarouRuby:Bool
+    }
+
+    static func GatherStorySpeechSettings(novelID:String) -> StorySpeechSettings {
+        RealmUtil.RealmBlock { (realm) -> StorySpeechSettings in
             let defaultSpeaker:RealmSpeakerSetting
-            if let novelDefaultSpeaker = RealmNovel.SearchNovelWith(realm: realm, novelID: story.novelID)?.defaultSpeakerWith(realm: realm) {
+            if let novelDefaultSpeaker = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.defaultSpeakerWith(realm: realm) {
                 defaultSpeaker = novelDefaultSpeaker
             }else if let globalStateDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) {
                 defaultSpeaker = globalStateDefaultSpeaker
@@ -1010,7 +1031,7 @@ class StoryTextClassifier {
             }
             
             let sectionConfigList:[SpeechSectionConfig]
-            if let speechSectionConfigDictValues = RealmSpeechSectionConfig.SearchSettingsFor(realm: realm, novelID: story.novelID) {
+            if let speechSectionConfigDictValues = RealmSpeechSectionConfig.SearchSettingsFor(realm: realm, novelID: novelID) {
                 sectionConfigList = ConvertSpeechSectionConfig(realm: realm, fromArray: Array(speechSectionConfigDictValues), defaultSpeaker: defaultSpeaker)
             }else{
                 sectionConfigList = []
@@ -1039,7 +1060,7 @@ class StoryTextClassifier {
             // 標準の読み替え辞書由来のエントリは「AVSpeechSynthesizer向け」とみなして印を付ける
             //(VOICEVOX 話者のブロックではこの印の付いた読み替えを適用しない)。
             let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
-            if let modSettingListFromSetting = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: story.novelID)?.map({ (realmModSetting) -> SpeechModSetting in
+            if let modSettingListFromSetting = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: novelID)?.map({ (realmModSetting) -> SpeechModSetting in
                 let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
                 // 標準辞書由来のエントリは AVSpeechSynthesizer 専用として扱う。それ以外(ユーザー追加)は
                 // 空配列=全エンジンに適用。
@@ -1074,13 +1095,35 @@ class StoryTextClassifier {
                 )
                 speechModSettingList.append(modSetting)
             }
-            if isOverrideRubyEnabled {
-                let rubySettingArray = GenerateRubyModString(text: story.content, notRubyString: notRubyCharactorStringArray, isDisableNarouRuby: isDisableNarouRuby)
-                speechModSettingList.append(contentsOf: rubySettingArray)
-            }
-            
-            return CategorizeStoryText(content: story.content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: SpeakerSetting(from: defaultSpeaker), sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, speechModArray: speechModSettingList)
+            return StorySpeechSettings(
+                defaultSpeaker: SpeakerSetting(from: defaultSpeaker),
+                sectionConfigList: sectionConfigList,
+                waitConfigList: waitConfigList,
+                speechModSettingList: speechModSettingList,
+                isOverrideRubyEnabled: isOverrideRubyEnabled,
+                notRubyCharactorStringArray: notRubyCharactorStringArray,
+                isDisableNarouRuby: isDisableNarouRuby
+            )
         }
+    }
+
+    /// 設定を渡してブロック分割する。まとめて処理する側はこちらを使う
+    /// (設定の組み立てを小説ごとに1回で済ませられる)。
+    static func CategorizeStoryText(story:Story, settings:StorySpeechSettings, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) -> [CombinedSpeechBlock] {
+        var speechModSettingList = settings.speechModSettingList
+        // ルビ由来の読み替えは本文ごとに違うので、ここで足す。
+        // 順番も元のまま(他の読み替えを全部足した後ろ)にしておく。
+        // 並べ替えの同着の扱いが変わると、同じ本文から違うブロックが出来てしまい、
+        // 作ってある音声キャッシュが命中しなくなる。
+        if settings.isOverrideRubyEnabled {
+            let rubySettingArray = GenerateRubyModString(text: story.content, notRubyString: settings.notRubyCharactorStringArray, isDisableNarouRuby: settings.isDisableNarouRuby)
+            speechModSettingList.append(contentsOf: rubySettingArray)
+        }
+        return CategorizeStoryText(content: story.content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: settings.defaultSpeaker, sectionConfigList: settings.sectionConfigList, waitConfigList: settings.waitConfigList, speechModArray: speechModSettingList)
+    }
+
+    static func CategorizeStoryText(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) -> [CombinedSpeechBlock] {
+        return CategorizeStoryText(story: story, settings: GatherStorySpeechSettings(novelID: story.novelID), withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
     }
     #endif
 

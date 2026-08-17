@@ -484,13 +484,16 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
                 loadSeconds += Date().timeIntervalSince(loadStart)
 
                 let splitStart = Date()
+                // 設定の組み立ては小説の中では変わらないので1回だけにする
+                //(ページごとにやり直すと Realm から5000件超の読み替え辞書を読み直す事になる)。
+                let settings = StoryTextClassifier.GatherStorySpeechSettings(novelID: novelID)
                 var keysByChapter: [Int: Set<String>] = [:]
                 for chapterNumber in chapterNumbers {
                     guard let story = storyByChapter[chapterNumber] else {
                         keysByChapter[chapterNumber] = []
                         continue
                     }
-                    keysByChapter[chapterNumber] = Set(VoicevoxCacheBlockSource.synthesisTargets(story: story).map { $0.key })
+                    keysByChapter[chapterNumber] = Set(VoicevoxCacheBlockSource.synthesisTargets(story: story, settings: settings).map { $0.key })
                 }
                 splitSeconds += Date().timeIntervalSince(splitStart)
 
