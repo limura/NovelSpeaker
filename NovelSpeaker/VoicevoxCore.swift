@@ -987,6 +987,10 @@ final class VoicevoxCore {
         throw VoicevoxCoreError.notSetUp
     }
 
+    func synthesizeForDiskCache(text: String, styleId: UInt32) async throws -> Data {
+        throw VoicevoxCoreError.notSetUp
+    }
+
     @discardableResult
     func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) -> Bool { return false }
     func notePlaybackBlockIndex(_ index: Int) {}
@@ -1040,6 +1044,14 @@ final class VoicevoxCore {
     }
     func applyThreadCountIfNeeded() {}
     func scheduleThreadCountUpdate() {}
+
+    struct DiskCacheContext {
+        let novelID: String
+        let chapterNumber: Int
+        var isWritable: Bool { return false }
+    }
+    var diskCacheContext: DiskCacheContext? { return nil }
+
     func setDiskCacheContext(novelID: String?, chapterNumber: Int) {}
     func isStoredOnDisk(text: String, styleId: UInt32) -> Bool { return false }
     func storeToDiskCacheIfNeeded(text: String, styleId: UInt32, wav: Data) {}
