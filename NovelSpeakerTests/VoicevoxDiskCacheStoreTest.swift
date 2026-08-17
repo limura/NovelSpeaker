@@ -218,6 +218,20 @@ class VoicevoxDiskCacheStoreTest: XCTestCase {
         XCTAssertNil(store.load(novelID: "novel-A", chapterNumber: 1, key: "stale"))
     }
 
+    // 消す前に「どれだけ無駄になっているか」を数えられる事。
+    // 消してから量が分かっても遅いので、先に見せるために使う。
+    func testSummaryOfEntriesNotInTheKeepList() throws {
+        for key in ["keep1", "keep2", "stale1", "stale2"] {
+            try store.store(novelID: "novel-A", chapterNumber: 1, key: key, data: makeData(bytes: 100), durationSeconds: 10)
+        }
+        let unused = store.summary(novelID: "novel-A", chapterNumber: 1, notIn: ["keep1", "keep2"])
+        XCTAssertEqual(unused.entryCount, 2)
+        XCTAssertEqual(unused.audioSeconds, 20, accuracy: 0.01)
+        XCTAssertEqual(unused.byteCount, 200)
+        // 数えただけで消えていない事。
+        XCTAssertEqual(store.summary(novelID: "novel-A", chapterNumber: 1).entryCount, 4)
+    }
+
     // MARK: - 存在確認と長さ
 
     // 生成の再開時に「どこまで作れているか」を数えるため、

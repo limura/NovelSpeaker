@@ -267,6 +267,17 @@ final class VoicevoxDiskCacheStore {
         lock.unlock()
     }
 
+    /// 残す鍵の一覧に無いものが、どれだけあるか(消さずに数えるだけ)。
+    /// 「今の設定だと x時間y分ぶん(zMB)が無駄になっています」を、
+    /// 実際に消す前に見せるために使う。
+    func summary(novelID: String, chapterNumber: Int, notIn keysToKeep: Set<String>) -> VoicevoxDiskCacheSummary {
+        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
+        lock.lock()
+        let listing = listingUnsafe(directory: directory)
+        lock.unlock()
+        return Self.summarize(listing.filter { keysToKeep.contains($0.key) == false }.values)
+    }
+
     /// 残す鍵の一覧に無いものを消す。
     /// 読み替え辞書の変更等で内容が変わった時に使う。作り直しには数十分かかるので、
     /// 全消しではなく「変わった分だけ」を消せる必要がある。
