@@ -98,6 +98,17 @@ struct SpeechModSetting {
     // (将来は読み替え辞書のデータ自体にこの対象エンジン情報を持たせるのが正しい)
     let targetSpeechEngineTypeArray : [String]
 
+    // before / after の文字数を最初に1回だけ数えて持っておく。
+    //
+    // 並べ替えの比較関数はこれを1回の比較で最大4回参照するので、その都度 String.count を
+    // 呼ぶと、10000件の並べ替えで50万回以上の文字数計算が走る。
+    // しかも Realm から取り出した String は NSString のまま橋渡しされている事があり、
+    // その状態の .count は桁違いに遅い。
+    // 実測(母艦・10107件): 並べ替えだけで 383.8ms かかっていたのが、
+    // 同じ件数のJSON由来(素のSwift String)では 17.6ms しかかからなかった。
+    let beforeCount : Int
+    let afterCount : Int
+
     // 指定した話者エンジンtypeにこの読み替えを適用すべきか。
     func isAppliedTo(speechEngineType:String) -> Bool {
         if targetSpeechEngineTypeArray.isEmpty { return true } // 未設定=全エンジン
@@ -106,10 +117,9 @@ struct SpeechModSetting {
 
     #if !os(watchOS)
     init(from:RealmSpeechModSetting, targetSpeechEngineTypeArray:[String] = []) {
-        before = from.before
-        after = from.after
-        isUseRegularExpression = from.isUseRegularExpression
-        self.targetSpeechEngineTypeArray = targetSpeechEngineTypeArray
+        // Realm から来た String は NSString のまま橋渡しされている事があり、
+        // その状態だと .count や比較が極端に遅い。ここで素の Swift String に写しておく。
+        self.init(before: String(from.before), after: String(from.after), isUseRegularExpression: from.isUseRegularExpression, targetSpeechEngineTypeArray: targetSpeechEngineTypeArray)
     }
     #endif
     init(before:String, after:String, isUseRegularExpression:Bool, targetSpeechEngineTypeArray:[String] = []) {
@@ -117,6 +127,8 @@ struct SpeechModSetting {
         self.after = after
         self.isUseRegularExpression = isUseRegularExpression
         self.targetSpeechEngineTypeArray = targetSpeechEngineTypeArray
+        self.beforeCount = before.count
+        self.afterCount = after.count
     }
 }
 
@@ -823,11 +835,11 @@ class StoryTextClassifier {
     /// 並べ替えと併合で必ず同じ物を使う(食い違うと同じ本文から違うブロックが出来て、
     /// 作ってある音声キャッシュが命中しなくなる)。
     static func SpeechModSettingIsOrderedBefore(_ a:SpeechModSetting, _ b:SpeechModSetting) -> Bool {
-        if a.before.count > b.before.count { return true }
-        if a.before.count < b.before.count { return false }
+        if a.beforeCount > b.beforeCount { return true }
+        if a.beforeCount < b.beforeCount { return false }
         if a.before == b.before {
-            if a.after.count > b.after.count { return true }
-            if a.after.count < b.after.count { return false }
+            if a.afterCount > b.afterCount { return true }
+            if a.afterCount < b.afterCount { return false }
             return a.after < b.after
         }
         return a.before < b.before
@@ -1102,7 +1114,15 @@ class StoryTextClassifier {
     nonisolated(unsafe) static var isGatherStorySpeechSettingsProfilingEnabled = false
 
     static func GatherStorySpeechSettings(novelID:String) -> StorySpeechSettings {
-        RealmUtil.RealmBlock { (realm) -> StorySpeechSettings in
+        return RealmUtil.RealmBlock { (realm) -> StorySpeechSettings in
+            return GatherStorySpeechSettings(realm: realm, novelID: novelID)
+        }
+    }
+
+    /// 既に開いてある Realm を使う版。
+    /// 何作品もまとめて処理する時は、Realm を開き直さずにこちらを使う。
+    static func GatherStorySpeechSettings(realm:Realm, novelID:String) -> StorySpeechSettings {
+        return { () -> StorySpeechSettings in
             let profiling = isGatherStorySpeechSettingsProfilingEnabled
             var phaseStart = Date()
             var phaseLog = ""
@@ -1208,7 +1228,7 @@ class StoryTextClassifier {
                 notRubyCharactorStringArray: notRubyCharactorStringArray,
                 isDisableNarouRuby: isDisableNarouRuby
             )
-        }
+        }()
     }
 
     /// 設定を渡してブロック分割する。まとめて処理する側はこちらを使う
