@@ -1112,6 +1112,9 @@ class StoryTextClassifier {
 
     /// 段階ごとの所要時間をログに出すか(遅い所を実機で特定するため)。
     nonisolated(unsafe) static var isGatherStorySpeechSettingsProfilingEnabled = false
+    /// データの規模のログは1回だけでよい。
+    nonisolated(unsafe) private static var isDataShapeLogged = false
+    static func resetSpeechSettingsDataShapeLog() { isDataShapeLogged = false }
 
     static func GatherStorySpeechSettings(novelID:String) -> StorySpeechSettings {
         return RealmUtil.RealmBlock { (realm) -> StorySpeechSettings in
@@ -1124,6 +1127,21 @@ class StoryTextClassifier {
     static func GatherStorySpeechSettings(realm:Realm, novelID:String) -> StorySpeechSettings {
         return { () -> StorySpeechSettings in
             let profiling = isGatherStorySpeechSettingsProfilingEnabled
+            if profiling && isDataShapeLogged == false {
+                isDataShapeLogged = true
+                // どこが重いのかは、どのデータがどれだけあるかで決まる。
+                // 手元で再現できるように、実機のデータの規模を1回だけ出す。
+                let sectionConfigs = realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false")
+                let modSettings = realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false")
+                let sectionTargetTotal = sectionConfigs.reduce(0) { $0 + $1.targetNovelIDArray.count }
+                let modTargetTotal = modSettings.reduce(0) { $0 + $1.targetNovelIDArray.count }
+                NSLog("NovelSpeaker.SpeechSettingsDataShape: 小説=%d 話者設定=%d 会話文設定=%d(対象小説の延べ数=%d) 読み替え=%d(対象小説の延べ数=%d) 間の設定=%d",
+                      realm.objects(RealmNovel.self).filter("isDeleted = false").count,
+                      realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false").count,
+                      sectionConfigs.count, sectionTargetTotal,
+                      modSettings.count, modTargetTotal,
+                      realm.objects(RealmSpeechWaitConfig.self).filter("isDeleted = false").count)
+            }
             var phaseStart = Date()
             var phaseLog = ""
             func recordPhase(_ name:String) {
@@ -1144,11 +1162,12 @@ class StoryTextClassifier {
 
             let sectionConfigList:[SpeechSectionConfig]
             if let speechSectionConfigDictValues = RealmSpeechSectionConfig.SearchSettingsFor(realm: realm, novelID: novelID) {
+                recordPhase("会話文の検索")
                 sectionConfigList = ConvertSpeechSectionConfig(realm: realm, fromArray: Array(speechSectionConfigDictValues), defaultSpeaker: defaultSpeaker)
             }else{
                 sectionConfigList = []
             }
-            recordPhase("会話文")
+            recordPhase("会話文の変換")
 
             var waitConfigList:[SpeechWaitConfig] = []
             if let allWaitConfigList = RealmSpeechWaitConfig.GetAllObjectsWith(realm: realm)?.map({ SpeechWaitConfig(from: $0) }) {
