@@ -1617,6 +1617,22 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     cell.editingAccessoryType = cell.accessoryType
                     cell.textLabel?.textColor = nil
                 })
+
+                // 音声モデル(1.4GB)の確認・取得・削除。作成済み音声とは別に貯まるので、
+                // 管理する場所も隣り合っていないと、どちらを消せばよいのか分からなくなる。
+                section
+                <<< ButtonRow() {
+                    $0.title = "VOICEVOXの音声モデル"
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
+                        return VoicevoxVoiceModelManageViewController()
+                    }), onDismiss: nil)
+                }.cellUpdate({ (cell, button) in
+                    cell.textLabel?.textAlignment = .left
+                    cell.accessoryType = .disclosureIndicator
+                    cell.editingAccessoryType = cell.accessoryType
+                    cell.textLabel?.textColor = nil
+                })
             }
 
 
@@ -1790,6 +1806,23 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         .build().show()
                 }
             })
+            // VOICEVOX のクレジット表記。取得済みのキャラクターを並べる。
+            // 規約への同意だけでなく、表記を出し続ける所までが利用の条件になっている。
+            if VoicevoxCore.isAvailableOnThisOS {
+                section
+                <<< ButtonRow() {
+                    $0.title = "VOICEVOX のクレジット表記"
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
+                        return VoicevoxCreditViewController()
+                    }), onDismiss: nil)
+                }.cellUpdate({ (cell, button) in
+                    cell.textLabel?.textAlignment = .left
+                    cell.accessoryType = .disclosureIndicator
+                    cell.editingAccessoryType = cell.accessoryType
+                    cell.textLabel?.textColor = nil
+                })
+            }
             section
             <<< ButtonRow() {
             $0.title = NSLocalizedString("SettingTableViewController_PrivacyPolicy", comment: "ことせかい のプライバシーポリシーを確認する")

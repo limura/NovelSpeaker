@@ -64,13 +64,26 @@ enum VoicevoxStyleListBuilder {
                       searchText: String) -> [VoicevoxStyleListSection] {
         let availableIds = Set(availableStyles.map { $0.styleId })
 
+        // 取得済みの行にも公式サイトへの出口を付ける。
+        // 手元で喋らせれば声は確かめられるが、そのキャラクターの事を知りたい時に
+        // 「取得したら辿れなくなる」のは不便なので、カタログから引いておく。
+        var officialPageByStyleId: [UInt32: String] = [:]
+        if let catalog = catalog {
+            for model in catalog.voiceModels {
+                for speaker in model.speakers {
+                    guard let page = speaker.officialPageURL else { continue }
+                    for style in speaker.styles { officialPageByStyleId[style.styleId] = page }
+                }
+            }
+        }
+
         let availableItems = availableStyles.map { style in
             VoicevoxStyleListItem(styleId: style.styleId,
                                   speakerName: style.speakerName,
                                   styleName: style.name,
                                   modelID: nil,
                                   byteSize: nil,
-                                  officialPageURL: nil)
+                                  officialPageURL: officialPageByStyleId[style.styleId])
         }
 
         var downloadableItems: [VoicevoxStyleListItem] = []

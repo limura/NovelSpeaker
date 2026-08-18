@@ -72,6 +72,16 @@ class VoicevoxStyleListTest: XCTestCase {
                        "https://voicevox.hiroshiba.jp/product/ずんだもん/")
     }
 
+    // 取得済みの行からも公式サイトへ飛べる事(カタログから引く)。
+    func testAvailableItemsAlsoCarryTheirOfficialPage() {
+        let sections = VoicevoxStyleListBuilder.build(
+            availableStyles: [makeStyle(3, "ずんだもん", "ノーマル")],
+            catalog: makeCatalog(), searchText: "ノーマル")
+        XCTAssertEqual(sections[0].kind, .available)
+        XCTAssertEqual(sections[0].items.first?.officialPageURL,
+                       "https://voicevox.hiroshiba.jp/product/ずんだもん/")
+    }
+
     func testDownloadableItemsCarryTheirModel() {
         let sections = VoicevoxStyleListBuilder.build(
             availableStyles: [], catalog: makeCatalog(), searchText: "ささやき")
