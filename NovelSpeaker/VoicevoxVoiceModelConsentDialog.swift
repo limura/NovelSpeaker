@@ -78,6 +78,54 @@ enum VoicevoxVoiceModelConsentDialog {
         builder.build().show()
     }
 
+    /// 未取得のスタイルで喋らせようとした時に、取得へ繋ぐ。
+    ///
+    /// 何も出さずに黙って失敗すると「押しても無反応」にしか見えない。
+    /// - Returns: 未取得で、案内を出した場合は true。
+    @discardableResult
+    static func presentIfNotDownloaded(on viewController: UIViewController,
+                                       styleId: UInt32,
+                                       onStarted: (() -> Void)? = nil) -> Bool {
+        guard VoicevoxCore.cachedStyles.contains(where: { $0.styleId == styleId }) == false else {
+            return false
+        }
+        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferred(
+                embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil),
+              let entry = catalog.entry(forStyleId: styleId) else {
+            NiftyUtility.EasyDialogBuilder(viewController)
+                .title(title: "この話者は使えません")
+                .label(text: "選ばれているVOICEVOXの話者(スタイル番号 \(styleId))が、"
+                       + "この端末にも一覧にも見当たりません。", textAlignment: .left)
+                .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { dialog in
+                    DispatchQueue.main.async { dialog.dismiss(animated: true) }
+                })
+                .build().show()
+            return true
+        }
+
+        NiftyUtility.EasyDialogBuilder(viewController)
+            .title(title: "音声モデルが必要です")
+            .label(text: "「\(entry.displayName)」で読み上げるには、"
+                   + "音声モデル \(entry.model.id).vvm "
+                   + "(\(VoicevoxVoiceModelConsentText.megabytesText(entry.model.byteSize))) の取得が必要です。",
+                   textAlignment: .left)
+            .addButton(title: "取得する", callback: { dialog in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false) {
+                        present(on: viewController, model: entry.model, catalog: catalog,
+                                requestedStyleDisplayName: entry.displayName,
+                                requestedStyleId: styleId,
+                                onStarted: onStarted)
+                    }
+                }
+            })
+            .addButton(title: NSLocalizedString("Cancel_button", comment: "キャンセル"), callback: { dialog in
+                DispatchQueue.main.async { dialog.dismiss(animated: true) }
+            })
+            .build().show()
+        return true
+    }
+
     /// 取得を始められなかった時の説明。
     static func presentBlocker(on viewController: UIViewController,
                                model: VoicevoxVoiceModelCatalog.VoiceModel,

@@ -591,6 +591,14 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                     return
                 }
                 print("testSpeech: volume: \(setting.volume), name: \(setting.name)")
+                // 未取得のVOICEVOX話者では合成できない。黙って失敗すると
+                // 「押しても無反応」にしか見えないので、取得へ繋ぐ。
+                if setting.type == "VOICEVOX", let styleId = UInt32(setting.voiceIdentifier),
+                   VoicevoxVoiceModelConsentDialog.presentIfNotDownloaded(
+                        on: self, styleId: styleId,
+                        onStarted: { [weak self] in self?.refreshAllVoicevoxStyleRows() }) {
+                    return
+                }
                 self.testSpeech(pitch: setting.pitch, rate: setting.rate, volume: setting.volume, identifier: setting.voiceIdentifier, locale: setting.locale, type: setting.type, text: self.testText)
             }
         })

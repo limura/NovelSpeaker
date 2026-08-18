@@ -198,9 +198,13 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
             message += "使っている話者設定: \(item.usedBySettingNames.joined(separator: "、"))\n"
                 + "消しても設定はそのままにしておくので、取り直せば元の声に戻ります。\n"
         }
-        // ★1.4GB の逃げ道。ここに書いておかないと気付かれない。
-        message += "\n作成済みのVOICEVOX音声はそのまま再生できます。"
-            + "作り終わった音声モデルは消してしまって構いません。"
+        // ★消した後に何ができて何ができないかを、はっきり分けて書く。
+        // 「消してしまって構いません」とだけ書くと、
+        // 作成済みの音声が無い箇所では喋れなくなる事が伝わらない。
+        // 特に、ブロックの途中から再生を始めた時は作成済みの音声と本文が一致せず、
+        // 作ってあるはずの箇所でも合成が必要になる。
+        message += "\n作成済みのVOICEVOX音声がある箇所は、消した後もそのまま再生できます。"
+            + "作っていない箇所は、この音声モデルを取り直すまで読み上げできません。"
 
         NiftyUtility.EasyDialogBuilder(self)
             .title(title: "音声モデルを削除")
@@ -213,6 +217,10 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
                             readableFormats: VoicevoxVoiceModelCatalogLoader.readableVvmFormatVersions)
                         // 消しただけでは話者一覧に残り続けるので作り直す。
                         VoicevoxCore.reloadStyleCatalogFromCurrentFiles()
+                        // 合成済みの音声はメモリにも載っている(16MBぶん)。
+                        // 残したままだと、消した直後の話者でしばらく喋れてしまい、
+                        // やがて押し出された時から急に喋れなくなる、という挙動になる。
+                        VoicevoxCore.shared.clearPrefetchCache()
                         self?.reload()
                     }
                 }

@@ -1758,6 +1758,23 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.presentationMode = .segueName(segueName: "CreditPageSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
+            // VOICEVOX のクレジット表記。取得済みのキャラクターを並べる。
+            // 規約への同意だけでなく、表記を出し続ける所までが利用の条件になっている。
+            if VoicevoxCore.isAvailableOnThisOS {
+                section
+                <<< ButtonRow() {
+                    $0.title = "VOICEVOX のクレジット表記"
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
+                        return VoicevoxCreditViewController()
+                    }), onDismiss: nil)
+                }.cellUpdate({ (cell, button) in
+                    cell.textLabel?.textAlignment = .left
+                    cell.accessoryType = .disclosureIndicator
+                    cell.editingAccessoryType = cell.accessoryType
+                    cell.textLabel?.textColor = nil
+                })
+            }
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について")
@@ -1806,23 +1823,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         .build().show()
                 }
             })
-            // VOICEVOX のクレジット表記。取得済みのキャラクターを並べる。
-            // 規約への同意だけでなく、表記を出し続ける所までが利用の条件になっている。
-            if VoicevoxCore.isAvailableOnThisOS {
-                section
-                <<< ButtonRow() {
-                    $0.title = "VOICEVOX のクレジット表記"
-                    $0.cell.textLabel?.numberOfLines = 0
-                    $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
-                        return VoicevoxCreditViewController()
-                    }), onDismiss: nil)
-                }.cellUpdate({ (cell, button) in
-                    cell.textLabel?.textAlignment = .left
-                    cell.accessoryType = .disclosureIndicator
-                    cell.editingAccessoryType = cell.accessoryType
-                    cell.textLabel?.textColor = nil
-                })
-            }
             section
             <<< ButtonRow() {
             $0.title = NSLocalizedString("SettingTableViewController_PrivacyPolicy", comment: "ことせかい のプライバシーポリシーを確認する")
