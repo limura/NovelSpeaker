@@ -133,15 +133,11 @@ extension VoicevoxVoiceModelCatalog {
 
     /// 同じ規約URLのキャラクターは束ねて数える。
     /// 同意画面に42行並べても読まれないため(zunko.jp 系だけで何人もいる)。
+    /// 実体は同意まわりと共有する(VoicevoxVoiceModelConsentText.groups)。
     func speakersGroupedByTermsURL(of model: VoiceModel) -> [(termsURL: String?, speakers: [Speaker])] {
-        var order: [String] = []
-        var grouped: [String: [Speaker]] = [:]
-        for speaker in model.speakers {
-            let key = speaker.termsURL ?? ""
-            if grouped[key] == nil { order.append(key) }
-            grouped[key, default: []].append(speaker)
+        return VoicevoxVoiceModelConsentText.groups(of: model).map {
+            (termsURL: $0.termsURL, speakers: $0.speakers)
         }
-        return order.map { key in (termsURL: key.isEmpty ? nil : key, speakers: grouped[key] ?? []) }
     }
 }
 
