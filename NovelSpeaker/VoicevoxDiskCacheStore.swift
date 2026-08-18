@@ -22,6 +22,15 @@
 //       `<小説の鍵>/<話番号>/<ブロックの鍵>_<ミリ秒>.m4a`
 //     話ごとに掘るのは、1ディレクトリのファイル数を数十に抑えるためだけでなく、
 //     「20話目の何%まで作れたか」がそのディレクトリを数えるだけで求まるため。
+//   - **パスに版を1段入れる**(`v1/...`)。
+//     鍵は styleId と読み上げ文字列からしか作っていないので、
+//     将来 user dict のように「音に影響するが鍵に入っていない入力」を足すと、
+//     同じ鍵のまま音が変わる = 「辞書を直したのに古い音が鳴り続ける」という
+//     追いにくい不具合になる。その時は版を上げれば、古い版のディレクトリが
+//     起動時に丸ごと消えるので、孤児が残り続ける事故が原理的に起きない。
+//     (SiteInfo のキャッシュで「キャッシュ名のバンプ忘れ」を踏んだのと同じ教訓)
+//     なお **VVMの版は鍵に入れない**。入れるとモデルを更新するたびに
+//     全キャッシュが無効になるため、そちらは更新時に個別に尋ねる。
 //   - 保存先は Application Support(Caches は OS に勝手に消される)+ バックアップ除外。
 //   - **端末ローカル限定**。他端末では話者(VVM)がダウンロードされているとは限らず、
 //     読み替え辞書も同じとは限らないので、共有しても使えない。
@@ -63,6 +72,11 @@ final class VoicevoxDiskCacheStore {
     /// 失われても音声そのものは無事で、「不明な小説」として削除だけはできる
     /// (索引と違って、壊れても整合性を取り直す必要が無い)。
     private static let novelIDMarkerFileName = "novelID.txt"
+
+    /// **音に影響する入力が変わったら上げる版。**
+    /// 上げると、古い版のディレクトリは起動時に丸ごと消える。
+    /// 鍵の式(key(text:styleId:))を変えた時も上げる事。
+    static let formatVersion = 1
 
     private let rootDirectory: URL
     private let fileManager = FileManager.default
@@ -109,8 +123,18 @@ final class VoicevoxDiskCacheStore {
 
     // MARK: - 場所
 
+    static func versionDirectoryName(_ version: Int) -> String {
+        return "v\(version)"
+    }
+
+    /// 今の版の置き場所。小説ディレクトリはこの下に掘る。
+    private var versionedRoot: URL {
+        return rootDirectory.appendingPathComponent(Self.versionDirectoryName(Self.formatVersion),
+                                                    isDirectory: true)
+    }
+
     private func novelDirectory(novelID: String) -> URL {
-        return rootDirectory.appendingPathComponent(Self.directoryName(novelID: novelID), isDirectory: true)
+        return versionedRoot.appendingPathComponent(Self.directoryName(novelID: novelID), isDirectory: true)
     }
 
     private func chapterDirectory(novelID: String, chapterNumber: Int) -> URL {
@@ -222,10 +246,10 @@ final class VoicevoxDiskCacheStore {
     /// キャッシュを持っている小説のID(管理画面用)。
     /// ディレクトリ名はハッシュで元に戻せないので、置いてある印から読む。
     func cachedNovelIDs() -> [String] {
-        guard let names = try? fileManager.contentsOfDirectory(atPath: rootDirectory.path) else { return [] }
+        guard let names = try? fileManager.contentsOfDirectory(atPath: versionedRoot.path) else { return [] }
         var result: [String] = []
         for name in names {
-            let markerURL = rootDirectory.appendingPathComponent(name, isDirectory: true)
+            let markerURL = versionedRoot.appendingPathComponent(name, isDirectory: true)
                 .appendingPathComponent(Self.novelIDMarkerFileName)
             guard let data = try? Data(contentsOf: markerURL),
                   let novelID = String(data: data, encoding: .utf8) else { continue }
@@ -265,6 +289,79 @@ final class VoicevoxDiskCacheStore {
         lock.lock()
         listings.removeAll()
         lock.unlock()
+    }
+
+    // MARK: - 版の移行と掃除
+
+    /// 版のディレクトリが無かった時代に貯めた分を、今の版の下へ移す。
+    ///
+    /// 中身の作り方は変わっていないので**消さずに引き継ぐ**。
+    /// (作り置きは1作品で数百MBあり、捨てると作り直しに何時間もかかる)
+    /// - Returns: 移した小説ディレクトリの数。
+    @discardableResult
+    func migrateLegacyLayoutIfNeeded() -> Int {
+        guard let names = try? fileManager.contentsOfDirectory(atPath: rootDirectory.path) else { return 0 }
+        // 版が付いていない時代の小説ディレクトリは、小説IDのSHA256(16進64文字)。
+        let legacyNames = names.filter { name in
+            name.count == 64 && name.allSatisfy { $0.isHexDigit }
+        }
+        guard legacyNames.isEmpty == false else { return 0 }
+        if fileManager.fileExists(atPath: versionedRoot.path) == false {
+            try? fileManager.createDirectory(at: versionedRoot, withIntermediateDirectories: true)
+        }
+        var moved = 0
+        for name in legacyNames {
+            let from = rootDirectory.appendingPathComponent(name, isDirectory: true)
+            let to = versionedRoot.appendingPathComponent(name, isDirectory: true)
+            if fileManager.fileExists(atPath: to.path) {
+                // 既に今の版にも同じ小説がある(移行の途中で落ちた等)。
+                // 新しい方を残し、古い方は捨てる。
+                try? fileManager.removeItem(at: from)
+                continue
+            }
+            if (try? fileManager.moveItem(at: from, to: to)) != nil { moved += 1 }
+        }
+        if moved > 0 {
+            lock.lock()
+            listings.removeAll()
+            lock.unlock()
+        }
+        return moved
+    }
+
+    /// 今の版でない `v*` ディレクトリを丸ごと消す。
+    ///
+    /// これがあるから「鍵の式を変えたら古いファイルが孤児として残り続ける」
+    /// という事故が起きない。版を上げるだけで済む。
+    /// - Returns: 消したバイト数。
+    @discardableResult
+    func removeOtherFormatVersions() -> Int64 {
+        guard let names = try? fileManager.contentsOfDirectory(atPath: rootDirectory.path) else { return 0 }
+        let current = Self.versionDirectoryName(Self.formatVersion)
+        var freed: Int64 = 0
+        for name in names where name != current && name.hasPrefix("v") {
+            // "v" + 数字 の形だけを対象にする(見覚えのない物は触らない)。
+            guard Int(name.dropFirst()) != nil else { continue }
+            let directory = rootDirectory.appendingPathComponent(name, isDirectory: true)
+            freed += Self.byteCount(of: directory)
+            try? fileManager.removeItem(at: directory)
+        }
+        if freed > 0 {
+            lock.lock()
+            listings.removeAll()
+            lock.unlock()
+        }
+        return freed
+    }
+
+    private static func byteCount(of directory: URL) -> Int64 {
+        guard let enumerator = FileManager.default.enumerator(
+            at: directory, includingPropertiesForKeys: [.fileSizeKey]) else { return 0 }
+        var total: Int64 = 0
+        for case let url as URL in enumerator {
+            total += Int64((try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize ?? 0)
+        }
+        return total
     }
 
     /// 残す鍵の一覧に無いものが、どれだけあるか(消さずに数えるだけ)。
@@ -314,6 +411,9 @@ final class VoicevoxDiskCacheStore {
             var values = URLResourceValues()
             values.isExcludedFromBackup = true
             try? root.setResourceValues(values)
+        }
+        if fileManager.fileExists(atPath: versionedRoot.path) == false {
+            try fileManager.createDirectory(at: versionedRoot, withIntermediateDirectories: true)
         }
         if fileManager.fileExists(atPath: chapterDirectory.path) == false {
             try fileManager.createDirectory(at: chapterDirectory, withIntermediateDirectories: true)

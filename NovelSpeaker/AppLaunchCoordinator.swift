@@ -70,6 +70,22 @@ final class AppLaunchCoordinator: NSObject {
                         message: "使われていない音声モデルを片付けました(\(freed / 1024 / 1024)MB)",
                         isForDebug: true)
                 }
+                // 作り置きした音声の置き場所に版が入る前の分を引き継ぐ。
+                // 中身の作り方は変わっていないので消さずに移す。
+                let migrated = VoicevoxDiskCacheStore.shared.migrateLegacyLayoutIfNeeded()
+                if migrated > 0 {
+                    AppInformationLogger.AddLog(
+                        message: "作成済みのVOICEVOX音声の置き場所を移しました(\(migrated)作品)",
+                        isForDebug: true)
+                }
+                // 音に影響する入力が変わって版が上がった時、古い版を丸ごと捨てる。
+                // これが無いと「辞書を直したのに古い音が鳴り続ける」事になる。
+                let staleAudio = VoicevoxDiskCacheStore.shared.removeOtherFormatVersions()
+                if staleAudio > 0 {
+                    AppInformationLogger.AddLog(
+                        message: "古い作り方のVOICEVOX音声を片付けました(\(staleAudio / 1024 / 1024)MB)",
+                        isForDebug: true)
+                }
                 await VoicevoxCore.setUpFromBundleIfNeeded()
             }
         }
