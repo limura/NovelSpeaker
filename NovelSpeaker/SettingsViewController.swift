@@ -131,16 +131,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             text: text, styleId: styleId, includeOneShotTTS: false)
                         let cpu = timing.stagedTotal.cpu
                         let wall = timing.stagedTotal.wall
-                        // 走っていない時間。前面で動いていれば ほぼ0 になるはず。
-                        // 大きく開いていたら、中断されたか他に食われたかで、この点は当てにならない。
-                        let stalled = wall - cpu
-                        if stalled > max(2.0, wall * 0.05) { suspectedInterruption = true }
+                        // 並列度 = CPU秒 ÷ 壁時計。
+                        // 1スレッドなら約1.0、全コアを使っていれば端末のコア数近くまで上がる
+                        // (SE2 の実測で 2.8)。**1.0 を大きく下回ったら中断されている。**
+                        // 背面のCPU上限が効くのは1コア相当なので、背面で測る時は1.0付近になるはず。
+                        let parallelism = wall > 0 ? cpu / wall : 0
+                        if parallelism < 0.9 { suspectedInterruption = true }
                         points.append((Double(characterCount), cpu))
                         AppInformationLogger.AddLog(
                             message: "[VOICEVOX合成コスト] \(characterCount)文字 "
                                 + "cpu=\(String(format: "%.2f", cpu))秒 "
                                 + "wall=\(String(format: "%.2f", wall))秒 "
-                                + "止まっていた時間=\(String(format: "%.2f", stalled))秒 "
+                                + "並列度=\(String(format: "%.2f", parallelism)) "
                                 + "音声=\(String(format: "%.2f", timing.audioSeconds))秒 "
                                 + "\(Self.deviceStateDescription())",
                             isForDebug: true)
@@ -200,7 +202,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         // 当てはまりが悪い/固定費が負 = 直線で説明できていない。
         // 持続負荷でだんだん遅くなっている(=長いほど不利)か、中断が混じっている。
         if suspectedInterruption {
-            message += "\n※ 合成が止まっていた時間があります。画面を消したか、他のアプリに食われた可能性があります。この値は当てになりません"
+            message += "\n※ 並列度が1を下回っています。合成が止められていた(画面を消した/他のアプリに食われた)可能性があり、この値は当てになりません"
         }
         if overhead < 0 || rSquared < 0.98 {
             message += "\n※ 直線に乗っていません。合成が進むにつれて遅くなっている(持続負荷でクロックが落ちている)可能性があります"

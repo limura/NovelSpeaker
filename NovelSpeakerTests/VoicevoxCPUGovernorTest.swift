@@ -306,6 +306,40 @@ class VoicevoxCPUGovernorCostModelTest: XCTestCase {
                           "1窓に \(maxCount) 文字入る判断は楽観的すぎる(CPU上限を超える)")
     }
 
+    // ★アプリ内計測(2026-08-18, iPhone SE2, ケーブルを抜いて前面)で取った実測。
+    //
+    // どちらも固定費は1〜3秒で、20秒ではない。R² も 0.999台で直線に乗っている。
+    // 低電力ONは1スレッド(並列度1.0)、OFFは全コア(並列度2.8)。
+    // 単価が CPU秒で見て近い(0.32 対 0.37)のは、並列化しても
+    // 「同じ仕事にかかるCPU秒」はあまり変わらない(むしろ少し増える)ため。
+    func testTracksInAppMeasurementsOnRealDevice() {
+        // 低電力ON: 固定費2.63秒 + 0.3215/文字 (R²=0.9998)
+        let lowPowerSamples: [(chars: Int, cpu: Double)] = [
+            (20, 8.86), (40, 15.75), (80, 28.34), (120, 41.17),
+        ]
+        // 低電力OFF: 固定費1.21秒 + 0.3745/文字 (R²=0.9992)
+        let fullPowerSamples: [(chars: Int, cpu: Double)] = [
+            (20, 8.71), (40, 16.50), (80, 30.49), (120, 46.49),
+        ]
+
+        for (label, samples) in [("低電力ON", lowPowerSamples), ("低電力OFF", fullPowerSamples)] {
+            let governor = makeGovernor()
+            feed(governor, samples)
+            for sample in samples {
+                let estimate = governor.estimatedCPUSeconds(forCharacterCount: sample.chars)
+                XCTAssertGreaterThanOrEqual(
+                    estimate, sample.cpu,
+                    "\(label) \(sample.chars)文字の見積り \(estimate) が実測 \(sample.cpu) を下回っている")
+                XCTAssertLessThan(
+                    estimate, sample.cpu * 1.5,
+                    "\(label) \(sample.chars)文字の見積り \(estimate) が実測 \(sample.cpu) に対し過大")
+            }
+            // 固定費が実測(1〜3秒)からかけ離れていない事
+            XCTAssertLessThan(governor.estimatedCPUSeconds(forCharacterCount: 0), 5.0,
+                              "\(label) の固定費が膨らんでいる")
+        }
+    }
+
     // 予算より大きい文字数を求められても、1文字以上は返す(前に進まなくなるのを防ぐ)。
     func testAlwaysAllowsAtLeastOneCharacter() {
         let governor = makeGovernor()
