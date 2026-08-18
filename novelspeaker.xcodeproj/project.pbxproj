@@ -318,13 +318,13 @@
 		D004756D4AA220A917F5A7B6 /* VoicevoxStyleList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33BF3A585337EFF153056CEA /* VoicevoxStyleList.swift */; };
 		D03FDE49B5A124B909AC670A /* VoicevoxVoiceModelConsentTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF33428A88145DF0E2E2A0B /* VoicevoxVoiceModelConsentTest.swift */; };
 		D063461FC62C10956C8B3C2F /* voicevox_onnxruntime.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95B152777FD1096B1CED447C /* voicevox_onnxruntime.xcframework */; platformFilter = ios; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeaderOnCopy, ); }; };
+		D30891FF82CCBE061432E41C /* 0.vvm in Resources */ = {isa = PBXBuildFile; fileRef = 7D361F044DB34565EE692F3A /* 0.vvm */; };
 		D4BAC0A2E6713DF29423991C /* NovelSpeakerWatchWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6E4A0478584A794080C4D53E /* NovelSpeakerWatchWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D70A66842ADA72D4A78A0B8C /* VoicevoxCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF22ADCC56BF76579F8F345 /* VoicevoxCore.swift */; };
 		D85133A9467B36BBC5D06308 /* GatherStorySpeechSettingsBenchmarkTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED8F3BC23E78F95A64ECBE1 /* GatherStorySpeechSettingsBenchmarkTest.swift */; };
 		D8BAA6E5BEA300EB537E8E52 /* VoicevoxStyleListTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31EE59A4CC0E179D0F7982C3 /* VoicevoxStyleListTest.swift */; };
 		D924890D876C8508F198D957 /* VoicevoxVoiceModelConsentDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D3325A00DB14B7690632BD2 /* VoicevoxVoiceModelConsentDialog.swift */; };
 		D931CA1746CEB0D4FA9B5329 /* StoryTextClassifierSpeechModOrderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F9326089771117B629E422 /* StoryTextClassifierSpeechModOrderTest.swift */; };
-		D9A2CDCE2FE45C9D525EC442 /* 0.vvm in Resources */ = {isa = PBXBuildFile; fileRef = 7D361F044DB34565EE692F3A /* 0.vvm */; platformFilter = ios; };
 		DA7280085D32604744E10CB4 /* VoicevoxVoiceModelConsent.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADBFF389808124C39F9F4868 /* VoicevoxVoiceModelConsent.swift */; };
 		DB2361CE5C59A20FDA4A0EBF /* VoicevoxSynthesisQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A37EE6BCDC13FCBB27851C4B /* VoicevoxSynthesisQueue.swift */; };
 		DCA91F6657AEDEB5C4677DC8 /* VoicevoxCacheAutoGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE496F7C7C71EF42457B67EA /* VoicevoxCacheAutoGeneration.swift */; };
@@ -347,6 +347,7 @@
 		F7387BA36B9656AE7BB42887 /* VoicevoxAudioCompressorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48346311A7698E847114D2D6 /* VoicevoxAudioCompressorTest.swift */; };
 		F758E2D2D483A52E97D6AE71 /* VoicevoxChunkedSynthesis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BF95C17C6DB7DAF15306D9 /* VoicevoxChunkedSynthesis.swift */; };
 		F80AF6E5872605AB8FDE3998 /* StoryTextClassifierBenchmarkTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C3B897863C317CAD1EB1D50 /* StoryTextClassifierBenchmarkTest.swift */; };
+		FB9ABC5E6FA631E314E5785D /* VoicevoxTestVoiceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A24C54D8CC9AC56EBA360F3 /* VoicevoxTestVoiceModel.swift */; };
 		FC5D9F103C975C9375485032 /* VoicevoxPrefetchThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */; };
 /* End PBXBuildFile section */
 
@@ -708,6 +709,7 @@
 		34A12B27DB5A5C4AC39AF8AD /* VoicevoxCacheGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheGenerator.swift; sourceTree = "<group>"; };
 		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
 		381E549D1602390C4166E75B /* VoicevoxDiskCacheStoreTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxDiskCacheStoreTest.swift; sourceTree = "<group>"; };
+		3A24C54D8CC9AC56EBA360F3 /* VoicevoxTestVoiceModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxTestVoiceModel.swift; sourceTree = "<group>"; };
 		3F8A56ADCB6B752A2BDF2BF5 /* TextPageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TextPageView.swift; sourceTree = "<group>"; };
 		470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		472A1C58C9BB83466543CE75 /* NiftyUtilityRubyTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NiftyUtilityRubyTest.swift; sourceTree = "<group>"; };
@@ -1275,6 +1277,7 @@
 				688457A23B9B3337BCF21B15 /* VoicevoxVoiceModelManageListTest.swift */,
 				AC37FEC11F478A8B3F4B2394 /* VoicevoxMissingModelNoticeTest.swift */,
 				828FF7E079DAC2D66677D00B /* VoicevoxDiskCacheVersionTest.swift */,
+				3A24C54D8CC9AC56EBA360F3 /* VoicevoxTestVoiceModel.swift */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1712,7 +1715,6 @@
 				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
 				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
 				2040F1799AC29B452C5CE81F /* open_jtalk_dic_utf_8-1.11 in Resources */,
-				D9A2CDCE2FE45C9D525EC442 /* 0.vvm in Resources */,
 				3AFB85679A2E0E31699D1EB1 /* VoicevoxVoiceModelCatalog.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1722,6 +1724,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
+				D30891FF82CCBE061432E41C /* 0.vvm in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2084,6 +2087,7 @@
 				8EFEAA770B69E434E09899F2 /* VoicevoxVoiceModelManageListTest.swift in Sources */,
 				CA324E1D6B9BFF0CAD7D2632 /* VoicevoxMissingModelNoticeTest.swift in Sources */,
 				92CADE446511A40FA69E48DB /* VoicevoxDiskCacheVersionTest.swift in Sources */,
+				FB9ABC5E6FA631E314E5785D /* VoicevoxTestVoiceModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -35,8 +35,8 @@ class VoicevoxRealDeviceReproTest: XCTestCase {
 
     private func setUpCoreAndPickStyles() async throws -> (narrator: UInt32, dialogue: UInt32) {
         guard let dictPath = Bundle.main.path(forResource: "open_jtalk_dic_utf_8-1.11", ofType: nil),
-              let vvmPath = Bundle.main.path(forResource: "0", ofType: "vvm") else {
-            XCTFail("同梱の辞書/0.vvm がバンドルに見つかりません")
+              let vvmPath = VoicevoxTestVoiceModel.path() else {
+            throw XCTSkip("テスト用の辞書/0.vvm がありません。scripts/fetch_voicevox_vendor.sh を実行してください")
             return (0, 0)
         }
         try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelFilePaths: [vvmPath])

@@ -13,9 +13,8 @@ class VoicevoxPrefetchTest: XCTestCase {
 
     private func setUpCore() async throws -> UInt32 {
         guard let dictPath = Bundle.main.path(forResource: "open_jtalk_dic_utf_8-1.11", ofType: nil),
-              let vvmPath = Bundle.main.path(forResource: "0", ofType: "vvm") else {
-            XCTFail("同梱の辞書/0.vvm がバンドルに見つかりません")
-            return 0
+              let vvmPath = VoicevoxTestVoiceModel.path() else {
+            throw XCTSkip("テスト用の辞書/0.vvm がありません。scripts/fetch_voicevox_vendor.sh を実行してください")
         }
         try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelFilePaths: [vvmPath])
         let styles = await VoicevoxCore.shared.styles
@@ -94,24 +93,24 @@ class VoicevoxPrefetchTest: XCTestCase {
 extension VoicevoxPrefetchTest {
     func testNearerBlockIsNotStarvedByBacklog() async throws {
         try XCTSkipUnless(VoicevoxCore.isAvailableOnThisOS, "VOICEVOXが利用できない環境")
-        await VoicevoxCore.setUpFromBundleIfNeeded()
-        let isSetUp = await VoicevoxCore.shared.isSetUp
-        try XCTSkipUnless(isSetUp, "VOICEVOXのセットアップができない環境")
+        // 音声モデルはアプリに同梱していないので、テストバンドルの物で用意する
+        // (setUpFromBundleIfNeeded は「利用者が取得した物」しか見ない)。
+        let styleId = try await setUpCore()
 
         VoicevoxCore.shared.schedulePrefetchCacheClear()
         // 先に「もっと先のブロック」を沢山積む(実機で起きていたバックログ)。
         for i in 0..<10 {
-            VoicevoxCore.shared.schedulePrefetch(blockIndex: 100 + i, text: "これは先の方のブロック\(i)です。", styleId: 3)
+            VoicevoxCore.shared.schedulePrefetch(blockIndex: 100 + i, text: "これは先の方のブロック\(i)です。", styleId: styleId)
         }
         // その後で「次に再生するブロック」(=再生順で手前)を要求する。
         let urgentText = "これは今すぐ必要なブロックです。"
-        VoicevoxCore.shared.schedulePrefetch(blockIndex: 1, text: urgentText, styleId: 3)
+        VoicevoxCore.shared.schedulePrefetch(blockIndex: 1, text: urgentText, styleId: styleId)
 
         // バックログ全部の完了を待たずに、優先ぶんが先に用意される事。
         let deadline = Date().addingTimeInterval(60)
         var isReady = false
         while Date() < deadline {
-            if VoicevoxCore.shared.cachedWavByteCount(text: urgentText, styleId: 3) != nil {
+            if VoicevoxCore.shared.cachedWavByteCount(text: urgentText, styleId: styleId) != nil {
                 isReady = true
                 break
             }

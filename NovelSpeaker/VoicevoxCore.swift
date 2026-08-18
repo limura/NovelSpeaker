@@ -374,21 +374,18 @@ actor VoicevoxCore {
     /// アプリに同梱されている辞書/VVMからの起動時セットアップ。
     /// 同梱リソースが見つからない場合は何もしない(iOS 16未満や、まだVVMを1つも
     /// 用意していない環境でも安全に呼べる)。
-    /// いま使える *.vvm の一覧(同梱 + 取得済み)。
+    /// いま使える *.vvm の一覧(利用者が取得した物だけ)。
     ///
-    /// 同じ番号の音声モデルが両方にあったら**取得済みの方を使う**。
-    /// 同梱の物はいずれ無くなるし、取得済みの方が新しい形式である事はあっても逆は無い。
-    /// (取得済み同士の形式の重複は VoicevoxVoiceModelStore が既に潰している)
+    /// **アプリには音声モデルを同梱していない。**
+    /// 同梱すると ことせかい が VVM の再配布者になるため、
+    /// 公式から取得してもらう方針にした(DESIGN_VOICEVOXの音声モデル取得.md §4)。
+    /// つまり**入れた直後は1つも無い**のが正しい状態で、
+    /// その時は話者一覧が空になる(選ぼうとすると取得へ促される)。
+    /// (形式の重複は VoicevoxVoiceModelStore が既に潰している)
     static func currentVoiceModelFilePaths() -> [String] {
-        var pathByFileName: [String: String] = [:]
-        if let bundledPath = Bundle.main.path(forResource: "0", ofType: "vvm") {
-            pathByFileName[(bundledPath as NSString).lastPathComponent] = bundledPath
-        }
-        for url in VoicevoxVoiceModelStore.shared.modelFileURLs(
-                readableFormats: VoicevoxVoiceModelCatalogLoader.readableVvmFormatVersions) {
-            pathByFileName[url.lastPathComponent] = url.path
-        }
-        return pathByFileName.values.sorted()
+        return VoicevoxVoiceModelStore.shared.modelFileURLs(
+            readableFormats: VoicevoxVoiceModelCatalogLoader.readableVvmFormatVersions)
+            .map { $0.path }
     }
 
     /// 音声モデルを取得した/消した後に、話者一覧を作り直す。

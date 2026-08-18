@@ -41,7 +41,7 @@ class VoicevoxStageTimingTest: XCTestCase {
         guard let dictPath = Bundle.main.path(forResource: "open_jtalk_dic_utf_8-1.11", ofType: nil) else {
             throw XCTSkip("open_jtalk_dic_utf_8-1.11 がバンドルにありません(scripts/fetch_voicevox_vendor.sh 未実行?)")
         }
-        guard let vvmPath = Bundle.main.path(forResource: "0", ofType: "vvm") else {
+        guard let vvmPath = VoicevoxTestVoiceModel.path() else {
             throw XCTSkip("0.vvm がバンドルにありません(scripts/fetch_voicevox_vendor.sh 未実行?)")
         }
         try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelFilePaths: [vvmPath])

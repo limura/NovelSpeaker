@@ -24,7 +24,7 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
     /// 手元にある本物の VVM。無ければテストを飛ばす
     /// (scripts/fetch_voicevox_vendor.sh を走らせていない環境でも落とさない)。
     private func realVvmURL() throws -> URL {
-        let path = Bundle.main.path(forResource: "0", ofType: "vvm")
+        let path = VoicevoxTestVoiceModel.path()
         try XCTSkipIf(path == nil, "0.vvm が無い(scripts/fetch_voicevox_vendor.sh を実行のこと)")
         return URL(fileURLWithPath: path!)
     }
@@ -42,7 +42,7 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
     // 本物の VVM を、コアを通さずに読めている事。
     func testInspectRealVoiceModelFile() throws {
         let info = try VoicevoxVoiceModelFileInspector.inspect(fileURL: try realVvmURL())
-        XCTAssertEqual(info.vvmFormatVersion, 1, "同梱の 0.vvm は形式1のはず")
+        XCTAssertEqual(info.vvmFormatVersion, 1, "テスト用の 0.vvm は形式1のはず")
         XCTAssertEqual(info.speakers.count, 4, "0.vvm は4キャラ入っている")
         XCTAssertEqual(info.allStyleIds, [0, 1, 2, 3, 4, 5, 6, 7, 8, 10])
         XCTAssertTrue(info.speakers.contains { $0.name == "ずんだもん" })

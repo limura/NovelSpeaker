@@ -16,9 +16,8 @@ class VoicevoxCoreTest: XCTestCase {
             XCTFail("同梱の open_jtalk_dic_utf_8-1.11 がバンドルに見つかりません")
             return
         }
-        guard let vvmPath = Bundle.main.path(forResource: "0", ofType: "vvm") else {
-            XCTFail("同梱の 0.vvm がバンドルに見つかりません")
-            return
+        guard let vvmPath = VoicevoxTestVoiceModel.path() else {
+            throw XCTSkip("テスト用の 0.vvm がありません。scripts/fetch_voicevox_vendor.sh を実行してください")
         }
 
         let core = VoicevoxCore.shared
