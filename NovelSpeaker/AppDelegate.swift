@@ -84,6 +84,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         NovelSpeakerUtility.ProcessURL(url: url)
     }
 
+    /// 背面で走らせていた取得(VOICEVOXの音声モデル)が終わって、OS がアプリを起こしてきた。
+    ///
+    /// **completionHandler を呼ばないと、次から背面で走らせてもらえなくなる。**
+    /// 実際の後始末が終わったところで呼びたいので、ダウンローダに預ける。
+    func application(_ application: UIApplication,
+                     handleEventsForBackgroundURLSession identifier: String,
+                     completionHandler: @escaping () -> Void) {
+        guard identifier == VoicevoxVoiceModelDownloader.sessionIdentifier else {
+            completionHandler()
+            return
+        }
+        VoicevoxVoiceModelDownloader.shared.backgroundEventsCompletionHandler = completionHandler
+        VoicevoxVoiceModelDownloader.shared.resumePendingDownloadsIfNeeded()
+    }
+
     override func buildMenu(with builder: UIMenuBuilder) {
         super.buildMenu(with: builder)
         if #available(iOS 13.0, *) {
