@@ -2934,130 +2934,143 @@ extension HTTPCookie {
 }
 
 /// 残されるメニュー項目の対象タイプ
-enum MenuItemsNotRemovedType: String {
-    /*
-     発見した全てのもの
-     canPerformAction: _accessibilityPauseSpeaking:
-     canPerformAction: _accessibilitySpeak:
-     canPerformAction: _accessibilitySpeakLanguageSelection:
-     canPerformAction: _accessibilitySpeakSentence:
-     canPerformAction: _accessibilitySpeakSpellOut:
-     canPerformAction: _addShortcut:
-     canPerformAction: _define:
-     canPerformAction: _findSelected:
-     canPerformAction: _insertDrawing:
-     canPerformAction: _lookup:
-     canPerformAction: _promptForReplace:
-     canPerformAction: _share:
-     canPerformAction: _showTextStyleOptions:
-     canPerformAction: _translate:
-     canPerformAction: _transliterateChinese:
-     canPerformAction: captureTextFromCamera:
-     canPerformAction: checkSpeechTextWithSender:
-     canPerformAction: copy:
-     canPerformAction: cut:
-     canPerformAction: delete:
-     canPerformAction: makeTextWritingDirectionLeftToRight:
-     canPerformAction: makeTextWritingDirectionRightToLeft:
-     canPerformAction: paste:
-     canPerformAction: select:
-     canPerformAction: selectAll:
-     canPerformAction: setSpeechModForThisNovelSettingWithSender:
-     canPerformAction: setSpeechModSettingWithSender:
-     canPerformAction: toggleBoldface:
-     canPerformAction: toggleItalics:
-     canPerformAction: toggleUnderline:
-     
-     呼び出された順のもの(おそらく表示順)
-     "cut:",
-     "copy:", // コピー
-     "paste:",
-     "delete:",
-     "select:",
-     "selectAll:",
-     "_promptForReplace:",
-     "_transliterateChinese:",
-     "_insertDrawing:",
-     "captureTextFromCamera:",
-     "toggleBoldface:",
-     "toggleItalics:",
-     "toggleUnderline:",
-     "makeTextWritingDirectionRightToLeft:",
-     "makeTextWritingDirectionLeftToRight:",
-     "_findSelected:",
-     "_define:", // 調べる
-     "_translate:", // 翻訳
-     "_addShortcut:", // ユーザ辞書...
-     "_accessibilitySpeak:", // 読み上げ
-     "_accessibilitySpeakSpellOut:", // スペル
-     "_share:",
-     "setSpeechModSettingWithSender:",
-     "setSpeechModForThisNovelSettingWithSender:",
-     "checkSpeechTextWithSender:",
-     */
+///
+/// iOS 16 以降は編集メニューが UIMenuElement のツリー(末端は UICommand)として取れるため、
+/// EditMenuFilter がこの型のセレクタ名一覧と突き合わせて「残す物以外を全部落とす」形で選別する。
+/// iOS 15 では従来通り canPerformAction(_:withSender:) のセレクタ名で判定する。
+///
+/// 同じメニュー項目でも canPerformAction に飛んでくる名前とメニューツリー中の UICommand の
+/// 名前が食い違う物がある(例: canPerformAction は "_share:" だがツリー中は "share:")ため、
+/// selectorNames には両方の綴りを列挙してある。
+///
+/// iOS 18.1 / iOS 26.5 のシミュレータで実測した編集メニューのツリー:
+///   com.apple.menu.standard-edit : cut: / copy: / paste: / delete: / select: / selectAll:
+///   com.apple.menu.replace       : promptForReplace: / transliterateChinese: / _insertDrawing:
+///                                  / showWritingTools: / (com.apple.menu.autofill: captureTextFromCamera:)
+///   com.apple.menu.open          : (空)
+///   com.apple.menu.format        : (text-style: toggleBoldface: / toggleItalics: / toggleUnderline:)
+///                                  (writing-direction: makeTextWritingDirectionRightToLeft:
+///                                   / makeTextWritingDirectionLeftToRight:)
+///                                  _showTextFormattingOptions:
+///   com.apple.menu.lookup        : findSelected: / _define: / _translate:
+///   com.apple.menu.learn         : addShortcut:
+///   com.apple.command.speech     : _accessibilitySpeak: / _accessibilitySpeakLanguageSelection:
+///                                  / _accessibilityPauseSpeaking:
+///   com.apple.menu.share         : share:
+///   com.apple.menu.dynamic.<UUID>: ことせかい が UIMenuController に積んでいる独自項目
+///
+/// rawValue は Realm に保存されているので、既存の物(copy/define/translate/addShortcut/share/selectAll)は
+/// 絶対に変更しないこと。
+enum MenuItemsNotRemovedType: String, CaseIterable {
+    // 標準の編集メニュー
+    case cut
     case copy // コピー
+    case paste
+    case deleteText // 削除(delete は紛らわしいので rawValue を deleteText にしてある)
+    case select
+    case systemSelectAll // OS 標準の「すべてを選択」(ことせかい 独自の selectAll とは別物)
+    // 置き換え系
+    case promptForReplace // 置き換え...
+    case transliterateChinese // 简⇄繁
+    case insertDrawing // 描画を挿入
+    case writingTools // 作文ツール(iOS 18 で追加された)
+    case captureTextFromCamera // テキストをスキャン
+    // 書式系
+    case bold
+    case italic
+    case underline
+    case writingDirection // 書字方向(右から左/左から右)
+    case textFormattingOptions // その他...
+    // 調べる系
+    case findSelected // 選択部分を検索
     case define // 調べる
     case translate // 翻訳
+    // ユーザ辞書
     case addShortcut // ユーザ辞書...
+    // 読み上げ系
+    case speak // 読み上げ
+    case speakLanguageSelection // 読み上げ(言語選択)
+    case pauseSpeaking // 読み上げを一時停止
+    // 共有
     case share // 共有
-    case selectAll // 全てを選択する(ことせかい 独自の selectAllText: 項目)
+    // ことせかい 独自項目
+    case selectAll // 全てを選択する(ことせかい 独自の selectAllTextWithSender: 項目)
 
-    func localizedString() -> String {
+    /// このメニュー項目を表すセレクタ名。
+    /// canPerformAction 経由とメニューツリー経由で名前が違う物があるので両方載せている。
+    var selectorNames: [String] {
         switch self {
-        case .copy:
-            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_copy", comment: "コピー")
-        case .define:
-            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_define", comment: "調べる")
-        case .translate:
-            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_translate", comment: "翻訳")
-        case .addShortcut:
-            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_addShortcut", comment: "ユーザ辞書...")
-        case .share:
-            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_share", comment: "共有")
-        case .selectAll:
-            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_selectAll", comment: "全てを選択する")
+        case .cut: return ["cut:"]
+        case .copy: return ["copy:"]
+        case .paste: return ["paste:"]
+        case .deleteText: return ["delete:"]
+        case .select: return ["select:"]
+        case .systemSelectAll: return ["selectAll:"]
+        case .promptForReplace: return ["promptForReplace:", "_promptForReplace:"]
+        case .transliterateChinese: return ["transliterateChinese:", "_transliterateChinese:"]
+        case .insertDrawing: return ["_insertDrawing:", "insertDrawing:"]
+        case .writingTools: return ["showWritingTools:", "_showWritingTools:"]
+        case .captureTextFromCamera: return ["captureTextFromCamera:"]
+        case .bold: return ["toggleBoldface:"]
+        case .italic: return ["toggleItalics:"]
+        case .underline: return ["toggleUnderline:"]
+        case .writingDirection: return ["makeTextWritingDirectionRightToLeft:", "makeTextWritingDirectionLeftToRight:"]
+        case .textFormattingOptions: return ["_showTextFormattingOptions:", "_showTextStyleOptions:"]
+        case .findSelected: return ["findSelected:", "_findSelected:"]
+        case .define: return ["_define:", "define:", "_lookup:"]
+        case .translate: return ["_translate:", "translate:"]
+        case .addShortcut: return ["addShortcut:", "_addShortcut:"]
+        // 「読み上げ」には文単位/スペル読みも巻き込んでおく(メニューツリーには出て来ないが
+        //  canPerformAction には飛んで来る事があるため)
+        case .speak: return ["_accessibilitySpeak:", "_accessibilitySpeakSentence:", "_accessibilitySpeakSpellOut:"]
+        case .speakLanguageSelection: return ["_accessibilitySpeakLanguageSelection:"]
+        case .pauseSpeaking: return ["_accessibilityPauseSpeaking:"]
+        case .share: return ["share:", "_share:"]
+        case .selectAll: return ["selectAllTextWithSender:"]
         }
     }
-    static func convertFromLocalizedString(localizedString: String) -> MenuItemsNotRemovedType? {
-        switch localizedString {
-        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_copy", comment: "コピー"):
-            return .copy
-        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_define", comment: "調べる"):
-            return .define
-        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_addShortcut", comment: "ユーザ辞書..."):
-            return .addShortcut
-        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_translate", comment: "翻訳"):
-            return .translate
-        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_share", comment: "共有"):
-            return .share
-        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_selectAll", comment: "全てを選択する"):
-            return .selectAll
-        default:
-            return nil
+
+    /// 設定画面でのグループ分け用のキー。
+    /// Eureka の MultipleSelectorViewController はセクションをこのキーの辞書順に並べるので、
+    /// メニュー上の並び順を保つために数字にしてある(表示名は sectionTitle(forSectionKey:) で引く)。
+    var sectionKey: String {
+        switch self {
+        case .cut, .copy, .paste, .deleteText, .select, .systemSelectAll: return "1"
+        case .promptForReplace, .transliterateChinese, .insertDrawing, .writingTools, .captureTextFromCamera: return "2"
+        case .bold, .italic, .underline, .writingDirection, .textFormattingOptions: return "3"
+        case .findSelected, .define, .translate: return "4"
+        case .addShortcut: return "5"
+        case .speak, .speakLanguageSelection, .pauseSpeaking: return "6"
+        case .share: return "7"
+        case .selectAll: return "8"
         }
+    }
+    /// sectionKey に対応する、設定画面に表示するグループ名
+    static func sectionTitle(forSectionKey sectionKey: String) -> String? {
+        switch sectionKey {
+        case "1": return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Section_standardEdit", comment: "編集")
+        case "2": return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Section_replace", comment: "置き換え")
+        case "3": return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Section_format", comment: "書式")
+        case "4": return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Section_lookup", comment: "調べる")
+        case "5": return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Section_learn", comment: "ユーザ辞書")
+        case "6": return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Section_speech", comment: "読み上げ")
+        case "7": return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Section_share", comment: "共有")
+        case "8": return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Section_novelSpeaker", comment: "ことせかい")
+        default: return nil
+        }
+    }
+
+    func localizedString() -> String {
+        // キーは "RealmModels_MenuItemsNotRemoved_Name_" + rawValue で統一してある。
+        // (既存の copy/define/translate/addShortcut/share/selectAll のキーもこの規則に沿っている)
+        return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_" + rawValue, comment: "長押しメニュー項目名")
+    }
+    static func convertFromLocalizedString(localizedString: String) -> MenuItemsNotRemovedType? {
+        return allCases.first(where: { $0.localizedString() == localizedString })
     }
 
     func isTargetSelector(selector: Selector) -> Bool {
-        switch self {
-        case .define:
-            return selector.description == "_define:"
-        case .addShortcut:
-            return selector.description == "_addShortcut:"
-        case .translate:
-            return selector.description == "_translate:"
-        case .share:
-            return selector.description == "_share:"
-        case .selectAll:
-            // ことせかい 独自メニュー項目「全てを選択する」の selectAllText(sender:) セレクタ。
-            return selector.description == "selectAllTextWithSender:"
-            #if !os(watchOS)
-        case .copy:
-            return selector == #selector(UIResponderStandardEditActions.copy(_:))
-            #else
-        default:
-            return false
-            #endif
-        }
+        return selectorNames.contains(selector.description)
     }
 }
 

@@ -236,6 +236,7 @@
 		21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
 		21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054F41917E0F200CC6BA9 /* InfoPlist.strings */; };
 		21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */; };
+		21F37B7F1EC2379100BE0452 /* EditMenuFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21F37B7E1EC2379100BE0452 /* EditMenuFilter.swift */; };
 		21F563C71FD801970037F5D7 /* >.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563C11FD801950037F5D7 /* >.png */; };
 		21F563C81FD801970037F5D7 /* >@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563C21FD801960037F5D7 /* >@2x.png */; };
 		21F563CA1FD801970037F5D7 /* >@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563C41FD801970037F5D7 /* >@3x.png */; };
@@ -582,6 +583,7 @@
 		21F054F51917E0F200CC6BA9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeaker-Bridging-Header.h"; sourceTree = "<group>"; };
 		21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomUITextView.swift; sourceTree = "<group>"; };
+		21F37B7E1EC2379100BE0452 /* EditMenuFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMenuFilter.swift; sourceTree = "<group>"; };
 		21F563C11FD801950037F5D7 /* >.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">.png"; sourceTree = "<group>"; };
 		21F563C21FD801960037F5D7 /* >@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">@2x.png"; sourceTree = "<group>"; };
 		21F563C41FD801970037F5D7 /* >@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">@3x.png"; sourceTree = "<group>"; };
@@ -884,6 +886,7 @@
 				21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */,
 				21E76BF81FB487B1003C659F /* EasyDialogs.swift */,
 				21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */,
+				21F37B7E1EC2379100BE0452 /* EditMenuFilter.swift */,
 				2167419F2043D592008A578D /* BehaviorLogger.swift */,
 				216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */,
 				2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */,
@@ -1740,6 +1743,7 @@
 				21DFB3FC22ADA1390006A933 /* ActivityIndicatorManager.swift in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
+				21F37B7F1EC2379100BE0452 /* EditMenuFilter.swift in Sources */,
 				21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */,
 				219106DF2468371A00BBA5AF /* NovelSearchViewController.swift in Sources */,
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,

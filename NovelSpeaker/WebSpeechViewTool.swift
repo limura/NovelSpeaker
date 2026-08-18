@@ -45,24 +45,30 @@ extension UIColor {
 }
 
 public class CustomWKWebView: WKWebView {
-    // WKWebView で長押しして出て来るメニューの項目を減らします
+    // WKWebView で長押しして出て来るメニューの項目を減らします
     // from http://qiita.com/watt1006/items/2425bfa1720d522d05fd
+    //
+    // iOS 16 以降は buildMenu(with:) 側でメニューのツリーを走査して選別するため、
+    // こちらは主に iOS 15 用の経路になる。
+    // (どちらも EditMenuFilter の同じ判定を使うので結果は一致する)
     override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         if StorySpeaker.shared.isPlayng {
             return false
         }
-        return RealmUtil.RealmBlock { (realm) -> Bool in
-            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                if globalState.isMenuItemIsAddNovelSpeakerItemsOnly {
-                    for typeName in globalState.menuItemsNotRemoved {
-                        if let type = MenuItemsNotRemovedType(rawValue: typeName), type.isTargetSelector(selector: action) {
-                            return super.canPerformAction(action, withSender: sender)
-                        }
-                    }
-                    return false
-                }
-            }
-            return super.canPerformAction(action, withSender: sender);
+        if !EditMenuFilter.isAllowedForCanPerformAction(action: action) {
+            return false
+        }
+        return super.canPerformAction(action, withSender: sender)
+    }
+
+    // WKWebView には UITextViewDelegate.editMenuForTextIn 相当の物が無いが、
+    // iOS 16 以降は長押しの編集メニューも UIMenuBuilder(.context)経由で組み立てられており、
+    // レスポンダである WKWebView の buildMenu(with:) にそのツリーが渡ってくる。
+    // ここで選別すれば、セレクタ名を知らない項目(OS が後から増やした物)も落とせる。
+    override public func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        if #available(iOS 16.0, *) {
+            EditMenuFilter.apply(builder: builder)
         }
     }
 }

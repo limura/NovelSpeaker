@@ -11,7 +11,7 @@ import RealmSwift
 import IceCream
 import Eureka
 
-class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, UIGestureRecognizerDelegate /*, UIEditMenuInteractionDelegate */ {
+class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, UIGestureRecognizerDelegate, UITextViewDelegate {
     
     public var storyID : String? = nil
     public var isNeedResumeSpeech : Bool = false
@@ -135,12 +135,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         RealmObserverHandler.shared.AddDelegate(delegate: self)
         searchTextCache = ""
         
-        /* // TODO: UIEditMenuInteraction をサポートする場合用。「設定タブ」→「本文中の長押しメニュー項目を減らす」がうまく実装できていないの一旦封印しておきます。
-        if #available(iOS 16.0, *) {
-            let editMenuInteraction = UIEditMenuInteraction(delegate: self)
-            self.textView.addInteraction(editMenuInteraction)
-        }
-         */
+        // iOS 16 以降の長押しメニュー選別のために delegate を設定する。
+        // (UIEditMenuInteraction を自前で addInteraction するのではなく、
+        //  UITextViewDelegate.textView(_:editMenuForTextIn:suggestedActions:) を使う)
+        self.textView.delegate = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -1643,25 +1641,21 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             self.storySpeaker.LoadNextChapter(realm: realm)
         }
     }
+    // iOS 16 以降の長押しメニューの選別。
+    // suggestedActions は UIMenu / UICommand のツリーとして渡ってくるので、
+    // セレクタ名を推測せずに「残すと指定された物以外を全部落とす」形で選別できる。
+    // (ことせかい 独自の項目は UIMenuController 由来の com.apple.menu.dynamic.* として
+    //  この中に含まれており、EditMenuFilter が常に残す)
     @available(iOS 16.0, *)
-    func editMenuInteraction(_ interaction: UIEditMenuInteraction, menuFor configuration: UIEditMenuConfiguration, suggestedActions: [UIMenuElement]) -> UIMenu? {
-        print("HOGEHOGE: editMenuInteraction: \(configuration.identifier) \(suggestedActions.map({"\($0.title):\($0.subtitle ?? "nil"):\($0.debugDescription)"}).joined(separator: ", "))")
+    func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
         if self.storySpeaker.isPlayng {
             return nil
         }
-        
-        let addActions: [UIMenuElement] = [
-            UIAction(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), handler: { _ in
-                self.setSpeechModSetting(sender: UIMenuItem())
-             }),
-            UIAction(title: NSLocalizedString("SpeechViewController_AddSpeechModSettingsForThisNovel", comment: "この小説用の読み替え辞書へ登録"), handler: { _ in
-                self.setSpeechModForThisNovelSetting(sender: UIMenuItem())
-            }),
-            UIAction(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), handler: { _ in
-                self.checkSpeechText(sender:UIMenuItem())
-            })
-        ]
-        return UIMenu(children: suggestedActions + addActions)
+        let children = EditMenuFilter.filteredSuggestedActions(suggestedActions)
+        if children.isEmpty {
+            return nil
+        }
+        return UIMenu(children: children)
     }
     
     override var keyCommands: [UIKeyCommand]? {
