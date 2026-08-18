@@ -91,29 +91,37 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     /// 合成コストの「固定費 + 単価」を、その場の状態で測る(デバッグ用)。
     ///
     /// **Xcode から繋いで走らせるテストでは、電源に繋がった状態でしか測れない。**
-    /// 背面CPU上限が効くのはバッテリー駆動時なので、その状態での単価が本当に知りたい値になる。
-    /// (CPU秒/文字はクロックで変わる。低クロックなら同じ仕事でもCPU秒が伸びる)
-    /// ここから走らせれば、ケーブルを抜いて、画面を消して、背面に回した状態でも測れる。
+    /// CPU秒/文字はクロックで変わる(低クロックなら同じ仕事でもCPU秒が伸びる)ので、
+    /// バッテリー駆動での単価は電源接続時より悪くなる。そこを知るための入口。
     ///
-    /// 結果は「アプリ内エラーのお知らせ」に出るので、後から見に行ける。
+    /// **画面を消してはいけない。** 音声を鳴らしていないので背面実行の資格が無く、
+    /// 中断されて計測が滅茶苦茶になる(実際に 240文字で wall-cpu が24秒開いた)。
+    /// ケーブルを抜いて、前面のまま置いておく事。画面は自動で消えないようにしてある。
     private func measureVoicevoxSynthesisCostModel() {
-        // 短い方と長い方の2点あれば、固定費と単価は分離できる。
-        // 端末が遅いと1点で90秒級かかるので、点数は絞る。
-        let characterCounts = [20, 240]
+        // 2点だと非線形性が全部「傾き」に化けて固定費が負になる事がある。
+        // 4点取って最小二乗で当てはめ、R² で当てはまりの良さも見る。
+        // 遅い端末(SE2・低電力)では1文字1秒近くかかるので、点は小さめに取る。
+        let characterCounts = [20, 40, 80, 120]
         let sample = "　少女は窓の外を眺めながら、そう答えた。空は抜けるように青く、遠くの山並みまではっきりと見えている。今日も良い天気になりそうだ。"
         let styleId = VoicevoxCore.cachedStyles.first?.styleId ?? 0
+        let totalCharacters = characterCounts.reduce(0, +)
         NiftyUtility.EasyDialogOneButton(
             viewController: self,
             title: "合成コストを測ります",
-            message: "\(characterCounts.map { "\($0)文字" }.joined(separator: " と "))を合成します。"
-                + "遅い端末では数分かかります。\n\n"
-                + "バッテリー駆動・背面での値を見たい場合は、開始後にケーブルを抜いて画面を消してください。\n\n"
+            message: "\(characterCounts.map { "\($0)" }.joined(separator: "/"))文字を順に合成します"
+                + "(合計\(totalCharacters)文字)。遅い端末では数分かかります。\n\n"
+                + "バッテリー駆動での値を見たい場合は、開始後にケーブルを抜いてください。\n"
+                + "**画面は消さないでください。** 中断されて正しく測れません。\n\n"
                 + "結果は「アプリ内エラーのお知らせ」に出ます。",
             buttonTitle: nil) { [weak self] in
             guard let self = self else { return }
+            // 計測中に画面が消えると中断されるので、消えないようにしておく。
+            UIApplication.shared.isIdleTimerDisabled = true
             Task {
+                defer { Task { @MainActor in UIApplication.shared.isIdleTimerDisabled = false } }
                 await VoicevoxCore.setUpFromBundleIfNeeded()
-                var points: [(chars: Int, cpu: Double)] = []
+                var points: [(chars: Double, cpu: Double)] = []
+                var suspectedInterruption = false
                 for characterCount in characterCounts {
                     var text = ""
                     while text.count < characterCount { text += sample }
@@ -121,12 +129,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     do {
                         let timing = try await VoicevoxCore.shared.debugMeasureStages(
                             text: text, styleId: styleId, includeOneShotTTS: false)
-                        points.append((characterCount, timing.stagedTotal.cpu))
+                        let cpu = timing.stagedTotal.cpu
+                        let wall = timing.stagedTotal.wall
+                        // 走っていない時間。前面で動いていれば ほぼ0 になるはず。
+                        // 大きく開いていたら、中断されたか他に食われたかで、この点は当てにならない。
+                        let stalled = wall - cpu
+                        if stalled > max(2.0, wall * 0.05) { suspectedInterruption = true }
+                        points.append((Double(characterCount), cpu))
                         AppInformationLogger.AddLog(
                             message: "[VOICEVOX合成コスト] \(characterCount)文字 "
-                                + "cpu=\(String(format: "%.2f", timing.stagedTotal.cpu))秒 "
-                                + "wall=\(String(format: "%.2f", timing.stagedTotal.wall))秒 "
-                                + "音声=\(String(format: "%.2f", timing.audioSeconds))秒",
+                                + "cpu=\(String(format: "%.2f", cpu))秒 "
+                                + "wall=\(String(format: "%.2f", wall))秒 "
+                                + "止まっていた時間=\(String(format: "%.2f", stalled))秒 "
+                                + "音声=\(String(format: "%.2f", timing.audioSeconds))秒 "
+                                + "\(Self.deviceStateDescription())",
                             isForDebug: true)
                     } catch {
                         AppInformationLogger.AddLog(
@@ -134,23 +150,62 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             isForDebug: true)
                     }
                 }
-                if points.count >= 2 {
-                    let first = points.first!
-                    let last = points.last!
-                    let span = Double(last.chars - first.chars)
-                    if span > 0 {
-                        let perCharacter = (last.cpu - first.cpu) / span
-                        let overhead = first.cpu - perCharacter * Double(first.chars)
-                        AppInformationLogger.AddLog(
-                            message: "[VOICEVOX合成コスト] 固定費=\(String(format: "%.2f", overhead))秒 "
-                                + "単価=\(String(format: "%.4f", perCharacter))秒/文字 "
-                                + "(低電力=\(ProcessInfo.processInfo.isLowPowerModeEnabled ? "入" : "切")"
-                                + " 発熱=\(ProcessInfo.processInfo.thermalState.rawValue))",
-                            isForDebug: false)
-                    }
-                }
+                AppInformationLogger.AddLog(
+                    message: Self.describeCostFit(points: points,
+                                                  suspectedInterruption: suspectedInterruption),
+                    isForDebug: false)
             }
         }
+    }
+
+    /// 低電力モードと発熱の状態。単価はこれで大きく変わるので、必ず数値に添える。
+    private static func deviceStateDescription() -> String {
+        let thermal: String
+        switch ProcessInfo.processInfo.thermalState {
+        case .nominal: thermal = "平常"
+        case .fair: thermal = "やや高い"
+        case .serious: thermal = "高い"
+        case .critical: thermal = "危険"
+        @unknown default: thermal = "不明"
+        }
+        return "(低電力=\(ProcessInfo.processInfo.isLowPowerModeEnabled ? "入" : "切") 発熱=\(thermal))"
+    }
+
+    /// 最小二乗で `固定費 + 単価 × 文字数` に当てはめ、当てはまりの良さも添えて文字列にする。
+    private static func describeCostFit(points: [(chars: Double, cpu: Double)],
+                                        suspectedInterruption: Bool) -> String {
+        guard points.count >= 2 else {
+            return "[VOICEVOX合成コスト] 点が足りず当てはめできませんでした"
+        }
+        let n = Double(points.count)
+        let sumX = points.reduce(0.0) { $0 + $1.chars }
+        let sumY = points.reduce(0.0) { $0 + $1.cpu }
+        let sumXY = points.reduce(0.0) { $0 + $1.chars * $1.cpu }
+        let sumXX = points.reduce(0.0) { $0 + $1.chars * $1.chars }
+        let denominator = n * sumXX - sumX * sumX
+        guard denominator != 0 else {
+            return "[VOICEVOX合成コスト] 文字数に幅が無く当てはめできませんでした"
+        }
+        let perCharacter = (n * sumXY - sumX * sumY) / denominator
+        let overhead = (sumY - perCharacter * sumX) / n
+        let mean = sumY / n
+        let totalVariance = points.reduce(0.0) { $0 + pow($1.cpu - mean, 2) }
+        let residual = points.reduce(0.0) { $0 + pow($1.cpu - (overhead + perCharacter * $1.chars), 2) }
+        let rSquared = totalVariance > 0 ? 1 - residual / totalVariance : 0
+
+        var message = "[VOICEVOX合成コスト] 固定費=\(String(format: "%.2f", overhead))秒 "
+            + "単価=\(String(format: "%.4f", perCharacter))秒/文字 "
+            + "R2=\(String(format: "%.4f", rSquared)) "
+            + deviceStateDescription()
+        // 当てはまりが悪い/固定費が負 = 直線で説明できていない。
+        // 持続負荷でだんだん遅くなっている(=長いほど不利)か、中断が混じっている。
+        if suspectedInterruption {
+            message += "\n※ 合成が止まっていた時間があります。画面を消したか、他のアプリに食われた可能性があります。この値は当てになりません"
+        }
+        if overhead < 0 || rSquared < 0.98 {
+            message += "\n※ 直線に乗っていません。合成が進むにつれて遅くなっている(持続負荷でクロックが落ちている)可能性があります"
+        }
+        return message
     }
 
     /// ディスクキャッシュに貯める音声の圧縮に、実機でどれだけ時間がかかるかを測る(デバッグ用)。
