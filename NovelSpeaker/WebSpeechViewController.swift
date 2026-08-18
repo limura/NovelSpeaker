@@ -22,7 +22,7 @@ import Eureka
  - 「このページ内で検索」の機能が未実装
  */
 
-class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, WKScriptMessageHandler {
+class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, WKScriptMessageHandler, UIGestureRecognizerDelegate {
     var targetStoryID:String? = nil
     var isNeedResumeSpeech:Bool = false
     var isNeedUpdateReadDate:Bool = true
@@ -48,6 +48,29 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var currentReadStoryIDChangeAlertFloatingButton:FloatingButton? = nil
 
     var scrollPullAndFireHandler:ScrollPullAndFireHandler? = nil
+
+    // MARK: 発話位置への自動スクロールの一時停止(通常版 SpeechViewController と同じ考え方)
+    // WebView版はハイライト(canvas)と selection が別物なので、
+    // 一時停止中も「ハイライトは動かす、スクロールと selection の張り替えはしない」にする。
+    var isScrollFollowSuspended:Bool = false {
+        didSet {
+            self.textWebView?.isScrollFollowSuspended = self.isScrollFollowSuspended
+            self.webSpeechTool.setKeepUserSelection(self.isScrollFollowSuspended)
+        }
+    }
+    var scrollFollowSuspendTimer:Timer? = nil
+    var scrollFollowPendingLocation:Int? = nil
+    var speakFromHereLongPressRecognizer:UILongPressGestureRecognizer? = nil
+
+    // 画面下部のボタン群(右上のボタン群とは独立した設定。既定では何も表示しない)
+    var bottomButtonBar:SpeechViewBottomButtonBar? = nil
+    var bottomStartStopButton:UIButton? = nil
+    var bottomSkipBackwardButton:UIButton? = nil
+    var bottomSkipForwardButton:UIButton? = nil
+    // 直前に画面下部のボタン群を作った時の状態。
+    // viewDidLayoutSubviews から呼ばれる事があるので、毎回作り直すと
+    // 「作り直す→レイアウトが走る→また呼ばれる」で無限に回ってしまう。同じ内容なら何もしない。
+    var currentBottomButtonSignature:String? = nil
     
     let previousChapterButton = UIButton()
     let nextChapterButton = UIButton()
@@ -118,6 +141,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
     
     deinit {
+        self.scrollFollowSuspendTimer?.invalidate()
+        self.scrollFollowSuspendTimer = nil
         StopObservers()
         self.unregistNotificationCenter()
         WebSpeechViewController.instance = nil
@@ -134,6 +159,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.resumeTheme()
+        self.cancelScrollFollowSuspend()
         StorySpeaker.shared.RemoveDelegate(delegate: self)
         self.displayTopAndDownComponents(animated: false)
     }
@@ -202,6 +228,57 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
                 guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
                 self.assignUpperButtons(novelID: novel.novelID, novelType: novel.type, aliveButtonSettings: buttonSettings)
             }
+            self.assignBottomButtons()
+        }
+    }
+
+    // 画面下部のボタン群を作り直す。設定が全部OFFなら何も表示しない(バー自体を消す)。
+    // viewDidLayoutSubviews からも呼ばれるので、同じ内容なら何もしないで返す
+    // (でないと「作り直す→レイアウトが走る→また呼ばれる」で無限に回る)。
+    func assignBottomButtons() {
+        DispatchQueue.main.async {
+            let isPlayng = StorySpeaker.shared.isPlayng
+            let info:(novelID:String, novelType:NovelType, settings:[SpeechViewButtonSetting], overlaps:Bool)? = RealmUtil.RealmBlock { (realm) -> (novelID:String, novelType:NovelType, settings:[SpeechViewButtonSetting], overlaps:Bool)? in
+                let storyID = StorySpeaker.shared.storyID
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(),
+                      let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return nil }
+                return (novelID: novel.novelID, novelType: novel.type, settings: globalState.GetSpeechViewBottomButtonSetting(), overlaps: globalState.isSpeechViewBottomButtonOverlapsChapterBar)
+            }
+            guard let info = info else { return }
+            let signature = "\(info.novelID)/\(info.novelType)/\(info.overlaps)/\(isPlayng)/\(NovelSpeakerUtility.GetBarButtonItemSpacing())/" + info.settings.map({ "\($0.type.rawValue):\($0.isOn)" }).joined(separator: ",")
+            if self.currentBottomButtonSignature == signature { return }
+            self.currentBottomButtonSignature = signature
+
+            self.bottomButtonBar?.removeFromSuperview()
+            self.bottomButtonBar = nil
+            self.bottomStartStopButton = nil
+            self.bottomSkipBackwardButton = nil
+            self.bottomSkipForwardButton = nil
+            if info.settings.contains(where: { $0.isOn }) == false { return }
+
+            let buttons = self.createSpeechViewButtonArray(novelID: info.novelID, novelType: info.novelType, aliveButtonSettings: info.settings, buttonSize: 28, isForBottomBar: true)
+            if buttons.isEmpty { return }
+
+            let bar = SpeechViewBottomButtonBar()
+            self.view.addSubview(bar)
+            self.view.bringSubviewToFront(bar)
+            bar.setButtons(buttons)
+            let safeAreaGuide = self.view.safeAreaLayoutGuide
+            var constraints:[NSLayoutConstraint] = [
+                bar.leadingAnchor.constraint(greaterThanOrEqualTo: safeAreaGuide.leadingAnchor, constant: 8),
+                bar.trailingAnchor.constraint(lessThanOrEqualTo: safeAreaGuide.trailingAnchor, constant: -8),
+                bar.centerXAnchor.constraint(equalTo: safeAreaGuide.centerXAnchor),
+            ]
+            if info.overlaps {
+                // ページ送りのバーに重ねる(本文は最大限広いが、ページ送り/スライダは押せなくなる)
+                constraints.append(bar.centerYAnchor.constraint(equalTo: self.previousChapterButton.centerYAnchor))
+            }else{
+                // ページ送りのバーの上に出す(ページ送りは押せるが、本文が少し隠れる)
+                constraints.append(bar.bottomAnchor.constraint(equalTo: self.previousChapterButton.topAnchor, constant: -4))
+            }
+            NSLayoutConstraint.activate(constraints)
+            self.bottomButtonBar = bar
+            self.applyTheme()
         }
     }
     // background から redume した時に何故かWebViewの中身が空(真っ白)になる事があるぽいのでそれに対抗するために redume した時に呼ばれて再描画？する関数を用意しておきます。(´・ω・`)
@@ -366,7 +443,29 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
                 }
             }
         }
+        scrollPullAndFireHandler.userScrollBeganHandler = { [weak self] in
+            guard let self = self else { return }
+            let second = self.scrollFollowSuspendSecond()
+            if second <= 0 { return }
+            self.suspendScrollFollow(second: second)
+        }
+        scrollPullAndFireHandler.userScrollEndedHandler = { [weak self] in
+            guard let self = self else { return }
+            // 指を離した時点から測り直す。
+            self.suspendScrollFollow(second: self.scrollFollowSuspendSecond())
+        }
         self.scrollPullAndFireHandler = scrollPullAndFireHandler
+
+        // 長押しで「ここから発話開始」を出すために、長押し開始で一時停止を始める。
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.handleSpeakFromHereLongPress(_:)))
+        longPressRecognizer.minimumPressDuration = 0.3
+        longPressRecognizer.cancelsTouchesInView = false
+        longPressRecognizer.delaysTouchesBegan = false
+        longPressRecognizer.delegate = self
+        webView.addGestureRecognizer(longPressRecognizer)
+        self.speakFromHereLongPressRecognizer = longPressRecognizer
+        (webView as? CustomWKWebView)?.speakFromHereSelector = #selector(self.speakFromHere(sender:))
+        (webView as? CustomWKWebView)?.speakFromHereTarget = self
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: safeAreaGuide.topAnchor, constant: 8),
             webView.bottomAnchor.constraint(equalTo: previousChapterButton.topAnchor, constant: -8),
@@ -636,6 +735,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
 
     func applyThemeColor(backgroundColor:UIColor, foregroundColor:UIColor, indicatorStyle:UIScrollView.IndicatorStyle, barStyle:UIBarStyle) {
+        self.bottomButtonBar?.applyThemeColor(backgroundColor: backgroundColor, foregroundColor: foregroundColor)
         
         self.view.backgroundColor = backgroundColor;
         if #available(iOS 13.0, *) {
@@ -947,146 +1047,153 @@ body.NovelSpeakerBody {
     var skipBackwardButtonItem:UIButton? = nil
     var skipForwardButtonItem:UIButton? = nil
     var currentWindowWidth:CGFloat = 0.0
+    // 右上のボタン群と画面下部のボタン群の両方で使う、設定配列から実際のボタンを作る処理。
+    func createSpeechViewButtonArray(novelID: String, novelType: NovelType, aliveButtonSettings:[SpeechViewButtonSetting], buttonSize:CGFloat, isForBottomBar:Bool) -> [UIButton] {
+        var barButtonArray:[UIButton] = []
+        
+        func createBarButtonItem(image: UIImage?, action: Selector, accessibilityLabel: String) -> UIButton {
+            let button = UIButton(type: .system)
+            button.setImage(image, for: .normal)
+            button.addTarget(self, action: action, for: .touchUpInside)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.accessibilityLabel = accessibilityLabel
+            let widthConstraint = button.widthAnchor.constraint(equalToConstant: buttonSize)
+            widthConstraint.priority = UILayoutPriority(999) // 1000未満にする
+            let heightConstraint = button.heightAnchor.constraint(equalToConstant: buttonSize)
+            heightConstraint.priority = UILayoutPriority(999)
+            NSLayoutConstraint.activate([
+                widthConstraint,
+                heightConstraint
+            ])
+            return button
+        }
+
+        for buttonSetting in aliveButtonSettings {
+            if buttonSetting.isOn == false { continue }
+            switch buttonSetting.type {
+            case .openCurrentWebPage:
+                if novelType == .URL {
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "globe.americas.fill"),
+                        action: #selector(self.openCurrentWebPageButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_CurrentWebPageButton_VoiceOverTitle", comment: "現在のページをWeb取込タブで開く")
+                    )
+                    barButtonArray.append(button)
+                }
+            case .openWebPage:
+                if novelType == .URL {
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "globe.badge.chevron.backward"),
+                        action: #selector(self.safariButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
+                    )
+                    barButtonArray.append(button)
+                }
+            case .reload:
+                if novelType == .URL || (novelType == .UserCreated && NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novelID)) {
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "arrow.clockwise"),
+                        action: #selector(self.urlRefreshButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewController_RefreshButton_AccessibilityLabel", comment: "この小説の更新確認を行う")
+                    )
+                    barButtonArray.append(button)
+                }
+            case .share:
+                if novelType == .URL {
+                    let button = createBarButtonItem(
+                        image: UIImage(systemName: "square.and.arrow.up"),
+                        action: #selector(self.shareButtonClicked(_:)),
+                        accessibilityLabel: NSLocalizedString("SpeechViewButtonType_Share", comment: "小説のURLをシェアする")
+                    )
+                    barButtonArray.append(button)
+                }
+            case .search:
+                //barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:))))
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "magnifyingglass"),
+                    action: #selector(self.searchButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewController_SearchButton_AccessibilityLabel", comment: "検索")
+                )
+                barButtonArray.append(button)
+                /*
+            case .searchByText:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "doc.text.magnifyingglass"),
+                    action: #selector(self.searchByTextButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewController_SearchByTextButton_AccessibilityLabel", comment: "ページ内を検索")
+                )
+                barButtonArray.append(button)
+                 */
+            case .edit:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "pencil"),
+                    action: #selector(self.editButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewController_Edit", comment: "編集")
+                )
+                barButtonArray.append(button)
+            case .detail:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "book.pages"),
+                    action: #selector(self.detailButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewController_Detail", comment: "詳細")
+                )
+                barButtonArray.append(button)
+            case .backup:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "tray.and.arrow.up"),
+                    action: #selector(self.backupButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewController_BackupButton", comment: "バックアップ")
+                )
+                barButtonArray.append(button)
+            case .skipBackward:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "gobackward.30"),
+                    action: #selector(self.skipBackwardButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し")
+                )
+                if isForBottomBar { self.bottomSkipBackwardButton = button } else { self.skipBackwardButtonItem = button }
+                barButtonArray.append(button)
+            case .skipForward:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "goforward.30"),
+                    action: #selector(self.skipForwardButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ")
+                )
+                if isForBottomBar { self.bottomSkipForwardButton = button } else { self.skipForwardButtonItem = button }
+                barButtonArray.append(button)
+            case .showTableOfContents:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "list.bullet"),
+                    action: #selector(self.showTableOfContentsButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
+                )
+                barButtonArray.append(button)
+            case .addPageToOtherNovel:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: "book.badge.plus"),
+                    action: #selector(self.addPageToOtherNovelButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
+                )
+                barButtonArray.append(button)
+            case .speechStop:
+                let button = createBarButtonItem(image: UIImage(systemName: "play.fill"), action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
+                if isForBottomBar { self.bottomStartStopButton = button } else { self.startStopButton = button }
+                barButtonArray.append(button)
+            default:
+                break
+            }
+        }
+
+        return barButtonArray
+    }
+
     func assignUpperButtons(novelID: String, novelType: NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
         DispatchQueue.main.async {
             let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
             if abs(self.currentWindowWidth - nowWidth) < 0.0001 && self.isUpperRightButtonsChanged == false {
                 return
             }
-            var barButtonArray:[UIButton] = []
-            
-            func createBarButtonItem(image: UIImage?, action: Selector, accessibilityLabel: String) -> UIButton {
-                let button = UIButton(type: .system)
-                button.setImage(image, for: .normal)
-                button.addTarget(self, action: action, for: .touchUpInside)
-                button.translatesAutoresizingMaskIntoConstraints = false
-                button.accessibilityLabel = accessibilityLabel
-                let widthConstraint = button.widthAnchor.constraint(equalToConstant: 28)
-                widthConstraint.priority = UILayoutPriority(999) // 1000未満にする
-                let heightConstraint = button.heightAnchor.constraint(equalToConstant: 28)
-                heightConstraint.priority = UILayoutPriority(999)
-                NSLayoutConstraint.activate([
-                    widthConstraint,
-                    heightConstraint
-                ])
-                return button
-            }
-
-            for buttonSetting in aliveButtonSettings {
-                if buttonSetting.isOn == false { continue }
-                switch buttonSetting.type {
-                case .openCurrentWebPage:
-                    if novelType == .URL {
-                        let button = createBarButtonItem(
-                            image: UIImage(systemName: "globe.americas.fill"),
-                            action: #selector(self.openCurrentWebPageButtonClicked(_:)),
-                            accessibilityLabel: NSLocalizedString("SpeechViewController_CurrentWebPageButton_VoiceOverTitle", comment: "現在のページをWeb取込タブで開く")
-                        )
-                        barButtonArray.append(button)
-                    }
-                case .openWebPage:
-                    if novelType == .URL {
-                        let button = createBarButtonItem(
-                            image: UIImage(systemName: "globe.badge.chevron.backward"),
-                            action: #selector(self.safariButtonClicked(_:)),
-                            accessibilityLabel: NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
-                        )
-                        barButtonArray.append(button)
-                    }
-                case .reload:
-                    if novelType == .URL || (novelType == .UserCreated && NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novelID)) {
-                        let button = createBarButtonItem(
-                            image: UIImage(systemName: "arrow.clockwise"),
-                            action: #selector(self.urlRefreshButtonClicked(_:)),
-                            accessibilityLabel: NSLocalizedString("SpeechViewController_RefreshButton_AccessibilityLabel", comment: "この小説の更新確認を行う")
-                        )
-                        barButtonArray.append(button)
-                    }
-                case .share:
-                    if novelType == .URL {
-                        let button = createBarButtonItem(
-                            image: UIImage(systemName: "square.and.arrow.up"),
-                            action: #selector(self.shareButtonClicked(_:)),
-                            accessibilityLabel: NSLocalizedString("SpeechViewButtonType_Share", comment: "小説のURLをシェアする")
-                        )
-                        barButtonArray.append(button)
-                    }
-                case .search:
-                    //barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:))))
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "magnifyingglass"),
-                        action: #selector(self.searchButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_SearchButton_AccessibilityLabel", comment: "検索")
-                    )
-                    barButtonArray.append(button)
-                    /*
-                case .searchByText:
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "doc.text.magnifyingglass"),
-                        action: #selector(self.searchByTextButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_SearchByTextButton_AccessibilityLabel", comment: "ページ内を検索")
-                    )
-                    barButtonArray.append(button)
-                     */
-                case .edit:
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "pencil"),
-                        action: #selector(self.editButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_Edit", comment: "編集")
-                    )
-                    barButtonArray.append(button)
-                case .detail:
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "book.pages"),
-                        action: #selector(self.detailButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_Detail", comment: "詳細")
-                    )
-                    barButtonArray.append(button)
-                case .backup:
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "tray.and.arrow.up"),
-                        action: #selector(self.backupButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_BackupButton", comment: "バックアップ")
-                    )
-                    barButtonArray.append(button)
-                case .skipBackward:
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "gobackward.30"),
-                        action: #selector(self.skipBackwardButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し")
-                    )
-                    self.skipBackwardButtonItem = button
-                    barButtonArray.append(button)
-                case .skipForward:
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "goforward.30"),
-                        action: #selector(self.skipForwardButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ")
-                    )
-                    self.skipForwardButtonItem = button
-                    barButtonArray.append(button)
-                case .showTableOfContents:
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "list.bullet"),
-                        action: #selector(self.showTableOfContentsButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
-                    )
-                    barButtonArray.append(button)
-                case .addPageToOtherNovel:
-                    let button = createBarButtonItem(
-                        image: UIImage(systemName: "book.badge.plus"),
-                        action: #selector(self.addPageToOtherNovelButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
-                    )
-                    barButtonArray.append(button)
-                case .speechStop:
-                    let button = createBarButtonItem(image: UIImage(systemName: "play.fill"), action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
-                    self.startStopButton = button
-                    barButtonArray.append(button)
-                default:
-                    break
-                }
-            }
+            let barButtonArray = self.createSpeechViewButtonArray(novelID: novelID, novelType: novelType, aliveButtonSettings: aliveButtonSettings, buttonSize: 28, isForBottomBar: false)
 
             let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
             // 見積もりは通常の本文画面(SpeechViewController)と完全に同一にする。
@@ -1750,12 +1857,24 @@ body.NovelSpeakerBody {
         }else{
             location = range.location
         }
+        // 自分でスクロールした直後はスクロールだけ止める。
+        // ハイライト(canvas)はそのまま動かして構わない(スクロールしないので支障がない)。
+        // ただし selection の張り替えは JS 側(SetKeepUserSelection)で止めてある。
+        if self.isScrollFollowSuspended {
+            self.scrollFollowPendingLocation = location
+            self.webSpeechTool.highlightSpeechLocation(location: location, length: range.length, completionHandler: nil)
+            return
+        }
         self.webSpeechTool.highlightSpeechLocation(location: location, length: range.length) {
             self.webSpeechTool.scrollToIndex(location: location, length: 1, scrollRatio: 0.3)
         }
     }
     func storySpeakerStoryChanged(story:Story) {
         self.readingChapterStoryUpdateDate = Date()
+        // ページが変わると表示位置も溜めていた発話位置も意味を失うので一時停止は取り消す。
+        NiftyUtility.DispatchSyncMainQueue {
+            self.cancelScrollFollowSuspend()
+        }
         self.speakerDisplayWholeText = StorySpeaker.shared.GenerateWholeDisplayText()
         self.loadStoryWithoutStorySpeakerWith(story: story)
         DispatchQueue.main.async {
@@ -1772,6 +1891,86 @@ body.NovelSpeakerBody {
     }
 }
 
+// MARK: 発話位置への自動スクロールの一時停止
+extension WebSpeechViewController {
+    // 設定されている「手動スクロールで止める秒数」。0 ならこの機能自体を使わない。
+    func scrollFollowSuspendSecond() -> Int {
+        return RealmUtil.RealmBlock { (realm) -> Int in
+            return RealmGlobalState.GetInstanceWith(realm: realm)?.scrollFollowSuspendSecond ?? 0
+        }
+    }
+
+    // second 秒だけ自動スクロールを止める。既に止まっていれば測り直す。
+    func suspendScrollFollow(second:Int) {
+        if second <= 0 { return }
+        self.scrollFollowSuspendTimer?.invalidate()
+        self.scrollFollowSuspendTimer = nil
+        self.isScrollFollowSuspended = true
+        self.scrollFollowSuspendTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(second), repeats: false) { [weak self] _ in
+            self?.resumeScrollFollow()
+        }
+    }
+
+    // 一時停止を取り消す(溜めていた発話位置へは追いつかない)。
+    func cancelScrollFollowSuspend() {
+        self.scrollFollowSuspendTimer?.invalidate()
+        self.scrollFollowSuspendTimer = nil
+        self.scrollFollowPendingLocation = nil
+        self.isScrollFollowSuspended = false
+    }
+
+    // 自動スクロールを再開する。止まっている間に発話が進んでいれば、その位置へ追いつく。
+    func resumeScrollFollow() {
+        self.scrollFollowSuspendTimer?.invalidate()
+        self.scrollFollowSuspendTimer = nil
+        if self.isScrollFollowSuspended == false { return }
+        self.isScrollFollowSuspended = false
+        guard let location = self.scrollFollowPendingLocation else { return }
+        self.scrollFollowPendingLocation = nil
+        self.webSpeechTool.highlightSpeechLocation(location: location, length: 1) {
+            self.webSpeechTool.scrollToIndex(location: location, length: 1, scrollRatio: 0.3)
+        }
+    }
+
+    // 長押しは OS 標準の選択用ジェスチャと同時に動いてもらう必要がある。
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return gestureRecognizer === self.speakFromHereLongPressRecognizer
+    }
+
+    @objc func handleSpeakFromHereLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
+        guard gestureRecognizer.state == .began, StorySpeaker.shared.isPlayng else { return }
+        // viewDidLoad で設定した UIMenuController.shared.menuItems が長押しの時点では
+        // 空になっている事があるので貼り直す(通常版と同じ理由)。
+        self.setCustomUIMenu()
+        // 一時停止していないと、選んだ位置が次の発話位置更新で上書きされてしまうので、
+        // 長押しの開始時点で一時停止を始める(秒数は手動スクロール時と同じ設定値を使う)。
+        self.suspendScrollFollow(second: self.scrollFollowSuspendSecond())
+    }
+
+    // 発話を止めずに、選択されている位置へ読み上げ位置だけを移す。
+    @objc func speakFromHere(sender: UIMenuItem) {
+        self.webSpeechTool.getSelectedLocation { location in
+            guard let location = location, location >= 0 else { return }
+            NiftyUtility.DispatchSyncMainQueue {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: false) {
+                        RealmUtil.RealmBlock { (realm) -> Void in
+                            StorySpeaker.shared.setReadLocationWith(realm: realm, location: location)
+                        }
+                        self.clearSearchView()
+                        // 連打で AVSpeechSynthesizer が固着するのを避けるため、再生再開はデバウンス経由で行う。
+                        StorySpeaker.shared.scheduleSpeechRestartAfterSeek(callerInfo: "小説本文画面(WebView)の長押しメニューの「ここから発話開始」.\(#function)")
+                    }
+                }
+            }
+            // 移動先へすぐ追従してほしいので、一時停止は解除する。
+            DispatchQueue.main.async {
+                self.cancelScrollFollowSuspend()
+            }
+        }
+    }
+}
+
 // MARK: custom UI Menu 周り
 extension WebSpeechViewController {
     func setCustomUIMenu() {
@@ -1781,7 +1980,10 @@ extension WebSpeechViewController {
         let checkSpeechTextMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)))
         // 「全てを選択する」は常にメニュー項目として登録し、表示可否は canPerformAction で(長押しメニュー削減設定に従って)判定する。
         let selectAllMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_SelectAllText", comment: "全てを選択する"), action: #selector(selectAllText(sender:)))
-        let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem, selectAllMenuItem]
+        // 「ここから発話開始」は常に登録しておいて、表示可否は canPerformAction に任せる
+        // (発話中 かつ 自動スクロール一時停止中 の時だけ表示される)。
+        let speakFromHereMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_SpeakFromHere", comment: "ここから発話開始"), action: #selector(speakFromHere(sender:)))
+        let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem, selectAllMenuItem, speakFromHereMenuItem]
         menuController.menuItems = menuItems
         #if targetEnvironment(macCatalyst)
         #if false
@@ -1898,8 +2100,17 @@ extension WebSpeechViewController {
     }
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        // 発話中は「ここから発話開始」以外の長押しメニューを出さない(通常版と同じ理由)。
+        if StorySpeaker.shared.isPlayng {
+            if action == #selector(self.speakFromHere(sender:)) {
+                return self.isScrollFollowSuspended
+            }
+            return false
+        }
+        if action == #selector(self.speakFromHere(sender:)) {
+            return false
+        }
         if action == #selector(self.selectAllText(sender:)) {
-            if StorySpeaker.shared.isPlayng { return false }
             return shouldShowSelectAllMenuItem()
         }
         return super.canPerformAction(action, withSender: sender)

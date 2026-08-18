@@ -243,7 +243,9 @@
 		21F563D01FD802400037F5D7 /* <@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CD1FD8023F0037F5D7 /* <@2x.png */; };
 		21F563D11FD802400037F5D7 /* <@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CE1FD8023F0037F5D7 /* <@3x.png */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
+		25D77E5F09AE145575F3A2FA /* SpeechViewBottomButtonBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F0F8961F9E3850CE109BA6 /* SpeechViewBottomButtonBar.swift */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
+		7C9DE7BAAB70B5E9B361ED74 /* SpeechViewBottomButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4213CD6FDBD3F7B69BBCB39D /* SpeechViewBottomButtonSettingsViewController.swift */; };
 		8261A40E09A2B1556BFC551B /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */; };
 		9CACC3CB8604EA2A797F6377 /* Pods_NovelSpeakerWatchApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */; };
 		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
@@ -591,10 +593,12 @@
 		21F7DE43197EB33900BD2899 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
 		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
 		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
+		4213CD6FDBD3F7B69BBCB39D /* SpeechViewBottomButtonSettingsViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechViewBottomButtonSettingsViewController.swift; sourceTree = "<group>"; };
 		470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerURLDownloadExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DA0062504DB8C705E4A8D40 /* Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig"; sourceTree = "<group>"; };
+		A5F0F8961F9E3850CE109BA6 /* SpeechViewBottomButtonBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechViewBottomButtonBar.swift; sourceTree = "<group>"; };
 		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF64DABA0B88B85E7F1DE40E /* Pods-NovelSpeakerWatchApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp/Pods-NovelSpeakerWatchApp.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1016,6 +1020,8 @@
 				21B53A1819619BE7009658B7 /* Resources */,
 				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
 				21F054D31917E0F200CC6BA9 /* Supporting Files */,
+				A5F0F8961F9E3850CE109BA6 /* SpeechViewBottomButtonBar.swift */,
+				4213CD6FDBD3F7B69BBCB39D /* SpeechViewBottomButtonSettingsViewController.swift */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -1748,6 +1754,8 @@
 				21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */,
 				210DD99825840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
+				25D77E5F09AE145575F3A2FA /* SpeechViewBottomButtonBar.swift in Sources */,
+				7C9DE7BAAB70B5E9B361ED74 /* SpeechViewBottomButtonSettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

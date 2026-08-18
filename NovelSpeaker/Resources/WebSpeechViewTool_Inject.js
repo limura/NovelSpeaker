@@ -62,6 +62,16 @@ function ScrollToIndex(index, margin){
   }
 }
 
+// 発話位置への自動スクロールが一時停止している間 true になる。
+// この間はハイライト(canvas)だけ動かして、selection の張り替えはしない。
+// 張り替えてしまうと、ユーザが長押しで作った選択範囲を毎ブロック奪ってしまい、
+// 「ここから発話開始」が位置を取れなくなる(位置は window.getSelection() から読んでいるため)。
+let novelSpeakerKeepUserSelection = false;
+function SetKeepUserSelection(value){
+  novelSpeakerKeepUserSelection = value ? true : false;
+  return "OK";
+}
+
 // Highlight 用のspan
 let highligtElement = document.createElement("canvas");
 highligtElement.style.cssText = "user-select: none; background: rgba(0,255,0,0.3); z-index: 10000; position: absolute; border-radius: 3px;";
@@ -109,9 +119,11 @@ function HighlightSpeechSentence(element, text, index, length){
     //console.log(`left: ${rect.x + window.pageXOffset}(${rect.x} + ${window.pageXOffset}) -> ${left}, top: ${rect.y + window.pageYOffset}(${rect.y} + ${window.pageYOffset}) -> ${top}, width: ${rect.width}, height: ${rect.height}, wh: ${w}/${h}, window: ${window.innerWidth}, ${window.innerHeight}, pageOffset: ${window.pageXOffset}, ${window.pageYOffset}`);
   }
 
-  let selection = window.getSelection();
-  selection.removeAllRanges();
-  selection.addRange(range);
+  if(!novelSpeakerKeepUserSelection){
+    let selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
 }
 function isNotSpeechElement(element){
   if(element instanceof HTMLElement){

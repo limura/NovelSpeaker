@@ -89,7 +89,12 @@ final class MemoryTraceLogger {
 }
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 18
+    // 18 -> 19: RealmGlobalState に scrollFollowSuspendSecond /
+    //            speechViewBottomButtonSettingArrayData /
+    //            isSpeechViewBottomButtonOverlapsChapterBar を追加した。
+    //            メンバの「追加」だけなのでデータ変換は不要(MigrateFunc への追記も不要)だが、
+    //            schemaVersion を上げないと既存の Realm が開けなくなる。
+    static let currentSchemaVersion : UInt64 = 19
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -196,6 +201,17 @@ final class MemoryTraceLogger {
         }
     }
 
+    // メンバを「追加」しただけの場合、既存の Realm では新しいメンバに
+    // Swift 側で書いた初期値ではなく 0 や false が入った状態になる。
+    // scrollFollowSuspendSecond は 0 が「機能を使わない」の意味になってしまい、
+    // 既存ユーザだけこの機能が無効の状態で始まってしまうため、明示的に既定値を入れておく。
+    static func Migrate_18_To_19(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
+            guard let newObject = newObject else { return }
+            newObject["scrollFollowSuspendSecond"] = RealmGlobalState.scrollFollowSuspendSecondDefault
+        }
+    }
+
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
             Migrate_0_To_1(migration: migration, oldSchemaVersion: oldSchemaVersion)
@@ -235,6 +251,9 @@ final class MemoryTraceLogger {
         }
         if oldSchemaVersion <= 17 {
             Migrate_17_To_18(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion <= 18 {
+            Migrate_18_To_19(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -2653,6 +2672,24 @@ struct SpeechViewButtonSetting: Codable {
         SpeechViewButtonSetting(type: .edit, isOn: true),
         SpeechViewButtonSetting(type: .speechStop, isOn: true), // ← ⚠️注意: これは一番最後であることを期待されています
     ]
+    // 画面下部のボタン群用の既定値。今まで無かった物なので、何も表示しない(全部OFF)。
+    static let bottomDefaultSetting:[SpeechViewButtonSetting] = defaultSetting.map({ SpeechViewButtonSetting(type: $0.type, isOn: false) })
+    // 画面下部のボタン群用のデコード。
+    // 右上用と違い、speechStop の強制表示はしないし、新しい type が増えた時も OFF で足す
+    // (勝手に表示が増えないようにするため)。
+    static func BottomDataToSettingArray(data:Data) -> [SpeechViewButtonSetting] {
+        guard let decoded = try? JSONDecoder().decode([SpeechViewButtonSetting].self, from: data) else { return bottomDefaultSetting }
+        var aliveSet = Set<SpeechViewButtonTypes>(defaultSetting.map({ $0.type }))
+        var result:[SpeechViewButtonSetting] = []
+        for setting in decoded {
+            result.append(setting)
+            aliveSet.remove(setting.type)
+        }
+        for setting in bottomDefaultSetting where aliveSet.contains(setting.type) {
+            result.append(setting)
+        }
+        return result
+    }
     // 与えられた配列を、defaultSetting に存在するtypeの物を全て含んだ状態にして返します。
     // つまり、壊れていて空の配列になっていれば defaultSetting そのものになるし、
     // 新しい要素が将来的に追加された時に、その要素が含まれないデータを読み込んだ場合でも
@@ -3122,10 +3159,27 @@ enum LikeButtonDialogType: Int {
     @objc dynamic var isDeleteBlockOnBookshelfTreeView = false
     @objc dynamic var isDynamicNovelDownloadThrottleEnabled = true
     @objc dynamic var baseMaxConcurrentNovelDownloadCount = 5
+    // 本文画面で手動スクロールした時に、発話位置への強制スクロール(と強制範囲選択)を
+    // 何秒間止めるか。スクロールする度に測り直される。0 でこの機能自体を使わない(常に追従する)。
+    @objc dynamic var scrollFollowSuspendSecond = RealmGlobalState.scrollFollowSuspendSecondDefault
+    // 小説本文画面の「画面下部」に表示するボタン群の設定。右上のボタン群とは独立している。
+    // 今まで無かった物なので、既定は「全部OFF」= 何も表示しない。
+    @objc dynamic var speechViewBottomButtonSettingArrayData = Data()
+    // 画面下部のボタン群を、章送り(◀ スライダ ▶)のバーに重ねて表示するかどうか。
+    // false ならバーの上(本文側)に出すのでバーは押せるが、本文が少し隠れる。
+    @objc dynamic var isSpeechViewBottomButtonOverlapsChapterBar = false
     let novelLikeOrder = List<String>()
     let menuItemsNotRemoved = List<String>()
     let preferredSiteInfoURLList = List<String>()
     
+    // scrollFollowSuspendSecond に設定できる最大値(設定画面のスライダ上限と、復元時の丸めに使う)
+    static let scrollFollowSuspendSecondMax = 60
+    // scrollFollowSuspendSecond の既定値。
+    // 今までは常に自動スクロールしていたので、いきなり長く止まると
+    // 「誤タップで動かなくなった」と受け取られかねない。まずは短くしておいて、
+    // 頻繁に先読みしたい人には設定で伸ばしてもらう。
+    static let scrollFollowSuspendSecondDefault = 5
+
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {
         let userDefaults = UserDefaults.standard
@@ -3280,6 +3334,13 @@ enum LikeButtonDialogType: Int {
         self.speechViewButtonSettingArrayData = SpeechViewButtonSetting.SettingArrayToData(settingArray: newValue) ?? Data()
     }
     
+    func GetSpeechViewBottomButtonSetting() -> [SpeechViewButtonSetting] {
+        return SpeechViewButtonSetting.BottomDataToSettingArray(data: self.speechViewBottomButtonSettingArrayData)
+    }
+    func SetSpeechViewBottomButtonSettingWith(realm:Realm, newValue:[SpeechViewButtonSetting]) {
+        self.speechViewBottomButtonSettingArrayData = SpeechViewButtonSetting.SettingArrayToData(settingArray: newValue) ?? Data()
+    }
+
     func GetBookshelfViewButtonSetting() -> [BookshelfViewButtonSetting] {
         return BookshelfViewButtonSetting.DataToSettingArray(data: self.bookshelfViewButtonSettingArrayData)
     }

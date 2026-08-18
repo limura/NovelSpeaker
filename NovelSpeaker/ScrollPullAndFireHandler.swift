@@ -27,6 +27,10 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
         }
     }
     var invokeMethod:((_ isForward:Bool)->Void)? = nil
+    // 手動スクロール(指やトラックパッドによるドラッグ)の開始/終了を外へ知らせるためのもの。
+    // scrollView.delegate をこのクラスが握っているので、ここから横流しする。
+    var userScrollBeganHandler:(()->Void)? = nil
+    var userScrollEndedHandler:(()->Void)? = nil
 
     let forwardScrollHintLabel = UILabel()
     let backwardScrollHintLabel = UILabel()
@@ -324,9 +328,16 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
     var isDragging = false
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         isDragging = true
+        userScrollBeganHandler?()
+    }
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        userScrollEndedHandler?()
     }
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         isDragging = false
+        if decelerate == false {
+            userScrollEndedHandler?()
+        }
         let bouncingLevel:CGFloat
         switch m_scrollBehavior {
         case .horizontal:

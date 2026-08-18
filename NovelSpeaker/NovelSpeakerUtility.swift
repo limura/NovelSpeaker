@@ -1671,6 +1671,17 @@ class NovelSpeakerUtility: NSObject {
                 if let baseMaxConcurrentNovelDownloadCount = dic.object(forKey: "baseMaxConcurrentNovelDownloadCount") as? NSNumber {
                     globalState.baseMaxConcurrentNovelDownloadCount = min(10, max(1, baseMaxConcurrentNovelDownloadCount.intValue))
                 }
+                // キーが無いバックアップ(この設定が存在しなかった頃の物)では、
+                // 現在の設定を初期値で潰さないように何もしない。
+                if let scrollFollowSuspendSecond = dic.object(forKey: "scrollFollowSuspendSecond") as? NSNumber {
+                    globalState.scrollFollowSuspendSecond = min(RealmGlobalState.scrollFollowSuspendSecondMax, max(0, scrollFollowSuspendSecond.intValue))
+                }
+                if let speechViewBottomButtonSettingArrayData = dic.object(forKey: "speechViewBottomButtonSettingArrayData") as? Data {
+                    globalState.speechViewBottomButtonSettingArrayData = speechViewBottomButtonSettingArrayData
+                }
+                if let isSpeechViewBottomButtonOverlapsChapterBar = dic.object(forKey: "isSpeechViewBottomButtonOverlapsChapterBar") as? NSNumber {
+                    globalState.isSpeechViewBottomButtonOverlapsChapterBar = isSpeechViewBottomButtonOverlapsChapterBar.boolValue
+                }
                 if let isDeleteBlockOnBookshelfTreeView = dic.object(forKey: "isDeleteBlockOnBookshelfTreeView") as? NSNumber {
                     globalState.isDeleteBlockOnBookshelfTreeView = isDeleteBlockOnBookshelfTreeView.boolValue
                 }
@@ -2348,6 +2359,9 @@ class NovelSpeakerUtility: NSObject {
                 "isNeedDisableIdleTimerWhenSpeechTime": globalState.isNeedDisableIdleTimerWhenSpeechTime,
                 "isDynamicNovelDownloadThrottleEnabled": globalState.isDynamicNovelDownloadThrottleEnabled,
                 "baseMaxConcurrentNovelDownloadCount": globalState.baseMaxConcurrentNovelDownloadCount,
+                "scrollFollowSuspendSecond": globalState.scrollFollowSuspendSecond,
+                "speechViewBottomButtonSettingArrayData": globalState.speechViewBottomButtonSettingArrayData,
+                "isSpeechViewBottomButtonOverlapsChapterBar": globalState.isSpeechViewBottomButtonOverlapsChapterBar,
                 "supportRotationMask": NovelSpeakerUtility.supportRotationMask.rawValue,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
                 "menuItemsNotRemoved": Array(globalState.menuItemsNotRemoved),

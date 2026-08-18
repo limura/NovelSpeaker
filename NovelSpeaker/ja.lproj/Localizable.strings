@@ -205,7 +205,7 @@
 "SettingTableViewController_IsDeleteBlockOnBookshelfTreeView" = "本棚画面でスワイプや「編集」から小説を削除できないようにする(これがONの場合でも、削除したい場合は小説の複数選択画面から行うことができます)";
 "SettingTableViewController_overrideTabBarTraitsRow" = "タブの表示を画面下部にする(非推奨です。また、アプリ再起動後に適用されます)";
 "SettingTableViewController_IsCarPlayModeToVoicePrompt" = "CarPlay接続時に音声モードを変える(音声モードを変更することで音声がクリアになるかもしれません。ただし、音声モード変更時は一部の機能が制限されます)";
-"SettingsViewController_BarButtonSpacing" = "画面右上のボタン群の間隔";
+"SettingsViewController_BarButtonSpacing" = "小説本文画面や本棚画面のボタン群の間隔";
 "SettingTableViewController_NovelImportSetting_Title" = "Webサイト毎の取り込み対象を指定する";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
@@ -1083,6 +1083,16 @@
 "ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (空であるべきだが抽出された)";
 "SettingsTableViewController_ScrapeInspectButtonTitle" = "今すぐ全サイトを検査する";
 "SettingsTableViewController_ScrapeInspectProgressMessage" = "検査中…\n(しばらくお待ちください)";
+
+"SettingsViewController_ScrollFollowSuspendSecond" = "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数";
+"SettingsViewController_ScrollFollowSuspendSecond_Disabled" = "使わない";
+"SettingsViewController_ScrollFollowSuspendSecond_ValueFormat" = "%d秒";
+"SpeechViewController_SpeakFromHere" = "ここから発話開始";
+
+"SpeechViewBottomButtonSettingsViewController_Title" = "小説本文画面の下部に表示するボタン群の設定";
+"SpeechViewBottomButtonSettingsViewController_PositionSectionTitle" = "表示位置";
+"SpeechViewBottomButtonSettingsViewController_OverlapsChapterBar" = "ページ送りのバーに重ねて表示する\n(OFFにするとページ送りのバーの上に表示します)";
+"SpeechViewBottomButtonSettingsViewController_ButtonsSectionTitle" = "表示するボタン(全てOFFにすると何も表示しません)";
 
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.1
 
