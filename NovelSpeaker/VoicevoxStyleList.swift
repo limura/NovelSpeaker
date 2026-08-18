@@ -25,6 +25,8 @@ struct VoicevoxStyleListItem: Equatable {
     /// 未取得の時に取ってくる音声モデル。取得済みの行では nil でもよい。
     let modelID: String?
     let byteSize: Int64?
+    /// 公式サイトのキャラクター紹介ページ。取得前に声を確かめたい人の出口。
+    let officialPageURL: String?
 
     var displayName: String { return "\(speakerName) - \(styleName)" }
 
@@ -67,7 +69,8 @@ enum VoicevoxStyleListBuilder {
                                   speakerName: style.speakerName,
                                   styleName: style.name,
                                   modelID: nil,
-                                  byteSize: nil)
+                                  byteSize: nil,
+                                  officialPageURL: nil)
         }
 
         var downloadableItems: [VoicevoxStyleListItem] = []
@@ -80,7 +83,8 @@ enum VoicevoxStyleListBuilder {
                                                   speakerName: speaker.name,
                                                   styleName: style.name,
                                                   modelID: model.id,
-                                                  byteSize: model.byteSize))
+                                                  byteSize: model.byteSize,
+                                                  officialPageURL: speaker.officialPageURL))
                     }
                 }
             }

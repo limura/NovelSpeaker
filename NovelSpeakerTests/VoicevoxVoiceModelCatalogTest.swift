@@ -164,6 +164,22 @@ class VoicevoxVoiceModelCatalogTest: XCTestCase {
         XCTAssertEqual(catalog.model(forStyleId: anyStyleId)?.id, entry.model.id)
     }
 
+    // ★全キャラに公式サイトの紹介ページがある事。
+    // サンプル音声はアプリに持ってこられない(公式の物はいずれも
+    // 「VOICEVOX の開発のための利用のみ許可」)ので、
+    // 取得前に声を確かめる手段はこのリンクだけになる。
+    func testEveryEmbeddedSpeakerHasAnOfficialPage() throws {
+        for catalog in try loadEmbeddedFile().variants {
+            for model in catalog.voiceModels {
+                for speaker in model.speakers {
+                    let page = try XCTUnwrap(speaker.officialPageURL,
+                                             "\(model.id).vvm の \(speaker.name) に公式サイトのページが無い")
+                    XCTAssertTrue(page.hasPrefix("https://voicevox.hiroshiba.jp/product/"), page)
+                }
+            }
+        }
+    }
+
     func testUnknownStyleIdIsNotFound() throws {
         XCTAssertNil(try loadEmbedded().entry(forStyleId: 999_999))
     }
@@ -187,7 +203,7 @@ class VoicevoxVoiceModelCatalogTest: XCTestCase {
         let style = VoicevoxVoiceModelCatalog.Style(name: "ノーマル", styleId: 3)
         let speaker = VoicevoxVoiceModelCatalog.Speaker(
             name: "ずんだもん", uuid: "u", version: nil, termsURL: "https://example.com",
-            credit: "VOICEVOX:ずんだもん", policyText: nil, styles: [style])
+            credit: "VOICEVOX:ずんだもん", policyText: nil, officialPageURL: nil, styles: [style])
         let variants = vvmFormatVersions.map { format in
             VoicevoxVoiceModelCatalog(
                 vvmFormatVersion: format, vvmTag: "tag\(format)",

@@ -185,6 +185,51 @@ def parse_policy(markdown, speaker_name):
     }
 
 
+OFFICIAL_SITE = "https://voicevox.hiroshiba.jp"
+
+
+def official_page_lookup(verbose=True):
+    """キャラクター名 → 公式サイトの紹介ページ。
+
+    ★サンプル音声そのものは持ってこられない。
+    voicevox_resource の character_info/*/voice_samples/ にも、公式サイトの
+    product ページにもサンプルの wav はあるが、どちらも
+    「VOICEVOX の開発のための利用のみ許可」であって、
+    ことせかい が取り込んで鳴らしてよい物ではない
+    (voicevox_resource の README のライセンス節)。
+    そこで、取得前に声を確かめたい人は公式サイトへ送る。
+
+    名前とURLの対応は公式サイトのトップページから拾う。
+    ページの作りが変わったら拾えなくなるが、その時は
+    「サンプルへの動線が消える」だけで、取得も規約提示も影響を受けない。
+    そのため、ここでは止めずに警告だけ出す。
+    """
+    try:
+        body, _ = http_get(OFFICIAL_SITE + "/")
+    except Exception as error:  # noqa: BLE001  動線が消えるだけなので握り潰す
+        if verbose:
+            print(f"公式サイトのキャラクター一覧を取れませんでした({error})。"
+                  "サンプルへの動線は入りません")
+        return lambda name: None
+
+    html = body.decode("utf-8", "replace")
+    by_name = {}
+    for match in re.finditer(r'href="(/product/[^"]+)"[^>]*>(.{0,300}?)</a>', html, re.S):
+        text = re.sub(r"<[^>]+>", "", match.group(2))
+        text = re.sub(r"\s+", "", text)
+        if text:
+            by_name.setdefault(text, OFFICIAL_SITE + match.group(1))
+    if verbose:
+        print(f"公式サイトのキャラクター紹介ページ: {len(by_name)} 件")
+
+    def page_for(name):
+        # 「†聖騎士 紅桜†」のように、metas.json と公式サイトとで
+        # 空白の入り方が違う事があるので、空白を潰して突き合わせる。
+        return by_name.get(re.sub(r"\s+", "", name))
+
+    return page_for
+
+
 def make_terms_lookup(verbose=True):
     directories = character_directories_by_uuid()
     if verbose:
@@ -210,11 +255,13 @@ def make_terms_lookup(verbose=True):
     return terms_for
 
 
-def build_variant(tag, expected_format, minimum_core_version, terms_for, verbose=True):
+def build_variant(tag, expected_format, minimum_core_version, terms_for,
+                  official_page_for, verbose=True):
     if verbose:
         print(f"タグ {tag} (形式 {expected_format}) を見ています")
     voice_models = []
     missing_terms = set()
+    missing_pages = set()
     index = 0
     while index < MAX_VVM_INDEX:
         url = vvm_url(tag, index)
@@ -244,6 +291,8 @@ def build_variant(tag, expected_format, minimum_core_version, terms_for, verbose
             if term is None:
                 missing_terms.add(f"{name} ({uuid})")
                 term = {"termsURL": None, "credit": None, "policyText": None}
+            if official_page_for(name) is None:
+                missing_pages.add(name)
             speakers.append({
                 "name": name,
                 "uuid": uuid,
@@ -251,6 +300,7 @@ def build_variant(tag, expected_format, minimum_core_version, terms_for, verbose
                 "termsURL": term["termsURL"],
                 "credit": term["credit"],
                 "policyText": term["policyText"],
+                "officialPageURL": official_page_for(name),
                 "styles": [{"name": style["name"], "styleId": style["id"]}
                            for style in meta.get("styles", [])],
             })
@@ -278,6 +328,11 @@ def build_variant(tag, expected_format, minimum_core_version, terms_for, verbose
             " policy.md があるか確認してください。"
             "\n規約を提示せずに配る事はできないので、ここは黙って通しません")
 
+    if missing_pages and verbose:
+        # 動線が消えるだけなので止めない。公式サイトの表記が変わった時に気付ける様にだけしておく。
+        print("  公式サイトの紹介ページが見つからないキャラクター: "
+              + "、".join(sorted(missing_pages)))
+
     return {
         "vvmFormatVersion": expected_format,
         "vvmTag": tag,
@@ -289,7 +344,8 @@ def build_variant(tag, expected_format, minimum_core_version, terms_for, verbose
 
 def build_catalog(verbose=True):
     terms_for = make_terms_lookup(verbose=verbose)
-    variants = [build_variant(tag, fmt, core, terms_for, verbose=verbose)
+    official_page_for = official_page_lookup(verbose=verbose)
+    variants = [build_variant(tag, fmt, core, terms_for, official_page_for, verbose=verbose)
                 for tag, fmt, core in VVM_VARIANTS]
     return {
         "formatVersion": CATALOG_FORMAT_VERSION,

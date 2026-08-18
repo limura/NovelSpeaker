@@ -88,6 +88,14 @@ struct VoicevoxVoiceModelCatalog: Codable, Equatable {
         let credit: String?
         /// 規約の要約文(「企業が携わる場合は事前確認が必要」等の条件が書かれている事がある)。
         let policyText: String?
+        /// VOICEVOX 公式サイトのキャラクター紹介ページ。**取得前に声を確かめる為の出口。**
+        ///
+        /// サンプル音声そのものはアプリに持ってこられない。公式にサンプルの wav は
+        /// あるが(voicevox_resource の character_info/*/voice_samples/ 等)、
+        /// いずれも「VOICEVOX の開発のための利用のみ許可」であって、
+        /// ことせかい が取り込んで鳴らしてよい物ではない。
+        /// そこで、聞きたい人には公式サイトへ出てもらう。
+        let officialPageURL: String?
         let styles: [Style]
     }
 

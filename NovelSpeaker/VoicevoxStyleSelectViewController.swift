@@ -119,7 +119,15 @@ class VoicevoxStyleSelectViewController: UITableViewController, UISearchResultsU
         content.text = item.displayName
         content.secondaryText = detailText(for: item, kind: sections[indexPath.section].kind)
         cell.contentConfiguration = content
-        cell.accessoryType = (item.styleId == currentStyleId) ? .checkmark : .none
+        // 未取得の行には ⓘ を出して、公式サイトで声を聞けるようにする。
+        // 今選ばれている物には印を優先する(どちらも accessoryType なので同時には出せない)。
+        if item.styleId == currentStyleId {
+            cell.accessoryType = .checkmark
+        } else if item.officialPageURL != nil {
+            cell.accessoryType = .detailButton
+        } else {
+            cell.accessoryType = .none
+        }
         return cell
     }
 
@@ -140,6 +148,14 @@ class VoicevoxStyleSelectViewController: UITableViewController, UISearchResultsU
             let size = item.megabytesText ?? ""
             return "⬇︎ \(modelID).vvm \(size)"
         }
+    }
+
+    /// ⓘ を押した時。公式サイトのそのキャラクターのページを開く。
+    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
+        guard let item = item(at: indexPath),
+              let pageURLString = item.officialPageURL,
+              let pageURL = URL(string: pageURLString) else { return }
+        UIApplication.shared.open(pageURL, options: [:], completionHandler: nil)
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -164,6 +180,7 @@ class VoicevoxStyleSelectViewController: UITableViewController, UISearchResultsU
         VoicevoxVoiceModelConsentDialog.present(
             on: self, model: model, catalog: catalog,
             requestedStyleDisplayName: item.displayName,
+            requestedStyleId: item.styleId,
             onStarted: { [weak self] in
                 // 取得が終わったらこのスタイルを選ぶ。設定を変えるのはその時。
                 self?.awaitingStyleId = item.styleId

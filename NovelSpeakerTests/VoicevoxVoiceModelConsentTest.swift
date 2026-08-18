@@ -29,7 +29,7 @@ class VoicevoxVoiceModelConsentTest: XCTestCase {
                              styleId: UInt32 = 3) -> VoicevoxVoiceModelCatalog.Speaker {
         return VoicevoxVoiceModelCatalog.Speaker(
             name: name, uuid: uuid, version: "0.16.0", termsURL: termsURL,
-            credit: credit, policyText: policyText,
+            credit: credit, policyText: policyText, officialPageURL: nil,
             styles: [VoicevoxVoiceModelCatalog.Style(name: "ノーマル", styleId: styleId)])
     }
 

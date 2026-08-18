@@ -20,6 +20,7 @@ class VoicevoxStyleListTest: XCTestCase {
                 name: name, uuid: "u-\(name)", version: nil,
                 termsURL: "https://zunko.jp/con_ongen_kiyaku.html",
                 credit: "VOICEVOX:\(name)", policyText: nil,
+                officialPageURL: "https://voicevox.hiroshiba.jp/product/\(name)/",
                 styles: styles.map { VoicevoxVoiceModelCatalog.Style(name: $0.0, styleId: $0.1) })
         }
         return VoicevoxVoiceModelCatalog(
@@ -61,6 +62,14 @@ class VoicevoxStyleListTest: XCTestCase {
             catalog: catalog, searchText: "")
         let listed = Set(sections.flatMap { $0.items.map { $0.styleId } })
         XCTAssertEqual(listed, catalog.allStyleIds)
+    }
+
+    // 未取得の行から公式サイトへ飛べる事(取得前に声を確かめる為の唯一の出口)。
+    func testDownloadableItemsCarryTheirOfficialPage() {
+        let sections = VoicevoxStyleListBuilder.build(
+            availableStyles: [], catalog: makeCatalog(), searchText: "ささやき")
+        XCTAssertEqual(sections[0].items.first?.officialPageURL,
+                       "https://voicevox.hiroshiba.jp/product/ずんだもん/")
     }
 
     func testDownloadableItemsCarryTheirModel() {

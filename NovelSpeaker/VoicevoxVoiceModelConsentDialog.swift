@@ -25,6 +25,7 @@ enum VoicevoxVoiceModelConsentDialog {
                         model: VoicevoxVoiceModelCatalog.VoiceModel,
                         catalog: VoicevoxVoiceModelCatalog,
                         requestedStyleDisplayName: String?,
+                        requestedStyleId: UInt32? = nil,
                         onStarted: (() -> Void)? = nil) {
         let consentStore = VoicevoxVoiceModelConsentStore.shared
         let message = VoicevoxVoiceModelConsentText.message(
@@ -35,6 +36,18 @@ enum VoicevoxVoiceModelConsentDialog {
         var builder = NiftyUtility.EasyDialogBuilder(viewController)
             .title(title: "音声モデルの利用規約")
             .textView(content: message, heightMultiplier: 0.5)
+
+        // ★取得前に声を確かめられるようにする。ただしサンプル音声そのものは
+        // アプリに持ってこられない(公式のサンプルは「VOICEVOX の開発のための利用のみ許可」)
+        // ので、公式サイトのそのキャラクターのページへ送る。
+        if let styleId = requestedStyleId,
+           let speaker = model.speakers.first(where: { $0.styles.contains { $0.styleId == styleId } }),
+           let pageURLString = speaker.officialPageURL, let pageURL = URL(string: pageURLString) {
+            builder = builder.addButton(title: "公式サイトで声を聞く(\(speaker.name))", callback: { _ in
+                // 読む・聞くではダイアログを閉じない。戻ってきたらそのまま同意できる。
+                UIApplication.shared.open(pageURL, options: [:], completionHandler: nil)
+            })
+        }
 
         for group in VoicevoxVoiceModelConsentText.groups(of: model) {
             guard let termsURL = group.termsURL, let url = URL(string: termsURL) else { continue }
