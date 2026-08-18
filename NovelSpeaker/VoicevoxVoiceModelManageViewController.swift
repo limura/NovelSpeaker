@@ -220,7 +220,7 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
                         // 合成済みの音声はメモリにも載っている(16MBぶん)。
                         // 残したままだと、消した直後の話者でしばらく喋れてしまい、
                         // やがて押し出された時から急に喋れなくなる、という挙動になる。
-                        VoicevoxCore.shared.clearPrefetchCache()
+                        VoicevoxCore.shared.schedulePrefetchCacheClear()
                         self?.reload()
                     }
                 }

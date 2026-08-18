@@ -57,6 +57,12 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     // 実際に得られたバッファのフォーマットで都度(初回のみ通常)接続し直す。
     private var connectedFormat: AVAudioFormat?
 
+    // 音声モデルが手元に無い時に、代わりに読み上げてもらう端末の音声。
+    // ここで諦めて無音のまま次のブロックへ進むと、
+    // 「一部だけ読まれない」という一番分かりにくい壊れ方になる。
+    private var fallbackSpeaker: Speaker?
+    private var isUsingFallbackSpeaker = false
+
     init(styleId: UInt32) {
         self.styleId = styleId
         super.init()
@@ -98,6 +104,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         isSpeechKicked = true
         m_IsPaused = false
         m_IsUtteranceActive = true
+        isUsingFallbackSpeaker = false
         currentSpeechText = text
         generation += 1
         let myGeneration = generation
@@ -113,6 +120,18 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                     self.playBuffer(buffer, generation: myGeneration, text: text)
                 }
             } catch {
+                // ★音声モデルが無いだけなら、端末の音声で代わりに読む。
+                // ここを「失敗」で終わらせると、作成済みの音声がある箇所だけ読まれて
+                // 無い箇所は飛ばされる、という一番分かりにくい壊れ方になる
+                // (ブロックの途中から再生を始めた時は、作ってあるはずの箇所でも
+                //  本文が一致せず合成が必要になるため、これは普通に起きる)。
+                if VoicevoxCore.cachedStyles.contains(where: { $0.styleId == self.styleId }) == false {
+                    VoicevoxMissingModelNotice.post(styleId: self.styleId)
+                    await MainActor.run {
+                        self.speakWithFallbackSpeaker(text: text, generation: myGeneration)
+                    }
+                    return
+                }
                 AppInformationLogger.AddLog(message: "VoicevoxSpeaker: synthesize failed: \(error.localizedDescription)", appendix: [
                     "text": text,
                     "styleId": "\(styleId)",
@@ -124,6 +143,26 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                 }
             }
         }
+    }
+
+    /// 音声モデルが無い箇所を、端末の音声で読み上げる。
+    ///
+    /// 進行状況(発話中か・一時停止中か)の問い合わせは、
+    /// この間だけ端末側の話者へ委ねる。こちらのフラグで答えると
+    /// 「読み上げているのに終わった事になっている」等の食い違いが起きる。
+    private func speakWithFallbackSpeaker(text: String, generation myGeneration: Int) {
+        guard myGeneration == generation else { return }
+        let speaker = fallbackSpeaker ?? Speaker()
+        fallbackSpeaker = speaker
+        speaker.SetVoiceWith(identifier: RealmSpeakerSetting.GuessBestVoiceIdentifier(), language: "ja-JP")
+        speaker.pitch = m_Pitch
+        speaker.rate = m_Rate
+        speaker.volume = m_Volume
+        speaker.delay = m_Delay
+        speaker.delegate = m_Delegate
+        isUsingFallbackSpeaker = true
+        m_IsUtteranceActive = false
+        speaker.Speech(text: text)
     }
 
     private func playBuffer(_ buffer: AVAudioPCMBuffer, generation myGeneration: Int, text: String) {
@@ -253,6 +292,14 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         let myGeneration = generation
         m_IsPaused = false
         m_IsUtteranceActive = false
+        if isUsingFallbackSpeaker {
+            // 端末の音声で読んでいる最中。停止の通知は向こうが出すので、
+            // ここで重ねて出すと同じブロックを2回消費してしまう。
+            isUsingFallbackSpeaker = false
+            stopProgressReporting()
+            fallbackSpeaker?.Stop()
+            return
+        }
         // ユーザー操作による停止は「意図しない無音」ではないので、計測の基準点を捨てる。
         VoicevoxPerformanceMonitor.shared.notePlaybackInterrupted()
         stopProgressReporting()
@@ -273,6 +320,10 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
 
     func Pause() {
         m_IsPaused = true
+        if isUsingFallbackSpeaker {
+            fallbackSpeaker?.Pause()
+            return
+        }
         // 一時停止中は「意図しない無音」ではないので、計測の基準点を捨てる。
         VoicevoxPerformanceMonitor.shared.notePlaybackInterrupted()
         stopProgressReporting()
@@ -280,6 +331,11 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     }
 
     func Resume() {
+        if isUsingFallbackSpeaker {
+            m_IsPaused = false
+            fallbackSpeaker?.Resume()
+            return
+        }
         guard engine.isRunning else { return }
         m_IsPaused = false
         playerNode.play()
@@ -315,12 +371,18 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     }
 
     func isSpeaking() -> Bool {
+        if isUsingFallbackSpeaker, let fallbackSpeaker = fallbackSpeaker {
+            return fallbackSpeaker.isSpeaking()
+        }
         // playerNode.isPlaying は再生バッファを撃ち終えても stop() まで true を返し続けるため
         // それには頼らず、明示的な「発話進行中」フラグで判定する(一時停止中は発話中ではない)。
         return m_IsUtteranceActive && !m_IsPaused
     }
 
     func isPaused() -> Bool {
+        if isUsingFallbackSpeaker, let fallbackSpeaker = fallbackSpeaker {
+            return fallbackSpeaker.isPaused()
+        }
         // 「再生していない」ことから推測するのではなく、明示的に Pause() された状態のみを
         // 一時停止とみなす(ブロックの合成中やブロック間で再生していないだけの状態を
         // 一時停止と誤判定しないため)。

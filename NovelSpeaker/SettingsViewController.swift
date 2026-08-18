@@ -274,6 +274,17 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     }
     
     func handleAppInformationLogAction(action: AppInformationLogAction) {
+        // 音声モデルが無いまま読み上げた時のお知らせから、取得画面へ。
+        if let styleId = VoicevoxMissingModelNotice.styleId(from: action) {
+            let manageViewController = VoicevoxVoiceModelManageViewController()
+            self.navigationController?.pushViewController(manageViewController, animated: true)
+            // 画面が出てから、その話者の音声モデルの取得を促す。
+            DispatchQueue.main.async {
+                VoicevoxVoiceModelConsentDialog.presentIfNotDownloaded(
+                    on: manageViewController, styleId: styleId)
+            }
+            return
+        }
         guard action.actionType == "openNovelImportSetting",
               let siteInfoId = action.payload["siteInfoId"]?.value as? String else { return }
         let scopeTypeString = action.payload["scopeType"]?.value as? String
