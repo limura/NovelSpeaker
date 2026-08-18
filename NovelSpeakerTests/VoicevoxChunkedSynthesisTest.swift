@@ -280,43 +280,57 @@ class VoicevoxWavJoinerTest: XCTestCase {
     }
 }
 
-// 合成コストは「固定費 + 文字数比例」で、固定費が無視できない大きさである事の反映。
-// 実機(iPhone SE2 低電力)の実測: 30文字で26.8秒、132文字で43秒。
-// 単純な「文字あたり」1本で見積もると、短い断片から学習した高い単価が次の分割を
-// 更に細かくし、細かくするほど固定費の割合が増える、という悪循環になっていた
-// (実機で102文字が8分割まで細かくなり、1ブロックの発話に5分以上かかった)。
+// 合成コストは「固定費 + 文字数比例」だが、**固定費は小さい**(1〜3秒)。
+//
+// ここには以前「固定費20秒」という前提のテストが並んでいた。
+// その値は VoicevoxCPUGovernor のラチェットが作った産物で、実在しなかった
+// (VoicevoxStageTimingTest で iPhone SE2 実機を測り直した結果:
+//  固定費1.60秒 + 0.346秒/文字, R^2=0.997)。
+// 誤った前提のデータを食わせて「再現できる事」を確かめていたので、
+// 実測に沿った形に置き換えてある。
 class VoicevoxCostModelTest: XCTestCase {
 
     private func makeGovernor() -> VoicevoxCPUGovernor {
         return VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.0, fixedOverheadSeconds: 1.0)
     }
 
-    // 実測から固定費と文字あたりの単価を分けて推定できる事。
-    func testSeparatesFixedOverheadFromPerCharacterCost() {
+    /// iPhone SE2 実機の実測(2026-08-18)。
+    private let realDeviceSamples: [(cpu: Double, chars: Int)] = [
+        (5.18, 10), (15.74, 40), (41.07, 120), (86.81, 240),
+    ]
+
+    // 実測を食わせたら、その実測を言い当てられる事。
+    func testReproducesRealDeviceMeasurements() {
         let governor = makeGovernor()
-        // 固定費20秒 + 0.16秒/文字 のつもりの実測を与える。
-        governor.recordSynthesis(cpuSeconds: 24.8, characterCount: 30, at: 0)
-        governor.recordSynthesis(cpuSeconds: 32.8, characterCount: 80, at: 1)
-        governor.recordSynthesis(cpuSeconds: 41.1, characterCount: 132, at: 2)
-        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 30), 24.8, accuracy: 1.5)
-        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 132), 41.1, accuracy: 1.5)
+        for sample in realDeviceSamples {
+            governor.recordSynthesis(cpuSeconds: sample.cpu, characterCount: sample.chars, at: 0)
+        }
+        for sample in realDeviceSamples {
+            let estimate = governor.estimatedCPUSeconds(forCharacterCount: sample.chars)
+            XCTAssertGreaterThanOrEqual(estimate, sample.cpu,
+                                        "\(sample.chars)文字の見積りが実測を下回っている")
+            XCTAssertLessThan(estimate, sample.cpu * 1.6,
+                              "\(sample.chars)文字の見積り \(estimate) が実測 \(sample.cpu) に対し過大")
+        }
     }
 
     // 分割すると合計コストが増える事が見積りに現れる事(=無闇に分割しない根拠になる)。
+    // 固定費が小さくなっても、この性質自体は保たれていなければならない。
     func testSplittingCostsMoreInTotalBecauseOfTheFixedOverhead() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 24.8, characterCount: 30, at: 0)
-        governor.recordSynthesis(cpuSeconds: 32.8, characterCount: 80, at: 1)
-        governor.recordSynthesis(cpuSeconds: 41.1, characterCount: 132, at: 2)
+        for sample in realDeviceSamples {
+            governor.recordSynthesis(cpuSeconds: sample.cpu, characterCount: sample.chars, at: 0)
+        }
         let whole = governor.estimatedCPUSeconds(forCharacterCount: 120)
         let halves = governor.estimatedCPUSeconds(forCharacterCount: 60) * 2
         XCTAssertGreaterThan(halves, whole, "分割した方が合計コストは大きくなるはず")
     }
 
     // 見積りが実測を下回らない事(下回るとそのまま強制終了に繋がる)。
+    // 発熱で1点だけ極端に重いサンプルが混じっても成り立つ事。
     func testEstimateNeverFallsBelowAnyMeasurement() {
         let governor = makeGovernor()
-        let samples: [(Double, Int)] = [(24.8, 30), (60.0, 80), (41.1, 132)] // 80文字だけ極端に重い
+        let samples: [(Double, Int)] = [(5.18, 10), (60.0, 80), (86.81, 240)] // 80文字だけ極端に重い
         for (cpu, count) in samples {
             governor.recordSynthesis(cpuSeconds: cpu, characterCount: count, at: 0)
         }
@@ -324,6 +338,17 @@ class VoicevoxCostModelTest: XCTestCase {
             XCTAssertGreaterThanOrEqual(governor.estimatedCPUSeconds(forCharacterCount: count), cpu,
                                         "\(count)文字の見積りが実測(\(cpu)秒)を下回ってはいけない")
         }
+    }
+
+    // ★極端に重いサンプルが混じっても、固定費が膨らまない事。
+    // 以前はここで固定費が20秒級まで押し上げられていた。
+    func testOutlierDoesNotInflateTheFixedCost() {
+        let governor = makeGovernor()
+        governor.recordSynthesis(cpuSeconds: 5.18, characterCount: 10, at: 0)
+        governor.recordSynthesis(cpuSeconds: 60.0, characterCount: 80, at: 1) // 発熱で極端に重い
+        governor.recordSynthesis(cpuSeconds: 86.81, characterCount: 240, at: 2)
+        XCTAssertLessThan(governor.estimatedCPUSeconds(forCharacterCount: 0), 5.0,
+                          "固定費が膨らんでいる(外れ値を固定費に吸収してしまっている)")
     }
 }
 

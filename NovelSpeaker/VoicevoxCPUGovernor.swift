@@ -61,6 +61,9 @@ final class VoicevoxCPUGovernor {
     /// 実測の重い側(SE2 の熱serious ≒ 0.33)に寄せてある。過大評価なら先行合成が
     /// 少し控えめになるだけだが、過小評価は強制終了に直結するため。
     static let defaultCostPerCharacter = 0.35
+    /// 単価がこれを下回る事は無いとみなす下限。
+    /// 0 になると「何文字でも入る」という判断になってしまうため。
+    static let minimumCostPerCharacter = 0.01
 
     init(windowSeconds: Double = 60, safetyFactor: Double = 1.25, fixedOverheadSeconds: Double = 1.0) {
         self.windowSeconds = windowSeconds
@@ -96,45 +99,44 @@ final class VoicevoxCPUGovernor {
 
     /// 実測から求めた合成コストのモデル `固定費 + 文字あたり単価 × 文字数`。
     ///
-    /// 合成には文字数に依らない固定費がある(実機の iPhone SE2 低電力では20秒超)。
-    /// 「文字あたり単価」だけで見積もると、短い断片から学習した高い単価が次の分割を
-    /// 更に細かくし、細かくするほど固定費の割合が増える、という悪循環になる
-    /// (実機で102文字が8分割まで細かくなり、1ブロックの発話に5分以上かかった)。
-    /// そのため固定費と単価を分けて推定する。
-    /// サンプルが足りない/文字数の幅が狭い間は、単価だけの保守的な見積りに落とす。
+    /// **固定費は学習しない。単価だけ実測から学ぶ。**
+    ///
+    /// 以前は両方を最小二乗で分離し、更に「どの実測も下回らないよう固定費を上へ倒す」
+    /// ラチェットを入れていた。見積りが実測を下回ると CPU 上限の超過(=強制終了)に
+    /// 直結するので必ず上側に倒す、という意図だったが、これが壊れていた。
+    ///
+    /// iPhone SE2 は熱状態で単価が2倍以上動く(0.16〜0.35 CPU秒/文字)。
+    /// 熱いサンプルと冷えたサンプルが混ざると傾きが低く出て、その分が全部
+    /// ラチェットで固定費に吸収される。しかも上がった固定費が分割を細かくし、
+    /// 短いサンプルばかりになって更に切片が上がる、という自己成就になっていた。
+    /// 実機で「固定費20秒」と見えていたのはこの産物で、実在しない
+    /// (`VoicevoxStageTimingTest` で測り直した実測は下表)。
+    ///
+    /// | | 固定費 | 単価 | R² |
+    /// |---|---|---|---|
+    /// | iPhone SE2 実機 | 1.60秒 | 0.346秒/文字 | 0.997 |
+    /// | 母艦のシミュレータ | 1.11秒 | 0.114秒/文字 | 0.9994 |
+    ///
+    /// **端末で3倍動くのは単価の方で、固定費はほとんど動かない。**
+    /// だから動く方だけ学べばよく、固定費を学習させる必要が無い。
+    ///
+    /// 単価は「固定費を引いてから文字数で割る」。引かずに割ると、短いサンプルほど
+    /// 固定費が単価に化けて過大になる(10文字なら実測5.2秒÷10=0.52/文字。真値は0.346)。
+    /// その上で最大値を採り、安全側に倒す。
+    ///
+    /// なお `fixedOverheadSeconds` は実測(1.1〜1.6秒)より少し低めに置いてある。
+    /// 高く置くと、短いサンプルから学ぶ単価がその分低く出て、長文を過小評価する
+    /// (=強制終了側に倒れる)ため。低めに置けば単価が高めに出て、安全側になる。
     private func fittedCost() -> (overhead: Double, perCharacter: Double) {
         // lock は呼び出し側で取っている前提。
+        let overhead = fixedOverheadSeconds
         guard costSamples.isEmpty == false else {
-            return (fixedOverheadSeconds, Self.defaultCostPerCharacter)
+            return (overhead, Self.defaultCostPerCharacter)
         }
-        let characterCounts = costSamples.map { Double($0.characterCount) }
-        let minCount = characterCounts.min() ?? 0
-        let maxCount = characterCounts.max() ?? 0
-        var overhead = fixedOverheadSeconds
-        var perCharacter = costSamples.map { $0.cpuSeconds / Double($0.characterCount) }.max() ?? Self.defaultCostPerCharacter
-
-        // 文字数に十分な幅がある時だけ最小二乗で分離する(幅が無いと固定費と単価を分けられない)。
-        if costSamples.count >= 3 && maxCount - minCount >= 20 {
-            let n = Double(costSamples.count)
-            let sumX = characterCounts.reduce(0, +)
-            let sumY = costSamples.reduce(0.0) { $0 + $1.cpuSeconds }
-            let sumXY = zip(characterCounts, costSamples).reduce(0.0) { $0 + $1.0 * $1.1.cpuSeconds }
-            let sumXX = characterCounts.reduce(0.0) { $0 + $1 * $1 }
-            let denominator = n * sumXX - sumX * sumX
-            if denominator != 0 {
-                let slope = (n * sumXY - sumX * sumY) / denominator
-                if slope >= 0 {
-                    perCharacter = slope
-                    overhead = (sumY - slope * sumX) / n
-                }
-            }
-        }
-        overhead = max(0, overhead)
-        // どの実測も下回らないように固定費を持ち上げる。見積りが実測を下回ると、
-        // その差がそのまま CPU 上限の超過(=強制終了)になるため、必ず上側に倒す。
-        let requiredOverhead = costSamples.map { $0.cpuSeconds - perCharacter * Double($0.characterCount) }.max() ?? 0
-        overhead = max(overhead, requiredOverhead)
-        return (overhead, perCharacter)
+        let perCharacter = costSamples.map { sample in
+            max(0, sample.cpuSeconds - overhead) / Double(sample.characterCount)
+        }.max() ?? Self.defaultCostPerCharacter
+        return (overhead, max(perCharacter, Self.minimumCostPerCharacter))
     }
 
     /// 指定文字数の合成に必要な CPU 秒の見積り(高めに出す)。

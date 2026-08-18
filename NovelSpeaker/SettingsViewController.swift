@@ -88,6 +88,71 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
 
+    /// 合成コストの「固定費 + 単価」を、その場の状態で測る(デバッグ用)。
+    ///
+    /// **Xcode から繋いで走らせるテストでは、電源に繋がった状態でしか測れない。**
+    /// 背面CPU上限が効くのはバッテリー駆動時なので、その状態での単価が本当に知りたい値になる。
+    /// (CPU秒/文字はクロックで変わる。低クロックなら同じ仕事でもCPU秒が伸びる)
+    /// ここから走らせれば、ケーブルを抜いて、画面を消して、背面に回した状態でも測れる。
+    ///
+    /// 結果は「アプリ内エラーのお知らせ」に出るので、後から見に行ける。
+    private func measureVoicevoxSynthesisCostModel() {
+        // 短い方と長い方の2点あれば、固定費と単価は分離できる。
+        // 端末が遅いと1点で90秒級かかるので、点数は絞る。
+        let characterCounts = [20, 240]
+        let sample = "　少女は窓の外を眺めながら、そう答えた。空は抜けるように青く、遠くの山並みまではっきりと見えている。今日も良い天気になりそうだ。"
+        let styleId = VoicevoxCore.cachedStyles.first?.styleId ?? 0
+        NiftyUtility.EasyDialogOneButton(
+            viewController: self,
+            title: "合成コストを測ります",
+            message: "\(characterCounts.map { "\($0)文字" }.joined(separator: " と "))を合成します。"
+                + "遅い端末では数分かかります。\n\n"
+                + "バッテリー駆動・背面での値を見たい場合は、開始後にケーブルを抜いて画面を消してください。\n\n"
+                + "結果は「アプリ内エラーのお知らせ」に出ます。",
+            buttonTitle: nil) { [weak self] in
+            guard let self = self else { return }
+            Task {
+                await VoicevoxCore.setUpFromBundleIfNeeded()
+                var points: [(chars: Int, cpu: Double)] = []
+                for characterCount in characterCounts {
+                    var text = ""
+                    while text.count < characterCount { text += sample }
+                    text = String(text.prefix(characterCount))
+                    do {
+                        let timing = try await VoicevoxCore.shared.debugMeasureStages(
+                            text: text, styleId: styleId, includeOneShotTTS: false)
+                        points.append((characterCount, timing.stagedTotal.cpu))
+                        AppInformationLogger.AddLog(
+                            message: "[VOICEVOX合成コスト] \(characterCount)文字 "
+                                + "cpu=\(String(format: "%.2f", timing.stagedTotal.cpu))秒 "
+                                + "wall=\(String(format: "%.2f", timing.stagedTotal.wall))秒 "
+                                + "音声=\(String(format: "%.2f", timing.audioSeconds))秒",
+                            isForDebug: true)
+                    } catch {
+                        AppInformationLogger.AddLog(
+                            message: "[VOICEVOX合成コスト] \(characterCount)文字 の合成に失敗: \(error.localizedDescription)",
+                            isForDebug: true)
+                    }
+                }
+                if points.count >= 2 {
+                    let first = points.first!
+                    let last = points.last!
+                    let span = Double(last.chars - first.chars)
+                    if span > 0 {
+                        let perCharacter = (last.cpu - first.cpu) / span
+                        let overhead = first.cpu - perCharacter * Double(first.chars)
+                        AppInformationLogger.AddLog(
+                            message: "[VOICEVOX合成コスト] 固定費=\(String(format: "%.2f", overhead))秒 "
+                                + "単価=\(String(format: "%.4f", perCharacter))秒/文字 "
+                                + "(低電力=\(ProcessInfo.processInfo.isLowPowerModeEnabled ? "入" : "切")"
+                                + " 発熱=\(ProcessInfo.processInfo.thermalState.rawValue))",
+                            isForDebug: false)
+                    }
+                }
+            }
+        }
+    }
+
     /// ディスクキャッシュに貯める音声の圧縮に、実機でどれだけ時間がかかるかを測る(デバッグ用)。
     ///
     /// 合成 1秒ぶんに対して圧縮が何%かが分かれば、「圧縮するくらいなら生で置く」を
@@ -2212,6 +2277,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     $0.cell.textLabel?.numberOfLines = 0
                 }.onCellSelection({ [weak self] _, _ in
                     self?.measureVoicevoxCompressionCost()
+                })
+                // 合成コストの「固定費 + 単価」をその場で測る。
+                // Xcode 経由のテストは電源に繋がった状態でしか測れないので、
+                // バッテリー駆動・背面での値を知るにはアプリ内から走らせる必要がある。
+                <<< ButtonRow() {
+                    $0.title = "VOICEVOX 合成コスト(固定費と単価)を測る"
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ [weak self] _, _ in
+                    self?.measureVoicevoxSynthesisCostModel()
                 })
                 // 再生中に「この先の貯金」がこの時間を切っていたら生成を続ける。
                 // 適切な値は聴き方と端末の速さで変わるので、固定値にはしない。

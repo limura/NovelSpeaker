@@ -121,11 +121,21 @@ class VoicevoxCPUGovernorTest: XCTestCase {
 
     // 短いテキストでも固定の立ち上がりコストがある事を見込む
     // (文字数比例だけだと、短いブロックを大量に積んだ時に過小評価する)。
+    //
+    // 単価は「固定費を引いてから文字数で割る」。
+    // 引かずに割ると固定費を二重に数える事になり、
+    // **自分が学習したサンプル自身を過大に見積もる**という妙な状態になる
+    // (100文字10秒を食わせて、その100文字を11秒と見積もっていた)。
     func testFixedOverheadIsIncluded() {
         let governor = VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.0, fixedOverheadSeconds: 1.0)
         governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: 0)
-        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 10), 2.0, accuracy: 0.01,
-                       "1秒(固定) + 1秒(10文字ぶん)")
+
+        // 10秒のうち1秒が固定費なので、単価は 9秒/100文字 = 0.09/文字。
+        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 10), 1.9, accuracy: 0.01,
+                       "1秒(固定) + 0.9秒(10文字ぶん)")
+        // 学習したサンプル自身は、そのまま言い当てられる。
+        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 100), 10.0, accuracy: 0.01,
+                       "食わせた実測(100文字10秒)を再現する")
     }
 
     // 先行合成は再生より先に止める(同じ予算を食い合うため)。
@@ -190,5 +200,116 @@ class VoicevoxCPUNumThreadsDefaultTest: XCTestCase {
         VoicevoxCore.threadCountMode = .automatic
         XCTAssertNil(UserDefaults.standard.object(forKey: key))
         XCTAssertEqual(VoicevoxCore.threadCountMode, .automatic)
+    }
+}
+
+// MARK: - 合成コストの見積り(2026-08-18 実機で取り直した後)
+
+/// 「固定費20秒」という誤った見立てを二度と作らないための固定。
+///
+/// 以前は最小二乗＋ラチェット(どの実測も下回らないよう固定費を上へ倒す)で
+/// 固定費と単価の両方を学習しており、発熱によるばらつきが全部固定費に吸収されて
+/// 20秒まで膨れ上がっていた。実在する固定費は1〜3秒(VoicevoxStageTimingTest の実測)。
+class VoicevoxCPUGovernorCostModelTest: XCTestCase {
+
+    /// iPhone SE2 実機の実測(VoicevoxStageTimingTest, 2026-08-18)。
+    /// 当てはめは CPU秒 = 1.60 + 0.346 × 文字数 (R^2=0.997)。
+    private let realDeviceSamples: [(chars: Int, cpu: Double)] = [
+        (10, 5.18), (20, 9.68), (40, 15.74), (80, 29.78),
+        (120, 41.07), (160, 54.79), (240, 86.81),
+    ]
+
+    private func makeGovernor() -> VoicevoxCPUGovernor {
+        return VoicevoxCPUGovernor()
+    }
+
+    private func feed(_ governor: VoicevoxCPUGovernor,
+                      _ samples: [(chars: Int, cpu: Double)]) {
+        var now: Double = 0
+        for sample in samples {
+            governor.recordSynthesis(cpuSeconds: sample.cpu, characterCount: sample.chars, at: now)
+            now += 1
+        }
+    }
+
+    // ★実機の実測を食わせた時、見積りが実測から大きく外れない事。
+    //
+    // 以前のモデル(固定費20秒 + 0.16/文字)は、10文字を +317%、240文字を -33% 外していた。
+    // 短い方を過大に見積もると分割が無駄に細かくなり、
+    // 長い方を過小に見積もると CPU 上限を超えて強制終了する。
+    func testEstimateTracksRealDeviceMeasurements() {
+        let governor = makeGovernor()
+        feed(governor, realDeviceSamples)
+
+        for sample in realDeviceSamples {
+            let estimate = governor.estimatedCPUSeconds(forCharacterCount: sample.chars)
+            // 安全率1.25が掛かるので、実測を下回らず、かつ2倍は超えない範囲に収まるはず。
+            XCTAssertGreaterThanOrEqual(
+                estimate, sample.cpu,
+                "\(sample.chars)文字の見積り \(estimate) が実測 \(sample.cpu) を下回っている(強制終了の危険)")
+            XCTAssertLessThan(
+                estimate, sample.cpu * 2.0,
+                "\(sample.chars)文字の見積り \(estimate) が実測 \(sample.cpu) に対し過大(無駄に細かく分割される)")
+        }
+    }
+
+    // ★発熱でばらついたサンプルが、固定費を押し上げない事。
+    //
+    // これが以前の不具合の正体。熱い時の短いサンプルと冷えた時の長いサンプルが
+    // 混ざると、ラチェットが差分を全部固定費に吸収して20秒まで膨らんでいた。
+    func testThermalVarianceDoesNotInflateFixedCost() {
+        let governor = makeGovernor()
+        // 熱い時の短い合成(単価が倍)と、冷えた時の長い合成を混ぜる
+        feed(governor, [(40, 28.0), (240, 84.6), (30, 21.0), (200, 70.0)])
+
+        // 0文字の見積り ≒ 固定費。ここが20秒級になっていたのが以前の姿。
+        let overheadEstimate = governor.estimatedCPUSeconds(forCharacterCount: 0)
+        XCTAssertLessThan(overheadEstimate, 5.0,
+                          "固定費が \(overheadEstimate) 秒に膨らんでいる(発熱のばらつきを吸収してしまっている)")
+    }
+
+    // ★短いサンプルしか無い状態から、長文を過小評価しない事。
+    //
+    // 分割が細かくなると短いサンプルばかりになる。そこから長文の見積りを外すと、
+    // 「たまに長いブロックを投げた時だけ強制終了する」という追いにくい壊れ方をする。
+    func testDoesNotUnderestimateLongTextFromShortSamples() {
+        let governor = makeGovernor()
+        feed(governor, [(10, 5.18), (20, 9.68), (30, 12.0)])
+
+        let estimate = governor.estimatedCPUSeconds(forCharacterCount: 240)
+        XCTAssertGreaterThanOrEqual(estimate, 86.81,
+                                    "短いサンプルからの外挿が実機の実測(86.8秒)を下回っている")
+    }
+
+    // 実測が無い間は、既定値による保守的な見積りに落ちる事。
+    func testFallsBackToDefaultsWithoutSamples() {
+        let governor = makeGovernor()
+        let estimate = governor.estimatedCPUSeconds(forCharacterCount: 100)
+        XCTAssertGreaterThan(estimate, 0)
+        // 既定 0.35/文字 × 100 に安全率が掛かる程度
+        XCTAssertGreaterThan(estimate, 35.0)
+    }
+
+    // ★分割の粒度が、実機で実用になる大きさになる事。
+    //
+    // 以前は固定費20秒のせいで「1窓(予算48秒)に40文字しか入らない」と判断していた。
+    // 実測(1.6 + 0.346/文字)なら、48秒あれば100文字前後は入るはず。
+    func testChunkSizeIsPracticalOnRealDevice() {
+        let governor = makeGovernor()
+        feed(governor, realDeviceSamples)
+
+        let maxCount = governor.maxCharacterCount(withinCPUSeconds: 48)
+        XCTAssertGreaterThan(maxCount, 60,
+                             "1窓に \(maxCount) 文字しか入らない判断になっている(分割が細かすぎる)")
+        // 実測 1.6 + 0.346×n に安全率1.25 を掛けて48秒に収まるのは 100文字強まで
+        XCTAssertLessThan(maxCount, 160,
+                          "1窓に \(maxCount) 文字入る判断は楽観的すぎる(CPU上限を超える)")
+    }
+
+    // 予算より大きい文字数を求められても、1文字以上は返す(前に進まなくなるのを防ぐ)。
+    func testAlwaysAllowsAtLeastOneCharacter() {
+        let governor = makeGovernor()
+        feed(governor, realDeviceSamples)
+        XCTAssertGreaterThanOrEqual(governor.maxCharacterCount(withinCPUSeconds: 0.1), 1)
     }
 }
