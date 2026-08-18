@@ -45,9 +45,27 @@ import sys
 import urllib.error
 import urllib.request
 
-CORE_VERSION = "0.16.4"
-# コア CORE_VERSION が読める VVM の形式。これ以外が出てきたら止める。
-EXPECTED_VVM_FORMAT_VERSION = 1
+# 配るVVMの一式。**形式(vvm_format_version)ごとに1つ**用意する。
+#
+# なぜコアのバージョンごとではなく形式ごとなのか:
+#   新しいコアは古い形式も読める(0.17.0 のソースに
+#   「互換性維持のために残している旧式(vvm_format_version=1)」とある)。
+#   壊れるのは「古いコア × 新しい形式」の一方向だけなので、
+#   互換性を決めているのは形式であってコアのバージョンではない。
+#   形式はめったに変わらないが、コアのバージョンは頻繁に上がる。
+#
+# 古いアプリ(iOSのバージョンで更新できない端末など)も、
+# 自分が読める形式の項目を使い続けられる。
+# タグは凍結されるので新キャラは来ないが、**配布URLが変わった時に直せる**のが効く。
+#
+# (タグ名, vvm_format_version, その形式を読める最小のコアのバージョン)
+VVM_VARIANTS = [
+    ("0.16.4", 1, "0.16.0"),
+    ("0.17.0", 2, "0.17.0"),
+]
+
+# このカタログファイル自体の形式。
+CATALOG_FORMAT_VERSION = 2
 # これ以上は探さない(404 で止まるはずだが、無限ループの保険)
 MAX_VVM_INDEX = 200
 # zip の先頭からこれだけ取れば manifest.json と metas.json が読める(実測で数KB)
@@ -55,8 +73,6 @@ HEAD_FETCH_BYTES = 64 * 1024
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_OUT = os.path.join(REPO_ROOT, "NovelSpeaker", "VoicevoxVoiceModelCatalog.json")
-
-CATALOG_FORMAT_VERSION = 1
 
 
 def vvm_url(tag, index):
@@ -169,12 +185,10 @@ def parse_policy(markdown, speaker_name):
     }
 
 
-def build_catalog(tag, verbose=True):
-    if verbose:
-        print(f"タグ {tag} を見ています")
+def make_terms_lookup(verbose=True):
     directories = character_directories_by_uuid()
     if verbose:
-        print(f"  voicevox_resource のキャラクター情報: {len(directories)} 件")
+        print(f"voicevox_resource のキャラクター情報: {len(directories)} 件")
 
     terms_cache = {}
 
@@ -193,6 +207,12 @@ def build_catalog(tag, verbose=True):
         terms_cache[uuid] = parse_policy(body.decode("utf-8"), name)
         return terms_cache[uuid]
 
+    return terms_for
+
+
+def build_variant(tag, expected_format, minimum_core_version, terms_for, verbose=True):
+    if verbose:
+        print(f"タグ {tag} (形式 {expected_format}) を見ています")
     voice_models = []
     missing_terms = set()
     index = 0
@@ -210,11 +230,11 @@ def build_catalog(tag, verbose=True):
         metas = json.loads(entries["metas.json"])
 
         format_version = manifest.get("vvm_format_version")
-        if format_version != EXPECTED_VVM_FORMAT_VERSION:
+        if format_version != expected_format:
             raise RuntimeError(
-                f"{index}.vvm の vvm_format_version が {format_version} です。"
-                f"コア {CORE_VERSION} が読めるのは {EXPECTED_VVM_FORMAT_VERSION} だけです。"
-                "コアを上げる作業とセットで対応してください")
+                f"{index}.vvm の vvm_format_version が {format_version} ですが、"
+                f"タグ {tag} には {expected_format} を期待しています。"
+                "VVM_VARIANTS の指定を見直してください")
 
         speakers = []
         for meta in metas:
@@ -259,14 +279,23 @@ def build_catalog(tag, verbose=True):
             "\n規約を提示せずに配る事はできないので、ここは黙って通しません")
 
     return {
+        "vvmFormatVersion": expected_format,
+        "vvmTag": tag,
+        "minimumCoreVersion": minimum_core_version,
+        "termsPageURL": terms_page_url(tag),
+        "voiceModels": voice_models,
+    }
+
+
+def build_catalog(verbose=True):
+    terms_for = make_terms_lookup(verbose=verbose)
+    variants = [build_variant(tag, fmt, core, terms_for, verbose=verbose)
+                for tag, fmt, core in VVM_VARIANTS]
+    return {
         "formatVersion": CATALOG_FORMAT_VERSION,
         "generatedAt": datetime.datetime.now(datetime.timezone.utc)
                                .replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "coreVersion": CORE_VERSION,
-        "vvmTag": tag,
-        "vvmFormatVersion": EXPECTED_VVM_FORMAT_VERSION,
-        "termsPageURL": terms_page_url(tag),
-        "voiceModels": voice_models,
+        "variants": variants,
     }
 
 
@@ -286,34 +315,62 @@ def comparable(catalog):
     return copied
 
 
-def describe_difference(old, new):
-    lines = []
-    if old is None:
-        return ["手元にカタログがありません(新規作成)"]
-    if old.get("vvmTag") != new.get("vvmTag"):
-        lines.append(f"タグが変わりました: {old.get('vvmTag')} → {new.get('vvmTag')}")
+def variants_by_format(catalog):
+    if not catalog:
+        return {}
+    return {variant["vvmFormatVersion"]: variant for variant in catalog.get("variants", [])}
 
-    def by_id(catalog):
-        return {model["id"]: model for model in catalog.get("voiceModels", [])}
+
+def describe_variant_difference(label, old, new):
+    lines = []
+
+    def by_id(variant):
+        return {model["id"]: model for model in (variant or {}).get("voiceModels", [])}
+
+    if old.get("vvmTag") != new.get("vvmTag"):
+        lines.append(f"{label}: タグが変わりました {old.get('vvmTag')} → {new.get('vvmTag')}")
 
     old_models, new_models = by_id(old), by_id(new)
     for model_id in sorted(set(new_models) - set(old_models), key=int):
-        lines.append(f"増えました: {model_id}.vvm")
+        lines.append(f"{label}: 増えました {model_id}.vvm")
     for model_id in sorted(set(old_models) - set(new_models), key=int):
-        lines.append(f"無くなりました: {model_id}.vvm")
+        lines.append(f"{label}: 無くなりました {model_id}.vvm")
     for model_id in sorted(set(old_models) & set(new_models), key=int):
         old_model, new_model = old_models[model_id], new_models[model_id]
         if old_model.get("byteSize") != new_model.get("byteSize"):
-            lines.append(f"大きさが変わりました: {model_id}.vvm "
+            lines.append(f"{label}: 大きさが変わりました {model_id}.vvm "
                          f"{old_model.get('byteSize')} → {new_model.get('byteSize')}")
-        old_styles = {(s["name"], style["styleId"])
-                      for s in old_model.get("speakers", []) for style in s.get("styles", [])}
-        new_styles = {(s["name"], style["styleId"])
-                      for s in new_model.get("speakers", []) for style in s.get("styles", [])}
+        if old_model.get("url") != new_model.get("url"):
+            lines.append(f"{label}: 取得先が変わりました {model_id}.vvm")
+
+        def styles_of(model):
+            return {(s["name"], style["styleId"])
+                    for s in model.get("speakers", []) for style in s.get("styles", [])}
+
+        old_styles, new_styles = styles_of(old_model), styles_of(new_model)
         for name, style_id in sorted(new_styles - old_styles):
-            lines.append(f"スタイルが増えました: {model_id}.vvm {name} (styleId={style_id})")
+            lines.append(f"{label}: スタイルが増えました {model_id}.vvm {name} (styleId={style_id})")
         for name, style_id in sorted(old_styles - new_styles):
-            lines.append(f"スタイルが無くなりました: {model_id}.vvm {name} (styleId={style_id})")
+            lines.append(f"{label}: スタイルが無くなりました {model_id}.vvm {name} (styleId={style_id})")
+    return lines
+
+
+def describe_difference(old, new):
+    if old is None:
+        return ["手元にカタログがありません(新規作成)"]
+    lines = []
+    if old.get("formatVersion") != new.get("formatVersion"):
+        lines.append(f"カタログの形式が変わりました: "
+                     f"{old.get('formatVersion')} → {new.get('formatVersion')}")
+    old_variants, new_variants = variants_by_format(old), variants_by_format(new)
+    for fmt in sorted(set(new_variants) - set(old_variants)):
+        lines.append(f"★VVM形式 {fmt} の一式が増えました"
+                     f"(タグ {new_variants[fmt].get('vvmTag')})")
+    for fmt in sorted(set(old_variants) - set(new_variants)):
+        lines.append(f"★VVM形式 {fmt} の一式が無くなりました。"
+                     "その形式しか読めない古いアプリが取得できなくなります")
+    for fmt in sorted(set(old_variants) & set(new_variants)):
+        lines.extend(describe_variant_difference(f"形式{fmt}", old_variants[fmt], new_variants[fmt]))
     return lines
 
 
@@ -324,38 +381,39 @@ def write_catalog(path, catalog):
         handle.write("\n")
 
 
+def summarize(catalog):
+    for variant in catalog["variants"]:
+        speakers = {s["name"] for m in variant["voiceModels"] for s in m["speakers"]}
+        styles = sum(len(s["styles"]) for m in variant["voiceModels"] for s in m["speakers"])
+        total = sum(m["byteSize"] for m in variant["voiceModels"])
+        print(f"  形式{variant['vvmFormatVersion']} (タグ {variant['vvmTag']} / "
+              f"コア {variant['minimumCoreVersion']}以降): "
+              f"{len(variant['voiceModels'])}ファイル / {len(speakers)}キャラ / "
+              f"{styles}スタイル / {total / 1024 / 1024 / 1024:.2f}GB")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--check", action="store_true", help="書かずに差分だけ報告する")
-    parser.add_argument("--tag", default=CORE_VERSION,
-                        help=f"voicevox_vvm のタグ(既定: コアと同じ {CORE_VERSION})")
     parser.add_argument("--out", default=DEFAULT_OUT, help="アプリ内蔵カタログの書き出し先")
     parser.add_argument("--gh-pages-out", default=None,
                         help="配布用カタログの書き出し先(gh-pages の data/ 以下)")
     args = parser.parse_args()
 
     try:
-        catalog = build_catalog(args.tag, verbose=not args.check)
+        catalog = build_catalog(verbose=not args.check)
     except Exception as error:  # noqa: BLE001 - 利用者に理由を見せて止まるのが目的
         print(f"エラー: {error}", file=sys.stderr)
         return 1
 
-    style_count = sum(len(style_list)
-                      for model in catalog["voiceModels"]
-                      for style_list in [sum((s["styles"] for s in model["speakers"]), [])])
-    speaker_names = {s["name"] for m in catalog["voiceModels"] for s in m["speakers"]}
-    total_bytes = sum(m["byteSize"] for m in catalog["voiceModels"])
-    print(f"{len(catalog['voiceModels'])}ファイル / "
-          f"{len(speaker_names)}キャラ / {style_count}スタイル / "
-          f"合計 {total_bytes / 1024 / 1024 / 1024:.2f}GB")
+    summarize(catalog)
 
     existing = load_existing(args.out)
-    differences = describe_difference(existing, catalog)
     if comparable(existing) == comparable(catalog):
         print("手元のカタログと同じ内容です。")
         return 0
-    for line in differences:
+    for line in describe_difference(existing, catalog):
         print(f"  ★ {line}")
 
     if args.check:
