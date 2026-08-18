@@ -1460,6 +1460,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21F054FB1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeaker" */;
 			buildPhases = (
+				E57E8C0BFEA7E8CFEF8BFD44 /* VOICEVOX カタログの点検 */,
 				E09854C708603E180E1222AF /* [CP] Check Pods Manifest.lock */,
 				21F054C51917E0F200CC6BA9 /* Sources */,
 				21F054C61917E0F200CC6BA9 /* Frameworks */,
@@ -1811,6 +1812,25 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		E57E8C0BFEA7E8CFEF8BFD44 /* VOICEVOX カタログの点検 */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "VOICEVOX カタログの点検";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# 同梱カタログが古いまま/コアと食い違ったままリリースするのを防ぐ。\n# 通信しないので毎回走らせても遅くならない。\n# Debug では黙らせる(手元のビルドの度に警告が出ると読み飛ばすようになるため)。\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then\n  exit 0\nfi\n/usr/bin/env python3 \"${SRCROOT}/scripts/check_voicevox_catalog.py\" --xcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
