@@ -20,10 +20,9 @@ class VoicevoxCoreTest: XCTestCase {
             XCTFail("同梱の 0.vvm がバンドルに見つかりません")
             return
         }
-        let vvmDirectory = (vvmPath as NSString).deletingLastPathComponent
 
         let core = VoicevoxCore.shared
-        try await core.setUp(dictDirectoryPath: dictPath, voiceModelDirectoryPaths: [vvmDirectory])
+        try await core.setUp(dictDirectoryPath: dictPath, voiceModelFilePaths: [vvmPath])
 
         let styles = await core.styles
         XCTAssertFalse(styles.isEmpty, "0.vvm からスタイルが1つも取れませんでした")

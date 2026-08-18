@@ -33,8 +33,7 @@ class VoicevoxSpeakerTest: XCTestCase {
             XCTFail("同梱の辞書/0.vvm がバンドルに見つかりません")
             return
         }
-        let vvmDirectory = (vvmPath as NSString).deletingLastPathComponent
-        try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelDirectoryPaths: [vvmDirectory])
+        try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelFilePaths: [vvmPath])
         let styles = await VoicevoxCore.shared.styles
         guard let style = styles.first else {
             XCTFail("0.vvm からスタイルが取れませんでした")
@@ -62,8 +61,7 @@ class VoicevoxSpeakerTest: XCTestCase {
             XCTFail("同梱の辞書/0.vvm がバンドルに見つかりません")
             return
         }
-        let vvmDirectory = (vvmPath as NSString).deletingLastPathComponent
-        try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelDirectoryPaths: [vvmDirectory])
+        try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelFilePaths: [vvmPath])
         let styles = await VoicevoxCore.shared.styles
         guard let style = styles.first else {
             XCTFail("0.vvm からスタイルが取れませんでした")

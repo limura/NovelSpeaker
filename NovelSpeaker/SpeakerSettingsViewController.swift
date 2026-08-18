@@ -48,6 +48,25 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         return Set(VoicevoxCore.cachedStyles.map { $0.styleId })
     }
 
+    /// 今この話者設定が指している styleId。取得済みでなくても返す。
+    static func currentVoicevoxStyleId(targetID: String) -> UInt32? {
+        return RealmUtil.RealmBlock { (realm) -> UInt32? in
+            guard let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID),
+                  setting.type == "VOICEVOX" else { return nil }
+            return UInt32(setting.voiceIdentifier)
+        }
+    }
+
+    /// 未取得のスタイルの名前。手元に無いので、カタログから引く。
+    /// これが無いと「(未取得) スタイル番号 37」としか出せず、
+    /// 誰を選んでいたのか利用者に分からない。
+    static func catalogStyleLabel(for styleId: UInt32) -> String? {
+        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferred(
+            embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil),
+              let entry = catalog.entry(forStyleId: styleId) else { return nil }
+        return entry.displayName
+    }
+
     /// VOICEVOX話者設定の voiceIdentifier を見て、スタイル選択行に表示すべきラベルを返す。
     ///
     /// **未取得なだけの設定は書き換えない。** 音声モデルを消しただけで
@@ -75,7 +94,8 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 // 保存値には触らない。音声モデルを取り直せば、そのまま元の話者に戻る。
                 resultLabel = VoicevoxStyleSelectionResolver.notDownloadedLabel(
                     styleId: styleId,
-                    knownName: SpeakerSettingsViewController.voicevoxStyleLabel(for: styleId))
+                    knownName: SpeakerSettingsViewController.voicevoxStyleLabel(for: styleId)
+                        ?? SpeakerSettingsViewController.catalogStyleLabel(for: styleId))
             case .notAStyleId:
                 // ★VOICEVOX を使う話者設定でない限り、絶対に書き換えない。
                 // AVSpeechSynthesizer の話者設定の voiceIdentifier は音声IDそのものなので、
@@ -96,32 +116,14 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         return resultLabel
     }
 
-    // 画面上の全VOICEVOXスタイル選択行のoptionsを最新化する。
+    // 画面上の全VOICEVOXスタイル選択行の表示を最新化する。
+    // (音声モデルを取得すると「(未取得) …」だった行が本来の名前に変わる)
     func refreshAllVoicevoxStyleRows() {
-        #if targetEnvironment(macCatalyst)
-        for row in self.form.rows.compactMap({ $0 as? PushRow<String> }) where row.tag?.hasPrefix("VoicevoxStyleAlertRow-") == true {
-            row.options = SpeakerSettingsViewController.voicevoxStyleOptions(keeping: row.value)
+        for row in self.form.rows.compactMap({ $0 as? LabelRow }) where row.tag?.hasPrefix("VoicevoxStyleRow-") == true {
+            let targetID = String(row.tag?.dropFirst("VoicevoxStyleRow-".count) ?? "")
+            row.value = self.resolveVoicevoxStyleLabel(targetID: targetID) ?? row.value
             row.updateCell()
         }
-        #else
-        for row in self.form.rows.compactMap({ $0 as? AlertRow<String> }) where row.tag?.hasPrefix("VoicevoxStyleAlertRow-") == true {
-            row.options = SpeakerSettingsViewController.voicevoxStyleOptions(keeping: row.value)
-            row.updateCell()
-        }
-        #endif
-    }
-
-    /// 選択行に並べる選択肢。
-    ///
-    /// 今表示している値が一覧に無い(=未取得のスタイルを指している)場合は、それも先頭に足す。
-    /// 足さないと選択行が空欄に見えて、利用者には「勝手に設定が変わった」と映るため。
-    static func voicevoxStyleOptions(keeping currentLabel: String?) -> [String] {
-        var options = voicevoxStyleOptionLabels()
-        if let currentLabel = currentLabel, currentLabel.isEmpty == false,
-           options.contains(currentLabel) == false {
-            options.insert(currentLabel, at: 0)
-        }
-        return options
     }
 
     static func voicevoxStyleOptionLabels() -> [String] {
@@ -238,7 +240,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 "EngineTypeAlertRow-\(targetID)",
                 "LanguageAlertRow-\(targetID)",
                 "VoiceIdentifierAlertRow-\(targetID)",
-                "VoicevoxStyleAlertRow-\(targetID)",
+                "VoicevoxStyleRow-\(targetID)",
                 "TestSpeechButtonRow-\(targetID)",
                 "RemoveButtonRow-\(targetID)"
                 ] {
@@ -437,12 +439,11 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 // AVSpeech の音声IDのまま残り、再生時に styleId=0 へフォールバックしていた。
                 // 有効な styleId を確定させ、スタイル選択行の表示とも一致させる。
                 if let label = self.resolveVoicevoxStyleLabel(targetID: targetID),
-                   let styleRow = self.form.rowBy(tag: "VoicevoxStyleAlertRow-\(targetID)") as? AlertRow<String> {
-                    styleRow.options = SpeakerSettingsViewController.voicevoxStyleOptions(keeping: label)
+                   let styleRow = self.form.rowBy(tag: "VoicevoxStyleRow-\(targetID)") as? LabelRow {
                     styleRow.value = label
                 }
             }
-            for tag in ["LanguageAlertRow-\(targetID)", "VoiceIdentifierAlertRow-\(targetID)", "VoicevoxStyleAlertRow-\(targetID)"] {
+            for tag in ["LanguageAlertRow-\(targetID)", "VoiceIdentifierAlertRow-\(targetID)", "VoicevoxStyleRow-\(targetID)"] {
                 if let row = self.form.rowBy(tag: tag) {
                     row.evaluateHidden()
                     row.updateCell()
@@ -545,33 +546,37 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         })
         section <<< voiceIdentifierRow
 
-        #if targetEnvironment(macCatalyst)
-        let voicevoxStyleRow = PushRow<String>("VoicevoxStyleAlertRow-\(targetID)")
-        ConfigureCatalystSingleSelectionPushRow(voicevoxStyleRow)
-        #else
-        let voicevoxStyleRow = AlertRow<String>("VoicevoxStyleAlertRow-\(targetID)")
-        voicevoxStyleRow.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
-        #endif
+        // スタイルは127個あり、その大半は手元に無い。選択肢を並べるのではなく、
+        // 絞り込みと取得ができる専用の画面へ送る(VoicevoxStyleSelectViewController)。
+        let voicevoxStyleRow = LabelRow("VoicevoxStyleRow-\(targetID)")
         voicevoxStyleRow.title = NSLocalizedString("SpeakSettingsViewController_VoicevoxStyleTitle", comment: "VOICEVOX話者")
-        voicevoxStyleRow.selectorTitle = NSLocalizedString("SpeakSettingsViewController_VoicevoxStyleDialogTitle", comment: "VOICEVOXの話者を選択してください")
         // 表示だけフォールバックして保存しないと画面と保存値が食い違うが、
         // かといって何でも書き換えると未取得のスタイルを指す設定を壊す。
         // その区別は resolveVoicevoxStyleLabel に閉じ込めてある。
-        let currentLabel = self.resolveVoicevoxStyleLabel(targetID: targetID)
-        voicevoxStyleRow.options = SpeakerSettingsViewController.voicevoxStyleOptions(keeping: currentLabel)
-        voicevoxStyleRow.value = currentLabel ?? SpeakerSettingsViewController.voicevoxStyleOptionLabels().first ?? ""
+        voicevoxStyleRow.value = self.resolveVoicevoxStyleLabel(targetID: targetID) ?? ""
         voicevoxStyleRow.hidden = Condition.function(["TitleLabelRow-\(targetID)", "EngineTypeAlertRow-\(targetID)"], { (form) -> Bool in
             if self.hideCache[targetID] ?? false { return true }
             return self.currentEngineType(targetID: targetID) != "VOICEVOX"
         })
-        voicevoxStyleRow.onChange({ (row) in
-            guard let label = row.value, let styleId = SpeakerSettingsViewController.voicevoxStyleId(forLabel: label) else { return }
-            RealmUtil.RealmBlock { (realm) -> Void in
-                guard let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else { return }
-                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
-                    setting.voiceIdentifier = String(styleId)
-                }
-            }
+        voicevoxStyleRow.cellUpdate({ (cell, _) in
+            cell.accessoryType = .disclosureIndicator
+            cell.editingAccessoryType = cell.accessoryType
+        })
+        voicevoxStyleRow.onCellSelection({ [weak self] (_, row) in
+            guard let self = self else { return }
+            let nextViewController = VoicevoxStyleSelectViewController.instantiate(
+                currentStyleId: SpeakerSettingsViewController.currentVoicevoxStyleId(targetID: targetID),
+                onSelected: { styleId in
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else { return }
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                            setting.voiceIdentifier = String(styleId)
+                        }
+                    }
+                    row.value = self.resolveVoicevoxStyleLabel(targetID: targetID) ?? ""
+                    row.updateCell()
+                })
+            self.navigationController?.pushViewController(nextViewController, animated: true)
         })
         section <<< voicevoxStyleRow
         <<< ButtonRow("TestSpeechButtonRow-\(targetID)") {

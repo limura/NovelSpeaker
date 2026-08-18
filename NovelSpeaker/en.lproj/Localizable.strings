@@ -1155,6 +1155,8 @@
 "VoicevoxStyleSelection_NotDownloadedLabelFormat" = "(not downloaded) %@";
 "VoicevoxStyleSelection_UnknownStyleNameFormat" = "style #%u";
 
+"VoicevoxStyleSelectViewController_SearchPlaceholder" = "Filter by character name";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.

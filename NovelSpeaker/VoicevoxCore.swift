@@ -374,13 +374,42 @@ actor VoicevoxCore {
     /// アプリに同梱されている辞書/VVMからの起動時セットアップ。
     /// 同梱リソースが見つからない場合は何もしない(iOS 16未満や、まだVVMを1つも
     /// 用意していない環境でも安全に呼べる)。
+    /// いま使える *.vvm の一覧(同梱 + 取得済み)。
+    ///
+    /// 同じ番号の音声モデルが両方にあったら**取得済みの方を使う**。
+    /// 同梱の物はいずれ無くなるし、取得済みの方が新しい形式である事はあっても逆は無い。
+    /// (取得済み同士の形式の重複は VoicevoxVoiceModelStore が既に潰している)
+    static func currentVoiceModelFilePaths() -> [String] {
+        var pathByFileName: [String: String] = [:]
+        if let bundledPath = Bundle.main.path(forResource: "0", ofType: "vvm") {
+            pathByFileName[(bundledPath as NSString).lastPathComponent] = bundledPath
+        }
+        for url in VoicevoxVoiceModelStore.shared.modelFileURLs(
+                readableFormats: VoicevoxVoiceModelCatalogLoader.readableVvmFormatVersions) {
+            pathByFileName[url.lastPathComponent] = url.path
+        }
+        return pathByFileName.values.sorted()
+    }
+
+    /// 音声モデルを取得した/消した後に、話者一覧を作り直す。
+    static func reloadStyleCatalogFromCurrentFiles() {
+        guard isAvailableOnThisOS else { return }
+        let paths = currentVoiceModelFilePaths()
+        Task {
+            do {
+                try await VoicevoxCore.shared.reloadStyleCatalog(voiceModelFilePaths: paths)
+            } catch {
+                AppInformationLogger.AddLog(message: "VoicevoxCore.reloadStyleCatalogFromCurrentFiles failed: \(error.localizedDescription)", appendix: [:], isForDebug: true)
+            }
+        }
+    }
+
     static func setUpFromBundleIfNeeded() async {
         guard isAvailableOnThisOS else { return }
         guard let dictPath = Bundle.main.path(forResource: "open_jtalk_dic_utf_8-1.11", ofType: nil) else { return }
-        guard let vvmPath = Bundle.main.path(forResource: "0", ofType: "vvm") else { return }
-        let vvmDirectory = (vvmPath as NSString).deletingLastPathComponent
         do {
-            try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelDirectoryPaths: [vvmDirectory])
+            try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath,
+                                                voiceModelFilePaths: currentVoiceModelFilePaths())
         } catch {
             AppInformationLogger.AddLog(message: "VoicevoxCore.setUpFromBundleIfNeeded failed: \(error.localizedDescription)", appendix: [:], isForDebug: true)
         }
@@ -389,8 +418,8 @@ actor VoicevoxCore {
     /// 起動時(または初回VOICEVOX利用時)に一度だけ呼ぶ。
     /// - Parameters:
     ///   - dictDirectoryPath: Open JTalk 辞書ディレクトリへのパス(ファイルではなくディレクトリ)
-    ///   - voiceModelDirectoryPaths: *.vvm を探索するディレクトリの一覧(バンドル同梱分 + 将来のダウンロード先)
-    func setUp(dictDirectoryPath: String, voiceModelDirectoryPaths: [String]) throws {
+    ///   - voiceModelFilePaths: 読み込む *.vvm の一覧(同梱分 + 取得済み)
+    func setUp(dictDirectoryPath: String, voiceModelFilePaths: [String]) throws {
         if synthesizer == nil {
             var ort: OpaquePointer?
             let ortResult = voicevox_onnxruntime_init_once(&ort)
@@ -411,7 +440,7 @@ actor VoicevoxCore {
             try createSynthesizer(onnxruntime: ortNotNil, openJTalk: jtalkNotNil, threadCount: Self.configuredCPUNumThreads)
         }
 
-        try reloadStyleCatalog(voiceModelDirectoryPaths: voiceModelDirectoryPaths)
+        try reloadStyleCatalog(voiceModelFilePaths: voiceModelFilePaths)
     }
 
     /// 指定されたスレッド数で synthesizer を作る。
@@ -459,17 +488,16 @@ actor VoicevoxCore {
         cpuGovernor.reset()
     }
 
-    /// 指定ディレクトリ群にある *.vvm を全部 open→メタ取得→close して話者カタログを作り直す。
+    /// 指定された *.vvm を全部 open→メタ取得→close して話者カタログを作り直す。
     /// (open だけならロードと違って軽い。VOICEVOX_IOS_INTEGRATION.md §3-4)
-    func reloadStyleCatalog(voiceModelDirectoryPaths: [String]) throws {
+    ///
+    /// ディレクトリを走査せずファイルを名指しで受け取るのは、
+    /// 同じ番号の音声モデルが複数の場所にある事があるため
+    /// (同梱と取得済み、形式1と形式2)。どれを使うかは呼び出し側で決める。
+    func reloadStyleCatalog(voiceModelFilePaths: [String]) throws {
         var newStyles: [VoicevoxStyle] = []
-        let fileManager = FileManager.default
-        for directoryPath in voiceModelDirectoryPaths {
-            guard let entries = try? fileManager.contentsOfDirectory(atPath: directoryPath) else { continue }
-            for entry in entries where entry.hasSuffix(".vvm") {
-                let vvmPath = (directoryPath as NSString).appendingPathComponent(entry)
-                newStyles.append(contentsOf: try stylesFrom(vvmPath: vvmPath))
-            }
+        for vvmPath in voiceModelFilePaths {
+            newStyles.append(contentsOf: try stylesFrom(vvmPath: vvmPath))
         }
         styles = newStyles
         VoicevoxCore.cachedStyles = newStyles
@@ -1191,6 +1219,8 @@ final class VoicevoxCore {
     }
 
     static func setUpFromBundleIfNeeded() async {}
+    static func currentVoiceModelFilePaths() -> [String] { return [] }
+    static func reloadStyleCatalogFromCurrentFiles() {}
 
     func synthesize(text: String, styleId: UInt32) async throws -> Data {
         throw VoicevoxCoreError.notSetUp

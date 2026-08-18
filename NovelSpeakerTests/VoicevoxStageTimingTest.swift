@@ -44,8 +44,7 @@ class VoicevoxStageTimingTest: XCTestCase {
         guard let vvmPath = Bundle.main.path(forResource: "0", ofType: "vvm") else {
             throw XCTSkip("0.vvm がバンドルにありません(scripts/fetch_voicevox_vendor.sh 未実行?)")
         }
-        let vvmDirectory = (vvmPath as NSString).deletingLastPathComponent
-        try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelDirectoryPaths: [vvmDirectory])
+        try await VoicevoxCore.shared.setUp(dictDirectoryPath: dictPath, voiceModelFilePaths: [vvmPath])
         let styles = await VoicevoxCore.shared.styles
         guard let style = styles.first else {
             throw XCTSkip("0.vvm からスタイルが取れませんでした")

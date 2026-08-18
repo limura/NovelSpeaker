@@ -190,6 +190,8 @@ extension VoicevoxVoiceModelDownloader: URLSessionDownloadDelegate {
             try store.store(temporaryFileURL: location, modelID: modelID,
                             expectedStyleIds: expected, readableFormats: readableFormats)
             queue.finish(modelID: modelID)
+            // 置いただけでは使えない。話者一覧を作り直して初めて選べるようになる。
+            VoicevoxCore.reloadStyleCatalogFromCurrentFiles()
             AppInformationLogger.AddLog(
                 message: "VOICEVOXの音声モデル \(modelID).vvm を取得しました", isForDebug: true)
         } catch {
