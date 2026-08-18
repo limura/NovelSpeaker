@@ -60,6 +60,16 @@ final class AppLaunchCoordinator: NSObject {
         #endif
         if !NiftyUtility.isTesting() {
             Task {
+                // 使われない音声モデルの取り残しを掃除する。
+                // 新しい形式を置いた直後に消しているので普通は何も無いが、
+                // その最中にアプリが落ちると60MB級が居座ってしまうため、念のため。
+                // (ディレクトリを2回読むだけなので、何も無ければ一瞬で終わる)
+                let freed = VoicevoxVoiceModelStore.shared.removeSupersededDuplicates()
+                if freed > 0 {
+                    AppInformationLogger.AddLog(
+                        message: "使われていない音声モデルを片付けました(\(freed / 1024 / 1024)MB)",
+                        isForDebug: true)
+                }
                 await VoicevoxCore.setUpFromBundleIfNeeded()
             }
         }

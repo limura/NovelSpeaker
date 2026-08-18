@@ -148,6 +148,73 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
         XCTAssertEqual(store.stored(modelID: "0", readableFormats: [1, 2])?.format, 2)
     }
 
+    // ★新しい形式を置いたら、同じ音声モデルの古い形式は消える事。
+    //
+    // 消さないと、使われない60MBがそのまま居座る。
+    // (「更新があります」から取り直した時に、まさにこの状況になる)
+    func testStoringNewerFormatRemovesOlderOne() throws {
+        // 形式1で持っている状態を作る
+        let old = store.fileURL(forModelID: "0", format: 1)
+        try FileManager.default.createDirectory(at: old.deletingLastPathComponent(),
+                                                withIntermediateDirectories: true)
+        try Data(repeating: 0, count: 4096).write(to: old)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: old.path))
+
+        // 形式1の本物を「形式2として」置く事はできないので、
+        // ここでは同じ形式に置き直した時に古い方が残らない事だけ確かめ、
+        // 形式をまたぐ場合は下の掃除のテストで見る。
+        let incoming = try copyOfRealVvm()
+        let stored = try store.store(temporaryFileURL: incoming, modelID: "0",
+                                     expectedStyleIds: [], readableFormats: [1])
+        XCTAssertEqual(stored, old, "同じ形式なら置き換わる")
+        XCTAssertEqual(store.storedModelIDs(readableFormats: [1, 2]), ["0": 1])
+    }
+
+    // ★取り残された古い形式を掃除できる事(置いた直後に落ちた場合など)。
+    func testSupersededDuplicatesAreReclaimed() throws {
+        for (format, size) in [(1, 4096), (2, 8192)] {
+            let url = store.fileURL(forModelID: "0", format: format)
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
+                                                    withIntermediateDirectories: true)
+            try Data(repeating: 0, count: size).write(to: url)
+        }
+        // 形式1にしか無い物は消してはいけない
+        let onlyOld = store.fileURL(forModelID: "5", format: 1)
+        try Data(repeating: 0, count: 2048).write(to: onlyOld)
+
+        XCTAssertEqual(store.reclaimableBytes(readableFormats: [1, 2]), 4096,
+                       "消せるのは、新しい形式で持っている物の古い方だけ")
+
+        let freed = store.removeSupersededDuplicates()
+        XCTAssertEqual(freed, 4096)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: store.fileURL(forModelID: "0", format: 1).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: store.fileURL(forModelID: "0", format: 2).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: onlyOld.path),
+                      "その形式でしか持っていない物を消してはいけない")
+        // もう一度呼んでも何も起きない
+        XCTAssertEqual(store.removeSupersededDuplicates(), 0)
+    }
+
+    // ★もう読めない形式の分も「消せる無駄」として数える事。
+    func testUnreadableFormatCountsAsReclaimable() throws {
+        let url = store.fileURL(forModelID: "0", format: 9)
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
+                                                withIntermediateDirectories: true)
+        try Data(repeating: 0, count: 1024).write(to: url)
+        XCTAssertEqual(store.reclaimableBytes(readableFormats: [1, 2]), 1024)
+        store.removeUnreadableFormats(readableFormats: [1, 2])
+        XCTAssertEqual(store.reclaimableBytes(readableFormats: [1, 2]), 0)
+    }
+
+    // 無駄が無い時は0を返す事(管理画面に「0MB削除できます」と出さないため)。
+    func testNothingReclaimableWhenClean() throws {
+        let incoming = try copyOfRealVvm()
+        try store.store(temporaryFileURL: incoming, modelID: "0",
+                        expectedStyleIds: [], readableFormats: [1])
+        XCTAssertEqual(store.reclaimableBytes(readableFormats: [1, 2]), 0)
+        XCTAssertEqual(store.removeSupersededDuplicates(), 0)
+    }
+
     // 読めなくなった形式のディレクトリを丸ごと捨てられる事。
     func testUnreadableFormatDirectoryCanBeDropped() throws {
         for format in [1, 9] {

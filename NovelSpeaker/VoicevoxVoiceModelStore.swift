@@ -20,9 +20,14 @@
 //  ファイル名に紛れ込ませず、ディレクトリで分けるのは、
 //  「この形式はもう読めない」となった時に**ディレクトリごと捨てられる**ため。
 //
-//  同じ音声モデルを複数の形式で持つ事はしない(取得前に isStored で弾く)。
-//  持ってしまうと同じ styleId を2つのファイルが名乗る事になる。
-//  それでも混ざった場合に備えて、列挙時は新しい形式の方を採る。
+//  同じ音声モデルを複数の形式で持つ事はしない。
+//  持ってしまうと同じ styleId を2つのファイルが名乗る上、
+//  使われない方が60MBを無駄に占め続ける。
+//  そうならないよう2段構えにしてある:
+//    - 取得前に isStored で「どの形式でも持っているか」を見て、二重取得を避ける
+//    - 新しい形式を置いた直後に、同じ音声モデルの古い形式を消す(store の中で行う)
+//  それでも取り残された物(置いた直後に落ちた等)は
+//  removeSupersededDuplicates() が起動時に掃除する。
 //
 
 import Foundation
@@ -164,7 +169,84 @@ class VoicevoxVoiceModelStore {
             try? FileManager.default.removeItem(at: destination)
         }
         try FileManager.default.moveItem(at: temporaryFileURL, to: destination)
+        // 同じ音声モデルの古い形式は、これでもう使われない。
+        // 置いた直後に消しておかないと、60MB がそのまま無駄に居座る。
+        removeOlderFormats(modelID: modelID, keeping: info.vvmFormatVersion)
         return destination
+    }
+
+    /// 指定した形式より**古い形式**の同じ音声モデルを消す。
+    private func removeOlderFormats(modelID: String, keeping format: Int) {
+        let entries = (try? FileManager.default.contentsOfDirectory(atPath: rootDirectory.path)) ?? []
+        for entry in entries where entry.hasPrefix("f") {
+            guard let candidate = Int(entry.dropFirst()), candidate < format else { continue }
+            try? FileManager.default.removeItem(at: fileURL(forModelID: modelID, format: candidate))
+        }
+    }
+
+    /// 新しい形式で持っている音声モデルの、古い形式の残骸を掃除する。
+    ///
+    /// 通常は store() が置いた直後に消すので、ここに引っかかる物は無い。
+    /// 置いた直後にアプリが落ちた場合などの取りこぼし用。
+    /// - Returns: 消したファイルの合計バイト数
+    @discardableResult
+    func removeSupersededDuplicates() -> Int64 {
+        let formats = availableFormatDirectories()
+        var freed: Int64 = 0
+        // 音声モデルIDごとに、一番新しい形式だけ残す。
+        var newestFormat: [String: Int] = [:]
+        for format in formats.sorted() {
+            for modelID in modelIDs(inFormat: format) {
+                newestFormat[modelID] = format
+            }
+        }
+        for format in formats {
+            for modelID in modelIDs(inFormat: format) {
+                guard let newest = newestFormat[modelID], newest > format else { continue }
+                let url = fileURL(forModelID: modelID, format: format)
+                let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size]) as? NSNumber
+                if (try? FileManager.default.removeItem(at: url)) != nil {
+                    freed += size?.int64Value ?? 0
+                }
+            }
+        }
+        return freed
+    }
+
+    /// 実際に存在する形式ディレクトリの一覧(読める形式かどうかは問わない)。
+    private func availableFormatDirectories() -> [Int] {
+        let entries = (try? FileManager.default.contentsOfDirectory(atPath: rootDirectory.path)) ?? []
+        return entries.compactMap { entry in
+            entry.hasPrefix("f") ? Int(entry.dropFirst()) : nil
+        }
+    }
+
+    private func modelIDs(inFormat format: Int) -> [String] {
+        let directory = directoryURL(forFormat: format)
+        let entries = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
+        return entries.filter { $0.hasSuffix(".vvm") }.map { String($0.dropLast(4)) }
+    }
+
+    /// 今すぐ消せる無駄の合計バイト数(管理画面に出す用)。
+    /// 「使われていない古い形式」と「もう読めない形式」の両方。
+    func reclaimableBytes(readableFormats: Set<Int>) -> Int64 {
+        var total: Int64 = 0
+        let formats = availableFormatDirectories()
+        var newestReadable: [String: Int] = [:]
+        for format in formats.sorted() where readableFormats.contains(format) {
+            for modelID in modelIDs(inFormat: format) { newestReadable[modelID] = format }
+        }
+        for format in formats {
+            for modelID in modelIDs(inFormat: format) {
+                let isUnreadable = readableFormats.contains(format) == false
+                let isSuperseded = (newestReadable[modelID] ?? format) > format
+                guard isUnreadable || isSuperseded else { continue }
+                let url = fileURL(forModelID: modelID, format: format)
+                let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size]) as? NSNumber
+                total += size?.int64Value ?? 0
+            }
+        }
+        return total
     }
 
     /// その音声モデルを、どの形式の物も消す。
