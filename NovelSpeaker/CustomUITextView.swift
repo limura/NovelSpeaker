@@ -33,6 +33,11 @@ public class CustomUITextView: UITextView {
 
     // UITextView で長押しして出て来るメニューの項目を減らします
     // from http://qiita.com/watt1006/items/2425bfa1720d522d05fd
+    //
+    // iOS 16 以降は SpeechViewController の
+    // textView(_:editMenuForTextIn:suggestedActions:) 側でメニューのツリーを走査して
+    // 選別するため、こちらは主に iOS 15 用の経路になる。
+    // (どちらも EditMenuFilter の同じ判定を使うので結果は一致する)
     override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         // 「ここから発話開始」は「発話中 かつ 自動スクロールが一時停止中」の時だけ出します。
         // 発話中の長押しメニューは(上記の理由で)全部潰しているので、ここを通した1項目だけが表示され、
@@ -43,53 +48,9 @@ public class CustomUITextView: UITextView {
         if StorySpeaker.shared.isPlayng {
             return false
         }
-        #if false
-        print("\"\(action.description)\",")
-        let passTarget = [
-            "cut:",
-            "copy:",
-            "paste:",
-            "delete:",
-            "select:",
-            "selectAll:",
-            "_promptForReplace:",
-            "_transliterateChinese:",
-            "_insertDrawing:",
-            "captureTextFromCamera:",
-            "toggleBoldface:",
-            "toggleItalics:",
-            "toggleUnderline:",
-            "makeTextWritingDirectionRightToLeft:",
-            "makeTextWritingDirectionLeftToRight:",
-            "_findSelected:",
-            "_define:",
-            "_translate:",
-            "_addShortcut:", // Webを検索
-            "_accessibilitySpeak:", // 読み上げ
-            "_accessibilitySpeakSpellOut:", // スペル
-            "_share:",
-            "setSpeechModSettingWithSender:",
-            "setSpeechModForThisNovelSettingWithSender:",
-            "checkSpeechTextWithSender:",
-        ]
-        if passTarget.contains(action.description) {
-            return super.canPerformAction(action, withSender: sender)
+        if !EditMenuFilter.isAllowedForCanPerformAction(action: action) {
+            return false
         }
-        return false
-        #endif
-        
-        return RealmUtil.RealmBlock { (realm) -> Bool in
-            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                if globalState.isMenuItemIsAddNovelSpeakerItemsOnly {
-                    for typeName in globalState.menuItemsNotRemoved {
-                        if let type = MenuItemsNotRemovedType(rawValue: typeName), type.isTargetSelector(selector: action) {
-                            return super.canPerformAction(action, withSender: sender)
-                        }
-                    }
-                    return false
-                }
-            }
-            return super.canPerformAction(action, withSender: sender);
-        }
+        return super.canPerformAction(action, withSender: sender)
     }
 }

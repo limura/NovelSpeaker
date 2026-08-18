@@ -265,12 +265,39 @@
 "SettingTableViewController_NovelImportSetting_Title" = "Specify the portion of each website to be included.";
 
 
+"RealmModels_MenuItemsNotRemoved_Name_cut" = "Cut";
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
+"RealmModels_MenuItemsNotRemoved_Name_paste" = "Paste";
+"RealmModels_MenuItemsNotRemoved_Name_deleteText" = "Delete";
+"RealmModels_MenuItemsNotRemoved_Name_select" = "Select";
+"RealmModels_MenuItemsNotRemoved_Name_systemSelectAll" = "Select All (system)";
+"RealmModels_MenuItemsNotRemoved_Name_promptForReplace" = "Replace...";
+"RealmModels_MenuItemsNotRemoved_Name_transliterateChinese" = "简⇄繁";
+"RealmModels_MenuItemsNotRemoved_Name_insertDrawing" = "Insert Drawing";
+"RealmModels_MenuItemsNotRemoved_Name_writingTools" = "Writing Tools";
+"RealmModels_MenuItemsNotRemoved_Name_captureTextFromCamera" = "Scan Text";
+"RealmModels_MenuItemsNotRemoved_Name_bold" = "Bold";
+"RealmModels_MenuItemsNotRemoved_Name_italic" = "Italic";
+"RealmModels_MenuItemsNotRemoved_Name_underline" = "Underline";
+"RealmModels_MenuItemsNotRemoved_Name_writingDirection" = "Writing Direction";
+"RealmModels_MenuItemsNotRemoved_Name_textFormattingOptions" = "More formatting...";
+"RealmModels_MenuItemsNotRemoved_Name_findSelected" = "Find Selection";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "Define";
 "RealmModels_MenuItemsNotRemoved_Name_translate" = "Translate";
 "RealmModels_MenuItemsNotRemoved_Name_addShortcut" = "Add shortcut";
+"RealmModels_MenuItemsNotRemoved_Name_speak" = "Speak";
+"RealmModels_MenuItemsNotRemoved_Name_speakLanguageSelection" = "Speak (select language)";
+"RealmModels_MenuItemsNotRemoved_Name_pauseSpeaking" = "Pause speaking";
 "RealmModels_MenuItemsNotRemoved_Name_share" = "Share";
 "RealmModels_MenuItemsNotRemoved_Name_selectAll" = "Select All";
+"RealmModels_MenuItemsNotRemoved_Section_standardEdit" = "Edit";
+"RealmModels_MenuItemsNotRemoved_Section_replace" = "Replace";
+"RealmModels_MenuItemsNotRemoved_Section_format" = "Format";
+"RealmModels_MenuItemsNotRemoved_Section_lookup" = "Look Up";
+"RealmModels_MenuItemsNotRemoved_Section_learn" = "Learn";
+"RealmModels_MenuItemsNotRemoved_Section_speech" = "Speech";
+"RealmModels_MenuItemsNotRemoved_Section_share" = "Share";
+"RealmModels_MenuItemsNotRemoved_Section_novelSpeaker" = "NovelSpeaker";
 
 "RemoteDataURLSettingViewController_Title" = "Setting URL for internal data reference";
 "RemoteDataURLSettingViewController_Information" = "Note: If you rewrite the settings here poorly, NovelSpeaker may not work properly. Make sure you understand the contents before rewriting.\nThe standard settings are all \"empty (nothing is written)\", so if a problem occurs, you can return to the standard settings by deleting the contents of all items.";

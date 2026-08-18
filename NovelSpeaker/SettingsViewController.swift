@@ -799,16 +799,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let row = form.rowBy(tag: "OnlyDisplayAddSpeechModSettingsRow") as? RowOf<Bool> else { return true }
                 return row.value ?? false == false
             })
-            row.options = [
-                MenuItemsNotRemovedType.copy,
-                MenuItemsNotRemovedType.define,
-                MenuItemsNotRemovedType.translate,
-                MenuItemsNotRemovedType.addShortcut,
-                MenuItemsNotRemovedType.share,
-                MenuItemsNotRemovedType.selectAll,
-            ].map({
-                $0.localizedString()
-            })
+            // iOS 16 以降はメニューのツリーを走査して選別できるようになったので、
+            // 「残せる項目」を実測できた分だけ全部並べる(MenuItemsNotRemovedType.allCases)。
+            row.options = MenuItemsNotRemovedType.allCases.map({ $0.localizedString() })
             row.cell.textLabel?.numberOfLines = 0
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
@@ -832,6 +825,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             }
         }).onPresent { from, to in
+            // 項目数が多いのでメニューのまとまりごとにセクション分けして表示する
+            to.sectionKeyForValue = { optionName in
+                return MenuItemsNotRemovedType.convertFromLocalizedString(localizedString: optionName)?.sectionKey ?? "9"
+            }
+            to.sectionHeaderTitleForKey = { sectionKey in
+                return MenuItemsNotRemovedType.sectionTitle(forSectionKey: sectionKey)
+            }
             to.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: from, action: #selector(self.multipleSelectorDone(_:)))
         }
 

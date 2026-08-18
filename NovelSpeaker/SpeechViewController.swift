@@ -11,7 +11,7 @@ import RealmSwift
 import IceCream
 import Eureka
 
-class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, UIGestureRecognizerDelegate, UITextViewDelegate /*, UIEditMenuInteractionDelegate */ {
+class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, UIGestureRecognizerDelegate, UITextViewDelegate {
     
     public var storyID : String? = nil
     public var isNeedResumeSpeech : Bool = false
@@ -159,12 +159,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         RealmObserverHandler.shared.AddDelegate(delegate: self)
         searchTextCache = ""
         
-        /* // TODO: UIEditMenuInteraction をサポートする場合用。「設定タブ」→「本文中の長押しメニュー項目を減らす」がうまく実装できていないの一旦封印しておきます。
-        if #available(iOS 16.0, *) {
-            let editMenuInteraction = UIEditMenuInteraction(delegate: self)
-            self.textView.addInteraction(editMenuInteraction)
-        }
-         */
+        // delegate は2つの用途で使う。
+        // ・iOS 16 以降の長押しメニュー選別
+        //   (UIEditMenuInteraction を自前で addInteraction するのではなく、
+        //    UITextViewDelegate.textView(_:editMenuForTextIn:suggestedActions:) を使う)
+        // ・手動スクロールの検出(scrollViewWillBeginDragging)。
+        //   指やトラックパッドのドラッグ開始でのみ呼ばれ、scrollRectToVisible() 等の
+        //   プログラム由来では呼ばれないので「自分で動かしたのか」の判定に使える。
+        self.textView.delegate = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -420,11 +422,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         setCustomUIMenu()
         
         self.textView.layoutManager.allowsNonContiguousLayout = false
-
-        // 手動スクロールの検出用。scrollViewWillBeginDragging は指(やトラックパッド)の
-        // ドラッグ開始でのみ呼ばれ、scrollRectToVisible() 等のプログラム由来では呼ばれないので、
-        // 「自分で動かしたのか」の判定にそのまま使える。
-        self.textView.delegate = self
 
         // 長押しで「ここから発話開始」を出すために、長押しが始まった時点で一時停止を始める。
         // (でないと、選択した位置が次の発話位置更新で上書きされてしまう)
@@ -1305,21 +1302,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
 
     // MARK: ここから発話開始
 
-    // iOS16 以降は、canPerformAction だけでは OS が出してくる項目
-    // (作文ツール / 読み上げ / スペル 等)を消しきれない事があるので、
-    // 発話中はこちらで内容そのものを差し替える。
-    // 発話していない時は nil を返して従来どおりの動作にする。
-    @available(iOS 16.0, *)
-    func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
-        guard StorySpeaker.shared.isPlayng else { return nil }
-        guard self.isScrollFollowSuspended else { return UIMenu(children: []) }
-        return UIMenu(children: [
-            UIAction(title: NSLocalizedString("SpeechViewController_SpeakFromHere", comment: "ここから発話開始")) { [weak self] _ in
-                self?.speakFromHere(sender: UIMenuItem())
-            }
-        ])
-    }
-
     @objc func handleSpeakFromHereLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
         guard gestureRecognizer.state == .began, self.storySpeaker.isPlayng else { return }
         // viewDidLoad で設定した UIMenuController.shared.menuItems が、長押しの時点では
@@ -1898,25 +1880,31 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             self.storySpeaker.LoadNextChapter(realm: realm)
         }
     }
+    // iOS 16 以降の長押しメニューの選別。
+    // suggestedActions は UIMenu / UICommand のツリーとして渡ってくるので、
+    // セレクタ名を推測せずに「残すと指定された物以外を全部落とす」形で選別できる。
+    // (ことせかい 独自の項目は UIMenuController 由来の com.apple.menu.dynamic.* として
+    //  この中に含まれており、EditMenuFilter が常に残す)
+    //
+    // 発話中は事情が違い、出したいのは「ここから発話開始」だけになる。
+    // canPerformAction だけでは OS が出してくる項目(作文ツール等)を消しきれないので、
+    // ここで内容ごと差し替える。発話位置への自動スクロールが一時停止している間だけ
+    // 「ここから発話開始」を出し、それ以外は何も出さない。
     @available(iOS 16.0, *)
-    func editMenuInteraction(_ interaction: UIEditMenuInteraction, menuFor configuration: UIEditMenuConfiguration, suggestedActions: [UIMenuElement]) -> UIMenu? {
-        print("HOGEHOGE: editMenuInteraction: \(configuration.identifier) \(suggestedActions.map({"\($0.title):\($0.subtitle ?? "nil"):\($0.debugDescription)"}).joined(separator: ", "))")
+    func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
         if self.storySpeaker.isPlayng {
+            guard self.isScrollFollowSuspended else { return UIMenu(children: []) }
+            return UIMenu(children: [
+                UIAction(title: NSLocalizedString("SpeechViewController_SpeakFromHere", comment: "ここから発話開始")) { [weak self] _ in
+                    self?.speakFromHere(sender: UIMenuItem())
+                }
+            ])
+        }
+        let children = EditMenuFilter.filteredSuggestedActions(suggestedActions)
+        if children.isEmpty {
             return nil
         }
-        
-        let addActions: [UIMenuElement] = [
-            UIAction(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), handler: { _ in
-                self.setSpeechModSetting(sender: UIMenuItem())
-             }),
-            UIAction(title: NSLocalizedString("SpeechViewController_AddSpeechModSettingsForThisNovel", comment: "この小説用の読み替え辞書へ登録"), handler: { _ in
-                self.setSpeechModForThisNovelSetting(sender: UIMenuItem())
-            }),
-            UIAction(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), handler: { _ in
-                self.checkSpeechText(sender:UIMenuItem())
-            })
-        ]
-        return UIMenu(children: suggestedActions + addActions)
+        return UIMenu(children: children)
     }
     
     override var keyCommands: [UIKeyCommand]? {
