@@ -60,6 +60,10 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     private var selectedNovelIDs = Set<String>()
 
     private let searchBar = UISearchBar()
+    /// 小説の一覧の節。絞り込みではここだけを作り直す。
+    private weak var novelSection: Section?
+    /// 一覧の元データ。小説名は Realm を引くので、絞り込みの度に取り直さない。
+    private var novelEntries: [(novelID: String, title: String, summary: VoicevoxDiskCacheSummary)] = []
     /// viewDidLoad で組んだ直後の viewWillAppear で作り直さないための印。
     ///
     /// Eureka の form.removeAll() は「今テーブルに出ている section を消す」形で
@@ -75,7 +79,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         searchBar.delegate = self
         searchBar.sizeToFit()
         searchBar.autocapitalizationType = .none
-        tableView.tableHeaderView = searchBar
+        searchBar.searchBarStyle = .minimal
         updateRightBarButton()
         // 生成中はこの画面の数字が増えていくので、進捗に合わせて更新する。
         NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange), name: VoicevoxCacheGenerator.progressDidChangeNotification, object: nil)
@@ -101,7 +105,12 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchText = searchText
-        reload()
+        // ★ここで form.removeAll() をしてはいけない。
+        // 検索欄を持っている節ごと消える上、Eureka の節の削除と
+        // tableView の更新が噛み合わず
+        // 「index 0 beyond bounds for empty array」で落ちる。
+        // 変わるのは小説の一覧だけなので、そこだけ作り直す。
+        reloadNovelRows()
     }
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -203,6 +212,63 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         tableView.reloadData()
     }
 
+    /// 小説の一覧の行を作り直す。絞り込みで変わるのはここだけ。
+    private func reloadNovelRows() {
+        guard let novelSection = novelSection else {
+            reload()
+            return
+        }
+        novelSection.removeAll()
+        appendNovelRows(to: novelSection)
+    }
+
+    private func appendNovelRows(to novelSection: Section) {
+        var entries = novelEntries
+        if searchText.isEmpty == false {
+            entries = entries.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+        }
+        let sortedIDs = sorted(entries: entries.map { (novelID: $0.novelID, summary: $0.summary) })
+            .map { $0.novelID }
+        entries = sortedIDs.compactMap { novelID in entries.first { $0.novelID == novelID } }
+
+        guard entries.isEmpty == false else {
+            novelSection <<< LabelRow() {
+                $0.title = String(format: NSLocalizedString(
+                    "VoicevoxCacheManageViewController_NoNovelMatchesFormat",
+                    comment: "「%@」に一致する小説はありません"), searchText)
+                $0.cell.textLabel?.numberOfLines = 0
+            }
+            return
+        }
+        for entry in entries {
+            let novelID = entry.novelID
+            let isGenerating = VoicevoxCacheGenerator.shared.runningNovelID == novelID
+            novelSection <<< ButtonRow(Self.rowTag(novelID: novelID)) {
+                $0.title = self.rowTitle(novelID: novelID)
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.textAlignment = .left
+                if isGenerating {
+                    $0.cell.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.15)
+                }
+            }.onCellSelection({ [weak self] _, row in
+                guard let self = self else { return }
+                if self.isSelecting {
+                    if self.selectedNovelIDs.contains(novelID) {
+                        self.selectedNovelIDs.remove(novelID)
+                    } else {
+                        self.selectedNovelIDs.insert(novelID)
+                    }
+                    row.title = self.rowTitle(novelID: novelID)
+                    row.updateCell()
+                    return
+                }
+                VoicevoxCacheDeleteDialog.present(on: self, novelID: novelID) { [weak self] in
+                    self?.reload()
+                }
+            })
+        }
+    }
+
     // MARK: - 表示文言
 
     private static func novelTitle(novelID: String) -> String {
@@ -258,44 +324,30 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             return
         }
 
-        var entries = allNovelIDs.map { (novelID: $0, summary: VoicevoxDiskCacheStore.shared.summary(novelID: $0)) }
-        if searchText.isEmpty == false {
-            entries = entries.filter { Self.novelTitle(novelID: $0.novelID).localizedCaseInsensitiveContains(searchText) }
+        novelEntries = allNovelIDs.map {
+            (novelID: $0, title: Self.novelTitle(novelID: $0),
+             summary: VoicevoxDiskCacheStore.shared.summary(novelID: $0))
         }
-        entries = sorted(entries: entries)
 
         form +++ sortSection()
 
-        let sectionTitle = isSelecting ? "小説ごと(タップで選択)" : "小説ごと(タップで削除)"
-        let novelSection = Section(entries.isEmpty ? "「\(searchText)」に一致する小説はありません" : sectionTitle)
-        for entry in entries {
-            let novelID = entry.novelID
-            let isGenerating = VoicevoxCacheGenerator.shared.runningNovelID == novelID
-            novelSection <<< ButtonRow(Self.rowTag(novelID: novelID)) {
-                $0.title = self.rowTitle(novelID: novelID)
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.textAlignment = .left
-                if isGenerating {
-                    $0.cell.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.15)
-                }
-            }.onCellSelection({ [weak self] _, row in
-                guard let self = self else { return }
-                if self.isSelecting {
-                    if self.selectedNovelIDs.contains(novelID) {
-                        self.selectedNovelIDs.remove(novelID)
-                    } else {
-                        self.selectedNovelIDs.insert(novelID)
-                    }
-                    row.title = self.rowTitle(novelID: novelID)
-                    row.updateCell()
-                    return
-                }
-                VoicevoxCacheDeleteDialog.present(on: self, novelID: novelID) { [weak self] in
-                    self?.reload()
-                }
-            })
+        // 検索欄はこの節の頭に置く。一覧から離れていると、
+        // 何を絞り込んでいるのかが結び付かない。
+        let novelSection = Section() { section in
+            var header = HeaderFooterView<UIView>(.callback({ [weak self] in
+                let container = UIView()
+                guard let self = self else { return container }
+                self.searchBar.frame = CGRect(x: 0, y: 0, width: container.bounds.width, height: 44)
+                self.searchBar.autoresizingMask = [.flexibleWidth]
+                container.addSubview(self.searchBar)
+                return container
+            }))
+            header.height = { 44 }
+            section.header = header
         }
+        self.novelSection = novelSection
         form +++ novelSection
+        appendNovelRows(to: novelSection)
 
         let allSection = Section()
         // 発話設定を変えると、同じ箇所の音声が古い鍵のまま残り続ける。
