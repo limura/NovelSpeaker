@@ -1374,31 +1374,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.textLabel?.textColor = nil
             })
 
-            // 事前に作った VOICEVOX 音声の容量確認と削除。
-            // 1作品で数百MB〜数GBになるので、確認して消せる場所が要る。
+            // VOICEVOX まわりの入口。音声モデル(1.4GB)と作成済み音声(数GB)、
+            // クレジット表記と、あちこちに散っていた物を1段掘って束ねてある。
             if VoicevoxCore.isAvailableOnThisOS {
                 section
                 <<< ButtonRow() {
-                    $0.title = "作成済みのVOICEVOX音声"
+                    $0.title = "VOICEVOX の設定"
                     $0.cell.textLabel?.numberOfLines = 0
                     $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
-                        return VoicevoxCacheManageViewController()
-                    }), onDismiss: nil)
-                }.cellUpdate({ (cell, button) in
-                    cell.textLabel?.textAlignment = .left
-                    cell.accessoryType = .disclosureIndicator
-                    cell.editingAccessoryType = cell.accessoryType
-                    cell.textLabel?.textColor = nil
-                })
-
-                // 音声モデル(1.4GB)の確認・取得・削除。作成済み音声とは別に貯まるので、
-                // 管理する場所も隣り合っていないと、どちらを消せばよいのか分からなくなる。
-                section
-                <<< ButtonRow() {
-                    $0.title = "VOICEVOXの音声モデル"
-                    $0.cell.textLabel?.numberOfLines = 0
-                    $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
-                        return VoicevoxVoiceModelManageViewController()
+                        return VoicevoxSettingsViewController()
                     }), onDismiss: nil)
                 }.cellUpdate({ (cell, button) in
                     cell.textLabel?.textAlignment = .left
@@ -2057,21 +2041,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         }.build().show()
                 }
             })
-            // 再生中に「この先の貯金」がこの時間を切っていたら生成を続ける。
-            // 適切な値は聴き方と端末の速さで変わるので、固定値にはしない。
-            if VoicevoxCore.isAvailableOnThisOS {
-                section
-                <<< StepperRow() {
-                    $0.title = "再生中に生成を続ける貯金の下限(分・0で続けない)"
-                    $0.value = Double(VoicevoxCacheLead.keepGeneratingBelowMinutes)
-                    $0.cell.stepper.minimumValue = 0
-                    $0.cell.stepper.maximumValue = 180
-                    $0.cell.stepper.stepValue = 5
-                    $0.cell.textLabel?.numberOfLines = 0
-                }.onChange({ row in
-                    VoicevoxCacheLead.keepGeneratingBelowMinutes = Int(row.value ?? 15)
-                })
-            }
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AppInformation_IncludeForDebug_OutputByJSON", comment:"アプリ内エラーのお知らせをJSONで取り出す")

@@ -239,6 +239,7 @@
 		4A20C65EB91B77B2C21E7F76 /* VoicevoxStyleSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C975773BB39B575CEC322 /* VoicevoxStyleSelection.swift */; };
 		4A5CB51F4B59EABA6D1D4896 /* VoicevoxSilenceReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A11E1BFA811FF6B06814D1 /* VoicevoxSilenceReporter.swift */; };
 		4BC87E478404A3F3716A4D40 /* VoicevoxDiskCacheStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29610087824D936C62E10B1C /* VoicevoxDiskCacheStore.swift */; };
+		4C14E07A3FE99C6F3C45F4B3 /* VoicevoxSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0CAA08C3B66036FA5C7E29A /* VoicevoxSettingsViewController.swift */; };
 		4CBB97C773D7BA547DF82293 /* VoicevoxCacheLimits.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AFA0E9D0F3FBD892093F10 /* VoicevoxCacheLimits.swift */; };
 		4E43854927FEE67928746720 /* VoicevoxAudioCompressor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B29AA5D9BBEBD8E7429869E /* VoicevoxAudioCompressor.swift */; };
 		5159CB020B6E9E171E9E1C0C /* VoicevoxCacheManageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DEE51DD7300977AB98FF54D /* VoicevoxCacheManageViewController.swift */; };
@@ -781,6 +782,7 @@
 		BC4F649680AEFB331B10BC87 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.release.xcconfig"; sourceTree = "<group>"; };
 		BFD5476A36FAD6CD441DBF86 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C0CAA08C3B66036FA5C7E29A /* VoicevoxSettingsViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxSettingsViewController.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000001 /* WatchWidgetURL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchWidgetURL.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000011 /* WatchActionComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchActionComplications.swift; sourceTree = "<group>"; };
 		C0DE10000000000000000021 /* WatchNovelSummaryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchNovelSummaryStore.swift; sourceTree = "<group>"; };
@@ -1219,6 +1221,7 @@
 				4CAF99D8484030AFE6D2591F /* VoicevoxAudioFormat.swift */,
 				F7A11E1BFA811FF6B06814D1 /* VoicevoxSilenceReporter.swift */,
 				19EDCF3F2D96CA21DDB253F2 /* ProcessCPUClock.swift */,
+				C0CAA08C3B66036FA5C7E29A /* VoicevoxSettingsViewController.swift */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -2043,6 +2046,7 @@
 				641CBB9E6797A7EC8DA7F9C9 /* VoicevoxAudioFormat.swift in Sources */,
 				4A5CB51F4B59EABA6D1D4896 /* VoicevoxSilenceReporter.swift in Sources */,
 				7FF1574FDCA29324B02DD6A5 /* ProcessCPUClock.swift in Sources */,
+				4C14E07A3FE99C6F3C45F4B3 /* VoicevoxSettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
