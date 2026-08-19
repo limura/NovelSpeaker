@@ -88,11 +88,33 @@ enum EditMenuFilter {
         return nil
     }
 
+    /// 指定したセレクタ名の項目だけを取り除く(削減設定が無効な時に使う)。
+    /// 残す物が無くなった UIMenu は nil を返す(= その階層ごと消す)。
+    @available(iOS 16.0, *)
+    static func removing(selectorNames: Set<String>, from element: UIMenuElement) -> UIMenuElement? {
+        if let menu = element as? UIMenu {
+            let children = menu.children.compactMap { removing(selectorNames: selectorNames, from: $0) }
+            if children.isEmpty { return nil }
+            return menu.replacingChildren(children)
+        }
+        // UIAction はセレクタを持たないので対象外(そのまま残す)。
+        if let command = element as? UICommand, (element as? UIAction) == nil {
+            return selectorNames.contains(NSStringFromSelector(command.action)) ? nil : command
+        }
+        return element
+    }
+
     /// UITextViewDelegate.textView(_:editMenuForTextIn:suggestedActions:) 用。
-    /// 削減設定が無効な場合は suggestedActions をそのまま返す。
+    /// 削減設定が無効な場合でも、「ここから発話開始」だけは必ず取り除く。
+    /// この項目は発話中に(メニューごと差し替える形で)出す物で、
+    /// 発話していない時に選ばれても何も起こらないため、出してはいけない。
+    /// (UIMenuController.shared.menuItems には常に登録してあるので、
+    ///  何もしないと suggestedActions に混ざって出てきてしまう)
     @available(iOS 16.0, *)
     static func filteredSuggestedActions(_ suggestedActions: [UIMenuElement]) -> [UIMenuElement] {
-        guard let keepSet = keepSetIfReducing() else { return suggestedActions }
+        guard let keepSet = keepSetIfReducing() else {
+            return suggestedActions.compactMap { removing(selectorNames: novelSpeakerOtherSelectorNames, from: $0) }
+        }
         return suggestedActions.compactMap { filter(element: $0, keepSet: keepSet) }
     }
 
