@@ -1131,7 +1131,6 @@
 // 設定タブのデバッグメニュー(Apple Watch連携の診断)
 "SettingsViewController_WatchSessionDiagnostics" = "Apple Watch連携の診断情報";
 
-"SettingsViewController_VoicevoxCPUNumThreads" = "VOICEVOXの合成に使うCPUスレッド数(計測用)";
 // VOICEVOXの音声モデルが未取得のスタイルを、話者設定の選択行にどう見せるか
 "VoicevoxStyleSelection_NotDownloadedLabelFormat" = "(未取得) %@";
 "VoicevoxStyleSelection_UnknownStyleNameFormat" = "スタイル番号 %u";

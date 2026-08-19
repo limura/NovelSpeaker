@@ -26,83 +26,6 @@ struct VoicevoxStyle {
     let vvmPath: String
 }
 
-
-/// 段階別の所要時間計測の結果(調査用)。
-/// 「合成の固定費20秒の正体は何か」を切り分けるために、`tts` を段階に分けて測ったもの。
-struct VoicevoxStageTiming {
-    struct Duration {
-        let wall: Double
-        let cpu: Double
-        static let zero = Duration(wall: 0, cpu: 0)
-        var description: String {
-            return String(format: "wall=%.3fs cpu=%.3fs", wall, cpu)
-        }
-    }
-
-    let text: String
-    let styleId: UInt32
-    /// VVM のロード(初回だけ時間がかかるはず)
-    let modelLoad: Duration
-    /// Open JTalk によるテキスト解析(推論なし)
-    let openJTalkAnalyze: Duration
-    /// 音素長の推論 (predict_duration)
-    let replacePhonemeLength: Duration
-    /// 音高の推論 (predict_intonation)
-    let replaceMoraPitch: Duration
-    /// AccentPhrase[] → AudioQuery(純JSON変換)
-    let audioQueryFromAccentPhrases: Duration
-    /// AudioQuery → WAV (decode/render)
-    let synthesis: Duration
-    /// 参考: create_audio_query 一発
-    let createAudioQueryOneShot: Duration
-    /// 参考: tts 一発
-    let ttsOneShot: Duration
-    let wavByteCount: Int
-    let ttsWavByteCount: Int
-    let moraCount: Int
-
-    var characterCount: Int { return text.count }
-    /// 24kHz/mono/16bit 前提の音声秒数。
-    var audioSeconds: Double {
-        return wavByteCount > 44 ? Double((wavByteCount - 44) / 2) / 24000.0 : 0
-    }
-    /// 段階に分けて呼んだ場合の合計(create_audio_query 一発 / tts 一発は含まない)。
-    var stagedTotal: Duration {
-        let stages = [openJTalkAnalyze, replacePhonemeLength, replaceMoraPitch, audioQueryFromAccentPhrases, synthesis]
-        return Duration(wall: stages.reduce(0) { $0 + $1.wall }, cpu: stages.reduce(0) { $0 + $1.cpu })
-    }
-
-    /// AccentPhrase の JSON からモーラ数を数える(音声長の代理指標)。
-    /// 厳密なパースはせず "vowel" の出現数で数える。
-    static func countMora(accentPhrasesJson: String) -> Int {
-        var count = 0
-        var search = accentPhrasesJson[accentPhrasesJson.startIndex...]
-        while let range = search.range(of: "\"vowel\"") {
-            count += 1
-            search = search[range.upperBound...]
-        }
-        return count
-    }
-
-    /// 実機ログに1行で出すための文字列。
-    var logLine: String {
-        return [
-            "chars=\(characterCount)",
-            "mora=\(moraCount)",
-            String(format: "audio=%.2fs", audioSeconds),
-            "| analyze " + openJTalkAnalyze.description,
-            "| duration " + replacePhonemeLength.description,
-            "| pitch " + replaceMoraPitch.description,
-            "| toQuery " + audioQueryFromAccentPhrases.description,
-            "| synthesis " + synthesis.description,
-            "| staged合計 " + stagedTotal.description,
-            "| createAudioQuery一発 " + createAudioQueryOneShot.description,
-            "| tts一発 " + ttsOneShot.description,
-            "| modelLoad " + modelLoad.description,
-        ].joined(separator: " ")
-    }
-}
-
 #if !targetEnvironment(macCatalyst) && !os(watchOS)
 
 enum VoicevoxCoreError: LocalizedError {
@@ -461,28 +384,6 @@ actor VoicevoxCore {
         Self.lastThreadCountChangeDate = Date()
     }
 
-    /// cpu_num_threads を明示指定して synthesizer を作り直す(計測用)。
-    /// スレッド数は synthesizer の生成時オプションなので、変更には作り直しが必要。
-    /// 比較計測を公平にするため、合成済みキャッシュと性能集計もリセットする。
-    func reconfigureCPUNumThreads(_ threads: UInt16) throws {
-        Self.threadCountMode = .fixed(threads)
-        cancelPendingPrefetch()
-        clearCache()
-        guard let ort = onnxruntime, let jtalk = openJTalk else {
-            // まだ setUp されていない場合は、設定だけ保存しておけば次の setUp で反映される。
-            return
-        }
-        if let existing = synthesizer {
-            voicevox_synthesizer_delete(existing)
-            synthesizer = nil
-        }
-        // 音声モデルは synthesizer に紐づいてロードされているので、読み直しが必要。
-        loadedVvmPaths.removeAll()
-        try createSynthesizer(onnxruntime: ort, openJTalk: jtalk, threadCount: threads)
-        // スレッド数が変わると文字数あたりの CPU 秒も変わるので、見積りも作り直す。
-        cpuGovernor.reset()
-    }
-
     /// 指定された *.vvm を全部 open→メタ取得→close して話者カタログを作り直す。
     /// (open だけならロードと違って軽い。VOICEVOX_IOS_INTEGRATION.md §3-4)
     ///
@@ -554,35 +455,13 @@ actor VoicevoxCore {
         loadedVvmPaths.insert(style.vvmPath)
     }
 
-    /// ONNX に渡す CPU スレッド数(0 = 自動 = 全コア)。
-    /// synthesizer 生成時オプションなので、変更を反映するには synthesizer の作り直しが要る。
-    /// 既定では状況に応じて自動で切り替える(VoicevoxThreadPolicy 参照)。
-    /// この UserDefaults キーが存在する場合のみ、その値で固定する(計測用)。
-    static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
-
-    /// スレッド数の決め方。未設定なら自動。
-    static var threadCountMode: VoicevoxThreadCountMode {
-        get {
-            guard let stored = UserDefaults.standard.object(forKey: cpuNumThreadsUserDefaultsKey) as? Int else {
-                return .automatic
-            }
-            return .fixed(UInt16(clamping: stored))
-        }
-        set {
-            switch newValue {
-            case .automatic:
-                UserDefaults.standard.removeObject(forKey: cpuNumThreadsUserDefaultsKey)
-            case .fixed(let threadCount):
-                UserDefaults.standard.set(Int(threadCount), forKey: cpuNumThreadsUserDefaultsKey)
-            }
-        }
-    }
-
-    /// 今の状況で使いたいスレッド数。
+    /// 今の状況で使いたい CPU スレッド数(0 = 全コア)。
+    ///
+    /// synthesizer の生成時オプションなので、変えるには synthesizer の作り直しが要る。
+    /// 状況に応じて自動で切り替える(VoicevoxThreadPolicy 参照)。
     static var configuredCPUNumThreads: UInt16 {
         let monitor = VoicevoxPrefetchThrottleMonitor.shared
         return VoicevoxThreadPolicy.desiredThreadCount(
-            mode: threadCountMode,
             isBackground: monitor.isBackground,
             isOnExternalPower: monitor.isOnExternalPower,
             isLowPowerModeEnabled: ProcessInfo.processInfo.isLowPowerModeEnabled
@@ -984,153 +863,6 @@ actor VoicevoxCore {
         }
     }
 
-    /// デバッグ用: キャッシュも CPU 予算も通さずに合成する。
-    /// 「一度に合成したもの」と「分割して繋いだもの」を聞き比べるための入り口。
-    /// - Parameters:
-    ///   - splitCharacterCount: nil なら分割せずに1本で合成する。値があればその長さで分割して繋ぐ。
-    ///   - trimJoinSilence: 分割位置の無音を削るかどうか。
-    func debugSynthesize(text: String, styleId: UInt32, splitCharacterCount: Int?, trimJoinSilence: Bool) throws -> Data {
-        guard let splitCharacterCount = splitCharacterCount else {
-            return try performSynthesize(text: text, styleId: styleId)
-        }
-        let chunks = VoicevoxTextChunker.split(text: text, maxCharacterCount: splitCharacterCount, minimumCharacterCount: 1)
-        var wavs: [Data] = []
-        for chunk in chunks {
-            wavs.append(try performSynthesize(text: chunk, styleId: styleId))
-        }
-        guard let joined = VoicevoxWavJoiner.join(wavs: wavs, trimJoinSilence: trimJoinSilence) else {
-            throw VoicevoxCoreError.invalidWav
-        }
-        return joined
-    }
-
-
-    // MARK: - 段階別の所要時間計測(調査用)
-
-    /// デバッグ用: `tts` を段階ごとに分けて呼び、各段階の所要時間を測る。
-    ///
-    /// 「合成の固定費(文字数に依らない費用)がどこにあるのか」を切り分けるための計測点。
-    /// キャッシュも CPU 予算も通さない。
-    ///
-    /// 0.16.4 の C API で分割できるのは以下だけ:
-    ///   1. `voicevox_open_jtalk_rc_analyze`            テキスト → AccentPhrase[]  (Open JTalk のみ・推論なし)
-    ///   2. `voicevox_synthesizer_replace_phoneme_length` 音素長の推論 (predict_duration)
-    ///   3. `voicevox_synthesizer_replace_mora_pitch`     音高の推論 (predict_intonation)
-    ///   4. `voicevox_audio_query_create_from_accent_phrases` AccentPhrase[] → AudioQuery (純JSON変換)
-    ///   5. `voicevox_synthesizer_synthesis`              AudioQuery → WAV (decode/render 推論)
-    /// `voicevox_synthesizer_create_audio_query` は 1+2+3+4 の、
-    /// `voicevox_synthesizer_tts` は 1〜5 のショートハンド。
-    func debugMeasureStages(text: String, styleId: UInt32, includeOneShotTTS: Bool = true) throws -> VoicevoxStageTiming {
-        guard let synthesizer = synthesizer, let openJTalk = openJTalk else { throw VoicevoxCoreError.notSetUp }
-
-        let modelLoad = try Self.measure { try ensureVoiceModelLoaded(styleId: styleId) }.duration
-
-        // 1. Open JTalk による解析(推論なし・スタイル非依存)
-        let analyzeResult = try Self.measure { () -> String in
-            try Self.jsonCall { out in
-                text.withCString { voicevox_open_jtalk_rc_analyze(openJTalk, $0, out) }
-            }
-        }
-        let accentPhrasesJson = analyzeResult.value
-
-        // 2. 音素長の推論
-        let phonemeLengthResult = try Self.measure { () -> String in
-            try Self.jsonCall { out in
-                accentPhrasesJson.withCString { voicevox_synthesizer_replace_phoneme_length(synthesizer, $0, styleId, out) }
-            }
-        }
-
-        // 3. 音高の推論
-        let moraPitchResult = try Self.measure { () -> String in
-            try Self.jsonCall { out in
-                phonemeLengthResult.value.withCString { voicevox_synthesizer_replace_mora_pitch(synthesizer, $0, styleId, out) }
-            }
-        }
-
-        // 4. AudioQuery への変換(純JSON・推論なし)
-        let queryResult = try Self.measure { () -> String in
-            try Self.jsonCall { out in
-                moraPitchResult.value.withCString { voicevox_audio_query_create_from_accent_phrases($0, out) }
-            }
-        }
-        let audioQueryJson = queryResult.value
-
-        // 5. AudioQuery → WAV(decode/render の推論。ここが本体のはず)
-        var wavLength: UInt = 0
-        var wavPointer: UnsafeMutablePointer<UInt8>?
-        let synthesisOptions = voicevox_make_default_synthesis_options()
-        let synthesisResult = try Self.measure { () -> Data in
-            let code = audioQueryJson.withCString {
-                voicevox_synthesizer_synthesis(synthesizer, $0, styleId, synthesisOptions, &wavLength, &wavPointer)
-            }
-            guard code == VOICEVOX_RESULT_OK, let wav = wavPointer else { throw VoicevoxCoreError.core(code) }
-            let data = Data(bytes: wav, count: Int(wavLength))
-            voicevox_wav_free(wav)
-            return data
-        }
-
-        // 参考: create_audio_query 一発(= 1+2+3+4)
-        let oneShotQuery = try Self.measure { () -> String in
-            try Self.jsonCall { out in
-                text.withCString { voicevox_synthesizer_create_audio_query(synthesizer, $0, styleId, out) }
-            }
-        }
-
-        // 参考: tts 一発(= 1〜5)。段階に分けた合計と比べるため。
-        var ttsDuration = VoicevoxStageTiming.Duration.zero
-        var ttsByteCount = 0
-        if includeOneShotTTS {
-            var ttsLength: UInt = 0
-            var ttsPointer: UnsafeMutablePointer<UInt8>?
-            let ttsOptions = voicevox_make_default_tts_options()
-            let ttsResult = try Self.measure { () -> Int in
-                let code = text.withCString {
-                    voicevox_synthesizer_tts(synthesizer, $0, styleId, ttsOptions, &ttsLength, &ttsPointer)
-                }
-                guard code == VOICEVOX_RESULT_OK, let wav = ttsPointer else { throw VoicevoxCoreError.core(code) }
-                voicevox_wav_free(wav)
-                return Int(ttsLength)
-            }
-            ttsDuration = ttsResult.duration
-            ttsByteCount = ttsResult.value
-        }
-
-        return VoicevoxStageTiming(
-            text: text,
-            styleId: styleId,
-            modelLoad: modelLoad,
-            openJTalkAnalyze: analyzeResult.duration,
-            replacePhonemeLength: phonemeLengthResult.duration,
-            replaceMoraPitch: moraPitchResult.duration,
-            audioQueryFromAccentPhrases: queryResult.duration,
-            synthesis: synthesisResult.duration,
-            createAudioQueryOneShot: oneShotQuery.duration,
-            ttsOneShot: ttsDuration,
-            wavByteCount: synthesisResult.value.count,
-            ttsWavByteCount: ttsByteCount,
-            moraCount: VoicevoxStageTiming.countMora(accentPhrasesJson: moraPitchResult.value)
-        )
-    }
-
-    /// 計測用: `voicevox_json_free` まで面倒を見て JSON 文字列を取り出す。
-    private static func jsonCall(_ body: (UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>) -> VoicevoxResultCode) throws -> String {
-        var out: UnsafeMutablePointer<CChar>?
-        let code = body(&out)
-        guard code == VOICEVOX_RESULT_OK, let json = out else { throw VoicevoxCoreError.core(code) }
-        defer { voicevox_json_free(json) }
-        return String(cString: json)
-    }
-
-    /// 計測用: 壁時計と CPU 秒を同時に測る。
-    private static func measure<T>(_ body: () throws -> T) rethrows -> (duration: VoicevoxStageTiming.Duration, value: T) {
-        let cpuBefore = ProcessCPUClock.totalCPUSeconds()
-        let wallBefore = Date()
-        let value = try body()
-        let wall = Date().timeIntervalSince(wallBefore)
-        let cpu = (ProcessCPUClock.totalCPUSeconds() ?? 0) - (cpuBefore ?? 0)
-        return (VoicevoxStageTiming.Duration(wall: wall, cpu: cpu), value)
-    }
-
     // テスト専用: 指定テキストが先行合成キャッシュに乗っているかどうか(進行中/未着手は含まない)。
     nonisolated func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool {
         return peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil
@@ -1196,14 +928,6 @@ final class VoicevoxCore {
 
     func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool { return false }
 
-    func debugSynthesize(text: String, styleId: UInt32, splitCharacterCount: Int?, trimJoinSilence: Bool) throws -> Data {
-        throw VoicevoxCoreError.notSetUp
-    }
-
-    func debugMeasureStages(text: String, styleId: UInt32, includeOneShotTTS: Bool = true) throws -> VoicevoxStageTiming {
-        throw VoicevoxCoreError.notSetUp
-    }
-
     /// ログ用(スタブ側は合成しないので常に 0)。
     func cachedAudioSecondsForLogging() -> Double { return 0 }
     func cachedWavByteCount(text: String, styleId: UInt32) -> Int? { return nil }
@@ -1213,27 +937,9 @@ final class VoicevoxCore {
         return UInt32(voiceIdentifier ?? "") ?? 0
     }
 
-    static let cpuNumThreadsUserDefaultsKey = "NovelSpeaker.Voicevox.cpuNumThreads"
-    static var threadCountMode: VoicevoxThreadCountMode {
-        get {
-            guard let stored = UserDefaults.standard.object(forKey: cpuNumThreadsUserDefaultsKey) as? Int else {
-                return .automatic
-            }
-            return .fixed(UInt16(clamping: stored))
-        }
-        set {
-            switch newValue {
-            case .automatic:
-                UserDefaults.standard.removeObject(forKey: cpuNumThreadsUserDefaultsKey)
-            case .fixed(let threadCount):
-                UserDefaults.standard.set(Int(threadCount), forKey: cpuNumThreadsUserDefaultsKey)
-            }
-        }
-    }
     static var configuredCPUNumThreads: UInt16 {
         let monitor = VoicevoxPrefetchThrottleMonitor.shared
         return VoicevoxThreadPolicy.desiredThreadCount(
-            mode: threadCountMode,
             isBackground: monitor.isBackground,
             isOnExternalPower: monitor.isOnExternalPower,
             isLowPowerModeEnabled: ProcessInfo.processInfo.isLowPowerModeEnabled
@@ -1256,9 +962,6 @@ final class VoicevoxCore {
     func setDiskCacheContext(novelID: String?, chapterNumber: Int) {}
     func isStoredOnDisk(text: String, styleId: UInt32) -> Bool { return false }
     func storeToDiskCacheIfNeeded(text: String, styleId: UInt32, wav: Data) {}
-    func reconfigureCPUNumThreads(_ threads: UInt16) throws {
-        Self.threadCountMode = .fixed(threads)
-    }
 }
 
 #endif

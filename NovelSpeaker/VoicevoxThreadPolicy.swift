@@ -22,14 +22,6 @@
 
 import Foundation
 
-/// スレッド数の決め方。
-enum VoicevoxThreadCountMode: Equatable {
-    /// 状況(前景/背面・電源・低電力モード)に応じて自動で切り替える。既定。
-    case automatic
-    /// 明示指定(0 = ONNX にお任せ = 全コア)。計測用。
-    case fixed(UInt16)
-}
-
 /// UIKit に依存しない純粋なポリシー(テスト可能)。
 enum VoicevoxThreadPolicy {
 
@@ -50,27 +42,18 @@ enum VoicevoxThreadPolicy {
         return threadCount == 0 ? Int.max : Int(threadCount)
     }
 
-    /// 自動時のスレッド数。
+    /// 状況から決まるスレッド数。
     /// - Parameters:
     ///   - isBackground: アプリがバックグラウンドにあるか。
     ///   - isOnExternalPower: 外部電源(AC/USB)に接続されているか。
     ///   - isLowPowerModeEnabled: 低電力モードか。
-    static func automaticThreadCount(isBackground: Bool, isOnExternalPower: Bool, isLowPowerModeEnabled: Bool) -> UInt16 {
+    static func desiredThreadCount(isBackground: Bool, isOnExternalPower: Bool, isLowPowerModeEnabled: Bool) -> UInt16 {
         // 低電力モードは「電池を使うな」という利用者の明示的な意思表示なので、
         // 前景や充電中であっても CPU秒あたりの効率が最良になるスレッド数1にする。
         if isLowPowerModeEnabled { return limitedThreadCount }
         // 背面の CPU 上限(60秒平均80%)は外部電源接続中には適用されない。
         if isBackground && isOnExternalPower == false { return limitedThreadCount }
         return unlimitedThreadCount
-    }
-
-    static func desiredThreadCount(mode: VoicevoxThreadCountMode, isBackground: Bool, isOnExternalPower: Bool, isLowPowerModeEnabled: Bool) -> UInt16 {
-        switch mode {
-        case .fixed(let threadCount):
-            return threadCount
-        case .automatic:
-            return automaticThreadCount(isBackground: isBackground, isOnExternalPower: isOnExternalPower, isLowPowerModeEnabled: isLowPowerModeEnabled)
-        }
     }
 
     /// synthesizer を作り直すべきか。

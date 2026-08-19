@@ -20,7 +20,7 @@ class VoicevoxThreadPolicyTest: XCTestCase {
     // ここで全コアを使うと即座に強制終了されるので、必ず1にする。
     func testUsesASingleThreadWhenTheBackgroundCPULimitApplies() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.automaticThreadCount(isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false),
             1
         )
     }
@@ -28,7 +28,7 @@ class VoicevoxThreadPolicyTest: XCTestCase {
     // 背面でも外部電源に繋がっていればCPU上限は適用されないので、全力で作ってよい。
     func testUsesAllCoresInBackgroundWhileOnExternalPower() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.automaticThreadCount(isBackground: true, isOnExternalPower: true, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isOnExternalPower: true, isLowPowerModeEnabled: false),
             0
         )
     }
@@ -37,7 +37,7 @@ class VoicevoxThreadPolicyTest: XCTestCase {
     // (1スレッドだと1.45倍速の再生に追いつけず、無音で途切れてしまう)。
     func testUsesAllCoresInForegroundEvenOnBattery() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.automaticThreadCount(isBackground: false, isOnExternalPower: false, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isOnExternalPower: false, isLowPowerModeEnabled: false),
             0
         )
     }
@@ -46,31 +46,18 @@ class VoicevoxThreadPolicyTest: XCTestCase {
     // 前景でも充電中でもCPU秒あたりの効率が最良になる1にする。
     func testLowPowerModeAlwaysUsesASingleThread() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.automaticThreadCount(isBackground: false, isOnExternalPower: true, isLowPowerModeEnabled: true),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isOnExternalPower: true, isLowPowerModeEnabled: true),
             1
         )
     }
 
-    // 計測用の明示指定は状況に関わらず尊重する。
-    func testFixedModeIgnoresTheSituation() {
+    func testThreadCountFollowsTheSituation() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(mode: .fixed(4), isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false),
-            4
-        )
-        XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(mode: .fixed(0), isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false),
-            0,
-            "明示的に選んだ「自動(全コア)」も尊重する"
-        )
-    }
-
-    func testAutomaticModeFollowsTheSituation() {
-        XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(mode: .automatic, isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false),
             1
         )
         XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(mode: .automatic, isBackground: false, isOnExternalPower: false, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isOnExternalPower: false, isLowPowerModeEnabled: false),
             0
         )
     }

@@ -1150,7 +1150,6 @@
 "アプリの起動" = "Open App";
 "ことせかい を開きます。" = "Opens NovelSpeaker.";
 
-"SettingsViewController_VoicevoxCPUNumThreads" = "CPU threads for VOICEVOX synthesis (for measurement)";
 // How a not-yet-downloaded VOICEVOX style is shown in the speaker setting row
 "VoicevoxStyleSelection_NotDownloadedLabelFormat" = "(not downloaded) %@";
 "VoicevoxStyleSelection_UnknownStyleNameFormat" = "style #%u";
