@@ -22,7 +22,7 @@ class VoicevoxCreditViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "VOICEVOX のクレジット表記"
+        title = NSLocalizedString("VoicevoxCredit_Title", comment: "VOICEVOX のクレジット表記")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "credit")
         reload()
     }
@@ -49,11 +49,11 @@ class VoicevoxCreditViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "作った音声を公開する場合は、次の表記が必要です"
+        return NSLocalizedString("VoicevoxCredit_Header", comment: "作った音声を公開する場合は、次の表記が必要です")
     }
 
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        return "行を選ぶと、そのキャラクターの利用規約を開きます。"
+        return NSLocalizedString("VoicevoxCredit_Footer", comment: "行を選ぶと、そのキャラクターの利用規約を開きます。")
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -62,7 +62,7 @@ class VoicevoxCreditViewController: UITableViewController {
         content.textProperties.numberOfLines = 0
         content.secondaryTextProperties.numberOfLines = 0
         guard entries.isEmpty == false else {
-            content.text = "取得済みの音声モデルはありません。"
+            content.text = NSLocalizedString("VoicevoxCredit_Empty", comment: "取得済みの音声モデルはありません。")
             cell.contentConfiguration = content
             cell.selectionStyle = .none
             cell.accessoryType = .none

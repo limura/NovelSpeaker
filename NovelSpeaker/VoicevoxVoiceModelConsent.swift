@@ -194,21 +194,25 @@ enum VoicevoxVoiceModelConsentText {
                         termsPageURL: String?) -> String {
         var lines: [String] = []
         if let requestedStyleDisplayName = requestedStyleDisplayName {
-            lines.append("「\(requestedStyleDisplayName)」を使うには、"
-                         + "音声モデル \(model.id).vvm (\(megabytesText(model.byteSize))) の取得が必要です。")
+            lines.append(String(format: NSLocalizedString(
+                "VoicevoxConsent_ForStyleFormat",
+                comment: "「%1$@」を使うには、音声モデル %2$@.vvm (%3$@) の取得が必要です。"),
+                requestedStyleDisplayName, model.id, megabytesText(model.byteSize)))
         } else {
-            lines.append("音声モデル \(model.id).vvm (\(megabytesText(model.byteSize))) を取得します。")
+            lines.append(String(format: NSLocalizedString(
+                "VoicevoxConsent_DownloadModelFormat",
+                comment: "音声モデル %1$@.vvm (%2$@) を取得します。"), model.id, megabytesText(model.byteSize)))
         }
         lines.append("")
-        lines.append("このファイルには次のキャラクターの音声が入っています。"
-                     + "それぞれの利用規約に同意する必要があります。")
+        lines.append(NSLocalizedString("VoicevoxConsent_CharactersIntro",
+                     comment: "このファイルには次のキャラクターの音声が入っています。それぞれの利用規約に同意する必要があります。"))
         lines.append("")
         for group in groups(of: model) {
             lines.append("・\(group.speakerNames)")
             if let termsURL = group.termsURL {
                 lines.append("    \(termsURL)")
             } else {
-                lines.append("    (規約の場所が分かりませんでした)")
+                lines.append("    " + NSLocalizedString("VoicevoxConsent_TermsNotFound", comment: "(規約の場所が分かりませんでした)"))
             }
             for speaker in group.speakers {
                 guard let policyText = speaker.policyText, policyText.isEmpty == false else { continue }
@@ -216,17 +220,19 @@ enum VoicevoxVoiceModelConsentText {
             }
         }
         lines.append("")
-        lines.append("作った音声を公開する場合は、次のようなクレジット表記が必要です。")
+        lines.append(NSLocalizedString("VoicevoxConsent_CreditIntro",
+                     comment: "作った音声を公開する場合は、次のようなクレジット表記が必要です。"))
         for credit in creditLines(of: model) {
             lines.append("・\(credit)")
         }
         if let termsPageURL = termsPageURL {
             lines.append("")
-            lines.append("音声モデル全体の規約: \(termsPageURL)")
+            lines.append(String(format: NSLocalizedString(
+                "VoicevoxConsent_OverallTermsFormat", comment: "音声モデル全体の規約: %@"), termsPageURL))
         }
         lines.append("")
-        lines.append("ファイルは VOICEVOX の公式の配布場所から取得します。"
-                     + "モバイル通信では取得せず、Wi-Fi に繋がるまで待ちます。")
+        lines.append(NSLocalizedString("VoicevoxConsent_DownloadNote",
+                     comment: "ファイルは VOICEVOX の公式の配布場所から取得します。モバイル通信では取得せず、Wi-Fi に繋がるまで待ちます。"))
         return lines.joined(separator: "\n")
     }
 }

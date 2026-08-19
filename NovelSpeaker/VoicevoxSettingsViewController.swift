@@ -26,9 +26,9 @@ class VoicevoxSettingsViewController: FormViewController {
     private static let keepGeneratingChoices = [0, 5, 15, 30, 60, 120, 180]
 
     private static func keepGeneratingText(minutes: Int) -> String {
-        if minutes <= 0 { return "続けない" }
-        if minutes >= 60 && minutes % 60 == 0 { return "\(minutes / 60)時間" }
-        return "\(minutes)分"
+        if minutes <= 0 { return NSLocalizedString("VoicevoxSettings_KeepGeneratingNever", comment: "続けない") }
+        if minutes >= 60 && minutes % 60 == 0 { return String(format: NSLocalizedString("VoicevoxSettings_HoursFormat", comment: "%d時間"), minutes / 60) }
+        return String(format: NSLocalizedString("VoicevoxSettings_MinutesFormat", comment: "%d分"), minutes)
     }
 
     override func viewDidLoad() {
@@ -44,15 +44,18 @@ class VoicevoxSettingsViewController: FormViewController {
     }
 
     private func createForm() {
-        form +++ Section("音声モデル")
+        form +++ Section(NSLocalizedString("VoicevoxSettings_VoiceModelSectionTitle", comment: "音声モデル"))
         // 取得済みの件数と容量をここに出す(1つ60MB前後あるので、掘らずに分かる方が良い)。
         // ButtonRow では右側に値を出せないので LabelRow を使う。
         <<< LabelRow("VoicevoxVoiceModelRow") {
-            $0.title = "音声モデルの取得と削除"
+            $0.title = NSLocalizedString("VoicevoxSettings_VoiceModelRowTitle", comment: "音声モデルの取得と削除")
             $0.cell.textLabel?.numberOfLines = 0
-        }.cellUpdate({ (cell, _) in
+        }.cellUpdate({ (cell, row) in
             cell.accessoryType = .disclosureIndicator
             cell.editingAccessoryType = cell.accessoryType
+            cell.accessibilityHint = NSLocalizedString(
+                "VoicevoxSettings_VoiceModelRowHint",
+                comment: "VOICEVOXの話者ごとの音声モデルを取得したり削除したりします。1つあたり60MB前後あります。")
         }).onCellSelection({ [weak self] (_, _) in
             self?.navigationController?.pushViewController(
                 VoicevoxVoiceModelManageViewController(), animated: true)
@@ -60,16 +63,20 @@ class VoicevoxSettingsViewController: FormViewController {
         <<< SwitchRow() {
             // 既定は切。1つ60MB前後あるので、黙ってモバイル通信で落とさない。
             // 切のままでも失敗はせず、Wi-Fi に繋がるまで OS が待つ。
-            $0.title = "モバイル通信でも取得する"
+            $0.title = NSLocalizedString("VoicevoxSettings_AllowsCellular", comment: "モバイル通信でも取得する")
             $0.value = VoicevoxVoiceModelDownloader.allowsCellularAccess
             $0.cell.textLabel?.numberOfLines = 0
-        }.onChange({ row in
+        }.cellUpdate({ (cell, _) in
+            cell.accessibilityHint = NSLocalizedString(
+                "VoicevoxSettings_AllowsCellularHint",
+                comment: "切っている間は取得を諦めずに、Wi-Fi に繋がるまで待ちます。")
+        }).onChange({ row in
             VoicevoxVoiceModelDownloader.allowsCellularAccess = row.value ?? false
         })
 
-        form +++ Section("作成済みの音声")
+        form +++ Section(NSLocalizedString("VoicevoxSettings_GeneratedAudioSectionTitle", comment: "作成済みの音声"))
         <<< ButtonRow() {
-            $0.title = "作成済みのVOICEVOX音声"
+            $0.title = NSLocalizedString("VoicevoxSettings_CacheManageRowTitle", comment: "作成済みのVOICEVOX音声")
             $0.cell.textLabel?.numberOfLines = 0
             $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
                 return VoicevoxCacheManageViewController()
@@ -81,11 +88,15 @@ class VoicevoxSettingsViewController: FormViewController {
             cell.textLabel?.textColor = nil
         })
         <<< PickerInputRow<String>() {
-            $0.title = "再生中に生成を続ける貯金の下限"
+            $0.title = NSLocalizedString("VoicevoxSettings_KeepGeneratingRowTitle", comment: "読み上げ中に作り足す下限")
             $0.options = Self.keepGeneratingChoices.map { Self.keepGeneratingText(minutes: $0) }
             $0.value = Self.keepGeneratingText(minutes: VoicevoxCacheLead.keepGeneratingBelowMinutes)
             $0.cell.textLabel?.numberOfLines = 0
-        }.onChange({ row in
+        }.cellUpdate({ (cell, _) in
+            cell.accessibilityHint = NSLocalizedString(
+                "VoicevoxSettings_KeepGeneratingRowHint",
+                comment: "先に作ってある音声の残りがこの時間より短くなったら、読み上げながら続きを作ります。")
+        }).onChange({ row in
             guard let value = row.value,
                   let minutes = Self.keepGeneratingChoices.first(where: {
                       Self.keepGeneratingText(minutes: $0) == value
@@ -93,9 +104,9 @@ class VoicevoxSettingsViewController: FormViewController {
             VoicevoxCacheLead.keepGeneratingBelowMinutes = minutes
         })
 
-        form +++ Section(footer: "作った音声を公開する場合はクレジット表記が必要です。")
+        form +++ Section(footer: NSLocalizedString("VoicevoxSettings_CreditSectionFooter", comment: "作った音声を公開する場合はクレジット表記が必要です。"))
         <<< ButtonRow() {
-            $0.title = "クレジット表記"
+            $0.title = NSLocalizedString("VoicevoxSettings_CreditRowTitle", comment: "クレジット表記")
             $0.cell.textLabel?.numberOfLines = 0
             $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
                 return VoicevoxCreditViewController()
@@ -118,8 +129,8 @@ class VoicevoxSettingsViewController: FormViewController {
         let count = store.storedModelIDs(readableFormats: formats).count
         let bytes = store.totalBytes(readableFormats: formats)
         row.value = count == 0
-            ? "0件"
-            : "\(count)件 \(VoicevoxVoiceModelManageListBuilder.megabytesText(bytes))"
+            ? NSLocalizedString("VoicevoxSettings_NoVoiceModelValue", comment: "0件")
+            : String(format: NSLocalizedString("VoicevoxSettings_VoiceModelCountFormat", comment: "%1$d件 %2$@"), count, VoicevoxVoiceModelManageListBuilder.megabytesText(bytes))
         row.updateCell()
     }
 }

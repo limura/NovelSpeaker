@@ -43,8 +43,8 @@ struct VoicevoxStyleListSection: Equatable {
 
         var title: String {
             switch self {
-            case .available: return "取得済み"
-            case .downloadable: return "取得するとつかえる"
+            case .available: return NSLocalizedString("VoicevoxStyleList_Available", comment: "取得済み")
+            case .downloadable: return NSLocalizedString("VoicevoxStyleList_Downloadable", comment: "取得するとつかえる")
             }
         }
     }

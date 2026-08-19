@@ -40,8 +40,8 @@ struct VoicevoxVoiceModelManageSection: Equatable {
 
         var title: String {
             switch self {
-            case .stored: return "取得済み"
-            case .notStored: return "取得していない"
+            case .stored: return NSLocalizedString("VoicevoxStyleList_Available", comment: "取得済み")
+            case .notStored: return NSLocalizedString("VoicevoxVoiceModelManage_NotStored", comment: "取得していない")
             }
         }
     }
@@ -109,9 +109,11 @@ enum VoicevoxVoiceModelManageListBuilder {
                             storedBytes: Int64,
                             generatedAudioBytes: Int64,
                             freeBytes: Int64) -> String {
-        return "音声モデル \(storedCount)件 \(megabytesText(storedBytes))"
-            + " / 作成済み音声 \(megabytesText(generatedAudioBytes))"
-            + " / 端末の空き \(megabytesText(freeBytes))"
+        return String(format: NSLocalizedString(
+            "VoicevoxVoiceModelManage_SummaryFormat",
+            comment: "音声モデル %1$d件 %2$@ / 作成済み音声 %3$@ / 端末の空き %4$@"),
+                      storedCount, megabytesText(storedBytes),
+                      megabytesText(generatedAudioBytes), megabytesText(freeBytes))
     }
 
     /// 未取得の音声モデルを指している話者設定への注意書き。無ければ nil。
@@ -125,9 +127,10 @@ enum VoicevoxVoiceModelManageListBuilder {
             for name in settingNames where names.contains(name) == false { names.append(name) }
         }
         guard names.isEmpty == false else { return nil }
-        return "取得していない音声モデルを使う話者設定が \(names.count)件 あります"
-            + "(\(names.sorted().joined(separator: "、")))。"
-            + "設定はそのままにしてあるので、取り直せば元の声に戻ります。"
+        return String(format: NSLocalizedString(
+            "VoicevoxVoiceModelManage_MissingWarningFormat",
+            comment: "取得していない音声モデルを使う話者設定が %1$d件 あります(%2$@)。設定はそのままにしてあるので、取り直せば元の声に戻ります。"),
+                      names.count, names.sorted().joined(separator: NSLocalizedString("Voicevox_NameSeparator", comment: "、")))
     }
 }
 

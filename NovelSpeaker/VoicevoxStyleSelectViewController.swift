@@ -119,6 +119,13 @@ class VoicevoxStyleSelectViewController: UITableViewController, UISearchResultsU
         content.text = item.displayName
         content.secondaryText = detailText(for: item, kind: sections[indexPath.section].kind)
         cell.contentConfiguration = content
+        cell.accessibilityLabel = [content.text, content.secondaryText]
+            .compactMap { $0 }.joined(separator: "\n")
+        if sections[indexPath.section].kind == .downloadable {
+            cell.accessibilityHint = NSLocalizedString(
+                "VoicevoxStyleSelect_DownloadableRowHint",
+                comment: "選ぶと利用規約を出して音声モデルを取得します。詳細ボタンで公式サイトの紹介ページを開きます。")
+        }
         // 未取得の行には ⓘ を出して、公式サイトで声を聞けるようにする。
         // 今選ばれている物には印を優先する(どちらも accessoryType なので同時には出せない)。
         if item.styleId == currentStyleId {
@@ -139,11 +146,11 @@ class VoicevoxStyleSelectViewController: UITableViewController, UISearchResultsU
         switch VoicevoxVoiceModelDownloader.shared.queue.state(ofModelID: modelID) {
         case .downloading(let receivedBytes, let totalBytes):
             let percent = totalBytes > 0 ? Int(Double(receivedBytes) / Double(totalBytes) * 100) : 0
-            return "取得中 \(percent)%"
+            return String(format: NSLocalizedString("Voicevox_DownloadingPercentFormat", comment: "取得中 %d%%"), percent)
         case .queued:
-            return "取得待ち"
+            return NSLocalizedString("Voicevox_DownloadQueued", comment: "取得待ち")
         case .failed(let reason):
-            return "取得できませんでした: \(reason)"
+            return String(format: NSLocalizedString("Voicevox_DownloadFailedFormat", comment: "取得できませんでした: %@"), reason)
         case nil:
             let size = item.megabytesText ?? ""
             return "⬇︎ \(modelID).vvm \(size)"

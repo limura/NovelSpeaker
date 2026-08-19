@@ -34,8 +34,8 @@ final class VoicevoxSilenceReporter {
 
         var text: String {
             switch self {
-            case .synthesisWasTooSlow: return "合成が再生に間に合わなかった"
-            case .notScheduled: return "先行合成に出せていなかった"
+            case .synthesisWasTooSlow: return NSLocalizedString("VoicevoxSilence_CauseTooSlow", comment: "合成が再生に間に合わなかった")
+            case .notScheduled: return NSLocalizedString("VoicevoxSilence_CauseNotScheduled", comment: "先行合成に出せていなかった")
             }
         }
     }
@@ -101,10 +101,12 @@ final class VoicevoxSilenceReporter {
     }
 
     static func message(gapSeconds: Double, totalCount: Int, cause: Cause?) -> String {
-        var text = "VOICEVOXの読み上げが \(String(format: "%.1f", gapSeconds))秒 途切れました"
-            + "(この起動で \(totalCount)回目)"
+        var text = String(format: NSLocalizedString(
+            "VoicevoxSilence_MessageFormat",
+            comment: "VOICEVOXの読み上げが %1$.1f秒 途切れました(この起動で %2$d回目)"), gapSeconds, totalCount)
         if let cause = cause {
-            text += "。理由: \(cause.text)"
+            text += String(format: NSLocalizedString(
+                "VoicevoxSilence_CauseFormat", comment: "。理由: %@"), cause.text)
         }
         return text
     }

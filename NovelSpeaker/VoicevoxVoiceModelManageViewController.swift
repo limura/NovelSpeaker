@@ -29,7 +29,7 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "VOICEVOXの音声モデル"
+        title = NSLocalizedString("VoicevoxVoiceModelManage_Title", comment: "VOICEVOXの音声モデル")
         catalog = VoicevoxVoiceModelCatalogLoader.preferred(
             embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil)
 
@@ -148,6 +148,12 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
         content.secondaryTextProperties.numberOfLines = 0
         cell.contentConfiguration = content
         cell.accessoryType = item.isStored ? .disclosureIndicator : .none
+        // VoiceOver では2段のラベルが別々に読まれて繋がらないので、1つにまとめて読ませる。
+        cell.accessibilityLabel = [content.text, content.secondaryText]
+            .compactMap { $0 }.joined(separator: "\n")
+        cell.accessibilityHint = item.isStored
+            ? NSLocalizedString("VoicevoxVoiceModelManage_StoredRowHint", comment: "選ぶと削除の確認を出します。")
+            : NSLocalizedString("VoicevoxVoiceModelManage_NotStoredRowHint", comment: "選ぶと利用規約を出して取得します。")
         return cell
     }
 
@@ -156,14 +162,16 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
         switch VoicevoxVoiceModelDownloader.shared.queue.state(ofModelID: item.modelID) {
         case .downloading(let receivedBytes, let totalBytes):
             let percent = totalBytes > 0 ? Int(Double(receivedBytes) / Double(totalBytes) * 100) : 0
-            lines.append("取得中 \(percent)%")
+            lines.append(String(format: NSLocalizedString("Voicevox_DownloadingPercentFormat", comment: "取得中 %d%%"), percent))
         case .queued:
-            lines.append("取得待ち")
+            lines.append(NSLocalizedString("Voicevox_DownloadQueued", comment: "取得待ち"))
         case .failed(let reason):
-            lines.append("取得できませんでした: \(reason)")
+            lines.append(String(format: NSLocalizedString("Voicevox_DownloadFailedFormat", comment: "取得できませんでした: %@"), reason))
         case nil:
             if item.usedBySettingNames.isEmpty == false {
-                lines.append("使っている話者設定: \(item.usedBySettingNames.joined(separator: "、"))")
+                lines.append(String(format: NSLocalizedString(
+                    "VoicevoxVoiceModelManage_UsedByFormat", comment: "使っている話者設定: %@"),
+                    item.usedBySettingNames.joined(separator: NSLocalizedString("Voicevox_NameSeparator", comment: "、"))))
             }
         }
         return lines.joined(separator: "\n")
@@ -193,23 +201,26 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
     private func presentDeleteConfirm(item: VoicevoxVoiceModelManageItem) {
         var message = "\(item.fileName) (\(item.megabytesText))\n\(item.speakerNamesText)\n\n"
         if item.usedBySettingNames.isEmpty {
-            message += "この音声モデルを使っている話者設定はありません。\n"
+            message += NSLocalizedString("VoicevoxVoiceModelManage_DeleteNotUsed", comment: "この音声モデルを使っている話者設定はありません。") + "\n"
         } else {
-            message += "使っている話者設定: \(item.usedBySettingNames.joined(separator: "、"))\n"
-                + "消しても設定はそのままにしておくので、取り直せば元の声に戻ります。\n"
+            message += String(format: NSLocalizedString(
+                "VoicevoxVoiceModelManage_DeleteUsedFormat",
+                comment: "使っている話者設定: %@\n消しても設定はそのままにしておくので、取り直せば元の声に戻ります。"),
+                item.usedBySettingNames.joined(separator: NSLocalizedString("Voicevox_NameSeparator", comment: "、"))) + "\n"
         }
         // ★消した後に何ができて何ができないかを、はっきり分けて書く。
         // 「消してしまって構いません」とだけ書くと、
         // 作成済みの音声が無い箇所では喋れなくなる事が伝わらない。
         // 特に、ブロックの途中から再生を始めた時は作成済みの音声と本文が一致せず、
         // 作ってあるはずの箇所でも合成が必要になる。
-        message += "\n作成済みのVOICEVOX音声がある箇所は、消した後もそのまま再生できます。"
-            + "作っていない箇所は、この音声モデルを取り直すまで読み上げできません。"
+        message += "\n" + NSLocalizedString(
+            "VoicevoxVoiceModelManage_DeleteWhatStillWorks",
+            comment: "作成済みのVOICEVOX音声がある箇所は、消した後もそのまま再生できます。作っていない箇所は、この音声モデルを取り直すまで読み上げできません。")
 
         NiftyUtility.EasyDialogBuilder(self)
-            .title(title: "音声モデルを削除")
+            .title(title: NSLocalizedString("VoicevoxVoiceModelManage_DeleteTitle", comment: "音声モデルを削除"))
             .label(text: message, textAlignment: .left)
-            .addButton(title: "削除", callback: { [weak self] dialog in
+            .addButton(title: NSLocalizedString("VoicevoxVoiceModelManage_DeleteButton", comment: "削除"), callback: { [weak self] dialog in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false) {
                         VoicevoxVoiceModelStore.shared.remove(

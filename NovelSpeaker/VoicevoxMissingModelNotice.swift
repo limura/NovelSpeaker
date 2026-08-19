@@ -41,16 +41,17 @@ enum VoicevoxMissingModelNotice {
     }
 
     static func message(styleId: UInt32, displayName: String?) -> String {
-        let who = displayName ?? "スタイル番号 \(styleId)"
-        return "VOICEVOXの話者「\(who)」の音声モデルがこの端末にありません。"
-            + "その箇所は端末の音声で読み上げました。"
-            + "話者設定はそのままにしてあるので、音声モデルを取得すれば元の声に戻ります。"
+        let who = displayName ?? String(format: NSLocalizedString(
+            "VoicevoxMissingModel_StyleNumberFormat", comment: "スタイル番号 %u"), styleId)
+        return String(format: NSLocalizedString(
+            "VoicevoxMissingModel_MessageFormat",
+            comment: "VOICEVOXの話者「%@」の音声モデルがこの端末にありません。その箇所は端末の音声で読み上げました。話者設定はそのままにしてあるので、音声モデルを取得すれば元の声に戻ります。"), who)
     }
 
     static func post(styleId: UInt32) {
         let name = displayName(styleId: styleId)
         let action = AppInformationLogAction(
-            title: "音声モデルを取得する",
+            title: NSLocalizedString("VoicevoxMissingModel_ActionTitle", comment: "音声モデルを取得する"),
             actionType: actionType,
             payload: ["styleId": AnyCodable("\(styleId)")])
         AppInformationLogger.AddLogWithStruct(

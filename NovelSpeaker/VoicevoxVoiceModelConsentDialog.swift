@@ -34,7 +34,7 @@ enum VoicevoxVoiceModelConsentDialog {
             termsPageURL: catalog.termsPageURL)
 
         var builder = NiftyUtility.EasyDialogBuilder(viewController)
-            .title(title: "音声モデルの利用規約")
+            .title(title: NSLocalizedString("VoicevoxConsent_DialogTitle", comment: "音声モデルの利用規約"))
             .textView(content: message, heightMultiplier: 0.5)
 
         // ★取得前に声を確かめられるようにする。ただしサンプル音声そのものは
@@ -43,7 +43,8 @@ enum VoicevoxVoiceModelConsentDialog {
         if let styleId = requestedStyleId,
            let speaker = model.speakers.first(where: { $0.styles.contains { $0.styleId == styleId } }),
            let pageURLString = speaker.officialPageURL, let pageURL = URL(string: pageURLString) {
-            builder = builder.addButton(title: "公式サイトで声を聞く(\(speaker.name))", callback: { _ in
+            builder = builder.addButton(title: String(format: NSLocalizedString(
+                "VoicevoxConsent_ListenOnSiteFormat", comment: "公式サイトで声を聞く(%@)"), speaker.name), callback: { _ in
                 // 読む・聞くではダイアログを閉じない。戻ってきたらそのまま同意できる。
                 UIApplication.shared.open(pageURL, options: [:], completionHandler: nil)
             })
@@ -52,14 +53,17 @@ enum VoicevoxVoiceModelConsentDialog {
         for group in VoicevoxVoiceModelConsentText.groups(of: model) {
             guard let termsURL = group.termsURL, let url = URL(string: termsURL) else { continue }
             let agreedBefore = consentStore.hasConsented(termsURL: termsURL)
-            let title = "規約を読む(\(group.hostName))" + (agreedBefore ? " ・同意済み" : "")
+            let title = String(format: NSLocalizedString(
+                "VoicevoxConsent_ReadTermsFormat", comment: "規約を読む(%@)"), group.hostName)
+                + (agreedBefore ? NSLocalizedString("VoicevoxConsent_AlreadyAgreedSuffix", comment: " ・同意済み") : "")
             builder = builder.addButton(title: title, callback: { _ in
                 // ここでは閉じない。読んで戻ってきたらそのまま同意できるようにする。
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             })
         }
 
-        builder = builder.addButton(title: "規約に同意して取得", callback: { dialog in
+        builder = builder.addButton(title: NSLocalizedString(
+            "VoicevoxConsent_AgreeAndDownload", comment: "規約に同意して取得"), callback: { dialog in
             DispatchQueue.main.async {
                 dialog.dismiss(animated: false) {
                     consentStore.recordConsent(model: model, vvmTag: catalog.vvmTag)
@@ -93,9 +97,11 @@ enum VoicevoxVoiceModelConsentDialog {
                 embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil),
               let entry = catalog.entry(forStyleId: styleId) else {
             NiftyUtility.EasyDialogBuilder(viewController)
-                .title(title: "この話者は使えません")
-                .label(text: "選ばれているVOICEVOXの話者(スタイル番号 \(styleId))が、"
-                       + "この端末にも一覧にも見当たりません。", textAlignment: .left)
+                .title(title: NSLocalizedString("VoicevoxConsent_UnknownStyleTitle", comment: "この話者は使えません"))
+                .label(text: String(format: NSLocalizedString(
+                    "VoicevoxConsent_UnknownStyleMessageFormat",
+                    comment: "選ばれているVOICEVOXの話者(スタイル番号 %u)が、この端末にも一覧にも見当たりません。"), styleId),
+                       textAlignment: .left)
                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { dialog in
                     DispatchQueue.main.async { dialog.dismiss(animated: true) }
                 })
@@ -104,12 +110,14 @@ enum VoicevoxVoiceModelConsentDialog {
         }
 
         NiftyUtility.EasyDialogBuilder(viewController)
-            .title(title: "音声モデルが必要です")
-            .label(text: "「\(entry.displayName)」で読み上げるには、"
-                   + "音声モデル \(entry.model.id).vvm "
-                   + "(\(VoicevoxVoiceModelConsentText.megabytesText(entry.model.byteSize))) の取得が必要です。",
+            .title(title: NSLocalizedString("VoicevoxConsent_NeedsModelTitle", comment: "音声モデルが必要です"))
+            .label(text: String(format: NSLocalizedString(
+                "VoicevoxConsent_NeedsModelMessageFormat",
+                comment: "「%1$@」で読み上げるには、音声モデル %2$@.vvm (%3$@) の取得が必要です。"),
+                entry.displayName, entry.model.id,
+                VoicevoxVoiceModelConsentText.megabytesText(entry.model.byteSize)),
                    textAlignment: .left)
-            .addButton(title: "取得する", callback: { dialog in
+            .addButton(title: NSLocalizedString("VoicevoxConsent_DownloadButton", comment: "取得する"), callback: { dialog in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false) {
                         present(on: viewController, model: entry.model, catalog: catalog,
@@ -133,18 +141,20 @@ enum VoicevoxVoiceModelConsentDialog {
         let message: String
         switch blocker {
         case .alreadyStored:
-            message = "音声モデル \(model.id).vvm は既に取得済みです。"
+            message = String(format: NSLocalizedString(
+                "VoicevoxConsent_AlreadyStoredFormat", comment: "音声モデル %@.vvm は既に取得済みです。"), model.id)
         case .needsWiFi:
             // OS 側で待たせているので普段は出ないが、念のため。
-            message = "Wi-Fi に繋がるまで待ってから取得します。"
+            message = NSLocalizedString("VoicevoxConsent_NeedsWiFi", comment: "Wi-Fi に繋がるまで待ってから取得します。")
         case .notEnoughSpace(let requiredBytes, let freeBytes):
-            message = "端末の空き容量が足りません。\n"
-                + "必要: \(VoicevoxVoiceModelConsentText.megabytesText(requiredBytes))"
-                + " / 空き: \(VoicevoxVoiceModelConsentText.megabytesText(freeBytes))\n"
-                + "作成済みのVOICEVOX音声や、使っていない音声モデルを消すと空けられます。"
+            message = String(format: NSLocalizedString(
+                "VoicevoxConsent_NotEnoughSpaceFormat",
+                comment: "端末の空き容量が足りません。\n必要: %1$@ / 空き: %2$@\n作成済みのVOICEVOX音声や、使っていない音声モデルを消すと空けられます。"),
+                VoicevoxVoiceModelConsentText.megabytesText(requiredBytes),
+                VoicevoxVoiceModelConsentText.megabytesText(freeBytes))
         }
         NiftyUtility.EasyDialogBuilder(viewController)
-            .title(title: "取得できません")
+            .title(title: NSLocalizedString("VoicevoxConsent_CannotDownloadTitle", comment: "取得できません"))
             .label(text: message, textAlignment: .left)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { dialog in
                 DispatchQueue.main.async { dialog.dismiss(animated: true) }

@@ -1156,6 +1156,78 @@
 
 "VoicevoxStyleSelectViewController_SearchPlaceholder" = "Filter by character name";
 
+"VoicevoxSettings_KeepGeneratingNever" = "Don't continue";
+"VoicevoxSettings_HoursFormat" = "%d hours";
+"VoicevoxSettings_MinutesFormat" = "%d min";
+"VoicevoxSettings_VoiceModelSectionTitle" = "Voice models";
+"VoicevoxSettings_VoiceModelRowTitle" = "Download and delete voice models";
+"VoicevoxSettings_AllowsCellular" = "Download over cellular";
+"VoicevoxSettings_GeneratedAudioSectionTitle" = "Generated speech";
+"VoicevoxSettings_CacheManageRowTitle" = "Generated VOICEVOX speech";
+"VoicevoxSettings_KeepGeneratingRowTitle" = "Keep generating below";
+"VoicevoxSettings_CreditSectionFooter" = "Publishing audio you made requires a credit notice.";
+"VoicevoxSettings_CreditRowTitle" = "Credit notice";
+"VoicevoxSettings_NoVoiceModelValue" = "None";
+"VoicevoxSettings_VoiceModelCountFormat" = "%1$d (%2$@)";
+
+"VoicevoxStyleList_Available" = "Downloaded";
+"VoicevoxStyleList_Downloadable" = "Available after download";
+"Voicevox_DownloadingPercentFormat" = "Downloading %d%%";
+"Voicevox_DownloadQueued" = "Waiting to download";
+"Voicevox_DownloadFailedFormat" = "Download failed: %@";
+"VoicevoxVoiceModelManage_NotStored" = "Not downloaded";
+"VoicevoxVoiceModelManage_SummaryFormat" = "Voice models: %1$d (%2$@) / Generated speech: %3$@ / Free space: %4$@";
+"VoicevoxVoiceModelManage_MissingWarningFormat" = "%1$d speaker setting(s) use voice models you have not downloaded (%2$@). The settings are kept as they are, so downloading again restores the original voice.";
+"Voicevox_NameSeparator" = ", ";
+
+"VoicevoxVoiceModelManage_Title" = "VOICEVOX voice models";
+"VoicevoxVoiceModelManage_UsedByFormat" = "Used by speaker settings: %@";
+"VoicevoxVoiceModelManage_DeleteNotUsed" = "No speaker setting uses this voice model.";
+"VoicevoxVoiceModelManage_DeleteUsedFormat" = "Used by speaker settings: %@\nThe settings are kept as they are, so downloading again restores the original voice.";
+"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "Parts that already have generated VOICEVOX speech still play after deleting. Parts that do not cannot be read aloud until you download this voice model again.";
+"VoicevoxVoiceModelManage_DeleteTitle" = "Delete voice model";
+"VoicevoxVoiceModelManage_DeleteButton" = "Delete";
+"VoicevoxCredit_Title" = "VOICEVOX credit notice";
+"VoicevoxCredit_Header" = "Publishing audio you made requires these notices";
+"VoicevoxCredit_Footer" = "Select a row to open that character's terms of use.";
+"VoicevoxCredit_Empty" = "No voice models have been downloaded.";
+"VoicevoxMissingModel_StyleNumberFormat" = "style number %u";
+"VoicevoxMissingModel_MessageFormat" = "The voice model for the VOICEVOX speaker \"%@\" is not on this device. That part was read with a device voice. The speaker setting is kept as it is, so downloading the voice model restores the original voice.";
+"VoicevoxMissingModel_ActionTitle" = "Download the voice model";
+"VoicevoxSilence_CauseTooSlow" = "synthesis could not keep up with playback";
+"VoicevoxSilence_CauseNotScheduled" = "it was not queued for synthesis ahead of time";
+"VoicevoxSilence_MessageFormat" = "VOICEVOX playback was silent for %1$.1f seconds (%2$d time(s) since launch)";
+"VoicevoxSilence_CauseFormat" = ". Reason: %@";
+
+"VoicevoxConsent_DialogTitle" = "Voice model terms of use";
+"VoicevoxConsent_ListenOnSiteFormat" = "Hear this voice on the official site (%@)";
+"VoicevoxConsent_ReadTermsFormat" = "Read the terms (%@)";
+"VoicevoxConsent_AlreadyAgreedSuffix" = " · already agreed";
+"VoicevoxConsent_AgreeAndDownload" = "Agree to the terms and download";
+"VoicevoxConsent_UnknownStyleTitle" = "This speaker is not available";
+"VoicevoxConsent_UnknownStyleMessageFormat" = "The selected VOICEVOX speaker (style number %u) was not found on this device or in the catalog.";
+"VoicevoxConsent_NeedsModelTitle" = "A voice model is required";
+"VoicevoxConsent_NeedsModelMessageFormat" = "Reading with \"%1$@\" requires downloading the voice model %2$@.vvm (%3$@).";
+"VoicevoxConsent_DownloadButton" = "Download";
+"VoicevoxConsent_AlreadyStoredFormat" = "The voice model %@.vvm has already been downloaded.";
+"VoicevoxConsent_NeedsWiFi" = "Downloading will start once Wi-Fi is available.";
+"VoicevoxConsent_NotEnoughSpaceFormat" = "Not enough free space on this device.\nNeeded: %1$@ / Free: %2$@\nDeleting generated VOICEVOX speech or unused voice models frees space.";
+"VoicevoxConsent_CannotDownloadTitle" = "Cannot download";
+"VoicevoxConsent_ForStyleFormat" = "Using \"%1$@\" requires downloading the voice model %2$@.vvm (%3$@).";
+"VoicevoxConsent_DownloadModelFormat" = "Downloading the voice model %1$@.vvm (%2$@).";
+"VoicevoxConsent_CharactersIntro" = "This file contains the voices of the following characters. You must agree to each of their terms of use.";
+"VoicevoxConsent_TermsNotFound" = "(the terms could not be located)";
+"VoicevoxConsent_CreditIntro" = "Publishing audio you made requires a credit notice like the following.";
+"VoicevoxConsent_OverallTermsFormat" = "Terms for all voice models: %@";
+"VoicevoxConsent_DownloadNote" = "Files are downloaded from the official VOICEVOX distribution site. Cellular is not used; it waits for Wi-Fi.";
+
+"VoicevoxSettings_VoiceModelRowHint" = "Download or delete the voice model for each VOICEVOX speaker. Each is about 60MB.";
+"VoicevoxSettings_AllowsCellularHint" = "While off, downloads are not abandoned; they wait for Wi-Fi.";
+"VoicevoxSettings_KeepGeneratingRowHint" = "When the speech generated ahead falls below this duration, more is generated while reading.";
+"VoicevoxVoiceModelManage_StoredRowHint" = "Select to confirm deletion.";
+"VoicevoxVoiceModelManage_NotStoredRowHint" = "Select to show the terms of use and download.";
+"VoicevoxStyleSelect_DownloadableRowHint" = "Select to show the terms of use and download the voice model. The detail button opens the official character page.";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.
