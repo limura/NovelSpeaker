@@ -86,8 +86,8 @@ enum VoicevoxAudioCompressor {
     /// WAV(24kHz/mono/16bit・44バイトヘッダ)の再生時間。
     /// 保存時にファイル名へ書き込む値になる。
     static func durationSeconds(wav: Data) -> Double {
-        guard wav.count > VoicevoxPerformanceMonitor.wavHeaderByteCount else { return 0 }
-        let payloadBytes = wav.count - VoicevoxPerformanceMonitor.wavHeaderByteCount
-        return Double(payloadBytes) / (VoicevoxPerformanceMonitor.outputSampleRate * VoicevoxPerformanceMonitor.outputBytesPerFrame)
+        guard wav.count > VoicevoxAudioFormat.wavHeaderByteCount else { return 0 }
+        let payloadBytes = wav.count - VoicevoxAudioFormat.wavHeaderByteCount
+        return Double(payloadBytes) / (VoicevoxAudioFormat.sampleRate * VoicevoxAudioFormat.bytesPerFrame)
     }
 }

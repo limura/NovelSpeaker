@@ -182,17 +182,12 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         timePitch.rate = Self.timePitchRate(fromUtteranceRate: m_Rate)
         // 「必要CPU率 = 再生速度倍率 × RTF」なので、実測ログに再生速度も残しておく
         // (VOICEVOX は常に1倍速で合成し、速度はこの timePitch.rate で変えている)。
-        VoicevoxPerformanceMonitor.shared.updatePlaybackRate(Double(timePitch.rate))
         timePitch.pitch = Self.timePitchCents(fromPitchMultiplier: m_Pitch)
         playerNode.volume = max(0.0, min(1.0, m_Volume))
 
         // 直前に鳴らし終えてから、ここで実際に音が出るまでが「意図しない無音」。
-        // 話者をまたいでも正しく測れるよう、起点は Monitor 側でグローバルに管理している。
-        VoicevoxPerformanceMonitor.shared.notePlaybackStarting()
-        // このブロックを鳴らすのにかかる実時間(倍速適用後)。無音率の分母になる。
-        let playbackRate = max(0.0001, Double(timePitch.rate))
-        VoicevoxPerformanceMonitor.shared.recordPlayback(
-            wallSeconds: Double(buffer.frameLength) / buffer.format.sampleRate / playbackRate)
+        // 話者をまたいでも拾えるよう、起点は VoicevoxSilenceReporter 側で持っている。
+        VoicevoxSilenceReporter.shared.notePlaybackStarting()
 
         startProgressReporting(text: text, buffer: buffer, generation: myGeneration)
 
@@ -205,7 +200,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                 self.stopProgressReporting()
                 let delaySeconds = max(0.0, self.m_Delay)
                 // 次のブロックが鳴り始めるまでの間隔を測るための基準点。
-                VoicevoxPerformanceMonitor.shared.notePlaybackEnded(intentionalDelay: delaySeconds)
+                VoicevoxSilenceReporter.shared.notePlaybackEnded(intentionalDelay: delaySeconds)
                 DispatchQueue.main.asyncAfter(deadline: .now() + delaySeconds) {
                     guard myGeneration == self.generation else { return }
                     self.m_Delegate?.finishSpeak(isCancel: false, speechString: text)
@@ -301,7 +296,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
             return
         }
         // ユーザー操作による停止は「意図しない無音」ではないので、計測の基準点を捨てる。
-        VoicevoxPerformanceMonitor.shared.notePlaybackInterrupted()
+        VoicevoxSilenceReporter.shared.notePlaybackInterrupted()
         stopProgressReporting()
         playerNode.stop()
         let text = currentSpeechText
@@ -325,7 +320,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
             return
         }
         // 一時停止中は「意図しない無音」ではないので、計測の基準点を捨てる。
-        VoicevoxPerformanceMonitor.shared.notePlaybackInterrupted()
+        VoicevoxSilenceReporter.shared.notePlaybackInterrupted()
         stopProgressReporting()
         playerNode.pause()
     }

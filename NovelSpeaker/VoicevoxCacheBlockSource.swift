@@ -95,7 +95,6 @@ enum VoicevoxCacheBlockSource {
         defer {
             let elapsed = Date().timeIntervalSince(startedAt)
             if elapsed >= 0.5 {
-                NSLog("NovelSpeaker.VoicevoxCacheBlockSource: 本文読み出し \(String(format: "%.2f", elapsed))秒 (\(wanted.count)ページ)")
             }
         }
         return RealmUtil.RealmBlock { (realm) -> [Int: Story] in

@@ -173,7 +173,6 @@ final class VoicevoxPrefetchThrottleMonitor {
         isBackgroundCache = newValue
         lock.unlock()
         if changed {
-            NSLog("NovelSpeaker.VoicevoxPrefetchThrottle: [\(VoicevoxCore.logTimestamp())] isBackground=\(newValue) parameters=\(currentParameters)")
             if newValue {
                 // 前景では上限が緩いため、背面に入る時点で大量の先行合成が積まれている事がある。
                 // 積まれたタスクは背面に入っても走り続けて CPU を焼き、背面CPU上限による

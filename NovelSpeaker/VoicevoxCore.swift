@@ -459,7 +459,6 @@ actor VoicevoxCore {
         synthesizer = synthNotNil
         Self.activeCPUNumThreads = threadCount
         Self.lastThreadCountChangeDate = Date()
-        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [synthesizer生成] cpu_num_threads=\(threadCount)")
     }
 
     /// cpu_num_threads を明示指定して synthesizer を作り直す(計測用)。
@@ -480,7 +479,6 @@ actor VoicevoxCore {
         // 音声モデルは synthesizer に紐づいてロードされているので、読み直しが必要。
         loadedVvmPaths.removeAll()
         try createSynthesizer(onnxruntime: ort, openJTalk: jtalk, threadCount: threads)
-        VoicevoxPerformanceMonitor.shared.resetForTesting()
         // スレッド数が変わると文字数あたりの CPU 秒も変わるので、見積りも作り直す。
         cpuGovernor.reset()
     }
@@ -606,7 +604,6 @@ actor VoicevoxCore {
         let elapsed = Date().timeIntervalSince(Self.lastThreadCountChangeDate)
         guard VoicevoxThreadPolicy.shouldReconfigure(current: Self.activeCPUNumThreads, desired: desired, secondsSinceLastChange: elapsed) else { return }
         guard let ort = onnxruntime, let jtalk = openJTalk else { return }
-        let previous = Self.activeCPUNumThreads
         do {
             if let existing = synthesizer {
                 voicevox_synthesizer_delete(existing)
@@ -619,7 +616,6 @@ actor VoicevoxCore {
             // ただし「既に使った CPU」の記録は残す(消すと、直前まで全コアで回していた事を
             // 忘れて、背面に移った直後の60秒窓で予算超過=強制終了を招く)。
             cpuGovernor.resetCostModel()
-            VoicevoxPerformanceMonitor.shared.recordEvent("スレッド数変更 \(Self.threadCountDescription(previous))→\(Self.threadCountDescription(desired))")
         } catch {
             AppInformationLogger.AddLog(message: "VoicevoxCore: スレッド数の切り替えに失敗: \(error.localizedDescription)", isForDebug: true)
         }
@@ -661,13 +657,12 @@ actor VoicevoxCore {
         var outputWav: UnsafeMutablePointer<UInt8>?
         let options = voicevox_make_default_tts_options()
         // 実性能(RTF)計測のため、実際の合成呼び出しの前後で CPU 時間と実時間を挟む。
-        // ここは先行合成・その場合成の両方が通る唯一の絞り点なので、計測点として適切。
+        // ここは先行合成・その場合成の両方が通る唯一の絞り点なので、実測点として適切。
+        // 測った CPU 秒は、次の合成を走らせてよいかの見積り(VoicevoxCPUGovernor)に使う。
         let cpuBefore = ProcessCPUClock.totalCPUSeconds()
-        let wallBefore = Date()
         let result = text.withCString { cString in
             voicevox_synthesizer_tts(synthesizer, cString, styleId, options, &outputWavLength, &outputWav)
         }
-        let wallSeconds = Date().timeIntervalSince(wallBefore)
         let cpuSeconds: Double?
         if let cpuBefore = cpuBefore, let cpuAfter = ProcessCPUClock.totalCPUSeconds() {
             cpuSeconds = cpuAfter - cpuBefore
@@ -684,7 +679,6 @@ actor VoicevoxCore {
             throw VoicevoxCoreError.invalidWav
         }
         if let cpuSeconds = cpuSeconds {
-            VoicevoxPerformanceMonitor.shared.recordSynthesis(wavByteCount: data.count, cpuSeconds: cpuSeconds, wallSeconds: wallSeconds, styleId: styleId)
             // 次回以降の見積り材料。同じ文字数でも端末と発熱状態で数倍違うので、実測が要る。
             cpuGovernor.recordSynthesis(cpuSeconds: cpuSeconds, characterCount: text.count, at: ProcessInfo.processInfo.systemUptime)
         }
@@ -722,25 +716,16 @@ actor VoicevoxCore {
             // これが付いている物から先に捨てる(付いていない=まだ再生していない物を
             // 捨てると、用意できていたのに再生直前で消える事になる)。
             wavCache.markPlayed(key: key)
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュHIT] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
-            VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
-            VoicevoxPerformanceMonitor.shared.recordEvent("再生HIT style=\(styleId) \"\(Self.logSnippet(text))\"")
             return cached
         }
         // メモリに無くても、事前に作ってディスクに貯めてあれば、そこから即座に返せる。
         // 背面バッテリーでは実時間合成が原理的に不可能(必要CPU率128〜226%に対し使えるのは80%)
         // なので、無音を無くせるのは実質この経路だけ。
         if let disk = peekDiskCache(text: text, styleId: styleId) {
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [ディスクHIT] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
-            VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: true, waitSeconds: 0)
-            VoicevoxPerformanceMonitor.shared.recordDiskCacheHit()
-            VoicevoxPerformanceMonitor.shared.recordEvent("ディスクHIT style=\(styleId) \"\(Self.logSnippet(text))\"")
             return disk
         }
         // ここに来た = 再生が必要な時点で先行合成が間に合っていなかった。
-        // その待ち時間がそのまま無音の長さになるので、回数と待ち時間を記録する。
-        let missStart = Date()
-
+        // その待ち時間がそのまま無音の長さになる(VoicevoxSilenceReporter が拾う)。
         // MISS の原因判定と「待機中の予約の横取り」は、**actor に入る前**に行う。
         //  - 予約済み(pending)   … 先行合成に出してはいたが間に合わなかった = 時間の問題。
         //  - 合成中(inFlight)   … ワーカーが今まさに作っている。完成を待つ方が速い。
@@ -755,11 +740,9 @@ actor VoicevoxCore {
         // 横取りを先に済ませる事で、actor 待ちの間にワーカーが同じ物を始める余地も無くなる。
         let claim = synthesisQueue.claimForImmediateSynthesis(text: text, styleId: styleId)
         let wasQueued = claim != .notQueued
-        VoicevoxPerformanceMonitor.shared.recordPlaybackCacheMiss(wasQueuedForPrefetch: wasQueued)
-        VoicevoxPerformanceMonitor.shared.recordEvent("再生MISS(\(wasQueued ? "予約済" : "未予約")) style=\(styleId) \"\(Self.logSnippet(text))\"")
+        VoicevoxSilenceReporter.shared.noteCacheMiss(wasQueuedForPrefetch: wasQueued)
 
         let data = try await synthesizeSlowPath(text: text, styleId: styleId, key: key, claim: claim)
-        VoicevoxPerformanceMonitor.shared.recordPlaybackSynthesisRequest(wasCacheHit: false, waitSeconds: Date().timeIntervalSince(missStart))
         return data
     }
 
@@ -769,7 +752,6 @@ actor VoicevoxCore {
         // 先行合成に予算を横取りされないよう、再生側の合成が進行中である事を知らせる。
         beginPlaybackSynthesis()
         defer { endPlaybackSynthesis() }
-        let snippet = Self.logSnippet(text)
         // actor に入るまでの間に先行合成が完成している事がある(むしろ、実行中だった
         // 合成の完了を待って actor に入るので、その可能性は高い)。まず確認する。
         if let cached = peekCache(key: key) {
@@ -781,28 +763,21 @@ actor VoicevoxCore {
             // 同じ物を二重に合成して CPU 予算を食い合い、どちらも進まなくなる
             // (実機で同じブロックの「分割合成」が二重に走り、1ブロックに4分以上かかっていた)。
             // 完成を待つ方が速い。
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:先行合成が実行中→その完成を待つ] styleId=\(styleId) text=\"\(snippet)\"")
-            VoicevoxPerformanceMonitor.shared.recordEvent("先行合成の完成待ち style=\(styleId) \"\(snippet)\"")
             if let data = await waitForInFlightSynthesis(key: key) {
                 return data
             }
         }
         if wasQueued {
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:予約済みだが未完了→追い越して合成] styleId=\(styleId) text=\"\(snippet)\"")
         } else {
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [MISS:先行合成に未予約] styleId=\(styleId) text=\"\(snippet)\"")
         }
         // 待っている間に先行合成が完了していた可能性があるので、合成前にもう一度確認する。
         if let cached = peekCache(key: key) {
             return cached
         }
-        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [キャッシュMISS・その場合成開始] styleId=\(styleId) text=\"\(snippet)\"")
-        let synthStart = Date()
         // 再生に必要な合成でも、CPU予算を超えたまま突入すると強制終了される
         // (殺されると再生そのものが止まるので、無音より重い)。先行合成より多くの
         // 予算を使ってよいが、上限は守る。
         let data = try await performSynthesizeWithinBudget(text: text, styleId: styleId, limitRatio: Self.playbackCPULimitRatio)
-        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [その場合成完了 \(String(format: "%.2f", Date().timeIntervalSince(synthStart)))秒] styleId=\(styleId) text=\"\(snippet)\"")
         // キャッシュを使い切った後にその場で合成した分も、そのままディスクへ積み上げる。
         // (次に同じ所を聴く時には出来ている)
         storeToDiskCacheIfNeeded(text: text, styleId: styleId, wav: data)
@@ -836,9 +811,6 @@ actor VoicevoxCore {
     @discardableResult
     nonisolated func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) -> Bool {
         guard synthesisQueue.enqueue(blockIndex: blockIndex, text: text, styleId: styleId) else { return false }
-        let snippet = Self.logSnippet(text)
-        NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成予約] block=\(blockIndex) styleId=\(styleId) text=\"\(snippet)\"")
-        VoicevoxPerformanceMonitor.shared.recordEvent("先読み予約 block=\(blockIndex) style=\(styleId) \"\(snippet)\"")
         startWorkerIfNeeded()
         return true
     }
@@ -904,8 +876,6 @@ actor VoicevoxCore {
         applyThreadCountIfNeeded()
         let texts = chunkedTextsForBudget(text: text, limitRatio: limitRatio)
         if texts.count > 1 {
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [CPU予算のため\(texts.count)分割して合成] styleId=\(styleId) text=\"\(Self.logSnippet(text))\"")
-            VoicevoxPerformanceMonitor.shared.recordEvent("分割合成 \(texts.count)個 style=\(styleId) \"\(Self.logSnippet(text))\"")
         }
         var wavs: [Data] = []
         for chunk in texts {
@@ -941,9 +911,6 @@ actor VoicevoxCore {
             // 分割してもなお1本で予算を超える(句読点が全く無い等)場合は、窓が空くまで待った上で
             // 実行する。その1本だけで窓を使い切る形になり、上限超過の確率が最も小さくなる。
             let sleepSeconds = min(waitSeconds.isInfinite ? Self.cpuWindowSeconds : waitSeconds, Self.cpuWindowSeconds)
-            let snippet = Self.logSnippet(text)
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [CPU予算のため待機 \(String(format: "%.1f", sleepSeconds))秒] styleId=\(styleId) text=\"\(snippet)\"")
-            VoicevoxPerformanceMonitor.shared.recordEvent("合成待機 \(String(format: "%.1f", sleepSeconds))秒(CPU予算) style=\(styleId) \"\(snippet)\"")
             try? await Task.sleep(nanoseconds: UInt64(sleepSeconds * 1_000_000_000))
         }
     }
@@ -961,20 +928,15 @@ actor VoicevoxCore {
 
     /// 待ち行列から取り出した1件を実際に合成する(ここだけが actor 隔離 = 直列実行)。
     private func runSynthesis(_ request: VoicevoxSynthesisQueue.Request) async {
-        let snippet = Self.logSnippet(request.text)
         // 順番待ちの間に読み上げが停止/シークされていたら、重いC呼び出しには入らず捨てる。
         // これをしないと、停止後も延々と(実機で16分=983秒の先行合成完了ログを確認)
         // 合成され続け、CPU/電池を浪費してしまう。
         if synthesisQueue.isStale(request) {
-            VoicevoxPerformanceMonitor.shared.recordEvent("先読みキャンセル style=\(request.styleId) \"\(snippet)\"")
             synthesisQueue.complete(request)
             return
         }
-        let startedAt = Date()
         do {
             let data = try await performSynthesizeWithinBudget(text: request.text, styleId: request.styleId, limitRatio: Self.prefetchCPULimitRatio)
-            NSLog("NovelSpeaker.VoicevoxCore: [\(Self.logTimestamp())] [先行合成完了 \(String(format: "%.2f", Date().timeIntervalSince(startedAt)))秒] styleId=\(request.styleId) text=\"\(snippet)\"")
-            VoicevoxPerformanceMonitor.shared.recordEvent("先読み完了 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))秒 style=\(request.styleId) \"\(snippet)\"")
             storeCache(key: Self.prefetchKey(text: request.text, styleId: request.styleId), data: data)
             storeToDiskCacheIfNeeded(text: request.text, styleId: request.styleId, wav: data)
         } catch {
@@ -982,7 +944,6 @@ actor VoicevoxCore {
                 "text": request.text,
                 "styleId": "\(request.styleId)",
             ], isForDebug: true)
-            VoicevoxPerformanceMonitor.shared.recordEvent("先読み失敗 style=\(request.styleId) \"\(snippet)\" \(error.localizedDescription)")
         }
         synthesisQueue.complete(request)
     }

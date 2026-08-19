@@ -110,8 +110,8 @@ final class VoicevoxWavCache {
         let count = entries.count
         lock.unlock()
         // 各エントリに WAV ヘッダ分が含まれるので差し引いてから秒数換算する。
-        let payloadBytes = max(0, bytes - count * VoicevoxPerformanceMonitor.wavHeaderByteCount)
-        return Double(payloadBytes) / (VoicevoxPerformanceMonitor.outputSampleRate * VoicevoxPerformanceMonitor.outputBytesPerFrame)
+        let payloadBytes = max(0, bytes - count * VoicevoxAudioFormat.wavHeaderByteCount)
+        return Double(payloadBytes) / (VoicevoxAudioFormat.sampleRate * VoicevoxAudioFormat.bytesPerFrame)
     }
 
     /// - Parameter protecting: 今入れたばかりのキー。これだけは追い出さない

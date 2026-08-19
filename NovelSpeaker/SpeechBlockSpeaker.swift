@@ -201,8 +201,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         let generation = speakGeneration
         // VoicevoxCoreの先行合成ログ(絶対時刻付き)と突き合わせて「どこで無音になったか」を
         // 追えるように、実際に発話を発注した瞬間も同じ絶対時刻フォーマットでログする。
-        NSLog("NovelSpeaker.SpeechBlockSpeaker: [\(VoicevoxCore.logTimestamp())] [発話発注] blockIndex=\(currentSpeechBlockIndex) type=\(block.type) text=\"\(Self.escapeForLog(speechText))\"")
-        VoicevoxPerformanceMonitor.shared.recordEvent("発話発注 block=\(currentSpeechBlockIndex) voice=\(block.voiceIdentifier ?? "nil") \"\(String(Self.escapeForLog(speechText).prefix(16)))\"")
         let effectiveRate = min(max(block.rate * rateMultiplier, AVSpeechUtteranceMinimumSpeechRate), AVSpeechUtteranceMaximumSpeechRate)
         let effectiveVolume = min(max(block.volume * volumeMultiplier, 0.0), 1.0)
         speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, type: block.type, pitch: block.pitch, rate: effectiveRate, volume: effectiveVolume, delay: block.delay)
@@ -269,7 +267,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         ) { text, styleId in
             VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId)
         }
-        VoicevoxPerformanceMonitor.shared.updateUnplayedLeadSeconds(currentLead)
         #if !os(watchOS)
         // 貯めてある音声が心細くなってきたら、読み上げの裏で作り足す。
         // キャッシュから再生している間は合成のCPUがゼロなので、ここが最も作りやすい。
@@ -369,7 +366,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             if VoicevoxCore.shared.cachedWavByteCount(text: text, styleId: styleId) == nil {
                 if lastImmediateEnsuredBlockIndex != blockIndex {
                     lastImmediateEnsuredBlockIndex = blockIndex
-                    VoicevoxPerformanceMonitor.shared.recordEvent("直近確保 block=\(blockIndex) style=\(styleId)")
                     // 待ち行列は再生順で手前のものほど優先するので、積まれている
                     // (もっと先の)先行合成より自動的に先に合成される。
                     VoicevoxCore.shared.schedulePrefetch(blockIndex: blockIndex, text: text, styleId: styleId)
@@ -417,7 +413,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
                 // ここで再生が止まるので、貯金はここまで。
                 break
             }
-            seconds += VoicevoxPerformanceMonitor.audioSeconds(wavByteCount: byteCount)
+            seconds += VoicevoxAudioFormat.audioSeconds(wavByteCount: byteCount)
         }
         return seconds
     }
@@ -751,7 +747,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // ここに来た = synth が utterance を完了して次へ進む = 実際に発話が進んだという事。
         // [発話発注]ログと突き合わせて「発注してから実際に発話し終えるまでどれだけ掛かったか
         // (=無音待ちがあったか)」を追えるように、絶対時刻付きでログする。
-        NSLog("NovelSpeaker.SpeechBlockSpeaker: [\(VoicevoxCore.logTimestamp())] [発話完了] blockIndex=\(currentSpeechBlockIndex) isCancel=\(isCancel)")
         // 固着回復の「連続失敗」カウンタをリセットする。
         // (willSpeakRange が飛ばない極短ブロック("。"等)でも確実にリセットするため、
         //  willSpeakRange 側のリセットだけに頼らずここでもリセットする)

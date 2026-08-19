@@ -76,7 +76,6 @@ final class VoicevoxCacheAutoGeneration {
                     "[VOICEVOX音声生成] この先の貯金が \(VoicevoxCacheGenerationProgress.durationText(seconds: lead))"
                     + "(下限\(VoicevoxCacheLead.keepGeneratingBelowMinutes)分)なので、読み上げの裏で作り足します",
                     isForDebug: true)
-                VoicevoxPerformanceMonitor.shared.recordEvent("自動生成開始 貯金\(String(format: "%.0f", lead))秒")
                 VoicevoxCacheGenerator.shared.start(novelID: context.novelID, mode: .followingPlayback)
             }
         } else {

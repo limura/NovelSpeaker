@@ -17,7 +17,7 @@ class VoicevoxPrefetchLeadTest: XCTestCase {
 
     /// 指定秒数ぶんの WAV バイト数(24kHz/mono/16bit + ヘッダ)。
     private func wavBytes(seconds: Double) -> Int {
-        return Int(seconds * VoicevoxPerformanceMonitor.outputSampleRate * VoicevoxPerformanceMonitor.outputBytesPerFrame) + VoicevoxPerformanceMonitor.wavHeaderByteCount
+        return Int(seconds * VoicevoxAudioFormat.sampleRate * VoicevoxAudioFormat.bytesPerFrame) + VoicevoxAudioFormat.wavHeaderByteCount
     }
 
     private func makeBlock(text: String, type: String = "VOICEVOX", styleId: UInt32 = 3) -> CombinedSpeechBlock {

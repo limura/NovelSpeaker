@@ -512,9 +512,6 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
                 splitSeconds += splitElapsed + settingsElapsed
                 // 小説ごとの内訳。ページ数と文字数が分かれば、
                 // 「ページが長いから遅い」のか「ページ数ぶん重いのか」を切り分けられる。
-                NSLog("NovelSpeaker.VoicevoxCacheScan: %d ページ %d 文字 設定 %.2f秒 分割 %.2f秒 (1ページ %.0fms)",
-                      chapterNumbers.count, characterCount, settingsElapsed, splitElapsed,
-                      chapterNumbers.isEmpty ? 0 : splitElapsed / Double(chapterNumbers.count) * 1000)
 
                 for chapterNumber in chapterNumbers {
                     let keysToKeep = keysByChapter[chapterNumber] ?? []
