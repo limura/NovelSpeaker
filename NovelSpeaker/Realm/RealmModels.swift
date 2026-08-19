@@ -3030,6 +3030,8 @@ enum MenuItemsNotRemovedType: String, CaseIterable {
     case pauseSpeaking // 読み上げを一時停止
     // 共有
     case share // 共有
+    // セレクタを持たない(UIAction で来る)項目。WebView 側で WebKit が足してくる。
+    case copyLinkToHighlight // 強調表示部分のリンクをコピー
     // ことせかい 独自項目
     case selectAll // 全てを選択する(ことせかい 独自の selectAllTextWithSender: 項目)
 
@@ -3064,6 +3066,18 @@ enum MenuItemsNotRemovedType: String, CaseIterable {
         case .pauseSpeaking: return ["_accessibilityPauseSpeaking:"]
         case .share: return ["share:", "_share:"]
         case .selectAll: return ["selectAllTextWithSender:"]
+        // UIAction で来る物はセレクタを持たない(actionIdentifiers 側で判別する)
+        case .copyLinkToHighlight: return []
+        }
+    }
+
+    /// セレクタを持たない UIAction を識別するための identifier。
+    /// WebView(WKWebView)側では、WebKit が長押しメニューに UIAction を足してくる事がある。
+    /// UIAction はハンドラ直結でセレクタが無いため、identifier で判別するしかない。
+    var actionIdentifiers: [String] {
+        switch self {
+        case .copyLinkToHighlight: return ["WKActionScrollToTextFragmentGeneration"]
+        default: return []
         }
     }
 
@@ -3079,6 +3093,8 @@ enum MenuItemsNotRemovedType: String, CaseIterable {
         case .addShortcut: return "5"
         case .speak, .speakLanguageSelection, .pauseSpeaking: return "6"
         case .share: return "7"
+        // 「コピー」の仲間なので編集グループに入れておく
+        case .copyLinkToHighlight: return "1"
         case .selectAll: return "8"
         }
     }

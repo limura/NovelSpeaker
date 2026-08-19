@@ -38,39 +38,52 @@ enum EditMenuFilter {
         "checkSpeechTextWithSender:",
     ]
 
-    /// 「本文中の長押しメニュー項目を減らす」が有効なら「残す対象のセレクタ名」の集合を返す。
+    /// 残す対象。セレクタ名で判別する物と、identifier で判別する物(UIAction)がある。
+    struct KeepSet {
+        let selectorNames: Set<String>
+        let actionIdentifiers: Set<String>
+    }
+
+    /// 「本文中の長押しメニュー項目を減らす」が有効なら「残す対象」を返す。
     /// 無効なら nil を返す(= 何も削減しない)。
-    static func keepSelectorNamesIfReducing() -> Set<String>? {
-        return RealmUtil.RealmBlock { (realm) -> Set<String>? in
+    static func keepSetIfReducing() -> KeepSet? {
+        return RealmUtil.RealmBlock { (realm) -> KeepSet? in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
                 , globalState.isMenuItemIsAddNovelSpeakerItemsOnly else { return nil }
             var result = novelSpeakerAlwaysKeepSelectorNames
+            var actionIdentifiers = Set<String>()
             for typeName in globalState.menuItemsNotRemoved {
                 guard let type = MenuItemsNotRemovedType(rawValue: typeName) else { continue }
+                actionIdentifiers.formUnion(type.actionIdentifiers)
                 result.formUnion(type.selectorNames)
             }
-            return result
+            return KeepSet(selectorNames: result, actionIdentifiers: actionIdentifiers)
         }
     }
 
     /// canPerformAction(_:withSender:) 用の判定。
-    /// 削減設定が無効なら常に true、有効なら keepSelectorNames に含まれる物だけ true。
+    /// 削減設定が無効なら常に true、有効なら残す対象のセレクタ名に含まれる物だけ true。
+    /// (UIAction は canPerformAction を通らないのでここでは関係しない)
     static func isAllowedForCanPerformAction(action: Selector) -> Bool {
-        guard let keepSelectorNames = keepSelectorNamesIfReducing() else { return true }
-        return keepSelectorNames.contains(action.description)
+        guard let keepSet = keepSetIfReducing() else { return true }
+        return keepSet.selectorNames.contains(action.description)
     }
 
     /// UIMenuElement を再帰的に選別する。残す物が無くなった UIMenu は nil を返す(= その階層ごと消す)。
     /// UICommand 以外(UIAction / UIDeferredMenuElement 等)はセレクタで判別できない
     /// = こちらが知らない項目なので落とす。
-    static func filter(element: UIMenuElement, keepSelectorNames: Set<String>) -> UIMenuElement? {
+    static func filter(element: UIMenuElement, keepSet: KeepSet) -> UIMenuElement? {
         if let menu = element as? UIMenu {
-            let children = menu.children.compactMap { filter(element: $0, keepSelectorNames: keepSelectorNames) }
+            let children = menu.children.compactMap { filter(element: $0, keepSet: keepSet) }
             if children.isEmpty { return nil }
             return menu.replacingChildren(children)
         }
+        // UIAction は UICommand の仲間ではなく、セレクタを持たない別物なので identifier で判別する。
+        if let action = element as? UIAction {
+            return keepSet.actionIdentifiers.contains(action.identifier.rawValue) ? action : nil
+        }
         if let command = element as? UICommand {
-            return keepSelectorNames.contains(NSStringFromSelector(command.action)) ? command : nil
+            return keepSet.selectorNames.contains(NSStringFromSelector(command.action)) ? command : nil
         }
         return nil
     }
@@ -79,8 +92,104 @@ enum EditMenuFilter {
     /// 削減設定が無効な場合は suggestedActions をそのまま返す。
     @available(iOS 16.0, *)
     static func filteredSuggestedActions(_ suggestedActions: [UIMenuElement]) -> [UIMenuElement] {
-        guard let keepSelectorNames = keepSelectorNamesIfReducing() else { return suggestedActions }
-        return suggestedActions.compactMap { filter(element: $0, keepSelectorNames: keepSelectorNames) }
+        guard let keepSet = keepSetIfReducing() else { return suggestedActions }
+        return suggestedActions.compactMap { filter(element: $0, keepSet: keepSet) }
+    }
+
+    // MARK: 実機で実際のメニューを集めるためのダンプ
+
+    // 長押しメニューに出てくる項目は、選択している文字列や端末の状況で変わる。
+    //   ・Apple Intelligence の有無(作文ツール)
+    //   ・選択した文字列の言語(简⇄繁、書字方向)や、置き換え候補の有無
+    //   ・データ検出(URL/電話番号/日付など。WebView 側で起こり得る)
+    //   ・iOS のバージョン
+    // 手元のシミュレータでは再現できない項目があり(作文ツールは Apple Intelligence が
+    // 無い端末では出てこない)、机上では網羅できない。
+    // そこで、実機で実際のツリーを集められるようにしておく。
+    //
+    // 「設定タブ」の隠しデバッグ欄で有効にすると、長押しのたびに
+    // 「設定タブ」→「アプリ内エラーのお知らせ」へツリーを書き出す。
+    // そこからコピーして持ち出せる。
+    static let isDumpEditMenuEnabledKey = "NovelSpeaker_IsDumpEditMenuEnabled"
+    static func IsDumpEditMenuEnabled() -> Bool {
+        return UserDefaults.standard.bool(forKey: isDumpEditMenuEnabledKey)
+    }
+    static func SetIsDumpEditMenuEnabled(_ newValue:Bool) {
+        UserDefaults.standard.set(newValue, forKey: isDumpEditMenuEnabledKey)
+    }
+
+    /// 削減設定とは別枠で ことせかい が出している項目。
+    /// 「ここから発話開始」は発話中にメニューごと差し替えて出しているので削減設定の対象外。
+    /// ダンプで「未知」と誤って印字しないためだけに使う。
+    static let novelSpeakerOtherSelectorNames: Set<String> = [
+        "speakFromHereWithSender:",
+    ]
+
+    /// MenuItemsNotRemovedType が知っているセレクタ名の全集合。
+    /// ここに無い物は「残される長押しメニュー項目」で選べない = 取りこぼしなので、
+    /// ダンプで目立つように印を付ける。
+    static var knownSelectorNames: Set<String> {
+        var result = novelSpeakerAlwaysKeepSelectorNames
+        result.formUnion(novelSpeakerOtherSelectorNames)
+        for type in MenuItemsNotRemovedType.allCases {
+            result.formUnion(type.selectorNames)
+        }
+        return result
+    }
+
+    /// MenuItemsNotRemovedType が知っている UIAction の identifier の全集合。
+    static var knownActionIdentifiers: Set<String> {
+        var result = Set<String>()
+        for type in MenuItemsNotRemovedType.allCases {
+            result.formUnion(type.actionIdentifiers)
+        }
+        return result
+    }
+
+    /// 長押しメニューのツリーを「アプリ内エラーのお知らせ」へ書き出す。
+    /// - Parameters:
+    ///   - elements: 選別する前のツリー(suggestedActions や builder.menu(for: .root)?.children)
+    ///   - sourceName: どちらの本文表示から来たか
+    ///   - selectedText: 選択されていた文字列(条件を後から見分けるため。先頭だけ記録する)
+    @available(iOS 16.0, *)
+    static func DumpEditMenuIfNeeded(elements: [UIMenuElement], sourceName: String, selectedText: String?) {
+        if IsDumpEditMenuEnabled() == false { return }
+        let knownSelectorNames = self.knownSelectorNames
+        var lines:[String] = []
+        func walk(_ element: UIMenuElement, indent: String) {
+            if let menu = element as? UIMenu {
+                lines.append("\(indent)UIMenu \(menu.identifier.rawValue) \"\(menu.title)\"")
+                for child in menu.children {
+                    walk(child, indent: indent + "  ")
+                }
+                return
+            }
+            if let command = element as? UICommand {
+                let selectorName = NSStringFromSelector(command.action)
+                let mark = knownSelectorNames.contains(selectorName) ? "" : "   ★未知"
+                lines.append("\(indent)UICommand \(selectorName) \"\(command.title)\"\(mark)")
+                return
+            }
+            // UIAction はセレクタを持たない(ハンドラ直結)ので、新方式では落とされる。
+            // WebKit がリンク選択時に足してくる「強調表示部分のリンクをコピー」等がこれに当たる。
+            // identifier で見分けられる可能性があるので記録しておく。
+            if let action = element as? UIAction {
+                let mark = knownActionIdentifiers.contains(action.identifier.rawValue) ? "" : "   ★未知(セレクタが取れない)"
+                lines.append("\(indent)UIAction identifier=\"\(action.identifier.rawValue)\" \"\(action.title)\"\(mark)")
+                return
+            }
+            // UIDeferredMenuElement 等。何が来ているのかを見るために記録しておく。
+            lines.append("\(indent)\(type(of: element)) \"\(element.title)\"   ★未知(セレクタが取れない)")
+        }
+        for element in elements {
+            walk(element, indent: "")
+        }
+        if lines.isEmpty { return }
+        var appendix:[String:String] = ["source": sourceName]
+        if let selectedText = selectedText, selectedText.count > 0 {
+            appendix["selected"] = String(selectedText.prefix(32))
+        }
+        AppInformationLogger.AddLog(message: "長押しメニューの内容(デバッグ):\n" + lines.joined(separator: "\n"), appendix: appendix, isForDebug: false)
     }
 
     /// UIResponder.buildMenu(with:) 用(WKWebView 側にはこちらしか手段が無い)。
@@ -88,13 +197,13 @@ enum EditMenuFilter {
     @available(iOS 16.0, *)
     static func apply(builder: UIMenuBuilder) {
         guard builder.system == .context else { return }
-        guard let keepSelectorNames = keepSelectorNamesIfReducing() else { return }
+        guard let keepSet = keepSetIfReducing() else { return }
         // 個々のメニュー識別子を決め打ちで並べるのではなく .root から辿る。
         // こうしておけば OS が新しいトップレベルメニューを増やしても取りこぼさない。
         guard let root = builder.menu(for: .root) else { return }
         for child in root.children {
             guard let menu = child as? UIMenu else { continue }
-            let children = menu.children.compactMap { filter(element: $0, keepSelectorNames: keepSelectorNames) }
+            let children = menu.children.compactMap { filter(element: $0, keepSet: keepSet) }
             if children.isEmpty {
                 builder.remove(menu: menu.identifier)
             } else {

@@ -380,6 +380,10 @@ struct AppInformationLogListSwiftUIView: View {
     let isIncludeDebugLog:Bool
     let actionHandler:(AppInformationLogAction)->Void
     @State private var logs:[AppInformationLog] = []
+    // 「今あるお知らせを全て消す」は、この画面を開くボタンとほぼ同じ位置に出るため、
+    // 連打すると意図せずお知らせが全部消えてしまう。確認を挟んで事故を防ぐ。
+    // (確認は画面下部のアクションシートで出るので、連打の指の位置とも重ならない)
+    @State private var isConfirmingClearLogs = false
 
     var body: some View {
         List {
@@ -391,10 +395,20 @@ struct AppInformationLogListSwiftUIView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     Divider()
                     Button(NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるお知らせを全て消す"), role: .destructive) {
-                        AppInformationLogger.ClearLogs()
-                        reloadLogs()
+                        isConfirmingClearLogs = true
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .confirmationDialog(
+                        NSLocalizedString("SettingsTableViewController_AppInformation_ClearConfirmTitle", comment: "今あるお知らせを全て消しますか?"),
+                        isPresented: $isConfirmingClearLogs,
+                        titleVisibility: .visible
+                    ) {
+                        Button(NSLocalizedString("SettingsTableViewController_AppInformation_ClearConfirmButtonTitle", comment: "全て消す"), role: .destructive) {
+                            AppInformationLogger.ClearLogs()
+                            reloadLogs()
+                        }
+                        Button(NSLocalizedString("Cancel_button", comment: "キャンセル"), role: .cancel) {}
+                    }
                 }
             }
             ForEach(Array(logs.enumerated()), id: \.offset) { _, log in

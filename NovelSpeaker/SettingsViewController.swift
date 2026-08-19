@@ -2151,6 +2151,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let value = row.value else { return }
                 NovelSpeakerUtility.SetIsSiteInfoEditorSpreadsheetCopyEnabled(isEnabled: value)
             })
+            section
+            <<< SwitchRow("isDumpEditMenuEnabledSwitchRow") { row in
+                row.title = "本文を長押しした時のメニューの中身を「アプリ内エラーのお知らせ」に記録する"
+                row.cell.textLabel?.numberOfLines = 0
+                row.value = EditMenuFilter.IsDumpEditMenuEnabled()
+            }.onChange({ row in
+                EditMenuFilter.SetIsDumpEditMenuEnabled(row.value ?? false)
+            })
             #endif
 
             /*

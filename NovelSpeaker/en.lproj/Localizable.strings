@@ -1132,6 +1132,11 @@
 "SpeechViewBottomButtonSettingsViewController_OverlapsChapterBar" = "Overlap the page navigation bar\n(When off, the buttons are shown above the page navigation bar)";
 "SpeechViewBottomButtonSettingsViewController_ButtonsSectionTitle" = "Buttons to show (nothing is shown when all are off)";
 
+"SettingsTableViewController_AppInformation_ClearConfirmTitle" = "Delete all of the current notices?";
+"SettingsTableViewController_AppInformation_ClearConfirmButtonTitle" = "Delete all";
+
+"RealmModels_MenuItemsNotRemoved_Name_copyLinkToHighlight" = "Copy Link with Highlight (WebView only)";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.

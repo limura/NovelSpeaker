@@ -1892,6 +1892,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     // 「ここから発話開始」を出し、それ以外は何も出さない。
     @available(iOS 16.0, *)
     func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
+        // 実機で実際に出てくる項目を集めるためのダンプ(隠しデバッグ設定が有効な時だけ動く)
+        let nsText = textView.text as NSString?
+        let selectedText:String?
+        if let nsText = nsText, range.location >= 0, range.length > 0, range.location + range.length <= nsText.length {
+            selectedText = nsText.substring(with: range)
+        }else{
+            selectedText = nil
+        }
+        EditMenuFilter.DumpEditMenuIfNeeded(elements: suggestedActions, sourceName: "UITextView", selectedText: selectedText)
         if self.storySpeaker.isPlayng {
             guard self.isScrollFollowSuspended else { return UIMenu(children: []) }
             return UIMenu(children: [

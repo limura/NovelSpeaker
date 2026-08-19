@@ -88,6 +88,11 @@ public class CustomWKWebView: WKWebView {
     override public func buildMenu(with builder: UIMenuBuilder) {
         super.buildMenu(with: builder)
         if #available(iOS 16.0, *) {
+            // 実機で実際に出てくる項目を集めるためのダンプ(隠しデバッグ設定が有効な時だけ動く)。
+            // 選別する前のツリーを記録したいので apply() より先に呼ぶ。
+            if builder.system == .context, let root = builder.menu(for: .root) {
+                EditMenuFilter.DumpEditMenuIfNeeded(elements: root.children, sourceName: "WKWebView", selectedText: nil)
+            }
             EditMenuFilter.apply(builder: builder)
         }
     }
