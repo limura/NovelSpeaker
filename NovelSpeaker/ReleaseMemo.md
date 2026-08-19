@@ -4489,3 +4489,84 @@ Fixing the problem
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.
 - Implemented various fixes for an issue where speech playback would fail to start until the app was restarted.
 - Fixed an issue where the behavior did not match the intended design when the "Change the audio mode when connected to CarPlay" setting (under the Settings tab) was enabled.
+
+
+# Version 2.13.0 (2.13.0)
+
+インタフェース・内部動作の変更
+
+-「設定タブ」→「開発者に問い合わせる」の「問題が発生する小説」の選択一覧のところで、検索して表示されている小説のリストを絞ることができるように
+-「小説本文画面」で文字を選択したときに出てくるメニューに「全てを選択する」を追加
+-「小説本文画面」の右上に表示されるボタン群に「他の小説にこのページを追加する」ボタンを追加
+-「小説の詳細・小説専用設定」の「この小説に対する操作」欄あたりに「他の小説にこのページを追加する」「この小説を別の小説の末尾に追加する」の二つのボタンを追加
+-「設定タブ」→「最優先SiteInfoを編集・追加」でSiteInfoを編集・テストする画面で、テキスト入力ができる部分に "x" のような感じの、入力されている文字を全部消すボタンを設置
+- 発話中に手動で本文をスクロールした時、発話位置への自動スクロールを一定時間止めることができるように
+- 発話中に本文を長押しすると「ここから発話開始」の表示が出るように
+-「設定タブ」→「小説本文画面の下部に表示するボタン群の設定」を追加
+-「設定タブ」→「画面右上のボタン群の間隔」を「小説本文画面や本棚画面のボタン群の間隔」に改名
+-「設定タブ」→「アプリ内エラーのお知らせ」の「今あるお知らせを全て消す」に確認を追加
+
+問題の修正
+
+- 本棚画面や小説本文画面での右上のボタン群周りの修正
+- rubyタグ周りの取り込みで意図しない閉じカッコが残る場合があった問題を修正
+-「設定タブ」→「本文中の長押しメニュー項目を減らす」をONにした時に出てくる「残される長押しメニュー項目」について、色々設定できていなかった項目を追加
+
+以下にざっくりと説明していきます。
+
+-「設定タブ」→「開発者に問い合わせる」の「問題が発生する小説」の選択一覧のところで、検索して表示されている小説のリストを絞ることができるように
+
+これは、本棚に大量の小説があるようなヘビーユーザの方がせっかく問い合わせをしようとしてくれているのに、検索機能がないために「このリストの中から小説をスクロールして探せというのか」という状態になっていて利用されていないという問題への対処になります
+
+-「小説本文画面」で文字を選択したときに出てくるメニューに「全てを選択する」を追加
+-「小説本文画面」の右上に表示されるボタン群に「他の小説にこのページを追加する」ボタンを追加
+-「小説の詳細・小説専用設定」の「この小説に対する操作」欄あたりに「他の小説にこのページを追加する」「この小説を別の小説の末尾に追加する」の二つのボタンを追加
+  こちらの機能については強く追加を要望されたのでつけたのですが、開発者の私は何に使われるのかいまいちわかっていない機能になりますので、おそらく監視されることはなく、将来的に動かなくなっていても気が付かれないなどのメンテナンス問題が発生する可能性があります。そういった場合は「おい動いてないぞ直せ？」と教えてください
+
+- 発話中に手動で本文をスクロールした時、発話位置への自動スクロールを一定時間止めることができるように
+  発話中は発話されている部分が画面内に入るように動いていますが、「ちょっと目で先読みしたい」とか「ちょっと前のって何って書いてあったの？変な読みだったんだけど」を目で確認したい時などに手動でスクロールするとしばらくその場で止まってくれるという感じの機能になります。
+  「設定タブ」→「本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数」で止まる時間を変更できるようにしていますので、適宜調整してください。
+- 発話中に本文を長押しすると「ここから発話開始」の表示が出るように
+  これと一つ上の機能を組み合わせると、発話させて聞いていて「もうこの段落(ステータスみたいなのが列挙されてるだけの項目とか)は聞かないでいいや」と思った時に同じページ内であれば目的の位置まで再生箇所を飛ばすことができるようになるはずです。
+
+-「設定タブ」→「小説本文画面の下部に表示するボタン群の設定」を追加
+  最近の大きめな端末だと画面上部のボタンが押しにくくて困る的な問題への対処になります。
+
+-「設定タブ」→「画面右上のボタン群の間隔」を「小説本文画面や本棚画面のボタン群の間隔」に改名
+  画面下部にも同様のボタンが出現するようになったので文言を変えます。
+
+-「設定タブ」→「アプリ内エラーのお知らせ」の「今あるお知らせを全て消す」に確認を追加
+  「アプリ内エラーのお知らせ」を開くボタンとほぼ同じ位置に出るため、連打するとお知らせが全部消えてしまう事故が起きていたので確認を挟むようにしました。
+
+- 本棚画面や小説本文画面での右上のボタン群周りの修正
+  ONにしている数が多すぎると「…」と一つのボタンだけになる場合があった問題や、iPadで過剰に切り詰められたりする問題、「設定タブ」→「画面右上のボタン群の間隔」や「右上に表示されるボタン群の編集」の変更に追従しない問題、横幅によっては表示が見切れて押せない(見えない)ボタンが発生していた問題など色々いじっています。
+
+- rubyタグ周りの取り込みで意図しない閉じカッコが残る場合があった問題を修正
+  具体的には青空文庫のルビ変換で、閉じ括弧の「）」が本文に残ってしまう問題がありました。
+
+-「設定タブ」→「本文中の長押しメニュー項目を減らす」をONにした時に出てくる「残される長押しメニュー項目」について、色々設定できていなかった項目を追加
+  選択肢として現れていなかったものなどを追加するなどしています。既存の仕組みですり抜けて表示されていたメニュー項目だとこちらが確認したものについては「残される」状態(ON状態)を初期値としています。
+
+  以上となります。
+  
+
+# Version 2.13.0 (2.13.0)
+
+Changes in interface/internal operation
+
+- In the "Settings tab" → "Send inquiries to developers via E-mail", the "Select the novels in which the error occurs" list can now be narrowed down by searching.
+- Added "Select All" to the menu that appears when you select text on the novel text screen.
+- Added an "Add this page to another novel" button to the buttons displayed in the upper right corner of the novel text screen.
+- Added "Add this page to another novel" and "Append this novel to the end of another novel" buttons to the "Manipulation on this novel" section of "Novel detail".
+- Added a button that clears the entered text (shown as an "x") to the text fields on the SiteInfo editing and testing screen in the "Settings tab" → "Edit / add priority SiteInfo".
+- While reading aloud, scrolling the text yourself now pauses the automatic scrolling to the speech position for a while.
+- Long pressing the text while reading aloud now shows "Speak from here".
+- Added "Buttons shown at the bottom of the novel text screen" to the "Settings tab".
+- Renamed "Spacing between the buttons at the top right of the screen" in the "Settings tab" to "Spacing between the buttons on the novel text screen and the bookshelf screen".
+- Added a confirmation to "Clear notification" in the "Settings tab" → "Notification of in-app error".
+
+Fixing the problem
+
+- Fixed several problems with the buttons displayed in the upper right corner of the bookshelf screen and the novel text screen.
+- Fixed an issue where an unintended closing parenthesis could remain when importing text that uses ruby tags.
+- Added items that could not be configured before to "Long press menu items left behind", which appears when "Long press only pops: corrections for pronounciation" in the "Settings tab" is turned on.

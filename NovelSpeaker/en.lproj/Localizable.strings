@@ -1137,15 +1137,48 @@
 
 "RealmModels_MenuItemsNotRemoved_Name_copyLinkToHighlight" = "Copy Link with Highlight (WebView only)";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.13.0
 
-- Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.
-- Implemented various fixes for an issue where speech playback would fail to start until the app was restarted.
-- Fixed an issue where the behavior did not match the intended design when the \"Change the audio mode when connected to CarPlay\" setting (under the Settings tab) was enabled.
+- In the \"Settings tab\" → \"Send inquiries to developers via E-mail\", the \"Select the novels in which the error occurs\" list can now be narrowed down by searching.
+- Added \"Select All\" to the menu that appears when you select text on the novel text screen.
+- Added an \"Add this page to another novel\" button to the buttons displayed in the upper right corner of the novel text screen.
+- Added \"Add this page to another novel\" and \"Append this novel to the end of another novel\" buttons to the \"Manipulation on this novel\" section of \"Novel detail\".
+- Added a button that clears the entered text (shown as an \"x\") to the text fields on the SiteInfo editing and testing screen in the \"Settings tab\" → \"Edit / add priority SiteInfo\".
+- While reading aloud, scrolling the text yourself now pauses the automatic scrolling to the speech position for a while.
+- Long pressing the text while reading aloud now shows \"Speak from here\".
+- Added \"Buttons shown at the bottom of the novel text screen\" to the \"Settings tab\".
+- Renamed \"Spacing between the buttons at the top right of the screen\" in the \"Settings tab\" to \"Spacing between the buttons on the novel text screen and the bookshelf screen\".
+- Added a confirmation to \"Clear notification\" in the \"Settings tab\" → \"Notification of in-app error\".
+- Fixed several problems with the buttons displayed in the upper right corner of the bookshelf screen and the novel text screen.
+- Fixed an issue where an unintended closing parenthesis could remain when importing text that uses ruby tags.
+- Added items that could not be configured before to \"Long press menu items left behind\", which appears when \"Long press only pops: corrections for pronounciation\" in the \"Settings tab\" is turned on.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.13.0
+
+Changes in interface/internal operation
+
+- In the \"Settings tab\" → \"Send inquiries to developers via E-mail\", the \"Select the novels in which the error occurs\" list can now be narrowed down by searching.
+- Added \"Select All\" to the menu that appears when you select text on the novel text screen.
+- Added an \"Add this page to another novel\" button to the buttons displayed in the upper right corner of the novel text screen.
+- Added \"Add this page to another novel\" and \"Append this novel to the end of another novel\" buttons to the \"Manipulation on this novel\" section of \"Novel detail\".
+- Added a button that clears the entered text (shown as an \"x\") to the text fields on the SiteInfo editing and testing screen in the \"Settings tab\" → \"Edit / add priority SiteInfo\".
+- While reading aloud, scrolling the text yourself now pauses the automatic scrolling to the speech position for a while.
+- Long pressing the text while reading aloud now shows \"Speak from here\".
+- Added \"Buttons shown at the bottom of the novel text screen\" to the \"Settings tab\".
+- Renamed \"Spacing between the buttons at the top right of the screen\" in the \"Settings tab\" to \"Spacing between the buttons on the novel text screen and the bookshelf screen\".
+- Added a confirmation to \"Clear notification\" in the \"Settings tab\" → \"Notification of in-app error\".
+
+Fixing the problem
+
+- Fixed several problems with the buttons displayed in the upper right corner of the bookshelf screen and the novel text screen.
+- Fixed an issue where an unintended closing parenthesis could remain when importing text that uses ruby tags.
+- Added items that could not be configured before to \"Long press menu items left behind\", which appears when \"Long press only pops: corrections for pronounciation\" in the \"Settings tab\" is turned on.
+
+
+
 Version 2.12.1
 
 Fixing the problem
