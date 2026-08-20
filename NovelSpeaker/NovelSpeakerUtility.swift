@@ -21,6 +21,7 @@ class NovelSpeakerUtility: NSObject {
 
     // MARK: - NFC正規化 (本棚検索の NFD/NFC 不一致対策)
     static let normalizeNovelTitleWriterToNFCDoneKey = "NovelSpeakerUtility_NormalizeNovelTitleWriterToNFCDone"
+    static let seedMenuItemsNotRemovedDefaultsDoneKey = "NovelSpeakerUtility_SeedMenuItemsNotRemovedDefaultsDone"
 
     /// 文字列を NFC(precomposed) に正規化する。
     /// Realm の CONTAINS はバイト単位の比較なので、保存文字列が NFD だと NFC で打った検索語に一致しない。その対策。
@@ -49,6 +50,45 @@ class NovelSpeakerUtility: NSObject {
                     let nfcWriter = NormalizeNFC(novel.writer)
                     if !nfcWriter.utf8.elementsEqual(novel.writer.utf8) { novel.writer = nfcWriter }
                 }
+            }
+        }
+    }
+
+    /// 「本文中の長押しメニュー項目を減らす」で、以前のバージョンでは
+    /// canPerformAction では消すことができず、ONにしていても残り続けていた項目を
+    /// 「残される長押しメニュー項目」の初期値として入れておく。
+    ///
+    /// iOS 16 以降はメニューのツリーを走査して「残すと指定した物以外は全部落とす」方式に
+    /// 変えたため、何もしないと更新した瞬間に今まで出ていた項目が消えてしまう。
+    /// 更新前と見た目が変わらないように、消せなかった項目は最初から「残す」側にしておく。
+    ///
+    /// 対象は以下の2つ。どちらも実機(iPadOS)で、旧バージョンでは削減設定をONにしていても
+    /// 残り続けることを確認している。(他の項目は旧バージョンでも消えていたので対象にしない)
+    ///   ・作文ツール(Apple Intelligence)
+    ///   ・強調表示部分のリンクをコピー(WebView でリンクを選択した時に WebKit が足してくる)
+    ///
+    /// 生涯1回だけ行い、以後はユーザが外した選択を尊重する(復活させない)。
+    static func SeedMenuItemsNotRemovedDefaultsIfNeeded() {
+        if NiftyUtility.isTesting() { return }
+        let defaults = UserDefaults.standard
+        if defaults.bool(forKey: seedMenuItemsNotRemovedDefaultsDoneKey) { return }
+        DispatchQueue.global(qos: .utility).async {
+            let targetRawValues = [
+                MenuItemsNotRemovedType.writingTools.rawValue,
+                MenuItemsNotRemovedType.copyLinkToHighlight.rawValue,
+            ]
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                let currentValues = Array(globalState.menuItemsNotRemoved)
+                let appendValues = targetRawValues.filter({ currentValues.contains($0) == false })
+                if appendValues.count <= 0 {
+                    defaults.set(true, forKey: seedMenuItemsNotRemovedDefaultsDoneKey)
+                    return
+                }
+                RealmUtil.WriteWith(realm: realm, block: { (realm) in
+                    globalState.menuItemsNotRemoved.append(objectsIn: appendValues)
+                })
+                defaults.set(true, forKey: seedMenuItemsNotRemovedDefaultsDoneKey)
             }
         }
     }
@@ -1695,6 +1735,17 @@ class NovelSpeakerUtility: NSObject {
                 if let baseMaxConcurrentNovelDownloadCount = dic.object(forKey: "baseMaxConcurrentNovelDownloadCount") as? NSNumber {
                     globalState.baseMaxConcurrentNovelDownloadCount = min(10, max(1, baseMaxConcurrentNovelDownloadCount.intValue))
                 }
+                // キーが無いバックアップ(この設定が存在しなかった頃の物)では、
+                // 現在の設定を初期値で潰さないように何もしない。
+                if let scrollFollowSuspendSecond = dic.object(forKey: "scrollFollowSuspendSecond") as? NSNumber {
+                    globalState.scrollFollowSuspendSecond = min(RealmGlobalState.scrollFollowSuspendSecondMax, max(0, scrollFollowSuspendSecond.intValue))
+                }
+                if let speechViewBottomButtonSettingArrayData = dic.object(forKey: "speechViewBottomButtonSettingArrayData") as? Data {
+                    globalState.speechViewBottomButtonSettingArrayData = speechViewBottomButtonSettingArrayData
+                }
+                if let isSpeechViewBottomButtonOverlapsChapterBar = dic.object(forKey: "isSpeechViewBottomButtonOverlapsChapterBar") as? NSNumber {
+                    globalState.isSpeechViewBottomButtonOverlapsChapterBar = isSpeechViewBottomButtonOverlapsChapterBar.boolValue
+                }
                 if let isDeleteBlockOnBookshelfTreeView = dic.object(forKey: "isDeleteBlockOnBookshelfTreeView") as? NSNumber {
                     globalState.isDeleteBlockOnBookshelfTreeView = isDeleteBlockOnBookshelfTreeView.boolValue
                 }
@@ -2372,6 +2423,9 @@ class NovelSpeakerUtility: NSObject {
                 "isNeedDisableIdleTimerWhenSpeechTime": globalState.isNeedDisableIdleTimerWhenSpeechTime,
                 "isDynamicNovelDownloadThrottleEnabled": globalState.isDynamicNovelDownloadThrottleEnabled,
                 "baseMaxConcurrentNovelDownloadCount": globalState.baseMaxConcurrentNovelDownloadCount,
+                "scrollFollowSuspendSecond": globalState.scrollFollowSuspendSecond,
+                "speechViewBottomButtonSettingArrayData": globalState.speechViewBottomButtonSettingArrayData,
+                "isSpeechViewBottomButtonOverlapsChapterBar": globalState.isSpeechViewBottomButtonOverlapsChapterBar,
                 "supportRotationMask": NovelSpeakerUtility.supportRotationMask.rawValue,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
                 "menuItemsNotRemoved": Array(globalState.menuItemsNotRemoved),

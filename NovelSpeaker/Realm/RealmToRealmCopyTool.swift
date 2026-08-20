@@ -195,6 +195,9 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isNeedDisableIdleTimerWhenSpeechTime = obj.isNeedDisableIdleTimerWhenSpeechTime
             newObj.isDynamicNovelDownloadThrottleEnabled = obj.isDynamicNovelDownloadThrottleEnabled
             newObj.baseMaxConcurrentNovelDownloadCount = obj.baseMaxConcurrentNovelDownloadCount
+            newObj.scrollFollowSuspendSecond = obj.scrollFollowSuspendSecond
+            newObj.speechViewBottomButtonSettingArrayData = obj.speechViewBottomButtonSettingArrayData
+            newObj.isSpeechViewBottomButtonOverlapsChapterBar = obj.isSpeechViewBottomButtonOverlapsChapterBar
             newObj.novelLikeOrder.removeAll()
             newObj.novelLikeOrder.append(objectsIn: obj.novelLikeOrder)
             newObj.menuItemsNotRemoved.removeAll()

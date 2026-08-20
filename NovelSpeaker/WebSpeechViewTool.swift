@@ -45,24 +45,55 @@ extension UIColor {
 }
 
 public class CustomWKWebView: WKWebView {
-    // WKWebView で長押しして出て来るメニューの項目を減らします
+    // WKWebView で長押しして出て来るメニューの項目を減らします
     // from http://qiita.com/watt1006/items/2425bfa1720d522d05fd
+    //
+    // iOS 16 以降は buildMenu(with:) 側でメニューのツリーを走査して選別するため、
+    // canPerformAction は主に iOS 15 用の経路になる。
+    // (どちらも EditMenuFilter の同じ判定を使うので結果は一致する)
+    //
+    // 発話位置への自動スクロール(と selection の張り替え)が一時停止している間だけ true になります。
+    // 通常版(CustomUITextView)と同じ理由で、発話中の長押しメニューを通すのはこの間だけに限定します。
+    public var isScrollFollowSuspended: Bool = false
+    // 一時停止中にだけ表示する「ここから発話開始」の selector。
+    public var speakFromHereSelector: Selector? = nil
+    // canPerformAction で true を返すと action がこの WKWebView 自身に送られてしまうので、
+    // 実装のある ViewController を送り先として明示しておく(通常版と同じ理由)。
+    public weak var speakFromHereTarget: AnyObject? = nil
+
+    override public func target(forAction action: Selector, withSender sender: Any?) -> Any? {
+        if let speakFromHereSelector = self.speakFromHereSelector, action == speakFromHereSelector {
+            return self.speakFromHereTarget
+        }
+        return super.target(forAction: action, withSender: sender)
+    }
+
     override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if let speakFromHereSelector = self.speakFromHereSelector, action == speakFromHereSelector {
+            return StorySpeaker.shared.isPlayng && self.isScrollFollowSuspended
+        }
         if StorySpeaker.shared.isPlayng {
             return false
         }
-        return RealmUtil.RealmBlock { (realm) -> Bool in
-            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                if globalState.isMenuItemIsAddNovelSpeakerItemsOnly {
-                    for typeName in globalState.menuItemsNotRemoved {
-                        if let type = MenuItemsNotRemovedType(rawValue: typeName), type.isTargetSelector(selector: action) {
-                            return super.canPerformAction(action, withSender: sender)
-                        }
-                    }
-                    return false
-                }
+        if !EditMenuFilter.isAllowedForCanPerformAction(action: action) {
+            return false
+        }
+        return super.canPerformAction(action, withSender: sender)
+    }
+
+    // WKWebView には UITextViewDelegate.editMenuForTextIn 相当の物が無いが、
+    // iOS 16 以降は長押しの編集メニューも UIMenuBuilder(.context)経由で組み立てられており、
+    // レスポンダである WKWebView の buildMenu(with:) にそのツリーが渡ってくる。
+    // ここで選別すれば、セレクタ名を知らない項目(OS が後から増やした物)も落とせる。
+    override public func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        if #available(iOS 16.0, *) {
+            // 実機で実際に出てくる項目を集めるためのダンプ(隠しデバッグ設定が有効な時だけ動く)。
+            // 選別する前のツリーを記録したいので apply() より先に呼ぶ。
+            if builder.system == .context, let root = builder.menu(for: .root) {
+                EditMenuFilter.DumpEditMenuIfNeeded(elements: root.children, sourceName: "WKWebView", selectedText: nil)
             }
-            return super.canPerformAction(action, withSender: sender);
+            EditMenuFilter.apply(builder: builder)
         }
     }
 }
@@ -251,6 +282,10 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     }
     func scrollToIndex(location:Int, length:Int, scrollRatio:Double, completionHandler:(()->Void)? = nil){
         evaluateJsToString(jsString: "ScrollToIndex(\(location), \(scrollRatio)); \"OK\";", completionHandler: { _ in completionHandler?() })
+    }
+    // 自動スクロールの一時停止中は、ハイライトは動かすが selection の張り替えはしないようにする。
+    func setKeepUserSelection(_ value:Bool) {
+        evaluateJsToString(jsString: "SetKeepUserSelection(\(value ? "true" : "false"));", completionHandler: { _ in })
     }
     func getSelectedLocation(completionHandler:((Int?)->Void)?){
         evaluateJsToDouble(jsString: "GetSelectedIndex();") { (result) in

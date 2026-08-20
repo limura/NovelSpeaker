@@ -433,6 +433,7 @@ private enum AppRootViewControllerFactory {
             NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
             NovelSpeakerUtility.ForceOverrideHungSpeakStringToSpeechModSettings()
             NovelSpeakerUtility.NormalizeExistingNovelTitlesAndWritersToNFCIfNeeded()
+            NovelSpeakerUtility.SeedMenuItemsNotRemovedDefaultsIfNeeded()
             storyboard = .main
         }
 

@@ -110,6 +110,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                  "cookieArrayData",
                                  "m_DisplayType",
                                  "bookshelfViewButtonSettingArrayData",
+                                 "speechViewBottomButtonSettingArrayData",
+                                 "isSpeechViewBottomButtonOverlapsChapterBar",
                                  "novelLikeOrder"
                                 :
                                 continue
@@ -808,16 +810,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let row = form.rowBy(tag: "OnlyDisplayAddSpeechModSettingsRow") as? RowOf<Bool> else { return true }
                 return row.value ?? false == false
             })
-            row.options = [
-                MenuItemsNotRemovedType.copy,
-                MenuItemsNotRemovedType.define,
-                MenuItemsNotRemovedType.translate,
-                MenuItemsNotRemovedType.addShortcut,
-                MenuItemsNotRemovedType.share,
-                MenuItemsNotRemovedType.selectAll,
-            ].map({
-                $0.localizedString()
-            })
+            // iOS 16 以降はメニューのツリーを走査して選別できるようになったので、
+            // 「残せる項目」を実測できた分だけ全部並べる(MenuItemsNotRemovedType.allCases)。
+            row.options = MenuItemsNotRemovedType.allCases.map({ $0.localizedString() })
             row.cell.textLabel?.numberOfLines = 0
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
@@ -841,6 +836,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             }
         }).onPresent { from, to in
+            // 項目数が多いのでメニューのまとまりごとにセクション分けして表示する
+            to.sectionKeyForValue = { optionName in
+                return MenuItemsNotRemovedType.convertFromLocalizedString(localizedString: optionName)?.sectionKey ?? "9"
+            }
+            to.sectionHeaderTitleForKey = { sectionKey in
+                return MenuItemsNotRemovedType.sectionTitle(forSectionKey: sectionKey)
+            }
             to.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: from, action: #selector(self.multipleSelectorDone(_:)))
         }
 
@@ -1188,6 +1190,19 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             section
             <<< ButtonRow() {
+                $0.title = NSLocalizedString("SpeechViewBottomButtonSettingsViewController_Title", comment: "小説本文画面の下部に表示するボタン群の設定")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (buttonCellOf, button) in
+                let nextViewController = SpeechViewBottomButtonSettingsViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+            section
+            <<< ButtonRow() {
                 $0.title = NSLocalizedString("BookshelfViewButtonSettingsViewController_Title", comment: "本棚画面の右上に表示されるボタン群の設定")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellOf, button) in
@@ -1211,7 +1226,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     return String(format: "%.0f", value)
                 }
                 $0.steps = 16
-                $0.title = NSLocalizedString("SettingsViewController_BarButtonSpacing", comment: "画面右上のボタン群の間隔")
+                $0.title = NSLocalizedString("SettingsViewController_BarButtonSpacing", comment: "小説本文画面や本棚画面のボタン群の間隔")
             }.onChange({ (row) in
                 if let value = row.value {
                     let prev = NovelSpeakerUtility.GetBarButtonItemSpacing()
@@ -1372,6 +1387,35 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.accessoryType = .disclosureIndicator
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
+            })
+            section
+            <<< SliderRow("ScrollFollowSuspendSecondSliderRow") { row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = Float(globalState.scrollFollowSuspendSecond)
+                }
+                row.cell.slider.minimumValue = 0
+                row.cell.slider.maximumValue = Float(RealmGlobalState.scrollFollowSuspendSecondMax)
+                row.cell.textLabel?.numberOfLines = 0
+                row.shouldHideValue = false
+                row.steps = UInt(RealmGlobalState.scrollFollowSuspendSecondMax)
+                row.displayValueFor = { (value:Float?) -> String? in
+                    guard let value = value else { return "" }
+                    if Int(value.rounded()) <= 0 {
+                        return NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond_Disabled", comment: "使わない")
+                    }
+                    return String(format: NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond_ValueFormat", comment: "%d秒"), Int(value.rounded()))
+                }
+                row.title = NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond", comment: "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数")
+            }.onChange({ (row) in
+                guard let value = row.value else { return }
+                let newValue = min(RealmGlobalState.scrollFollowSuspendSecondMax, max(0, Int(value.rounded())))
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.scrollFollowSuspendSecond != newValue else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
+                        globalState.scrollFollowSuspendSecond = newValue
+                    }
+                }
             })
 
             // VOICEVOX まわりの入口。音声モデル(1.4GB)と作成済み音声(数GB)、
@@ -2170,6 +2214,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ row in
                 guard let value = row.value else { return }
                 NovelSpeakerUtility.SetIsSiteInfoEditorSpreadsheetCopyEnabled(isEnabled: value)
+            })
+            section
+            <<< SwitchRow("isDumpEditMenuEnabledSwitchRow") { row in
+                row.title = "本文を長押しした時のメニューの中身を「アプリ内エラーのお知らせ」に記録する"
+                row.cell.textLabel?.numberOfLines = 0
+                row.value = EditMenuFilter.IsDumpEditMenuEnabled()
+            }.onChange({ row in
+                EditMenuFilter.SetIsDumpEditMenuEnabled(row.value ?? false)
             })
             #endif
 
