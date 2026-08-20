@@ -101,6 +101,13 @@ class VoicevoxSettingsViewController: FormViewController {
             cell.editingAccessoryType = cell.accessoryType
             cell.textLabel?.textColor = nil
         })
+
+        // 「先へどれだけ作るか」「後ろへどれだけ残すか」を並べ、その結果の量を最後に出す。
+        // 3つとも読み上げ中に作られる音声の話なので、1つの節にまとめる。
+        // 量を2つの設定の後に置くのは、「この2つで決まる量」だと読めるようにするため。
+        form +++ Section(header: NSLocalizedString("VoicevoxSettings_TemporarySectionTitle", comment: "読み上げ中に作られる音声"),
+                         footer: NSLocalizedString("VoicevoxSettings_TemporarySectionFooter",
+                                                   comment: "読み上げ中に足りなくなって作った音声は一時的に保存され、聴き終わった所から順に消えます。別の小説を読み始めると、前の小説の分は消えます。"))
         <<< PickerInputRow<String>() {
             $0.title = NSLocalizedString("VoicevoxSettings_KeepGeneratingRowTitle", comment: "読み上げ中に作り足す下限")
             $0.options = Self.keepGeneratingChoices.map { Self.keepGeneratingText(minutes: $0) }
@@ -117,18 +124,6 @@ class VoicevoxSettingsViewController: FormViewController {
                   }) else { return }
             VoicevoxCacheLead.keepGeneratingBelowMinutes = minutes
         })
-
-        // 一時分は「勝手にストレージを使っている」物なので、
-        // 使っている量と、放っておいても消える事をここに出しておく。
-        form +++ Section(header: NSLocalizedString("VoicevoxSettings_TemporarySectionTitle", comment: "読み上げ中に作った音声"),
-                         footer: NSLocalizedString("VoicevoxSettings_TemporarySectionFooter",
-                                                   comment: "読み上げ中に足りなくなって作った音声は一時的に保存され、聴き終わった所から順に消えます。別の小説を読み始めると、前の小説の分は消えます。"))
-        <<< LabelRow("VoicevoxTemporaryRow") {
-            $0.title = NSLocalizedString("VoicevoxSettings_TemporaryRowTitle", comment: "一時保存の音声")
-            $0.cell.textLabel?.numberOfLines = 0
-        }
-
-        form +++ Section(NSLocalizedString("VoicevoxSettings_AdvancedSectionTitle", comment: "通常は変更する必要のないもの"))
         <<< PickerInputRow<String>() {
             $0.title = NSLocalizedString("VoicevoxSettings_KeepBehindRowTitle", comment: "聴いた所を残しておく時間")
             $0.options = Self.keepBehindChoices.map { Self.keepBehindText(minutes: $0) }
@@ -145,6 +140,10 @@ class VoicevoxSettingsViewController: FormViewController {
                   }) else { return }
             VoicevoxTemporaryAudio.keepBehindMinutes = minutes
         })
+        <<< LabelRow("VoicevoxTemporaryRow") {
+            $0.title = NSLocalizedString("VoicevoxSettings_TemporaryRowTitle", comment: "一時保存の音声")
+            $0.cell.textLabel?.numberOfLines = 0
+        }
 
         form +++ Section(footer: NSLocalizedString("VoicevoxSettings_CreditSectionFooter", comment: "作った音声を公開する場合はクレジット表記が必要です。"))
         <<< ButtonRow() {

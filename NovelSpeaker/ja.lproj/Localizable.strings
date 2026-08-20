@@ -1216,10 +1216,9 @@
 "EditBookViewController_SubTitleTextField_AccesibilityLabel" = "副題";
 "RealmStoryBulk_DummStoryContent" = "(本文がありません)";
 
-"VoicevoxSettings_TemporarySectionTitle" = "読み上げ中に作った音声";
-"VoicevoxSettings_TemporarySectionFooter" = "読み上げ中に足りなくなって作った音声は一時的に保存され、聴き終わった所から順に消えます。別の小説を読み始めると、前の小説の分は消えます。";
+"VoicevoxSettings_TemporarySectionTitle" = "読み上げ中に作られる音声";
+"VoicevoxSettings_TemporarySectionFooter" = "読み上げに間に合わなくなりそうな時は、読み上げながら先の音声を作ります。作った音声は一時的に保存され、聴き終わった所から順に消えます。別の小説を読み始めると、前の小説の分は消えます。";
 "VoicevoxSettings_TemporaryRowTitle" = "一時保存の音声";
-"VoicevoxSettings_AdvancedSectionTitle" = "通常は変更する必要のないもの";
 "VoicevoxSettings_KeepBehindRowTitle" = "聴いた所を残しておく時間";
 "VoicevoxSettings_KeepBehindRowHint" = "少し戻って聴き直す時に作り直さずに済む長さです。長くすると、その分だけ一時的に使う容量が増えます。";
 

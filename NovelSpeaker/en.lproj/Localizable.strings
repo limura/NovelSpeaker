@@ -1235,10 +1235,9 @@
 "EditBookViewController_SubTitleTextField_AccesibilityLabel" = "Subtitle";
 "RealmStoryBulk_DummStoryContent" = "(no content)";
 
-"VoicevoxSettings_TemporarySectionTitle" = "Speech generated while reading";
-"VoicevoxSettings_TemporarySectionFooter" = "Speech generated while reading is stored temporarily and is removed from the parts you have finished listening to. Starting another novel removes the previous one.";
+"VoicevoxSettings_TemporarySectionTitle" = "Speech made while reading";
+"VoicevoxSettings_TemporarySectionFooter" = "When synthesis is about to fall behind, more speech is made while reading. It is stored temporarily and removed from the parts you have finished listening to. Starting another novel removes the previous one.";
 "VoicevoxSettings_TemporaryRowTitle" = "Temporarily stored speech";
-"VoicevoxSettings_AdvancedSectionTitle" = "Rarely needs changing";
 "VoicevoxSettings_KeepBehindRowTitle" = "Keep what you have listened to for";
 "VoicevoxSettings_KeepBehindRowHint" = "How far back you can skip without regenerating. A longer setting uses more temporary storage.";
 
