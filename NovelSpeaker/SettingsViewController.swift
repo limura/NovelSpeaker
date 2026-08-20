@@ -1378,6 +1378,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.textLabel?.textColor = nil
             })
             section
+            <<< LabelRow("ScrollFollowSuspendSecondLabelRow") { row in
+                row.title = NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond", comment: "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.selectionStyle = .none
+            }
             <<< SliderRow("ScrollFollowSuspendSecondSliderRow") { row in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
@@ -1395,7 +1400,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                     return String(format: NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond_ValueFormat", comment: "%d秒"), Int(value.rounded()))
                 }
-                row.title = NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond", comment: "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数")
+                // SliderCell は タイトル・スライダ・値ラベル を横一列に並べるため、
+                // 長いタイトルを row.title に持たせるとスライダの幅がほとんど無くなってしまう。
+                // そのため、タイトルは直前の LabelRow 側に表示させて、
+                // ここでは title を設定せずにスライダを幅いっぱいに広げる。
+                row.cell.slider.accessibilityLabel = NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond", comment: "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数")
             }.onChange({ (row) in
                 guard let value = row.value else { return }
                 let newValue = min(RealmGlobalState.scrollFollowSuspendSecondMax, max(0, Int(value.rounded())))
@@ -1405,7 +1414,43 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         globalState.scrollFollowSuspendSecond = newValue
                     }
                 }
-            })
+            }).cellUpdate { cell, row in
+                cell.slider.translatesAutoresizingMaskIntoConstraints = false
+                cell.valueLabel.translatesAutoresizingMaskIntoConstraints = false
+                // 値ラベル側が伸びてスライダを圧迫しないようにしておく
+                cell.valueLabel.setContentHuggingPriority(UILayoutPriority(750), for: .horizontal)
+
+                // 既に制約が追加されているか identifier でチェック
+                let sliderConstraintID = "ScrollFollowSuspendSecondSliderMinWidth"
+                if !cell.slider.constraints.contains(where: { $0.identifier == sliderConstraintID }) {
+                    let c = cell.slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 120)
+                    c.identifier = sliderConstraintID
+                    c.priority = .required
+                    c.isActive = true
+                }
+
+                let valueConstraintID = "ScrollFollowSuspendSecondValueMinWidth"
+                if !cell.valueLabel.constraints.contains(where: { $0.identifier == valueConstraintID }) {
+                    let c = cell.valueLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 72)
+                    c.identifier = valueConstraintID
+                    c.priority = .required
+                    c.isActive = true
+                }
+
+                // SliderCell は縦方向に centerY しか指定していないため、
+                // タイトルが無い状態だと行の高さが決まらなくなる。高さの下限を与えておく。
+                let verticalConstraintID = "ScrollFollowSuspendSecondSliderVerticalMargin"
+                if !cell.contentView.constraints.contains(where: { $0.identifier == verticalConstraintID }) {
+                    let top = cell.slider.topAnchor.constraint(greaterThanOrEqualTo: cell.contentView.topAnchor, constant: 8)
+                    top.identifier = verticalConstraintID
+                    top.priority = UILayoutPriority(999)
+                    top.isActive = true
+                    let bottom = cell.contentView.bottomAnchor.constraint(greaterThanOrEqualTo: cell.slider.bottomAnchor, constant: 8)
+                    bottom.identifier = verticalConstraintID
+                    bottom.priority = UILayoutPriority(999)
+                    bottom.isActive = true
+                }
+            }
 
 
             #if false
