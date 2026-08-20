@@ -536,6 +536,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     self.updateTabBadge()
                 }
             })
+            form +++ section
+            section = Section(NSLocalizedString("SettingsViewController_Section_Speech", comment: "読み上げ"))
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment:"話者・声色設定")
@@ -589,36 +591,125 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
             }
             section
-            <<< CountDownInlineRow() { (row) in
-                row.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
-                row.minuteInterval = 1
+            <<< SwitchRow("OverrideRubySwitchRow") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
+                row.cell.textLabel?.numberOfLines = 0
+                row.value = false
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    var dateComponents = DateComponents()
-                    if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                        dateComponents.hour = (globalState.maxSpeechTimeInSec / 60 / 60) % 24
-                        dateComponents.minute = (globalState.maxSpeechTimeInSec / 60) % 60
-                        dateComponents.timeZone = NSTimeZone.system
-                    }else{
-                        dateComponents.hour = 23
-                        dateComponents.minute = 59
-                        dateComponents.timeZone = NSTimeZone.system
-                    }
-                    row.value = NSCalendar.current.date(from: dateComponents)
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isOverrideRubyIsEnabled
                 }
-            }.onChange({ (row) in
-                guard let value = row.value else { return }
-                let calender = Calendar.current
-                let hour = calender.component(.hour, from: value)
-                let minute = calender.component(.minute, from: value)
-                let timeInterval = hour * 60 * 60 + minute * 60
-                //print("value: \(value.description), timeInterval: \(timeInterval)")
+            }.onChange({ row in
+                self.m_RubySwitchToggleHitCount += 1
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.maxSpeechTimeInSec != timeInterval else { return }
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.maxSpeechTimeInSec = timeInterval
+                        globalState.isOverrideRubyIsEnabled = value
                     }
                 }
             })
+            section
+            <<< TextRow("OverrideRubyTextRow") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_EditNotRubyStringTitle", comment:"非ルビ文字")
+                row.cell.textLabel?.numberOfLines = 0
+                row.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+                    let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
+                    return row.value ?? false == false
+                })
+                row.cell.textField.borderStyle = .roundedRect
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    row.value = ""
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.notRubyCharactorStringArray
+                }
+            }.onChange({ textRow in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = textRow.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.notRubyCharactorStringArray = value
+                    }
+                }
+            })
+            section
+            <<< SwitchRow("DisableNarouRubyRow") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_DisableNarouRuby", comment:"ことせかい 由来のルビ表記のみを対象とする")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                row.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+                    let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
+                    return row.value ?? false == false
+                })
+                row.value = false
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isDisableNarouRuby
+                }
+            }.onChange({ row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.isDisableNarouRuby = value
+                    }
+                }
+            })
+            section
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingTableViewController_IgnoreURISpeechIsEnabled", comment: "URIを読み上げないようにする")
+                row.cell.textLabel?.numberOfLines = 0
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isIgnoreURIStringSpeechEnabled
+                }
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.isIgnoreURIStringSpeechEnabled = value
+                    }
+                }
+            })
+
+
+            #if false
+            /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
+            section
+            <<< SwitchRow("isDisableWillSpeakRange") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_isDisableWillSpeakRange", comment:"読み上げ位置表示しないようにする(iOS 16.3 から発生しているメモリリーク問題に対する対策になります)")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .footnote)
+                row.value = NovelSpeakerUtility.GetIsDisableWillSpeakRange()
+            }.onChange({ row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let value = row.value else { return }
+                    NovelSpeakerUtility.SetIsDisableWillSpeakRange(isDisable: value)
+                    StorySpeaker.shared.UpdateMoreSplitMinimumLetterCount()
+                    StorySpeaker.shared.ChangeSpeakerWillSpeakRangeType()
+                }
+            })
+            section
+            <<< AlertRow<Int>("MoreSplitTargetsMinimumCount") { (row) in
+                row.cellStyle = .subtitle
+                row.title = NSLocalizedString("SettingTableViewController_MoreSplitTargetsMinimumCount", comment:"一息で読み上げる範囲が長くなる場合にテキトーな範囲で区切る時に区切られなくなる最小の文字数(iOS 16.3 から発生しているメモリリーク問題に対する対策になります)")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .footnote)
+                row.options = [1, 25, 50, 100, 200, 9999999]
+                row.value = NovelSpeakerUtility.GetMoreSplitTargetsMinimumCount()
+                row.hidden = .function(["isDisableWillSpeakRange"], { form -> Bool in
+                    let row: RowOf<Bool>! = form.rowBy(tag: "isDisableWillSpeakRange")
+                    return row.value ?? false == false
+                })
+            }.onChange({ row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let value = row.value else { return }
+                    NovelSpeakerUtility.SetMoreSplitTargetsMinimumCount(newValue: value)
+                    StorySpeaker.shared.UpdateMoreSplitMinimumLetterCount()
+                    StorySpeaker.shared.ChangeSpeakerWillSpeakRangeType()
+                }
+            })
+            */
+            #endif
+            form +++ section
+            section = Section(NSLocalizedString("SettingsViewController_Section_NovelImport", comment: "小説の取り込み・追加"))
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_CreateNewUserText", comment:"新規自作本の追加")
@@ -707,83 +798,59 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
         #endif
             section
-            <<< SwitchRow("OverrideRubySwitchRow") { (row) in
-                row.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
-                row.cell.textLabel?.numberOfLines = 0
-                row.value = false
+            <<< SwitchRow("isDisallowsCellularAccess") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsDisallowsCellularAccess", comment: "携帯電話網ではダウンロードしないようにする")
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.isOverrideRubyIsEnabled
+                    row.value = globalState.IsDisallowsCellularAccess
                 }
-            }.onChange({ row in
-                self.m_RubySwitchToggleHitCount += 1
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.isOverrideRubyIsEnabled = value
-                    }
-                }
-            })
-            section
-            <<< TextRow("OverrideRubyTextRow") { (row) in
-                row.title = NSLocalizedString("SettingTableViewController_EditNotRubyStringTitle", comment:"非ルビ文字")
                 row.cell.textLabel?.numberOfLines = 0
-                row.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
-                    let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
-                    return row.value ?? false == false
-                })
-                row.cell.textField.borderStyle = .roundedRect
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    row.value = ""
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.notRubyCharactorStringArray
-                }
-            }.onChange({ textRow in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = textRow.value else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.notRubyCharactorStringArray = value
-                    }
-                }
-            })
-            section
-            <<< SwitchRow("DisableNarouRubyRow") { (row) in
-                row.title = NSLocalizedString("SettingTableViewController_DisableNarouRuby", comment:"ことせかい 由来のルビ表記のみを対象とする")
-                row.cell.textLabel?.numberOfLines = 0
-                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                row.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
-                    let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
-                    return row.value ?? false == false
-                })
-                row.value = false
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.isDisableNarouRuby
-                }
-            }.onChange({ row in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.isDisableNarouRuby = value
-                    }
-                }
-            })
-            section
-            <<< SwitchRow(){ row in
-                row.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
-                row.cell.textLabel?.numberOfLines = 0
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.isReadingProgressDisplayEnabled
-                }
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.isReadingProgressDisplayEnabled = value
+                        globalState.IsDisallowsCellularAccess = value
                     }
                 }
             })
+            section
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingsViewController_AutoSplitStringSetting", comment:"テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (buttonCellOf, button) in
+                let nextViewController = AutoSplitStringSettingViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+            section
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_NovelImportSetting_Title", comment: "Webサイト毎の取り込み対象を指定する")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (buttonCellOf, button) in
+                // 最優先SiteInfo(ローカル保存分)も含めるため effectiveSiteInfoArrayArray を使う(先頭=最優先)。
+                // 重複除去は id で行い uniquingKeysWith は先頭優先なので、同 id のローカル版がシート版より優先される。
+                let siteInfoArrayArray = StoryHtmlDecoder.shared.effectiveSiteInfoArrayArray.flatMap { $0 }
+                let siteInfoArray = siteInfoArrayArray.filter{
+                    $0.pageElementDict.count > 1
+                }
+                let uniqueSiteInfoArray = Dictionary(siteInfoArray.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.map { $0 }
+                let swiftUIView = RealmUtil.RealmBlock { realm in
+                    return NovelImportSettingSwiftUIView(sites: uniqueSiteInfoArray).environment(\.realmConfiguration, realm.configuration)
+                }
+                let hostingController = UIHostingController(rootView: swiftUIView)
+                self.navigationController?.pushViewController(hostingController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+            form +++ section
+            section = Section(NSLocalizedString("SettingsViewController_Section_ScreenAndControl", comment: "画面の見え方と操作"))
         #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow("OnlyDisplayAddSpeechModSettingsRow"){ row in
@@ -847,6 +914,135 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
 
         #endif
+            #if !targetEnvironment(macCatalyst)
+            section
+            <<< SwitchRow("isEnableSwipeOnStoryView") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsEnableSwipeOnStoryView", comment: "小説本文画面での左右スワイプでページめくりができるようにする")
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isEnableSwipeOnStoryView
+                }
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
+                        globalState.isEnableSwipeOnStoryView = value
+                    }
+                }
+            })
+            #endif
+            section
+            <<< LabelRow("ScrollFollowSuspendSecondLabelRow") { row in
+                row.title = NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond", comment: "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.selectionStyle = .none
+            }
+            <<< SliderRow("ScrollFollowSuspendSecondSliderRow") { row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = Float(globalState.scrollFollowSuspendSecond)
+                }
+                row.cell.slider.minimumValue = 0
+                row.cell.slider.maximumValue = Float(RealmGlobalState.scrollFollowSuspendSecondMax)
+                row.cell.textLabel?.numberOfLines = 0
+                row.shouldHideValue = false
+                row.steps = UInt(RealmGlobalState.scrollFollowSuspendSecondMax)
+                row.displayValueFor = { (value:Float?) -> String? in
+                    guard let value = value else { return "" }
+                    if Int(value.rounded()) <= 0 {
+                        return NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond_Disabled", comment: "使わない")
+                    }
+                    return String(format: NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond_ValueFormat", comment: "%d秒"), Int(value.rounded()))
+                }
+                // SliderCell は タイトル・スライダ・値ラベル を横一列に並べるため、
+                // 長いタイトルを row.title に持たせるとスライダの幅がほとんど無くなってしまう。
+                // そのため、タイトルは直前の LabelRow 側に表示させて、
+                // ここでは title を設定せずにスライダを幅いっぱいに広げる。
+                row.cell.slider.accessibilityLabel = NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond", comment: "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数")
+            }.onChange({ (row) in
+                guard let value = row.value else { return }
+                let newValue = min(RealmGlobalState.scrollFollowSuspendSecondMax, max(0, Int(value.rounded())))
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.scrollFollowSuspendSecond != newValue else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
+                        globalState.scrollFollowSuspendSecond = newValue
+                    }
+                }
+            }).cellUpdate { cell, row in
+                cell.slider.translatesAutoresizingMaskIntoConstraints = false
+                cell.valueLabel.translatesAutoresizingMaskIntoConstraints = false
+                // 値ラベル側が伸びてスライダを圧迫しないようにしておく
+                cell.valueLabel.setContentHuggingPriority(UILayoutPriority(750), for: .horizontal)
+
+                // 既に制約が追加されているか identifier でチェック
+                let sliderConstraintID = "ScrollFollowSuspendSecondSliderMinWidth"
+                if !cell.slider.constraints.contains(where: { $0.identifier == sliderConstraintID }) {
+                    let c = cell.slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 120)
+                    c.identifier = sliderConstraintID
+                    c.priority = .required
+                    c.isActive = true
+                }
+
+                let valueConstraintID = "ScrollFollowSuspendSecondValueMinWidth"
+                if !cell.valueLabel.constraints.contains(where: { $0.identifier == valueConstraintID }) {
+                    let c = cell.valueLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 72)
+                    c.identifier = valueConstraintID
+                    c.priority = .required
+                    c.isActive = true
+                }
+
+                // SliderCell は縦方向に centerY しか指定していないため、
+                // タイトルが無い状態だと行の高さが決まらなくなる。高さの下限を与えておく。
+                let verticalConstraintID = "ScrollFollowSuspendSecondSliderVerticalMargin"
+                if !cell.contentView.constraints.contains(where: { $0.identifier == verticalConstraintID }) {
+                    let top = cell.slider.topAnchor.constraint(greaterThanOrEqualTo: cell.contentView.topAnchor, constant: 8)
+                    top.identifier = verticalConstraintID
+                    top.priority = UILayoutPriority(999)
+                    top.isActive = true
+                    let bottom = cell.contentView.bottomAnchor.constraint(greaterThanOrEqualTo: cell.slider.bottomAnchor, constant: 8)
+                    bottom.identifier = verticalConstraintID
+                    bottom.priority = UILayoutPriority(999)
+                    bottom.isActive = true
+                }
+            }
+
+            // ipad only feature.
+            if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
+                section
+                <<< SwitchRow("isNeedoverrideTabBarTraitsRow") { (row) in
+                    row.title = NSLocalizedString("SettingTableViewController_overrideTabBarTraitsRow", comment:"タブの表示を画面下部にする(非推奨です。また、アプリ再起動後に適用されます)")
+                    row.cell.textLabel?.numberOfLines = 0
+                    row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                    row.value = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
+                }.onChange({ row in
+                    if let value = row.value {
+                        NovelSpeakerUtility.SetIsNeedOverrideTabBarTraits(IsNeed: value)
+                    }
+                })
+            }
+
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                section
+                <<< SwitchRow("isSupportAutoRotateRow") { (row) in
+                    row.title = NSLocalizedString("SettingTableViewController_isSupportAutoRotate", comment:"画面の回転に追従する")
+                    row.cell.textLabel?.numberOfLines = 0
+                    //row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                    row.value = NovelSpeakerUtility.supportRotationMask == UIInterfaceOrientationMask.all
+                }.onChange({ row in
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let value = row.value else { return }
+                        switch value {
+                            case true:
+                                NovelSpeakerUtility.supportRotationMask = UIInterfaceOrientationMask.all
+                            case false:
+                                NovelSpeakerUtility.supportRotationMask = UIInterfaceOrientationMask.portrait
+                        }
+                    }
+                })
+            }
+            form +++ section
+            section = Section(NSLocalizedString("SettingsViewController_Section_DuringSpeech", comment: "読み上げ中の動き"))
         #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow(){ row in
@@ -898,22 +1094,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
                         globalState.isPageTurningSoundEnabled = value
-                    }
-                }
-            })
-            section
-            <<< SwitchRow() { row in
-                row.title = NSLocalizedString("SettingTableViewController_IgnoreURISpeechIsEnabled", comment: "URIを読み上げないようにする")
-                row.cell.textLabel?.numberOfLines = 0
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.isIgnoreURIStringSpeechEnabled
-                }
-            }.onChange({ (row) in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.isIgnoreURIStringSpeechEnabled = value
                     }
                 }
             })
@@ -1044,6 +1224,70 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
         #endif
             section
+            <<< CountDownInlineRow() { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
+                row.minuteInterval = 1
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    var dateComponents = DateComponents()
+                    if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                        dateComponents.hour = (globalState.maxSpeechTimeInSec / 60 / 60) % 24
+                        dateComponents.minute = (globalState.maxSpeechTimeInSec / 60) % 60
+                        dateComponents.timeZone = NSTimeZone.system
+                    }else{
+                        dateComponents.hour = 23
+                        dateComponents.minute = 59
+                        dateComponents.timeZone = NSTimeZone.system
+                    }
+                    row.value = NSCalendar.current.date(from: dateComponents)
+                }
+            }.onChange({ (row) in
+                guard let value = row.value else { return }
+                let calender = Calendar.current
+                let hour = calender.component(.hour, from: value)
+                let minute = calender.component(.minute, from: value)
+                let timeInterval = hour * 60 * 60 + minute * 60
+                //print("value: \(value.description), timeInterval: \(timeInterval)")
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.maxSpeechTimeInSec != timeInterval else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.maxSpeechTimeInSec = timeInterval
+                    }
+                }
+            })
+            #if !targetEnvironment(macCatalyst)
+            section
+            <<< SwitchRow("isNeedDisableIdleTimerWhenSpeechTimeRow") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_isNeedDisableIdleTimerWhenSpeechTime", comment:"読み上げ中はスリープモードに入らないようにする")
+                row.cell.textLabel?.numberOfLines = 0
+                //row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                row.value = false
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isNeedDisableIdleTimerWhenSpeechTime
+                }
+            }.onChange({ row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.isNeedDisableIdleTimerWhenSpeechTime = value
+                    }
+                }
+            })
+            #endif
+
+            section
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_IsCarPlayModeToVoicePrompt", comment: "CarPlay接続時に発話モードを変える(発話モード変更時は一部の機能が制限されます)")
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.value = NovelSpeakerUtility.IsCarPlayModeToVoicePrompt()
+            }.onChange({ row in
+                if let value = row.value {
+                    NovelSpeakerUtility.SetIsCarPlayModeToVoicePrompt(IsCarPlayModeToVoicePrompt: value)
+                }
+            })
+            form +++ section
+            section = Section(NSLocalizedString("SettingsViewController_Section_Bookshelf", comment: "本棚"))
+            section
             <<< SwitchRow("IsOpenRecentBookInStartTime") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsOpenRecentBookInStartTime", comment: "起動時に前回開いていた小説を開く")
                 row.cell.textLabel?.numberOfLines = 0
@@ -1056,22 +1300,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     guard let globalState = RealmGlobalState.GetInstanceWith( realm: realm), let value = row.value else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
                         globalState.isOpenRecentNovelInStartTime = value
-                    }
-                }
-            })
-            section
-            <<< SwitchRow("isDisallowsCellularAccess") { row in
-                row.title = NSLocalizedString("SettingTableViewController_IsDisallowsCellularAccess", comment: "携帯電話網ではダウンロードしないようにする")
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.IsDisallowsCellularAccess
-                }
-                row.cell.textLabel?.numberOfLines = 0
-            }.onChange({ (row) in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.IsDisallowsCellularAccess = value
                     }
                 }
             })
@@ -1120,19 +1348,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             section
-            <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingsViewController_AutoSplitStringSetting", comment:"テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)")
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (buttonCellOf, button) in
-                let nextViewController = AutoSplitStringSettingViewController()
-                self.navigationController?.pushViewController(nextViewController, animated: true)
-            }).cellUpdate({ (cell, button) in
-                cell.textLabel?.textAlignment = .left
-                cell.accessoryType = .disclosureIndicator
-                cell.editingAccessoryType = cell.accessoryType
-                cell.textLabel?.textColor = nil
-            })
-            section
             <<< ButtonRow() { (row) in
                 row.title = NSLocalizedString("SettingsViewController_ManageFolderOrderButton", comment: "自作フォルダを編集する")
                 row.cell.textLabel?.numberOfLines = 0
@@ -1159,6 +1374,48 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.textLabel?.textColor = nil
             })
             section
+            <<< SwitchRow(){ row in
+                row.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
+                row.cell.textLabel?.numberOfLines = 0
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isReadingProgressDisplayEnabled
+                }
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.isReadingProgressDisplayEnabled = value
+                    }
+                }
+            })
+            #if targetEnvironment(macCatalyst)
+            let likeButtonDialogTypeRow = PushRow<String>("likeButtonDialogTypeRow")
+            ConfigureCatalystSingleSelectionPushRow(likeButtonDialogTypeRow)
+            #else
+            let likeButtonDialogTypeRow = AlertRow<String>("likeButtonDialogTypeRow")
+            #endif
+            likeButtonDialogTypeRow.title = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
+            likeButtonDialogTypeRow.selectorTitle = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
+            likeButtonDialogTypeRow.options = NovelSpeakerUtility.GetAllLikeButtonDialogType().map({NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: $0)})
+            likeButtonDialogTypeRow.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: .noDialog)
+            likeButtonDialogTypeRow.cell.textLabel?.numberOfLines = 0
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let type = LikeButtonDialogType(rawValue: globalState.likeButtonDialogType) else { return }
+                likeButtonDialogTypeRow.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: type)
+            }
+            likeButtonDialogTypeRow.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.LikeButtonDialogTypeStringToType(typeString: typeString) else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.likeButtonDialogType = type.rawValue
+                    }
+                }
+            })
+            section <<< likeButtonDialogTypeRow
+            form +++ section
+            section = Section("iCloud")
+            section
             <<< SwitchRow("IsUseiCloud") {
                 $0.title = NSLocalizedString("SettingsViewController_IsUseiCloud_Title", comment: "iCloud 同期を使用する")
                 $0.value = RealmUtil.IsUseCloudRealm()
@@ -1175,6 +1432,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            form +++ section
+            section = Section(NSLocalizedString("SettingsViewController_Section_Buttons", comment: "画面のボタン"))
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SpeechViewButtonSettingsViewController_Title", comment: "小説本文画面の右上に表示されるボタン群の設定")
@@ -1258,214 +1517,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     c.isActive = true
                 }
             }
-            #if !targetEnvironment(macCatalyst)
-            section
-            <<< SwitchRow("isEnableSwipeOnStoryView") { row in
-                row.title = NSLocalizedString("SettingTableViewController_IsEnableSwipeOnStoryView", comment: "小説本文画面での左右スワイプでページめくりができるようにする")
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.isEnableSwipeOnStoryView
-                }
-                row.cell.textLabel?.numberOfLines = 0
-            }.onChange({ (row) in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
-                        globalState.isEnableSwipeOnStoryView = value
-                    }
-                }
-            })
-            #endif
-            #if !targetEnvironment(macCatalyst)
-            section
-            <<< SwitchRow("isNeedDisableIdleTimerWhenSpeechTimeRow") { (row) in
-                row.title = NSLocalizedString("SettingTableViewController_isNeedDisableIdleTimerWhenSpeechTime", comment:"読み上げ中はスリープモードに入らないようにする")
-                row.cell.textLabel?.numberOfLines = 0
-                //row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                row.value = false
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.isNeedDisableIdleTimerWhenSpeechTime
-                }
-            }.onChange({ row in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.isNeedDisableIdleTimerWhenSpeechTime = value
-                    }
-                }
-            })
-            #endif
-            #if targetEnvironment(macCatalyst)
-            let likeButtonDialogTypeRow = PushRow<String>("likeButtonDialogTypeRow")
-            ConfigureCatalystSingleSelectionPushRow(likeButtonDialogTypeRow)
-            #else
-            let likeButtonDialogTypeRow = AlertRow<String>("likeButtonDialogTypeRow")
-            #endif
-            likeButtonDialogTypeRow.title = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
-            likeButtonDialogTypeRow.selectorTitle = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
-            likeButtonDialogTypeRow.options = NovelSpeakerUtility.GetAllLikeButtonDialogType().map({NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: $0)})
-            likeButtonDialogTypeRow.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: .noDialog)
-            likeButtonDialogTypeRow.cell.textLabel?.numberOfLines = 0
-            RealmUtil.RealmBlock { (realm) -> Void in
-                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let type = LikeButtonDialogType(rawValue: globalState.likeButtonDialogType) else { return }
-                likeButtonDialogTypeRow.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: type)
-            }
-            likeButtonDialogTypeRow.onChange({ (row) in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.LikeButtonDialogTypeStringToType(typeString: typeString) else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.likeButtonDialogType = type.rawValue
-                    }
-                }
-            })
-            section <<< likeButtonDialogTypeRow
-            // ipad only feature.
-            if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
-                section
-                <<< SwitchRow("isNeedoverrideTabBarTraitsRow") { (row) in
-                    row.title = NSLocalizedString("SettingTableViewController_overrideTabBarTraitsRow", comment:"タブの表示を画面下部にする(非推奨です。また、アプリ再起動後に適用されます)")
-                    row.cell.textLabel?.numberOfLines = 0
-                    row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                    row.value = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
-                }.onChange({ row in
-                    if let value = row.value {
-                        NovelSpeakerUtility.SetIsNeedOverrideTabBarTraits(IsNeed: value)
-                    }
-                })
-            }
-
-            if UIDevice.current.userInterfaceIdiom == .phone {
-                section
-                <<< SwitchRow("isSupportAutoRotateRow") { (row) in
-                    row.title = NSLocalizedString("SettingTableViewController_isSupportAutoRotate", comment:"画面の回転に追従する")
-                    row.cell.textLabel?.numberOfLines = 0
-                    //row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                    row.value = NovelSpeakerUtility.supportRotationMask == UIInterfaceOrientationMask.all
-                }.onChange({ row in
-                    RealmUtil.RealmBlock { (realm) -> Void in
-                        guard let value = row.value else { return }
-                        switch value {
-                            case true:
-                                NovelSpeakerUtility.supportRotationMask = UIInterfaceOrientationMask.all
-                            case false:
-                                NovelSpeakerUtility.supportRotationMask = UIInterfaceOrientationMask.portrait
-                        }
-                    }
-                })
-            }
-
-            section
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_IsCarPlayModeToVoicePrompt", comment: "CarPlay接続時に発話モードを変える(発話モード変更時は一部の機能が制限されます)")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.value = NovelSpeakerUtility.IsCarPlayModeToVoicePrompt()
-            }.onChange({ row in
-                if let value = row.value {
-                    NovelSpeakerUtility.SetIsCarPlayModeToVoicePrompt(IsCarPlayModeToVoicePrompt: value)
-                }
-            })
-            section
-            <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_NovelImportSetting_Title", comment: "Webサイト毎の取り込み対象を指定する")
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (buttonCellOf, button) in
-                // 最優先SiteInfo(ローカル保存分)も含めるため effectiveSiteInfoArrayArray を使う(先頭=最優先)。
-                // 重複除去は id で行い uniquingKeysWith は先頭優先なので、同 id のローカル版がシート版より優先される。
-                let siteInfoArrayArray = StoryHtmlDecoder.shared.effectiveSiteInfoArrayArray.flatMap { $0 }
-                let siteInfoArray = siteInfoArrayArray.filter{
-                    $0.pageElementDict.count > 1
-                }
-                let uniqueSiteInfoArray = Dictionary(siteInfoArray.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.map { $0 }
-                let swiftUIView = RealmUtil.RealmBlock { realm in
-                    return NovelImportSettingSwiftUIView(sites: uniqueSiteInfoArray).environment(\.realmConfiguration, realm.configuration)
-                }
-                let hostingController = UIHostingController(rootView: swiftUIView)
-                self.navigationController?.pushViewController(hostingController, animated: true)
-            }).cellUpdate({ (cell, button) in
-                cell.textLabel?.textAlignment = .left
-                cell.accessoryType = .disclosureIndicator
-                cell.editingAccessoryType = cell.accessoryType
-                cell.textLabel?.textColor = nil
-            })
-            section
-            <<< LabelRow("ScrollFollowSuspendSecondLabelRow") { row in
-                row.title = NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond", comment: "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数")
-                row.cell.textLabel?.numberOfLines = 0
-                row.cell.selectionStyle = .none
-            }
-            <<< SliderRow("ScrollFollowSuspendSecondSliderRow") { row in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = Float(globalState.scrollFollowSuspendSecond)
-                }
-                row.cell.slider.minimumValue = 0
-                row.cell.slider.maximumValue = Float(RealmGlobalState.scrollFollowSuspendSecondMax)
-                row.cell.textLabel?.numberOfLines = 0
-                row.shouldHideValue = false
-                row.steps = UInt(RealmGlobalState.scrollFollowSuspendSecondMax)
-                row.displayValueFor = { (value:Float?) -> String? in
-                    guard let value = value else { return "" }
-                    if Int(value.rounded()) <= 0 {
-                        return NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond_Disabled", comment: "使わない")
-                    }
-                    return String(format: NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond_ValueFormat", comment: "%d秒"), Int(value.rounded()))
-                }
-                // SliderCell は タイトル・スライダ・値ラベル を横一列に並べるため、
-                // 長いタイトルを row.title に持たせるとスライダの幅がほとんど無くなってしまう。
-                // そのため、タイトルは直前の LabelRow 側に表示させて、
-                // ここでは title を設定せずにスライダを幅いっぱいに広げる。
-                row.cell.slider.accessibilityLabel = NSLocalizedString("SettingsViewController_ScrollFollowSuspendSecond", comment: "本文を自分でスクロールした時に発話位置への自動スクロールを止める秒数")
-            }.onChange({ (row) in
-                guard let value = row.value else { return }
-                let newValue = min(RealmGlobalState.scrollFollowSuspendSecondMax, max(0, Int(value.rounded())))
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.scrollFollowSuspendSecond != newValue else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
-                        globalState.scrollFollowSuspendSecond = newValue
-                    }
-                }
-            }).cellUpdate { cell, row in
-                cell.slider.translatesAutoresizingMaskIntoConstraints = false
-                cell.valueLabel.translatesAutoresizingMaskIntoConstraints = false
-                // 値ラベル側が伸びてスライダを圧迫しないようにしておく
-                cell.valueLabel.setContentHuggingPriority(UILayoutPriority(750), for: .horizontal)
-
-                // 既に制約が追加されているか identifier でチェック
-                let sliderConstraintID = "ScrollFollowSuspendSecondSliderMinWidth"
-                if !cell.slider.constraints.contains(where: { $0.identifier == sliderConstraintID }) {
-                    let c = cell.slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 120)
-                    c.identifier = sliderConstraintID
-                    c.priority = .required
-                    c.isActive = true
-                }
-
-                let valueConstraintID = "ScrollFollowSuspendSecondValueMinWidth"
-                if !cell.valueLabel.constraints.contains(where: { $0.identifier == valueConstraintID }) {
-                    let c = cell.valueLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 72)
-                    c.identifier = valueConstraintID
-                    c.priority = .required
-                    c.isActive = true
-                }
-
-                // SliderCell は縦方向に centerY しか指定していないため、
-                // タイトルが無い状態だと行の高さが決まらなくなる。高さの下限を与えておく。
-                let verticalConstraintID = "ScrollFollowSuspendSecondSliderVerticalMargin"
-                if !cell.contentView.constraints.contains(where: { $0.identifier == verticalConstraintID }) {
-                    let top = cell.slider.topAnchor.constraint(greaterThanOrEqualTo: cell.contentView.topAnchor, constant: 8)
-                    top.identifier = verticalConstraintID
-                    top.priority = UILayoutPriority(999)
-                    top.isActive = true
-                    let bottom = cell.contentView.bottomAnchor.constraint(greaterThanOrEqualTo: cell.slider.bottomAnchor, constant: 8)
-                    bottom.identifier = verticalConstraintID
-                    bottom.priority = UILayoutPriority(999)
-                    bottom.isActive = true
-                }
-            }
-
             // VOICEVOX まわりの入口。音声モデル(1.4GB)と作成済み音声(数GB)、
             // クレジット表記と、あちこちに散っていた物を1段掘って束ねてある。
             if VoicevoxCore.isAvailableOnThisOS {
+                form +++ section
+                section = Section("VOICEVOX")
                 section
                 <<< ButtonRow() {
                     $0.title = NSLocalizedString("SettingsViewController_VoicevoxSettingsRowTitle", comment: "VOICEVOX の設定")
@@ -1480,87 +1536,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     cell.textLabel?.textColor = nil
                 })
             }
-
-
-            #if false
-            /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
-            section
-            <<< SwitchRow("isDisableWillSpeakRange") { (row) in
-                row.title = NSLocalizedString("SettingTableViewController_isDisableWillSpeakRange", comment:"読み上げ位置表示しないようにする(iOS 16.3 から発生しているメモリリーク問題に対する対策になります)")
-                row.cell.textLabel?.numberOfLines = 0
-                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .footnote)
-                row.value = NovelSpeakerUtility.GetIsDisableWillSpeakRange()
-            }.onChange({ row in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let value = row.value else { return }
-                    NovelSpeakerUtility.SetIsDisableWillSpeakRange(isDisable: value)
-                    StorySpeaker.shared.UpdateMoreSplitMinimumLetterCount()
-                    StorySpeaker.shared.ChangeSpeakerWillSpeakRangeType()
-                }
-            })
-            section
-            <<< AlertRow<Int>("MoreSplitTargetsMinimumCount") { (row) in
-                row.cellStyle = .subtitle
-                row.title = NSLocalizedString("SettingTableViewController_MoreSplitTargetsMinimumCount", comment:"一息で読み上げる範囲が長くなる場合にテキトーな範囲で区切る時に区切られなくなる最小の文字数(iOS 16.3 から発生しているメモリリーク問題に対する対策になります)")
-                row.cell.textLabel?.numberOfLines = 0
-                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .footnote)
-                row.options = [1, 25, 50, 100, 200, 9999999]
-                row.value = NovelSpeakerUtility.GetMoreSplitTargetsMinimumCount()
-                row.hidden = .function(["isDisableWillSpeakRange"], { form -> Bool in
-                    let row: RowOf<Bool>! = form.rowBy(tag: "isDisableWillSpeakRange")
-                    return row.value ?? false == false
-                })
-            }.onChange({ row in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let value = row.value else { return }
-                    NovelSpeakerUtility.SetMoreSplitTargetsMinimumCount(newValue: value)
-                    StorySpeaker.shared.UpdateMoreSplitMinimumLetterCount()
-                    StorySpeaker.shared.ChangeSpeakerWillSpeakRangeType()
-                }
-            })
-            */
-            #endif
-
-            section
-            <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (butonCellof, buttonRow) in
-                self.ConfirmAddDefaultSpeechModSetting()
-            })
-            section
-            <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings", comment:"標準の読みの修正と同じものを読み替え辞書登録から削除")
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (butonCellof, buttonRow) in
-                DispatchQueue.main.async {
-                    NiftyUtility.EasyDialogTwoButton(
-                        viewController: self,
-                        title: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmTitle", comment: "確認"),
-                        message: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmMessage", comment: "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除します。よろしいですか？"),
-                        button1Title: nil, // Cancel
-                        button1Action: nil,
-                        button2Title: nil, // OK
-                        button2Action: {
-                            NovelSpeakerUtility.RemoveAllDefaultSpeechModSettings()
-                            DispatchQueue.main.async {
-                                NiftyUtility.EasyDialogOneButton(
-                                    viewController: self,
-                                    title: nil,
-                                    message: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage", comment: "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除しました。"),
-                                    buttonTitle: nil, // OK
-                                    buttonAction: nil)
-                            }
-                    })
-                }
-            })
-            section
-            <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_GetNcodeDownloadURLScheme", comment:"再ダウンロード用データの生成")
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (butonCellof, buttonRow) in
-                self.ShareNcodeListURLScheme()
-            })
+            form +++ section
+            section = Section(NSLocalizedString("SettingsViewController_Section_About", comment: "このアプリについて"))
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite", comment: "サポートサイトを開く")
@@ -1697,6 +1674,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             form +++ section
             section = Section(NSLocalizedString("SettingsViewController_DontUsallyUseSection_Title", comment: "普段は使わない物"))
+            section
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_GetNcodeDownloadURLScheme", comment:"バックアップ用データの生成")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                self.ShareNcodeListURLScheme()
+            })
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_RemoteDataURLSetting", comment:"内部データ参照用URLの設定")
@@ -1850,6 +1834,40 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     c.isActive = true
                 }
             }
+
+            section
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                self.ConfirmAddDefaultSpeechModSetting()
+            })
+            section
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings", comment:"標準の読みの修正と同じものを読み替え辞書登録から削除")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogTwoButton(
+                        viewController: self,
+                        title: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmTitle", comment: "確認"),
+                        message: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmMessage", comment: "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除します。よろしいですか？"),
+                        button1Title: nil, // Cancel
+                        button1Action: nil,
+                        button2Title: nil, // OK
+                        button2Action: {
+                            NovelSpeakerUtility.RemoveAllDefaultSpeechModSettings()
+                            DispatchQueue.main.async {
+                                NiftyUtility.EasyDialogOneButton(
+                                    viewController: self,
+                                    title: nil,
+                                    message: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage", comment: "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除しました。"),
+                                    buttonTitle: nil, // OK
+                                    buttonAction: nil)
+                            }
+                    })
+                }
+            })
             form +++ section
 
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、

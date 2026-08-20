@@ -1402,6 +1402,15 @@
 
 "RealmModels_MenuItemsNotRemoved_Name_copyLinkToHighlight" = "Copy Link with Highlight (WebView only)";
 
+/* Section headers in the Settings tab. */
+"SettingsViewController_Section_Speech" = "Speech";
+"SettingsViewController_Section_NovelImport" = "Adding and importing novels";
+"SettingsViewController_Section_ScreenAndControl" = "Screen appearance and controls";
+"SettingsViewController_Section_DuringSpeech" = "While speaking";
+"SettingsViewController_Section_Bookshelf" = "Bookshelf";
+"SettingsViewController_Section_Buttons" = "Buttons on the screen";
+"SettingsViewController_Section_About" = "About this app";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.13.0
 
 - In the \"Settings tab\" → \"Send inquiries to developers via E-mail\", the \"Select the novels in which the error occurs\" list can now be narrowed down by searching.

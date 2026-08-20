@@ -1383,6 +1383,15 @@
 
 "RealmModels_MenuItemsNotRemoved_Name_copyLinkToHighlight" = "強調表示部分のリンクをコピー (WebView表示の時のみ)";
 
+/* 「設定タブ」の見出し。項目が多くなり過ぎて探せなくなっていたので、まとまりごとに見出しを付ける。 */
+"SettingsViewController_Section_Speech" = "読み上げ";
+"SettingsViewController_Section_NovelImport" = "小説の取り込み・追加";
+"SettingsViewController_Section_ScreenAndControl" = "画面の見え方と操作";
+"SettingsViewController_Section_DuringSpeech" = "読み上げ中の動き";
+"SettingsViewController_Section_Bookshelf" = "本棚";
+"SettingsViewController_Section_Buttons" = "画面のボタン";
+"SettingsViewController_Section_About" = "このアプリについて";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.13.0
 
 -「設定タブ」→「開発者に問い合わせる」の「問題が発生する小説」の選択一覧のところで、検索して表示されている小説のリストを絞ることができるように
