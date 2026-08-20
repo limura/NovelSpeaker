@@ -280,6 +280,14 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             self.chapterSlider.maximumValue = Float(lastChapterNumber) + Float(0.01)
             self.chapterSlider.value = Float(chapterNumber)
             
+            // 「3/10」だけでは VoiceOver で何を指すのか分からないので、
+            // スライダーに名前を、位置には言葉にした値を持たせる。
+            let positionText = String(format: NSLocalizedString(
+                "ChapterPosition_AccessibilityValueFormat", comment: "全%2$dページ中%1$dページ目"),
+                chapterNumber, lastChapterNumber)
+            self.chapterSlider.accessibilityLabel = NSLocalizedString("ChapterSlider_AccessibilityLabel", comment: "ページ")
+            self.chapterSlider.accessibilityValue = positionText
+            self.chapterPositionLabel.accessibilityLabel = positionText
             self.chapterPositionLabel.text = "\(chapterNumber)/\(lastChapterNumber)"
             self.chapterPositionLabel.sizeToFit()
             if self.view.subviews.contains(self.chapterPositionLabel) {

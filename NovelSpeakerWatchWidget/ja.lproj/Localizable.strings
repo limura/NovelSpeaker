@@ -28,3 +28,6 @@
 /* アクション3枠(AccessoryWidgetGroup) */
 "Watch_Widget_ActionGroup_Name" = "3種の操作を設定";
 "Watch_Widget_ActionGroup_Desc" = "選んだ3つの操作を並べて置けます。";
+
+/* 円形コンプリケーションの widgetLabel(小説名と読んでいる位置) */
+"Watch_Widget_TitleChapterFormat" = "%1$@・%2$@";

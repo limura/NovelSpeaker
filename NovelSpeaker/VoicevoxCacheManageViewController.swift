@@ -35,11 +35,11 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
 
         var title: String {
             switch self {
-            case .sizeDescending: return "容量が大きい順"
-            case .lastReadDateAscending: return "最近読んでいない順"
-            case .lastReadDateDescending: return "最近読んだ順"
-            case .titleAscending: return "タイトル順"
-            case .novelUpdatedAtDescending: return "更新が新しい順"
+            case .sizeDescending: return NSLocalizedString("VoicevoxCacheManage_SortSizeDescending", comment: "容量が大きい順")
+            case .lastReadDateAscending: return NSLocalizedString("VoicevoxCacheManage_SortLastReadAscending", comment: "最近読んでいない順")
+            case .lastReadDateDescending: return NSLocalizedString("VoicevoxCacheManage_SortLastReadDescending", comment: "最近読んだ順")
+            case .titleAscending: return NSLocalizedString("VoicevoxCacheManage_SortTitleAscending", comment: "タイトル順")
+            case .novelUpdatedAtDescending: return NSLocalizedString("VoicevoxCacheManage_SortNovelUpdatedDescending", comment: "更新が新しい順")
             }
         }
     }
@@ -74,8 +74,8 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "作成済みのVOICEVOX音声"
-        searchBar.placeholder = "小説名で絞り込む"
+        self.title = NSLocalizedString("VoicevoxCacheManage_Title", comment: "作成済みのVOICEVOX音声")
+        searchBar.placeholder = NSLocalizedString("VoicevoxCacheManage_SearchPlaceholder", comment: "小説名で絞り込む")
         searchBar.delegate = self
         searchBar.sizeToFit()
         searchBar.autocapitalizationType = .none
@@ -122,13 +122,14 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     private func updateRightBarButton() {
         if isSelecting {
             navigationItem.rightBarButtonItems = [
-                UIBarButtonItem(title: "やめる", style: .plain, target: self, action: #selector(endSelecting)),
-                UIBarButtonItem(title: "選択を削除", style: .plain, target: self, action: #selector(deleteSelected)),
+                UIBarButtonItem(title: NSLocalizedString("VoicevoxCacheManage_EndSelecting", comment: "やめる"), style: .plain, target: self, action: #selector(endSelecting)),
+                UIBarButtonItem(title: NSLocalizedString("VoicevoxCacheManage_DeleteSelected", comment: "選択を削除"), style: .plain, target: self, action: #selector(deleteSelected)),
             ]
         } else {
-            navigationItem.rightBarButtonItems = [
-                UIBarButtonItem(title: "選択", style: .plain, target: self, action: #selector(beginSelecting)),
-            ]
+            let selectButton = UIBarButtonItem(title: NSLocalizedString("VoicevoxCacheManage_BeginSelecting", comment: "選択"), style: .plain, target: self, action: #selector(beginSelecting))
+            // 「選択」だけだと何が始まるのか分からないので、VoiceOver では一言足す。
+            selectButton.accessibilityHint = NSLocalizedString("VoicevoxCacheManage_BeginSelectingHint", comment: "複数の小説を選んで、まとめて削除できるようにします。")
+            navigationItem.rightBarButtonItems = [selectButton]
         }
     }
 
@@ -149,7 +150,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     @objc private func deleteSelected() {
         let targets = selectedNovelIDs
         guard targets.isEmpty == false else {
-            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: "削除する小説が選ばれていません。")
+            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("VoicevoxCacheManage_NoNovelSelected", comment: "削除する小説が選ばれていません。"))
             return
         }
         var summary = VoicevoxDiskCacheSummary.empty
@@ -158,8 +159,10 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         }
         _ = NiftyUtility.EasyDialogTwoButton(
             viewController: self,
-            title: "選んだ音声を削除",
-            message: "\(targets.count)作品の音声(\(Self.sizeText(summary)))を削除します。\n\n削除しても本文は消えません。",
+            title: NSLocalizedString("VoicevoxCacheManage_DeleteSelectedTitle", comment: "選んだ音声を削除"),
+            message: String(format: NSLocalizedString(
+                "VoicevoxCacheManage_DeleteSelectedMessageFormat",
+                comment: "%1$d作品の音声(%2$@)を削除します。"), targets.count, Self.sizeText(summary)),
             button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
             button1Action: nil,
             button2Title: NSLocalizedString("OK_button", comment: "OK"),
@@ -247,10 +250,14 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
                 $0.title = self.rowTitle(novelID: novelID)
                 $0.cell.textLabel?.numberOfLines = 0
                 $0.cell.textLabel?.textAlignment = .left
+                self.applyRowAccessibility($0.cell, novelID: novelID)
                 if isGenerating {
                     $0.cell.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.15)
                 }
-            }.onCellSelection({ [weak self] _, row in
+            }.cellUpdate({ [weak self] cell, _ in
+                // Eureka はセルを使い回すので、updateCell の度に付け直す。
+                self?.applyRowAccessibility(cell, novelID: novelID)
+            }).onCellSelection({ [weak self] _, row in
                 guard let self = self else { return }
                 if self.isSelecting {
                     if self.selectedNovelIDs.contains(novelID) {
@@ -260,6 +267,10 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
                     }
                     row.title = self.rowTitle(novelID: novelID)
                     row.updateCell()
+                    // 選択状態が変わった事を VoiceOver に伝える
+                    // (見た目の ☑︎/☐ は切り替わるが、それだけでは読み上げられない)。
+                    UIAccessibility.post(notification: .announcement,
+                                         argument: self.rowAccessibilityLabel(novelID: novelID))
                     return
                 }
                 VoicevoxCacheDeleteDialog.present(on: self, novelID: novelID) { [weak self] in
@@ -274,12 +285,15 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     private static func novelTitle(novelID: String) -> String {
         return RealmUtil.RealmBlock { (realm) -> String? in
             return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.title
-        } ?? "(本棚に無い小説)"
+        } ?? NSLocalizedString("VoicevoxCacheDelete_UnknownNovelTitle", comment: "(本棚に無い小説)")
     }
 
     private static func sizeText(_ summary: VoicevoxDiskCacheSummary) -> String {
         let megabytes = Double(summary.byteCount) / 1024 / 1024
-        return "\(VoicevoxCacheGenerationProgress.durationText(seconds: summary.audioSeconds))ぶん / \(String(format: "%.1f", megabytes))MB"
+        return String(format: NSLocalizedString(
+            "VoicevoxCacheManage_SizeTextFormat", comment: "%1$@ぶん / %2$@"),
+            VoicevoxCacheGenerationProgress.durationText(seconds: summary.audioSeconds),
+            String(format: "%.1fMB", megabytes))
     }
 
     /// 生成中の小説は、それと分かるように出す。
@@ -289,23 +303,56 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         let mark = isSelecting ? (selectedNovelIDs.contains(novelID) ? "☑︎ " : "☐ ") : ""
         if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
             let progress = VoicevoxCacheGenerator.shared.progress?.description ?? ""
-            return "\(mark)▶ 生成中: \(title)\n\(Self.sizeText(summary))" + (progress.isEmpty ? "" : "\n\(progress)")
+            let generating = String(format: NSLocalizedString(
+                "VoicevoxCacheManage_GeneratingRowFormat", comment: "▶ 生成中: %@"), title)
+            return "\(mark)\(generating)\n\(Self.sizeText(summary))" + (progress.isEmpty ? "" : "\n\(progress)")
         }
         return "\(mark)\(title)\n\(Self.sizeText(summary))"
+    }
+
+    /// VoiceOver 用の行の読み上げ文。
+    ///
+    /// 表示は ☑︎ / ☐ / ▶ という記号で状態を出しているが、
+    /// これらは読み上げても状態が分からない(読み飛ばされる事もある)ため、
+    /// 記号の代わりに「選択中」「未選択」「生成中」と言葉で先頭に置く。
+    private func rowAccessibilityLabel(novelID: String) -> String {
+        let summary = VoicevoxDiskCacheStore.shared.summary(novelID: novelID)
+        let title = Self.novelTitle(novelID: novelID)
+        var prefix = ""
+        if isSelecting {
+            prefix = selectedNovelIDs.contains(novelID)
+                ? NSLocalizedString("VoicevoxCacheManage_RowCheckedPrefix", comment: "選択中。")
+                : NSLocalizedString("VoicevoxCacheManage_RowUncheckedPrefix", comment: "未選択。")
+        }
+        if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
+            prefix += NSLocalizedString("VoicevoxCacheManage_RowGeneratingPrefix", comment: "生成中。")
+            let progress = VoicevoxCacheGenerator.shared.progress?.description ?? ""
+            return "\(prefix)\(title)\n\(Self.sizeText(summary))" + (progress.isEmpty ? "" : "\n\(progress)")
+        }
+        return "\(prefix)\(title)\n\(Self.sizeText(summary))"
+    }
+
+    private func applyRowAccessibility(_ cell: UITableViewCell, novelID: String) {
+        cell.accessibilityLabel = rowAccessibilityLabel(novelID: novelID)
+        cell.accessibilityHint = isSelecting
+            ? NSLocalizedString("VoicevoxCacheManage_SelectingRowHint", comment: "選ぶと、削除する対象への追加と解除を切り替えます。")
+            : NSLocalizedString("VoicevoxCacheManage_RowHint", comment: "選ぶと、この小説の音声を削除する方法を選べます。")
     }
 
     // MARK: - 画面の組み立て
 
     private func createCells() {
         let total = VoicevoxDiskCacheStore.shared.totalSummary()
-        let summarySection = Section("合計")
+        let summarySection = Section(NSLocalizedString("VoicevoxCacheManage_TotalSectionTitle", comment: "合計"))
         summarySection <<< LabelRow(Self.totalRowTag) {
             $0.title = Self.sizeText(total)
             $0.cell.textLabel?.numberOfLines = 0
         }
         if let freeBytes = VoicevoxCacheGenerator.freeBytes() {
             summarySection <<< LabelRow() {
-                $0.title = "端末の空き容量: \(String(format: "%.1f", Double(freeBytes) / 1024 / 1024 / 1024))GB"
+                $0.title = String(format: NSLocalizedString(
+                    "VoicevoxCacheManage_FreeSpaceFormat", comment: "端末の空き容量: %@"),
+                    String(format: "%.1fGB", Double(freeBytes) / 1024 / 1024 / 1024))
                 $0.cell.textLabel?.numberOfLines = 0
             }
         }
@@ -317,7 +364,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         if allNovelIDs.isEmpty {
             let emptySection = Section()
             emptySection <<< LabelRow() {
-                $0.title = "作成済みの音声はありません。\n小説の詳細画面の「VOICEVOX音声を今の読み上げ位置から生成する」から作れます。"
+                $0.title = NSLocalizedString("VoicevoxCacheManage_Empty", comment: "作成済みの音声はありません。")
                 $0.cell.textLabel?.numberOfLines = 0
             }
             form +++ emptySection
@@ -353,20 +400,22 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         // 発話設定を変えると、同じ箇所の音声が古い鍵のまま残り続ける。
         // 本文から今の設定で鍵を作り直して、その集合に無い物を消す(ハッシュの逆算は要らない)。
         allSection <<< ButtonRow() {
-            $0.title = "今の設定で使われない音声を削除する\n(話者や読みの修正を変えた後の掃除に使えます)"
+            $0.title = NSLocalizedString("VoicevoxCacheManage_RemoveUnusedRowTitle", comment: "今の設定で使われない音声を削除する")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ [weak self] _, _ in
             self?.removeUnusedByCurrentSettings()
         })
         allSection <<< ButtonRow() {
-            $0.title = "作成済みの音声を全て削除する"
+            $0.title = NSLocalizedString("VoicevoxCacheManage_RemoveAllRowTitle", comment: "作成済みの音声を全て削除する")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ [weak self] _, _ in
             guard let self = self else { return }
             _ = NiftyUtility.EasyDialogTwoButton(
                 viewController: self,
-                title: "作成済みの音声を全て削除",
-                message: "作成済みの音声(\(Self.sizeText(total)))を全て削除します。\n\n削除しても本文は消えません。",
+                title: NSLocalizedString("VoicevoxCacheManage_RemoveAllTitle", comment: "作成済みの音声を全て削除"),
+                message: String(format: NSLocalizedString(
+                    "VoicevoxCacheManage_RemoveAllMessageFormat",
+                    comment: "作成済みの音声(%@)を全て削除します。"), Self.sizeText(total)),
                 button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
                 button1Action: nil,
                 button2Title: NSLocalizedString("OK_button", comment: "OK"),
@@ -423,7 +472,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     private func sortSection() -> Section {
         let section = Section()
         section <<< PickerInputRow<String>() {
-            $0.title = "並び順"
+            $0.title = NSLocalizedString("VoicevoxCacheManage_SortRowTitle", comment: "並び順")
             $0.options = SortType.allCases.map { $0.title }
             $0.value = sortType.title
             $0.cell.textLabel?.numberOfLines = 0
@@ -465,29 +514,31 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     }
 
     private func limitSection() -> Section {
-        let section = Section("使ってよい容量")
+        let unlimitedText = NSLocalizedString("VoicevoxCacheManage_Unlimited", comment: "無制限")
+        let doNotStopText = NSLocalizedString("VoicevoxCacheManage_DoNotStop", comment: "止めない")
+        let section = Section(NSLocalizedString("VoicevoxCacheManage_LimitSectionTitle", comment: "使ってよい容量"))
         section <<< PickerInputRow<String>() {
-            $0.title = "音声の合計の上限"
-            $0.options = Self.totalLimitChoices.map { Self.capacityText(megabytes: $0, zeroText: "無制限") }
-            $0.value = Self.capacityText(megabytes: VoicevoxCacheLimits.maximumTotalMegabytes, zeroText: "無制限")
+            $0.title = NSLocalizedString("VoicevoxCacheManage_TotalLimitRowTitle", comment: "音声の合計の上限")
+            $0.options = Self.totalLimitChoices.map { Self.capacityText(megabytes: $0, zeroText: unlimitedText) }
+            $0.value = Self.capacityText(megabytes: VoicevoxCacheLimits.maximumTotalMegabytes, zeroText: unlimitedText)
             $0.cell.textLabel?.numberOfLines = 0
         }.onChange({ row in
             guard let value = row.value,
-                  let megabytes = Self.totalLimitChoices.first(where: { Self.capacityText(megabytes: $0, zeroText: "無制限") == value }) else { return }
+                  let megabytes = Self.totalLimitChoices.first(where: { Self.capacityText(megabytes: $0, zeroText: unlimitedText) == value }) else { return }
             VoicevoxCacheLimits.maximumTotalMegabytes = megabytes
         })
         section <<< PickerInputRow<String>() {
-            $0.title = "空き容量がこれを切ったら止める"
-            $0.options = Self.freeSpaceChoices.map { Self.capacityText(megabytes: $0, zeroText: "止めない") }
-            $0.value = Self.capacityText(megabytes: VoicevoxCacheLimits.minimumFreeMegabytes, zeroText: "止めない")
+            $0.title = NSLocalizedString("VoicevoxCacheManage_FreeSpaceLimitRowTitle", comment: "空き容量がこれを切ったら止める")
+            $0.options = Self.freeSpaceChoices.map { Self.capacityText(megabytes: $0, zeroText: doNotStopText) }
+            $0.value = Self.capacityText(megabytes: VoicevoxCacheLimits.minimumFreeMegabytes, zeroText: doNotStopText)
             $0.cell.textLabel?.numberOfLines = 0
         }.onChange({ row in
             guard let value = row.value,
-                  let megabytes = Self.freeSpaceChoices.first(where: { Self.capacityText(megabytes: $0, zeroText: "止めない") == value }) else { return }
+                  let megabytes = Self.freeSpaceChoices.first(where: { Self.capacityText(megabytes: $0, zeroText: doNotStopText) == value }) else { return }
             VoicevoxCacheLimits.minimumFreeMegabytes = megabytes
         })
         section <<< SwitchRow() {
-            $0.title = "読み上げ中に合成した分も貯める"
+            $0.title = NSLocalizedString("VoicevoxCacheManage_StoresWhilePlayingRowTitle", comment: "読み上げ中に合成した分も貯める")
             $0.value = VoicevoxCacheLimits.storesWhilePlaying
             $0.cell.textLabel?.numberOfLines = 0
         }.onChange({ row in
@@ -510,12 +561,14 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     private func removeUnusedByCurrentSettings() {
         let novelIDs = VoicevoxDiskCacheStore.shared.cachedNovelIDs()
         guard novelIDs.isEmpty == false else {
-            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: "作成済みの音声がありません。")
+            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("VoicevoxCacheManage_NoStoredAudio", comment: "作成済みの音声がありません。"))
             return
         }
         let pageCount = novelIDs.reduce(0) { $0 + VoicevoxDiskCacheStore.shared.chapterNumbers(novelID: $1).count }
         let dialog = NiftyUtility.EasyDialogBuilder(self)
-            .label(text: "今の設定で使われない音声を探しています……\n(\(novelIDs.count)作品・\(pageCount)ページ)", textAlignment: .center)
+            .label(text: String(format: NSLocalizedString(
+                "VoicevoxCacheManage_ScanningFormat",
+                comment: "今の設定で使われない音声を探しています……\n(%1$d作品・%2$dページ)"), novelIDs.count, pageCount), textAlignment: .center)
             .build()
         dialog.show()
 
@@ -586,16 +639,18 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
                 dialog.dismiss(animated: false) {
                     guard let self = self else { return }
                     guard unusedSummary.entryCount > 0 else {
-                        NiftyUtility.EasyDialogMessageDialog(viewController: self, message: "今の設定で使われない音声はありませんでした。")
+                        NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("VoicevoxCacheManage_NoUnusedAudio", comment: "今の設定で使われない音声はありませんでした。"))
                         return
                     }
                     _ = NiftyUtility.EasyDialogTwoButton(
                         viewController: self,
-                        title: "今の設定で使われない音声",
-                        message: "現在の発話設定では \(Self.sizeText(unusedSummary)) の音声が使われません。\n\n削除しますか？\n(削除しても本文は消えません。必要になれば作り直せます)",
+                        title: NSLocalizedString("VoicevoxCacheManage_UnusedTitle", comment: "今の設定で使われない音声"),
+                        message: String(format: NSLocalizedString(
+                            "VoicevoxCacheManage_UnusedMessageFormat",
+                            comment: "現在の発話設定では %@ の音声が使われません。"), Self.sizeText(unusedSummary)),
                         button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
                         button1Action: nil,
-                        button2Title: "削除する",
+                        button2Title: NSLocalizedString("VoicevoxCacheManage_DeleteButton", comment: "削除する"),
                         button2Action: { [weak self] in
                             DispatchQueue.global(qos: .userInitiated).async {
                                 for entry in removalPlan {

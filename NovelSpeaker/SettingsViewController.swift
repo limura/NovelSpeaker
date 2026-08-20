@@ -1379,7 +1379,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             if VoicevoxCore.isAvailableOnThisOS {
                 section
                 <<< ButtonRow() {
-                    $0.title = "VOICEVOX の設定"
+                    $0.title = NSLocalizedString("SettingsViewController_VoicevoxSettingsRowTitle", comment: "VOICEVOX の設定")
                     $0.cell.textLabel?.numberOfLines = 0
                     $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
                         return VoicevoxSettingsViewController()
@@ -1520,7 +1520,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             if VoicevoxCore.isAvailableOnThisOS {
                 section
                 <<< ButtonRow() {
-                    $0.title = "VOICEVOX のクレジット表記"
+                    $0.title = NSLocalizedString("VoicevoxCredit_Title", comment: "VOICEVOX のクレジット表記")
                     $0.cell.textLabel?.numberOfLines = 0
                     $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
                         return VoicevoxCreditViewController()

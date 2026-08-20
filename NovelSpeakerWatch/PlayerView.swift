@@ -276,6 +276,7 @@ struct PlayerView: View {
             Image(systemName: "chevron.up.chevron.down")
                 .font(.system(size: 8))
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true) // 「切り替えられる」印。説明は accessibilityHint 側にある
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 1)

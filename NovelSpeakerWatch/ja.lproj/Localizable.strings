@@ -174,3 +174,6 @@
 "Watch_Color_darkGray" = "暗い灰色";
 "Watch_Color_navy" = "紺色";
 "Watch_Color_sepia" = "セピア";
+
+/* 本棚の分類の行の冊数(VoiceOver で「12」とだけ読まれないようにする) */
+"Watch_Bookshelf_GroupNovelCountFormat" = "%d冊";

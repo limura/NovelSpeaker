@@ -177,9 +177,23 @@ struct ActionComplicationView: View {
     var body: some View {
         ActionGlyphView(badgeSystemName: badgeSystemName, badgeColor: entry.tint, baseSystemName: baseSystemName)
             .padding(2)
+            // 絵は記号だけなので、そのままでは3種のコンプリケーションが
+            // VoiceOver で区別できない。何をする物なのかを言葉で持たせる。
+            .accessibilityLabel(accessibilityName)
             .containerBackground(for: .widget) { Color.clear }
             .widgetLabel { Text(labelText) }
             .widgetURL(action.url)
+    }
+
+    private var accessibilityName: String {
+        switch action {
+        case .togglePlayPause: return NSLocalizedString("Watch_Widget_PlayToggle_Name", comment: "再生または停止")
+        case .openTextPage:    return NSLocalizedString("Watch_Widget_TextPage_Name", comment: "Watchアプリの本文画面")
+        case .checkUpdatesAll: return NSLocalizedString("Watch_Widget_CheckUpdates_Name", comment: "全小説の更新確認を開始")
+        case .playOnWatch:     return NSLocalizedString("Watch_Widget_PlayOnWatch_Name", comment: "Watchで再生開始")
+        case .playOnPhone:     return NSLocalizedString("Watch_Widget_PlayOnPhone_Name", comment: "iPhoneで再生開始")
+        case .playNovel:       return NSLocalizedString("Watch_Widget_PlayNovel_Name", comment: "指定小説の再生を開始")
+        }
     }
 
     private var labelText: String {
@@ -303,6 +317,19 @@ enum ActionSlotKind: String, AppEnum {
         }
     }
 
+    /// VoiceOver 用の名前。
+    /// 3枠のコンプリケーションはアイコンしか無く、そのままでは
+    /// 「リンク」が3つ並ぶだけで何の操作なのかが分からない。
+    var accessibilityName: String {
+        switch self {
+        case .playToggle:   return NSLocalizedString("Watch_Widget_PlayToggle_Name", comment: "再生または停止")
+        case .playOnWatch:  return NSLocalizedString("Watch_Widget_PlayOnWatch_Name", comment: "Watchで再生開始")
+        case .playOnPhone:  return NSLocalizedString("Watch_Widget_PlayOnPhone_Name", comment: "iPhoneで再生開始")
+        case .textPage:     return NSLocalizedString("Watch_Widget_TextPage_Name", comment: "Watchアプリの本文画面")
+        case .checkUpdates: return NSLocalizedString("Watch_Widget_CheckUpdates_Name", comment: "全小説の更新確認を開始")
+        }
+    }
+
     /// この枠のディープリンク
     var url: URL {
         switch self {
@@ -385,6 +412,7 @@ struct ActionGroupComplicationView: View {
             ActionGlyphView(badgeSystemName: slot.badgeSystemName,
                             baseSystemName: slot.baseSystemName)
         }
+        .accessibilityLabel(slot.accessibilityName)
     }
 }
 

@@ -1224,6 +1224,123 @@
 "VoicevoxSettings_KeepBehindRowHint" = "少し戻って聴き直す時に作り直さずに済む長さです。長くすると、その分だけ一時的に使う容量が増えます。";
 
 "VoicevoxSettings_KeepBehindNever" = "残さない";
+/* VOICEVOX 音声の事前生成: 進み具合の表示 */
+"VoicevoxCacheGeneration_PausedByBackground" = "画面が消えた(背面にある)ため一時停止中";
+"VoicevoxCacheGeneration_PausedByDownload" = "小説の更新確認中のため一時停止中";
+"VoicevoxCacheGeneration_PageNumberFormat" = "%dページ目";
+"VoicevoxCacheGeneration_PageNumberOfTotalFormat" = "%1$dページ目/全%2$dページ";
+"VoicevoxCacheGeneration_PageWithTitleFormat" = "%1$@「%2$@」";
+"VoicevoxCacheGeneration_GeneratingFormat" = "%1$@の%2$d%%を生成中";
+"VoicevoxCacheGeneration_StoredFormat" = "作成済み %1$dページ・合計%2$@";
+"VoicevoxCacheGeneration_DurationHoursMinutesFormat" = "%1$d時間%2$d分";
+"VoicevoxCacheGeneration_DurationMinutesSecondsFormat" = "%1$d分%2$d秒";
+"VoicevoxCacheGeneration_DurationSecondsFormat" = "%d秒";
+
+/* VOICEVOX 音声の事前生成: 開始/停止のダイアログ */
+"VoicevoxCacheGenerationDialog_GeneratingFallback" = "生成中です";
+"VoicevoxCacheGenerationDialog_StopTitle" = "VOICEVOX音声を生成中";
+"VoicevoxCacheGenerationDialog_StopMessageFormat" = "%@\n\n止めても、作った分はそのまま残ります。次に始める時は続きから作ります。";
+"VoicevoxCacheGenerationDialog_ContinueButton" = "生成を続ける";
+"VoicevoxCacheGenerationDialog_StopButton" = "生成を止める";
+"VoicevoxCacheGenerationDialog_StartTitle" = "VOICEVOX音声の生成";
+"VoicevoxCacheGenerationDialog_ResumeMessageFormat" = "前回の続きから音声を作ります。既に作ってある分(%@ぶん)は作り直しません。\n\n作っている間は画面を消さずに置いておいてください(画面が消えると一時停止します)。\n音声1時間ぶんで約15MBを使います。";
+"VoicevoxCacheGenerationDialog_StartMessage" = "今の読み上げ位置から先の音声を作って端末に貯めます。\n\n作っている間は画面を消さずに置いておいてください(画面が消えると一時停止します)。\n音声1時間ぶんで約15MBを使います。\n\n作った音声はこの端末でだけ使えます。";
+"VoicevoxCacheGenerationDialog_ResumeButton" = "続きから作る";
+"VoicevoxCacheGenerationDialog_StartButton" = "生成を始める";
+
+/* VOICEVOX 音声の削除ダイアログ */
+"VoicevoxCacheDelete_UnknownNovelTitle" = "(本棚に無い小説)";
+"VoicevoxCacheDelete_Title" = "作成済みの音声を削除";
+"VoicevoxCacheDelete_SummaryFormat" = "「%1$@」\n%2$@(%3$@)";
+"VoicevoxCacheDelete_ListenedButtonFormat" = "読み終わった分だけ削除\n(%1$dページ目より前の %2$@・%3$@)";
+"VoicevoxCacheDelete_AllButton" = "この小説の音声を全て削除";
+
+/* 作成済みの VOICEVOX 音声の管理画面 */
+"VoicevoxCacheManage_Title" = "作成済みのVOICEVOX音声";
+"VoicevoxCacheManage_SearchPlaceholder" = "小説名で絞り込む";
+"VoicevoxCacheManage_SortSizeDescending" = "容量が大きい順";
+"VoicevoxCacheManage_SortLastReadAscending" = "最近読んでいない順";
+"VoicevoxCacheManage_SortLastReadDescending" = "最近読んだ順";
+"VoicevoxCacheManage_SortTitleAscending" = "タイトル順";
+"VoicevoxCacheManage_SortNovelUpdatedDescending" = "更新が新しい順";
+"VoicevoxCacheManage_SortRowTitle" = "並び順";
+"VoicevoxCacheManage_BeginSelecting" = "選択";
+"VoicevoxCacheManage_EndSelecting" = "やめる";
+"VoicevoxCacheManage_DeleteSelected" = "選択を削除";
+"VoicevoxCacheManage_NoNovelSelected" = "削除する小説が選ばれていません。";
+"VoicevoxCacheManage_DeleteSelectedTitle" = "選んだ音声を削除";
+"VoicevoxCacheManage_DeleteSelectedMessageFormat" = "%1$d作品の音声(%2$@)を削除します。\n\n削除しても本文は消えません。";
+"VoicevoxCacheManage_SizeTextFormat" = "%1$@ぶん / %2$@";
+"VoicevoxCacheManage_GeneratingRowFormat" = "▶ 生成中: %@";
+"VoicevoxCacheManage_TotalSectionTitle" = "合計";
+"VoicevoxCacheManage_FreeSpaceFormat" = "端末の空き容量: %@";
+"VoicevoxCacheManage_Empty" = "作成済みの音声はありません。\n小説の詳細画面の「VOICEVOX音声を今の読み上げ位置から生成する」から作れます。";
+"VoicevoxCacheManage_LimitSectionTitle" = "使ってよい容量";
+"VoicevoxCacheManage_TotalLimitRowTitle" = "音声の合計の上限";
+"VoicevoxCacheManage_Unlimited" = "無制限";
+"VoicevoxCacheManage_FreeSpaceLimitRowTitle" = "空き容量がこれを切ったら止める";
+"VoicevoxCacheManage_DoNotStop" = "止めない";
+"VoicevoxCacheManage_StoresWhilePlayingRowTitle" = "読み上げ中に合成した分も貯める";
+"VoicevoxCacheManage_RemoveUnusedRowTitle" = "今の設定で使われない音声を削除する\n(話者や読みの修正を変えた後の掃除に使えます)";
+"VoicevoxCacheManage_RemoveAllRowTitle" = "作成済みの音声を全て削除する";
+"VoicevoxCacheManage_RemoveAllTitle" = "作成済みの音声を全て削除";
+"VoicevoxCacheManage_RemoveAllMessageFormat" = "作成済みの音声(%@)を全て削除します。\n\n削除しても本文は消えません。";
+"VoicevoxCacheManage_NoStoredAudio" = "作成済みの音声がありません。";
+"VoicevoxCacheManage_ScanningFormat" = "今の設定で使われない音声を探しています……\n(%1$d作品・%2$dページ)";
+"VoicevoxCacheManage_NoUnusedAudio" = "今の設定で使われない音声はありませんでした。";
+"VoicevoxCacheManage_UnusedTitle" = "今の設定で使われない音声";
+"VoicevoxCacheManage_UnusedMessageFormat" = "現在の発話設定では %@ の音声が使われません。\n\n削除しますか？\n(削除しても本文は消えません。必要になれば作り直せます)";
+"VoicevoxCacheManage_DeleteButton" = "削除する";
+"VoicevoxCacheManage_BeginSelectingHint" = "複数の小説を選んで、まとめて削除できるようにします。";
+"VoicevoxCacheManage_RowHint" = "選ぶと、この小説の音声を削除する方法を選べます。";
+"VoicevoxCacheManage_SelectingRowHint" = "選ぶと、削除する対象への追加と解除を切り替えます。";
+"VoicevoxCacheManage_RowCheckedPrefix" = "選択中。";
+"VoicevoxCacheManage_RowUncheckedPrefix" = "未選択。";
+"VoicevoxCacheManage_RowGeneratingPrefix" = "生成中。";
+
+/* 小説の詳細画面の VOICEVOX 音声の行 */
+"NovelDetailViewController_VoicevoxCacheGeneratingRowTitle" = "VOICEVOX音声を生成中(タップで確認/停止)";
+"NovelDetailViewController_VoicevoxCacheGeneratingRowTitleFormat" = "%1$@\n%2$@";
+"NovelDetailViewController_VoicevoxCacheGenerateRowTitle" = "VOICEVOX音声を今の読み上げ位置から生成する";
+"NovelDetailViewController_VoicevoxCacheGenerateRowTitleFormat" = "%1$@\n%2$@(%3$@)";
+"NovelDetailViewController_VoicevoxCacheDeleteRowTitle" = "作成済みのVOICEVOX音声を削除する";
+"NovelDetailViewController_VoicevoxCacheRowHint" = "今の読み上げ位置から先の音声を、あらかじめ作って端末に貯めます。";
+"NovelDetailViewController_VoicevoxCacheGeneratingRowHint" = "選ぶと、生成の進み具合を確かめたり、生成を止めたりできます。";
+"NovelDetailViewController_VoicevoxCacheDeleteRowHint" = "選ぶと、この小説の作成済み音声を削除する方法を選べます。";
+
+/* VOICEVOX の設定への入口 */
+"SettingsViewController_VoicevoxSettingsRowTitle" = "VOICEVOX の設定";
+
+/* VOICEVOX の音声モデルの取得に失敗した時の説明 */
+"VoicevoxVoiceModelStore_Unreadable" = "取得したファイルの中身を確認できませんでした";
+"VoicevoxVoiceModelStore_UnsupportedFormatFormat" = "このアプリでは読めない形式の音声モデルでした(形式%@)";
+"VoicevoxVoiceModelStore_MissingExpectedStylesFormat" = "期待していた話者が入っていませんでした(%@)";
+
+/* VOICEVOX の内部エラーの説明 */
+"VoicevoxCoreError_NotSetUp" = "VOICEVOXの準備ができていません";
+"VoicevoxCoreError_StyleNotFoundFormat" = "指定されたVOICEVOXスタイル(%u)に対応する音声モデルが見つかりません";
+"VoicevoxCoreError_InvalidWav" = "VOICEVOXの合成結果が不正なWAVデータでした";
+"VoicevoxCoreError_NotAvailableOnCatalyst" = "VOICEVOXはMac Catalystでは利用できません";
+
+/* VOICEVOX 話者選択の未取得行 */
+"VoicevoxStyleSelect_DownloadableDetailFormat" = "⬇︎ %1$@.vvm %2$@";
+"VoicevoxStyleSelect_DownloadableDetailAccessibilityFormat" = "取得できます。%1$@.vvm %2$@";
+
+/* ページ送りのスライダー(VoiceOver) */
+"ChapterSlider_AccessibilityLabel" = "ページ";
+"ChapterPosition_AccessibilityValueFormat" = "全%2$dページ中%1$dページ目";
+
+/* 本棚のダウンロード状態ボタン(VoiceOver) */
+"BookShelfTreeViewController_downloadStatusButton_AccessibilityLabel" = "ダウンロード状態の表示";
+
+/* Web取込画面のトップページに並べるリンク */
+"ImportFromWebPageViewController_SupportSiteLinkTitle" = "ことせかい サポートサイト";
+"ImportFromWebPageViewController_WebImportHowToLinkTitle" = "Web取込機能の使い方(下記のサイト以外の取り込み方等)";
+"ImportFromWebPageViewController_DeleteBookmarkButton_AccessibilityLabel" = "このブックマークを削除";
+
+/* 区切り記号(英語では日本語の「・」が読みにくいので置き換える) */
+"BookShelfTreeViewController_FilterPopup_SummarySeparator" = "・";
+"VoicevoxConsent_BulletPrefix" = "・";
 
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.1
 

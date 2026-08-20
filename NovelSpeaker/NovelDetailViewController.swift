@@ -27,10 +27,15 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
     /// 「ここまで作れているなら、このまま持ち出していいか」を判断できる事を狙っている。
     static func voicevoxCacheRowTitle(novelID: String) -> String {
         if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
+            let generating = NSLocalizedString(
+                "NovelDetailViewController_VoicevoxCacheGeneratingRowTitle",
+                comment: "VOICEVOX音声を生成中(タップで確認/停止)")
             if let progress = VoicevoxCacheGenerator.shared.progress {
-                return "VOICEVOX音声を生成中(タップで確認/停止)\n\(progress.description)"
+                return String(format: NSLocalizedString(
+                    "NovelDetailViewController_VoicevoxCacheGeneratingRowTitleFormat",
+                    comment: "%1$@\n%2$@"), generating, progress.description)
             }
-            return "VOICEVOX音声を生成中(タップで確認/停止)"
+            return generating
         }
         let summary = VoicevoxDiskCacheStore.shared.summary(novelID: novelID)
         if summary.entryCount > 0 {
@@ -38,11 +43,16 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
             let megabytes = Double(summary.byteCount) / 1024 / 1024
             // 「続きから」とは言わない。生成は常に今の読み上げ位置から始めて
             // 作成済みを飛ばしていくので、どこから作られるかは読み上げ位置で決まる。
-            return "VOICEVOX音声を今の読み上げ位置から生成する\n"
-                + VoicevoxCacheGenerationProgress.storedText(chapterCount: chapterCount, audioSeconds: summary.audioSeconds)
-                + "(\(String(format: "%.0f", megabytes))MB)"
+            return String(format: NSLocalizedString(
+                "NovelDetailViewController_VoicevoxCacheGenerateRowTitleFormat",
+                comment: "%1$@\n%2$@(%3$@)"),
+                NSLocalizedString("NovelDetailViewController_VoicevoxCacheGenerateRowTitle",
+                                  comment: "VOICEVOX音声を今の読み上げ位置から生成する"),
+                VoicevoxCacheGenerationProgress.storedText(chapterCount: chapterCount, audioSeconds: summary.audioSeconds),
+                String(format: "%.0fMB", megabytes))
         }
-        return "VOICEVOX音声を今の読み上げ位置から生成する"
+        return NSLocalizedString("NovelDetailViewController_VoicevoxCacheGenerateRowTitle",
+                                 comment: "VOICEVOX音声を今の読み上げ位置から生成する")
     }
 
     private func toggleVoicevoxCacheGeneration() {
@@ -530,7 +540,16 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 actionSection <<< ButtonRow(Self.voicevoxCacheRowTag) {
                     $0.title = Self.voicevoxCacheRowTitle(novelID: self.novelID)
                     $0.cell.textLabel?.numberOfLines = 0
-                }.onCellSelection({ [weak self] _, _ in
+                }.cellUpdate({ [weak self] cell, _ in
+                    // 「押すと何が起きるのか」が題目だけでは分かりにくいので、
+                    // 生成中かどうかで説明を切り替えて VoiceOver に持たせる。
+                    guard let self = self else { return }
+                    cell.accessibilityHint = VoicevoxCacheGenerator.shared.runningNovelID == self.novelID
+                        ? NSLocalizedString("NovelDetailViewController_VoicevoxCacheGeneratingRowHint",
+                                            comment: "選ぶと、生成の進み具合を確かめたり、生成を止めたりできます。")
+                        : NSLocalizedString("NovelDetailViewController_VoicevoxCacheRowHint",
+                                            comment: "今の読み上げ位置から先の音声を、あらかじめ作って端末に貯めます。")
+                }).onCellSelection({ [weak self] _, _ in
                     guard let self = self else { return }
                     self.toggleVoicevoxCacheGeneration()
                 })
@@ -538,8 +557,12 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 // 作ってある時はこの小説の画面からも消せるようにする。
                 if VoicevoxDiskCacheStore.shared.summary(novelID: self.novelID).entryCount > 0 {
                     actionSection <<< ButtonRow(Self.voicevoxCacheDeleteRowTag) {
-                        $0.title = "作成済みのVOICEVOX音声を削除する"
+                        $0.title = NSLocalizedString("NovelDetailViewController_VoicevoxCacheDeleteRowTitle",
+                                                     comment: "作成済みのVOICEVOX音声を削除する")
                         $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.accessibilityHint = NSLocalizedString(
+                            "NovelDetailViewController_VoicevoxCacheDeleteRowHint",
+                            comment: "選ぶと、この小説の作成済み音声を削除する方法を選べます。")
                     }.onCellSelection({ [weak self] _, _ in
                         guard let self = self else { return }
                         VoicevoxCacheDeleteDialog.present(on: self, novelID: self.novelID) { [weak self] in

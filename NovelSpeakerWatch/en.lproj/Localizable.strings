@@ -175,3 +175,6 @@
 "Watch_Color_darkGray" = "Dark gray";
 "Watch_Color_navy" = "Navy";
 "Watch_Color_sepia" = "Sepia";
+
+/* Number of novels in a bookshelf group row (so VoiceOver does not just say "12") */
+"Watch_Bookshelf_GroupNovelCountFormat" = "%d novels";

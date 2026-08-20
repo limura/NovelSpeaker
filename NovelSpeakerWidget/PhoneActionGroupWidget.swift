@@ -104,14 +104,16 @@ struct PhoneActionGroupWidgetView: View {
         VStack(spacing: 6) {
             HStack(alignment: .top, spacing: 8) {
                 // 再生・停止
-                cell(caption: NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止")) {
+                cell(caption: NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止"),
+                     accessibilityLabel: NSLocalizedString("Phone_Widget_PlayToggle_Name", comment: "再生または停止")) {
                     Button(intent: PhoneSpeechToggleIntent()) {
                         PhoneActionGlyphView(badgeSystemName: "playpause.fill", badgeColor: .orange, brandStyle: whiteFG)
                     }
                     .buttonStyle(.plain)
                 }
                 // アプリの起動
-                cell(caption: appName) {
+                cell(caption: appName,
+                     accessibilityLabel: NSLocalizedString("Phone_Widget_Launcher_Name", comment: "アプリの起動")) {
                     Button(intent: PhoneOpenAppIntent()) {
                         PhoneBrandGlyph(forceTemplate: whiteFG)
                     }
@@ -126,16 +128,23 @@ struct PhoneActionGroupWidgetView: View {
         .phoneWidgetContainerBackground()
     }
 
-    // アイコン+小さいラベルの1枠。ラベルは見切れてもよいので小説名を出す
+    // アイコン+小さいラベルの1枠。ラベルは見切れてもよいので小説名を出す。
+    //
+    // ボタンの中身は記号だけで、説明のラベルは VStack の兄弟として外に置いてある。
+    // このままだと VoiceOver では「名前の無いボタン」と「文字」が別々に読まれて
+    // 結び付かないので、押せる方に名前を持たせ、ラベルは読み上げから外す。
     @ViewBuilder
-    private func cell(caption: String, @ViewBuilder content: () -> some View) -> some View {
+    private func cell(caption: String, accessibilityLabel: String,
+                      @ViewBuilder content: () -> some View) -> some View {
         VStack(spacing: 2) {
             content()
                 .frame(width: 42, height: 42)
+                .accessibilityLabel(accessibilityLabel)
             Text(caption)
                 .font(.system(size: 9))
                 .lineLimit(1)
                 .foregroundStyle(subtleStyle)
+                .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity)
     }
@@ -143,7 +152,9 @@ struct PhoneActionGroupWidgetView: View {
     @ViewBuilder
     private func novelSlot(_ slot: PhoneActionGroupSlot) -> some View {
         if let novelID = slot.novelID {
-            cell(caption: slot.title ?? "") {
+            cell(caption: slot.title ?? "",
+                 accessibilityLabel: String(format: NSLocalizedString(
+                    "Phone_Widget_PlayNovel_AccessibilityFormat", comment: "%@ の再生を開始"), slot.title ?? "")) {
                 Button(intent: PhonePlayNovelIntent(novelID: novelID)) {
                     PhoneActionGlyphView(badgeSystemName: slot.iconSystemName, badgeColor: slot.tint, brandStyle: whiteFG)
                 }
@@ -152,7 +163,8 @@ struct PhoneActionGroupWidgetView: View {
         } else {
             // 未選択。タップはボタンにせず通常のアプリ起動にしておく
             // (ギャラリーのプレビューでは機能の見本として選択アイコンを出す)
-            cell(caption: NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択")) {
+            cell(caption: NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択"),
+                 accessibilityLabel: NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", comment: "ウィジェットの編集で小説を選択してください")) {
                 PhoneActionGlyphView(badgeSystemName: entry.isPreview ? slot.iconSystemName : "gearshape.fill", badgeColor: slot.tint, brandStyle: whiteFG)
             }
         }

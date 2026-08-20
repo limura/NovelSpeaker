@@ -119,7 +119,10 @@ class VoicevoxStyleSelectViewController: UITableViewController, UISearchResultsU
         content.text = item.displayName
         content.secondaryText = detailText(for: item, kind: sections[indexPath.section].kind)
         cell.contentConfiguration = content
-        cell.accessibilityLabel = [content.text, content.secondaryText]
+        // 副題の「⬇︎」は読み上げても意味が伝わらない(読み飛ばされる事もある)ので、
+        // VoiceOver には「取得できます」と言葉で伝える版を渡す。
+        cell.accessibilityLabel = [content.text,
+                                   accessibleDetailText(for: item, kind: sections[indexPath.section].kind)]
             .compactMap { $0 }.joined(separator: "\n")
         if sections[indexPath.section].kind == .downloadable {
             cell.accessibilityHint = NSLocalizedString(
@@ -153,8 +156,21 @@ class VoicevoxStyleSelectViewController: UITableViewController, UISearchResultsU
             return String(format: NSLocalizedString("Voicevox_DownloadFailedFormat", comment: "取得できませんでした: %@"), reason)
         case nil:
             let size = item.megabytesText ?? ""
-            return "⬇︎ \(modelID).vvm \(size)"
+            return String(format: NSLocalizedString(
+                "VoicevoxStyleSelect_DownloadableDetailFormat", comment: "⬇︎ %1$@.vvm %2$@"), modelID, size)
         }
+    }
+
+    /// VoiceOver 用の副題。記号(⬇︎)の代わりに言葉で状態を伝える。
+    private func accessibleDetailText(for item: VoicevoxStyleListItem,
+                                      kind: VoicevoxStyleListSection.Kind) -> String? {
+        guard kind == .downloadable, let modelID = item.modelID,
+              VoicevoxVoiceModelDownloader.shared.queue.state(ofModelID: modelID) == nil else {
+            return detailText(for: item, kind: kind)
+        }
+        return String(format: NSLocalizedString(
+            "VoicevoxStyleSelect_DownloadableDetailAccessibilityFormat",
+            comment: "取得できます。%1$@.vvm %2$@"), modelID, item.megabytesText ?? "")
     }
 
     /// ⓘ を押した時。公式サイトのそのキャラクターのページを開く。

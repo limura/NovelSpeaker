@@ -21,17 +21,19 @@ enum VoicevoxCacheDeleteDialog {
         let chapterCount = VoicevoxDiskCacheStore.shared.chapterNumbers(novelID: novelID).count
         let title = RealmUtil.RealmBlock { (realm) -> String? in
             return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.title
-        } ?? "(本棚に無い小説)"
+        } ?? NSLocalizedString("VoicevoxCacheDelete_UnknownNovelTitle", comment: "(本棚に無い小説)")
         let readingChapterNumber = RealmUtil.RealmBlock { (realm) -> Int? in
             return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.readingChapterNumber
         }
 
         let megabytes = Double(summary.byteCount) / 1024 / 1024
         var builder = NiftyUtility.EasyDialogBuilder(viewController)
-            .title(title: "作成済みの音声を削除")
-            .label(text: "「\(title)」\n"
-                   + VoicevoxCacheGenerationProgress.storedText(chapterCount: chapterCount, audioSeconds: summary.audioSeconds)
-                   + "(\(String(format: "%.1f", megabytes))MB)",
+            .title(title: NSLocalizedString("VoicevoxCacheDelete_Title", comment: "作成済みの音声を削除"))
+            .label(text: String(format: NSLocalizedString(
+                        "VoicevoxCacheDelete_SummaryFormat", comment: "「%1$@」\n%2$@(%3$@)"),
+                        title,
+                        VoicevoxCacheGenerationProgress.storedText(chapterCount: chapterCount, audioSeconds: summary.audioSeconds),
+                        String(format: "%.1fMB", megabytes)),
                    textAlignment: .left)
 
         // 読み終わった所より前だけを消す(そこに実際に音声がある時だけ出す)。
@@ -40,7 +42,12 @@ enum VoicevoxCacheDeleteDialog {
             if listened.entryCount > 0 {
                 let listenedMegabytes = Double(listened.byteCount) / 1024 / 1024
                 builder = builder.addButton(
-                    title: "読み終わった分だけ削除\n(\(readingChapterNumber)ページ目より前の \(VoicevoxCacheGenerationProgress.durationText(seconds: listened.audioSeconds))・\(String(format: "%.1f", listenedMegabytes))MB)",
+                    title: String(format: NSLocalizedString(
+                        "VoicevoxCacheDelete_ListenedButtonFormat",
+                        comment: "読み終わった分だけ削除\n(%1$dページ目より前の %2$@・%3$@)"),
+                        readingChapterNumber,
+                        VoicevoxCacheGenerationProgress.durationText(seconds: listened.audioSeconds),
+                        String(format: "%.1fMB", listenedMegabytes)),
                     callback: { dialog in
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false) {
@@ -52,7 +59,7 @@ enum VoicevoxCacheDeleteDialog {
             }
         }
 
-        builder = builder.addButton(title: "この小説の音声を全て削除", callback: { dialog in
+        builder = builder.addButton(title: NSLocalizedString("VoicevoxCacheDelete_AllButton", comment: "この小説の音声を全て削除"), callback: { dialog in
             DispatchQueue.main.async {
                 dialog.dismiss(animated: false) {
                     if VoicevoxCacheGenerator.shared.runningNovelID == novelID {

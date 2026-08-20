@@ -30,7 +30,9 @@ struct VoicevoxVoiceModelManageItem: Equatable {
 
     var fileName: String { return "\(modelID).vvm" }
     var megabytesText: String { return String(format: "%.0fMB", Double(byteSize) / 1024.0 / 1024.0) }
-    var speakerNamesText: String { return speakerNames.joined(separator: "・") }
+    var speakerNamesText: String {
+        return speakerNames.joined(separator: NSLocalizedString("Voicevox_NameSeparator", comment: "、"))
+    }
 }
 
 struct VoicevoxVoiceModelManageSection: Equatable {

@@ -250,11 +250,16 @@ extension VoicevoxVoiceModelDownloader: URLSessionDownloadDelegate {
         }
         switch error {
         case .unreadable:
-            return "取得したファイルの中身を確認できませんでした"
+            return NSLocalizedString("VoicevoxVoiceModelStore_Unreadable", comment: "取得したファイルの中身を確認できませんでした")
         case .unsupportedFormat(let format):
-            return "このアプリでは読めない形式の音声モデルでした(形式\(format))"
+            return String(format: NSLocalizedString(
+                "VoicevoxVoiceModelStore_UnsupportedFormatFormat",
+                comment: "このアプリでは読めない形式の音声モデルでした(形式%@)"), "\(format)")
         case .missingExpectedStyles(let styles):
-            return "期待していた話者が入っていませんでした(\(styles.sorted().map(String.init).joined(separator: ",")))"
+            return String(format: NSLocalizedString(
+                "VoicevoxVoiceModelStore_MissingExpectedStylesFormat",
+                comment: "期待していた話者が入っていませんでした(%@)"),
+                styles.sorted().map(String.init).joined(separator: ","))
         }
     }
 }

@@ -2384,7 +2384,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 if buttonSetting.isOn == false { continue }
                 switch buttonSetting.type {
                 case .downloadStatus:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(self.downloadStatusButtonTapped), accessibilityLabel: "ダウンロード状態の表示")
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(self.downloadStatusButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_downloadStatusButton_AccessibilityLabel", comment: "ダウンロード状態の表示"))
                     barButtonItemArray.append(button)
                     break
                 case .edit:
@@ -2946,7 +2946,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         case .transferred: parts.append(NSLocalizedString("BookShelfRATreeViewController_WatchBucket_Transferred", comment: "Apple Watchに転送済み"))
         case .notTransferred: parts.append(NSLocalizedString("BookShelfTreeViewController_FilterPopup_WatchNotTransferred", comment: "Watch未転送"))
         }
-        return NSLocalizedString("BookShelfTreeViewController_FilterPopup_SummaryPrefix", comment: "絞り込み: ") + parts.joined(separator: "・")
+        return NSLocalizedString("BookShelfTreeViewController_FilterPopup_SummaryPrefix", comment: "絞り込み: ") + parts.joined(separator: NSLocalizedString("BookShelfTreeViewController_FilterPopup_SummarySeparator", comment: "・"))
     }
 
     @objc func filterButtonClicked(sender:Any) {

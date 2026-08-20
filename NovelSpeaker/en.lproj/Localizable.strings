@@ -1243,6 +1243,123 @@
 "VoicevoxSettings_KeepBehindRowHint" = "How far back you can skip without regenerating. A longer setting uses more temporary storage.";
 
 "VoicevoxSettings_KeepBehindNever" = "Don't keep";
+/* VOICEVOX speech pre-generation: progress display */
+"VoicevoxCacheGeneration_PausedByBackground" = "Paused because the screen turned off (the app is in the background)";
+"VoicevoxCacheGeneration_PausedByDownload" = "Paused while checking the novel for updates";
+"VoicevoxCacheGeneration_PageNumberFormat" = "page %d";
+"VoicevoxCacheGeneration_PageNumberOfTotalFormat" = "page %1$d of %2$d";
+"VoicevoxCacheGeneration_PageWithTitleFormat" = "%1$@ \"%2$@\"";
+"VoicevoxCacheGeneration_GeneratingFormat" = "Generating %2$d%% of %1$@";
+"VoicevoxCacheGeneration_StoredFormat" = "%1$d pages generated, %2$@ in total";
+"VoicevoxCacheGeneration_DurationHoursMinutesFormat" = "%1$dh %2$dm";
+"VoicevoxCacheGeneration_DurationMinutesSecondsFormat" = "%1$dm %2$ds";
+"VoicevoxCacheGeneration_DurationSecondsFormat" = "%ds";
+
+/* VOICEVOX speech pre-generation: start/stop dialog */
+"VoicevoxCacheGenerationDialog_GeneratingFallback" = "Generating.";
+"VoicevoxCacheGenerationDialog_StopTitle" = "Generating VOICEVOX speech";
+"VoicevoxCacheGenerationDialog_StopMessageFormat" = "%@\n\nStopping keeps what has been generated so far. Starting again continues from there.";
+"VoicevoxCacheGenerationDialog_ContinueButton" = "Keep generating";
+"VoicevoxCacheGenerationDialog_StopButton" = "Stop generating";
+"VoicevoxCacheGenerationDialog_StartTitle" = "Generate VOICEVOX speech";
+"VoicevoxCacheGenerationDialog_ResumeMessageFormat" = "Generation continues from where it left off. What has already been generated (%@) is not generated again.\n\nPlease leave the screen on while it generates (it pauses when the screen turns off).\nOne hour of speech uses about 15MB.";
+"VoicevoxCacheGenerationDialog_StartMessage" = "Speech from the current reading position onward is generated and stored on this device.\n\nPlease leave the screen on while it generates (it pauses when the screen turns off).\nOne hour of speech uses about 15MB.\n\nThe generated speech can only be used on this device.";
+"VoicevoxCacheGenerationDialog_ResumeButton" = "Continue generating";
+"VoicevoxCacheGenerationDialog_StartButton" = "Start generating";
+
+/* VOICEVOX speech deletion dialog */
+"VoicevoxCacheDelete_UnknownNovelTitle" = "(a novel that is not on the bookshelf)";
+"VoicevoxCacheDelete_Title" = "Delete generated speech";
+"VoicevoxCacheDelete_SummaryFormat" = "\"%1$@\"\n%2$@ (%3$@)";
+"VoicevoxCacheDelete_ListenedButtonFormat" = "Delete only what you have finished\n(before page %1$d: %2$@, %3$@)";
+"VoicevoxCacheDelete_AllButton" = "Delete all speech for this novel";
+
+/* Generated VOICEVOX speech management screen */
+"VoicevoxCacheManage_Title" = "Generated VOICEVOX speech";
+"VoicevoxCacheManage_SearchPlaceholder" = "Filter by novel name";
+"VoicevoxCacheManage_SortSizeDescending" = "Largest first";
+"VoicevoxCacheManage_SortLastReadAscending" = "Least recently read first";
+"VoicevoxCacheManage_SortLastReadDescending" = "Most recently read first";
+"VoicevoxCacheManage_SortTitleAscending" = "By title";
+"VoicevoxCacheManage_SortNovelUpdatedDescending" = "Most recently updated first";
+"VoicevoxCacheManage_SortRowTitle" = "Order";
+"VoicevoxCacheManage_BeginSelecting" = "Select";
+"VoicevoxCacheManage_EndSelecting" = "Done";
+"VoicevoxCacheManage_DeleteSelected" = "Delete selected";
+"VoicevoxCacheManage_NoNovelSelected" = "No novel is selected for deletion.";
+"VoicevoxCacheManage_DeleteSelectedTitle" = "Delete the selected speech";
+"VoicevoxCacheManage_DeleteSelectedMessageFormat" = "Deleting the speech for %1$d novels (%2$@).\n\nThe novel text itself is not deleted.";
+"VoicevoxCacheManage_SizeTextFormat" = "%1$@ / %2$@";
+"VoicevoxCacheManage_GeneratingRowFormat" = "▶ Generating: %@";
+"VoicevoxCacheManage_TotalSectionTitle" = "Total";
+"VoicevoxCacheManage_FreeSpaceFormat" = "Free space on this device: %@";
+"VoicevoxCacheManage_Empty" = "No speech has been generated yet.\nIt can be generated from \"Generate VOICEVOX speech from the current reading position\" on a novel's detail screen.";
+"VoicevoxCacheManage_LimitSectionTitle" = "Space it may use";
+"VoicevoxCacheManage_TotalLimitRowTitle" = "Limit on the total size of speech";
+"VoicevoxCacheManage_Unlimited" = "No limit";
+"VoicevoxCacheManage_FreeSpaceLimitRowTitle" = "Stop when free space falls below";
+"VoicevoxCacheManage_DoNotStop" = "Never stop";
+"VoicevoxCacheManage_StoresWhilePlayingRowTitle" = "Also store speech synthesized while reading";
+"VoicevoxCacheManage_RemoveUnusedRowTitle" = "Delete speech the current settings do not use\n(useful for cleaning up after changing speakers or pronunciations)";
+"VoicevoxCacheManage_RemoveAllRowTitle" = "Delete all generated speech";
+"VoicevoxCacheManage_RemoveAllTitle" = "Delete all generated speech";
+"VoicevoxCacheManage_RemoveAllMessageFormat" = "Deleting all generated speech (%@).\n\nThe novel text itself is not deleted.";
+"VoicevoxCacheManage_NoStoredAudio" = "There is no generated speech.";
+"VoicevoxCacheManage_ScanningFormat" = "Looking for speech the current settings do not use...\n(%1$d novels, %2$d pages)";
+"VoicevoxCacheManage_NoUnusedAudio" = "There was no speech that the current settings do not use.";
+"VoicevoxCacheManage_UnusedTitle" = "Speech the current settings do not use";
+"VoicevoxCacheManage_UnusedMessageFormat" = "The current speech settings do not use %@ of generated speech.\n\nDelete it?\n(The novel text is not deleted. It can be generated again if needed.)";
+"VoicevoxCacheManage_DeleteButton" = "Delete";
+"VoicevoxCacheManage_BeginSelectingHint" = "Lets you pick several novels and delete them together.";
+"VoicevoxCacheManage_RowHint" = "Select to choose how to delete this novel's speech.";
+"VoicevoxCacheManage_SelectingRowHint" = "Select to add or remove this novel from what will be deleted.";
+"VoicevoxCacheManage_RowCheckedPrefix" = "Selected. ";
+"VoicevoxCacheManage_RowUncheckedPrefix" = "Not selected. ";
+"VoicevoxCacheManage_RowGeneratingPrefix" = "Generating. ";
+
+/* VOICEVOX speech rows on a novel's detail screen */
+"NovelDetailViewController_VoicevoxCacheGeneratingRowTitle" = "Generating VOICEVOX speech (tap to check or stop)";
+"NovelDetailViewController_VoicevoxCacheGeneratingRowTitleFormat" = "%1$@\n%2$@";
+"NovelDetailViewController_VoicevoxCacheGenerateRowTitle" = "Generate VOICEVOX speech from the current reading position";
+"NovelDetailViewController_VoicevoxCacheGenerateRowTitleFormat" = "%1$@\n%2$@ (%3$@)";
+"NovelDetailViewController_VoicevoxCacheDeleteRowTitle" = "Delete the generated VOICEVOX speech";
+"NovelDetailViewController_VoicevoxCacheRowHint" = "Generates speech ahead of the current reading position and stores it on this device.";
+"NovelDetailViewController_VoicevoxCacheGeneratingRowHint" = "Select to check how far generation has got, or to stop it.";
+"NovelDetailViewController_VoicevoxCacheDeleteRowHint" = "Select to choose how to delete this novel's generated speech.";
+
+/* Entry point for the VOICEVOX settings */
+"SettingsViewController_VoicevoxSettingsRowTitle" = "VOICEVOX settings";
+
+/* Why a VOICEVOX voice model could not be downloaded */
+"VoicevoxVoiceModelStore_Unreadable" = "The contents of the downloaded file could not be verified";
+"VoicevoxVoiceModelStore_UnsupportedFormatFormat" = "The voice model is in a format this app cannot read (format %@)";
+"VoicevoxVoiceModelStore_MissingExpectedStylesFormat" = "The expected speakers were not included (%@)";
+
+/* VOICEVOX internal errors */
+"VoicevoxCoreError_NotSetUp" = "VOICEVOX is not ready yet";
+"VoicevoxCoreError_StyleNotFoundFormat" = "No voice model was found for the selected VOICEVOX style (%u)";
+"VoicevoxCoreError_InvalidWav" = "The VOICEVOX synthesis result was not valid WAV data";
+"VoicevoxCoreError_NotAvailableOnCatalyst" = "VOICEVOX is not available on Mac Catalyst";
+
+/* Not-yet-downloaded rows in the VOICEVOX speaker list */
+"VoicevoxStyleSelect_DownloadableDetailFormat" = "⬇︎ %1$@.vvm %2$@";
+"VoicevoxStyleSelect_DownloadableDetailAccessibilityFormat" = "Available to download. %1$@.vvm %2$@";
+
+/* Chapter slider (VoiceOver) */
+"ChapterSlider_AccessibilityLabel" = "Page";
+"ChapterPosition_AccessibilityValueFormat" = "page %1$d of %2$d";
+
+/* Download status button on the bookshelf (VoiceOver) */
+"BookShelfTreeViewController_downloadStatusButton_AccessibilityLabel" = "Show download status";
+
+/* Web取込画面のトップページに並べるリンク */
+"ImportFromWebPageViewController_SupportSiteLinkTitle" = "Kotosekai support site";
+"ImportFromWebPageViewController_WebImportHowToLinkTitle" = "How to use web import (importing from sites other than those listed below)";
+"ImportFromWebPageViewController_DeleteBookmarkButton_AccessibilityLabel" = "Delete this bookmark";
+
+/* 区切り記号(英語では日本語の「・」が読みにくいので置き換える) */
+"BookShelfTreeViewController_FilterPopup_SummarySeparator" = ", ";
+"VoicevoxConsent_BulletPrefix" = "• ";
 
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 

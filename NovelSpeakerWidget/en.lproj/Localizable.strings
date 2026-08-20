@@ -52,3 +52,6 @@
 "青" = "Blue";
 "ティール" = "Teal";
 "緑" = "Green";
+
+/* For VoiceOver */
+"Phone_Widget_PlayNovel_AccessibilityFormat" = "Start playing %@";
