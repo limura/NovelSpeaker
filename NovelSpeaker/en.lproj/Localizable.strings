@@ -927,7 +927,7 @@
 "SpeechViewButtonType_SkipForward" = "Advance a little (during playback)";
 "SpeechViewButtonType_ShowTableOfContents" = "Table of Contents";
 "SpeechViewButtonType_AddPageToOtherNovel" = "Add this page to another novel";
-"SpeechViewButtonType_VoicevoxCacheGeneration" = "Generate VOICEVOX audio in advance";
+"SpeechViewButtonType_VoicevoxCacheGeneration" = "Pre-generate speech";
 "AddPageToOtherNovel_ConfirmMessage" = "Add this page to \"%@\"?";
 "AddPageToOtherNovel_Success" = "The page was added.";
 "AddPageToOtherNovel_Failure" = "Failed to add the page.";
@@ -1162,8 +1162,8 @@
 "VoicevoxSettings_VoiceModelSectionTitle" = "Voice models";
 "VoicevoxSettings_VoiceModelRowTitle" = "Download and delete voice models";
 "VoicevoxSettings_AllowsCellular" = "Download over cellular";
-"VoicevoxSettings_GeneratedAudioSectionTitle" = "Generated speech";
-"VoicevoxSettings_CacheManageRowTitle" = "Generated VOICEVOX speech";
+"VoicevoxSettings_GeneratedAudioSectionTitle" = "Pre-generated speech";
+"VoicevoxSettings_CacheManageRowTitle" = "Review and delete pre-generated speech";
 "VoicevoxSettings_KeepGeneratingRowTitle" = "Keep generating below";
 "VoicevoxSettings_CreditSectionFooter" = "Publishing audio you made requires a credit notice.";
 "VoicevoxSettings_CreditRowTitle" = "Credit notice";
@@ -1176,7 +1176,7 @@
 "Voicevox_DownloadQueued" = "Waiting to download";
 "Voicevox_DownloadFailedFormat" = "Download failed: %@";
 "VoicevoxVoiceModelManage_NotStored" = "Not downloaded";
-"VoicevoxVoiceModelManage_SummaryFormat" = "Voice models: %1$d (%2$@) / Generated speech: %3$@ / Free space: %4$@";
+"VoicevoxVoiceModelManage_SummaryFormat" = "Voice models: %1$d (%2$@) / Pre-generated speech: %3$@ / Free space: %4$@";
 "VoicevoxVoiceModelManage_MissingWarningFormat" = "%1$d speaker setting(s) use voice models you have not downloaded (%2$@). The settings are kept as they are, so downloading again restores the original voice.";
 "Voicevox_NameSeparator" = ", ";
 
@@ -1184,7 +1184,7 @@
 "VoicevoxVoiceModelManage_UsedByFormat" = "Used by speaker settings: %@";
 "VoicevoxVoiceModelManage_DeleteNotUsed" = "No speaker setting uses this voice model.";
 "VoicevoxVoiceModelManage_DeleteUsedFormat" = "Used by speaker settings: %@\nThe settings are kept as they are, so downloading again restores the original voice.";
-"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "Parts that already have generated VOICEVOX speech still play after deleting. Parts that do not cannot be read aloud until you download this voice model again.";
+"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "Parts that already have pre-generated speech still play after deleting. Parts that do not cannot be read aloud until you download this voice model again.";
 "VoicevoxVoiceModelManage_DeleteTitle" = "Delete voice model";
 "VoicevoxVoiceModelManage_DeleteButton" = "Delete";
 "VoicevoxCredit_Title" = "VOICEVOX credit notice";
@@ -1211,7 +1211,7 @@
 "VoicevoxConsent_DownloadButton" = "Download";
 "VoicevoxConsent_AlreadyStoredFormat" = "The voice model %@.vvm has already been downloaded.";
 "VoicevoxConsent_NeedsWiFi" = "Downloading will start once Wi-Fi is available.";
-"VoicevoxConsent_NotEnoughSpaceFormat" = "Not enough free space on this device.\nNeeded: %1$@ / Free: %2$@\nDeleting generated VOICEVOX speech or unused voice models frees space.";
+"VoicevoxConsent_NotEnoughSpaceFormat" = "Not enough free space on this device.\nNeeded: %1$@ / Free: %2$@\nDeleting pre-generated speech or unused voice models frees space.";
 "VoicevoxConsent_CannotDownloadTitle" = "Cannot download";
 "VoicevoxConsent_ForStyleFormat" = "Using \"%1$@\" requires downloading the voice model %2$@.vvm (%3$@).";
 "VoicevoxConsent_DownloadModelFormat" = "Downloading the voice model %1$@.vvm (%2$@).";
@@ -1250,18 +1250,18 @@
 "VoicevoxCacheGeneration_PageNumberOfTotalFormat" = "page %1$d of %2$d";
 "VoicevoxCacheGeneration_PageWithTitleFormat" = "%1$@ \"%2$@\"";
 "VoicevoxCacheGeneration_GeneratingFormat" = "Generating %2$d%% of %1$@";
-"VoicevoxCacheGeneration_StoredFormat" = "%1$d pages generated, %2$@ in total";
+"VoicevoxCacheGeneration_StoredFormat" = "%1$d page(s) generated, %2$@ in total";
 "VoicevoxCacheGeneration_DurationHoursMinutesFormat" = "%1$dh %2$dm";
 "VoicevoxCacheGeneration_DurationMinutesSecondsFormat" = "%1$dm %2$ds";
 "VoicevoxCacheGeneration_DurationSecondsFormat" = "%ds";
 
 /* VOICEVOX speech pre-generation: start/stop dialog */
 "VoicevoxCacheGenerationDialog_GeneratingFallback" = "Generating.";
-"VoicevoxCacheGenerationDialog_StopTitle" = "Generating VOICEVOX speech";
+"VoicevoxCacheGenerationDialog_StopTitle" = "Generating speech in advance";
 "VoicevoxCacheGenerationDialog_StopMessageFormat" = "%@\n\nStopping keeps what has been generated so far. Starting again continues from there.";
 "VoicevoxCacheGenerationDialog_ContinueButton" = "Keep generating";
 "VoicevoxCacheGenerationDialog_StopButton" = "Stop generating";
-"VoicevoxCacheGenerationDialog_StartTitle" = "Generate VOICEVOX speech";
+"VoicevoxCacheGenerationDialog_StartTitle" = "Generate speech in advance";
 "VoicevoxCacheGenerationDialog_ResumeMessageFormat" = "Generation continues from where it left off. What has already been generated (%@) is not generated again.\n\nPlease leave the screen on while it generates (it pauses when the screen turns off).\nOne hour of speech uses about 15MB.";
 "VoicevoxCacheGenerationDialog_StartMessage" = "Speech from the current reading position onward is generated and stored on this device.\n\nPlease leave the screen on while it generates (it pauses when the screen turns off).\nOne hour of speech uses about 15MB.\n\nThe generated speech can only be used on this device.";
 "VoicevoxCacheGenerationDialog_ResumeButton" = "Continue generating";
@@ -1269,13 +1269,13 @@
 
 /* VOICEVOX speech deletion dialog */
 "VoicevoxCacheDelete_UnknownNovelTitle" = "(a novel that is not on the bookshelf)";
-"VoicevoxCacheDelete_Title" = "Delete generated speech";
+"VoicevoxCacheDelete_Title" = "Delete pre-generated speech";
 "VoicevoxCacheDelete_SummaryFormat" = "\"%1$@\"\n%2$@ (%3$@)";
 "VoicevoxCacheDelete_ListenedButtonFormat" = "Delete only what you have finished\n(before page %1$d: %2$@, %3$@)";
 "VoicevoxCacheDelete_AllButton" = "Delete all speech for this novel";
 
 /* Generated VOICEVOX speech management screen */
-"VoicevoxCacheManage_Title" = "Generated VOICEVOX speech";
+"VoicevoxCacheManage_Title" = "VOICEVOX pre-generated speech";
 "VoicevoxCacheManage_SearchPlaceholder" = "Filter by novel name";
 "VoicevoxCacheManage_SortSizeDescending" = "Largest first";
 "VoicevoxCacheManage_SortLastReadAscending" = "Least recently read first";
@@ -1293,7 +1293,7 @@
 "VoicevoxCacheManage_GeneratingRowFormat" = "▶ Generating: %@";
 "VoicevoxCacheManage_TotalSectionTitle" = "Total";
 "VoicevoxCacheManage_FreeSpaceFormat" = "Free space on this device: %@";
-"VoicevoxCacheManage_Empty" = "No speech has been generated yet.\nIt can be generated from \"Generate VOICEVOX speech from the current reading position\" on a novel's detail screen.";
+"VoicevoxCacheManage_Empty" = "There is no pre-generated speech.\nIt can be made from \"Pre-generate speech from the current reading position\" on a novel's detail screen.";
 "VoicevoxCacheManage_LimitSectionTitle" = "Space it may use";
 "VoicevoxCacheManage_TotalLimitRowTitle" = "Limit on the total size of speech";
 "VoicevoxCacheManage_Unlimited" = "No limit";
@@ -1301,10 +1301,10 @@
 "VoicevoxCacheManage_DoNotStop" = "Never stop";
 "VoicevoxCacheManage_StoresWhilePlayingRowTitle" = "Also store speech synthesized while reading";
 "VoicevoxCacheManage_RemoveUnusedRowTitle" = "Delete speech the current settings do not use\n(useful for cleaning up after changing speakers or pronunciations)";
-"VoicevoxCacheManage_RemoveAllRowTitle" = "Delete all generated speech";
-"VoicevoxCacheManage_RemoveAllTitle" = "Delete all generated speech";
-"VoicevoxCacheManage_RemoveAllMessageFormat" = "Deleting all generated speech (%@).\n\nThe novel text itself is not deleted.";
-"VoicevoxCacheManage_NoStoredAudio" = "There is no generated speech.";
+"VoicevoxCacheManage_RemoveAllRowTitle" = "Delete all pre-generated speech";
+"VoicevoxCacheManage_RemoveAllTitle" = "Delete all pre-generated speech";
+"VoicevoxCacheManage_RemoveAllMessageFormat" = "Deleting all pre-generated speech (%@).\n\nThe novel text itself is not deleted.";
+"VoicevoxCacheManage_NoStoredAudio" = "There is no pre-generated speech.";
 "VoicevoxCacheManage_ScanningFormat" = "Looking for speech the current settings do not use...\n(%1$d novels, %2$d pages)";
 "VoicevoxCacheManage_NoUnusedAudio" = "There was no speech that the current settings do not use.";
 "VoicevoxCacheManage_UnusedTitle" = "Speech the current settings do not use";
@@ -1318,14 +1318,14 @@
 "VoicevoxCacheManage_RowGeneratingPrefix" = "Generating. ";
 
 /* VOICEVOX speech rows on a novel's detail screen */
-"NovelDetailViewController_VoicevoxCacheGeneratingRowTitle" = "Generating VOICEVOX speech (tap to check or stop)";
+"NovelDetailViewController_VoicevoxCacheGeneratingRowTitle" = "Generating speech in advance (tap to check or stop)";
 "NovelDetailViewController_VoicevoxCacheGeneratingRowTitleFormat" = "%1$@\n%2$@";
-"NovelDetailViewController_VoicevoxCacheGenerateRowTitle" = "Generate VOICEVOX speech from the current reading position";
+"NovelDetailViewController_VoicevoxCacheGenerateRowTitle" = "Pre-generate speech from the current reading position";
 "NovelDetailViewController_VoicevoxCacheGenerateRowTitleFormat" = "%1$@\n%2$@ (%3$@)";
-"NovelDetailViewController_VoicevoxCacheDeleteRowTitle" = "Delete the generated VOICEVOX speech";
+"NovelDetailViewController_VoicevoxCacheDeleteRowTitle" = "Delete this novel's pre-generated speech";
 "NovelDetailViewController_VoicevoxCacheRowHint" = "Generates speech ahead of the current reading position and stores it on this device.";
 "NovelDetailViewController_VoicevoxCacheGeneratingRowHint" = "Select to check how far generation has got, or to stop it.";
-"NovelDetailViewController_VoicevoxCacheDeleteRowHint" = "Select to choose how to delete this novel's generated speech.";
+"NovelDetailViewController_VoicevoxCacheDeleteRowHint" = "Select to choose how to delete this novel's pre-generated speech.";
 
 /* Entry point for the VOICEVOX settings */
 "SettingsViewController_VoicevoxSettingsRowTitle" = "VOICEVOX settings";

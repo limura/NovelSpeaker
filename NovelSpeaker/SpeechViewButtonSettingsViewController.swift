@@ -175,7 +175,7 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                     // VOICEVOX 公式のアイコンは薄緑地に「V」なので、
                     // SF Symbols の v.circle で見た目の対応を取る(公式素材は使わない)。
                     section <<< SwitchRow(setting.type.rawValue) {
-                        $0.title = NSLocalizedString("SpeechViewButtonType_VoicevoxCacheGeneration", comment: "VOICEVOX音声の生成")
+                        $0.title = NSLocalizedString("SpeechViewButtonType_VoicevoxCacheGeneration", comment: "事前生成音声を作る")
                         if #available(iOS 13.0, *) {
                             $0.cell.imageView?.image = UIImage(systemName: "v.circle")
                         }

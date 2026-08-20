@@ -74,7 +74,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = NSLocalizedString("VoicevoxCacheManage_Title", comment: "作成済みのVOICEVOX音声")
+        self.title = NSLocalizedString("VoicevoxCacheManage_Title", comment: "事前生成音声の確認と削除")
         searchBar.placeholder = NSLocalizedString("VoicevoxCacheManage_SearchPlaceholder", comment: "小説名で絞り込む")
         searchBar.delegate = self
         searchBar.sizeToFit()
@@ -364,7 +364,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
         if allNovelIDs.isEmpty {
             let emptySection = Section()
             emptySection <<< LabelRow() {
-                $0.title = NSLocalizedString("VoicevoxCacheManage_Empty", comment: "作成済みの音声はありません。")
+                $0.title = NSLocalizedString("VoicevoxCacheManage_Empty", comment: "事前生成音声はありません。")
                 $0.cell.textLabel?.numberOfLines = 0
             }
             form +++ emptySection
@@ -406,16 +406,16 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             self?.removeUnusedByCurrentSettings()
         })
         allSection <<< ButtonRow() {
-            $0.title = NSLocalizedString("VoicevoxCacheManage_RemoveAllRowTitle", comment: "作成済みの音声を全て削除する")
+            $0.title = NSLocalizedString("VoicevoxCacheManage_RemoveAllRowTitle", comment: "事前生成音声を全て削除する")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ [weak self] _, _ in
             guard let self = self else { return }
             _ = NiftyUtility.EasyDialogTwoButton(
                 viewController: self,
-                title: NSLocalizedString("VoicevoxCacheManage_RemoveAllTitle", comment: "作成済みの音声を全て削除"),
+                title: NSLocalizedString("VoicevoxCacheManage_RemoveAllTitle", comment: "事前生成音声を全て削除"),
                 message: String(format: NSLocalizedString(
                     "VoicevoxCacheManage_RemoveAllMessageFormat",
-                    comment: "作成済みの音声(%@)を全て削除します。"), Self.sizeText(total)),
+                    comment: "事前生成音声(%@)を全て削除します。"), Self.sizeText(total)),
                 button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
                 button1Action: nil,
                 button2Title: NSLocalizedString("OK_button", comment: "OK"),
@@ -561,7 +561,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
     private func removeUnusedByCurrentSettings() {
         let novelIDs = VoicevoxDiskCacheStore.shared.cachedNovelIDs()
         guard novelIDs.isEmpty == false else {
-            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("VoicevoxCacheManage_NoStoredAudio", comment: "作成済みの音声がありません。"))
+            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("VoicevoxCacheManage_NoStoredAudio", comment: "事前生成音声がありません。"))
             return
         }
         let pageCount = novelIDs.reduce(0) { $0 + VoicevoxDiskCacheStore.shared.chapterNumbers(novelID: $1).count }

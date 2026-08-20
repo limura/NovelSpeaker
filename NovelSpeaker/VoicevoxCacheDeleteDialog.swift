@@ -28,7 +28,7 @@ enum VoicevoxCacheDeleteDialog {
 
         let megabytes = Double(summary.byteCount) / 1024 / 1024
         var builder = NiftyUtility.EasyDialogBuilder(viewController)
-            .title(title: NSLocalizedString("VoicevoxCacheDelete_Title", comment: "作成済みの音声を削除"))
+            .title(title: NSLocalizedString("VoicevoxCacheDelete_Title", comment: "事前生成音声を削除"))
             .label(text: String(format: NSLocalizedString(
                         "VoicevoxCacheDelete_SummaryFormat", comment: "「%1$@」\n%2$@(%3$@)"),
                         title,

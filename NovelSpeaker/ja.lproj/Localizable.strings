@@ -917,7 +917,7 @@
 "SpeechViewButtonType_SkipForward" = "(再生中に)少し進める";
 "SpeechViewButtonType_ShowTableOfContents" = "章リスト(目次)";
 "SpeechViewButtonType_AddPageToOtherNovel" = "他の小説にこのページを追加する";
-"SpeechViewButtonType_VoicevoxCacheGeneration" = "VOICEVOX音声を先に作っておく";
+"SpeechViewButtonType_VoicevoxCacheGeneration" = "事前生成音声を作る";
 "AddPageToOtherNovel_ConfirmMessage" = "「%@」にこのページを追加しますか？";
 "AddPageToOtherNovel_Success" = "ページを追加しました。";
 "AddPageToOtherNovel_Failure" = "ページの追加に失敗しました。";
@@ -1143,8 +1143,8 @@
 "VoicevoxSettings_VoiceModelSectionTitle" = "音声モデル";
 "VoicevoxSettings_VoiceModelRowTitle" = "音声モデルの取得と削除";
 "VoicevoxSettings_AllowsCellular" = "モバイル通信でも取得する";
-"VoicevoxSettings_GeneratedAudioSectionTitle" = "作成済みの音声";
-"VoicevoxSettings_CacheManageRowTitle" = "作成済みのVOICEVOX音声";
+"VoicevoxSettings_GeneratedAudioSectionTitle" = "事前生成音声";
+"VoicevoxSettings_CacheManageRowTitle" = "事前生成音声の確認と削除";
 "VoicevoxSettings_KeepGeneratingRowTitle" = "読み上げ中に作り足す下限";
 "VoicevoxSettings_CreditSectionFooter" = "作った音声を公開する場合はクレジット表記が必要です。";
 "VoicevoxSettings_CreditRowTitle" = "クレジット表記";
@@ -1157,7 +1157,7 @@
 "Voicevox_DownloadQueued" = "取得待ち";
 "Voicevox_DownloadFailedFormat" = "取得できませんでした: %@";
 "VoicevoxVoiceModelManage_NotStored" = "取得していない";
-"VoicevoxVoiceModelManage_SummaryFormat" = "音声モデル %1$d件 %2$@ / 作成済み音声 %3$@ / 端末の空き %4$@";
+"VoicevoxVoiceModelManage_SummaryFormat" = "音声モデル %1$d件 %2$@ / 事前生成音声 %3$@ / 端末の空き %4$@";
 "VoicevoxVoiceModelManage_MissingWarningFormat" = "取得していない音声モデルを使う話者設定が %1$d件 あります(%2$@)。設定はそのままにしてあるので、取り直せば元の声に戻ります。";
 "Voicevox_NameSeparator" = "、";
 
@@ -1165,7 +1165,7 @@
 "VoicevoxVoiceModelManage_UsedByFormat" = "使っている話者設定: %@";
 "VoicevoxVoiceModelManage_DeleteNotUsed" = "この音声モデルを使っている話者設定はありません。";
 "VoicevoxVoiceModelManage_DeleteUsedFormat" = "使っている話者設定: %@\n消しても設定はそのままにしておくので、取り直せば元の声に戻ります。";
-"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "作成済みのVOICEVOX音声がある箇所は、消した後もそのまま再生できます。作っていない箇所は、この音声モデルを取り直すまで読み上げできません。";
+"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "事前生成音声がある箇所は、消した後もそのまま再生できます。作っていない箇所は、この音声モデルを取り直すまで読み上げできません。";
 "VoicevoxVoiceModelManage_DeleteTitle" = "音声モデルを削除";
 "VoicevoxVoiceModelManage_DeleteButton" = "削除";
 "VoicevoxCredit_Title" = "VOICEVOX のクレジット表記";
@@ -1192,7 +1192,7 @@
 "VoicevoxConsent_DownloadButton" = "取得する";
 "VoicevoxConsent_AlreadyStoredFormat" = "音声モデル %@.vvm は既に取得済みです。";
 "VoicevoxConsent_NeedsWiFi" = "Wi-Fi に繋がるまで待ってから取得します。";
-"VoicevoxConsent_NotEnoughSpaceFormat" = "端末の空き容量が足りません。\n必要: %1$@ / 空き: %2$@\n作成済みのVOICEVOX音声や、使っていない音声モデルを消すと空けられます。";
+"VoicevoxConsent_NotEnoughSpaceFormat" = "端末の空き容量が足りません。\n必要: %1$@ / 空き: %2$@\n事前生成音声や、使っていない音声モデルを消すと空けられます。";
 "VoicevoxConsent_CannotDownloadTitle" = "取得できません";
 "VoicevoxConsent_ForStyleFormat" = "「%1$@」を使うには、音声モデル %2$@.vvm (%3$@) の取得が必要です。";
 "VoicevoxConsent_DownloadModelFormat" = "音声モデル %1$@.vvm (%2$@) を取得します。";
@@ -1218,7 +1218,7 @@
 
 "VoicevoxSettings_TemporarySectionTitle" = "読み上げ中に作った音声";
 "VoicevoxSettings_TemporarySectionFooter" = "読み上げ中に足りなくなって作った音声は一時的に保存され、聴き終わった所から順に消えます。別の小説を読み始めると、前の小説の分は消えます。";
-"VoicevoxSettings_TemporaryRowTitle" = "一時的に保存されている音声";
+"VoicevoxSettings_TemporaryRowTitle" = "一時保存の音声";
 "VoicevoxSettings_AdvancedSectionTitle" = "通常は変更する必要のないもの";
 "VoicevoxSettings_KeepBehindRowTitle" = "聴いた所を残しておく時間";
 "VoicevoxSettings_KeepBehindRowHint" = "少し戻って聴き直す時に作り直さずに済む長さです。長くすると、その分だけ一時的に使う容量が増えます。";
@@ -1231,18 +1231,18 @@
 "VoicevoxCacheGeneration_PageNumberOfTotalFormat" = "%1$dページ目/全%2$dページ";
 "VoicevoxCacheGeneration_PageWithTitleFormat" = "%1$@「%2$@」";
 "VoicevoxCacheGeneration_GeneratingFormat" = "%1$@の%2$d%%を生成中";
-"VoicevoxCacheGeneration_StoredFormat" = "作成済み %1$dページ・合計%2$@";
+"VoicevoxCacheGeneration_StoredFormat" = "%1$dページぶん作成済み・合計%2$@";
 "VoicevoxCacheGeneration_DurationHoursMinutesFormat" = "%1$d時間%2$d分";
 "VoicevoxCacheGeneration_DurationMinutesSecondsFormat" = "%1$d分%2$d秒";
 "VoicevoxCacheGeneration_DurationSecondsFormat" = "%d秒";
 
 /* VOICEVOX 音声の事前生成: 開始/停止のダイアログ */
 "VoicevoxCacheGenerationDialog_GeneratingFallback" = "生成中です";
-"VoicevoxCacheGenerationDialog_StopTitle" = "VOICEVOX音声を生成中";
+"VoicevoxCacheGenerationDialog_StopTitle" = "事前生成音声を作成中";
 "VoicevoxCacheGenerationDialog_StopMessageFormat" = "%@\n\n止めても、作った分はそのまま残ります。次に始める時は続きから作ります。";
 "VoicevoxCacheGenerationDialog_ContinueButton" = "生成を続ける";
 "VoicevoxCacheGenerationDialog_StopButton" = "生成を止める";
-"VoicevoxCacheGenerationDialog_StartTitle" = "VOICEVOX音声の生成";
+"VoicevoxCacheGenerationDialog_StartTitle" = "事前生成音声を作る";
 "VoicevoxCacheGenerationDialog_ResumeMessageFormat" = "前回の続きから音声を作ります。既に作ってある分(%@ぶん)は作り直しません。\n\n作っている間は画面を消さずに置いておいてください(画面が消えると一時停止します)。\n音声1時間ぶんで約15MBを使います。";
 "VoicevoxCacheGenerationDialog_StartMessage" = "今の読み上げ位置から先の音声を作って端末に貯めます。\n\n作っている間は画面を消さずに置いておいてください(画面が消えると一時停止します)。\n音声1時間ぶんで約15MBを使います。\n\n作った音声はこの端末でだけ使えます。";
 "VoicevoxCacheGenerationDialog_ResumeButton" = "続きから作る";
@@ -1250,13 +1250,13 @@
 
 /* VOICEVOX 音声の削除ダイアログ */
 "VoicevoxCacheDelete_UnknownNovelTitle" = "(本棚に無い小説)";
-"VoicevoxCacheDelete_Title" = "作成済みの音声を削除";
+"VoicevoxCacheDelete_Title" = "事前生成音声を削除";
 "VoicevoxCacheDelete_SummaryFormat" = "「%1$@」\n%2$@(%3$@)";
 "VoicevoxCacheDelete_ListenedButtonFormat" = "読み終わった分だけ削除\n(%1$dページ目より前の %2$@・%3$@)";
 "VoicevoxCacheDelete_AllButton" = "この小説の音声を全て削除";
 
-/* 作成済みの VOICEVOX 音声の管理画面 */
-"VoicevoxCacheManage_Title" = "作成済みのVOICEVOX音声";
+/* VOICEVOX の事前生成音声の管理画面 */
+"VoicevoxCacheManage_Title" = "VOICEVOXの事前生成音声";
 "VoicevoxCacheManage_SearchPlaceholder" = "小説名で絞り込む";
 "VoicevoxCacheManage_SortSizeDescending" = "容量が大きい順";
 "VoicevoxCacheManage_SortLastReadAscending" = "最近読んでいない順";
@@ -1274,7 +1274,7 @@
 "VoicevoxCacheManage_GeneratingRowFormat" = "▶ 生成中: %@";
 "VoicevoxCacheManage_TotalSectionTitle" = "合計";
 "VoicevoxCacheManage_FreeSpaceFormat" = "端末の空き容量: %@";
-"VoicevoxCacheManage_Empty" = "作成済みの音声はありません。\n小説の詳細画面の「VOICEVOX音声を今の読み上げ位置から生成する」から作れます。";
+"VoicevoxCacheManage_Empty" = "事前生成音声はありません。\n小説の詳細画面の「事前生成音声を今の読み上げ位置から作る」から作れます。";
 "VoicevoxCacheManage_LimitSectionTitle" = "使ってよい容量";
 "VoicevoxCacheManage_TotalLimitRowTitle" = "音声の合計の上限";
 "VoicevoxCacheManage_Unlimited" = "無制限";
@@ -1282,10 +1282,10 @@
 "VoicevoxCacheManage_DoNotStop" = "止めない";
 "VoicevoxCacheManage_StoresWhilePlayingRowTitle" = "読み上げ中に合成した分も貯める";
 "VoicevoxCacheManage_RemoveUnusedRowTitle" = "今の設定で使われない音声を削除する\n(話者や読みの修正を変えた後の掃除に使えます)";
-"VoicevoxCacheManage_RemoveAllRowTitle" = "作成済みの音声を全て削除する";
-"VoicevoxCacheManage_RemoveAllTitle" = "作成済みの音声を全て削除";
-"VoicevoxCacheManage_RemoveAllMessageFormat" = "作成済みの音声(%@)を全て削除します。\n\n削除しても本文は消えません。";
-"VoicevoxCacheManage_NoStoredAudio" = "作成済みの音声がありません。";
+"VoicevoxCacheManage_RemoveAllRowTitle" = "事前生成音声を全て削除する";
+"VoicevoxCacheManage_RemoveAllTitle" = "事前生成音声を全て削除";
+"VoicevoxCacheManage_RemoveAllMessageFormat" = "事前生成音声(%@)を全て削除します。\n\n削除しても本文は消えません。";
+"VoicevoxCacheManage_NoStoredAudio" = "事前生成音声がありません。";
 "VoicevoxCacheManage_ScanningFormat" = "今の設定で使われない音声を探しています……\n(%1$d作品・%2$dページ)";
 "VoicevoxCacheManage_NoUnusedAudio" = "今の設定で使われない音声はありませんでした。";
 "VoicevoxCacheManage_UnusedTitle" = "今の設定で使われない音声";
@@ -1299,14 +1299,14 @@
 "VoicevoxCacheManage_RowGeneratingPrefix" = "生成中。";
 
 /* 小説の詳細画面の VOICEVOX 音声の行 */
-"NovelDetailViewController_VoicevoxCacheGeneratingRowTitle" = "VOICEVOX音声を生成中(タップで確認/停止)";
+"NovelDetailViewController_VoicevoxCacheGeneratingRowTitle" = "事前生成音声を作成中(タップで確認/停止)";
 "NovelDetailViewController_VoicevoxCacheGeneratingRowTitleFormat" = "%1$@\n%2$@";
-"NovelDetailViewController_VoicevoxCacheGenerateRowTitle" = "VOICEVOX音声を今の読み上げ位置から生成する";
+"NovelDetailViewController_VoicevoxCacheGenerateRowTitle" = "事前生成音声を今の読み上げ位置から作る";
 "NovelDetailViewController_VoicevoxCacheGenerateRowTitleFormat" = "%1$@\n%2$@(%3$@)";
-"NovelDetailViewController_VoicevoxCacheDeleteRowTitle" = "作成済みのVOICEVOX音声を削除する";
+"NovelDetailViewController_VoicevoxCacheDeleteRowTitle" = "この小説の事前生成音声を削除する";
 "NovelDetailViewController_VoicevoxCacheRowHint" = "今の読み上げ位置から先の音声を、あらかじめ作って端末に貯めます。";
 "NovelDetailViewController_VoicevoxCacheGeneratingRowHint" = "選ぶと、生成の進み具合を確かめたり、生成を止めたりできます。";
-"NovelDetailViewController_VoicevoxCacheDeleteRowHint" = "選ぶと、この小説の作成済み音声を削除する方法を選べます。";
+"NovelDetailViewController_VoicevoxCacheDeleteRowHint" = "選ぶと、この小説の事前生成音声を削除する方法を選べます。";
 
 /* VOICEVOX の設定への入口 */
 "SettingsViewController_VoicevoxSettingsRowTitle" = "VOICEVOX の設定";

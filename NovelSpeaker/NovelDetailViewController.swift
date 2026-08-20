@@ -29,7 +29,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
         if VoicevoxCacheGenerator.shared.runningNovelID == novelID {
             let generating = NSLocalizedString(
                 "NovelDetailViewController_VoicevoxCacheGeneratingRowTitle",
-                comment: "VOICEVOX音声を生成中(タップで確認/停止)")
+                comment: "事前生成音声を作成中(タップで確認/停止)")
             if let progress = VoicevoxCacheGenerator.shared.progress {
                 return String(format: NSLocalizedString(
                     "NovelDetailViewController_VoicevoxCacheGeneratingRowTitleFormat",
@@ -47,12 +47,12 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 "NovelDetailViewController_VoicevoxCacheGenerateRowTitleFormat",
                 comment: "%1$@\n%2$@(%3$@)"),
                 NSLocalizedString("NovelDetailViewController_VoicevoxCacheGenerateRowTitle",
-                                  comment: "VOICEVOX音声を今の読み上げ位置から生成する"),
+                                  comment: "事前生成音声を今の読み上げ位置から作る"),
                 VoicevoxCacheGenerationProgress.storedText(chapterCount: chapterCount, audioSeconds: summary.audioSeconds),
                 String(format: "%.0fMB", megabytes))
         }
         return NSLocalizedString("NovelDetailViewController_VoicevoxCacheGenerateRowTitle",
-                                 comment: "VOICEVOX音声を今の読み上げ位置から生成する")
+                                 comment: "事前生成音声を今の読み上げ位置から作る")
     }
 
     private func toggleVoicevoxCacheGeneration() {
@@ -558,11 +558,11 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 if VoicevoxDiskCacheStore.shared.summary(novelID: self.novelID).entryCount > 0 {
                     actionSection <<< ButtonRow(Self.voicevoxCacheDeleteRowTag) {
                         $0.title = NSLocalizedString("NovelDetailViewController_VoicevoxCacheDeleteRowTitle",
-                                                     comment: "作成済みのVOICEVOX音声を削除する")
+                                                     comment: "この小説の事前生成音声を削除する")
                         $0.cell.textLabel?.numberOfLines = 0
                         $0.cell.accessibilityHint = NSLocalizedString(
                             "NovelDetailViewController_VoicevoxCacheDeleteRowHint",
-                            comment: "選ぶと、この小説の作成済み音声を削除する方法を選べます。")
+                            comment: "選ぶと、この小説の事前生成音声を削除する方法を選べます。")
                     }.onCellSelection({ [weak self] _, _ in
                         guard let self = self else { return }
                         VoicevoxCacheDeleteDialog.present(on: self, novelID: self.novelID) { [weak self] in

@@ -25,7 +25,7 @@ enum VoicevoxCacheGenerationDialog {
             ?? NSLocalizedString("VoicevoxCacheGenerationDialog_GeneratingFallback", comment: "生成中です")
         _ = NiftyUtility.EasyDialogTwoButton(
             viewController: viewController,
-            title: NSLocalizedString("VoicevoxCacheGenerationDialog_StopTitle", comment: "VOICEVOX音声を生成中"),
+            title: NSLocalizedString("VoicevoxCacheGenerationDialog_StopTitle", comment: "事前生成音声を作成中"),
             message: String(format: NSLocalizedString(
                 "VoicevoxCacheGenerationDialog_StopMessageFormat",
                 comment: "%@\n\n止めても、作った分はそのまま残ります。次に始める時は続きから作ります。"), progressText),
@@ -55,7 +55,7 @@ enum VoicevoxCacheGenerationDialog {
         }
         _ = NiftyUtility.EasyDialogTwoButton(
             viewController: viewController,
-            title: NSLocalizedString("VoicevoxCacheGenerationDialog_StartTitle", comment: "VOICEVOX音声の生成"),
+            title: NSLocalizedString("VoicevoxCacheGenerationDialog_StartTitle", comment: "事前生成音声を作る"),
             message: message,
             button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
             button1Action: nil,

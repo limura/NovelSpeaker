@@ -88,9 +88,9 @@ class VoicevoxSettingsViewController: FormViewController {
             VoicevoxVoiceModelDownloader.allowsCellularAccess = row.value ?? false
         })
 
-        form +++ Section(NSLocalizedString("VoicevoxSettings_GeneratedAudioSectionTitle", comment: "作成済みの音声"))
+        form +++ Section(NSLocalizedString("VoicevoxSettings_GeneratedAudioSectionTitle", comment: "事前生成音声"))
         <<< ButtonRow() {
-            $0.title = NSLocalizedString("VoicevoxSettings_CacheManageRowTitle", comment: "作成済みのVOICEVOX音声")
+            $0.title = NSLocalizedString("VoicevoxSettings_CacheManageRowTitle", comment: "事前生成音声の確認と削除")
             $0.cell.textLabel?.numberOfLines = 0
             $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
                 return VoicevoxCacheManageViewController()
@@ -124,7 +124,7 @@ class VoicevoxSettingsViewController: FormViewController {
                          footer: NSLocalizedString("VoicevoxSettings_TemporarySectionFooter",
                                                    comment: "読み上げ中に足りなくなって作った音声は一時的に保存され、聴き終わった所から順に消えます。別の小説を読み始めると、前の小説の分は消えます。"))
         <<< LabelRow("VoicevoxTemporaryRow") {
-            $0.title = NSLocalizedString("VoicevoxSettings_TemporaryRowTitle", comment: "一時的に保存されている音声")
+            $0.title = NSLocalizedString("VoicevoxSettings_TemporaryRowTitle", comment: "一時保存の音声")
             $0.cell.textLabel?.numberOfLines = 0
         }
 

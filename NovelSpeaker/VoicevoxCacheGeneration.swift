@@ -87,7 +87,7 @@ struct VoicevoxCacheGenerationProgress {
     static func storedText(chapterCount: Int, audioSeconds: Double) -> String {
         return String(format: NSLocalizedString(
             "VoicevoxCacheGeneration_StoredFormat",
-            comment: "作成済み %1$dページ・合計%2$@"), chapterCount, durationText(seconds: audioSeconds))
+            comment: "%1$dページぶん作成済み・合計%2$@"), chapterCount, durationText(seconds: audioSeconds))
     }
 
     static func durationText(seconds: Double) -> String {

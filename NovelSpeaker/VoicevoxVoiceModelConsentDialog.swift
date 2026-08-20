@@ -149,7 +149,7 @@ enum VoicevoxVoiceModelConsentDialog {
         case .notEnoughSpace(let requiredBytes, let freeBytes):
             message = String(format: NSLocalizedString(
                 "VoicevoxConsent_NotEnoughSpaceFormat",
-                comment: "端末の空き容量が足りません。\n必要: %1$@ / 空き: %2$@\n作成済みのVOICEVOX音声や、使っていない音声モデルを消すと空けられます。"),
+                comment: "端末の空き容量が足りません。\n必要: %1$@ / 空き: %2$@\n事前生成音声や、使っていない音声モデルを消すと空けられます。"),
                 VoicevoxVoiceModelConsentText.megabytesText(requiredBytes),
                 VoicevoxVoiceModelConsentText.megabytesText(freeBytes))
         }

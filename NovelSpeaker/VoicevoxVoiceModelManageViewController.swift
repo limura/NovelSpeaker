@@ -215,7 +215,7 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
         // 作ってあるはずの箇所でも合成が必要になる。
         message += "\n" + NSLocalizedString(
             "VoicevoxVoiceModelManage_DeleteWhatStillWorks",
-            comment: "作成済みのVOICEVOX音声がある箇所は、消した後もそのまま再生できます。作っていない箇所は、この音声モデルを取り直すまで読み上げできません。")
+            comment: "事前生成音声がある箇所は、消した後もそのまま再生できます。作っていない箇所は、この音声モデルを取り直すまで読み上げできません。")
 
         NiftyUtility.EasyDialogBuilder(self)
             .title(title: NSLocalizedString("VoicevoxVoiceModelManage_DeleteTitle", comment: "音声モデルを削除"))

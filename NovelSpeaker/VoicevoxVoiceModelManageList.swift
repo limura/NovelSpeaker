@@ -101,6 +101,11 @@ enum VoicevoxVoiceModelManageListBuilder {
         if bytes >= 1024 * 1024 * 1024 {
             return String(format: "%.1fGB", Double(bytes) / 1024.0 / 1024.0 / 1024.0)
         }
+        // 1MB未満を "0MB" と出すと「保存されていない」と読める。
+        // 一時分は貯まり始めがこの大きさなので、そこはKBで出す。
+        if bytes < 1024 * 1024 {
+            return String(format: "%.0fKB", Double(bytes) / 1024.0)
+        }
         return String(format: "%.0fMB", Double(bytes) / 1024.0 / 1024.0)
     }
 
@@ -113,7 +118,7 @@ enum VoicevoxVoiceModelManageListBuilder {
                             freeBytes: Int64) -> String {
         return String(format: NSLocalizedString(
             "VoicevoxVoiceModelManage_SummaryFormat",
-            comment: "音声モデル %1$d件 %2$@ / 作成済み音声 %3$@ / 端末の空き %4$@"),
+            comment: "音声モデル %1$d件 %2$@ / 事前生成音声 %3$@ / 端末の空き %4$@"),
                       storedCount, megabytesText(storedBytes),
                       megabytesText(generatedAudioBytes), megabytesText(freeBytes))
     }

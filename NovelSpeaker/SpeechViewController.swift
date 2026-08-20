@@ -560,7 +560,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     let button = createBarButtonItem(
                         image: UIImage(systemName: isGenerating ? "v.circle.fill" : "v.circle"),
                         action: #selector(self.voicevoxCacheGenerationButtonClicked(_:)),
-                        accessibilityLabel: NSLocalizedString("SpeechViewButtonType_VoicevoxCacheGeneration", comment: "VOICEVOX音声の生成")
+                        accessibilityLabel: NSLocalizedString("SpeechViewButtonType_VoicevoxCacheGeneration", comment: "事前生成音声を作る")
                     )
                     self.voicevoxCacheGenerationButtonItem = button
                     barButtonArray.append(button)
