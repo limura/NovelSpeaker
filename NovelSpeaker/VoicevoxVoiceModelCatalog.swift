@@ -154,10 +154,11 @@ enum VoicevoxVoiceModelCatalogLoader {
 
     /// **アプリに同梱しているコアが読めるVVMの形式。**
     ///
-    /// コアを上げたらここも足すこと(0.17.0 に上げるなら [1, 2])。
+    /// コアを上げたらここも足すこと。
     /// 新しいコアは古い形式も読めるので、足すだけでよく、消してはいけない。
     /// 消すと、その形式で既に取得済みのファイルが使えない扱いになる。
-    static let readableVvmFormatVersions: Set<Int> = [1]
+    /// (形式1のまま 1.4GB 取得済みの人が、更新した途端に取り直しになる)
+    static let readableVvmFormatVersions: Set<Int> = [1, 2]
 
     /// アプリに同梱しているカタログ。**これが最後の拠り所**なので、
     /// 取得元が落ちていてもVOICEVOXが全く使えなくなる事は無い。

@@ -29,6 +29,12 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
         return URL(fileURLWithPath: path!)
     }
 
+    /// 手元の 0.vvm の形式。コアを上げると変わる(0.16.4なら1、0.17.0なら2)ので、
+    /// 直に書かずにファイルから読む。こうしておけば次にコアを上げても落ちない。
+    private func realVvmFormat() throws -> Int {
+        return try VoicevoxVoiceModelFileInspector.inspect(fileURL: try realVvmURL()).vvmFormatVersion
+    }
+
     private func copyOfRealVvm() throws -> URL {
         let source = try realVvmURL()
         let destination = root.appendingPathComponent("incoming-\(UUID().uuidString).vvm")
@@ -42,7 +48,12 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
     // 本物の VVM を、コアを通さずに読めている事。
     func testInspectRealVoiceModelFile() throws {
         let info = try VoicevoxVoiceModelFileInspector.inspect(fileURL: try realVvmURL())
-        XCTAssertEqual(info.vvmFormatVersion, 1, "テスト用の 0.vvm は形式1のはず")
+        // ★手元の 0.vvm は、このアプリのコアが読める形式でなければならない。
+        // ここが食い違うのは fetch スクリプトとコアの版がずれている時。
+        XCTAssertTrue(VoicevoxVoiceModelCatalogLoader.readableVvmFormatVersions
+                        .contains(info.vvmFormatVersion),
+                      "テスト用の 0.vvm の形式(\(info.vvmFormatVersion))をこのアプリのコアが読めない"
+                      + "(scripts/fetch_voicevox_vendor.sh を実行し直すこと)")
         XCTAssertEqual(info.speakers.count, 4, "0.vvm は4キャラ入っている")
         XCTAssertEqual(info.allStyleIds, [0, 1, 2, 3, 4, 5, 6, 7, 8, 10])
         XCTAssertTrue(info.speakers.contains { $0.name == "ずんだもん" })
@@ -73,14 +84,15 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
 
     func testStoreAndFindRealVoiceModel() throws {
         let incoming = try copyOfRealVvm()
+        let format = try realVvmFormat()
         let stored = try store.store(temporaryFileURL: incoming, modelID: "0",
-                                     expectedStyleIds: [3], readableFormats: [1])
+                                     expectedStyleIds: [3], readableFormats: [format])
         XCTAssertTrue(FileManager.default.fileExists(atPath: stored.path))
         // 形式ごとのディレクトリに入っている事
-        XCTAssertEqual(stored.deletingLastPathComponent().lastPathComponent, "f1")
-        XCTAssertTrue(store.isStored(modelID: "0", readableFormats: [1]))
-        XCTAssertEqual(store.storedModelIDs(readableFormats: [1]), ["0": 1])
-        XCTAssertGreaterThan(store.totalBytes(readableFormats: [1]), 1_000_000)
+        XCTAssertEqual(stored.deletingLastPathComponent().lastPathComponent, "f\(format)")
+        XCTAssertTrue(store.isStored(modelID: "0", readableFormats: [format]))
+        XCTAssertEqual(store.storedModelIDs(readableFormats: [format]), ["0": format])
+        XCTAssertGreaterThan(store.totalBytes(readableFormats: [format]), 1_000_000)
         // 元の場所からは移動している(コピーを残さない)
         XCTAssertFalse(FileManager.default.fileExists(atPath: incoming.path))
     }
@@ -89,21 +101,24 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
     // 置いてしまうと「取得済み」として扱われ、再生時に初めて失敗する。
     func testStoreRejectsUnsupportedFormat() throws {
         let incoming = try copyOfRealVvm()
+        let format = try realVvmFormat()
+        // 手元の物とは違う形式しか読めない、という状況を作る
         XCTAssertThrowsError(try store.store(temporaryFileURL: incoming, modelID: "0",
-                                             expectedStyleIds: [], readableFormats: [2])) {
-            XCTAssertEqual($0 as? VoicevoxVoiceModelStoreError, .unsupportedFormat(1))
+                                             expectedStyleIds: [], readableFormats: [format + 1])) {
+            XCTAssertEqual($0 as? VoicevoxVoiceModelStoreError, .unsupportedFormat(format))
         }
-        XCTAssertFalse(store.isStored(modelID: "0", readableFormats: [1, 2]))
+        XCTAssertFalse(store.isStored(modelID: "0", readableFormats: [format, format + 1]))
     }
 
     // ★期待したスタイルが入っていない物は置かない事(取り違えの検出)。
     func testStoreRejectsWrongContent() throws {
         let incoming = try copyOfRealVvm()
+        let format = try realVvmFormat()
         XCTAssertThrowsError(try store.store(temporaryFileURL: incoming, modelID: "5",
-                                             expectedStyleIds: [22], readableFormats: [1])) {
+                                             expectedStyleIds: [22], readableFormats: [format])) {
             XCTAssertEqual($0 as? VoicevoxVoiceModelStoreError, .missingExpectedStyles([22]))
         }
-        XCTAssertFalse(store.isStored(modelID: "5", readableFormats: [1]))
+        XCTAssertFalse(store.isStored(modelID: "5", readableFormats: [format]))
     }
 
     // 壊れた物は置かない事。
@@ -123,13 +138,14 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
     // ★コアを上げた後も、古い形式で取得済みの物を使い続けられる事。
     // これが成り立たないと、コア更新のたびに1.4GBの取り直しになる。
     func testOlderFormatFilesRemainUsableAfterCoreUpgrade() throws {
+        let format = try realVvmFormat()
         let incoming = try copyOfRealVvm()
         try store.store(temporaryFileURL: incoming, modelID: "0",
-                        expectedStyleIds: [], readableFormats: [1])
-        // コアを上げて形式2も読めるようになった、という状況
-        XCTAssertTrue(store.isStored(modelID: "0", readableFormats: [1, 2]))
-        XCTAssertEqual(store.storedModelIDs(readableFormats: [1, 2]), ["0": 1])
-        XCTAssertEqual(store.modelFileURLs(readableFormats: [1, 2]).count, 1)
+                        expectedStyleIds: [], readableFormats: [format])
+        // コアを上げて次の形式も読めるようになった、という状況
+        XCTAssertTrue(store.isStored(modelID: "0", readableFormats: [format, format + 1]))
+        XCTAssertEqual(store.storedModelIDs(readableFormats: [format, format + 1]), ["0": format])
+        XCTAssertEqual(store.modelFileURLs(readableFormats: [format, format + 1]).count, 1)
     }
 
     // ★同じ音声モデルが複数の形式で置かれてしまっても、コアには1つしか渡さない事。
@@ -153,21 +169,22 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
     // 消さないと、使われない60MBがそのまま居座る。
     // (「更新があります」から取り直した時に、まさにこの状況になる)
     func testStoringNewerFormatRemovesOlderOne() throws {
-        // 形式1で持っている状態を作る
-        let old = store.fileURL(forModelID: "0", format: 1)
+        // 手元の物と同じ形式で持っている状態を作る
+        let format = try realVvmFormat()
+        let old = store.fileURL(forModelID: "0", format: format)
         try FileManager.default.createDirectory(at: old.deletingLastPathComponent(),
                                                 withIntermediateDirectories: true)
         try Data(repeating: 0, count: 4096).write(to: old)
         XCTAssertTrue(FileManager.default.fileExists(atPath: old.path))
 
-        // 形式1の本物を「形式2として」置く事はできないので、
+        // 本物を別の形式として置く事はできないので、
         // ここでは同じ形式に置き直した時に古い方が残らない事だけ確かめ、
         // 形式をまたぐ場合は下の掃除のテストで見る。
         let incoming = try copyOfRealVvm()
         let stored = try store.store(temporaryFileURL: incoming, modelID: "0",
-                                     expectedStyleIds: [], readableFormats: [1])
+                                     expectedStyleIds: [], readableFormats: [format])
         XCTAssertEqual(stored, old, "同じ形式なら置き換わる")
-        XCTAssertEqual(store.storedModelIDs(readableFormats: [1, 2]), ["0": 1])
+        XCTAssertEqual(store.storedModelIDs(readableFormats: [format, format + 1]), ["0": format])
     }
 
     // ★取り残された古い形式を掃除できる事(置いた直後に落ちた場合など)。
@@ -208,10 +225,11 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
 
     // 無駄が無い時は0を返す事(管理画面に「0MB削除できます」と出さないため)。
     func testNothingReclaimableWhenClean() throws {
+        let format = try realVvmFormat()
         let incoming = try copyOfRealVvm()
         try store.store(temporaryFileURL: incoming, modelID: "0",
-                        expectedStyleIds: [], readableFormats: [1])
-        XCTAssertEqual(store.reclaimableBytes(readableFormats: [1, 2]), 0)
+                        expectedStyleIds: [], readableFormats: [format])
+        XCTAssertEqual(store.reclaimableBytes(readableFormats: [format, format + 1]), 0)
         XCTAssertEqual(store.removeSupersededDuplicates(), 0)
     }
 
@@ -231,12 +249,13 @@ class VoicevoxVoiceModelStoreTest: XCTestCase {
     // MARK: - 消す
 
     func testRemove() throws {
+        let format = try realVvmFormat()
         let incoming = try copyOfRealVvm()
         try store.store(temporaryFileURL: incoming, modelID: "0",
-                        expectedStyleIds: [], readableFormats: [1])
-        store.remove(modelID: "0", readableFormats: [1, 2])
-        XCTAssertFalse(store.isStored(modelID: "0", readableFormats: [1, 2]))
-        XCTAssertEqual(store.totalBytes(readableFormats: [1]), 0)
+                        expectedStyleIds: [], readableFormats: [format])
+        store.remove(modelID: "0", readableFormats: [format, format + 1])
+        XCTAssertFalse(store.isStored(modelID: "0", readableFormats: [format, format + 1]))
+        XCTAssertEqual(store.totalBytes(readableFormats: [format]), 0)
     }
 
     // 何も持っていない状態でも、問い合わせが素直に答える事。

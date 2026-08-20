@@ -17,15 +17,18 @@
 #
 set -uo pipefail
 
-readonly CORE_VERSION="0.16.4"
-readonly ORT_VERSION="1.17.3"
+readonly CORE_VERSION="0.17.0"
+readonly ORT_VERSION="1.23.2"
 readonly DICT_VERSION="1.11"
 # テスト専用。アプリ本体には同梱しない(DESIGN_VOICEVOXの音声モデル取得.md §4)
 readonly TEST_VVM="0"
-# コア ${CORE_VERSION} が読める VVM の形式。取得した物がこれでなければ配置しない。
-readonly VVM_FORMAT_VERSION="1"
+# コア ${CORE_VERSION} が読める VVM の形式のうち、**新しい方**。
+# 取得した物がこれでなければ配置しない(古い形式も読めるが、テストは新しい方で行う)。
+readonly VVM_FORMAT_VERSION="2"
 
-readonly CORE_URL="https://github.com/VOICEVOX/voicevox_core/releases/download/${CORE_VERSION}/voicevox_core-ios-xcframework-cpu-${CORE_VERSION}.zip"
+# 0.17.0 で XCFramework に macOS 向けも入るようになり、配布物の名前から
+# "ios" と "cpu" が消えて voicevox_core-xcframework-{版}.zip になった。
+readonly CORE_URL="https://github.com/VOICEVOX/voicevox_core/releases/download/${CORE_VERSION}/voicevox_core-xcframework-${CORE_VERSION}.zip"
 readonly ORT_URL="https://github.com/VOICEVOX/onnxruntime-builder/releases/download/voicevox_onnxruntime-${ORT_VERSION}/voicevox_onnxruntime-ios-xcframework-${ORT_VERSION}.zip"
 readonly DICT_URL="https://downloads.sourceforge.net/open-jtalk/open_jtalk_dic_utf_8-${DICT_VERSION}.tar.gz"
 # ★VVM は必ずコアと同じバージョンのタグから取る。main を指してはいけない。
@@ -33,12 +36,13 @@ readonly DICT_URL="https://downloads.sourceforge.net/open-jtalk/open_jtalk_dic_u
 # main は次のコア版に進んでいることがあり、そちらの VVM は形式が変わっていて
 # 古いコアでは読めない(0.17.0 で vvm_format_version が 1→2 になり、
 # 0.16.4 のコアは VOICEVOX_RESULT_INVALID_MODEL_HEADER_ERROR(28) で開けない)。
+# 逆向きは大丈夫で、新しいコアは古い形式の VVM も読める。
 readonly VVM_URL="https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/${CORE_VERSION}/vvms/${TEST_VVM}.vvm"
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 readonly VENDOR_DIR="${REPO_ROOT}/NovelSpeaker/Vendor/VoicevoxCore"
-readonly HEADER_PATCH="${SCRIPT_DIR}/voicevox_core_header.patch"
+readonly HEADER_FIX="${SCRIPT_DIR}/voicevox_core_header_fix.py"
 
 MODE="fetch"
 case "${1:-}" in
@@ -95,45 +99,39 @@ fetch_xcframework() {
     ok "${name}.xcframework ${version}"
 }
 
-# --- ヘッダのパッチ ---------------------------------------------------------
+# --- ヘッダの直し ------------------------------------------------------------
 # 上流のヘッダは enum を `enum X {...}; typedef int32_t X;` と宣言しているため、
 # Swift からは Int32 に見えて VoicevoxResultCode 等が列挙型として扱えない。
 # `typedef enum X {...} X;` に直すことで Swift 側が列挙型として取り込めるようにする。
 # (この変更は commit 7e27fff で入った。VoicevoxCore.swift はこれを前提にしている)
-# 適用済みかどうかは、patch コマンドではなく中身の目印で判定する。
-# macOS の patch は未適用のファイルに -R を当てると
-# 「Unreversed (or previously applied) patch detected! Ignore -R? [y]」と聞いた上で
-# **exit 0 を返す**ため、逆当ての成否では判定できない。
-readonly UNPATCHED_MARK="typedef int32_t VoicevoxResultCode;"
-readonly PATCHED_MARK="} VoicevoxResultCode;"
-
+#
+# 以前は行位置を持つ .patch を当てていたが、0.17.0 で enum が1つ増えた
+# (VoicevoxOnExistingVoiceModelId)だけで当たらなくなったため、
+# 「その形の宣言を探して直す」スクリプトに替えてある。何度実行してもよい。
 apply_header_patch() {
-    local patched=0 already=0
+    local headers=() result
     for header in "${VENDOR_DIR}"/voicevox_core.xcframework/*/voicevox_core.framework/Headers/voicevox_core.h; do
-        [ -f "${header}" ] || continue
-        if grep -qF "${PATCHED_MARK}" "${header}"; then
-            already=$((already + 1))
-            continue
-        fi
-        if ! grep -qF "${UNPATCHED_MARK}" "${header}"; then
-            fail "ヘッダが未知の形です。上流の voicevox_core.h が変わった可能性があります: ${header}"
-        fi
-        if [ "${MODE}" = "check" ]; then
-            warn "ヘッダにパッチが当たっていません: ${header}"
-            continue
-        fi
-        # -t: 対話しない(何があっても質問で止まらせない)
-        patch -s -t -p0 "${header}" < "${HEADER_PATCH}" \
-            || fail "ヘッダへのパッチに失敗しました。上流のヘッダが変わった可能性があります: ${header}"
-        grep -qF "${PATCHED_MARK}" "${header}" \
-            || fail "ヘッダにパッチを当てましたが、期待の形になっていません: ${header}"
-        patched=$((patched + 1))
+        [ -f "${header}" ] && headers+=("${header}")
     done
-    if [ "${patched}" -gt 0 ]; then
-        ok "ヘッダにパッチを当てました (${patched}件)"
-    elif [ "${already}" -gt 0 ]; then
-        ok "ヘッダのパッチは適用済みです (${already}件)"
+    [ "${#headers[@]}" -eq 0 ] && return 0
+
+    if [ "${MODE}" = "check" ]; then
+        # check では書き換えない。直っていない物があるかだけを見る。
+        local unfixed=0
+        for header in "${headers[@]}"; do
+            grep -q "^typedef enum " "${header}" || unfixed=$((unfixed + 1))
+        done
+        if [ "${unfixed}" -gt 0 ]; then
+            warn "ヘッダの enum が直されていません (${unfixed}件)"
+        else
+            ok "ヘッダの enum は直っています (${#headers[@]}件)"
+        fi
+        return 0
     fi
+
+    result="$(/usr/bin/env python3 "${HEADER_FIX}" "${headers[@]}")" \
+        || fail "ヘッダを直せませんでした。上流の voicevox_core.h が変わった可能性があります"
+    ok "ヘッダの enum: ${result}"
 }
 
 # --- onnxruntime のバンドルID -----------------------------------------------
@@ -167,6 +165,38 @@ fix_onnxruntime_bundle_identifier() {
         ok "onnxruntime のバンドルIDを直しました (${fixed}件)"
     elif [ "${already}" -gt 0 ]; then
         ok "onnxruntime のバンドルIDは直っています (${already}件)"
+    fi
+}
+
+# --- 署名の付け直し ----------------------------------------------------------
+# ここまでで、ヘッダの enum と onnxruntime のバンドルIDを書き換えている。
+# 1.23.2 の onnxruntime と 0.17.0 の macOS 版コアは**署名付きで配られる**ようになり、
+# 署名は Info.plist やヘッダも含めて封をしているため、書き換えると封が破れる。
+# 破れたまま埋め込むと、実行時に SIGKILL (Code Signature Invalid) で即死する。
+#
+# かといって署名を外すだけだと、今度はシミュレータが未署名の dylib を読まない
+# (dyld: "Trying to load an unsigned library")。
+# そこでアドホック署名を付け直しておく。実機やストア向けのビルドでは
+# Xcode が開発者の署名で付け直すので、ここでの署名はその土台になるだけ。
+resign_adhoc() {
+    local signed=0
+    for framework in "${VENDOR_DIR}"/voicevox_core.xcframework/*/voicevox_core.framework \
+                     "${VENDOR_DIR}"/voicevox_onnxruntime.xcframework/*/voicevox_onnxruntime.framework; do
+        [ -d "${framework}" ] || continue
+        # 既にアドホック署名が付いていて、かつ中身と合っているなら何もしない。
+        if codesign -v "${framework}" >/dev/null 2>&1; then
+            continue
+        fi
+        if [ "${MODE}" = "check" ]; then
+            warn "署名が付いていない(または壊れている)ものがあります: ${framework##*/VoicevoxCore/}"
+            continue
+        fi
+        codesign --force --sign - "${framework}" >/dev/null 2>&1 \
+            || fail "署名を付け直せませんでした: ${framework}"
+        signed=$((signed + 1))
+    done
+    if [ "${signed}" -gt 0 ]; then
+        ok "配布物に署名を付け直しました (${signed}件)"
     fi
 }
 
@@ -255,6 +285,7 @@ fetch_xcframework "voicevox_core"        "${CORE_URL}" "${CORE_VERSION}"
 fetch_xcframework "voicevox_onnxruntime" "${ORT_URL}"  "${ORT_VERSION}"
 apply_header_patch
 fix_onnxruntime_bundle_identifier
+resign_adhoc
 fetch_dict
 fetch_test_vvm
 

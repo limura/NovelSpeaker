@@ -454,7 +454,11 @@ actor VoicevoxCore {
         // ロードしてしまえば VoicevoxVoiceModelFile 自体は閉じてよい(VOICEVOX_IOS_INTEGRATION.md §2)
         defer { voicevox_voice_model_file_delete(model) }
 
-        let loadResult = voicevox_synthesizer_load_voice_model(synthesizer, model)
+        // 0.17.0 でオプション引数が増えた。既定は「同じIDが既に読み込まれていたらエラー」で、
+        // これは 0.16.4 までの挙動と同じ。こちらは loadedVvmPaths で二重ロードを防いでいるので
+        // 既定のままでよい(RELOAD はメモリを開放し直したい時のための物)。
+        let loadOptions = voicevox_make_default_load_voice_model_options()
+        let loadResult = voicevox_synthesizer_load_voice_model(synthesizer, model, loadOptions)
         guard loadResult == VOICEVOX_RESULT_OK else {
             throw VoicevoxCoreError.core(loadResult)
         }
