@@ -46,16 +46,35 @@ struct VoicevoxCacheGenerationProgress {
     }
 
     var pauseReasonText: String? {
-        if isPausedByBackground { return "画面が消えた(背面にある)ため一時停止中" }
-        if isPausedByDownload { return "小説の更新確認中のため一時停止中" }
+        if isPausedByBackground {
+            return NSLocalizedString("VoicevoxCacheGeneration_PausedByBackground", comment: "画面が消えた(背面にある)ため一時停止中")
+        }
+        if isPausedByDownload {
+            return NSLocalizedString("VoicevoxCacheGeneration_PausedByDownload", comment: "小説の更新確認中のため一時停止中")
+        }
         return nil
     }
 
     var description: String {
-        var text = "\(chapterNumber)ページ目"
-        if let last = lastChapterNumber { text += "/全\(last)ページ" }
-        if chapterTitle.isEmpty == false { text += "「\(chapterTitle)」" }
-        text += "の\(chapterPercent)%を生成中"
+        // 「Nページ目」「Nページ目/全Mページ」「〜「章題」」までを1つの塊にしてから
+        // 「〜の何%を生成中」に差し込む。英語では語順が丸ごと変わるため、
+        // 部品を連結せずに書式文字列側で並べ替えられるようにしてある。
+        var location: String
+        if let last = lastChapterNumber {
+            location = String(format: NSLocalizedString(
+                "VoicevoxCacheGeneration_PageNumberOfTotalFormat",
+                comment: "%1$dページ目/全%2$dページ"), chapterNumber, last)
+        } else {
+            location = String(format: NSLocalizedString(
+                "VoicevoxCacheGeneration_PageNumberFormat", comment: "%dページ目"), chapterNumber)
+        }
+        if chapterTitle.isEmpty == false {
+            location = String(format: NSLocalizedString(
+                "VoicevoxCacheGeneration_PageWithTitleFormat", comment: "%1$@「%2$@」"), location, chapterTitle)
+        }
+        var text = String(format: NSLocalizedString(
+            "VoicevoxCacheGeneration_GeneratingFormat",
+            comment: "%1$@の%2$d%%を生成中"), location, chapterPercent)
         text += "\n" + Self.storedText(chapterCount: generatedChapterCount, audioSeconds: totalAudioSeconds)
         if let reason = pauseReasonText {
             text += "\n\(reason)"
@@ -66,18 +85,25 @@ struct VoicevoxCacheGenerationProgress {
     /// 作ってある量の言い方。連続性を主張しない
     /// (「Nページ目まで作成済み」と書くと、その手前が全部あるように読める)。
     static func storedText(chapterCount: Int, audioSeconds: Double) -> String {
-        return "作成済み \(chapterCount)ページ・合計\(durationText(seconds: audioSeconds))"
+        return String(format: NSLocalizedString(
+            "VoicevoxCacheGeneration_StoredFormat",
+            comment: "作成済み %1$dページ・合計%2$@"), chapterCount, durationText(seconds: audioSeconds))
     }
 
     static func durationText(seconds: Double) -> String {
         let total = max(0, Int(seconds))
         if total >= 3600 {
-            return "\(total / 3600)時間\((total % 3600) / 60)分"
+            return String(format: NSLocalizedString(
+                "VoicevoxCacheGeneration_DurationHoursMinutesFormat",
+                comment: "%1$d時間%2$d分"), total / 3600, (total % 3600) / 60)
         }
         if total >= 60 {
-            return "\(total / 60)分\(total % 60)秒"
+            return String(format: NSLocalizedString(
+                "VoicevoxCacheGeneration_DurationMinutesSecondsFormat",
+                comment: "%1$d分%2$d秒"), total / 60, total % 60)
         }
-        return "\(total)秒"
+        return String(format: NSLocalizedString(
+            "VoicevoxCacheGeneration_DurationSecondsFormat", comment: "%d秒"), total)
     }
 }
 

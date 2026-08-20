@@ -21,14 +21,17 @@ enum VoicevoxCacheGenerationDialog {
     }
 
     private static func presentStopConfirmation(on viewController: UIViewController, novelID: String) {
-        let progressText = VoicevoxCacheGenerator.shared.progress?.description ?? "生成中です"
+        let progressText = VoicevoxCacheGenerator.shared.progress?.description
+            ?? NSLocalizedString("VoicevoxCacheGenerationDialog_GeneratingFallback", comment: "生成中です")
         _ = NiftyUtility.EasyDialogTwoButton(
             viewController: viewController,
-            title: "VOICEVOX音声を生成中",
-            message: "\(progressText)\n\n止めても、作った分はそのまま残ります。次に始める時は続きから作ります。",
-            button1Title: "生成を続ける",
+            title: NSLocalizedString("VoicevoxCacheGenerationDialog_StopTitle", comment: "VOICEVOX音声を生成中"),
+            message: String(format: NSLocalizedString(
+                "VoicevoxCacheGenerationDialog_StopMessageFormat",
+                comment: "%@\n\n止めても、作った分はそのまま残ります。次に始める時は続きから作ります。"), progressText),
+            button1Title: NSLocalizedString("VoicevoxCacheGenerationDialog_ContinueButton", comment: "生成を続ける"),
             button1Action: nil,
-            button2Title: "生成を止める",
+            button2Title: NSLocalizedString("VoicevoxCacheGenerationDialog_StopButton", comment: "生成を止める"),
             button2Action: {
                 VoicevoxCacheGenerator.shared.stop()
             })
@@ -41,23 +44,24 @@ enum VoicevoxCacheGenerationDialog {
         // 作り済みの所をもう一度作り直すように読めてしまうので、書き分ける。
         let message: String
         if hasExisting {
-            message = "前回の続きから音声を作ります。"
-                + "既に作ってある分(\(VoicevoxCacheGenerationProgress.durationText(seconds: summary.audioSeconds))ぶん)は作り直しません。"
-                + "\n\n作っている間は画面を消さずに置いておいてください(画面が消えると一時停止します)。"
-                + "\n音声1時間ぶんで約15MBを使います。"
+            message = String(format: NSLocalizedString(
+                "VoicevoxCacheGenerationDialog_ResumeMessageFormat",
+                comment: "前回の続きから音声を作ります。既に作ってある分(%@ぶん)は作り直しません。"),
+                VoicevoxCacheGenerationProgress.durationText(seconds: summary.audioSeconds))
         } else {
-            message = "今の読み上げ位置から先の音声を作って端末に貯めます。"
-                + "\n\n作っている間は画面を消さずに置いておいてください(画面が消えると一時停止します)。"
-                + "\n音声1時間ぶんで約15MBを使います。"
-                + "\n\n作った音声はこの端末でだけ使えます。"
+            message = NSLocalizedString(
+                "VoicevoxCacheGenerationDialog_StartMessage",
+                comment: "今の読み上げ位置から先の音声を作って端末に貯めます。")
         }
         _ = NiftyUtility.EasyDialogTwoButton(
             viewController: viewController,
-            title: "VOICEVOX音声の生成",
+            title: NSLocalizedString("VoicevoxCacheGenerationDialog_StartTitle", comment: "VOICEVOX音声の生成"),
             message: message,
             button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"),
             button1Action: nil,
-            button2Title: hasExisting ? "続きから作る" : "生成を始める",
+            button2Title: hasExisting
+                ? NSLocalizedString("VoicevoxCacheGenerationDialog_ResumeButton", comment: "続きから作る")
+                : NSLocalizedString("VoicevoxCacheGenerationDialog_StartButton", comment: "生成を始める"),
             button2Action: {
                 VoicevoxCacheGenerator.shared.start(novelID: novelID)
             })

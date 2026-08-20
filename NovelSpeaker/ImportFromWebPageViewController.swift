@@ -413,13 +413,15 @@ li {
             + "<html><body>"
         homePageHtmlString += "<ul>"
         //homePageHtmlString += "<li><a href=\"\"></a></li>"
-        homePageHtmlString += "<li><a href=\"https://limura.github.io/NovelSpeaker/\">ことせかい サポートサイト</a></li>"
+        homePageHtmlString += "<li><a href=\"https://limura.github.io/NovelSpeaker/\">" + NSLocalizedString("ImportFromWebPageViewController_SupportSiteLinkTitle", comment: "ことせかい サポートサイト") + "</a></li>"
         homePageHtmlString += "<li><a href=\"" + NSLocalizedString("NovelSpeakerUtility_FirstStoryURLString", comment: "https://limura.github.io/NovelSpeaker/topics/jp/00001.html") + "\">" + NSLocalizedString("NovelSpeakerUtility_FirstStoryTitleString", comment: "はじめに(ことせかい の使い方)") + "</a></li>"
-        homePageHtmlString += "<li><a href=\"https://limura.github.io/NovelSpeaker/WebImport.html\">Web取込機能の使い方(下記のサイト以外の取り込み方等)</a></li>"
+        homePageHtmlString += "<li><a href=\"https://limura.github.io/NovelSpeaker/WebImport.html\">" + NSLocalizedString("ImportFromWebPageViewController_WebImportHowToLinkTitle", comment: "Web取込機能の使い方(下記のサイト以外の取り込み方等)") + "</a></li>"
         let bookmarks = getBookmark()
         for bookmark in bookmarks {
             for (name, url) in bookmark {
-                homePageHtmlString += "<li><a href=\"" + url.absoluteString + "\">" + name + "</a>&nbsp;<button onclick=\"deleteBookmark('\(url.absoluteString)')\")>🗑️</button></li>"
+                // 🗑️ だけのボタンは VoiceOver で何をする物か分からないので、aria-label で名前を付ける。
+                let deleteButtonLabel = NSLocalizedString("ImportFromWebPageViewController_DeleteBookmarkButton_AccessibilityLabel", comment: "このブックマークを削除")
+                homePageHtmlString += "<li><a href=\"" + url.absoluteString + "\">" + name + "</a>&nbsp;<button aria-label=\"" + deleteButtonLabel + "\" onclick=\"deleteBookmark('\(url.absoluteString)')\")>🗑️</button></li>"
             }
         }
         homePageHtmlString += "</ul>"

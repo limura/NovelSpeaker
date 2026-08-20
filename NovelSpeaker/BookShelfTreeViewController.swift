@@ -2384,7 +2384,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 if buttonSetting.isOn == false { continue }
                 switch buttonSetting.type {
                 case .downloadStatus:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(self.downloadStatusButtonTapped), accessibilityLabel: "ダウンロード状態の表示")
+                    let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(self.downloadStatusButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_downloadStatusButton_AccessibilityLabel", comment: "ダウンロード状態の表示"))
                     barButtonItemArray.append(button)
                     break
                 case .edit:

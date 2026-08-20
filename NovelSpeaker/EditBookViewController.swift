@@ -658,6 +658,14 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                 }
                 if let maxChapterNumber = novel.lastChapterNumber {
                     self.subTitleTextField.text = story.GetSubtitle()
+                    // 「3/10」だけでは VoiceOver で何を指すのか分からないので、
+                    // スライダーに名前を、位置には言葉にした値を持たせる。
+                    let positionText = String(format: NSLocalizedString(
+                        "ChapterPosition_AccessibilityValueFormat", comment: "全%2$dページ中%1$dページ目"),
+                        chapterNumber, maxChapterNumber)
+                    self.chapterSlider.accessibilityLabel = NSLocalizedString("ChapterSlider_AccessibilityLabel", comment: "ページ")
+                    self.chapterSlider.accessibilityValue = positionText
+                    self.chapterNumberIndicatorLabel.accessibilityLabel = positionText
                     self.chapterNumberIndicatorLabel.text = "\(chapterNumber)/\(maxChapterNumber)"
                     self.chapterNumberIndicatorLabel.removeConstraint(self.chapterNumberIndicatorLabelWidthConstraint)
                     self.chapterNumberIndicatorLabel.sizeToFit()

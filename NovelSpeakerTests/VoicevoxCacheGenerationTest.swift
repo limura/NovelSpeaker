@@ -14,6 +14,23 @@ import XCTest
 
 class VoicevoxCacheGenerationProgressTest: XCTestCase {
 
+    /// 表示文言は国際化してあるので、テストの実行環境の言語に左右されないよう
+    /// 日本語版の書式文字列を直接引いて期待値を組み立てる。
+    /// (「第N話と言わない」等、日本語の言い回しについての決まりを確かめるため)
+    private func ja(_ key: String) -> String {
+        guard let path = Bundle.main.path(forResource: "ja", ofType: "lproj"),
+              let bundle = Bundle(path: path) else {
+            XCTFail("ja.lproj が見つかりません")
+            return ""
+        }
+        return bundle.localizedString(forKey: key, value: nil, table: nil)
+    }
+
+    /// 実行環境の言語での表示文言。
+    private func L(_ key: String) -> String {
+        return NSLocalizedString(key, comment: "")
+    }
+
     func testPercentOfChapter() {
         let progress = VoicevoxCacheGenerationProgress(
             chapterNumber: 20, chapterTitle: "邂逅", generatedBlockCount: 15, totalBlockCount: 30, totalAudioSeconds: 0)
@@ -40,10 +57,12 @@ class VoicevoxCacheGenerationProgressTest: XCTestCase {
             chapterNumber: 20, chapterTitle: "邂逅", generatedBlockCount: 15, totalBlockCount: 30,
             totalAudioSeconds: 3 * 3600 + 12 * 60)
         let text = progress.description
-        XCTAssertTrue(text.contains("20ページ目"), "何ページ目かが分かる事")
+        XCTAssertTrue(text.contains(String(format: L("VoicevoxCacheGeneration_PageNumberFormat"), 20)),
+                      "何ページ目かが分かる事")
         XCTAssertTrue(text.contains("邂逅"), "章のタイトルが分かる事")
         XCTAssertTrue(text.contains("50%"), "そのページのどこまでかが分かる事")
-        XCTAssertTrue(text.contains("3時間12分"), "合計で何分ぶんかが分かる事")
+        XCTAssertTrue(text.contains(VoicevoxCacheGenerationProgress.durationText(seconds: 3 * 3600 + 12 * 60)),
+                      "合計で何分ぶんかが分かる事")
     }
 
     // 「第2話」のような言い方をしない事。
@@ -53,8 +72,13 @@ class VoicevoxCacheGenerationProgressTest: XCTestCase {
         let progress = VoicevoxCacheGenerationProgress(
             chapterNumber: 2, chapterTitle: "第1話", generatedBlockCount: 1, totalBlockCount: 3,
             totalAudioSeconds: 60)
+        // 日本語の言い回しについての決まりなので、日本語版の書式を直接確かめる。
+        XCTAssertFalse(ja("VoicevoxCacheGeneration_PageNumberFormat").contains("第"),
+                       "章題と紛らわしい「第N話」表記を使わない")
+        XCTAssertFalse(ja("VoicevoxCacheGeneration_PageNumberOfTotalFormat").contains("第"),
+                       "章題と紛らわしい「第N話」表記を使わない")
         XCTAssertFalse(progress.description.contains("第2話"), "章題と紛らわしい「第N話」表記を使わない")
-        XCTAssertTrue(progress.description.contains("2ページ目"))
+        XCTAssertTrue(progress.description.contains(String(format: L("VoicevoxCacheGeneration_PageNumberFormat"), 2)))
     }
 
     // 作ってある範囲が連続であるかのように読める表示をしない事。
@@ -68,8 +92,19 @@ class VoicevoxCacheGenerationProgressTest: XCTestCase {
             chapterNumber: 102, chapterTitle: "", generatedBlockCount: 1, totalBlockCount: 2,
             totalAudioSeconds: 3 * 3600, lastChapterNumber: 1000, generatedChapterCount: 87)
         let text = progress.description
-        XCTAssertTrue(text.contains("102ページ目/全1000ページ"), "今どこを作っているかは出す")
-        XCTAssertTrue(text.contains("作成済み 87ページ"), "作れている量はページ数で出す")
+        XCTAssertTrue(text.contains(String(format: L("VoicevoxCacheGeneration_PageNumberOfTotalFormat"), 102, 1000)),
+                      "今どこを作っているかは出す")
+        XCTAssertTrue(text.contains("87"), "作れている量はページ数で出す")
+        XCTAssertTrue(L("VoicevoxCacheGeneration_StoredFormat").contains("%1$d"),
+                      "作れている量はページ数で出す")
+        // 連続範囲を示唆する言い方をしない(日本語の言い回しについての決まり)。
+        for key in ["VoicevoxCacheGeneration_PageNumberFormat",
+                    "VoicevoxCacheGeneration_PageNumberOfTotalFormat",
+                    "VoicevoxCacheGeneration_GeneratingFormat",
+                    "VoicevoxCacheGeneration_StoredFormat"] {
+            XCTAssertFalse(ja(key).contains("から開始"), "連続範囲を示唆する言い方をしない: \(key)")
+            XCTAssertFalse(ja(key).contains("まで生成済み"), "連続範囲を示唆する言い方をしない: \(key)")
+        }
         XCTAssertFalse(text.contains("から開始"), "連続範囲を示唆する言い方をしない")
         XCTAssertFalse(text.contains("まで生成済み"), "連続範囲を示唆する言い方をしない")
     }
@@ -81,18 +116,29 @@ class VoicevoxCacheGenerationProgressTest: XCTestCase {
         XCTAssertNil(progress.pauseReasonText)
         progress.isPausedByBackground = true
         XCTAssertNotNil(progress.pauseReasonText)
-        XCTAssertTrue(progress.description.contains("一時停止"))
+        XCTAssertTrue(progress.description.contains(L("VoicevoxCacheGeneration_PausedByBackground")))
+        XCTAssertTrue(ja("VoicevoxCacheGeneration_PausedByBackground").contains("一時停止"))
         progress.isPausedByBackground = false
         progress.isPausedByDownload = true
-        XCTAssertTrue(progress.description.contains("更新確認"))
+        XCTAssertTrue(progress.description.contains(L("VoicevoxCacheGeneration_PausedByDownload")))
+        XCTAssertTrue(ja("VoicevoxCacheGeneration_PausedByDownload").contains("更新確認"))
     }
 
+    // 秒/分/時間の切り替わりが正しい事。文言は国際化してあるので、
+    // 実行環境の言語の書式に数値を差し込んだ物と比べる。
     func testDurationTextFormats() {
-        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 0), "0秒")
-        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 45), "45秒")
-        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 62), "1分2秒")
-        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 3600), "1時間0分")
-        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 3 * 3600 + 12 * 60 + 30), "3時間12分")
+        let seconds = "VoicevoxCacheGeneration_DurationSecondsFormat"
+        let minutes = "VoicevoxCacheGeneration_DurationMinutesSecondsFormat"
+        let hours = "VoicevoxCacheGeneration_DurationHoursMinutesFormat"
+        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 0), String(format: L(seconds), 0))
+        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 45), String(format: L(seconds), 45))
+        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 62), String(format: L(minutes), 1, 2))
+        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 3600), String(format: L(hours), 1, 0))
+        XCTAssertEqual(VoicevoxCacheGenerationProgress.durationText(seconds: 3 * 3600 + 12 * 60 + 30), String(format: L(hours), 3, 12))
+        // 日本語版の言い回しが変わっていない事も確かめておく。
+        XCTAssertEqual(String(format: ja(seconds), 45), "45秒")
+        XCTAssertEqual(String(format: ja(minutes), 1, 2), "1分2秒")
+        XCTAssertEqual(String(format: ja(hours), 3, 12), "3時間12分")
     }
 }
 

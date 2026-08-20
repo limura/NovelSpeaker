@@ -39,11 +39,13 @@ enum VoicevoxCoreError: LocalizedError {
         case .core(let code):
             return String(cString: voicevox_error_result_to_message(code))
         case .notSetUp:
-            return "VoicevoxCore.setUp() がまだ呼ばれていません"
+            return NSLocalizedString("VoicevoxCoreError_NotSetUp", comment: "VOICEVOXの準備ができていません")
         case .styleNotFound(let styleId):
-            return "指定されたVOICEVOXスタイル(\(styleId))に対応する音声モデルが見つかりません"
+            return String(format: NSLocalizedString(
+                "VoicevoxCoreError_StyleNotFoundFormat",
+                comment: "指定されたVOICEVOXスタイル(%u)に対応する音声モデルが見つかりません"), styleId)
         case .invalidWav:
-            return "VOICEVOXの合成結果が不正なWAVデータでした"
+            return NSLocalizedString("VoicevoxCoreError_InvalidWav", comment: "VOICEVOXの合成結果が不正なWAVデータでした")
         }
     }
 }
@@ -884,11 +886,13 @@ enum VoicevoxCoreError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notSetUp:
-            return "VOICEVOXはMac Catalystでは利用できません"
+            return NSLocalizedString("VoicevoxCoreError_NotAvailableOnCatalyst", comment: "VOICEVOXはMac Catalystでは利用できません")
         case .styleNotFound(let styleId):
-            return "指定されたVOICEVOXスタイル(\(styleId))に対応する音声モデルが見つかりません"
+            return String(format: NSLocalizedString(
+                "VoicevoxCoreError_StyleNotFoundFormat",
+                comment: "指定されたVOICEVOXスタイル(%u)に対応する音声モデルが見つかりません"), styleId)
         case .invalidWav:
-            return "VOICEVOXの合成結果が不正なWAVデータでした"
+            return NSLocalizedString("VoicevoxCoreError_InvalidWav", comment: "VOICEVOXの合成結果が不正なWAVデータでした")
         }
     }
 }
