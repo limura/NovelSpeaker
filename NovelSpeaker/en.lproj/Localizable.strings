@@ -1228,6 +1228,13 @@
 "VoicevoxVoiceModelManage_NotStoredRowHint" = "Select to show the terms of use and download.";
 "VoicevoxStyleSelect_DownloadableRowHint" = "Select to show the terms of use and download the voice model. The detail button opens the official character page.";
 
+"VoicevoxCacheManageViewController_NoNovelMatchesFormat" = "No novel matches \"%@\"";
+"AppInformationLogger_SameLogFoundMessage_Format" = "%@ notices with the same content";
+"BookShelfTreeViewController_checkboxselected_AssignUniqueSpeechMod" = "Assign a separate pronunciation dictionary to the selected novels";
+"Cancel" = "Cancel";
+"EditBookViewController_SubTitleTextField_AccesibilityLabel" = "Subtitle";
+"RealmStoryBulk_DummStoryContent" = "(no content)";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.
