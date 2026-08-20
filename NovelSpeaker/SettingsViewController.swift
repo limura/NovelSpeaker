@@ -1559,23 +1559,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.presentationMode = .segueName(segueName: "CreditPageSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
-            // VOICEVOX のクレジット表記。取得済みのキャラクターを並べる。
-            // 規約への同意だけでなく、表記を出し続ける所までが利用の条件になっている。
-            if VoicevoxCore.isAvailableOnThisOS {
-                section
-                <<< ButtonRow() {
-                    $0.title = NSLocalizedString("VoicevoxCredit_Title", comment: "VOICEVOX のクレジット表記")
-                    $0.cell.textLabel?.numberOfLines = 0
-                    $0.presentationMode = .show(controllerProvider: ControllerProvider.callback(builder: {
-                        return VoicevoxCreditViewController()
-                    }), onDismiss: nil)
-                }.cellUpdate({ (cell, button) in
-                    cell.textLabel?.textAlignment = .left
-                    cell.accessoryType = .disclosureIndicator
-                    cell.editingAccessoryType = cell.accessoryType
-                    cell.textLabel?.textColor = nil
-                })
-            }
+            // VOICEVOX のクレジット表記は「VOICEVOX」の設定の中にある。
+            // ここ(権利表記の隣)にも出していたが、同じ物が2箇所にあると
+            // どちらが本体か分からなくなるので、こちらは畳んだ。
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について")
