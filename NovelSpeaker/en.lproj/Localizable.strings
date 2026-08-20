@@ -1349,6 +1349,10 @@
 "ImportFromWebPageViewController_WebImportHowToLinkTitle" = "How to use web import (importing from sites other than those listed below)";
 "ImportFromWebPageViewController_DeleteBookmarkButton_AccessibilityLabel" = "Delete this bookmark";
 
+/* 区切り記号(英語では日本語の「・」が読みにくいので置き換える) */
+"BookShelfTreeViewController_FilterPopup_SummarySeparator" = ", ";
+"VoicevoxConsent_BulletPrefix" = "• ";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.12.1
 
 - Fixed an issue where chapters already stored locally were being unnecessarily re-downloaded when checking for updates or filling in missing parts of a novel.

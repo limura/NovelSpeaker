@@ -331,6 +331,7 @@ struct PhoneLauncherWidgetView: View {
                 HStack(spacing: 3) {
                     Text(NSLocalizedString("Phone_Widget_Launcher_OpenApp", comment: "アプリを開く"))
                     Image(systemName: "arrow.up.forward.app")
+                        .accessibilityHidden(true) // 隣の文字と同じ事しか言わない飾り
                 }
                 .font(.caption2)
                 .foregroundStyle(subtleStyle)

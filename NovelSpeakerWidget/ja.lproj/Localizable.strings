@@ -21,3 +21,6 @@
 /* 4枠アクションウィジェット */
 "Phone_Widget_ActionGroup_Name" = "操作をまとめて配置";
 "Phone_Widget_ActionGroup_Desc" = "再生・停止、アプリの起動、選んだ小説2冊の再生開始を1つのウィジェットに並べます。";
+
+/* VoiceOver 用 */
+"Phone_Widget_PlayNovel_AccessibilityFormat" = "%@ の再生を開始";

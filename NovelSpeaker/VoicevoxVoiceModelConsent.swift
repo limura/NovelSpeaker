@@ -207,8 +207,10 @@ enum VoicevoxVoiceModelConsentText {
         lines.append(NSLocalizedString("VoicevoxConsent_CharactersIntro",
                      comment: "このファイルには次のキャラクターの音声が入っています。それぞれの利用規約に同意する必要があります。"))
         lines.append("")
+        // 箇条書きの先頭。英語では「・」が読みにくいので中黒(•)に差し替えられるようにする。
+        let bullet = NSLocalizedString("VoicevoxConsent_BulletPrefix", comment: "・")
         for group in groups(of: model) {
-            lines.append("・\(group.speakerNames)")
+            lines.append("\(bullet)\(group.speakerNames)")
             if let termsURL = group.termsURL {
                 lines.append("    \(termsURL)")
             } else {
@@ -223,7 +225,7 @@ enum VoicevoxVoiceModelConsentText {
         lines.append(NSLocalizedString("VoicevoxConsent_CreditIntro",
                      comment: "作った音声を公開する場合は、次のようなクレジット表記が必要です。"))
         for credit in creditLines(of: model) {
-            lines.append("・\(credit)")
+            lines.append("\(bullet)\(credit)")
         }
         if let termsPageURL = termsPageURL {
             lines.append("")

@@ -60,3 +60,6 @@
 "青" = "Blue";
 "ティール" = "Teal";
 "緑" = "Green";
+
+/* widgetLabel of the circular complication (novel name and reading position) */
+"Watch_Widget_TitleChapterFormat" = "%1$@, %2$@";

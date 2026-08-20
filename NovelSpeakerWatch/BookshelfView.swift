@@ -472,6 +472,11 @@ struct BookshelfView: View {
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
         }
+        // 冊数が別の Text に分かれていて「◯◯、12」としか読まれないので、
+        // 行をひとまとまりにして「◯◯、12冊」と読ませる。
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(group.name), " + String(format: NSLocalizedString(
+            "Watch_Bookshelf_GroupNovelCountFormat", comment: "%d冊"), group.novels.count))
     }
 
     private var syncingRow: some View {

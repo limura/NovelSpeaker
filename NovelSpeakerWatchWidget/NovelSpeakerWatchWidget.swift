@@ -123,7 +123,10 @@ struct LauncherComplicationView: View {
                 BrandGlyph().padding(7)
             }
             .padding(1)
-            .widgetLabel { Text("\(reading.title)・\(reading.chapterFraction)") }
+            .widgetLabel {
+                Text(String(format: NSLocalizedString("Watch_Widget_TitleChapterFormat", comment: "%1$@・%2$@"),
+                            reading.title, reading.chapterFraction))
+            }
         } else {
             BrandGlyph().padding(2)
         }

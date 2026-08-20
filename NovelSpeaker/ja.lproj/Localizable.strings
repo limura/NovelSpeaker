@@ -1330,6 +1330,10 @@
 "ImportFromWebPageViewController_WebImportHowToLinkTitle" = "Web取込機能の使い方(下記のサイト以外の取り込み方等)";
 "ImportFromWebPageViewController_DeleteBookmarkButton_AccessibilityLabel" = "このブックマークを削除";
 
+/* 区切り記号(英語では日本語の「・」が読みにくいので置き換える) */
+"BookShelfTreeViewController_FilterPopup_SummarySeparator" = "・";
+"VoicevoxConsent_BulletPrefix" = "・";
+
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.12.1
 
 - 歯抜け小説の更新確認/補完DL時に、手元にある章を無駄に再取得していた問題を修正
