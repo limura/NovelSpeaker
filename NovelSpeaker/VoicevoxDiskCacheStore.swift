@@ -124,29 +124,61 @@ final class VoicevoxDiskCacheStore {
 
     // MARK: - 場所
 
+    /// 音声の置き場所は2つある。
+    ///
+    /// - `permanent`: 利用者が「作って」と言った分。消えない。
+    /// - `temporary`: 読み上げ中に足りなくなって作った分。自動で消える。
+    ///
+    /// 分けているのは、**利用者の実感と実体を合わせるため**。
+    /// 1つにすると「作らせた覚えの無い容量」が「作成済み」に混ざって増えていく。
+    /// 分けておけば「作成済み = 自分が作らせた分」で一致し、
+    /// 一時分は別勘定で「聴き終わった所から消える物」として説明できる。
+    enum Area: CaseIterable {
+        case permanent
+        case temporary
+
+        /// 探す順。作らせた分を先に見る(同じ物が両方にある事は無いが、順を決めておく)。
+        static var lookupOrder: [Area] { return [.permanent, .temporary] }
+    }
+
     static func versionDirectoryName(_ version: Int) -> String {
         return "v\(version)"
     }
 
-    /// 今の版の置き場所。小説ディレクトリはこの下に掘る。
-    private var versionedRoot: URL {
-        return rootDirectory.appendingPathComponent(Self.versionDirectoryName(Self.formatVersion),
+    static func temporaryDirectoryName(_ version: Int) -> String {
+        return "t\(version)"
+    }
+
+    static func directoryName(of area: Area, version: Int) -> String {
+        switch area {
+        case .permanent: return versionDirectoryName(version)
+        case .temporary: return temporaryDirectoryName(version)
+        }
+    }
+
+    private func areaRoot(_ area: Area) -> URL {
+        return rootDirectory.appendingPathComponent(Self.directoryName(of: area, version: Self.formatVersion),
                                                     isDirectory: true)
     }
 
-    private func novelDirectory(novelID: String) -> URL {
-        return versionedRoot.appendingPathComponent(Self.directoryName(novelID: novelID), isDirectory: true)
+    /// 今の版の置き場所(作らせた分)。
+    private var versionedRoot: URL { return areaRoot(.permanent) }
+
+    private func novelDirectory(novelID: String, area: Area = .permanent) -> URL {
+        return areaRoot(area).appendingPathComponent(Self.directoryName(novelID: novelID), isDirectory: true)
     }
 
-    private func chapterDirectory(novelID: String, chapterNumber: Int) -> URL {
-        return novelDirectory(novelID: novelID).appendingPathComponent("\(chapterNumber)", isDirectory: true)
+    private func chapterDirectory(novelID: String, chapterNumber: Int, area: Area = .permanent) -> URL {
+        return novelDirectory(novelID: novelID, area: area)
+            .appendingPathComponent("\(chapterNumber)", isDirectory: true)
     }
 
     // MARK: - 保存と取り出し
 
-    func store(novelID: String, chapterNumber: Int, key: String, data: Data, durationSeconds: Double) throws {
-        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
-        try prepareDirectories(novelID: novelID, chapterDirectory: directory)
+    func store(novelID: String, chapterNumber: Int, key: String, data: Data, durationSeconds: Double,
+               area: Area = .permanent) throws {
+        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber, area: area)
+        try prepareDirectories(novelID: novelID, chapterDirectory: directory, area: area)
 
         let milliseconds = max(0, Int((durationSeconds * 1000).rounded()))
         let fileName = "\(key)_\(milliseconds).\(Self.fileExtension)"
@@ -171,21 +203,35 @@ final class VoicevoxDiskCacheStore {
         lock.unlock()
     }
 
+    /// 作らせた分と一時分の両方から探す。再生側から見れば区別は無い。
     func load(novelID: String, chapterNumber: Int, key: String) -> Data? {
-        let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
-        guard let entry = entry(directory: directory, key: key) else { return nil }
-        return try? Data(contentsOf: directory.appendingPathComponent(entry.fileName))
+        for area in Area.lookupOrder {
+            let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber, area: area)
+            if let entry = entry(directory: directory, key: key) {
+                return try? Data(contentsOf: directory.appendingPathComponent(entry.fileName))
+            }
+        }
+        return nil
     }
 
     /// 中身を読まずに有無だけを判定する(生成の再開時に「どこまで作れているか」を数えるため)。
     func contains(novelID: String, chapterNumber: Int, key: String) -> Bool {
-        return entry(directory: chapterDirectory(novelID: novelID, chapterNumber: chapterNumber), key: key) != nil
+        return Area.lookupOrder.contains { area in
+            entry(directory: chapterDirectory(novelID: novelID, chapterNumber: chapterNumber, area: area),
+                  key: key) != nil
+        }
     }
 
     /// 保存してある音声の長さ。中身を読まずに求まる(ファイル名に入っているため)。
     /// 「この先どれだけ再生ぶんが貯まっているか」の計算に使う。
     func durationSeconds(novelID: String, chapterNumber: Int, key: String) -> Double? {
-        return entry(directory: chapterDirectory(novelID: novelID, chapterNumber: chapterNumber), key: key)?.durationSeconds
+        for area in Area.lookupOrder {
+            if let entry = entry(directory: chapterDirectory(novelID: novelID, chapterNumber: chapterNumber, area: area),
+                                 key: key) {
+                return entry.durationSeconds
+            }
+        }
+        return nil
     }
 
     private func entry(directory: URL, key: String) -> Entry? {
@@ -274,9 +320,124 @@ final class VoicevoxDiskCacheStore {
     // MARK: - 削除
 
     func remove(novelID: String) {
-        let directory = novelDirectory(novelID: novelID)
-        try? fileManager.removeItem(at: directory)
-        forgetListings(under: directory)
+        for area in Area.allCases {
+            let directory = novelDirectory(novelID: novelID, area: area)
+            try? fileManager.removeItem(at: directory)
+            forgetListings(under: directory)
+        }
+    }
+
+    // MARK: - 一時分
+
+    /// 一時分の合計(容量の表示と、上限の判定に使う)。
+    func temporaryTotalSummary() -> VoicevoxDiskCacheSummary {
+        var total = VoicevoxDiskCacheSummary.empty
+        for novelID in temporaryNovelIDs() {
+            total = total + temporarySummary(novelID: novelID)
+        }
+        return total
+    }
+
+    func temporarySummary(novelID: String) -> VoicevoxDiskCacheSummary {
+        var total = VoicevoxDiskCacheSummary.empty
+        let novelDirectory = self.novelDirectory(novelID: novelID, area: .temporary)
+        guard let names = try? fileManager.contentsOfDirectory(atPath: novelDirectory.path) else { return total }
+        for name in names.compactMap({ Int($0) }).sorted() {
+            let directory = novelDirectory.appendingPathComponent("\(name)", isDirectory: true)
+            lock.lock()
+            let listing = listingUnsafe(directory: directory)
+            lock.unlock()
+            total = total + Self.summarize(listing.values)
+        }
+        return total
+    }
+
+    /// 一時分を持っている小説のID。
+    func temporaryNovelIDs() -> [String] {
+        let root = areaRoot(.temporary)
+        guard let names = try? fileManager.contentsOfDirectory(atPath: root.path) else { return [] }
+        var result: [String] = []
+        for name in names {
+            let markerURL = root.appendingPathComponent(name, isDirectory: true)
+                .appendingPathComponent(Self.novelIDMarkerFileName)
+            guard let data = try? Data(contentsOf: markerURL),
+                  let novelID = String(data: data, encoding: .utf8) else { continue }
+            result.append(novelID)
+        }
+        return result
+    }
+
+    /// ★別の小説を読み始めた時に、それ以外の小説の一時分を捨てる。
+    ///
+    /// 一時分は「今読んでいる小説のための物」と決めておくと、
+    /// 消す条件がこれだけで済み、説明も1行で済む
+    /// (「別の小説を読み始めると、前の小説の一時分は消えます」)。
+    /// 複数の小説の一時分を上限の中で按分し合う仕組みは、
+    /// 得られる物の割に説明が増える。
+    /// - Returns: 消したバイト数。
+    @discardableResult
+    func removeTemporary(exceptNovelID novelID: String?) -> Int64 {
+        var freed: Int64 = 0
+        let root = areaRoot(.temporary)
+        guard let names = try? fileManager.contentsOfDirectory(atPath: root.path) else { return 0 }
+        let keepDirectoryName = novelID.map { Self.directoryName(novelID: $0) }
+        for name in names where name != keepDirectoryName {
+            let directory = root.appendingPathComponent(name, isDirectory: true)
+            freed += Self.byteCount(of: directory)
+            try? fileManager.removeItem(at: directory)
+            forgetListings(under: directory)
+        }
+        return freed
+    }
+
+    /// ★一時分を「新しい方から指定の秒数ぶん」だけ残して、古い物から捨てる。
+    ///
+    /// 再生位置との突き合わせはしない。作った順に古い物から消せば、
+    /// 結果として「聴き終わった所」から消える。
+    /// 読み上げの先へ作り足した分は作ったばかりなので新しく、自然に守られる。
+    /// (巻き戻しで聴き直す分だけ後ろに残す、という指定は呼び出し側の秒数で決める)
+    /// - Returns: 消したバイト数。
+    @discardableResult
+    func trimTemporary(novelID: String, keepingSeconds: Double) -> Int64 {
+        struct Candidate {
+            let url: URL
+            let directory: URL
+            let modifiedAt: Date
+            let durationSeconds: Double
+            let byteCount: Int
+        }
+        let novelDirectory = self.novelDirectory(novelID: novelID, area: .temporary)
+        guard let chapterNames = try? fileManager.contentsOfDirectory(atPath: novelDirectory.path) else { return 0 }
+        var candidates: [Candidate] = []
+        for chapterName in chapterNames.compactMap({ Int($0) }).sorted() {
+            let directory = novelDirectory.appendingPathComponent("\(chapterName)", isDirectory: true)
+            guard let names = try? fileManager.contentsOfDirectory(atPath: directory.path) else { continue }
+            for name in names {
+                guard let parsed = Self.parse(fileName: name) else { continue }
+                let url = directory.appendingPathComponent(name)
+                let attributes = try? fileManager.attributesOfItem(atPath: url.path)
+                candidates.append(Candidate(
+                    url: url,
+                    directory: directory,
+                    modifiedAt: (attributes?[.modificationDate] as? Date) ?? Date.distantPast,
+                    durationSeconds: parsed.durationSeconds,
+                    byteCount: (attributes?[.size] as? Int) ?? 0))
+            }
+        }
+        let total = candidates.reduce(0.0) { $0 + $1.durationSeconds }
+        guard total > keepingSeconds else { return 0 }
+
+        // 古い順に、残す秒数を下回るまで捨てる。
+        var remaining = total
+        var freed: Int64 = 0
+        for candidate in candidates.sorted(by: { $0.modifiedAt < $1.modifiedAt }) {
+            if remaining <= keepingSeconds { break }
+            try? fileManager.removeItem(at: candidate.url)
+            forgetListings(under: candidate.directory)
+            remaining -= candidate.durationSeconds
+            freed += Int64(candidate.byteCount)
+        }
+        return freed
     }
 
     func remove(novelID: String, chapterNumber: Int) {
@@ -294,7 +455,7 @@ final class VoicevoxDiskCacheStore {
 
     // MARK: - 版の掃除
 
-    /// 今の版のディレクトリ以外を、この置き場所から丸ごと消す。
+    /// 今の版のディレクトリ(作らせた分・一時分)以外を、この置き場所から丸ごと消す。
     ///
     /// **この置き場所はこのアプリ専用**なので、
     /// 「今の版でない物は全部要らない」で言い切れる。
@@ -305,9 +466,9 @@ final class VoicevoxDiskCacheStore {
     @discardableResult
     func removeOutdatedLayouts() -> Int64 {
         guard let names = try? fileManager.contentsOfDirectory(atPath: rootDirectory.path) else { return 0 }
-        let current = Self.versionDirectoryName(Self.formatVersion)
+        let current = Set(Area.allCases.map { Self.directoryName(of: $0, version: Self.formatVersion) })
         var freed: Int64 = 0
-        for name in names where name != current {
+        for name in names where current.contains(name) == false {
             let url = rootDirectory.appendingPathComponent(name, isDirectory: true)
             freed += Self.byteCount(of: url)
             try? fileManager.removeItem(at: url)
@@ -368,25 +529,26 @@ final class VoicevoxDiskCacheStore {
 
     // MARK: - ディレクトリ
 
-    private func prepareDirectories(novelID: String, chapterDirectory: URL) throws {
+    private func prepareDirectories(novelID: String, chapterDirectory: URL, area: Area = .permanent) throws {
         if fileManager.fileExists(atPath: rootDirectory.path) == false {
             try fileManager.createDirectory(at: rootDirectory, withIntermediateDirectories: true)
         }
         // 合成し直せる物であり1作品で数百MBになるため、バックアップには含めない。
         // (含めると利用者のバックアップ容量を無断で食い潰す事になる)
-        var root = rootDirectory
-        if (try? root.resourceValues(forKeys: [.isExcludedFromBackupKey]))?.isExcludedFromBackup != true {
+        var backupExclusionTarget = rootDirectory
+        if (try? backupExclusionTarget.resourceValues(forKeys: [.isExcludedFromBackupKey]))?.isExcludedFromBackup != true {
             var values = URLResourceValues()
             values.isExcludedFromBackup = true
-            try? root.setResourceValues(values)
+            try? backupExclusionTarget.setResourceValues(values)
         }
-        if fileManager.fileExists(atPath: versionedRoot.path) == false {
-            try fileManager.createDirectory(at: versionedRoot, withIntermediateDirectories: true)
+        let root = areaRoot(area)
+        if fileManager.fileExists(atPath: root.path) == false {
+            try fileManager.createDirectory(at: root, withIntermediateDirectories: true)
         }
         if fileManager.fileExists(atPath: chapterDirectory.path) == false {
             try fileManager.createDirectory(at: chapterDirectory, withIntermediateDirectories: true)
         }
-        let markerURL = novelDirectory(novelID: novelID).appendingPathComponent(Self.novelIDMarkerFileName)
+        let markerURL = novelDirectory(novelID: novelID, area: area).appendingPathComponent(Self.novelIDMarkerFileName)
         if fileManager.fileExists(atPath: markerURL.path) == false {
             try? Data(novelID.utf8).write(to: markerURL, options: .atomic)
         }

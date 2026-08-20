@@ -177,10 +177,12 @@ actor VoicevoxCore {
     /// = 合成の0.62%)なので、合成の裏で気にせず走らせてよい。
     /// 呼び出し元(合成の完了直後)を待たせないよう、別タスクへ逃がす。
     nonisolated func storeToDiskCacheIfNeeded(text: String, styleId: UInt32, wav: Data) {
-        guard let context = diskCacheContext, context.isWritable else { return }
-        // 「読み上げ中に合成した分も貯める」を切っている時は積まない。
-        // 入れっぱなしだと、一度生成を有効にした小説は聴くたびにディスクが増え続ける。
-        guard VoicevoxCacheLimits.storesWhilePlaying || VoicevoxCacheGenerator.shared.runningNovelID == context.novelID else { return }
+        guard let context = diskCacheContext else { return }
+        // ★ここで作った物は必ず一時分に置く(作成済みとしては残さない)。
+        // 利用者が「作って」と言っていない音声なので、聴き終わったら消えてよい。
+        // 一時分にする事で、事前生成を有効にしていない小説でも貯められるようになり、
+        // メモリキャッシュ(16MB≒6分)の頭打ちに縛られなくなる。
+        guard VoicevoxCacheLimits.storesWhilePlaying else { return }
         // 上限に達していたら積まない(生成側と同じ線引き)。
         guard VoicevoxCacheGenerator.currentStopCause() == nil else { return }
         let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
@@ -193,8 +195,10 @@ actor VoicevoxCore {
                     chapterNumber: context.chapterNumber,
                     key: key,
                     data: encoded,
-                    durationSeconds: VoicevoxAudioCompressor.durationSeconds(wav: wav)
+                    durationSeconds: VoicevoxAudioCompressor.durationSeconds(wav: wav),
+                    area: .temporary
                 )
+                VoicevoxTemporaryAudio.trimIfNeeded(novelID: context.novelID)
             } catch {
                 AppInformationLogger.AddLog(message: "VoicevoxCore: 音声キャッシュの保存に失敗: \(error.localizedDescription)", isForDebug: true)
             }

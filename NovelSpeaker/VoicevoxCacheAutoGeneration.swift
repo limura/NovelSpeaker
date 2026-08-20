@@ -54,7 +54,10 @@ final class VoicevoxCacheAutoGeneration {
             VoicevoxCacheGenerator.shared.stopIfFollowingPlayback()
             return
         }
-        guard let context = VoicevoxCore.shared.diskCacheContext, context.isWritable else {
+        // 事前生成を有効にしていない小説でも作り足す。
+        // 作った物は一時分に置かれ、聴き終わった所から消えるので、
+        // 「断りなくストレージを使い続ける」事にはならない。
+        guard let context = VoicevoxCore.shared.diskCacheContext else {
             VoicevoxCacheGenerator.shared.stopIfFollowingPlayback()
             return
         }

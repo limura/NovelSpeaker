@@ -220,12 +220,16 @@ final class VoicevoxCacheGenerator {
                 do {
                     let wav = try await VoicevoxCore.shared.synthesizeForDiskCache(text: target.text, styleId: target.styleId)
                     let encoded = try VoicevoxAudioCompressor.encode(wav: wav)
+                    // ★「作って」と言われた分だけを作成済みとして残す。
+                    // 読み上げの裏で足りない分を作っているだけの時は一時分に置き、
+                    // 聴き終わった所から自動で消えるようにする。
                     try VoicevoxDiskCacheStore.shared.store(
                         novelID: novelID,
                         chapterNumber: chapterNumber,
                         key: target.key,
                         data: encoded,
-                        durationSeconds: VoicevoxAudioCompressor.durationSeconds(wav: wav)
+                        durationSeconds: VoicevoxAudioCompressor.durationSeconds(wav: wav),
+                        area: runningMode == .manual ? .permanent : .temporary
                     )
                 } catch {
                     // 1ブロックの失敗で全体を止めない(記号だけのブロック等で形態素解析に

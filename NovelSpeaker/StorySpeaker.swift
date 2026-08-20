@@ -769,6 +769,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStartSpeechEvent(storyID: self.storyID)
         }
+        #if !os(watchOS)
+        // VOICEVOX の一時分は「今読んでいる小説のための物」と決めてある。
+        // 別の小説を読み始めたので、それ以外の分は捨てる。
+        // (開いただけでは捨てない。目次を見ただけで作り直しになるため)
+        let speakingNovelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
+        DispatchQueue.global(qos: .utility).async {
+            VoicevoxTemporaryAudio.handlePlaybackStarted(novelID: speakingNovelID)
+        }
+        #endif
         DispatchQueue.global(qos: .userInitiated).async {
             self.audioSessionInit(isActive: true)
         }

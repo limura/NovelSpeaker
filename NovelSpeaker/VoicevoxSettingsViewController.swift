@@ -25,8 +25,21 @@ class VoicevoxSettingsViewController: FormViewController {
     /// 文字も重なるので、選ぶ形にしてある。
     private static let keepGeneratingChoices = [0, 5, 15, 30, 60, 120, 180]
 
+    /// 「聴いた所を残しておく時間」の選択肢(分)。0 は「残さない」。
+    private static let keepBehindChoices = [0, 5, 10, 20, 30, 60]
+
     private static func keepGeneratingText(minutes: Int) -> String {
-        if minutes <= 0 { return NSLocalizedString("VoicevoxSettings_KeepGeneratingNever", comment: "続けない") }
+        return durationText(minutes: minutes,
+                            zeroText: NSLocalizedString("VoicevoxSettings_KeepGeneratingNever", comment: "続けない"))
+    }
+
+    private static func keepBehindText(minutes: Int) -> String {
+        return durationText(minutes: minutes,
+                            zeroText: NSLocalizedString("VoicevoxSettings_KeepBehindNever", comment: "残さない"))
+    }
+
+    private static func durationText(minutes: Int, zeroText: String) -> String {
+        if minutes <= 0 { return zeroText }
         if minutes >= 60 && minutes % 60 == 0 { return String(format: NSLocalizedString("VoicevoxSettings_HoursFormat", comment: "%d時間"), minutes / 60) }
         return String(format: NSLocalizedString("VoicevoxSettings_MinutesFormat", comment: "%d分"), minutes)
     }
@@ -41,6 +54,7 @@ class VoicevoxSettingsViewController: FormViewController {
         super.viewWillAppear(animated)
         // 音声モデルを取得・削除して戻ってきた時に、件数の表示を合わせる。
         updateVoiceModelSummary()
+        updateTemporarySummary()
     }
 
     private func createForm() {
@@ -104,6 +118,34 @@ class VoicevoxSettingsViewController: FormViewController {
             VoicevoxCacheLead.keepGeneratingBelowMinutes = minutes
         })
 
+        // 一時分は「勝手にストレージを使っている」物なので、
+        // 使っている量と、放っておいても消える事をここに出しておく。
+        form +++ Section(header: NSLocalizedString("VoicevoxSettings_TemporarySectionTitle", comment: "読み上げ中に作った音声"),
+                         footer: NSLocalizedString("VoicevoxSettings_TemporarySectionFooter",
+                                                   comment: "読み上げ中に足りなくなって作った音声は一時的に保存され、聴き終わった所から順に消えます。別の小説を読み始めると、前の小説の分は消えます。"))
+        <<< LabelRow("VoicevoxTemporaryRow") {
+            $0.title = NSLocalizedString("VoicevoxSettings_TemporaryRowTitle", comment: "一時的に保存されている音声")
+            $0.cell.textLabel?.numberOfLines = 0
+        }
+
+        form +++ Section(NSLocalizedString("VoicevoxSettings_AdvancedSectionTitle", comment: "通常は変更する必要のないもの"))
+        <<< PickerInputRow<String>() {
+            $0.title = NSLocalizedString("VoicevoxSettings_KeepBehindRowTitle", comment: "聴いた所を残しておく時間")
+            $0.options = Self.keepBehindChoices.map { Self.keepBehindText(minutes: $0) }
+            $0.value = Self.keepBehindText(minutes: VoicevoxTemporaryAudio.keepBehindMinutes)
+            $0.cell.textLabel?.numberOfLines = 0
+        }.cellUpdate({ (cell, _) in
+            cell.accessibilityHint = NSLocalizedString(
+                "VoicevoxSettings_KeepBehindRowHint",
+                comment: "少し戻って聴き直す時に作り直さずに済む長さです。長くすると、その分だけ一時的に使う容量が増えます。")
+        }).onChange({ row in
+            guard let value = row.value,
+                  let minutes = Self.keepBehindChoices.first(where: {
+                      Self.keepBehindText(minutes: $0) == value
+                  }) else { return }
+            VoicevoxTemporaryAudio.keepBehindMinutes = minutes
+        })
+
         form +++ Section(footer: NSLocalizedString("VoicevoxSettings_CreditSectionFooter", comment: "作った音声を公開する場合はクレジット表記が必要です。"))
         <<< ButtonRow() {
             $0.title = NSLocalizedString("VoicevoxSettings_CreditRowTitle", comment: "クレジット表記")
@@ -119,6 +161,15 @@ class VoicevoxSettingsViewController: FormViewController {
         })
 
         updateVoiceModelSummary()
+        updateTemporarySummary()
+    }
+
+    /// 一時分の容量。断りなく使っている物なので、量が見えている事が大事。
+    private func updateTemporarySummary() {
+        guard let row = form.rowBy(tag: "VoicevoxTemporaryRow") as? LabelRow else { return }
+        let summary = VoicevoxDiskCacheStore.shared.temporaryTotalSummary()
+        row.value = VoicevoxVoiceModelManageListBuilder.megabytesText(Int64(summary.byteCount))
+        row.updateCell()
     }
 
     /// 音声モデルの行に「何件・何MB」を出す。
