@@ -457,13 +457,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         }
 
         speaker.StopSpeech()
-        let defaultSpeaker:SpeakerSetting = RealmUtil.RealmBlock { (realm) -> SpeakerSetting in
-            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let realmDefaultSpeaker = globalState.defaultSpeakerWith(realm: realm) {
-                return SpeakerSetting(from: realmDefaultSpeaker)
-            }
-            let realmDefaultSpeaker = RealmSpeakerSetting()
-            return SpeakerSetting(from: realmDefaultSpeaker)
-        }
+        let defaultSpeaker = Self.testSpeakerSetting()
         let modSettingArray = [SpeechModSetting(before: before, after: after, isUseRegularExpression: isUseRegexp)]
         speaker.SetText(content: testText, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [], speechModArray: modSettingArray)
         let displayText = speaker.speechText
@@ -476,6 +470,32 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         speaker.StartSpeech()
     }
     
+    /// 「発音テスト」で使う話者。
+    ///
+    /// ★必ず AVSpeechSynthesizer にする。
+    ///
+    /// この画面の「テスト用読み替え後」は、置換した結果の**文字列**を見せるためのもので、
+    /// それをそのまま読ませて確かめる仕組みである。VOICEVOX は読み方をユーザー辞書でも
+    /// 変えるので、ここで VOICEVOX を使うと「画面に出ている文字列」と「聞こえる音」が
+    /// 一致しなくなり、何を確かめているのか分からなくなる。
+    /// VOICEVOX での聞こえ方は「VOICEVOX での読みとアクセント」の方で確かめられる。
+    static func testSpeakerSetting() -> SpeakerSetting {
+        let defaultSpeaker:SpeakerSetting = RealmUtil.RealmBlock { (realm) -> SpeakerSetting in
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let realmDefaultSpeaker = globalState.defaultSpeakerWith(realm: realm) {
+                return SpeakerSetting(from: realmDefaultSpeaker)
+            }
+            return SpeakerSetting(from: RealmSpeakerSetting())
+        }
+        guard defaultSpeaker.type != "AVSpeechSynthesizer" else { return defaultSpeaker }
+        // 標準の話者が VOICEVOX でも、速さや高さの好みは引き継ぐ。
+        return SpeakerSetting(pitch: defaultSpeaker.pitch,
+                              rate: defaultSpeaker.rate,
+                              volume: defaultSpeaker.volume,
+                              type: "AVSpeechSynthesizer",
+                              voiceIdentifier: "",
+                              locale: defaultSpeaker.locale)
+    }
+
     func SelectedNovelIDSetToNovelNameString(selectedNovelIDSet: Set<String>) -> String {
         var selectedNovelNameArray:[String] = []
         if selectedNovelIDSet.contains(MultipleNovelIDSelectorViewController.AnyTypeTag) {

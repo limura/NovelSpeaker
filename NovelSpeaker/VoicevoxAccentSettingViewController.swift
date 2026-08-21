@@ -42,6 +42,8 @@ class VoicevoxAccentSettingViewController: FormViewController {
     private var moras: [String] = []
     /// 候補の行。選び直した時に印だけ付け替えるために持っておく。
     private var accentRows: [(row: LabelRow, accentType: Int)] = []
+    /// この内容で VOICEVOX が受け付けてくれるか。
+    private var isRegistrable = true
     private let speaker = SpeechBlockSpeaker()
     /// 聞き比べのために一時的に差し替える前の、本来の辞書。
     private var savedDictionaryEntries: [VoicevoxUserDictionaryEntry] = []
@@ -116,6 +118,7 @@ class VoicevoxAccentSettingViewController: FormViewController {
                 } else if self.accentType > moras.count {
                     self.accentType = moras.count
                 }
+                self.updateRegistrableWarning()
                 if moras.count == previousMoraCount {
                     // 候補の顔ぶれは変わらないので、印だけ付け替える(スクロール位置を保つ)。
                     self.updateAccentCheckmarks()
@@ -149,6 +152,12 @@ class VoicevoxAccentSettingViewController: FormViewController {
             self.pronunciation = row.value ?? ""
             self.refreshFromVoicevox(loadPronunciationIfEmpty: false)
         })
+        <<< LabelRow("PronunciationWarningRow") { row in
+            row.title = NSLocalizedString("VoicevoxAccentSettingViewController_NotRegistrableWarning", comment: "この読みは VOICEVOX に受け付けてもらえません。カタカナで入力してください。")
+            row.cell.textLabel?.numberOfLines = 0
+            row.cell.textLabel?.textColor = .systemRed
+            row.hidden = true
+        }
         <<< ButtonRow() {
             $0.title = NSLocalizedString("VoicevoxAccentSettingViewController_LoadFromVoicevox", comment: "VOICEVOX の読み方を取り込む")
         }.onCellSelection({ [weak self] _, _ in
@@ -218,6 +227,41 @@ class VoicevoxAccentSettingViewController: FormViewController {
             section <<< labelRow
         }
         return section
+    }
+
+    /// 「登録できない読み」を出しておく。
+    ///
+    /// ★ここが無いと一番分かりにくい壊れ方をする。
+    /// カタカナ以外を入れても、置換の方は効くので**発話は普通にできてしまう**。
+    /// 利用者からは「アクセントだけ効かない」と見え、原因に辿り着けない。
+    /// 実際に「ケいケンチ」と入れて気付けなかった、という報告があった。
+    private func updateRegistrableWarning() {
+        let pronunciation = self.pronunciation.trimmingCharacters(in: .whitespacesAndNewlines)
+        let surface = self.surface
+        let accentType = self.accentType
+        guard pronunciation.isEmpty == false, surface.isEmpty == false else {
+            setWarning(hidden: true)
+            return
+        }
+        Task { [weak self] in
+            let canRegister = await VoicevoxCore.shared.canRegisterUserDictWord(
+                surface: surface, pronunciation: pronunciation, accentType: accentType)
+            await MainActor.run { [weak self] in
+                guard let self = self else { return }
+                // 待っている間に書き換わっていたら、古い結果は捨てる。
+                guard self.pronunciation.trimmingCharacters(in: .whitespacesAndNewlines) == pronunciation else { return }
+                self.isRegistrable = canRegister
+                self.setWarning(hidden: canRegister)
+            }
+        }
+    }
+
+    private func setWarning(hidden: Bool) {
+        guard let row = form.rowBy(tag: "PronunciationWarningRow") else { return }
+        guard row.isHidden != hidden else { return }
+        if hidden { row.evaluateHidden() }
+        row.hidden = Condition(booleanLiteral: hidden)
+        row.evaluateHidden()
     }
 
     private func updateAccentCheckmarks() {

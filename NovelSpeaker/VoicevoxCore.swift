@@ -508,6 +508,35 @@ actor VoicevoxCore {
         }
     }
 
+    /// この内容で VOICEVOX のユーザー辞書に登録できるか。
+    ///
+    /// **判定は VOICEVOX 自身にさせる。** 受け付けられる文字の範囲を
+    /// こちらで書き写すと、本体の更新でずれた時に「登録したつもりで効いていない」
+    /// という一番分かりにくい壊れ方をする。
+    ///
+    /// 読みがカタカナでないと弾かれるが、弾かれても**発話自体は普通にできてしまう**
+    /// (置換の方は効くので)。利用者からは「アクセントだけ効かない」と見え、
+    /// 原因に辿り着けない。だから登録できるかどうかを先に確かめて知らせる。
+    func canRegisterUserDictWord(surface: String, pronunciation: String, accentType: Int) -> Bool {
+        guard surface.isEmpty == false, pronunciation.isEmpty == false else { return false }
+        guard let dict = voicevox_user_dict_new() else { return false }
+        defer { voicevox_user_dict_delete(dict) }
+        let result = surface.withCString { surfacePointer -> VoicevoxResultCode in
+            return pronunciation.withCString { pronunciationPointer -> VoicevoxResultCode in
+                var word = voicevox_user_dict_word_make(surfacePointer, pronunciationPointer, UInt(max(0, accentType)))
+                var uuid = (UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                            UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0))
+                return withUnsafeMutableBytes(of: &uuid) { rawBuffer -> VoicevoxResultCode in
+                    guard let base = rawBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                        return VOICEVOX_RESULT_INVALID_USER_DICT_WORD_ERROR
+                    }
+                    return voicevox_user_dict_add_word(dict, &word, UnsafeMutablePointer<(UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8)>(OpaquePointer(base)))
+                }
+            }
+        }
+        return result == VOICEVOX_RESULT_OK
+    }
+
     /// テキストを Open JTalk に解析させて、モーラ列とアクセントを得る。
     ///
     /// **声のモデル(VVM)は要らない。** synthesizer ではなく Open JTalk が持っている
@@ -1121,6 +1150,7 @@ final class VoicevoxCore {
     nonisolated var isPlaybackSynthesisPending: Bool { return false }
 
     func applyUserDictionary(_ entries: [VoicevoxUserDictionaryEntry]) {}
+    func canRegisterUserDictWord(surface: String, pronunciation: String, accentType: Int) -> Bool { return false }
     func analyze(text: String) throws -> [VoicevoxAccentPhrase] {
         throw VoicevoxCoreError.notSetUp
     }
