@@ -189,8 +189,15 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             guard let self = self else { return }
             guard let novelID = VoicevoxCacheGenerator.shared.runningNovelID,
                   let row = self.form.rowBy(tag: Self.rowTag(novelID: novelID)) as? ButtonRow else {
-                // 生成が終わった時は並び順(容量の大きい順)も変わるので作り直す。
-                self.reload()
+                // ★ここで reload()(= form.removeAll())をしてはいけない。
+                //
+                // 通知は生成の進捗で何度も飛んでくる。tableView が更新の最中に
+                // 節ごと消されると、Eureka が消えた節の見出しの高さを訊きに来て
+                // 配列の範囲外を引き、落ちる。
+                // 2026-08-22 の実機で実際に落ちた
+                //(heightForHeaderInSection → Form.subscript → NSArray objectAtIndex)。
+                // 変わるのは数字と並び順だけなので、節は触らずに中身だけ入れ替える。
+                self.refreshRowsWithoutRebuildingSections()
                 return
             }
             row.title = self.rowTitle(novelID: novelID)
@@ -199,10 +206,37 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             //(これが無いと1行に潰れて末尾が「…」で切れる)。
             self.tableView.beginUpdates()
             self.tableView.endUpdates()
-            if let summaryRow = self.form.rowBy(tag: Self.totalRowTag) as? LabelRow {
-                summaryRow.title = Self.sizeText(VoicevoxDiskCacheStore.shared.totalSummary())
-                summaryRow.updateCell()
-            }
+            self.updateTotalRow()
+        }
+    }
+
+    /// 節の構成は変えずに、数字と一覧の中身だけを取り直す。
+    ///
+    /// 節の追加・削除は tableView の更新と噛み合わないと落ちるので、
+    /// 通知で何度も呼ばれる経路ではこちらを使う。
+    private func refreshRowsWithoutRebuildingSections() {
+        guard let novelSection = novelSection else {
+            // 一覧の節がまだ無い(音声が1つも無かった等)。
+            // 次に画面へ戻ってきた時に viewWillAppear が作り直す。
+            updateTotalRow()
+            return
+        }
+        novelEntries = Self.loadNovelEntries()
+        novelSection.removeAll()
+        appendNovelRows(to: novelSection)
+        updateTotalRow()
+    }
+
+    private func updateTotalRow() {
+        guard let summaryRow = form.rowBy(tag: Self.totalRowTag) as? LabelRow else { return }
+        summaryRow.title = Self.sizeText(VoicevoxDiskCacheStore.shared.totalSummary())
+        summaryRow.updateCell()
+    }
+
+    private static func loadNovelEntries() -> [(novelID: String, title: String, summary: VoicevoxDiskCacheSummary)] {
+        return VoicevoxDiskCacheStore.shared.cachedNovelIDs().map {
+            (novelID: $0, title: novelTitle(novelID: $0),
+             summary: VoicevoxDiskCacheStore.shared.summary(novelID: $0))
         }
     }
 
@@ -371,10 +405,7 @@ class VoicevoxCacheManageViewController: FormViewController, UISearchBarDelegate
             return
         }
 
-        novelEntries = allNovelIDs.map {
-            (novelID: $0, title: Self.novelTitle(novelID: $0),
-             summary: VoicevoxDiskCacheStore.shared.summary(novelID: $0))
-        }
+        novelEntries = Self.loadNovelEntries()
 
         form +++ sortSection()
 

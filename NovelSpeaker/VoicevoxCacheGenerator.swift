@@ -69,6 +69,18 @@ final class VoicevoxCacheGenerator {
     /// stop() を呼んだ側が申告した停止理由。
     /// 実際に止まる(run が抜ける)のは非同期なので、ここに預けて finish で拾う。
     private var requestedStopReasonUnsafe: StopReason?
+    /// 何回目の生成か。**古い生成の後始末が、新しい生成の状態を消さないようにするため。**
+    ///
+    /// stop() は runningNovelID をその場で nil にするが、走っている Task は
+    /// 次の打ち切り確認まで(1ブロックの合成が終わるまで=数十秒)止まらない。
+    /// その間に自動生成が「動いていない」と判断して start() し直すと、
+    /// **後から古い方の finish() が来て、新しい方の runningNovelID と
+    /// インジケータを消してしまう。**
+    ///
+    /// 2026-08-22 の実機で実際にこうなった。生成は続いていて端末も熱いのに、
+    /// インジケータが出ず、本文画面の「V」も塗り潰されず、押すと
+    /// 「生成を開始しますか」と訊かれる、という状態だった。
+    private var runSerialUnsafe = 0
     /// 進捗表示を組み立てる時に使う、生成中ずっと変わらない情報。
     private var lastChapterNumberUnsafe: Int?
 
@@ -107,7 +119,11 @@ final class VoicevoxCacheGenerator {
         loadedStories.removeAll()
         loadedStoriesNovelID = nil
         VoicevoxCacheGenerationState.shared.setEnabled(true, novelID: novelID)
+        // 前の生成がまだ止まりきっていない事がある。必ず打ち切っておく。
+        task?.cancel()
         lock.lock()
+        runSerialUnsafe += 1
+        let serial = runSerialUnsafe
         runningNovelIDUnsafe = novelID
         runningModeUnsafe = mode
         lastStopReasonUnsafe = nil
@@ -132,7 +148,7 @@ final class VoicevoxCacheGenerator {
         task = Task(priority: .utility) { [weak self] in
             guard let self = self else { return }
             let reason = await self.run(novelID: novelID)
-            self.finish(reason: reason)
+            self.finish(reason: reason, serial: serial)
         }
     }
 
@@ -165,9 +181,14 @@ final class VoicevoxCacheGenerator {
         stop(reason: .stoppedAutomatically(reason))
     }
 
-    private func finish(reason: StopReason) {
+    private func finish(reason: StopReason, serial: Int) {
         let wasManual = runningMode == .manual
         lock.lock()
+        // 自分より後に始まった生成があるなら、その状態を消してはいけない。
+        guard serial == runSerialUnsafe else {
+            lock.unlock()
+            return
+        }
         // run() は打ち切りを一律 .stoppedByUser として返してくるので、
         // stop() を呼んだ側が理由を申告していればそちらを優先する。
         var reason = reason
