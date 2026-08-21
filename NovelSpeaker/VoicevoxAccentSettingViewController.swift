@@ -83,7 +83,14 @@ class VoicevoxAccentSettingViewController: FormViewController {
             return
         }
         let surface = self.surface
+        let entriesWithoutThisWord = savedDictionaryEntries.filter({ $0.surface != self.surface })
+        let entriesToRestore = savedDictionaryEntries
         Task { [weak self] in
+            // ★この語の登録を外してから訊く。
+            // 付けたままだと自分が登録した読みがそのまま返ってきて、
+            // 「VOICEVOX の読み方を取り込む」が「今の自分の設定を取り込む」になってしまう。
+            await VoicevoxCore.shared.applyUserDictionary(entriesWithoutThisWord)
+            defer { Task { await VoicevoxCore.shared.applyUserDictionary(entriesToRestore) } }
             var loadedPronunciation: String? = nil
             var loadedAccentType: Int? = nil
             if surface.isEmpty == false,

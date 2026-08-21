@@ -366,10 +366,10 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
 
     /// VOICEVOX が読む文字列。
     ///
-    /// この行は VOICEVOX が対象の時にだけ効き、その時 VOICEVOX が目にするのは
-    /// 置換した後の文字列なので、常に読み替え後になる。
+    /// 読みを指定した行では VOICEVOX 向けの置換を行わないので、
+    /// VOICEVOX が目にするのは元の文字列(= 読み替え前)になる。
     func voicevoxSurface() -> String {
-        return afterText
+        return beforeText
     }
 
     /// この行の読みとアクセントが VOICEVOX に効くか。

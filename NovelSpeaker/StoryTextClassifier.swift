@@ -167,27 +167,47 @@ struct SpeechModSetting {
     let beforeCount : Int
     let afterCount : Int
 
-    // 指定した話者エンジンtypeにこの読み替えを適用すべきか。
+    // VOICEVOX 用の読み(voicevoxPronunciation)が指定されているか。
+    //
+    // ★指定されている時、VOICEVOX に対しては**置換をしない**。
+    //
+    // 置換と辞書は、同じ「読みを直す」でも効き方が違う。
+    //  - 置換は本文の文字を差し替えるので、文の解析そのものが変わる
+    //    (「橋」を「ハシ」にすると、外来語のように扱われて前後の抑揚まで変わる)。
+    //    そしてアクセントは指定できない。
+    //  - 辞書は本文を変えずに「この表記はこう読む」とだけ教えるので、
+    //    文は自然なまま読まれ、アクセントまで指定できる。
+    //
+    // つまり辞書の方が細かく指定できるので、指定されている時はそちらを使う。
+    // 両方を効かせる事はできない(置換してしまうと、辞書が探す文字列が
+    // 本文から消えてしまう)。
+    let hasVoicevoxPronunciation : Bool
+
+    // 指定した話者エンジンtypeにこの読み替え(置換)を適用すべきか。
     func isAppliedTo(speechEngineType:String) -> Bool {
         // 知らないエンジンなら適用する側に倒す。
         // 落とす側に倒すと、新しいエンジンが増えた時に、そのエンジンでだけ
         // 読み替えが全部効かなくなる(利用者からは原因の分からない不具合に見える)。
         guard let type = SpeechEngineType(typeString: speechEngineType) else { return true }
-        return targetSpeechEngineTypeArray.isApplied(to: type)
+        guard targetSpeechEngineTypeArray.isApplied(to: type) else { return false }
+        // VOICEVOX 用の読みがあるなら、置換ではなく辞書に任せる(上のコメント参照)。
+        if type == .voicevox, hasVoicevoxPronunciation { return false }
+        return true
     }
 
     #if !os(watchOS)
     init(from:RealmSpeechModSetting, targetSpeechEngineTypeArray:[SpeechEngineType] = []) {
         // Realm から来た String は NSString のまま橋渡しされている事があり、
         // その状態だと .count や比較が極端に遅い。ここで素の Swift String に写しておく。
-        self.init(before: String(from.before), after: String(from.after), isUseRegularExpression: from.isUseRegularExpression, targetSpeechEngineTypeArray: targetSpeechEngineTypeArray)
+        self.init(before: String(from.before), after: String(from.after), isUseRegularExpression: from.isUseRegularExpression, targetSpeechEngineTypeArray: targetSpeechEngineTypeArray, hasVoicevoxPronunciation: from.voicevoxPronunciation.isEmpty == false)
     }
     #endif
-    init(before:String, after:String, isUseRegularExpression:Bool, targetSpeechEngineTypeArray:[SpeechEngineType] = []) {
+    init(before:String, after:String, isUseRegularExpression:Bool, targetSpeechEngineTypeArray:[SpeechEngineType] = [], hasVoicevoxPronunciation:Bool = false) {
         self.before = before
         self.after = after
         self.isUseRegularExpression = isUseRegularExpression
         self.targetSpeechEngineTypeArray = targetSpeechEngineTypeArray
+        self.hasVoicevoxPronunciation = hasVoicevoxPronunciation
         self.beforeCount = before.count
         self.afterCount = after.count
     }

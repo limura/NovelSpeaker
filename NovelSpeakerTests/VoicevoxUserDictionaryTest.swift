@@ -32,9 +32,13 @@ class VoicevoxUserDictionaryTest: XCTestCase {
 
     // MARK: - どの行を登録するか
 
-    // VOICEVOX が対象なら、VOICEVOX が目にするのは置換した後の文字列。
-    func testSurfaceIsTheReplacedText() {
-        XCTAssertEqual(entry(before: "橋", after: "ハシ", isAppliedToVoicevox: true)?.surface, "ハシ")
+    // ★読みを指定した行では VOICEVOX 向けの置換を行わないので、
+    // VOICEVOX が目にするのは元の文字列(読み替え前)。
+    //
+    // 置換してしまうと辞書が探す文字列が本文から消えるので、
+    // 両方を効かせる事はできない。細かく指定できる辞書の方を採る。
+    func testSurfaceIsTheOriginalText() {
+        XCTAssertEqual(entry(before: "橋", after: "ハシ", isAppliedToVoicevox: true)?.surface, "橋")
     }
 
     // ★VOICEVOX が対象でない行は、読みとアクセントも効かない。
@@ -65,7 +69,7 @@ class VoicevoxUserDictionaryTest: XCTestCase {
 
     // 表記が空になる組み合わせでは登録しない。
     func testEmptySurfaceIsNotRegistered() {
-        XCTAssertNil(entry(after: "", isAppliedToVoicevox: true))
+        XCTAssertNil(entry(before: "", isAppliedToVoicevox: true))
     }
 
     // MARK: - 値の範囲
@@ -83,8 +87,8 @@ class VoicevoxUserDictionaryTest: XCTestCase {
 
     // VOICEVOX は同じ表記を2つ登録できないので、こちらで決める必要がある。
     func testSameSurfaceKeepsHigherPriority() {
-        let low = entry(after: "ハシ", priority: 3)!
-        let high = entry(after: "ハシ", pronunciation: "ハシ", accentType: 2, priority: 8)!
+        let low = entry(before: "橋", priority: 3)!
+        let high = entry(before: "橋", pronunciation: "ハシ", accentType: 2, priority: 8)!
         let result = VoicevoxUserDictionaryBuilder.deduplicated([low, high])
         XCTAssertEqual(result.count, 1)
         XCTAssertEqual(result.first?.accentType, 2)
@@ -92,8 +96,8 @@ class VoicevoxUserDictionaryTest: XCTestCase {
 
     // 並びが決まっていないと、同じ内容でも署名が変わってキャッシュが無駄になる。
     func testDeduplicatedIsSortedBySurface() {
-        let a = entry(after: "アア")!
-        let b = entry(after: "イイ")!
+        let a = entry(before: "アア")!
+        let b = entry(before: "イイ")!
         XCTAssertEqual(VoicevoxUserDictionaryBuilder.deduplicated([b, a]).map({ $0.surface }), ["アア", "イイ"])
     }
 
@@ -102,35 +106,66 @@ class VoicevoxUserDictionaryTest: XCTestCase {
     // ★辞書を使っていない本文の鍵は、これまでと同じままである事。
     // ここが変わると、既に作ってある音声が全部使われなくなる。
     func testSignatureIsEmptyWhenNothingApplies() {
-        let entries = [entry(after: "ハシ")!]
+        let entries = [entry(before: "橋")!]
         XCTAssertEqual(VoicevoxUserDictionaryBuilder.signature(forText: "こんにちは", entries: entries), "")
         XCTAssertEqual(VoicevoxUserDictionaryBuilder.signature(forText: "こんにちは", entries: []), "")
+    }
+
+    // MARK: - 読みを指定した行では置換しない
+
+    // 置換と辞書は同時に効かせられない(置換すると辞書が探す文字列が消える)。
+    // 細かく指定できる辞書の方を採るので、VOICEVOX への置換は行わない。
+    func testSubstitutionIsSkippedForVoicevoxWhenPronunciationIsGiven() {
+        let mod = NovelSpeaker.SpeechModSetting(
+            before: "橋", after: "ハシ", isUseRegularExpression: false,
+            targetSpeechEngineTypeArray: [.any], hasVoicevoxPronunciation: true)
+        XCTAssertFalse(mod.isAppliedTo(speechEngineType: "VOICEVOX"),
+                       "読みを指定した行では VOICEVOX に置換を当ててはいけない")
+        XCTAssertTrue(mod.isAppliedTo(speechEngineType: "AVSpeechSynthesizer"),
+                      "端末の音声には今までどおり置換が効く")
+    }
+
+    // 読みを指定していなければ、今までどおり置換が効く。
+    func testSubstitutionStillAppliesWhenNoPronunciationIsGiven() {
+        let mod = NovelSpeaker.SpeechModSetting(
+            before: "橋", after: "ハシ", isUseRegularExpression: false,
+            targetSpeechEngineTypeArray: [.any], hasVoicevoxPronunciation: false)
+        XCTAssertTrue(mod.isAppliedTo(speechEngineType: "VOICEVOX"))
+    }
+
+    // 対象から外れている行は、読みの有無に関わらず何も効かない。
+    func testNothingAppliesWhenVoicevoxIsNotTargeted() {
+        let mod = NovelSpeaker.SpeechModSetting(
+            before: "橋", after: "ハシ", isUseRegularExpression: false,
+            targetSpeechEngineTypeArray: [.avSpeechSynthesizer], hasVoicevoxPronunciation: true)
+        XCTAssertFalse(mod.isAppliedTo(speechEngineType: "VOICEVOX"))
+        XCTAssertNil(entry(isAppliedToVoicevox: false))
     }
 
     // ★その語を含む本文だけ署名が付く事。
     // 辞書全体の版番号を混ぜると、1語直しただけで何時間ぶんもの作り置きが
     // 一斉に無駄になってしまう。
     func testSignatureOnlyCoversEntriesThatAppearInTheText() {
-        let entries = [entry(after: "ハシ")!, entry(after: "ヤマ", pronunciation: "ヤマ")!]
-        let signature = VoicevoxUserDictionaryBuilder.signature(forText: "ハシをわたる", entries: entries)
-        XCTAssertTrue(signature.contains("ハシ"))
-        XCTAssertFalse(signature.contains("ヤマ"))
+        let entries = [entry(before: "橋")!, entry(before: "山", pronunciation: "ヤマ")!]
+        let signature = VoicevoxUserDictionaryBuilder.signature(forText: "橋をわたる", entries: entries)
+        XCTAssertTrue(signature.contains("橋"))
+        XCTAssertFalse(signature.contains("山"))
     }
 
     // アクセントだけ変えても署名は変わる(音が変わるので作り直しが要る)。
     func testSignatureChangesWhenAccentChanges() {
-        let flat = [entry(after: "ハシ", accentType: 0)!]
-        let head = [entry(after: "ハシ", accentType: 1)!]
-        XCTAssertNotEqual(VoicevoxUserDictionaryBuilder.signature(forText: "ハシ", entries: flat),
-                          VoicevoxUserDictionaryBuilder.signature(forText: "ハシ", entries: head))
+        let flat = [entry(before: "橋", accentType: 0)!]
+        let head = [entry(before: "橋", accentType: 1)!]
+        XCTAssertNotEqual(VoicevoxUserDictionaryBuilder.signature(forText: "橋", entries: flat),
+                          VoicevoxUserDictionaryBuilder.signature(forText: "橋", entries: head))
     }
 
     // 同じ内容なら署名も同じである事(でないと毎回作り直しになる)。
     func testSignatureIsStableForTheSameContent() {
-        let a = [entry(after: "ハシ", accentType: 1)!]
-        let b = [entry(after: "ハシ", accentType: 1)!]
-        XCTAssertEqual(VoicevoxUserDictionaryBuilder.signature(forText: "ハシ", entries: a),
-                       VoicevoxUserDictionaryBuilder.signature(forText: "ハシ", entries: b))
+        let a = [entry(before: "橋", accentType: 1)!]
+        let b = [entry(before: "橋", accentType: 1)!]
+        XCTAssertEqual(VoicevoxUserDictionaryBuilder.signature(forText: "橋", entries: a),
+                       VoicevoxUserDictionaryBuilder.signature(forText: "橋", entries: b))
     }
 
     // MARK: - 今有効な辞書の入れ替え
@@ -140,17 +175,17 @@ class VoicevoxUserDictionaryTest: XCTestCase {
     func testReplaceReportsWhetherItActuallyChanged() {
         let dictionary = VoicevoxUserDictionary.shared
         defer { dictionary.replace(with: []) }
-        XCTAssertTrue(dictionary.replace(with: [entry(after: "ハシ", accentType: 1)!]))
-        XCTAssertFalse(dictionary.replace(with: [entry(after: "ハシ", accentType: 1)!]))
-        XCTAssertTrue(dictionary.replace(with: [entry(after: "ハシ", accentType: 0)!]))
+        XCTAssertTrue(dictionary.replace(with: [entry(before: "橋", accentType: 1)!]))
+        XCTAssertFalse(dictionary.replace(with: [entry(before: "橋", accentType: 1)!]))
+        XCTAssertTrue(dictionary.replace(with: [entry(before: "橋", accentType: 0)!]))
     }
 
     // 並び順の違いだけでは「変わった」にならない事。
     func testReplaceIgnoresOrder() {
         let dictionary = VoicevoxUserDictionary.shared
         defer { dictionary.replace(with: []) }
-        let a = entry(after: "アア")!
-        let b = entry(after: "イイ")!
+        let a = entry(before: "アア")!
+        let b = entry(before: "イイ")!
         XCTAssertTrue(dictionary.replace(with: [a, b]))
         XCTAssertFalse(dictionary.replace(with: [b, a]))
     }

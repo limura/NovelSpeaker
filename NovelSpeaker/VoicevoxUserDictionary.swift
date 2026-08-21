@@ -26,8 +26,21 @@
 //  VOICEVOX でだけ読みを直したい語は、VOICEVOX を対象にした行を別に作る
 //  (読み替え前と読み替え後を同じ文字列にすれば、置換はしないまま読みだけ与えられる)。
 //
-//  そのため surface は**常に読み替え後**になる。
-//  この行が効く時、VOICEVOX が目にするのは置換した後の文字列だからである。
+//  ★読みを指定した行では、VOICEVOX に対して**置換をしない**。
+//
+//  置換(after)と辞書は、同じ「読みを直す」でも効き方が違う。
+//   - 置換は本文の文字を差し替えるので、文の解析そのものが変わる。
+//     「橋」を「ハシ」にすると外来語のように扱われて前後の抑揚まで変わるし、
+//     アクセントは指定できない。
+//   - 辞書は本文を変えずに「この表記はこう読む」と教えるだけなので、
+//     文は自然なまま読まれ、アクセントまで指定できる。
+//
+//  細かく指定できる方を採る、という当たり前の理由で辞書を優先する。
+//  そして両方を効かせる事はできない。置換してしまうと、
+//  辞書が探す文字列が本文から消えてしまうからである。
+//
+//  よって surface は**読み替え前**になる。置換していないので、
+//  VOICEVOX が目にするのは元の文字列である。
 //
 
 import Foundation
@@ -87,9 +100,10 @@ enum VoicevoxUserDictionaryBuilder {
         // 読み替え後が "$1" のようなテンプレートで、実際に何という文字列になるのかが
         // 登録の時点では決まらないため。画面でもこの場合は欄を出さない。
         guard isUseRegularExpression == false else { return nil }
-        // この行が効く時、VOICEVOX が目にするのは置換した後の文字列。
-        _ = before
-        let surface = after
+        // 読みを指定した行では VOICEVOX 向けの置換を行わないので、
+        // VOICEVOX が目にするのは元の文字列(= 読み替え前)。
+        _ = after
+        let surface = before
         guard surface.isEmpty == false else { return nil }
         return VoicevoxUserDictionaryEntry(
             surface: surface,
