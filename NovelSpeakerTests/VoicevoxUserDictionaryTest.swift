@@ -30,20 +30,22 @@ class VoicevoxUserDictionaryTest: XCTestCase {
             pronunciation: pronunciation, accentType: accentType, priority: priority)
     }
 
-    // MARK: - 表記に何が入るか
+    // MARK: - どの行を登録するか
 
-    // VOICEVOX にも適用される読み替えなら、VOICEVOX が目にするのは読み替え「後」。
-    func testSurfaceIsAfterWhenAppliedToVoicevox() {
+    // VOICEVOX が対象なら、VOICEVOX が目にするのは置換した後の文字列。
+    func testSurfaceIsTheReplacedText() {
         XCTAssertEqual(entry(before: "橋", after: "ハシ", isAppliedToVoicevox: true)?.surface, "ハシ")
     }
 
-    // ★端末の音声専用の読み替えなら、VOICEVOX には元の文字列が届く。
+    // ★VOICEVOX が対象でない行は、読みとアクセントも効かない。
     //
-    // 「実際」→「"実際"」のような引用符の細工は端末の音声の癖を避けるためのもので、
-    // VOICEVOX には適用しない。この時 VOICEVOX が読むのは「実際」なので、
-    // 「"実際"」を登録しても一致しない(記号入りの表記はそもそも受け付けられない)。
-    func testSurfaceIsBeforeWhenNotAppliedToVoicevox() {
-        XCTAssertEqual(entry(before: "実際", after: "\"実際\"", isAppliedToVoicevox: false)?.surface, "実際")
+    // 「適用する音声合成」で VOICEVOX を外した = この読みの修正は VOICEVOX には
+    // 効かない、という指定なので、その一部であるここも効かない。
+    // 以前は「代わりに読み替え前の文字列へ読みを与える」という作りにしていたが、
+    // 同じ項目に2つの意味を持たせる事になり、設定から受ける印象と正反対に動いていた。
+    func testNotRegisteredWhenVoicevoxIsNotTargeted() {
+        XCTAssertNil(entry(before: "実際", after: "\"実際\"", isAppliedToVoicevox: false))
+        XCTAssertNil(entry(before: "橋", after: "ハシ", isAppliedToVoicevox: false))
     }
 
     // MARK: - 登録しない場合
@@ -64,7 +66,6 @@ class VoicevoxUserDictionaryTest: XCTestCase {
     // 表記が空になる組み合わせでは登録しない。
     func testEmptySurfaceIsNotRegistered() {
         XCTAssertNil(entry(after: "", isAppliedToVoicevox: true))
-        XCTAssertNil(entry(before: "", isAppliedToVoicevox: false))
     }
 
     // MARK: - 値の範囲

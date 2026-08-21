@@ -29,9 +29,8 @@ protocol VoicevoxAccentSettingDelegate: AnyObject {
 
 class VoicevoxAccentSettingViewController: FormViewController {
 
-    /// VOICEVOX が実際に目にする文字列(読み替え後、または読み替え前)。
-    /// **呼び出し側が決めて渡す。** どちらになるかは、その読み替えが
-    /// VOICEVOX に適用されるかどうかで変わる(VoicevoxUserDictionary 参照)。
+    /// VOICEVOX が読む文字列(= 読み替え後)。
+    /// この画面は「適用する音声合成」に VOICEVOX が入っている時にだけ開ける。
     var surface: String = ""
     var pronunciation: String = ""
     var accentType: Int = 0
@@ -154,14 +153,17 @@ class VoicevoxAccentSettingViewController: FormViewController {
         })
         <<< LabelRow("PronunciationWarningRow") { row in
             row.title = NSLocalizedString("VoicevoxAccentSettingViewController_NotRegistrableWarning", comment: "この読みは VOICEVOX に受け付けてもらえません。カタカナで入力してください。")
-            row.cell.textLabel?.numberOfLines = 0
-            // systemRed は暗い配色でも読める色に自動で切り替わるので、
-            // 見た目の設定はこれで足りる。太字にして更に目立たせる。
-            row.cell.textLabel?.textColor = .systemRed
-            row.cell.textLabel?.font = UIFont.boldSystemFont(ofSize: UIFont.preferredFont(forTextStyle: .body).pointSize)
-            row.cell.textLabel?.adjustsFontForContentSizeCategory = true
             row.hidden = true
-        }
+        }.cellUpdate({ cell, _ in
+            // ★見た目は cellUpdate で付ける事。
+            // 初期化の所で色を付けても、Eureka がセルを使い回して update する度に
+            // 元の色へ戻されるので、実機では黒いままだった。
+            // systemRed は暗い配色でも読める色に iOS が自動で切り替える。
+            cell.textLabel?.numberOfLines = 0
+            cell.textLabel?.textColor = .systemRed
+            cell.textLabel?.font = UIFont.boldSystemFont(ofSize: UIFont.preferredFont(forTextStyle: .body).pointSize)
+            cell.textLabel?.adjustsFontForContentSizeCategory = true
+        })
         <<< ButtonRow() {
             $0.title = NSLocalizedString("VoicevoxAccentSettingViewController_LoadFromVoicevox", comment: "VOICEVOX の読み方を取り込む")
         }.onCellSelection({ [weak self] _, _ in
@@ -263,9 +265,9 @@ class VoicevoxAccentSettingViewController: FormViewController {
     private func setWarning(hidden: Bool) {
         guard let row = form.rowBy(tag: "PronunciationWarningRow") else { return }
         guard row.isHidden != hidden else { return }
-        if hidden { row.evaluateHidden() }
         row.hidden = Condition(booleanLiteral: hidden)
         row.evaluateHidden()
+        row.updateCell()
     }
 
     private func updateAccentCheckmarks() {

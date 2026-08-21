@@ -189,10 +189,10 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.accessibilityHint = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineHint", comment: "この読み替えを、どの音声合成で読み上げる時に使うかを選びます。")
             }.onChange({ row in
-                let previousSurface = self.voicevoxSurface()
                 let selected = row.value ?? []
                 self.targetEngineTypes = SpeechEngineType.selectableTypes.filter({ selected.contains($0.localizedName) })
-                self.clearVoicevoxSettingIfSurfaceChanged(from: previousSurface)
+                // VOICEVOX を外す/入れると、読みとアクセントの行が出たり消えたりする。
+                self.form.rowBy(tag: "VoicevoxAccentRow")?.evaluateHidden()
             })
         }
         if VoicevoxCore.isAvailableOnThisOS {
@@ -204,11 +204,17 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 row.cell.editingAccessoryType = .disclosureIndicator
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.accessibilityHint = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_VoicevoxAccentHint", comment: "VOICEVOX で読み上げる時の読みとアクセントを指定します。")
-                // 正規表現マッチの時は出さない。読み替え後が "$1" のような
-                // テンプレートで、実際に何という文字列になるのかが決まらないため。
-                row.hidden = .function(["IsUseRegexpRow"], { form -> Bool in
-                    guard let row = form.rowBy(tag: "IsUseRegexpRow") as? SwitchRow else { return false }
-                    return row.value ?? false
+                // 出さない条件は2つ。
+                //  - 正規表現マッチ: 読み替え後が "$1" のようなテンプレートで、
+                //    実際に何という文字列になるのかが登録の時点で決まらない。
+                //  - 「適用する音声合成」に VOICEVOX が入っていない:
+                //    その指定は「この読みの修正は VOICEVOX には効かない」という意味なので、
+                //    読みとアクセントだけ効くのは設定と矛盾する。
+                row.hidden = .function(["IsUseRegexpRow"], { [weak self] form -> Bool in
+                    if let regexpRow = form.rowBy(tag: "IsUseRegexpRow") as? SwitchRow, regexpRow.value ?? false {
+                        return true
+                    }
+                    return self?.isVoicevoxAccentAvailable() == false
                 })
             }.onCellSelection({ [weak self] _, _ in
                 guard let self = self else { return }
@@ -358,30 +364,17 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         return types
     }
 
-    /// VOICEVOX が実際に目にする文字列。
+    /// VOICEVOX が読む文字列。
     ///
-    /// その読み替えが VOICEVOX に適用されるなら読み替え後、
-    /// されないなら読み替え前(VOICEVOX には元の文字列が届く)。
-    /// 詳しくは VoicevoxUserDictionary の冒頭のコメントを参照。
+    /// この行は VOICEVOX が対象の時にだけ効き、その時 VOICEVOX が目にするのは
+    /// 置換した後の文字列なので、常に読み替え後になる。
     func voicevoxSurface() -> String {
-        return targetEngineTypes.isApplied(to: .voicevox) ? afterText : beforeText
+        return afterText
     }
 
-    /// 適用先エンジンを変えると、VOICEVOX が読む文字列が
-    /// 読み替え後↔読み替え前で入れ替わる。
-    ///
-    /// ★入れ替わったのに読みを残してはいけない。
-    /// 「SAN値」に対して付けた読み「エスエエエヌチ」がそのまま残ると、
-    /// 今度は「サンチ」を「エスエエエヌチ」と読む登録になってしまう。
-    /// **音は出るが読みだけが間違う**ので、原因に辿り着けない類の壊れ方をする。
-    /// 別の文字列に対して付けた読みなので、未設定に戻す。
-    func clearVoicevoxSettingIfSurfaceChanged(from previousSurface: String) {
-        guard voicevoxSurface() != previousSurface else { return }
-        guard voicevoxPronunciation.isEmpty == false else { return }
-        voicevoxPronunciation = ""
-        voicevoxAccentType = 0
-        voicevoxWordPriority = VoicevoxUserDictionaryEntry.defaultPriority
-        updateVoicevoxAccentRowValue()
+    /// この行の読みとアクセントが VOICEVOX に効くか。
+    func isVoicevoxAccentAvailable() -> Bool {
+        return targetEngineTypes.isApplied(to: .voicevox)
     }
 
     func voicevoxAccentRowValue() -> String {

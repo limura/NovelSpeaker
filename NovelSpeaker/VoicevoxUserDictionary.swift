@@ -11,20 +11,23 @@
 //  カタカナに置き換えても言い分けられない。
 //  アクセントを指定できるのは VOICEVOX 本体のユーザー辞書だけである。
 //
-//  ★surface(表記)に何を入れるかが、この仕組みの肝。
+//  ★「適用する音声合成」に VOICEVOX が入っていない行は、ここでも一切扱わない。
 //
-//  ユーザー辞書は「VOICEVOX が読む文字列」に対して効く。つまり、
-//  その読み替えが VOICEVOX にも適用されるかどうかで、入れるべき文字列が変わる。
+//  `targetSpeechEngineTypeArray` は「この読みの修正がどのエンジンに適用されるか」
+//  という**1つの意味**を持つ。読みとアクセントもその読みの修正の一部なので、
+//  VOICEVOX が対象でなければ効かない。
 //
-//  | その行が VOICEVOX に適用されるか | surface |
-//  |---|---|
-//  | される      | **読み替え後**(VOICEVOX はその文字列を読むので) |
-//  | されない    | **読み替え前**(VOICEVOX には元の文字列が届くので) |
+//  以前は「VOICEVOX に適用されない行では、代わりに読み替え前の文字列へ
+//  読みを与える」という作りにしていた。1行で両方のエンジンの面倒を見られて
+//  得に見えたが、**同じ項目に2つの意味を持たせる**事になり、
+//  「VOICEVOX には適用しないと指定したのに VOICEVOX の読みが変わる」という、
+//  設定から受ける印象と正反対の動きになっていた。
 //
-//  例: 「実際」→「"実際"」は端末の音声の癖を避けるための引用符付けで、
-//  VOICEVOX には適用しない。この時 VOICEVOX が目にするのは「実際」なので、
-//  surface は「実際」でなければならない。「"実際"」を登録しても一致しない
-//  (そもそも記号入りの表記は VOICEVOX に受け付けてもらえない)。
+//  VOICEVOX でだけ読みを直したい語は、VOICEVOX を対象にした行を別に作る
+//  (読み替え前と読み替え後を同じ文字列にすれば、置換はしないまま読みだけ与えられる)。
+//
+//  そのため surface は**常に読み替え後**になる。
+//  この行が効く時、VOICEVOX が目にするのは置換した後の文字列だからである。
 //
 
 import Foundation
@@ -60,7 +63,8 @@ enum VoicevoxUserDictionaryBuilder {
     ///   - before: 読み替え前。
     ///   - after: 読み替え後。
     ///   - isUseRegularExpression: 正規表現マッチか。
-    ///   - isAppliedToVoicevox: この読み替えが VOICEVOX にも適用されるか。
+    ///   - isAppliedToVoicevox: この読み替えが VOICEVOX に適用されるか。
+    ///     false ならこの行は VOICEVOX に一切効かないので、辞書にも登録しない。
     ///   - pronunciation: VOICEVOX に渡す読み(カタカナ)。空なら登録しない。
     ///   - accentType: アクセント核の位置。
     ///   - priority: 優先度。
@@ -72,6 +76,10 @@ enum VoicevoxUserDictionaryBuilder {
                       pronunciation: String,
                       accentType: Int,
                       priority: Int) -> VoicevoxUserDictionaryEntry? {
+        // ★VOICEVOX が対象でない行は、読みもアクセントも効かない。
+        // 「適用する音声合成」で VOICEVOX を外した = この読みの修正は
+        // VOICEVOX には効かない、という指定なので、その一部であるここも効かない。
+        guard isAppliedToVoicevox else { return nil }
         // 読みが無いものは、そもそもこの機能を使っていない行。
         let pronunciation = pronunciation.trimmingCharacters(in: .whitespacesAndNewlines)
         guard pronunciation.isEmpty == false else { return nil }
@@ -79,8 +87,9 @@ enum VoicevoxUserDictionaryBuilder {
         // 読み替え後が "$1" のようなテンプレートで、実際に何という文字列になるのかが
         // 登録の時点では決まらないため。画面でもこの場合は欄を出さない。
         guard isUseRegularExpression == false else { return nil }
-        // ★VOICEVOX が実際に目にする文字列を表記にする(冒頭のコメント参照)。
-        let surface = isAppliedToVoicevox ? after : before
+        // この行が効く時、VOICEVOX が目にするのは置換した後の文字列。
+        _ = before
+        let surface = after
         guard surface.isEmpty == false else { return nil }
         return VoicevoxUserDictionaryEntry(
             surface: surface,
