@@ -24,8 +24,19 @@ final class VoicevoxCacheAutoGeneration {
     /// 判定の間隔。毎回のwillSpeakRangeで測ると重いので間引く。
     private static let evaluationIntervalSeconds: Double = 15
 
+    /// 走り続けている間、貯金がどうなっているかを残す間隔。
+    ///
+    /// 開始と停止しか記録していなかったため、実機ログから
+    /// 「作り足しは動いているのに貯金が増えているのか減っているのか」が読めなかった。
+    /// 74分回して無音が55%という結果は取れたのに、その間ずっと生成は走りっぱなしで、
+    /// 貯まっていたのか追いつけていなかったのかが分からない。
+    /// 前景か背面か・スレッド数も一緒に残す(画面が消えて背面に落ちていた場合、
+    /// それは「前景で測った結果」ではないため)。
+    private static let heartbeatIntervalSeconds: Double = 300
+
     private let lock = NSLock()
     private var lastEvaluationDate = Date.distantPast
+    private var lastHeartbeatDate = Date.distantPast
 
     private init() {}
 
@@ -73,6 +84,7 @@ final class VoicevoxCacheAutoGeneration {
         }
 
         let lead = contiguousLeadSeconds(context: context)
+        logHeartbeatIfNeeded(leadSeconds: lead)
         if VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: lead) {
             if VoicevoxCacheGenerator.shared.runningNovelID != context.novelID {
                 AppInformationLogger.AddLog(message:
@@ -90,6 +102,32 @@ final class VoicevoxCacheAutoGeneration {
             }
             VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "貯金が下限まで貯まったため")
         }
+    }
+
+    /// 走り続けている間の様子を、たまに記録する。
+    ///
+    /// 貯金が増えているのか減っているのかは、これが無いと後から分からない。
+    private func logHeartbeatIfNeeded(leadSeconds: Double) {
+        guard VoicevoxCacheGenerator.shared.runningNovelID != nil else { return }
+        let now = Date()
+        lock.lock()
+        guard now.timeIntervalSince(lastHeartbeatDate) >= Self.heartbeatIntervalSeconds else {
+            lock.unlock()
+            return
+        }
+        lastHeartbeatDate = now
+        lock.unlock()
+        let monitor = VoicevoxPrefetchThrottleMonitor.shared
+        AppInformationLogger.AddLog(message:
+            "[VOICEVOX音声生成] 作り足し中: この先の貯金は "
+            + VoicevoxCacheGenerationProgress.durationText(seconds: leadSeconds),
+            appendix: [
+                "leadSeconds": String(format: "%.0f", leadSeconds),
+                "isBackground": monitor.isBackground ? "true" : "false",
+                "isOnExternalPower": monitor.isOnExternalPower ? "true" : "false",
+                "threadCount": "\(VoicevoxCore.activeCPUNumThreads)",
+                "thermalState": "\(ProcessInfo.processInfo.thermalState.rawValue)",
+            ], isForDebug: VoicevoxDiagnostics.isForDebug)
     }
 
     /// 今の再生位置から先に、**途切れずに**貯めてある音声の秒数。
