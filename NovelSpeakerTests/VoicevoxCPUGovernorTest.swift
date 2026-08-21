@@ -28,7 +28,7 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // まだ何も使っていなければ、すぐに合成してよい。
     func testAllowsImmediatelyWhenNothingHasBeenUsed() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: 0) // 0.1秒/文字
+        governor.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: 0) // 0.1秒/文字
         let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 1000)
         XCTAssertEqual(wait, 0, accuracy: 0.001, "窓の中に何も無いなら即座に合成してよい")
     }
@@ -43,9 +43,9 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // しかならず、上限80%に対して予算を大きく余らせる原因になっていた)。
     func testWaitsUntilThereIsRoomInTheWindowAtCompletionTime() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: 0)
+        governor.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: 0)
         // t=100 に終わった 40秒の合成 = 区間 [60, 100] を占めていた。
-        governor.recordSynthesis(cpuSeconds: 40, characterCount: 400, at: 100)
+        governor.recordSynthesis(cpuSeconds: 40, wallSeconds: 40, characterCount: 400, at: 100)
         // 予算は 0.8 × 60 = 48秒。次の合成(100文字=10秒)が終わる時点の窓に、
         // 古い区間が38秒までしか入らなければよい。
         let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 100)
@@ -57,7 +57,7 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // 「終了から60秒」も待つ必要はない。
     func testLongSynthesisIsCountedAsAnIntervalNotAPoint() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 40, characterCount: 400, at: 100)
+        governor.recordSynthesis(cpuSeconds: 40, wallSeconds: 40, characterCount: 400, at: 100)
         let wait = governor.waitSeconds(forCharacterCount: 400, limitRatio: 0.8, at: 100)
         XCTAssertGreaterThan(wait, 0, "直後には始められない")
         XCTAssertLessThan(wait, 60, "終了から丸ごと60秒待つ必要は無い")
@@ -66,8 +66,8 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // 窓から出た使用量は勘定に入らない事。
     func testUsageOutsideTheWindowIsForgotten() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: 0)
-        governor.recordSynthesis(cpuSeconds: 45, characterCount: 450, at: 10)
+        governor.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: 0)
+        governor.recordSynthesis(cpuSeconds: 45, wallSeconds: 45, characterCount: 450, at: 10)
         let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 200)
         XCTAssertEqual(wait, 0, accuracy: 0.001, "60秒窓より古い使用量は無視されるべき")
     }
@@ -78,7 +78,7 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // (待てば実行できると誤認すると、待った挙句に上限を超えて殺される)。
     func testReportsImpossibleWhenOneSynthesisExceedsTheWholeBudget() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 33, characterCount: 100, at: 0) // 0.33秒/文字
+        governor.recordSynthesis(cpuSeconds: 33, wallSeconds: 33, characterCount: 100, at: 0) // 0.33秒/文字
         let wait = governor.waitSeconds(forCharacterCount: 160, limitRatio: 0.8, at: 1000)
         XCTAssertTrue(wait.isInfinite, "1本で予算(48秒)を超える合成は、待っても実行できない")
     }
@@ -86,7 +86,7 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // 見積りは文字数に比例し、実測が反映される事。
     func testEstimateScalesWithCharacterCountAndFollowsMeasurements() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 13, characterCount: 100, at: 0) // 0.13秒/文字
+        governor.recordSynthesis(cpuSeconds: 13, wallSeconds: 13, characterCount: 100, at: 0) // 0.13秒/文字
         XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 100), 13, accuracy: 0.01)
         XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 50), 6.5, accuracy: 0.01)
     }
@@ -97,9 +97,9 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     func testEstimateFollowsTheHeaviestRecentMeasurement() {
         let governor = makeGovernor()
         for i in 0..<5 {
-            governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: Double(i)) // 0.1秒/文字
+            governor.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: Double(i)) // 0.1秒/文字
         }
-        governor.recordSynthesis(cpuSeconds: 33, characterCount: 100, at: 10) // 急に0.33秒/文字へ悪化
+        governor.recordSynthesis(cpuSeconds: 33, wallSeconds: 33, characterCount: 100, at: 10) // 急に0.33秒/文字へ悪化
         XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 100), 33, accuracy: 0.01,
                        "直近で最も重かった実測に合わせるべき(平均で薄めない)")
     }
@@ -115,7 +115,7 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // 安全係数が効いている事(見積りは実測より高めに出す)。
     func testSafetyFactorInflatesTheEstimate() {
         let governor = VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.25, fixedOverheadSeconds: 0)
-        governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: 0)
+        governor.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: 0)
         XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 100), 12.5, accuracy: 0.01)
     }
 
@@ -128,7 +128,7 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // (100文字10秒を食わせて、その100文字を11秒と見積もっていた)。
     func testFixedOverheadIsIncluded() {
         let governor = VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.0, fixedOverheadSeconds: 1.0)
-        governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: 0)
+        governor.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: 0)
 
         // 10秒のうち1秒が固定費なので、単価は 9秒/100文字 = 0.09/文字。
         XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 10), 1.9, accuracy: 0.01,
@@ -142,8 +142,8 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     // limitRatio を小さくすると、より早い段階で待たされる事。
     func testLowerLimitRatioStopsEarlier() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 10, characterCount: 100, at: 0)
-        governor.recordSynthesis(cpuSeconds: 30, characterCount: 300, at: 100)
+        governor.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: 0)
+        governor.recordSynthesis(cpuSeconds: 30, wallSeconds: 30, characterCount: 300, at: 100)
         // 予算48秒(0.8)なら 100文字(10秒)はまだ入る。
         XCTAssertEqual(governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 100), 0, accuracy: 0.001)
         // 予算36秒(0.6)なら入らないので待たされる。
@@ -154,7 +154,7 @@ class VoicevoxCPUGovernorTest: XCTestCase {
     func testOldRecordsAreDiscarded() {
         let governor = makeGovernor()
         for i in 0..<1000 {
-            governor.recordSynthesis(cpuSeconds: 0.01, characterCount: 1, at: Double(i))
+            governor.recordSynthesis(cpuSeconds: 0.01, wallSeconds: 0.01, characterCount: 1, at: Double(i))
         }
         XCTAssertLessThan(governor.recordCountForTesting, 100, "60秒窓を大きく超える記録は保持しない")
     }
@@ -184,7 +184,7 @@ class VoicevoxCPUGovernorCostModelTest: XCTestCase {
                       _ samples: [(chars: Int, cpu: Double)]) {
         var now: Double = 0
         for sample in samples {
-            governor.recordSynthesis(cpuSeconds: sample.cpu, characterCount: sample.chars, at: now)
+            governor.recordSynthesis(cpuSeconds: sample.cpu, wallSeconds: sample.cpu, characterCount: sample.chars, at: now)
             now += 1
         }
     }
@@ -343,5 +343,114 @@ class VoicevoxCPUGovernorCostModelTest: XCTestCase {
         let governor = makeGovernor()
         feed(governor, realDeviceSamples)
         XCTAssertGreaterThanOrEqual(governor.maxCharacterCount(withinCPUSeconds: 0.1), 1)
+    }
+}
+
+/// 窓(60秒)の勘定が「実時間」で行われているかを見るテスト。
+///
+/// 合成が窓のどこをどれだけ占めていたかは、CPU 秒ではなく実時間で置かないと合わない。
+/// 全コアで走れば 17 CPU秒 の合成でも実時間は4秒ほどしかない。
+class VoicevoxCPUGovernorWindowTest: XCTestCase {
+
+    // 60秒窓・上限80% → 予算48秒。見積りに係数を掛けず、素の勘定だけを見る。
+    private func makeGovernor() -> VoicevoxCPUGovernor {
+        return VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.0, fixedOverheadSeconds: 0)
+    }
+
+    // ★2026-08-21 の実機事故の再現。
+    //
+    // 全コアで走ると、17 CPU秒 の合成でも実時間は4秒ほどしかかからない。
+    // それを「17秒間占めていた」ものとして記録すると、窓(実時間の60秒)から
+    // はみ出た分が捨てられ、窓の中の使用量を実際より少なく見積もってしまう。
+    // 実機ではプロセス全体が直近60秒で 159%(上限80%)に達していたのに、
+    // 予算管理は一度も待たせていなかった(waitedSeconds = 0.00)。
+    func testCountsCPUByWallClockIntervalNotByCPUSeconds() {
+        let governor = makeGovernor()
+        // 予算は 0.8 × 60 = 48秒。
+        // 実時間で 12秒ずつ、4本で 48 CPU秒 を使い切ったところ。
+        // 全コアなので、実時間の合計は 48秒ではなく 48/4 = 12秒しか経っていない。
+        for i in 0..<4 {
+            let end = Double(i) * 3 + 3
+            governor.recordSynthesis(cpuSeconds: 12, wallSeconds: 3, characterCount: 120, at: end)
+        }
+        // t=12 の時点で、直近60秒には 48 CPU秒 が丸ごと入っている。もう空きは無い。
+        let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 12)
+        XCTAssertGreaterThan(wait, 0, "実時間で数えれば窓は埋まっている。待たせなければならない")
+    }
+
+    // 同じ 48 CPU秒 でも、どれだけの時間に詰め込まれていたかで待つべき長さが変わる。
+    //
+    // 1スレッドで48秒かけて使ったのなら、時間が経つにつれ窓の外へこぼれていくので、
+    // 少し待てば空きができる。全コアで12秒に詰め込んだのなら、窓の中に固まって
+    // 残っているので、窓がその塊を追い越すまで待たなければならない。
+    // CPU 秒だけを見ていると、この2つが区別できない。
+    func testSameCPUSecondsWaitLongerWhenPackedIntoAShorterTime() {
+        let spread = makeGovernor()
+        // 1スレッド。区間 [0, 48] に 48 CPU秒。
+        spread.recordSynthesis(cpuSeconds: 48, wallSeconds: 48, characterCount: 480, at: 48)
+        // 100文字(=10 CPU秒)を今から始めると終わるのは t=58。窓は [-2, 58] で 48秒ぶんが丸ごと入る。
+        // 窓の左端が t=10 まで進めば入るのは 38秒ぶんになり、38 + 10 = 48 で予算に収まる。
+        XCTAssertEqual(spread.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 48),
+                       12, accuracy: 1.0, "窓の外へ出ていった分は数えない")
+
+        let packed = makeGovernor()
+        // 全コア(4並列)。同じ 48 CPU秒 が区間 [36, 48] に固まっている。
+        packed.recordSynthesis(cpuSeconds: 48, wallSeconds: 12, characterCount: 480, at: 48)
+        let packedWait = packed.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 48)
+        XCTAssertGreaterThan(packedWait, 40,
+                             "短時間に詰め込まれた CPU は窓の中に固まって残るので、ずっと長く待つ必要がある")
+    }
+
+    // 区間が窓の端に半分だけ掛かっている時は、その割合ぶんだけ数える。
+    func testPartiallyOverlappingRecordIsProrated() {
+        let governor = makeGovernor()
+        // 実時間 [0, 10] に 40 CPU秒(=4並列)。
+        governor.recordSynthesis(cpuSeconds: 40, wallSeconds: 10, characterCount: 400, at: 10)
+        // 窓の左端が t=5 に来る時刻を作る。区間の半分だけが窓に入るので 20 CPU秒。
+        // 100文字(10 CPU秒)を足しても 30秒で、予算48秒に収まる。
+        let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 64)
+        XCTAssertEqual(wait, 0, accuracy: 0.001, "窓に掛かっている割合ぶんだけ数える")
+    }
+
+    // 実時間が測れなかった場合でも、CPU 秒を取り零さない事。
+    // (点として、終了時刻に全部使ったものとして数える = 安全側)
+    func testRecordWithoutWallClockIsCountedAsAPoint() {
+        let governor = makeGovernor()
+        governor.recordSynthesis(cpuSeconds: 48, wallSeconds: 0, characterCount: 480, at: 0)
+        let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 0)
+        XCTAssertGreaterThan(wait, 0, "実時間が測れなくても、使った CPU を無かった事にしてはいけない")
+    }
+
+    // 並列度を学んだ後は、これから走らせる合成も「実時間では短い」ものとして扱う。
+    // 窓の終わりが手前に来るので、直近に使った CPU がより多く窓に入る = 安全側に倒れる。
+    func testFutureSynthesisIsProjectedWithLearnedParallelism() {
+        let singleThreaded = makeGovernor()
+        let multiThreaded = makeGovernor()
+        // 単価は同じ(0.1 CPU秒/文字)。違うのは並列度だけ。
+        for i in 0..<4 {
+            let end = Double(i) * 10 + 10
+            singleThreaded.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: end)
+        }
+        for i in 0..<4 {
+            let end = Double(i) * 10 + 10
+            multiThreaded.recordSynthesis(cpuSeconds: 10, wallSeconds: 2.5, characterCount: 100, at: end)
+        }
+        // どちらも窓の中身は 40 CPU秒。予算 48秒に対し、次の 100文字(10秒)を足すと 50秒。
+        // 並列度が高い方は「窓の終わり」が手前に来るぶん、古い分が抜けにくく、より待つ。
+        let waitSingle = singleThreaded.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 40)
+        let waitMulti = multiThreaded.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 40)
+        XCTAssertGreaterThanOrEqual(waitMulti, waitSingle,
+                                    "並列度が高いほど CPU が短時間に詰まるので、安全側(待つ側)に倒れるべき")
+    }
+
+    // スレッド数を変えた時に並列度の学習をやり直しても、
+    // 既に使った CPU の記録は消えない事(前景→背面の遷移がまさにこれ)。
+    func testResetCostModelKeepsUsageRecords() {
+        let governor = makeGovernor()
+        governor.recordSynthesis(cpuSeconds: 48, wallSeconds: 12, characterCount: 480, at: 12)
+        governor.resetCostModel()
+        XCTAssertEqual(governor.recordCountForTesting, 1, "使った CPU の記録まで消してはいけない")
+        let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 12)
+        XCTAssertGreaterThan(wait, 0, "直前まで使っていた事を忘れてはいけない")
     }
 }

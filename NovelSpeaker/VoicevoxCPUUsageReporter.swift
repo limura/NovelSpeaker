@@ -90,11 +90,15 @@ final class VoicevoxCPUUsageReporter {
     ///   - characterCount: 合成した文字数。
     ///   - estimatedCPUSeconds: ガバナーの見積り。
     ///   - actualCPUSeconds: 実際にかかった CPU 秒。
+    ///   - actualWallSeconds: 実際にかかった時間(壁時計)。
+    ///     CPU 秒との比が、その合成の実効並列度になる。窓の勘定が合っているかを
+    ///     後から確かめるのに要る(1スレッドを仮定していた頃はここが食い違っていた)。
     ///   - waitedSeconds: ガバナーの指示で待った秒数。
     ///   - isCPULimitApplied: ガバナーが効く条件だったか。
     func report(characterCount: Int,
                 estimatedCPUSeconds: Double,
                 actualCPUSeconds: Double,
+                actualWallSeconds: Double,
                 waitedSeconds: Double,
                 isCPULimitApplied: Bool,
                 now: Double = ProcessInfo.processInfo.systemUptime) {
@@ -136,6 +140,8 @@ final class VoicevoxCPUUsageReporter {
                 "characterCount": AnyCodable("\(characterCount)"),
                 "estimatedCPUSeconds": AnyCodable(String(format: "%.2f", estimatedCPUSeconds)),
                 "actualCPUSeconds": AnyCodable(String(format: "%.2f", actualCPUSeconds)),
+                "actualWallSeconds": AnyCodable(String(format: "%.2f", actualWallSeconds)),
+                "parallelism": AnyCodable(actualWallSeconds > 0 ? String(format: "%.2f", actualCPUSeconds / actualWallSeconds) : "-"),
                 "estimateRatio": AnyCodable(String(format: "%.2f", estimateRatio)),
                 "waitedSeconds": AnyCodable(String(format: "%.2f", waitedSeconds)),
             ],

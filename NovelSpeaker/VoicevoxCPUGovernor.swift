@@ -27,18 +27,39 @@ final class VoicevoxCPUGovernor {
 
     /// 実際に行われた合成1本ぶんの CPU 使用。
     ///
-    /// 合成は CPU を占有し続けるので、40秒かかった合成は「終了時刻の40秒前から終了時刻まで」を
-    /// 占めていた事になる。これを終了時刻の一点で使ったものとして数えると、実際には空いている
-    /// 窓を埋まっていると誤認して必要以上に待ってしまう(実機で CPU 率が20%前後にしかならず、
-    /// 上限80%に対して予算を大きく余らせる原因になっていた)。区間として扱う。
+    /// 合成は CPU を占有し続けるので、終了時刻の一点で使ったものとして数えると、
+    /// 実際には空いている窓を埋まっていると誤認して必要以上に待ってしまう
+    /// (実機で CPU 率が20%前後にしかならず、上限80%に対して予算を大きく余らせていた)。
+    /// そこで区間として扱う。
+    ///
+    /// ★区間の長さは CPU 秒ではなく**実時間**でなければならない。
+    ///
+    /// 以前は `startTime = endTime - cpuSeconds` としていた。これは
+    /// 「1スレッドで走った」場合にしか成り立たない。全コアで走れば、17 CPU秒 の合成は
+    /// 実時間では4秒ほどしかかからない。それを17秒間に薄く伸ばして記録すると、
+    /// 窓の外へはみ出した分が捨てられ、**窓の中の使用量を実際より少なく見積もる**。
+    /// 判定窓(60秒)は実時間の窓なので、実時間で置かないと勘定が合わない。
+    ///
+    /// 2026-08-21 の実機ログがまさにこれ。94文字/17.1 CPU秒 の合成の直後に
+    /// プロセス全体の直近60秒が **159%**(上限80%)に達していたのに、
+    /// 予算管理は一度も待たせていない(waitedSeconds = 0.00)。
     private struct UsageRecord {
         let endTime: Double
         let cpuSeconds: Double
-        var startTime: Double { return endTime - cpuSeconds }
+        /// 実際にかかった時間(壁時計)。CPU 秒 ÷ これ が、その合成の実効並列度になる。
+        let wallSeconds: Double
+        var startTime: Double { return endTime - wallSeconds }
 
         /// 指定区間と重なっている CPU 秒。
+        ///
+        /// 区間の中では CPU を一定の割合で使い続けていたものとして按分する。
         func overlap(from: Double, to: Double) -> Double {
-            return max(0, min(endTime, to) - max(startTime, from))
+            guard wallSeconds > 0 else {
+                // 実時間が測れなかった(または一瞬で終わった)場合は、点として扱う。
+                return (endTime > from && endTime <= to) ? cpuSeconds : 0
+            }
+            let overlapped = max(0, min(endTime, to) - max(startTime, from))
+            return cpuSeconds * (overlapped / wallSeconds)
         }
     }
 
@@ -53,6 +74,10 @@ final class VoicevoxCPUGovernor {
     }
 
     private var usageRecords: [UsageRecord] = []
+    /// 直近の合成の実効並列度(CPU秒 ÷ 実時間)。これから走らせる合成が
+    /// 実時間で何秒かかるかを見積もるのに使う。
+    private var parallelismSamples: [Double] = []
+    private let parallelismSampleCapacity = 8
     /// 合成の実測(文字数と CPU 秒)。直近のものだけを持つ。
     private var costSamples: [CostSample] = []
     private let costSampleCapacity = 8
@@ -92,11 +117,19 @@ final class VoicevoxCPUGovernor {
     }
 
     /// 実際に行われた合成の実績を記録する(見積りの材料と、窓の使用量の両方になる)。
-    func recordSynthesis(cpuSeconds: Double, characterCount: Int, at now: Double) {
+    /// - Parameter wallSeconds: その合成に実際にかかった時間。CPU 秒とは別に要る。
+    ///   窓(60秒)は実時間の窓なので、区間の長さは実時間で置かないと勘定が合わない。
+    func recordSynthesis(cpuSeconds: Double, wallSeconds: Double, characterCount: Int, at now: Double) {
         lock.lock()
         defer { lock.unlock() }
-        usageRecords.append(UsageRecord(endTime: now, cpuSeconds: cpuSeconds))
+        usageRecords.append(UsageRecord(endTime: now, cpuSeconds: cpuSeconds, wallSeconds: wallSeconds))
         usageRecords.removeAll { $0.endTime <= now - windowSeconds }
+        if wallSeconds > 0 && cpuSeconds > 0 {
+            parallelismSamples.append(cpuSeconds / wallSeconds)
+            if parallelismSamples.count > parallelismSampleCapacity {
+                parallelismSamples.removeFirst(parallelismSamples.count - parallelismSampleCapacity)
+            }
+        }
         // ★単価の材料にするのは「学べるサンプル」だけ。
         //
         // 短い合成や、固定費に埋もれる軽い合成を混ぜると、
@@ -196,15 +229,23 @@ final class VoicevoxCPUGovernor {
 
         lock.lock()
         let records = usageRecords
+        let parallelism = estimatedParallelismLocked()
         lock.unlock()
 
         // 判定するのは「この合成が終わる瞬間」の60秒窓。合成中ずっと CPU を使い続けるので、
-        // 終了時点が最も窓の中身が多くなる。d 秒後に始めるとすると、
-        // 窓は [now + d + estimate - windowSeconds, now + d + estimate]。
+        // 終了時点が最も窓の中身が多くなる。
+        //
+        // ★窓は実時間の窓なので、「この合成が終わるまで何秒か」も**実時間**で置く。
+        // CPU 秒をそのまま実時間として使うと(=1スレッドを仮定すると)、全コアで走る時に
+        // 窓の終わりを実際より先へ置いてしまい、直前に使った CPU が窓から外れて
+        // 「空いている」と誤判断する。
+        let wallEstimate = estimate / parallelism
+        // d 秒後に始めるとすると、窓は
+        // [now + d + wallEstimate - windowSeconds, now + d + wallEstimate]。
         // その窓に入る過去の使用量 + 自分の見積り が予算に収まる最小の d を探す。
         var d = 0.0
         while d <= windowSeconds * 2 {
-            let windowEnd = now + d + estimate
+            let windowEnd = now + d + wallEstimate
             let windowStart = windowEnd - windowSeconds
             let used = records.reduce(0.0) { $0 + $1.overlap(from: windowStart, to: windowEnd) }
             if used + estimate <= budget { return d }
@@ -213,12 +254,24 @@ final class VoicevoxCPUGovernor {
         return .infinity
     }
 
+    /// これから走らせる合成の実効並列度(CPU秒 ÷ 実時間)の見積り。
+    ///
+    /// 大きく見るほど「短い時間に CPU を詰め込む」判断になり、窓の終わりが手前に来て
+    /// 直近の使用量を多く数える。つまり**大きい方が安全側**なので最大値を採る。
+    /// 実測が無い間は 1(=1スレッド)とする。並列度が上がるのはスレッド数を増やした
+    /// 時だけで、それは前景に出た時、つまり CPU 上限が掛からない時だから。
+    private func estimatedParallelismLocked() -> Double {
+        // lock は呼び出し側で取っている前提。
+        return max(1.0, parallelismSamples.max() ?? 1.0)
+    }
+
     /// 読み上げ停止やスタイル変更等で集計をやり直す時に使う。
     func reset() {
         lock.lock()
         defer { lock.unlock() }
         usageRecords.removeAll()
         costSamples.removeAll()
+        parallelismSamples.removeAll()
     }
 
     /// 文字数あたりのコストの見積りだけを作り直す(実際に使った CPU の記録は残す)。
@@ -231,5 +284,9 @@ final class VoicevoxCPUGovernor {
         lock.lock()
         defer { lock.unlock() }
         costSamples.removeAll()
+        // 並列度もスレッド数と一緒に変わるので、これも作り直す。
+        // 既に使った CPU の記録(usageRecords)は、上の理由でここでは消さない。
+        // そちらは記録した時点の実時間を持っているので、後から並列度が変わっても正しいままである。
+        parallelismSamples.removeAll()
     }
 }

@@ -303,7 +303,7 @@ class VoicevoxCostModelTest: XCTestCase {
     func testReproducesRealDeviceMeasurements() {
         let governor = makeGovernor()
         for sample in realDeviceSamples {
-            governor.recordSynthesis(cpuSeconds: sample.cpu, characterCount: sample.chars, at: 0)
+            governor.recordSynthesis(cpuSeconds: sample.cpu, wallSeconds: sample.cpu, characterCount: sample.chars, at: 0)
         }
         for sample in realDeviceSamples {
             let estimate = governor.estimatedCPUSeconds(forCharacterCount: sample.chars)
@@ -319,7 +319,7 @@ class VoicevoxCostModelTest: XCTestCase {
     func testSplittingCostsMoreInTotalBecauseOfTheFixedOverhead() {
         let governor = makeGovernor()
         for sample in realDeviceSamples {
-            governor.recordSynthesis(cpuSeconds: sample.cpu, characterCount: sample.chars, at: 0)
+            governor.recordSynthesis(cpuSeconds: sample.cpu, wallSeconds: sample.cpu, characterCount: sample.chars, at: 0)
         }
         let whole = governor.estimatedCPUSeconds(forCharacterCount: 120)
         let halves = governor.estimatedCPUSeconds(forCharacterCount: 60) * 2
@@ -332,7 +332,7 @@ class VoicevoxCostModelTest: XCTestCase {
         let governor = makeGovernor()
         let samples: [(Double, Int)] = [(5.18, 10), (60.0, 80), (86.81, 240)] // 80文字だけ極端に重い
         for (cpu, count) in samples {
-            governor.recordSynthesis(cpuSeconds: cpu, characterCount: count, at: 0)
+            governor.recordSynthesis(cpuSeconds: cpu, wallSeconds: cpu, characterCount: count, at: 0)
         }
         for (cpu, count) in samples {
             XCTAssertGreaterThanOrEqual(governor.estimatedCPUSeconds(forCharacterCount: count), cpu,
@@ -344,9 +344,9 @@ class VoicevoxCostModelTest: XCTestCase {
     // 以前はここで固定費が20秒級まで押し上げられていた。
     func testOutlierDoesNotInflateTheFixedCost() {
         let governor = makeGovernor()
-        governor.recordSynthesis(cpuSeconds: 5.18, characterCount: 10, at: 0)
-        governor.recordSynthesis(cpuSeconds: 60.0, characterCount: 80, at: 1) // 発熱で極端に重い
-        governor.recordSynthesis(cpuSeconds: 86.81, characterCount: 240, at: 2)
+        governor.recordSynthesis(cpuSeconds: 5.18, wallSeconds: 5.18, characterCount: 10, at: 0)
+        governor.recordSynthesis(cpuSeconds: 60.0, wallSeconds: 60.0, characterCount: 80, at: 1) // 発熱で極端に重い
+        governor.recordSynthesis(cpuSeconds: 86.81, wallSeconds: 86.81, characterCount: 240, at: 2)
         XCTAssertLessThan(governor.estimatedCPUSeconds(forCharacterCount: 0), 5.0,
                           "固定費が膨らんでいる(外れ値を固定費に吸収してしまっている)")
     }
@@ -358,7 +358,7 @@ class VoicevoxGovernorChunkSizeTest: XCTestCase {
     // これが「どのくらいの長さなら分割せずに済むか」の判断基準になる。
     func testMaxCharacterCountIsDerivedFromMeasurements() {
         let governor = VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.0, fixedOverheadSeconds: 0)
-        governor.recordSynthesis(cpuSeconds: 33, characterCount: 100, at: 0) // 0.33秒/文字
+        governor.recordSynthesis(cpuSeconds: 33, wallSeconds: 33, characterCount: 100, at: 0) // 0.33秒/文字
         // 予算 48秒 ÷ 0.33秒/文字 ≒ 145文字
         let maxCount = governor.maxCharacterCount(withinCPUSeconds: 48)
         XCTAssertEqual(maxCount, 145)
@@ -369,7 +369,7 @@ class VoicevoxGovernorChunkSizeTest: XCTestCase {
     // 端末が速ければ、分割せずに済む長さは長くなる(=分割が起きない)。
     func testFastDeviceAllowsMuchLongerText() {
         let governor = VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.0, fixedOverheadSeconds: 0)
-        governor.recordSynthesis(cpuSeconds: 13, characterCount: 100, at: 0) // 0.13秒/文字
+        governor.recordSynthesis(cpuSeconds: 13, wallSeconds: 13, characterCount: 100, at: 0) // 0.13秒/文字
         XCTAssertGreaterThan(governor.maxCharacterCount(withinCPUSeconds: 48), 300,
                              "速い端末ではブロック最大長(160文字)を余裕で超えるので分割は起きない")
     }
@@ -377,7 +377,7 @@ class VoicevoxGovernorChunkSizeTest: XCTestCase {
     // 極端に遅くても最低1文字は返す(0を返すと分割が終わらなくなる)。
     func testNeverReturnsZero() {
         let governor = VoicevoxCPUGovernor(windowSeconds: 60, safetyFactor: 1.0, fixedOverheadSeconds: 0)
-        governor.recordSynthesis(cpuSeconds: 100, characterCount: 1, at: 0)
+        governor.recordSynthesis(cpuSeconds: 100, wallSeconds: 100, characterCount: 1, at: 0)
         XCTAssertGreaterThanOrEqual(governor.maxCharacterCount(withinCPUSeconds: 1), 1)
     }
 }

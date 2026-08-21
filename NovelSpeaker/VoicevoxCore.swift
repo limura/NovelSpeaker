@@ -557,9 +557,14 @@ actor VoicevoxCore {
         // ここは先行合成・その場合成の両方が通る唯一の絞り点なので、実測点として適切。
         // 測った CPU 秒は、次の合成を走らせてよいかの見積り(VoicevoxCPUGovernor)に使う。
         let cpuBefore = ProcessCPUClock.totalCPUSeconds()
+        let wallBefore = ProcessInfo.processInfo.systemUptime
         let result = text.withCString { cString in
             voicevox_synthesizer_tts(synthesizer, cString, styleId, options, &outputWavLength, &outputWav)
         }
+        // 実時間も測る。CPU 上限の判定窓(60秒)は実時間の窓なので、
+        // 「その合成が窓のどこをどれだけ占めていたか」は実時間でないと置けない
+        // (全コアで走れば 17 CPU秒 の合成でも実時間は4秒ほどしかない)。
+        let wallSeconds = ProcessInfo.processInfo.systemUptime - wallBefore
         let cpuSeconds: Double?
         if let cpuBefore = cpuBefore, let cpuAfter = ProcessCPUClock.totalCPUSeconds() {
             cpuSeconds = cpuAfter - cpuBefore
@@ -577,13 +582,14 @@ actor VoicevoxCore {
         }
         if let cpuSeconds = cpuSeconds {
             // 次回以降の見積り材料。同じ文字数でも端末と発熱状態で数倍違うので、実測が要る。
-            cpuGovernor.recordSynthesis(cpuSeconds: cpuSeconds, characterCount: text.count, at: ProcessInfo.processInfo.systemUptime)
+            cpuGovernor.recordSynthesis(cpuSeconds: cpuSeconds, wallSeconds: wallSeconds, characterCount: text.count, at: ProcessInfo.processInfo.systemUptime)
             // 「予算管理が効いていたのに使い過ぎた」のかどうかを後から判断できるように、
             // プロセス全体の使用率と一緒に残す(VoicevoxCPUUsageReporter 参照)。
             VoicevoxCPUUsageReporter.shared.report(
                 characterCount: text.count,
                 estimatedCPUSeconds: lastEstimatedCPUSeconds,
                 actualCPUSeconds: cpuSeconds,
+                actualWallSeconds: wallSeconds,
                 waitedSeconds: lastGovernorWaitedSeconds,
                 isCPULimitApplied: VoicevoxPrefetchThrottleMonitor.shared.isCPULimitApplied)
         }
