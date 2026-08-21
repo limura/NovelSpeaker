@@ -622,6 +622,7 @@ actor VoicevoxCore {
                 estimatedCPUSeconds: lastEstimatedCPUSeconds,
                 actualCPUSeconds: cpuSeconds,
                 actualWallSeconds: wallSeconds,
+                audioSeconds: VoicevoxAudioCompressor.durationSeconds(wav: data),
                 waitedSeconds: lastGovernorWaitedSeconds,
                 isCPULimitApplied: VoicevoxPrefetchThrottleMonitor.shared.isCPULimitApplied)
         }

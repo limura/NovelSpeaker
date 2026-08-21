@@ -90,6 +90,9 @@ final class VoicevoxCPUUsageReporter {
     ///   - characterCount: 合成した文字数。
     ///   - estimatedCPUSeconds: ガバナーの見積り。
     ///   - actualCPUSeconds: 実際にかかった CPU 秒。
+    ///   - audioSeconds: 出来上がった音声の長さ。
+    ///     これが無いと「実時間の何倍の速さで作れているのか」が分からない。
+    ///     読み上げ速度がこれを上回っていれば、貯金は必ず減っていく。
     ///   - actualWallSeconds: 実際にかかった時間(壁時計)。
     ///     CPU 秒との比が、その合成の実効並列度になる。窓の勘定が合っているかを
     ///     後から確かめるのに要る(1スレッドを仮定していた頃はここが食い違っていた)。
@@ -99,6 +102,7 @@ final class VoicevoxCPUUsageReporter {
                 estimatedCPUSeconds: Double,
                 actualCPUSeconds: Double,
                 actualWallSeconds: Double,
+                audioSeconds: Double,
                 waitedSeconds: Double,
                 isCPULimitApplied: Bool,
                 now: Double = ProcessInfo.processInfo.systemUptime) {
@@ -127,8 +131,9 @@ final class VoicevoxCPUUsageReporter {
         let estimateRatio = actualCPUSeconds > 0 ? estimatedCPUSeconds / actualCPUSeconds : 0
 
         AppInformationLogger.AddLogWithStruct(
-            message: String(format: "[VOICEVOX CPU] 直近60秒 %.0f%% (上限80%%) / 待ち %.1f秒 / 見積り %.1f秒 に対し実測 %.1f秒",
-                            utilization * 100, waitedSeconds, estimatedCPUSeconds, actualCPUSeconds),
+            message: String(format: "[VOICEVOX CPU] 直近60秒 %.0f%% (上限80%%) / 待ち %.1f秒 / 見積り %.1f秒 に対し実測 %.1f秒 / 実時間の %.2f倍速で生成",
+                            utilization * 100, waitedSeconds, estimatedCPUSeconds, actualCPUSeconds,
+                            actualWallSeconds > 0 ? audioSeconds / actualWallSeconds : 0),
             appendix: [
                 "utilization": AnyCodable(String(format: "%.3f", utilization)),
                 "isCPULimitApplied": AnyCodable(isCPULimitApplied ? "true" : "false"),
@@ -142,6 +147,12 @@ final class VoicevoxCPUUsageReporter {
                 "actualCPUSeconds": AnyCodable(String(format: "%.2f", actualCPUSeconds)),
                 "actualWallSeconds": AnyCodable(String(format: "%.2f", actualWallSeconds)),
                 "parallelism": AnyCodable(actualWallSeconds > 0 ? String(format: "%.2f", actualCPUSeconds / actualWallSeconds) : "-"),
+                "audioSeconds": AnyCodable(String(format: "%.1f", audioSeconds)),
+                // 実時間の何倍の速さで音声を作れているか。読み上げ速度がこれを超えると
+                // 貯金は必ず減る。1.0 を割っていれば、等速再生にすら追いつけない。
+                "generationSpeed": AnyCodable(actualWallSeconds > 0 ? String(format: "%.2f", audioSeconds / actualWallSeconds) : "-"),
+                // CPU秒あたりどれだけ音声を作れたか(RTF の逆数)。
+                "audioPerCPUSecond": AnyCodable(actualCPUSeconds > 0 ? String(format: "%.2f", audioSeconds / actualCPUSeconds) : "-"),
                 "estimateRatio": AnyCodable(String(format: "%.2f", estimateRatio)),
                 "waitedSeconds": AnyCodable(String(format: "%.2f", waitedSeconds)),
             ],
