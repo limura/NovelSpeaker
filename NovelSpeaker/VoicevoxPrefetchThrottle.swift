@@ -14,13 +14,15 @@
 //  として実際に殺されたことを確認している。重いスタックは onnxruntime の推論で、
 //  「再生に追いつこうとして先行合成が CPU を回し続ける」のが死因だった。
 //
-//  重要なのは以下の2点:
-//   - この CPU 上限は **バックグラウンド**のアプリにのみ効く(前景では別勘定)。
-//   - **外部電源(AC)接続中は適用されない**。実機で「Mac に繋いでいると落ちないが、
-//     電源を抜くと落ちる」という挙動になっていたのはこれが理由。
+//  この CPU 上限は **バックグラウンド**のアプリにのみ効く(前景では別勘定)。
 //
-//  よって「背面 かつ バッテリー駆動」の時だけ先行合成を最小限に絞り、
-//  それ以外(前景/充電中)は従来どおりの積極的な先読みを維持する。
+//  ★以前ここには「外部電源(AC)接続中は適用されない」と書いてあったが、**誤りだった**。
+//   2026-08-21 に、電源に繋いだ直後(全27標本が AC)に 88% で殺されている。
+//   「Mac に繋いでいると落ちない」という観測は AC ではなく、
+//   **Xcode のデバッガ接続中は CPU 監視自体が無効になる**ためと思われる。
+//   充電しているだけなら監視は普通に効く。
+//
+//  よって「背面」であれば充電中でも先行合成を絞る。
 //
 //  なお、これは「殺されないようにする」ための対策であって、
 //  CPU 合成の RTF(実時間比)そのものを下げるものではない。RTF≒1.0 のままだと
@@ -91,16 +93,13 @@ enum VoicevoxPrefetchThrottlePolicy {
 
     /// - Parameters:
     ///   - isBackground: アプリがバックグラウンドにあるか。
-    ///   - isOnExternalPower: 外部電源(AC/USB)に接続されているか。
     ///   - isLowPowerModeEnabled: 低電力モードか。
-    static func parameters(isBackground: Bool, isOnExternalPower: Bool, isLowPowerModeEnabled: Bool) -> VoicevoxPrefetchParameters {
+    static func parameters(isBackground: Bool, isLowPowerModeEnabled: Bool) -> VoicevoxPrefetchParameters {
         // 前景では、このバックグラウンド CPU 上限の対象にならないので従来どおり。
         guard isBackground else { return normal }
-        // 低電力モードでは CPU クロックが落ちて合成が更に間に合わなくなるため、
-        // 充電中であっても絞る(発熱・電池消費の面でも望ましい)。
-        if isLowPowerModeEnabled { return throttled }
-        // 外部電源接続中はバックグラウンド CPU 上限が適用されないので絞らなくてよい。
-        if isOnExternalPower { return normal }
+        // 背面では、充電中かどうかに関わらず絞る(理由は isCPULimitApplied)。
+        // 低電力モードでは更に CPU クロックが落ちるが、絞る先は同じ。
+        _ = isLowPowerModeEnabled
         return throttled
     }
 }
@@ -207,19 +206,31 @@ final class VoicevoxPrefetchThrottleMonitor {
         #endif
     }
 
-    /// iOS の「60秒平均 CPU 80%」上限が適用される状況か
-    /// (背面かつ外部電源に繋がっていない時)。CPU予算による合成の抑制
-    /// (VoicevoxCPUGovernor)を効かせるかどうかの判定に使う。
+    /// iOS の「60秒平均 CPU 80%」上限が適用される状況か。
+    /// CPU予算による合成の抑制(VoicevoxCPUGovernor)を効かせるかどうかの判定に使う。
+    ///
+    /// **背面であれば、充電中かどうかに関わらず適用される。**
+    /// 以前は「外部電源に繋がっている時は適用されない」としていたが、これは誤りで、
+    /// 実際には充電中でも殺される。
+    /// 2026-08-21 の実機(iPhone 17 Pro Max / iOS 26.6)で、電源に繋いだ直後に
+    ///   CPU: 48 seconds cpu time over 54 seconds (88% cpu average)
+    ///   Power Source: 0 samples on Battery, 27 samples on AC
+    /// として強制終了された。電源に繋いだ事でここが false になり、
+    /// 予算管理とスレッド数の抑制がどちらも外れて全開になったのが原因。
+    ///
+    /// 「Mac に繋いでいると落ちない」という以前の観測は、AC であることではなく
+    /// **Xcode のデバッガが接続されていると CPU 監視自体が無効になる**ためと思われる。
+    /// 充電しているだけの状態では監視は普通に効く。
+    ///
     /// 低電力モードはこの上限自体には関係しない(CPUが遅くなるだけ)ので条件に入れない。
     var isCPULimitApplied: Bool {
-        return isBackground && isOnExternalPower == false
+        return isBackground
     }
 
     /// 現在の状況に応じた先行合成パラメータ。
     var currentParameters: VoicevoxPrefetchParameters {
         return VoicevoxPrefetchThrottlePolicy.parameters(
             isBackground: isBackground,
-            isOnExternalPower: isOnExternalPower,
             isLowPowerModeEnabled: ProcessInfo.processInfo.isLowPowerModeEnabled
         )
     }

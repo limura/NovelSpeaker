@@ -236,11 +236,16 @@ actor VoicevoxCore {
     private static let cpuWindowSeconds = 60.0
 
     /// CPU予算的に、この合成を始めてよくなるまであと何秒待つべきか。
-    /// 上限が適用されない状況(前景/充電中)では常に0。
+    /// 上限が適用されない状況(前景)では常に0。
     nonisolated private func governorWaitSeconds(text: String, limitRatio: Double) -> Double {
         guard VoicevoxPrefetchThrottleMonitor.shared.isCPULimitApplied else { return 0 }
         return cpuGovernor.waitSeconds(forCharacterCount: text.count, limitRatio: limitRatio, at: ProcessInfo.processInfo.systemUptime)
     }
+
+    // 直前の合成について、見積りが幾らで何秒待たせたか(計測ログ用)。
+    // 合成は直列に走るので、単純に上書きしてよい。
+    nonisolated(unsafe) private var lastEstimatedCPUSeconds: Double = 0
+    nonisolated(unsafe) private var lastGovernorWaitedSeconds: Double = 0
 
     // ワーカー(待ち行列から1件ずつ取り出して合成するループ)の起動状態。
     // actor へ入らずに判定したいので専用ロックで守る。
@@ -473,7 +478,6 @@ actor VoicevoxCore {
         let monitor = VoicevoxPrefetchThrottleMonitor.shared
         return VoicevoxThreadPolicy.desiredThreadCount(
             isBackground: monitor.isBackground,
-            isOnExternalPower: monitor.isOnExternalPower,
             isLowPowerModeEnabled: ProcessInfo.processInfo.isLowPowerModeEnabled
         )
     }
@@ -570,6 +574,14 @@ actor VoicevoxCore {
         if let cpuSeconds = cpuSeconds {
             // 次回以降の見積り材料。同じ文字数でも端末と発熱状態で数倍違うので、実測が要る。
             cpuGovernor.recordSynthesis(cpuSeconds: cpuSeconds, characterCount: text.count, at: ProcessInfo.processInfo.systemUptime)
+            // 「予算管理が効いていたのに使い過ぎた」のかどうかを後から判断できるように、
+            // プロセス全体の使用率と一緒に残す(VoicevoxCPUUsageReporter 参照)。
+            VoicevoxCPUUsageReporter.shared.report(
+                characterCount: text.count,
+                estimatedCPUSeconds: lastEstimatedCPUSeconds,
+                actualCPUSeconds: cpuSeconds,
+                waitedSeconds: lastGovernorWaitedSeconds,
+                isCPULimitApplied: VoicevoxPrefetchThrottleMonitor.shared.isCPULimitApplied)
         }
         return data
     }
@@ -793,6 +805,8 @@ actor VoicevoxCore {
         // 予算を使っている事がある。起きた後にもう一度確かめる。
         // ただし待ち続けて再生が完全に止まる方が困るので、確認は1回だけにする
         // (実機で 60秒待機が3回続き、1ブロックに3分以上かかる事があった)。
+        lastEstimatedCPUSeconds = cpuGovernor.estimatedCPUSeconds(forCharacterCount: text.count)
+        lastGovernorWaitedSeconds = 0
         let maxWaitCount = 2
         for _ in 0..<maxWaitCount {
             let waitSeconds = governorWaitSeconds(text: text, limitRatio: limitRatio)
@@ -800,6 +814,7 @@ actor VoicevoxCore {
             // 分割してもなお1本で予算を超える(句読点が全く無い等)場合は、窓が空くまで待った上で
             // 実行する。その1本だけで窓を使い切る形になり、上限超過の確率が最も小さくなる。
             let sleepSeconds = min(waitSeconds.isInfinite ? Self.cpuWindowSeconds : waitSeconds, Self.cpuWindowSeconds)
+            lastGovernorWaitedSeconds += sleepSeconds
             try? await Task.sleep(nanoseconds: UInt64(sleepSeconds * 1_000_000_000))
         }
     }
@@ -953,7 +968,6 @@ final class VoicevoxCore {
         let monitor = VoicevoxPrefetchThrottleMonitor.shared
         return VoicevoxThreadPolicy.desiredThreadCount(
             isBackground: monitor.isBackground,
-            isOnExternalPower: monitor.isOnExternalPower,
             isLowPowerModeEnabled: ProcessInfo.processInfo.isLowPowerModeEnabled
         )
     }

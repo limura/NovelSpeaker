@@ -43,16 +43,20 @@ enum VoicevoxThreadPolicy {
     }
 
     /// 状況から決まるスレッド数。
+    ///
+    /// **外部電源に繋がっているかは見ない。** 以前は「充電中は背面CPU上限が
+    /// 適用されない」として全コアに戻していたが、これは誤りだった
+    /// (詳細は VoicevoxPrefetchThrottle.swift の isCPULimitApplied)。
+    ///
     /// - Parameters:
     ///   - isBackground: アプリがバックグラウンドにあるか。
-    ///   - isOnExternalPower: 外部電源(AC/USB)に接続されているか。
     ///   - isLowPowerModeEnabled: 低電力モードか。
-    static func desiredThreadCount(isBackground: Bool, isOnExternalPower: Bool, isLowPowerModeEnabled: Bool) -> UInt16 {
+    static func desiredThreadCount(isBackground: Bool, isLowPowerModeEnabled: Bool) -> UInt16 {
         // 低電力モードは「電池を使うな」という利用者の明示的な意思表示なので、
-        // 前景や充電中であっても CPU秒あたりの効率が最良になるスレッド数1にする。
+        // 前景であっても CPU秒あたりの効率が最良になるスレッド数1にする。
         if isLowPowerModeEnabled { return limitedThreadCount }
-        // 背面の CPU 上限(60秒平均80%)は外部電源接続中には適用されない。
-        if isBackground && isOnExternalPower == false { return limitedThreadCount }
+        // 背面では CPU 上限(60秒平均80%)が効くので、スレッド数を絞る。
+        if isBackground { return limitedThreadCount }
         return unlimitedThreadCount
     }
 

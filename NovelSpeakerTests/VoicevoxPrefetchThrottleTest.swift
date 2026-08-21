@@ -17,30 +17,30 @@ class VoicevoxPrefetchThrottleTest: XCTestCase {
 
     // 前景では従来どおりの積極的な先読みを維持する(このCPU上限は背面のみ対象のため)。
     func testForegroundIsNotThrottled() {
-        for onExternalPower in [true, false] {
-            for lowPower in [true, false] {
-                let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: false, isOnExternalPower: onExternalPower, isLowPowerModeEnabled: lowPower)
-                XCTAssertEqual(p, normal, "前景では絞らないはず (power=\(onExternalPower) lowPower=\(lowPower))")
-            }
+        for lowPower in [true, false] {
+            let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: false, isLowPowerModeEnabled: lowPower)
+            XCTAssertEqual(p, normal, "前景では絞らないはず (lowPower=\(lowPower))")
         }
     }
 
-    // 実機で落ちた条件そのもの: 背面 + バッテリー駆動 → 絞る。
-    func testBackgroundOnBatteryIsThrottled() {
-        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false)
-        XCTAssertEqual(p, throttled, "背面+バッテリーでは絞るはず")
+    // 実機で落ちた条件そのもの: 背面 → 絞る。
+    func testBackgroundIsThrottled() {
+        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isLowPowerModeEnabled: false)
+        XCTAssertEqual(p, throttled, "背面では絞るはず")
     }
 
-    // 実機で落ちなかった条件: 背面でも AC 接続中は CPU 上限が適用されないので絞らない。
-    func testBackgroundOnExternalPowerIsNotThrottled() {
-        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isOnExternalPower: true, isLowPowerModeEnabled: false)
-        XCTAssertEqual(p, normal, "背面でも充電中は絞らないはず")
+    // ★充電中でも背面なら絞る事。
+    // 以前は「背面でも AC 接続中は CPU 上限が適用されない」として絞っていなかったが、
+    // 2026-08-21 に実機で、電源に繋いだ直後(全27標本がAC)に 88% で強制終了された。
+    func testBackgroundIsThrottledEvenWhileCharging() {
+        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isLowPowerModeEnabled: false)
+        XCTAssertEqual(p, throttled, "背面なら充電中でも絞るはず")
     }
 
-    // 低電力モードでは CPU クロックが落ちて追いつけなくなるので、充電中でも絞る。
-    func testLowPowerModeIsThrottledEvenOnExternalPower() {
-        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isOnExternalPower: true, isLowPowerModeEnabled: true)
-        XCTAssertEqual(p, throttled, "低電力モードでは充電中でも絞るはず")
+    // 低電力モードでも当然絞る。
+    func testLowPowerModeIsThrottled() {
+        let p = VoicevoxPrefetchThrottlePolicy.parameters(isBackground: true, isLowPowerModeEnabled: true)
+        XCTAssertEqual(p, throttled, "低電力モードでは絞るはず")
     }
 
     // 絞った側が前景側を上回らない事(定数を後から触った時の保険)。

@@ -16,20 +16,23 @@ import XCTest
 
 class VoicevoxThreadPolicyTest: XCTestCase {
 
-    // 背面かつバッテリー駆動 = iOSのCPU上限(60秒平均80%)が効く状況。
+    // 背面 = iOSのCPU上限(60秒平均80%)が効く状況。
     // ここで全コアを使うと即座に強制終了されるので、必ず1にする。
     func testUsesASingleThreadWhenTheBackgroundCPULimitApplies() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isLowPowerModeEnabled: false),
             1
         )
     }
 
-    // 背面でも外部電源に繋がっていればCPU上限は適用されないので、全力で作ってよい。
-    func testUsesAllCoresInBackgroundWhileOnExternalPower() {
+    // ★充電中でも背面なら絞る事。
+    // 以前は「外部電源に繋がっていればCPU上限は適用されない」として全コアに戻していたが、
+    // 2026-08-21 に実機で、電源に繋いだ直後(全27標本がAC)に 88% で強制終了された。
+    // ここが元に戻ると同じ死に方をするので、テストで固定しておく。
+    func testUsesASingleThreadInBackgroundEvenWhileCharging() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isOnExternalPower: true, isLowPowerModeEnabled: false),
-            0
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isLowPowerModeEnabled: false),
+            1
         )
     }
 
@@ -37,27 +40,27 @@ class VoicevoxThreadPolicyTest: XCTestCase {
     // (1スレッドだと1.45倍速の再生に追いつけず、無音で途切れてしまう)。
     func testUsesAllCoresInForegroundEvenOnBattery() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isOnExternalPower: false, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isLowPowerModeEnabled: false),
             0
         )
     }
 
     // 低電力モードは「電池を使うな」という明示的な意思表示なので、
-    // 前景でも充電中でもCPU秒あたりの効率が最良になる1にする。
+    // 前景であってもCPU秒あたりの効率が最良になる1にする。
     func testLowPowerModeAlwaysUsesASingleThread() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isOnExternalPower: true, isLowPowerModeEnabled: true),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isLowPowerModeEnabled: true),
             1
         )
     }
 
     func testThreadCountFollowsTheSituation() {
         XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isOnExternalPower: false, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: true, isLowPowerModeEnabled: false),
             1
         )
         XCTAssertEqual(
-            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isOnExternalPower: false, isLowPowerModeEnabled: false),
+            VoicevoxThreadPolicy.desiredThreadCount(isBackground: false, isLowPowerModeEnabled: false),
             0
         )
     }

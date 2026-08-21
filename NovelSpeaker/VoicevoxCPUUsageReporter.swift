@@ -1,0 +1,145 @@
+//
+//  VoicevoxCPUUsageReporter.swift
+//  NovelSpeaker
+//
+//  「背面でCPUを使い過ぎて強制終了された」時の切り分けのための計測。
+//
+//  なぜ要るのか:
+//  2026-08-21 の実機で2回強制終了されたが、片方(充電中)は原因が特定できた一方、
+//  もう片方(バッテリー・背面)は **CPU予算(VoicevoxCPUGovernor)が効いているはずの
+//  条件なのに 94% まで上がっていた**。ここから先は
+//   - そもそもガバナーが効いていなかったのか
+//   - 効いていたが見積りが甘くて足りなかったのか
+//   - 合成以外(再生・保存など)の CPU が乗っていたのか
+//  のどれなのかを、クラッシュレポートだけでは決められない。
+//
+//  ガバナーは **合成呼び出しの CPU 秒しか台帳に持っていない**が、
+//  OS が見るのは**プロセス全体**の CPU である。この差が犯人かどうかも、
+//  実際に両方を並べて記録しないと分からない。
+//
+//  そこで、合成のたびに
+//   - プロセス全体の直近60秒の CPU 使用率(= OS が見ているものと同じ土俵)
+//   - ガバナーが効く条件だったか、実際に何秒待たせたか
+//   - 端末の熱状態(熱で単価が上がると見積りが置いていかれる)
+//   - 見積りと実測のズレ
+//  を1行にして「アプリ内エラーのお知らせ(デバッグ用)」に残す。
+//
+//  常時ログを吐くと邪魔なので、
+//   - 普段は間隔を空けて(既定30秒)
+//   - 危ない水準(既定70%)を超えた時は間隔を無視して
+//  記録する。dedupeKey でまとめられるので件数が増えるだけで済む。
+//
+
+import Foundation
+
+final class VoicevoxCPUUsageReporter {
+    static let shared = VoicevoxCPUUsageReporter()
+
+    /// OS の判定窓と同じ。これと同じ長さで使用率を出さないと比較にならない。
+    static let windowSeconds: Double = 60
+    /// この使用率を超えたら、間隔を無視して必ず残す。
+    /// OS の上限は 80% なので、その手前で見えるようにしておく。
+    static let alertUtilization: Double = 0.70
+    /// 平常時に記録する最短間隔。
+    static let normalIntervalSeconds: Double = 30
+
+    private struct Sample {
+        let uptime: Double
+        let cpuSeconds: Double
+    }
+
+    private let lock = NSLock()
+    private var samples: [Sample] = []
+    private var lastReportUptime: Double = -Double.infinity
+
+    private init() {}
+
+    /// プロセス全体の、直近 `windowSeconds` の CPU 使用率。
+    ///
+    /// 1.0 が「1コアを使い切っている」状態。OS の背面上限もこの土俵で
+    /// 「60秒平均 80%」と判定される。
+    /// 窓を埋めるだけの記録がまだ無い場合は nil。
+    func currentUtilization(at now: Double = ProcessInfo.processInfo.systemUptime) -> Double? {
+        guard let cpu = ProcessCPUClock.totalCPUSeconds() else { return nil }
+        lock.lock()
+        defer { lock.unlock() }
+        samples.append(Sample(uptime: now, cpuSeconds: cpu))
+        // 窓の外は捨てるが、窓の左端を跨ぐ1件は残す(それが無いと差分を取れない)。
+        if let lastOutsideIndex = samples.lastIndex(where: { $0.uptime <= now - Self.windowSeconds }),
+           lastOutsideIndex > 0 {
+            samples.removeFirst(lastOutsideIndex)
+        }
+        guard let oldest = samples.first else { return nil }
+        let elapsed = now - oldest.uptime
+        // 窓の半分も溜まっていないうちは、値が跳ねるので出さない。
+        guard elapsed >= Self.windowSeconds / 2 else { return nil }
+        return (cpu - oldest.cpuSeconds) / elapsed
+    }
+
+    /// 合成1本ぶんの結果を記録する。必要なら「お知らせ」に1行残す。
+    ///
+    /// - Parameters:
+    ///   - characterCount: 合成した文字数。
+    ///   - estimatedCPUSeconds: ガバナーの見積り。
+    ///   - actualCPUSeconds: 実際にかかった CPU 秒。
+    ///   - waitedSeconds: ガバナーの指示で待った秒数。
+    ///   - isCPULimitApplied: ガバナーが効く条件だったか。
+    func report(characterCount: Int,
+                estimatedCPUSeconds: Double,
+                actualCPUSeconds: Double,
+                waitedSeconds: Double,
+                isCPULimitApplied: Bool,
+                now: Double = ProcessInfo.processInfo.systemUptime) {
+        guard let utilization = currentUtilization(at: now) else { return }
+
+        lock.lock()
+        let shouldReport = utilization >= Self.alertUtilization
+            || now - lastReportUptime >= Self.normalIntervalSeconds
+        if shouldReport { lastReportUptime = now }
+        lock.unlock()
+        guard shouldReport else { return }
+
+        let monitor = VoicevoxPrefetchThrottleMonitor.shared
+        // 見積りが実測を下回っていると、そのぶん予算を食い越す。
+        // 1.0 未満が「見積りが甘かった」= 危ない側。
+        let estimateRatio = actualCPUSeconds > 0 ? estimatedCPUSeconds / actualCPUSeconds : 0
+
+        AppInformationLogger.AddLogWithStruct(
+            message: String(format: "[VOICEVOX CPU] 直近60秒 %.0f%% (上限80%%) / 待ち %.1f秒 / 見積り %.1f秒 に対し実測 %.1f秒",
+                            utilization * 100, waitedSeconds, estimatedCPUSeconds, actualCPUSeconds),
+            appendix: [
+                "utilization": AnyCodable(String(format: "%.3f", utilization)),
+                "isCPULimitApplied": AnyCodable(isCPULimitApplied ? "true" : "false"),
+                "isBackground": AnyCodable(monitor.isBackground ? "true" : "false"),
+                "isOnExternalPower": AnyCodable(monitor.isOnExternalPower ? "true" : "false"),
+                "isLowPowerMode": AnyCodable(ProcessInfo.processInfo.isLowPowerModeEnabled ? "true" : "false"),
+                "thermalState": AnyCodable(Self.thermalStateText(ProcessInfo.processInfo.thermalState)),
+                "threadCount": AnyCodable("\(VoicevoxCore.activeCPUNumThreads)"),
+                "characterCount": AnyCodable("\(characterCount)"),
+                "estimatedCPUSeconds": AnyCodable(String(format: "%.2f", estimatedCPUSeconds)),
+                "actualCPUSeconds": AnyCodable(String(format: "%.2f", actualCPUSeconds)),
+                "estimateRatio": AnyCodable(String(format: "%.2f", estimateRatio)),
+                "waitedSeconds": AnyCodable(String(format: "%.2f", waitedSeconds)),
+            ],
+            isForDebug: true,
+            dedupeKey: "voicevoxCPUUsage")
+    }
+
+    /// 読み上げの停止などで、窓の中身をやり直す。
+    func reset() {
+        lock.lock()
+        defer { lock.unlock() }
+        samples.removeAll()
+        lastReportUptime = -Double.infinity
+    }
+
+    static func thermalStateText(_ state: ProcessInfo.ThermalState) -> String {
+        switch state {
+        case .nominal: return "nominal"
+        case .fair: return "fair"
+        case .serious: return "serious"
+        case .critical: return "critical"
+        @unknown default: return "unknown"
+        }
+    }
+}
