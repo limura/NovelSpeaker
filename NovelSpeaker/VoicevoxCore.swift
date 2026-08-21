@@ -269,7 +269,11 @@ actor VoicevoxCore {
         workerLock.unlock()
     }
 
-    nonisolated private var isPlaybackSynthesisPending: Bool {
+    /// 再生に必要な合成が進行中(順番待ち・CPU予算待ちを含む)か。
+    ///
+    /// 固着検出(SpeechBlockSpeaker)から見えないと困るので internal にしてある。
+    /// 「発話中のつもりなのに音も出ていないし合成もしていない」を判定するのに使う。
+    nonisolated var isPlaybackSynthesisPending: Bool {
         workerLock.lock()
         defer { workerLock.unlock() }
         return pendingPlaybackSynthesisCountUnsafe > 0
@@ -946,6 +950,8 @@ final class VoicevoxCore {
     func synthesizeForDiskCache(text: String, styleId: UInt32) async throws -> Data {
         throw VoicevoxCoreError.notSetUp
     }
+
+    nonisolated var isPlaybackSynthesisPending: Bool { return false }
 
     @discardableResult
     func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) -> Bool { return false }

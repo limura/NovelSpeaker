@@ -472,8 +472,15 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // ブロックが長いと(RTF≈1のため)合成そのものに数秒〜掛かる事があり、これは正常な処理中で
         // あって固着ではない。同じ閾値を当てはめると誤検出でブロックを延々作り直すことになり、
         // (前回試行のVOICEVOX合成がactor上でまだ実行中のまま次々新しい合成を投げてしまい)
-        // メモリ/CPUを急激に消費してしまうため、VOICEVOXのブロックはこの監視の対象外とする。
-        if type == "VOICEVOX" { return }
+        // メモリ/CPUを急激に消費してしまう。
+        // そこで VOICEVOX は閾値ではなく**合成中かどうか**で見分ける別の監視に回す。
+        if type == "VOICEVOX" {
+            scheduleVoicevoxWedgeWatch(blockIndex: blockIndex,
+                                       willSpeakRangeCountAtSpeak: willSpeakRangeCountAtSpeak,
+                                       speechText: speechText,
+                                       generation: generation)
+            return
+        }
         // 停止/次の speak で世代が変わっていたら、この watcher はもう現役ではない
         //(「停止→同じブロックで再生し直し」をまたいだ誤回復を防ぐ)。
         func isStillWedged(_ self: SpeechBlockSpeaker) -> Bool {
@@ -510,6 +517,90 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             logAndRecover(self)
             #endif
         }
+    }
+
+    // MARK: - VOICEVOX 用の固着検出
+
+    /// 「発話中のつもりなのに、音も出ていないし合成もしていない」状態を見張る間隔。
+    ///
+    /// VOICEVOX は合成に数十秒かかる事があるので、経過時間だけでは固着と区別できない。
+    /// 代わりに **再生用の合成が進行中かどうか** を見る。合成待ち・CPU予算待ち・合成中は
+    /// VoicevoxCore.isPlaybackSynthesisPending が true になるので、その間は正常とみなす。
+    private let voicevoxWedgeCheckInterval: TimeInterval = 5.0
+    /// 上の条件が連続してこの回数成立したら固着とみなす。
+    /// 1回だけで判断すると、合成が終わって再生が始まる隙間で誤検出しうる。
+    private let voicevoxWedgeConsecutiveCount = 3
+
+    /// 「VOICEVOX のブロックが固着している」と判断してよいか。
+    ///
+    /// 経過時間では判断できない。VOICEVOX は1ブロックを丸ごと合成してから再生するので、
+    /// 長いブロックでは数十秒何も起きないのが**正常**だからである。
+    /// 代わりに「再生用の合成が進行中か」を見る。合成待ち・CPU予算待ち・合成中は
+    /// `VoicevoxCore.isPlaybackSynthesisPending` が true になるので、その間は固着ではない。
+    ///
+    /// - Parameters:
+    ///   - isSpeaking: こちらが「発話中のつもり」か。
+    ///   - isSameGeneration: 見張り始めた時と同じ発話か(停止や再生し直しを跨いでいないか)。
+    ///   - didWillSpeakRangeProgress: 発話位置が進んだか。
+    ///   - didBlockMove: 次のブロックへ移ったか。
+    ///   - isPlaybackSynthesisPending: 再生に必要な合成が進行中か。
+    static func isVoicevoxWedged(isSpeaking: Bool,
+                                 isSameGeneration: Bool,
+                                 didWillSpeakRangeProgress: Bool,
+                                 didBlockMove: Bool,
+                                 isPlaybackSynthesisPending: Bool) -> Bool {
+        if isSameGeneration == false { return false }
+        if isSpeaking == false { return false }
+        if didWillSpeakRangeProgress { return false }
+        if didBlockMove { return false }
+        // ★合成中は正常。ここを見落とすと、長いブロックの合成を固着と誤検出して
+        //  延々と作り直し、CPU と電池を焼く事になる。
+        if isPlaybackSynthesisPending { return false }
+        return true
+    }
+
+    /// VOICEVOX のブロックが固着していないか見張る。
+    ///
+    /// ★実機で 2026-08-21 に発生。無音の報告が5回続いた後ぱたりと止まり、
+    /// (=再生が二度と始まらない) 6分ほど無音のまま。アプリ自体は生きていて
+    /// 音声の作り置きは動き続けていた。利用者が再生ボタンを押すと即座に復帰した。
+    /// それまで VOICEVOX はこの監視の対象外だったため、誰も気付けなかった。
+    private func scheduleVoicevoxWedgeWatch(blockIndex: Int,
+                                            willSpeakRangeCountAtSpeak: Int,
+                                            speechText: String,
+                                            generation: Int) {
+        var remaining = voicevoxWedgeConsecutiveCount
+
+        func isStuck(_ speaker: SpeechBlockSpeaker) -> Bool {
+            return Self.isVoicevoxWedged(
+                isSpeaking: speaker.m_IsSpeaking,
+                // 停止/次の speak で世代が変わっていたら、この watcher はもう現役ではない。
+                isSameGeneration: speaker.speakGeneration == generation,
+                didWillSpeakRangeProgress: speaker.willSpeakRangeCallCount != willSpeakRangeCountAtSpeak,
+                didBlockMove: speaker.currentSpeechBlockIndex != blockIndex,
+                isPlaybackSynthesisPending: VoicevoxCore.shared.isPlaybackSynthesisPending)
+        }
+
+        func check() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + voicevoxWedgeCheckInterval) { [weak self] in
+                guard let self = self else { return }
+                guard isStuck(self) else { return }
+                remaining -= 1
+                if remaining > 0 {
+                    check()
+                    return
+                }
+                let waited = self.voicevoxWedgeCheckInterval * Double(self.voicevoxWedgeConsecutiveCount)
+                let message = "VOICEVOX wedge疑い: 発話中のつもりだが \(Int(waited))秒間、音も出ず合成もしていない blockIndex=\(blockIndex) text=\"\(Self.escapeForLog(speechText))\""
+                NSLog("NovelSpeaker.SynthWedge: ⚠️ \(message)")
+                AppInformationLogger.AddLog(message: message, appendix: [
+                    "blockIndex": "\(blockIndex)",
+                    "willSpeakRangeCallCount": "\(self.willSpeakRangeCallCount)",
+                ], isForDebug: true)
+                self.recoverFromWedge(blockIndex: blockIndex)
+            }
+        }
+        check()
     }
 
     // 固着の自己回復: synth を作り直し、固着した block から再生し直す。
