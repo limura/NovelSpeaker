@@ -153,4 +153,48 @@ class VoicevoxUserDictionaryTest: XCTestCase {
         XCTAssertTrue(dictionary.replace(with: [a, b]))
         XCTAssertFalse(dictionary.replace(with: [b, a]))
     }
+    // MARK: - アクセントの見せ方
+
+    // 下がる位置に印を付ける。印は「下がる直前のモーラの後ろ」。
+    func testMarkedKanaPutsTheMarkAfterTheDroppingMora() {
+        let moras = ["ハ", "シ"]
+        XCTAssertEqual(VoicevoxAccentDisplay.markedKana(moras: moras, accentType: 0), "ハシ")
+        XCTAssertEqual(VoicevoxAccentDisplay.markedKana(moras: moras, accentType: 1), "ハ\u{A71C}シ")
+        XCTAssertEqual(VoicevoxAccentDisplay.markedKana(moras: moras, accentType: 2), "ハシ\u{A71C}")
+    }
+
+    // ★モーラは1文字とは限らない(「キャ」は2文字で1モーラ)。
+    // 文字数で数えると印の位置がずれる。
+    func testMarkedKanaCountsMorasNotCharacters() {
+        XCTAssertEqual(VoicevoxAccentDisplay.markedKana(moras: ["キャ", "ク"], accentType: 1), "キャ\u{A71C}ク")
+    }
+
+    // 範囲外の値では印を付けない(壊れた表示を出さない)。
+    func testMarkedKanaIgnoresOutOfRangeAccent() {
+        XCTAssertEqual(VoicevoxAccentDisplay.markedKana(moras: ["ハ", "シ"], accentType: 9), "ハシ")
+        XCTAssertEqual(VoicevoxAccentDisplay.markedKana(moras: ["ハ", "シ"], accentType: -1), "ハシ")
+    }
+
+    func testTypeNames() {
+        XCTAssertEqual(VoicevoxAccentDisplay.typeName(accentType: 0, moraCount: 3), "平板")
+        XCTAssertEqual(VoicevoxAccentDisplay.typeName(accentType: 1, moraCount: 3), "頭高")
+        XCTAssertEqual(VoicevoxAccentDisplay.typeName(accentType: 2, moraCount: 3), "中高")
+        XCTAssertEqual(VoicevoxAccentDisplay.typeName(accentType: 3, moraCount: 3), "尾高")
+        // 1モーラの語では、1 は頭高でもあり尾高でもある。頭高を優先する。
+        XCTAssertEqual(VoicevoxAccentDisplay.typeName(accentType: 1, moraCount: 1), "頭高")
+    }
+
+    // 候補は 0 〜 モーラ数(平板を含めてモーラ数+1個)。
+    func testCandidatesCoverFlatToFinal() {
+        XCTAssertEqual(VoicevoxAccentDisplay.candidates(moraCount: 3), [0, 1, 2, 3])
+        XCTAssertEqual(VoicevoxAccentDisplay.candidates(moraCount: 0), [])
+    }
+
+    // ★聞き比べる時は助詞を付ける。
+    // 付けないと平板と尾高がまったく同じ音になり、選び分けられない。
+    func testPreviewTextHasAParticle() {
+        let text = VoicevoxAccentDisplay.previewText(kana: "ハシ")
+        XCTAssertTrue(text.hasPrefix("ハシ"))
+        XCTAssertGreaterThan(text.count, "ハシ".count, "助詞が付いていない")
+    }
 }

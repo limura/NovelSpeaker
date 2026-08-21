@@ -10,7 +10,7 @@ import UIKit
 import Eureka
 import RealmSwift
 
-class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNovelIDSelectorDelegate {
+class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNovelIDSelectorDelegate, VoicevoxAccentSettingDelegate {
     @objc public var targetSpeechModSettingBeforeString:String? = nil
     public var targetNovelID = ""
     public var isUseAnyNovelID = true
@@ -24,6 +24,10 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
     /// 従来の推測(標準の読み替え辞書と一致すれば端末の音声のみ)を解決した結果)。
     var targetEngineTypes:[SpeechEngineType] = []
     var targetNovelIDSet:Set<String> = Set<String>()
+    /// VOICEVOX に渡す読み(カタカナ)。空 = この行では VOICEVOX の辞書を使わない。
+    var voicevoxPronunciation = ""
+    var voicevoxAccentType = 0
+    var voicevoxWordPriority = VoicevoxUserDictionaryEntry.defaultPriority
     let speaker = SpeechBlockSpeaker()
 
     override func viewDidLoad() {
@@ -32,6 +36,9 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         self.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_Title", comment: "読みの修正詳細")
         
         createCells()
+        if VoicevoxCore.isAvailableOnThisOS {
+            updateVoicevoxAccentRowValue()
+        }
         registNotificationCenter()
     }
     
@@ -84,6 +91,9 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 after = targetSetting.after
                 isUseRegularExpression = targetSetting.isUseRegularExpression
                 self.targetEngineTypes = Self.effectiveSpeechEngineTypes(of: targetSetting)
+                self.voicevoxPronunciation = String(targetSetting.voicevoxPronunciation)
+                self.voicevoxAccentType = targetSetting.voicevoxAccentType
+                self.voicevoxWordPriority = targetSetting.voicevoxWordPriority
                 for novelID in targetSetting.targetNovelIDArray {
                     self.targetNovelIDSet.insert(novelID)
                 }
@@ -144,7 +154,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             cell.textField.textAlignment = .left
             cell.textField.clearButtonMode = .always
         })
-        <<< SwitchRow() {
+        <<< SwitchRow("IsUseRegexpRow") {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_RegularExpressionTitle", comment: "正規表現マッチ")
             $0.value = self.isUseRegexp
         }.onChange({ (row) in
@@ -181,6 +191,32 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             }.onChange({ row in
                 let selected = row.value ?? []
                 self.targetEngineTypes = SpeechEngineType.selectableTypes.filter({ selected.contains($0.localizedName) })
+            })
+        }
+        if VoicevoxCore.isAvailableOnThisOS {
+            self.form.last!
+            <<< LabelRow("VoicevoxAccentRow") { row in
+                row.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_VoicevoxAccentTitle", comment: "VOICEVOX での読みとアクセント")
+                row.value = self.voicevoxAccentRowValue()
+                row.cell.accessoryType = .disclosureIndicator
+                row.cell.editingAccessoryType = .disclosureIndicator
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.accessibilityHint = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_VoicevoxAccentHint", comment: "VOICEVOX で読み上げる時の読みとアクセントを指定します。")
+                // 正規表現マッチの時は出さない。読み替え後が "$1" のような
+                // テンプレートで、実際に何という文字列になるのかが決まらないため。
+                row.hidden = .function(["IsUseRegexpRow"], { form -> Bool in
+                    guard let row = form.rowBy(tag: "IsUseRegexpRow") as? SwitchRow else { return false }
+                    return row.value ?? false
+                })
+            }.onCellSelection({ [weak self] _, _ in
+                guard let self = self else { return }
+                let nextViewController = VoicevoxAccentSettingViewController()
+                nextViewController.surface = self.voicevoxSurface()
+                nextViewController.pronunciation = self.voicevoxPronunciation
+                nextViewController.accentType = self.voicevoxAccentType
+                nextViewController.priority = self.voicevoxWordPriority
+                nextViewController.delegate = self
+                self.navigationController?.pushViewController(nextViewController, animated: true)
             })
         }
         self.form.last!
@@ -270,6 +306,9 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 // 保存の度に、今画面に出ている(=実際に効いている)値を書き込む事で、
                 // 編集しても対象が勝手に変わらないようにする。
                 setting.setSpeechEngineTypes(Self.normalizeForStorage(self.targetEngineTypes))
+                setting.voicevoxPronunciation = self.voicevoxPronunciation
+                setting.voicevoxAccentType = self.voicevoxAccentType
+                setting.voicevoxWordPriority = self.voicevoxWordPriority
                 setting.targetNovelIDArray.removeAll()
                 for novelID in self.targetNovelIDSet {
                     setting.targetNovelIDArray.append(novelID)
@@ -315,6 +354,59 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         if types.contains(.any) { return [.any] }
         if Set(types) == Set(SpeechEngineType.selectableTypes) { return [.any] }
         return types
+    }
+
+    /// VOICEVOX が実際に目にする文字列。
+    ///
+    /// その読み替えが VOICEVOX に適用されるなら読み替え後、
+    /// されないなら読み替え前(VOICEVOX には元の文字列が届く)。
+    /// 詳しくは VoicevoxUserDictionary の冒頭のコメントを参照。
+    func voicevoxSurface() -> String {
+        return targetEngineTypes.isApplied(to: .voicevox) ? afterText : beforeText
+    }
+
+    func voicevoxAccentRowValue() -> String {
+        let pronunciation = voicevoxPronunciation.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard pronunciation.isEmpty == false else {
+            return NSLocalizedString("CreateSpeechModSettingViewControllerSwift_VoicevoxAccentUnset", comment: "未設定")
+        }
+        return pronunciation
+    }
+
+    /// 下がる位置の印を付けた読みを出す。
+    ///
+    /// 印の位置は**モーラ**で数えるので、文字数では代用できない
+    /// (「キャ」は2文字で1モーラ)。VOICEVOX に区切ってもらう必要があるため、
+    /// まず印無しで出しておいて、解析が終わってから書き換える。
+    func updateVoicevoxAccentRowValue() {
+        guard let row = self.form.rowBy(tag: "VoicevoxAccentRow") as? LabelRow else { return }
+        row.value = voicevoxAccentRowValue()
+        row.updateCell()
+        let pronunciation = voicevoxPronunciation.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard pronunciation.isEmpty == false else { return }
+        let accentType = voicevoxAccentType
+        Task { [weak self] in
+            let moras = (try? await VoicevoxCore.shared.analyze(text: pronunciation))?.allMoras.map({ $0.text }) ?? []
+            guard moras.isEmpty == false else { return }
+            await MainActor.run { [weak self] in
+                guard let self = self else { return }
+                guard let row = self.form.rowBy(tag: "VoicevoxAccentRow") as? LabelRow else { return }
+                // 待っている間に書き換わっていたら、古い結果は捨てる。
+                guard self.voicevoxPronunciation.trimmingCharacters(in: .whitespacesAndNewlines) == pronunciation,
+                      self.voicevoxAccentType == accentType else { return }
+                row.value = VoicevoxAccentDisplay.markedKana(moras: moras, accentType: accentType)
+                row.updateCell()
+            }
+        }
+    }
+
+    func voicevoxAccentSettingDidChange(pronunciation: String, accentType: Int, priority: Int) {
+        self.voicevoxPronunciation = pronunciation
+        self.voicevoxAccentType = accentType
+        self.voicevoxWordPriority = priority
+        DispatchQueue.main.async {
+            self.updateVoicevoxAccentRowValue()
+        }
     }
 
     func validateDataAndAlert(before:String, after:String, isUseRegexp:Bool) -> Bool {

@@ -124,6 +124,56 @@ enum VoicevoxUserDictionaryBuilder {
     }
 }
 
+/// アクセントの見せ方。
+///
+/// **数値では選べない。**「橋」なのか「箸」なのかは無意識に言い分けているもので、
+/// 「アクセント核は1です」と言われて分かる人はほとんどいない。
+/// 型の名前と、下がる位置を示した読みを並べて、聞いて選んでもらう。
+enum VoicevoxAccentDisplay {
+
+    /// 下がる位置に印を付けた読み。
+    ///
+    /// 「ハꜜシ」のように、**下がる直前のモーラの後ろ**に ꜜ(U+A71C)を置く。
+    /// 日本語のアクセント表記として一般的な書き方で、桁を揃える必要が無い
+    /// (モーラは「キャ」のように2文字になる事があるので、上下に線を引く形だと揃わない)。
+    static func markedKana(moras: [String], accentType: Int) -> String {
+        guard accentType > 0, accentType <= moras.count else { return moras.joined() }
+        var result = ""
+        for (index, mora) in moras.enumerated() {
+            result += mora
+            if index + 1 == accentType { result += "\u{A71C}" }
+        }
+        return result
+    }
+
+    /// アクセント型の呼び名。
+    ///
+    /// 平板と尾高は**その語だけでは同じ音になる**(違うのは後ろに付く助詞が
+    /// 下がるかどうかだけ)。聞き比べてもらうには助詞を付けて鳴らす必要がある。
+    static func typeName(accentType: Int, moraCount: Int) -> String {
+        if accentType <= 0 { return NSLocalizedString("VoicevoxAccent_TypeFlat", comment: "平板") }
+        if accentType == 1 { return NSLocalizedString("VoicevoxAccent_TypeHead", comment: "頭高") }
+        if accentType >= moraCount { return NSLocalizedString("VoicevoxAccent_TypeTail", comment: "尾高") }
+        return NSLocalizedString("VoicevoxAccent_TypeMiddle", comment: "中高")
+    }
+
+    /// 聞き比べる時に鳴らす文字列。
+    ///
+    /// ★語を単独で鳴らしてはいけない。
+    /// 平板(0)と尾高(モーラ数と同じ値)は、その語だけでは**まったく同じ音**になる。
+    /// 助詞を付けて初めて違いが出る(実物で確認済み・VoicevoxAccentTest)。
+    static let previewParticle = "が"
+    static func previewText(kana: String) -> String {
+        return kana + previewParticle
+    }
+
+    /// 選べるアクセント型の一覧(0 〜 モーラ数)。
+    static func candidates(moraCount: Int) -> [Int] {
+        guard moraCount > 0 else { return [] }
+        return Array(0...moraCount)
+    }
+}
+
 /// 今この端末で有効なユーザー辞書。
 ///
 /// ディスクキャッシュの鍵(`VoicevoxDiskCacheStore.key`)と、

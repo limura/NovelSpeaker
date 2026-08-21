@@ -96,6 +96,7 @@
 		216359A922B16F5A00264A89 /* NotLikeStar@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 216359A622B16F5A00264A89 /* NotLikeStar@3x.png */; };
 		21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */; };
 		21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */; };
+		A3B4C5D6E7F8091223344556 /* VoicevoxAccentSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C5D6E7F809122334455667 /* VoicevoxAccentSettingViewController.swift */; };
 		21647FFC228CF44900A183DF /* UpdateLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFB228CF44900A183DF /* UpdateLogViewController.swift */; };
 		21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFF228D5EE000A183DF /* EditBookViewController.swift */; };
 		21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648005229003E100A183DF /* BookShelfTreeViewCell.swift */; };
@@ -565,6 +566,7 @@
 		216359A622B16F5A00264A89 /* NotLikeStar@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "NotLikeStar@3x.png"; path = "Resources/NotLikeStar@3x.png"; sourceTree = "<group>"; };
 		21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSizeSettingViewControllerSwift.swift; sourceTree = "<group>"; };
 		21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateSpeechModSettingViewControllerSwift.swift; sourceTree = "<group>"; };
+		B4C5D6E7F809122334455667 /* VoicevoxAccentSettingViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxAccentSettingViewController.swift; sourceTree = "<group>"; };
 		21647FFB228CF44900A183DF /* UpdateLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateLogViewController.swift; sourceTree = "<group>"; };
 		21647FFF228D5EE000A183DF /* EditBookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookViewController.swift; sourceTree = "<group>"; };
 		21648005229003E100A183DF /* BookShelfTreeViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookShelfTreeViewCell.swift; sourceTree = "<group>"; };
@@ -1375,6 +1377,7 @@
 				21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */,
 				21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */,
 				21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */,
+				B4C5D6E7F809122334455667 /* VoicevoxAccentSettingViewController.swift */,
 				21E975B922A06CC60027A0A0 /* MigrationViewController.swift */,
 				212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */,
 				21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */,
@@ -2037,6 +2040,7 @@
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
 				216631E72682D26800F80C1D /* UITabBarControllerExtension.swift in Sources */,
 				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,
+				A3B4C5D6E7F8091223344556 /* VoicevoxAccentSettingViewController.swift in Sources */,
 				21A97B462F7BBFC800DF9236 /* EurekaSupport.swift in Sources */,
 				21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */,
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
