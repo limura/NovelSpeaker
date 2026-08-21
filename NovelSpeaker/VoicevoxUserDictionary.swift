@@ -167,6 +167,35 @@ enum VoicevoxAccentDisplay {
         return kana + previewParticle
     }
 
+    /// カタカナの読みをモーラに区切る。
+    ///
+    /// ★ここで VOICEVOX の解析(analyze)を使ってはいけない。
+    ///
+    /// analyze は「実際にどう発音するか」を返すので、書いた通りの文字は返らない。
+    /// 「イジョウチ」を解析すると長音として扱われて「イ / ジョ / **オ** / チ」になり、
+    /// 利用者が入れた文字が勝手に書き換わったように見える。
+    /// しかも聞き比べの間だけ辞書を差し替えているせいで、同じ文字列でも
+    /// 差し替えの前後で結果が変わり、画面を行き来する度に表示が揺れる
+    /// (実機で「イジョオ↓チ」と「イジョウ↓チ」が交互に出た)。
+    ///
+    /// アクセントの位置を数えるのに要るのは**モーラの区切り**だけで、
+    /// 発音の中身は要らない。区切りは小書きの仮名を前にくっつけるだけで決まる。
+    /// 「ン」「ッ」「ー」はそれぞれ1モーラとして数える(日本語の数え方どおり)。
+    static func moras(fromKatakana text: String) -> [String] {
+        // 小書きの仮名。直前の仮名と合わせて1モーラになる。
+        let smallKana: Set<Character> = ["ァ", "ィ", "ゥ", "ェ", "ォ", "ャ", "ュ", "ョ", "ヮ",
+                                         "ぁ", "ぃ", "ぅ", "ぇ", "ぉ", "ゃ", "ゅ", "ょ", "ゎ"]
+        var result: [String] = []
+        for character in text {
+            if smallKana.contains(character), result.isEmpty == false {
+                result[result.count - 1].append(character)
+                continue
+            }
+            result.append(String(character))
+        }
+        return result
+    }
+
     /// 選べるアクセント型の一覧(0 〜 モーラ数)。
     static func candidates(moraCount: Int) -> [Int] {
         guard moraCount > 0 else { return [] }

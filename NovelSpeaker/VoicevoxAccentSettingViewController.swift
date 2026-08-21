@@ -77,31 +77,26 @@ class VoicevoxAccentSettingViewController: FormViewController {
     /// - Parameter loadPronunciationIfEmpty: 読みが空の時に、VOICEVOX の読み方を初期値として入れるか。
     ///   初めて開いた時はこれで埋まるので、たいていは直す必要があるのはアクセントだけになる。
     private func refreshFromVoicevox(loadPronunciationIfEmpty: Bool, forceLoadPronunciation: Bool = false) {
+        guard forceLoadPronunciation || (loadPronunciationIfEmpty && pronunciation.isEmpty) else {
+            // VOICEVOX に訊く必要が無い。読みは利用者が入れた物なので、
+            // モーラの区切りはその場で数えられる(解析に投げると発音に化けてしまう)。
+            applyMorasFromPronunciation()
+            return
+        }
         let surface = self.surface
-        let currentPronunciation = self.pronunciation
         Task { [weak self] in
             var loadedPronunciation: String? = nil
             var loadedAccentType: Int? = nil
-            if forceLoadPronunciation || (loadPronunciationIfEmpty && currentPronunciation.isEmpty) {
-                if surface.isEmpty == false,
-                   let phrases = try? await VoicevoxCore.shared.analyze(text: surface),
-                   phrases.isEmpty == false {
-                    loadedPronunciation = phrases.kana
-                    // 複数のアクセント句に分かれる事があるが、辞書に登録するのは1語なので
-                    // 最初の句のアクセントを採る(利用者が聞いて直せる)。
-                    loadedAccentType = phrases.first?.accent ?? 0
-                }
-            }
-            let pronunciationToAnalyze = (loadedPronunciation ?? currentPronunciation)
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            var moras:[String] = []
-            if pronunciationToAnalyze.isEmpty == false,
-               let phrases = try? await VoicevoxCore.shared.analyze(text: pronunciationToAnalyze) {
-                moras = phrases.allMoras.map({ $0.text })
+            if surface.isEmpty == false,
+               let phrases = try? await VoicevoxCore.shared.analyze(text: surface),
+               phrases.isEmpty == false {
+                loadedPronunciation = phrases.kana
+                // 複数のアクセント句に分かれる事があるが、辞書に登録するのは1語なので
+                // 最初の句のアクセントを採る(利用者が聞いて直せる)。
+                loadedAccentType = phrases.first?.accent ?? 0
             }
             await MainActor.run { [weak self] in
                 guard let self = self else { return }
-                let previousMoraCount = self.moras.count
                 if let loadedPronunciation = loadedPronunciation {
                     self.pronunciation = loadedPronunciation
                     if let loadedAccentType = loadedAccentType { self.accentType = loadedAccentType }
@@ -110,22 +105,27 @@ class VoicevoxAccentSettingViewController: FormViewController {
                         row.updateCell()
                     }
                 }
-                self.moras = moras
-                if moras.isEmpty {
-                    // 解析できない読み(カタカナでない等)。候補は出せないが、
-                    // 保存はできるようにしておく。
-                    self.accentType = 0
-                } else if self.accentType > moras.count {
-                    self.accentType = moras.count
-                }
-                self.updateRegistrableWarning()
-                if moras.count == previousMoraCount {
-                    // 候補の顔ぶれは変わらないので、印だけ付け替える(スクロール位置を保つ)。
-                    self.updateAccentCheckmarks()
-                } else {
-                    self.reloadAccentSection()
-                }
+                self.applyMorasFromPronunciation()
             }
+        }
+    }
+
+    /// 今の読みからモーラの区切りを数え直して、候補の一覧に反映する。
+    private func applyMorasFromPronunciation() {
+        let previousMoraCount = moras.count
+        let text = pronunciation.trimmingCharacters(in: .whitespacesAndNewlines)
+        moras = text.isEmpty ? [] : VoicevoxAccentDisplay.moras(fromKatakana: text)
+        if moras.isEmpty {
+            accentType = 0
+        } else if accentType > moras.count {
+            accentType = moras.count
+        }
+        updateRegistrableWarning()
+        if moras.count == previousMoraCount {
+            // 候補の顔ぶれは変わらないので、印だけ付け替える(スクロール位置を保つ)。
+            updateAccentCheckmarks()
+        } else {
+            reloadAccentSection()
         }
     }
 
@@ -155,7 +155,11 @@ class VoicevoxAccentSettingViewController: FormViewController {
         <<< LabelRow("PronunciationWarningRow") { row in
             row.title = NSLocalizedString("VoicevoxAccentSettingViewController_NotRegistrableWarning", comment: "この読みは VOICEVOX に受け付けてもらえません。カタカナで入力してください。")
             row.cell.textLabel?.numberOfLines = 0
+            // systemRed は暗い配色でも読める色に自動で切り替わるので、
+            // 見た目の設定はこれで足りる。太字にして更に目立たせる。
             row.cell.textLabel?.textColor = .systemRed
+            row.cell.textLabel?.font = UIFont.boldSystemFont(ofSize: UIFont.preferredFont(forTextStyle: .body).pointSize)
+            row.cell.textLabel?.adjustsFontForContentSizeCategory = true
             row.hidden = true
         }
         <<< ButtonRow() {

@@ -189,8 +189,10 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.accessibilityHint = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineHint", comment: "この読み替えを、どの音声合成で読み上げる時に使うかを選びます。")
             }.onChange({ row in
+                let previousSurface = self.voicevoxSurface()
                 let selected = row.value ?? []
                 self.targetEngineTypes = SpeechEngineType.selectableTypes.filter({ selected.contains($0.localizedName) })
+                self.clearVoicevoxSettingIfSurfaceChanged(from: previousSurface)
             })
         }
         if VoicevoxCore.isAvailableOnThisOS {
@@ -365,39 +367,39 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         return targetEngineTypes.isApplied(to: .voicevox) ? afterText : beforeText
     }
 
+    /// 適用先エンジンを変えると、VOICEVOX が読む文字列が
+    /// 読み替え後↔読み替え前で入れ替わる。
+    ///
+    /// ★入れ替わったのに読みを残してはいけない。
+    /// 「SAN値」に対して付けた読み「エスエエエヌチ」がそのまま残ると、
+    /// 今度は「サンチ」を「エスエエエヌチ」と読む登録になってしまう。
+    /// **音は出るが読みだけが間違う**ので、原因に辿り着けない類の壊れ方をする。
+    /// 別の文字列に対して付けた読みなので、未設定に戻す。
+    func clearVoicevoxSettingIfSurfaceChanged(from previousSurface: String) {
+        guard voicevoxSurface() != previousSurface else { return }
+        guard voicevoxPronunciation.isEmpty == false else { return }
+        voicevoxPronunciation = ""
+        voicevoxAccentType = 0
+        voicevoxWordPriority = VoicevoxUserDictionaryEntry.defaultPriority
+        updateVoicevoxAccentRowValue()
+    }
+
     func voicevoxAccentRowValue() -> String {
         let pronunciation = voicevoxPronunciation.trimmingCharacters(in: .whitespacesAndNewlines)
         guard pronunciation.isEmpty == false else {
             return NSLocalizedString("CreateSpeechModSettingViewControllerSwift_VoicevoxAccentUnset", comment: "未設定")
         }
-        return pronunciation
+        // 利用者が入れた文字をそのまま数える。VOICEVOX の解析に投げると
+        // 「イジョウチ」が「イジョオチ」になって、書いた物と違う表示になる。
+        return VoicevoxAccentDisplay.markedKana(
+            moras: VoicevoxAccentDisplay.moras(fromKatakana: pronunciation),
+            accentType: voicevoxAccentType)
     }
 
-    /// 下がる位置の印を付けた読みを出す。
-    ///
-    /// 印の位置は**モーラ**で数えるので、文字数では代用できない
-    /// (「キャ」は2文字で1モーラ)。VOICEVOX に区切ってもらう必要があるため、
-    /// まず印無しで出しておいて、解析が終わってから書き換える。
     func updateVoicevoxAccentRowValue() {
         guard let row = self.form.rowBy(tag: "VoicevoxAccentRow") as? LabelRow else { return }
         row.value = voicevoxAccentRowValue()
         row.updateCell()
-        let pronunciation = voicevoxPronunciation.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard pronunciation.isEmpty == false else { return }
-        let accentType = voicevoxAccentType
-        Task { [weak self] in
-            let moras = (try? await VoicevoxCore.shared.analyze(text: pronunciation))?.allMoras.map({ $0.text }) ?? []
-            guard moras.isEmpty == false else { return }
-            await MainActor.run { [weak self] in
-                guard let self = self else { return }
-                guard let row = self.form.rowBy(tag: "VoicevoxAccentRow") as? LabelRow else { return }
-                // 待っている間に書き換わっていたら、古い結果は捨てる。
-                guard self.voicevoxPronunciation.trimmingCharacters(in: .whitespacesAndNewlines) == pronunciation,
-                      self.voicevoxAccentType == accentType else { return }
-                row.value = VoicevoxAccentDisplay.markedKana(moras: moras, accentType: accentType)
-                row.updateCell()
-            }
-        }
     }
 
     func voicevoxAccentSettingDidChange(pronunciation: String, accentType: Int, priority: Int) {

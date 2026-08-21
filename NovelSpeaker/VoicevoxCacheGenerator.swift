@@ -187,6 +187,10 @@ final class VoicevoxCacheGenerator {
         // 自分より後に始まった生成があるなら、その状態を消してはいけない。
         guard serial == runSerialUnsafe else {
             lock.unlock()
+            // これが出たら、上に書いた「古い方が新しい方の状態を消す」状況が
+            // 実際に起きているという事(直す前はここで消していた)。
+            // 再現手順が分からなかったので、起きた事だけでも残す。
+            AppInformationLogger.AddLog(message: "[VOICEVOX音声生成] 前の生成の後始末が遅れて届きました(状態は消していません)", isForDebug: true)
             return
         }
         // run() は打ち切りを一律 .stoppedByUser として返してくるので、

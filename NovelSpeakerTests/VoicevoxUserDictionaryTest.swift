@@ -197,4 +197,39 @@ class VoicevoxUserDictionaryTest: XCTestCase {
         XCTAssertTrue(text.hasPrefix("ハシ"))
         XCTAssertGreaterThan(text.count, "ハシ".count, "助詞が付いていない")
     }
+    // MARK: - モーラの区切り
+
+    // ★VOICEVOX の解析を使ってはいけない。
+    // analyze は「実際にどう発音するか」を返すので、「イジョウチ」が
+    // 「イ / ジョ / オ / チ」になって、利用者が入れた文字と違う表示になる。
+    // 区切りだけが必要なので、書いた文字のまま数える。
+    func testMorasKeepTheCharactersAsTyped() {
+        XCTAssertEqual(VoicevoxAccentDisplay.moras(fromKatakana: "イジョウチ"), ["イ", "ジョ", "ウ", "チ"])
+    }
+
+    // 小書きの仮名は直前にくっついて1モーラ。
+    func testSmallKanaJoinsThePreviousMora() {
+        XCTAssertEqual(VoicevoxAccentDisplay.moras(fromKatakana: "キャク"), ["キャ", "ク"])
+        XCTAssertEqual(VoicevoxAccentDisplay.moras(fromKatakana: "ファイト"), ["ファ", "イ", "ト"])
+    }
+
+    // 「ン」「ッ」「ー」はそれぞれ1モーラ(日本語の数え方どおり)。
+    func testSpecialMorasAreCountedSeparately() {
+        XCTAssertEqual(VoicevoxAccentDisplay.moras(fromKatakana: "コッケン"), ["コ", "ッ", "ケ", "ン"])
+        XCTAssertEqual(VoicevoxAccentDisplay.moras(fromKatakana: "ラーメン"), ["ラ", "ー", "メ", "ン"])
+    }
+
+    // 小書きの仮名で始まっていても落ちない。
+    func testLeadingSmallKanaDoesNotCrash() {
+        XCTAssertEqual(VoicevoxAccentDisplay.moras(fromKatakana: "ャ"), ["ャ"])
+        XCTAssertEqual(VoicevoxAccentDisplay.moras(fromKatakana: ""), [])
+    }
+
+    // 実機で起きた表示の揺れ。同じ読みなら何度数えても同じ結果になる事。
+    func testMorasAreStable() {
+        let first = VoicevoxAccentDisplay.moras(fromKatakana: "イジョウチ")
+        let second = VoicevoxAccentDisplay.moras(fromKatakana: "イジョウチ")
+        XCTAssertEqual(first, second)
+        XCTAssertEqual(VoicevoxAccentDisplay.markedKana(moras: first, accentType: 3), "イジョウ\u{A71C}チ")
+    }
 }
