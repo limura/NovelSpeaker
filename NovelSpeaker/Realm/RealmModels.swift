@@ -94,6 +94,10 @@ final class MemoryTraceLogger {
     //            isSpeechViewBottomButtonOverlapsChapterBar を追加した。
     //            メンバの「追加」だけなのでデータ変換は不要(MigrateFunc への追記も不要)だが、
     //            schemaVersion を上げないと既存の Realm が開けなくなる。
+    // 20 -> 21: RealmSpeechModSetting に voicevoxPronunciation / voicevoxAccentType /
+    //            voicevoxWordPriority を追加した。VOICEVOX 本体のユーザー辞書へ登録して
+    //            アクセントまで指定できるようにするため(置換ではアクセントを変えられない)。
+    //            メンバの「追加」だけなのでデータ変換は不要。
     // 19 -> 20: RealmSpeechModSetting に targetSpeechEngineTypeArray を追加した。
     //            「この読み替えをどの音声合成に適用するか」を、推測ではなくデータで持つため。
     //            メンバの「追加」だけなのでデータ変換は不要(MigrateFunc への追記も不要)だが、
@@ -102,7 +106,7 @@ final class MemoryTraceLogger {
     //            そちらが書き戻した時に中身が消える事がありうる。
     //            消えても「空 = 未指定」となって従来どおりの推測に落ちるだけで、
     //            読み替えが効かなくなったりはしない(次に編集または上書き登録すれば戻る)。
-    static let currentSchemaVersion : UInt64 = 20
+    static let currentSchemaVersion : UInt64 = 21
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -2384,6 +2388,25 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
         targetSpeechEngineTypeArray.removeAll()
         targetSpeechEngineTypeArray.append(objectsIn: types.map { $0.rawValue })
     }
+
+    /// VOICEVOX に渡す読み(カタカナ)。空 = この行では VOICEVOX の辞書を使わない。
+    ///
+    /// 「読みの修正」は文字列を置換する仕組みなので、読みは変えられても
+    /// **アクセントは変えられない**(「橋」「箸」「端」はどれも「ハシ」)。
+    /// アクセントまで指定できるのは VOICEVOX 本体のユーザー辞書だけなので、
+    /// そこへ登録する内容をここに持つ。
+    ///
+    /// **カタカナ以外は VOICEVOX が受け付けない。** 読み替え後には漢字や
+    /// 引用符での細工が入っている事が普通にあるので、読み替え後をそのまま
+    /// 使う事はできず、別に持つ必要がある。
+    @objc dynamic var voicevoxPronunciation : String = ""
+    /// アクセント核の位置。0 = 平板(下がらない)、N = N モーラ目の後で下がる。
+    @objc dynamic var voicevoxAccentType : Int = 0
+    /// 優先度(0〜10)。既定は VOICEVOX 側の既定値に合わせて 5。
+    ///
+    /// Open JTalk は長い語が自動的に勝つ仕組みではないので、
+    /// 「黒剣騎士団」と「黒剣」のように登録語同士が食い合う時に要る。
+    @objc dynamic var voicevoxWordPriority : Int = VoicevoxUserDictionaryEntry.defaultPriority
 
     func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {
         return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in

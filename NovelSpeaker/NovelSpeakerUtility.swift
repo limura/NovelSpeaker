@@ -170,6 +170,63 @@ class NovelSpeakerUtility: NSObject {
         return keySet
     }
 
+    /// 保存されている指定と、標準の読み替え辞書からの推測を合わせた、
+    /// 「実際に効いている適用先エンジン」。**空 = どのエンジンにも適用する。**
+    ///
+    /// 対象エンジンをデータで持つようになる前のエントリは全部空になるので、
+    /// 空の時は従来どおり「標準の読み替え辞書と値が一致すれば端末の音声専用」
+    /// という推測に落とす。ここを「全エンジン」と読むと、まだ VOICEVOX で
+    /// 確かめていない標準の読み替えが一斉に適用されてしまう。
+    ///
+    /// 同じ判断をする場所が3箇所(読み上げ・Apple Watchへの転送・編集画面)あり、
+    /// ばらけると画面と実際の挙動がずれるので、ここに寄せてある。
+    ///
+    /// - Parameter defaultSpeechModKeySet: 何度も呼ぶ場合に外から渡す(5000件超あるため)。
+    static func EffectiveSpeechEngineTypes(of setting: RealmSpeechModSetting,
+                                           defaultSpeechModKeySet: Set<String>? = nil) -> [SpeechEngineType] {
+        let stored = setting.speechEngineTypes
+        if stored.isEmpty == false { return stored }
+        let keySet = defaultSpeechModKeySet ?? GetDefaultSpeechModKeySet()
+        let key = DefaultSpeechModKey(before: setting.before, after: setting.after, isRegexp: setting.isUseRegularExpression)
+        return keySet.contains(key) ? [.avSpeechSynthesizer] : []
+    }
+
+    /// 「読みの修正」から VOICEVOX のユーザー辞書を組み立て直し、必要なら反映する。
+    ///
+    /// 読み替えを編集した時・標準の読み替え辞書を入れ直した時・起動時に呼ぶ。
+    /// 中身が変わっていなければ何もしない(作り置きを無駄に捨てないため)。
+    static func ReloadVoicevoxUserDictionary() {
+        guard VoicevoxCore.isAvailableOnThisOS else { return }
+        var entries:[VoicevoxUserDictionaryEntry] = []
+        RealmUtil.RealmBlock { (realm) -> Void in
+            let defaultSpeechModKeySet = GetDefaultSpeechModKeySet()
+            guard let settings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
+            for setting in settings {
+                guard setting.voicevoxPronunciation.count > 0 else { continue }
+                let engineTypes = EffectiveSpeechEngineTypes(of: setting, defaultSpeechModKeySet: defaultSpeechModKeySet)
+                guard let entry = VoicevoxUserDictionaryBuilder.entry(
+                    before: String(setting.before),
+                    after: String(setting.after),
+                    isUseRegularExpression: setting.isUseRegularExpression,
+                    isAppliedToVoicevox: engineTypes.isApplied(to: .voicevox),
+                    pronunciation: String(setting.voicevoxPronunciation),
+                    accentType: setting.voicevoxAccentType,
+                    priority: setting.voicevoxWordPriority) else { continue }
+                entries.append(entry)
+            }
+        }
+        guard VoicevoxUserDictionary.shared.replace(with: entries) else { return }
+        let applied = VoicevoxUserDictionary.shared.entries
+        // 読み方が変わったので、作り置き済みの音声のうち影響を受ける物は使えない。
+        // ディスクの方は鍵に署名が入っているので自然に使われなくなる(古い物は
+        // 「今の設定で使われない音声」として管理画面から消せる)。
+        // メモリ側の鍵には署名が入っていないので、ここで捨てる。
+        VoicevoxCore.shared.schedulePrefetchCacheClear()
+        Task {
+            await VoicevoxCore.shared.applyUserDictionary(applied)
+        }
+    }
+
     static func getSpeechModSettings(completion:([SpeechModSetting])->Void) {
         var speechModSettings:[SpeechModSetting]? = nil
         RealmUtil.RealmBlock { (realm) -> Void in
@@ -309,6 +366,7 @@ class NovelSpeakerUtility: NSObject {
                     realm.add(speechModSetting, update: .modified)
                 }
             }
+            ReloadVoicevoxUserDictionary()
         }
     }
 
@@ -335,6 +393,7 @@ class NovelSpeakerUtility: NSObject {
                     }
                 }
             }
+            ReloadVoicevoxUserDictionary()
         }
     }
     
@@ -348,6 +407,7 @@ class NovelSpeakerUtility: NSObject {
                 }
             }
         }
+        ReloadVoicevoxUserDictionary()
     }
     
     // 指定された realm に、必須データが入っているか否かを判定します。
@@ -1395,9 +1455,14 @@ class NovelSpeakerUtility: NSObject {
                         mod.targetSpeechEngineTypeArray.append(rawValue)
                     }
                 }
+                // 古いバックアップにはこれらの項目が無い。その場合は既定のままにする。
+                mod.voicevoxPronunciation = (speechMod.object(forKey: "voicevoxPronunciation") as? String) ?? ""
+                mod.voicevoxAccentType = (speechMod.object(forKey: "voicevoxAccentType") as? NSNumber)?.intValue ?? 0
+                mod.voicevoxWordPriority = (speechMod.object(forKey: "voicevoxWordPriority") as? NSNumber)?.intValue ?? VoicevoxUserDictionaryEntry.defaultPriority
                 realm.add(mod, update: .modified)
             }
         }
+        ReloadVoicevoxUserDictionary()
     }
     
     static func RestoreSpeechWaitConfig_V_2_0_0(waitArray:NSArray, progressUpdate:@escaping(String)->Void) {
@@ -2320,7 +2385,10 @@ class NovelSpeakerUtility: NSObject {
                     "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate),
                     "isUseRegularExpression": setting.isUseRegularExpression,
                     "targetNovelIDArray": Array(setting.targetNovelIDArray),
-                    "targetSpeechEngineTypeArray": Array(setting.targetSpeechEngineTypeArray)
+                    "targetSpeechEngineTypeArray": Array(setting.targetSpeechEngineTypeArray),
+                    "voicevoxPronunciation": setting.voicevoxPronunciation,
+                    "voicevoxAccentType": setting.voicevoxAccentType,
+                    "voicevoxWordPriority": setting.voicevoxWordPriority
                 ]
             }
             return result

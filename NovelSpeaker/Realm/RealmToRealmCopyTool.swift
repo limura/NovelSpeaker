@@ -77,6 +77,9 @@ class RealmToRealmCopyTool: NSObject {
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
             newObj.targetSpeechEngineTypeArray.removeAll()
             newObj.targetSpeechEngineTypeArray.append(objectsIn: obj.targetSpeechEngineTypeArray)
+            newObj.voicevoxPronunciation = obj.voicevoxPronunciation
+            newObj.voicevoxAccentType = obj.voicevoxAccentType
+            newObj.voicevoxWordPriority = obj.voicevoxWordPriority
             to.add(newObj, update: .modified)
             try to.commitWrite()
         }

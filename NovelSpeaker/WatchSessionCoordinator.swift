@@ -1074,18 +1074,11 @@ class WatchSessionCoordinator: NSObject {
             let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
             if let modSettings = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: globalOnlyNovelID) {
                 for modSetting in modSettings {
-                    // データとして持っていればそれを使い、無い時だけ従来の推測に落とす
-                    // (StoryTextClassifier と同じ判断)。
                     // 転送するのは文字列。時計側のアプリが古いままの事があるので、
                     // 数値ではなく自分で意味の分かる形で送る。
-                    let stored = modSetting.speechEngineTypes
-                    let targetEngines: [String]
-                    if stored.isEmpty {
-                        let key = NovelSpeakerUtility.DefaultSpeechModKey(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isUseRegularExpression)
-                        targetEngines = defaultSpeechModKeySet.contains(key) ? ["AVSpeechSynthesizer"] : []
-                    } else {
-                        targetEngines = stored.map { $0.typeString ?? "any" }
-                    }
+                    let targetEngines = NovelSpeakerUtility.EffectiveSpeechEngineTypes(
+                        of: modSetting, defaultSpeechModKeySet: defaultSpeechModKeySet)
+                        .map { $0.typeString ?? "any" }
                     settings.speechMods.append(WatchSpeechSettings.Mod(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isUseRegularExpression, targetEngines: targetEngines))
                 }
             }

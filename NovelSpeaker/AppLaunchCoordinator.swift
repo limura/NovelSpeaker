@@ -75,6 +75,11 @@ final class AppLaunchCoordinator: NSObject {
                 }
                 // 音に影響する入力が変わって版が上がった時、古い版を丸ごと捨てる。
                 // これが無いと「辞書を直したのに古い音が鳴り続ける」事になる。
+                // 「読みの修正」で指定された VOICEVOX 用の読みとアクセントを先に組み立てる。
+                // ディスクキャッシュの鍵にはこれが混ざるので、この後の後始末や
+                // setUp より**前**に済ませておかないと、鍵の食い違いで
+                // 作り置きを取り違える(古い方を消してしまう)。
+                NovelSpeakerUtility.ReloadVoicevoxUserDictionary()
                 let staleAudio = VoicevoxDiskCacheStore.shared.removeOutdatedLayouts()
                 if staleAudio > 0 {
                     AppInformationLogger.AddLog(

@@ -49,6 +49,41 @@ enum VoicevoxDiagnostics {
     static var isForDebug: Bool { return isVisibleInAppInformation == false }
 }
 
+/// Open JTalk の解析結果のモーラ1つ。
+///
+/// VOICEVOX が返す JSON にはこれ以外に長さや音高も入っているが、
+/// アクセントの設定画面で要るのは「どう読むか」だけなので、そこだけ取る。
+struct VoicevoxMora: Codable, Equatable {
+    /// カタカナ1モーラ。
+    let text: String
+    let consonant: String?
+    let vowel: String
+}
+
+/// Open JTalk の解析結果のアクセント句1つ。
+struct VoicevoxAccentPhrase: Codable, Equatable {
+    let moras: [VoicevoxMora]
+    /// アクセント核の位置。0 = 平板、N = N モーラ目の後で下がる。
+    let accent: Int
+    let pauseMora: VoicevoxMora?
+
+    enum CodingKeys: String, CodingKey {
+        case moras
+        case accent
+        case pauseMora = "pause_mora"
+    }
+
+    /// 読み(カタカナ)。
+    var kana: String { return moras.map({ $0.text }).joined() }
+}
+
+extension Array where Element == VoicevoxAccentPhrase {
+    /// 全体の読み(カタカナ)。
+    var kana: String { return map({ $0.kana }).joined() }
+    /// 全体のモーラ列。
+    var allMoras: [VoicevoxMora] { return flatMap({ $0.moras }) }
+}
+
 struct VoicevoxStyle {
     let name: String
     let styleId: UInt32
@@ -106,6 +141,8 @@ actor VoicevoxCore {
     private var onnxruntime: OpaquePointer?
     private var openJTalk: OpaquePointer?
     private var synthesizer: OpaquePointer?
+    /// 今 Open JTalk に登録してあるユーザー辞書。作り直す時に古い方を捨てるために持つ。
+    private var userDict: OpaquePointer?
 
     private(set) var styles: [VoicevoxStyle] = []
     // 一度ロードした声モデルのVVMパスの集合(再ロードによる数百ms級の待ちを避けるため)
@@ -406,7 +443,92 @@ actor VoicevoxCore {
             try createSynthesizer(onnxruntime: ortNotNil, openJTalk: jtalkNotNil, threadCount: Self.configuredCPUNumThreads)
         }
 
+        // 「読みの修正」で指定された読みとアクセントを Open JTalk に持たせる。
+        applyUserDictionary(VoicevoxUserDictionary.shared.entries)
+
         try reloadStyleCatalog(voiceModelFilePaths: voiceModelFilePaths)
+    }
+
+    // MARK: - ユーザー辞書
+
+    /// 「読みの修正」で指定された読みとアクセントを、Open JTalk のユーザー辞書として登録し直す。
+    ///
+    /// 置換ではアクセントを変えられない(「橋」「箸」「端」はどれも「ハシ」)ので、
+    /// アクセントを指定できるのはここだけである。
+    ///
+    /// 1語ずつ足し引きせず**毎回作り直す**。追加・変更・削除を差分で追うと、
+    /// UUID の管理が要るうえに Realm 側の変更(iCloud 経由の同期を含む)と
+    /// ずれた時に直す手段が無くなる。数千件でもミリ秒で終わる処理なので、
+    /// 「今あるべき姿を作って差し替える」方が確実に合う。
+    func applyUserDictionary(_ entries: [VoicevoxUserDictionaryEntry]) {
+        guard let openJTalk = openJTalk else { return }
+        guard let dict = voicevox_user_dict_new() else { return }
+        var addedCount = 0
+        var rejectedCount = 0
+        for entry in entries {
+            // ★C文字列の寿命に注意。
+            // voicevox_user_dict_word_make が返す構造体は surface / pronunciation の
+            // ポインタを**そのまま持つ**ので、withCString の外へ持ち出すと解放済みの
+            // メモリを指す事になる(実際にテストランナーが落ちた)。
+            // 追加まで入れ子の内側で済ませる。
+            let result = entry.surface.withCString { surfacePointer -> VoicevoxResultCode in
+                return entry.pronunciation.withCString { pronunciationPointer -> VoicevoxResultCode in
+                    var word = voicevox_user_dict_word_make(surfacePointer, pronunciationPointer, UInt(entry.accentType))
+                    word.priority = UInt8(entry.priority)
+                    var uuid = (UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                                UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0))
+                    return withUnsafeMutableBytes(of: &uuid) { rawBuffer -> VoicevoxResultCode in
+                        guard let base = rawBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                            return VOICEVOX_RESULT_INVALID_USER_DICT_WORD_ERROR
+                        }
+                        return voicevox_user_dict_add_word(dict, &word, UnsafeMutablePointer<(UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8)>(OpaquePointer(base)))
+                    }
+                }
+            }
+            if result == VOICEVOX_RESULT_OK {
+                addedCount += 1
+            } else {
+                // 1語弾かれても他は使えるので止めない。
+                // 表記に記号が入っている・読みがカタカナでない等で弾かれる。
+                rejectedCount += 1
+            }
+        }
+        let useResult = voicevox_open_jtalk_rc_use_user_dict(openJTalk, dict)
+        if useResult != VOICEVOX_RESULT_OK {
+            voicevox_user_dict_delete(dict)
+            AppInformationLogger.AddLog(message: "VoicevoxCore: ユーザー辞書の登録に失敗しました(\(useResult.rawValue))", isForDebug: true)
+            return
+        }
+        if let previous = userDict {
+            voicevox_user_dict_delete(previous)
+        }
+        userDict = dict
+        if entries.isEmpty == false {
+            AppInformationLogger.AddLog(message: "VoicevoxCore: ユーザー辞書を登録しました(\(addedCount)語・受け付けられなかったもの \(rejectedCount)語)", isForDebug: true)
+        }
+    }
+
+    /// テキストを Open JTalk に解析させて、モーラ列とアクセントを得る。
+    ///
+    /// **声のモデル(VVM)は要らない。** synthesizer ではなく Open JTalk が持っている
+    /// 機能なので、音声モデルを1つも持っていない端末でも読みとアクセントは出せる。
+    ///
+    /// アクセントの設定画面で、
+    ///  - 利用者が入れた文字列(漢字混じりでもよい)のカタカナ読み
+    ///  - 今のところ VOICEVOX がどう読むつもりなのか
+    /// を出すのに使う。**実際に喋るのと同じ解析器**なので、答えは本物である。
+    func analyze(text: String) throws -> [VoicevoxAccentPhrase] {
+        guard let openJTalk = openJTalk else { throw VoicevoxCoreError.notSetUp }
+        var json: UnsafeMutablePointer<CChar>?
+        let result = text.withCString { cString in
+            voicevox_open_jtalk_rc_analyze(openJTalk, cString, &json)
+        }
+        guard result == VOICEVOX_RESULT_OK, let json = json else {
+            throw VoicevoxCoreError.core(result)
+        }
+        defer { voicevox_json_free(json) }
+        let data = Data(String(cString: json).utf8)
+        return try JSONDecoder().decode([VoicevoxAccentPhrase].self, from: data)
     }
 
     /// 指定されたスレッド数で synthesizer を作る。
@@ -997,6 +1119,11 @@ final class VoicevoxCore {
     }
 
     nonisolated var isPlaybackSynthesisPending: Bool { return false }
+
+    func applyUserDictionary(_ entries: [VoicevoxUserDictionaryEntry]) {}
+    func analyze(text: String) throws -> [VoicevoxAccentPhrase] {
+        throw VoicevoxCoreError.notSetUp
+    }
 
     @discardableResult
     func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) -> Bool { return false }

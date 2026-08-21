@@ -133,6 +133,16 @@ enum SpeechEngineType: Int, CaseIterable {
     }
 }
 
+extension Array where Element == SpeechEngineType {
+    /// この指定が、そのエンジンに当てはまるか。
+    /// 空 = 未指定 = どのエンジンにも当てはまる。
+    func isApplied(to type: SpeechEngineType) -> Bool {
+        if isEmpty { return true }
+        if contains(.any) { return true }
+        return contains(type)
+    }
+}
+
 struct SpeechModSetting {
     let before : String
     let after : String
@@ -159,13 +169,11 @@ struct SpeechModSetting {
 
     // 指定した話者エンジンtypeにこの読み替えを適用すべきか。
     func isAppliedTo(speechEngineType:String) -> Bool {
-        if targetSpeechEngineTypeArray.isEmpty { return true } // 未設定=全エンジン
-        if targetSpeechEngineTypeArray.contains(.any) { return true }
         // 知らないエンジンなら適用する側に倒す。
         // 落とす側に倒すと、新しいエンジンが増えた時に、そのエンジンでだけ
         // 読み替えが全部効かなくなる(利用者からは原因の分からない不具合に見える)。
         guard let type = SpeechEngineType(typeString: speechEngineType) else { return true }
-        return targetSpeechEngineTypeArray.contains(type)
+        return targetSpeechEngineTypeArray.isApplied(to: type)
     }
 
     #if !os(watchOS)
@@ -507,20 +515,8 @@ class StoryTextClassifier {
             var shared:[SpeechModSetting] = []
             var specific:[String:[SpeechModSetting]] = [:]
             for realmModSetting in realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false") {
-                // データとして持っていればそれを使う。
-                // 持っていない(=これまでのバージョンで作られた)場合だけ、
-                // 「標準の読み替え辞書と値が一致するなら AVSpeechSynthesizer 専用」という
-                // 従来の推測に落とす。項目を足しただけでは既存のデータは空になるので、
-                // ここで従来の挙動に落とさないと、確認していない読み替えが
-                // 一斉に VOICEVOX へ適用されてしまう。
-                let stored = realmModSetting.speechEngineTypes
-                let targetEngines:[SpeechEngineType]
-                if stored.isEmpty {
-                    let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
-                    targetEngines = defaultSpeechModKeySet.contains(key) ? [.avSpeechSynthesizer] : []
-                } else {
-                    targetEngines = stored
-                }
+                let targetEngines = NovelSpeakerUtility.EffectiveSpeechEngineTypes(
+                    of: realmModSetting, defaultSpeechModKeySet: defaultSpeechModKeySet)
                 let setting = SpeechModSetting(from: realmModSetting, targetSpeechEngineTypeArray: targetEngines)
                 if realmModSetting.targetNovelIDArray.contains(RealmSpeechModSetting.anyTarget) {
                     shared.append(setting)

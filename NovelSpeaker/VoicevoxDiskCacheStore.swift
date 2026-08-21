@@ -108,8 +108,22 @@ final class VoicevoxDiskCacheStore {
 
     /// 音声の内容から決まる鍵。話者と読み上げ文字列が同じなら同じ音声になる。
     /// そのままファイル名にするので、英数字のみ(SHA256 の16進表記)である事が必要。
+    ///
+    /// ★VOICEVOX のユーザー辞書も内容のうちに入る。
+    ///
+    /// 読み替えを変えると本文そのものが変わるので鍵も自然に変わるが、
+    /// ユーザー辞書は本文を変えずに読み方だけを変えるので、そのままでは
+    /// 古い音声が使われ続けてしまう。かといって辞書全体の版番号を混ぜると、
+    /// 1語直しただけで何時間ぶんもの作り置きが一斉に無駄になる。
+    /// **その本文に実際に効いてくる語だけ**を署名にして混ぜる。
+    /// 何も効かない本文では空文字列になるので、辞書を使っていない限り
+    /// 鍵はこれまでと同じままである。
     static func key(text: String, styleId: UInt32) -> String {
-        return sha256Hex("\(styleId)::\(text)")
+        let signature = VoicevoxUserDictionary.shared.signature(forText: text)
+        if signature.isEmpty {
+            return sha256Hex("\(styleId)::\(text)")
+        }
+        return sha256Hex("\(styleId)::\(text)::\(signature)")
     }
 
     private static func sha256Hex(_ string: String) -> String {

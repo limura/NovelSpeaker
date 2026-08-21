@@ -276,6 +276,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 }
                 realm.add(setting, update: .modified)
             }
+            // 読みやアクセントが変わったかもしれないので、ユーザー辞書を組み立て直す。
+            NovelSpeakerUtility.ReloadVoicevoxUserDictionary()
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
             }
@@ -298,16 +300,10 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
     /// 「標準の読み替え辞書と値が一致すれば端末の音声のみ」という推測に落とす
     /// (StoryTextClassifier と同じ判断をしないと、画面と実際の挙動がずれる)。
     static func effectiveSpeechEngineTypes(of setting: RealmSpeechModSetting) -> [SpeechEngineType] {
-        let stored = setting.speechEngineTypes
-        if stored.isEmpty == false {
-            if stored.contains(.any) { return SpeechEngineType.selectableTypes }
-            return stored
-        }
-        let key = NovelSpeakerUtility.DefaultSpeechModKey(before: setting.before, after: setting.after, isRegexp: setting.isUseRegularExpression)
-        if NovelSpeakerUtility.GetDefaultSpeechModKeySet().contains(key) {
-            return [.avSpeechSynthesizer]
-        }
-        return SpeechEngineType.selectableTypes
+        let effective = NovelSpeakerUtility.EffectiveSpeechEngineTypes(of: setting)
+        // 画面では「未指定」も「すべて」も、全部にチェックが入った状態として見せる。
+        if effective.isEmpty || effective.contains(.any) { return SpeechEngineType.selectableTypes }
+        return effective
     }
 
     /// 保存する形にする。全部選ばれているなら `.any` 1つにまとめる。
