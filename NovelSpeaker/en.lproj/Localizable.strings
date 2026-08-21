@@ -1225,6 +1225,9 @@
 "VoicevoxSilence_CauseNotScheduled" = "it was not queued for synthesis ahead of time";
 "VoicevoxSilence_MessageFormat" = "VOICEVOX playback was silent for %1$.1f seconds (%2$d time(s) since launch)";
 "VoicevoxSilence_CauseFormat" = ". Reason: %@";
+"VoicevoxWedge_RecoveredMessageFormat" = "VOICEVOX playback stayed stuck for %d seconds, so it was restarted";
+"SettingsViewController_IsVoicevoxDiagnosticsVisible" = "Show VOICEVOX playback problems in \"In-app error notices\"";
+"SettingsViewController_IsVoicevoxDiagnosticsVisible_Hint" = "Shows dropouts and stalls in playback under \"In-app error notices\" instead of only in the debug log. You normally do not need this.";
 
 "VoicevoxConsent_DialogTitle" = "Voice model terms of use";
 "VoicevoxConsent_ListenOnSiteFormat" = "Hear this voice on the official site (%@)";

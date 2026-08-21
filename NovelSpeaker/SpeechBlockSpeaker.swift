@@ -591,12 +591,19 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
                     return
                 }
                 let waited = self.voicevoxWedgeCheckInterval * Double(self.voicevoxWedgeConsecutiveCount)
-                let message = "VOICEVOX wedge疑い: 発話中のつもりだが \(Int(waited))秒間、音も出ず合成もしていない blockIndex=\(blockIndex) text=\"\(Self.escapeForLog(speechText))\""
-                NSLog("NovelSpeaker.SynthWedge: ⚠️ \(message)")
-                AppInformationLogger.AddLog(message: message, appendix: [
-                    "blockIndex": "\(blockIndex)",
-                    "willSpeakRangeCallCount": "\(self.willSpeakRangeCallCount)",
-                ], isForDebug: true)
+                NSLog("NovelSpeaker.SynthWedge: ⚠️ VOICEVOX wedge疑い: 発話中のつもりだが \(Int(waited))秒間、音も出ず合成もしていない blockIndex=\(blockIndex) text=\"\(Self.escapeForLog(speechText))\"")
+                // 15秒ほどで勝手に戻ってしまうので、既定ではデバッグ用のログにしか残らない。
+                // 「VOICEVOX の不調をお知らせに出す」を点けている人にだけ見せる。
+                // その時に読まれる文なので、本文は技術的な内容にせず、細かい値は appendix に回す。
+                AppInformationLogger.AddLog(
+                    message: String(format: NSLocalizedString(
+                        "VoicevoxWedge_RecoveredMessageFormat",
+                        comment: "VOICEVOXの読み上げが %d秒 止まったままだったので、再生し直しました"), Int(waited)),
+                    appendix: [
+                        "blockIndex": "\(blockIndex)",
+                        "willSpeakRangeCallCount": "\(self.willSpeakRangeCallCount)",
+                        "text": Self.escapeForLog(speechText),
+                    ], isForDebug: VoicevoxDiagnostics.isForDebug)
                 self.recoverFromWedge(blockIndex: blockIndex)
             }
         }

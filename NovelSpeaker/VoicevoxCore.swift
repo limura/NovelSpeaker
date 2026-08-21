@@ -18,6 +18,37 @@ import Foundation
 import voicevox_core
 #endif
 
+/// VOICEVOX の読み上げの不調(無音・固着)を「アプリ内エラーのお知らせ」に出すかどうか。
+///
+/// 既定は false で、これらはデバッグ用のログにだけ残る。
+/// 固着は 15秒ほどで自力復帰するので、普段の利用では気付かないまま過ぎてしまう。
+/// 「おかしいと思ったら点けてもらう」ための、調査用のスイッチ。
+///
+/// デバッグメニューの表示状態には紐付けていない。
+/// デバッグメニューを常に出している人が見たいものは、大抵これとは別の物だから。
+///
+/// ここに置いてあるのは、固着検出(SpeechBlockSpeaker)が watchOS を含む
+/// 全ターゲットでコンパイルされるため。NovelSpeakerUtility は watchOS には無い。
+enum VoicevoxDiagnostics {
+    static let isVisibleInAppInformationKey = "IsVoicevoxDiagnosticsVisible"
+
+    static var isVisibleInAppInformation: Bool {
+        get {
+            let defaults = UserDefaults.standard
+            defaults.register(defaults: [isVisibleInAppInformationKey: false])
+            return defaults.bool(forKey: isVisibleInAppInformationKey)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: isVisibleInAppInformationKey)
+            UserDefaults.standard.synchronize()
+        }
+    }
+
+    /// AppInformationLogger の isForDebug に渡す値。
+    /// 表示する時だけ false(=通常のお知らせ扱い)になる。
+    static var isForDebug: Bool { return isVisibleInAppInformation == false }
+}
+
 struct VoicevoxStyle {
     let name: String
     let styleId: UInt32

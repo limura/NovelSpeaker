@@ -2059,6 +2059,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let value = row.value else { return }
                 NovelSpeakerUtility.isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog = value
             })
+            if VoicevoxCore.isAvailableOnThisOS {
+                section
+                <<< SwitchRow("IsVoicevoxDiagnosticsVisible") { row in
+                    row.title = NSLocalizedString("SettingsViewController_IsVoicevoxDiagnosticsVisible", comment: "VOICEVOX の読み上げの不調を「アプリ内エラーのお知らせ」に出す")
+                    row.value = VoicevoxDiagnostics.isVisibleInAppInformation
+                    row.cell.textLabel?.numberOfLines = 0
+                    row.cell.accessibilityHint = NSLocalizedString("SettingsViewController_IsVoicevoxDiagnosticsVisible_Hint", comment: "読み上げが途切れたり止まったりした事を、デバッグログではなく「アプリ内エラーのお知らせ」に表示するようにします。普段は必要ありません。")
+                }.onChange({ row in
+                    guard let value = row.value else { return }
+                    VoicevoxDiagnostics.isVisibleInAppInformation = value
+                })
+            }
             section
             <<< SwitchRow("IsInspectableWkWebView") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsInspectableWkWebView", comment:"WkWebViewをmacのSafariからInspectできるようにする。")

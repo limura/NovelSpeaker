@@ -1206,6 +1206,9 @@
 "VoicevoxSilence_CauseNotScheduled" = "先行合成に出せていなかった";
 "VoicevoxSilence_MessageFormat" = "VOICEVOXの読み上げが %1$.1f秒 途切れました(この起動で %2$d回目)";
 "VoicevoxSilence_CauseFormat" = "。理由: %@";
+"VoicevoxWedge_RecoveredMessageFormat" = "VOICEVOXの読み上げが %d秒 止まったままだったので、再生し直しました";
+"SettingsViewController_IsVoicevoxDiagnosticsVisible" = "VOICEVOX の読み上げの不調を「アプリ内エラーのお知らせ」に出す";
+"SettingsViewController_IsVoicevoxDiagnosticsVisible_Hint" = "読み上げが途切れたり止まったりした事を、デバッグログではなく「アプリ内エラーのお知らせ」に表示するようにします。普段は必要ありません。";
 
 "VoicevoxConsent_DialogTitle" = "音声モデルの利用規約";
 "VoicevoxConsent_ListenOnSiteFormat" = "公式サイトで声を聞く(%@)";

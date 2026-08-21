@@ -94,7 +94,9 @@ final class VoicevoxSilenceReporter {
 
         AppInformationLogger.AddLogWithStruct(
             message: Self.message(gapSeconds: seconds, totalCount: count, cause: cause),
-            isForDebug: true,
+            // 既定ではデバッグ用のログにだけ残る。
+            // 「VOICEVOX の不調をお知らせに出す」を点けている間は普通のお知らせとして見せる。
+            isForDebug: VoicevoxDiagnostics.isForDebug,
             category: "voicevoxSilence",
             dedupeKey: "voicevoxSilence")
         return seconds
