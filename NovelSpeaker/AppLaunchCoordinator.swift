@@ -42,6 +42,9 @@ final class AppLaunchCoordinator: NSObject {
         NovelSpeakerUtility.CleanBackupFolder()
         ImportFromWebPageViewController.ClearDownloadTemporaryDirectory()
         NovelSpeakerUtility.SetInitialAvailableMemory()
+        // 強制終了された時に失った読み上げ位置を、控えから書き戻す。
+        // 書き戻しはここ(起動時)の1回だけで、それ以外の場面の挙動は変わらない。
+        applyReadingPositionBreadcrumbIfNeeded()
         NovelSpeakerUtility.StartPrivacyTrackingBlockRuleListRefreshTimerIfNeeded()
         WatchSessionCoordinator.shared.start()
         PhoneWidgetDataUpdater.startObserving()
@@ -80,6 +83,47 @@ final class AppLaunchCoordinator: NSObject {
                 }
                 await VoicevoxCore.setUpFromBundleIfNeeded()
             }
+        }
+    }
+
+    /// 前回の実行が強制終了で終わっていた場合に、控えておいた読み上げ位置を栞へ書き戻す。
+    ///
+    /// 読み上げ中の栞は章の切れ目でしか Realm に書かれないため、章の途中で殺されると
+    /// 章の頭まで戻ってしまう。ブロック境界の位置を UserDefaults に控えてあるので、
+    /// それが「今の栞と同じ章で、かつその先」を指している時だけ書き戻す
+    /// (判断の詳細は ReadingPositionBreadcrumbStore.shouldApply)。
+    private static func applyReadingPositionBreadcrumbIfNeeded() {
+        guard let breadcrumb = ReadingPositionBreadcrumbStore.load() else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: breadcrumb.storyID) else {
+                // 章そのものが無くなっている(小説を消した等)。控えも捨てる。
+                ReadingPositionBreadcrumbStore.clear()
+                return
+            }
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: breadcrumb.novelID) else {
+                ReadingPositionBreadcrumbStore.clear()
+                return
+            }
+            let currentStoryID = novel.m_readingChapterStoryID
+            let currentLocation = story.readLocation(realm: realm)
+            guard ReadingPositionBreadcrumbStore.shouldApply(
+                    breadcrumb,
+                    currentStoryID: currentStoryID,
+                    currentLocation: currentLocation) else {
+                ReadingPositionBreadcrumbStore.clear()
+                return
+            }
+            guard breadcrumb.location <= story.content.unicodeScalars.count else {
+                ReadingPositionBreadcrumbStore.clear()
+                return
+            }
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                story.SetCurrentReadLocationWith(realm: realm, location: breadcrumb.location)
+            }
+            AppInformationLogger.AddLog(
+                message: "前回の終了時に記録した読み上げ位置(\(currentLocation) → \(breadcrumb.location))を書き戻しました",
+                isForDebug: true)
+            ReadingPositionBreadcrumbStore.clear()
         }
     }
 

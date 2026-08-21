@@ -1463,9 +1463,33 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
 
     // MARK: SpeakRangeProtocl implement
     func willSpeakRange(range:NSRange) {
+        saveReadingPositionBreadcrumbIfBlockChanged()
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerUpdateReadingPoint(storyID: self.storyID, range: range)
         }
+    }
+
+    /// 最後に控えを置いた時のブロック番号。ブロックが変わった時だけ置き直す。
+    private var lastBreadcrumbBlockIndex: Int = -1
+
+    /// 読み上げ位置の控え(ReadingPositionBreadcrumb)を置く。
+    ///
+    /// **ブロックが変わった時だけ**置く。ブロック単位にしているのは、
+    /// 事前生成音声がブロック単位で作られているため。ブロックの途中で止まると
+    /// 再開時に必ず作り直しになるが、境界なら作ってある音声がそのまま使える。
+    ///
+    /// ここでは Realm を触らない(触ると iCloud 同期の通信がブロック毎に飛ぶ)。
+    private func saveReadingPositionBreadcrumbIfBlockChanged() {
+        let blockIndex = self.speaker.currentBlockIndex
+        guard blockIndex != lastBreadcrumbBlockIndex else { return }
+        lastBreadcrumbBlockIndex = blockIndex
+        let storyID = self.storyID
+        guard storyID.count > 0 else { return }
+        ReadingPositionBreadcrumbStore.save(ReadingPositionBreadcrumb(
+            novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID),
+            storyID: storyID,
+            location: self.speaker.currentLocation,
+            savedAt: Date()))
     }
     
     func InterruptByiOS16_3MemoryLeak() {
@@ -1725,6 +1749,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func setReadLocationWith(realm:Realm, location:Int) {
         if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.unicodeScalars.count >= location && location >= 0 {
             self.speaker.SetSpeechLocation(location: location)
+            // Realm に本物の栞を書くので、控えは要らなくなる。
+            // 残すと、この後で別の経路(他端末からの同期や手動シーク)で動いた位置を
+            // 古い控えで巻き戻しかねない。
+            ReadingPositionBreadcrumbStore.clear()
+            lastBreadcrumbBlockIndex = -1
             if story.readLocation(realm: realm) != location {
                 NiftyUtility.DispatchSyncMainQueue {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
