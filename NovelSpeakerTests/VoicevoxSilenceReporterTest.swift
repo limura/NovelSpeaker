@@ -63,22 +63,44 @@ class VoicevoxSilenceReporterTest: XCTestCase {
         XCTAssertNil(reporter.notePlaybackStarting(at: start.addingTimeInterval(10)))
     }
 
-    // MARK: - 文面
+    // MARK: - 文面とまとめ方
 
-    // 問い合わせで効くのは「何秒・何回目・なぜ」の3つ。
-    func testMessageSaysHowLongHowManyAndWhy() {
-        let message = VoicevoxSilenceReporter.message(
-            gapSeconds: 3.25, totalCount: 4, cause: .synthesisWasTooSlow)
-        XCTAssertTrue(message.contains("3.2秒"), message)
-        XCTAssertTrue(message.contains("4回目"), message)
+    // 問い合わせで効くのは「何回・合計何秒・最長何秒・なぜ」。
+    func testSummaryMessageSaysCountTotalWorstAndWhy() {
+        let message = VoicevoxSilenceReporter.summaryMessage(
+            totalCount: 217, totalSeconds: 940, worstSeconds: 14.0, latestSeconds: 3.25,
+            cause: .synthesisWasTooSlow)
+        XCTAssertTrue(message.contains("217回"), message)
+        XCTAssertTrue(message.contains("940秒"), message)
+        XCTAssertTrue(message.contains("14.0秒"), message)
         XCTAssertTrue(message.contains("合成が再生に間に合わなかった"), message)
     }
 
-    // 理由が分からない事もある。その時も秒数と回数は出す。
-    func testMessageWithoutCause() {
-        let message = VoicevoxSilenceReporter.message(gapSeconds: 3, totalCount: 1, cause: nil)
-        XCTAssertTrue(message.contains("3.0秒"), message)
+    // 理由が分からない事もある。その時も数字は出す。
+    func testSummaryMessageWithoutCause() {
+        let message = VoicevoxSilenceReporter.summaryMessage(
+            totalCount: 1, totalSeconds: 3, worstSeconds: 3, latestSeconds: 3, cause: nil)
+        XCTAssertTrue(message.contains("1回"), message)
         XCTAssertFalse(message.contains("理由"), message)
+    }
+
+    // ★長さの分布が残る事。これが無いと「2秒が200回」なのか
+    // 「14秒が200回」なのかが区別できない(実機ログで実際に区別できなかった)。
+    func testLengthDistributionIsKept() {
+        XCTAssertEqual(VoicevoxSilenceReporter.bucketIndex(forSeconds: 2.5), 0)
+        XCTAssertEqual(VoicevoxSilenceReporter.bucketIndex(forSeconds: 3.0), 1)
+        XCTAssertEqual(VoicevoxSilenceReporter.bucketIndex(forSeconds: 7.0), 2)
+        XCTAssertEqual(VoicevoxSilenceReporter.bucketIndex(forSeconds: 14.0), 3)
+        XCTAssertEqual(VoicevoxSilenceReporter.bucketIndex(forSeconds: 60.0), 4)
+    }
+
+    // 分布の1行表示。0件の区切りは出さない(読みにくくなるだけなので)。
+    func testBucketTextShowsOnlyNonEmptyBuckets() {
+        let text = VoicevoxSilenceReporter.bucketText(counts: [12, 0, 3, 0, 1])
+        XCTAssertTrue(text.contains("2-3s:12"), text)
+        XCTAssertTrue(text.contains("5-10s:3"), text)
+        XCTAssertTrue(text.contains("20s-:1"), text)
+        XCTAssertFalse(text.contains(":0"), text)
     }
 
     // 先行合成に出せていなかった場合は、端末の速さではなく取りこぼしを疑う事になる。

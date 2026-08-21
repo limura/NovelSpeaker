@@ -1204,7 +1204,7 @@
 "VoicevoxMissingModel_ActionTitle" = "音声モデルを取得する";
 "VoicevoxSilence_CauseTooSlow" = "合成が再生に間に合わなかった";
 "VoicevoxSilence_CauseNotScheduled" = "先行合成に出せていなかった";
-"VoicevoxSilence_MessageFormat" = "VOICEVOXの読み上げが %1$.1f秒 途切れました(この起動で %2$d回目)";
+"VoicevoxSilence_SummaryFormat" = "VOICEVOXの読み上げが途切れています: この起動で %1$d回 / 合計 %2$.0f秒 / 最長 %3$.1f秒 / 直近 %4$.1f秒";
 "VoicevoxSilence_CauseFormat" = "。理由: %@";
 "VoicevoxWedge_RecoveredMessageFormat" = "VOICEVOXの読み上げが %d秒 止まったままだったので、再生し直しました";
 "SettingsViewController_IsVoicevoxDiagnosticsVisible" = "VOICEVOX の読み上げの不調を「アプリ内エラーのお知らせ」に出す";

@@ -45,24 +45,24 @@ final class VoicevoxCacheAutoGeneration {
     /// 読み上げが止まった時に呼ぶ。自動生成も止める
     /// (利用者が明示的に始めた生成は止めない)。
     func playbackDidStop() {
-        VoicevoxCacheGenerator.shared.stopIfFollowingPlayback()
+        VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "読み上げが止まったため")
     }
 
     func evaluate() {
         // この機能を使わない設定(0分)なら何もしない。
         guard VoicevoxCacheLead.keepGeneratingBelowMinutes > 0 else {
-            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback()
+            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "裏での作り足しが設定で無効になっているため")
             return
         }
         // 事前生成を有効にしていない小説でも作り足す。
         // 作った物は一時分に置かれ、聴き終わった所から消えるので、
         // 「断りなくストレージを使い続ける」事にはならない。
         guard let context = VoicevoxCore.shared.diskCacheContext else {
-            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback()
+            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "今読んでいる小説が分からないため")
             return
         }
         guard StorySpeaker.shared.isPlayng else {
-            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback()
+            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "読み上げ中ではないため")
             return
         }
         // 利用者が明示的に始めた生成が走っている時は、そちらに任せる。
@@ -88,7 +88,7 @@ final class VoicevoxCacheAutoGeneration {
                     "[VOICEVOX音声生成] この先の貯金が \(VoicevoxCacheGenerationProgress.durationText(seconds: lead)) 貯まったので、裏での作り足しを止めます",
                     isForDebug: true)
             }
-            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback()
+            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "貯金が下限まで貯まったため")
         }
     }
 

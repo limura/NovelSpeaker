@@ -36,6 +36,12 @@ final class VoicevoxCacheGenerator {
     enum StopReason {
         case finished
         case stoppedByUser
+        /// 読み上げに追従して走っていた分が、こちらの判断で止まった。
+        ///
+        /// 以前はこれも `.stoppedByUser` として「生成を止めました」と記録していた。
+        /// 実機ログで91分の間に160回この行が並んだのに、**利用者は何も止めておらず**、
+        /// どの条件で止まったのかもログからは特定できなかった。理由を持たせる。
+        case stoppedAutomatically(String)
         case limitReached(VoicevoxCacheLimits.StopCause)
         case failed(String)
 
@@ -43,6 +49,7 @@ final class VoicevoxCacheGenerator {
             switch self {
             case .finished: return "最後まで作り終えました"
             case .stoppedByUser: return "生成を止めました"
+            case .stoppedAutomatically(let text): return "裏での作り足しを止めました(\(text))"
             case .limitReached(let cause): return cause.message
             case .failed(let text): return "生成に失敗したため止めました(\(text))"
             }
@@ -59,6 +66,9 @@ final class VoicevoxCacheGenerator {
     private var runningModeUnsafe: Mode = .manual
     private var progressUnsafe: VoicevoxCacheGenerationProgress?
     private var lastStopReasonUnsafe: StopReason?
+    /// stop() を呼んだ側が申告した停止理由。
+    /// 実際に止まる(run が抜ける)のは非同期なので、ここに預けて finish で拾う。
+    private var requestedStopReasonUnsafe: StopReason?
     /// 進捗表示を組み立てる時に使う、生成中ずっと変わらない情報。
     private var lastChapterNumberUnsafe: Int?
 
@@ -126,7 +136,13 @@ final class VoicevoxCacheGenerator {
         }
     }
 
-    func stop() {
+    /// - Parameter reason: 止める理由。省略すると利用者が止めたものとして扱う。
+    ///   `run()` は打ち切りを一律 `.stoppedByUser` として返してくるので、
+    ///   誰がなぜ止めたのかはここでしか分からない。
+    func stop(reason: StopReason? = nil) {
+        lock.lock()
+        requestedStopReasonUnsafe = reason
+        lock.unlock()
         task?.cancel()
         task = nil
         let wasRunning = runningNovelID != nil
@@ -143,14 +159,22 @@ final class VoicevoxCacheGenerator {
 
     /// 読み上げに追従して自動で走っている分だけを止める。
     /// 利用者が明示的に始めた生成は、読み上げを止めても続ける。
-    func stopIfFollowingPlayback() {
+    /// - Parameter reason: なぜ止めるのか(ログに残る)。
+    func stopIfFollowingPlayback(reason: String) {
         guard runningNovelID != nil, runningMode == .followingPlayback else { return }
-        stop()
+        stop(reason: .stoppedAutomatically(reason))
     }
 
     private func finish(reason: StopReason) {
         let wasManual = runningMode == .manual
         lock.lock()
+        // run() は打ち切りを一律 .stoppedByUser として返してくるので、
+        // stop() を呼んだ側が理由を申告していればそちらを優先する。
+        var reason = reason
+        if case .stoppedByUser = reason, let requested = requestedStopReasonUnsafe {
+            reason = requested
+        }
+        requestedStopReasonUnsafe = nil
         runningNovelIDUnsafe = nil
         lastStopReasonUnsafe = reason
         lock.unlock()

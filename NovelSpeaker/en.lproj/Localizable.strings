@@ -1223,7 +1223,7 @@
 "VoicevoxMissingModel_ActionTitle" = "Download the voice model";
 "VoicevoxSilence_CauseTooSlow" = "synthesis could not keep up with playback";
 "VoicevoxSilence_CauseNotScheduled" = "it was not queued for synthesis ahead of time";
-"VoicevoxSilence_MessageFormat" = "VOICEVOX playback was silent for %1$.1f seconds (%2$d time(s) since launch)";
+"VoicevoxSilence_SummaryFormat" = "VOICEVOX playback keeps going silent: %1$d time(s) since launch / %2$.0f seconds total / %3$.1f seconds at the longest / %4$.1f seconds just now";
 "VoicevoxSilence_CauseFormat" = ". Reason: %@";
 "VoicevoxWedge_RecoveredMessageFormat" = "VOICEVOX playback stayed stuck for %d seconds, so it was restarted";
 "SettingsViewController_IsVoicevoxDiagnosticsVisible" = "Show VOICEVOX playback problems in \"In-app error notices\"";
