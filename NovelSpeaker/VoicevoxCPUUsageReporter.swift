@@ -24,10 +24,14 @@
 //   - 見積りと実測のズレ
 //  を1行にして「アプリ内エラーのお知らせ(デバッグ用)」に残す。
 //
-//  常時ログを吐くと邪魔なので、
-//   - 普段は間隔を空けて(既定30秒)
-//   - 危ない水準(既定70%)を超えた時は間隔を無視して
-//  記録する。dedupeKey でまとめられるので件数が増えるだけで済む。
+//  常時ログを吐くと邪魔なので、**「今までで一番悪かった時」だけ**を残す。
+//
+//  ここで dedupeKey は使えない。AppInformationLogger の dedupe は
+//  「最初のログの内容を残して回数だけ増やす」実装なので、
+//  それだと起動直後のまだCPUを使っていない値が残り、
+//  **肝心の一番危なかった時の数字が消えてしまう**。
+//  代わりに、これまでの最悪値を上回った時にだけ1件足す。
+//  最悪値は単調に増えるので件数は増え続けない(実際には数件で止まる)。
 //
 
 import Foundation
@@ -37,11 +41,12 @@ final class VoicevoxCPUUsageReporter {
 
     /// OS の判定窓と同じ。これと同じ長さで使用率を出さないと比較にならない。
     static let windowSeconds: Double = 60
-    /// この使用率を超えたら、間隔を無視して必ず残す。
-    /// OS の上限は 80% なので、その手前で見えるようにしておく。
-    static let alertUtilization: Double = 0.70
-    /// 平常時に記録する最短間隔。
-    static let normalIntervalSeconds: Double = 30
+    /// これを下回っている間は、最悪値を更新しても記録しない(平常運転なので見る価値が無い)。
+    /// OS の上限は 80% なので、その手前から見えるようにしておく。
+    static let reportFloorUtilization: Double = 0.50
+    /// 前回残した最悪値をこれだけ上回ったら記録する。
+    /// 少しずつ更新される度に1件増えるのを防ぐ。
+    static let worseningStep: Double = 0.05
 
     private struct Sample {
         let uptime: Double
@@ -50,7 +55,10 @@ final class VoicevoxCPUUsageReporter {
 
     private let lock = NSLock()
     private var samples: [Sample] = []
-    private var lastReportUptime: Double = -Double.infinity
+    /// これまでに記録した中で最も悪かった使用率。
+    private var reportedWorstUtilization: Double = 0
+    /// 一度も記録していない間は、最初の1件を必ず残す(仕組みが動いている事の確認用)。
+    private var hasReportedOnce = false
 
     private init() {}
 
@@ -93,9 +101,19 @@ final class VoicevoxCPUUsageReporter {
         guard let utilization = currentUtilization(at: now) else { return }
 
         lock.lock()
-        let shouldReport = utilization >= Self.alertUtilization
-            || now - lastReportUptime >= Self.normalIntervalSeconds
-        if shouldReport { lastReportUptime = now }
+        // 1件目は必ず残す(この仕組みが動いている事と、平常時の水準が分かる)。
+        // 以降は「見る価値のある水準」かつ「今までで一番悪い」時だけ。
+        let shouldReport: Bool
+        if hasReportedOnce == false {
+            shouldReport = true
+        } else {
+            shouldReport = utilization >= Self.reportFloorUtilization
+                && utilization >= reportedWorstUtilization + Self.worseningStep
+        }
+        if shouldReport {
+            hasReportedOnce = true
+            reportedWorstUtilization = max(reportedWorstUtilization, utilization)
+        }
         lock.unlock()
         guard shouldReport else { return }
 
@@ -121,8 +139,7 @@ final class VoicevoxCPUUsageReporter {
                 "estimateRatio": AnyCodable(String(format: "%.2f", estimateRatio)),
                 "waitedSeconds": AnyCodable(String(format: "%.2f", waitedSeconds)),
             ],
-            isForDebug: true,
-            dedupeKey: "voicevoxCPUUsage")
+            isForDebug: true)
     }
 
     /// 読み上げの停止などで、窓の中身をやり直す。
@@ -130,7 +147,8 @@ final class VoicevoxCPUUsageReporter {
         lock.lock()
         defer { lock.unlock() }
         samples.removeAll()
-        lastReportUptime = -Double.infinity
+        reportedWorstUtilization = 0
+        hasReportedOnce = false
     }
 
     static func thermalStateText(_ state: ProcessInfo.ThermalState) -> String {
