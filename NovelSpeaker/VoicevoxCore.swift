@@ -540,10 +540,11 @@ actor VoicevoxCore {
             // 音声モデルは synthesizer に紐づいてロードされているので、読み直しが必要。
             loadedVvmPaths.removeAll()
             try createSynthesizer(onnxruntime: ort, openJTalk: jtalk, threadCount: desired)
-            // 文字数あたりの CPU 秒はスレッド数で変わるので、見積りは作り直す。
+            // 文字数あたりの CPU 秒はスレッド数で変わるので、見積りは切り替える。
+            // 捨てるのではなく**スレッド数ごとに覚えておく**(行き来しても既定値に戻らない)。
             // ただし「既に使った CPU」の記録は残す(消すと、直前まで全コアで回していた事を
             // 忘れて、背面に移った直後の60秒窓で予算超過=強制終了を招く)。
-            cpuGovernor.resetCostModel()
+            cpuGovernor.useThreadCountProfile(desired)
         } catch {
             AppInformationLogger.AddLog(message: "VoicevoxCore: スレッド数の切り替えに失敗: \(error.localizedDescription)", isForDebug: true)
         }

@@ -73,6 +73,26 @@ final class VoicevoxCPUGovernor {
         let cpuSeconds: Double
     }
 
+    /// スレッド数ごとに覚えておく学習結果。
+    ///
+    /// スレッド数が変わると文字数あたりの CPU 秒も実効並列度も変わるので、
+    /// 切り替え時に**そのまま使い続ける事はできない**。かといって捨ててしまうと、
+    /// 次の1本を「実測が無い時の既定値(0.35秒/文字)」で見積もる事になる。
+    ///
+    /// 2026-08-21 の実機ログでこれが表に出た。背面に落ちてスレッド数を1にした直後、
+    /// 46文字を **21.4秒**と見積もって実測 8.8秒(2.4倍の過大評価)、
+    /// その結果 **29秒待たされている**。逆算した単価は 0.35 ちょうど、つまり既定値そのもの。
+    /// よりによって貯金が減り始める切り替え直後に、無駄に待たせていた事になる。
+    ///
+    /// スレッド数ごとに分けて覚えておけば、行き来しても既定値には戻らない。
+    private struct CostProfile {
+        var costSamples: [CostSample] = []
+        var parallelismSamples: [Double] = []
+    }
+    private var savedProfiles: [UInt16: CostProfile] = [:]
+    /// 今どのスレッド数の学習結果を使っているか。
+    private var activeThreadCount: UInt16 = 0
+
     private var usageRecords: [UsageRecord] = []
     /// 直近の合成の実効並列度(CPU秒 ÷ 実時間)。これから走らせる合成が
     /// 実時間で何秒かかるかを見積もるのに使う。
@@ -272,21 +292,32 @@ final class VoicevoxCPUGovernor {
         usageRecords.removeAll()
         costSamples.removeAll()
         parallelismSamples.removeAll()
+        savedProfiles.removeAll()
     }
 
-    /// 文字数あたりのコストの見積りだけを作り直す(実際に使った CPU の記録は残す)。
+    /// スレッド数を切り替えた事を知らせる。
     ///
-    /// スレッド数を切り替えた時に使う。スレッド数が変わると文字数あたりの CPU 秒は
-    /// 変わるので見積りは作り直す必要があるが、**既に使った CPU の記録は消してはいけない**。
+    /// 今の学習結果をそのスレッド数のものとして仕舞い、切り替え先の学習結果を出してくる。
+    /// 初めて使うスレッド数なら空(=既定値からやり直し)になる。
+    ///
+    /// **既に使った CPU の記録(usageRecords)はここでは消さない。**
     /// 消すと「直前まで全コアで回していた」事を忘れ、背面に移った直後の60秒窓で
-    /// 予算超過(=強制終了)を招く。前景→背面はまさにその危険な遷移そのもの。
-    func resetCostModel() {
+    /// 予算超過(=強制終了)を招く。前景→背面はまさにその危険な遷移そのものである。
+    /// あちらは記録した時点の実時間を持っているので、並列度が変わっても正しいまま。
+    ///
+    /// 仕舞ってあった学習結果が古い(その後に端末が温まった)場合は、
+    /// 単価を実際より安く見てしまう事がある。ただし `fittedCost` は直近8件の**最大**を
+    /// 採るので、切り替え後に1本測れば重い方に張り替わる。加えて窓の勘定は実測で
+    /// 行っているため、見積りが外れてもその1本ぶんで頭打ちになる。
+    func useThreadCountProfile(_ threadCount: UInt16) {
         lock.lock()
         defer { lock.unlock() }
-        costSamples.removeAll()
-        // 並列度もスレッド数と一緒に変わるので、これも作り直す。
-        // 既に使った CPU の記録(usageRecords)は、上の理由でここでは消さない。
-        // そちらは記録した時点の実時間を持っているので、後から並列度が変わっても正しいままである。
-        parallelismSamples.removeAll()
+        guard threadCount != activeThreadCount else { return }
+        savedProfiles[activeThreadCount] = CostProfile(costSamples: costSamples,
+                                                       parallelismSamples: parallelismSamples)
+        activeThreadCount = threadCount
+        let restored = savedProfiles[threadCount] ?? CostProfile()
+        costSamples = restored.costSamples
+        parallelismSamples = restored.parallelismSamples
     }
 }

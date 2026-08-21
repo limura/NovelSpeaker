@@ -443,14 +443,53 @@ class VoicevoxCPUGovernorWindowTest: XCTestCase {
                                     "並列度が高いほど CPU が短時間に詰まるので、安全側(待つ側)に倒れるべき")
     }
 
-    // スレッド数を変えた時に並列度の学習をやり直しても、
+    // スレッド数を変えて学習結果を切り替えても、
     // 既に使った CPU の記録は消えない事(前景→背面の遷移がまさにこれ)。
-    func testResetCostModelKeepsUsageRecords() {
+    func testSwitchingThreadCountProfileKeepsUsageRecords() {
         let governor = makeGovernor()
         governor.recordSynthesis(cpuSeconds: 48, wallSeconds: 12, characterCount: 480, at: 12)
-        governor.resetCostModel()
+        governor.useThreadCountProfile(1)
         XCTAssertEqual(governor.recordCountForTesting, 1, "使った CPU の記録まで消してはいけない")
         let wait = governor.waitSeconds(forCharacterCount: 100, limitRatio: 0.8, at: 12)
         XCTAssertGreaterThan(wait, 0, "直前まで使っていた事を忘れてはいけない")
+    }
+
+    // ★スレッド数を行き来しても、既定値には戻らない事。
+    //
+    // 実機ログで、背面に落ちてスレッド数を1にした直後の1本を
+    // 46文字=21.4秒(単価0.35=既定値そのもの)と見積もって実測8.8秒、
+    // その結果29秒待たされていた。学習をスレッド数ごとに仕舞っておけば起きない。
+    func testCostModelIsRememberedPerThreadCount() {
+        let governor = makeGovernor()
+        // 全コア(0)で 0.2秒/文字 を学ぶ。
+        governor.recordSynthesis(cpuSeconds: 20, wallSeconds: 5, characterCount: 100, at: 10)
+        let allCoreEstimate = governor.estimatedCPUSeconds(forCharacterCount: 100)
+
+        // 1スレッドに切り替え。ここはまだ何も知らないので既定値になる。
+        governor.useThreadCountProfile(1)
+        XCTAssertFalse(governor.hasMeasurement, "別のスレッド数の実測を流用してはいけない")
+        // 1スレッドで 0.1秒/文字 を学ぶ。
+        governor.recordSynthesis(cpuSeconds: 10, wallSeconds: 10, characterCount: 100, at: 20)
+        let singleEstimate = governor.estimatedCPUSeconds(forCharacterCount: 100)
+
+        // 全コアへ戻すと、さっきの全コアの実測が戻ってくる。
+        governor.useThreadCountProfile(0)
+        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 100), allCoreEstimate,
+                       accuracy: 0.001, "戻したら前に測った全コアの見積りに戻るべき")
+        // もう一度1スレッドへ。こちらも覚えている。
+        governor.useThreadCountProfile(1)
+        XCTAssertEqual(governor.estimatedCPUSeconds(forCharacterCount: 100), singleEstimate,
+                       accuracy: 0.001, "行き来しても既定値に戻ってはいけない")
+        XCTAssertNotEqual(allCoreEstimate, singleEstimate, accuracy: 0.001,
+                          "スレッド数が違えば見積りも違うはず(テストの前提)")
+    }
+
+    // 同じスレッド数を指定し直した時に、学習を捨ててしまわない事。
+    // 合成の度に applyThreadCountIfNeeded 経由で呼ばれうるため。
+    func testSwitchingToTheSameThreadCountKeepsTheModel() {
+        let governor = makeGovernor()
+        governor.recordSynthesis(cpuSeconds: 20, wallSeconds: 5, characterCount: 100, at: 10)
+        governor.useThreadCountProfile(0)
+        XCTAssertTrue(governor.hasMeasurement, "同じスレッド数なら学習は残るべき")
     }
 }
