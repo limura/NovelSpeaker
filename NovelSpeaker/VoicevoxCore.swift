@@ -817,10 +817,16 @@ actor VoicevoxCore {
         //  背面CPU上限で強制終了されるので、取り零しは許容できない)。
         applyThreadCountIfNeeded()
         let texts = chunkedTextsForBudget(text: text, limitRatio: limitRatio)
-        if texts.count > 1 {
-        }
         var wavs: [Data] = []
-        for chunk in texts {
+        for (index, chunk) in texts.enumerated() {
+            // 分割した2つ目以降でも、その都度スレッド数を見直す。
+            // 合成は走り始めたら止められない(スレッド数は synthesizer の生成時オプションで、
+            // 実行中の合成には効かないし、途中で中断する手段も無い)ので、
+            // 「今から走らせる1本」を減らす事でしか間に合わせられない。
+            // ここが無いと、1つ目の途中で背面に落ちた時に残りの塊まで全コアで走ってしまう。
+            if index > 0 {
+                applyThreadCountIfNeeded()
+            }
             await waitForCPUBudget(text: chunk, styleId: styleId, limitRatio: limitRatio)
             wavs.append(try performSynthesize(text: chunk, styleId: styleId))
         }
