@@ -61,6 +61,14 @@ final class VoicevoxCPUGovernor {
     /// 実測の重い側(SE2 の熱serious ≒ 0.33)に寄せてある。過大評価なら先行合成が
     /// 少し控えめになるだけだが、過小評価は強制終了に直結するため。
     static let defaultCostPerCharacter = 0.35
+
+    /// 単価の学習に使ってよいサンプルの最小文字数。
+    ///
+    /// 短い合成は中身のほとんどが固定費で、単価の情報をほとんど持たない。
+    /// それを混ぜると、固定費を引いた残りが 0 になって単価を押し下げてしまう。
+    /// 会話文の続く場面では「はい。」「そうか。」のような短いブロックが並ぶので、
+    /// これを弾かないと手持ちのサンプルが全部そういう物で埋まる。
+    static let minimumCharacterCountToLearn = 10
     /// 単価がこれを下回る事は無いとみなす下限。
     /// 0 になると「何文字でも入る」という判断になってしまうため。
     static let minimumCostPerCharacter = 0.01
@@ -89,7 +97,20 @@ final class VoicevoxCPUGovernor {
         defer { lock.unlock() }
         usageRecords.append(UsageRecord(endTime: now, cpuSeconds: cpuSeconds))
         usageRecords.removeAll { $0.endTime <= now - windowSeconds }
-        if characterCount > 0 && cpuSeconds > 0 {
+        // ★単価の材料にするのは「学べるサンプル」だけ。
+        //
+        // 短い合成や、固定費に埋もれる軽い合成を混ぜると、
+        // `max(0, cpuSeconds - 固定費) / 文字数` が 0 になって単価を押し下げる。
+        // 手持ち(8件)が全部そうなると最大値が 0 になり、単価が下限 0.01 まで落ちる。
+        // これは「実測が無い時の既定値 0.35」より遥かに小さく、見積りが35倍甘くなる。
+        //
+        // 2026-08-21 の実機で実際にこれが起きた。87文字を 2.3秒 と見積もって
+        // 実測 8.2秒、予算管理は一度も待たせず(waitedSeconds=0.0)、CPU率 121%。
+        // 会話文が続く場面では短いブロックが8個並ぶのは普通に起きる。
+        //
+        // 弾いたサンプルも「使った CPU」としては上の usageRecords に入っているので、
+        // 窓の勘定から漏れる事は無い。ここで捨てるのは単価の材料としてだけ。
+        if characterCount >= Self.minimumCharacterCountToLearn && cpuSeconds > fixedOverheadSeconds {
             costSamples.append(CostSample(characterCount: characterCount, cpuSeconds: cpuSeconds))
             if costSamples.count > costSampleCapacity {
                 costSamples.removeFirst(costSamples.count - costSampleCapacity)
@@ -136,6 +157,12 @@ final class VoicevoxCPUGovernor {
         let perCharacter = costSamples.map { sample in
             max(0, sample.cpuSeconds - overhead) / Double(sample.characterCount)
         }.max() ?? Self.defaultCostPerCharacter
+        // ★情報の無いサンプルしか無かった場合は、下限ではなく**既定値**に落ちる事。
+        // 下限(0.01)は「単価が 0 になって何文字でも入る事にならないように」置いた歯止めで、
+        // 「分からない時に使ってよい値」ではない。分からないなら保守的な側へ倒す。
+        if perCharacter <= 0 {
+            return (overhead, Self.defaultCostPerCharacter)
+        }
         return (overhead, max(perCharacter, Self.minimumCostPerCharacter))
     }
 

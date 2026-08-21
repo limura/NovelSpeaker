@@ -238,6 +238,47 @@ class VoicevoxCPUGovernorCostModelTest: XCTestCase {
                                     "短いサンプルからの外挿が実機の実測(86.8秒)を下回っている")
     }
 
+    // ★実機で起きた事故そのもの。
+    //
+    // 2026-08-21 の実機ログ:
+    //   直近60秒 121% (上限80%) / 待ち 0.0秒 / 見積り 2.3秒 に対し実測 8.2秒
+    //   isCPULimitApplied=true / thermalState=nominal / threadCount=1
+    // 87文字を 2.3秒 と見積もっていたが、実測は 8.2秒 だった。
+    // 逆算すると、その時の単価は 0.0097秒/文字 = **下限値 minimumCostPerCharacter そのもの**。
+    //
+    // 原因は、単価の学習が `max(0, cpuSeconds - 固定費) / 文字数` の最大値を採る事。
+    // 固定費(1.0秒)より軽い合成は、どれも 0 として扱われる。
+    // 軽い合成が続いて手持ちのサンプルが全部 0 になると、最大値が 0 になり、
+    // 下限の 0.01 まで落ちる。**「実測が無い時の 0.35」より遥かに小さい値**になり、
+    // 見積りが甘くなって予算管理が一度も待たせなくなる(実機で waitedSeconds=0.0)。
+    //
+    // 情報の無いサンプルしか無い時は、下限ではなく**保守的な既定値**に落ちなければならない。
+    func testDoesNotCollapseToTheFloorWhenAllSamplesAreTooShortToLearnFrom() {
+        let governor = makeGovernor()
+        // 固定費(1.0秒)を下回る軽い合成ばかりが続いた状況。
+        feed(governor, [(5, 0.4), (6, 0.5), (4, 0.3), (7, 0.6),
+                        (5, 0.4), (6, 0.5), (4, 0.3), (7, 0.6)])
+
+        let estimate = governor.estimatedCPUSeconds(forCharacterCount: 87)
+        // 下限(0.01/文字)まで落ちていると 2.3秒 になる。実機はそれで殺されかけた。
+        XCTAssertGreaterThan(estimate, 2.5,
+                             "学べるサンプルが無いのに、下限まで落ちて甘い見積りになっている")
+        // 実測 8.2秒 を下回らない事(下回ると予算を食い越す)。
+        XCTAssertGreaterThanOrEqual(estimate, 8.2,
+                                    "実機の実測(8.2秒)を下回る見積りは、そのまま強制終了に繋がる")
+    }
+
+    // 学べるサンプルが1つでもあれば、そちらを使う事(上のフォールバックが効き過ぎない事)。
+    func testUsesRealMeasurementEvenIfShortSamplesAreMixedIn() {
+        let governor = makeGovernor()
+        feed(governor, [(5, 0.4), (87, 8.2), (6, 0.5)])
+
+        let estimate = governor.estimatedCPUSeconds(forCharacterCount: 87)
+        XCTAssertGreaterThanOrEqual(estimate, 8.2, "実測を下回ってはいけない")
+        // 既定値(0.35/文字)まで戻ると 87文字で38秒を超える。実測があるならそこまで要らない。
+        XCTAssertLessThan(estimate, 20.0, "実測があるのに既定値の保守的な見積りに戻っている")
+    }
+
     // 実測が無い間は、既定値による保守的な見積りに落ちる事。
     func testFallsBackToDefaultsWithoutSamples() {
         let governor = makeGovernor()
