@@ -1202,6 +1202,13 @@
 "VoicevoxMissingModel_StyleNumberFormat" = "スタイル番号 %u";
 "VoicevoxMissingModel_MessageFormat" = "VOICEVOXの話者「%@」の音声モデルがこの端末にありません。その箇所は端末の音声で読み上げました。話者設定はそのままにしてあるので、音声モデルを取得すれば元の声に戻ります。";
 "VoicevoxMissingModel_ActionTitle" = "音声モデルを取得する";
+"SpeechEngineType_Any" = "すべて";
+"SpeechEngineType_AVSpeechSynthesizer" = "端末の音声";
+"SpeechEngineType_VOICEVOX" = "VOICEVOX";
+"CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineTitle" = "適用する音声合成";
+"CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineHint" = "この読み替えを、どの音声合成で読み上げる時に使うかを選びます。「端末の音声」は iOS 標準の AVSpeechSynthesizer の事です。標準の読みの修正には、端末の音声の癖を避けるために作られたものが多く、VOICEVOX に当てると逆におかしくなる事があります。";
+"CreateSpeechModSettingViewControllerSwift_ValidateTargetSpeechEngineFailedTitle" = "適用する音声合成が選ばれていません";
+"CreateSpeechModSettingViewControllerSwift_ValidateTargetSpeechEngineMessage" = "どの音声合成にも適用しない読み替えは、何もしないのと同じになります。少なくとも1つ選んでください。";
 "VoicevoxSilence_CauseTooSlow" = "合成が再生に間に合わなかった";
 "VoicevoxSilence_CauseNotScheduled" = "先行合成に出せていなかった";
 "VoicevoxSilence_SummaryFormat" = "VOICEVOXの読み上げが途切れています: この起動で %1$d回 / 合計 %2$.0f秒 / 最長 %3$.1f秒 / 直近 %4$.1f秒";

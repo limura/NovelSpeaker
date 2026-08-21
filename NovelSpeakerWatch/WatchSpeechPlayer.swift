@@ -329,7 +329,10 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         func toSpeakerSetting(_ speaker: WatchSpeechSettings.Speaker) -> SpeakerSetting {
             return SpeakerSetting(pitch: speaker.pitch, rate: speaker.rate, volume: speaker.volume, type: speaker.type, voiceIdentifier: speaker.voiceIdentifier, locale: speaker.locale)
         }
-        var mods = settings.speechMods.map { SpeechModSetting(before: $0.before, after: $0.after, isUseRegularExpression: $0.isRegexp, targetSpeechEngineTypeArray: $0.targetEngines) }
+        var mods = settings.speechMods.map { SpeechModSetting(before: $0.before, after: $0.after, isUseRegularExpression: $0.isRegexp, targetSpeechEngineTypeArray: $0.targetEngines.compactMap { text in
+            // 転送は文字列。知らない綴りは捨てる(捨てても空配列=全エンジン適用になるだけ)。
+            text == "any" ? SpeechEngineType.any : SpeechEngineType(typeString: text)
+        }) }
         if settings.isIgnoreURIStringSpeechEnabled {
             mods.append(SpeechModSetting(before: StoryTextClassifier.ignoreURIStringRegexpPattern, after: "", isUseRegularExpression: true))
         }

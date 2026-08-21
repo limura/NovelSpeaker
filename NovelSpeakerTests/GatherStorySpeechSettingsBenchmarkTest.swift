@@ -166,7 +166,7 @@ class GatherStorySpeechSettingsBenchmarkTest: XCTestCase {
             let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
             let mods = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: novelID)?.map { realmModSetting -> NovelSpeaker.SpeechModSetting in
                 let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
-                let targetEngines:[String] = defaultSpeechModKeySet.contains(key) ? ["AVSpeechSynthesizer"] : []
+                let targetEngines:[SpeechEngineType] = defaultSpeechModKeySet.contains(key) ? [.avSpeechSynthesizer] : []
                 return NovelSpeaker.SpeechModSetting(from: realmModSetting, targetSpeechEngineTypeArray: targetEngines)
             } ?? []
             return StoryTextClassifier.StorySpeechSettings(

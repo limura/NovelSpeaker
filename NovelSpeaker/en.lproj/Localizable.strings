@@ -1221,6 +1221,13 @@
 "VoicevoxMissingModel_StyleNumberFormat" = "style number %u";
 "VoicevoxMissingModel_MessageFormat" = "The voice model for the VOICEVOX speaker \"%@\" is not on this device. That part was read with a device voice. The speaker setting is kept as it is, so downloading the voice model restores the original voice.";
 "VoicevoxMissingModel_ActionTitle" = "Download the voice model";
+"SpeechEngineType_Any" = "All";
+"SpeechEngineType_AVSpeechSynthesizer" = "Device voice";
+"SpeechEngineType_VOICEVOX" = "VOICEVOX";
+"CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineTitle" = "Speech engines to apply to";
+"CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineHint" = "Chooses which speech engines this substitution is used for. \"Device voice\" means the iOS built-in AVSpeechSynthesizer. Many of the standard pronunciation fixes exist to work around quirks of the device voice, and applying them to VOICEVOX can make it sound worse instead.";
+"CreateSpeechModSettingViewControllerSwift_ValidateTargetSpeechEngineFailedTitle" = "No speech engine is selected";
+"CreateSpeechModSettingViewControllerSwift_ValidateTargetSpeechEngineMessage" = "A substitution that applies to no speech engine does nothing at all. Please select at least one.";
 "VoicevoxSilence_CauseTooSlow" = "synthesis could not keep up with playback";
 "VoicevoxSilence_CauseNotScheduled" = "it was not queued for synthesis ahead of time";
 "VoicevoxSilence_SummaryFormat" = "VOICEVOX playback keeps going silent: %1$d time(s) since launch / %2$.0f seconds total / %3$.1f seconds at the longest / %4$.1f seconds just now";

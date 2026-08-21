@@ -94,7 +94,15 @@ final class MemoryTraceLogger {
     //            isSpeechViewBottomButtonOverlapsChapterBar を追加した。
     //            メンバの「追加」だけなのでデータ変換は不要(MigrateFunc への追記も不要)だが、
     //            schemaVersion を上げないと既存の Realm が開けなくなる。
-    static let currentSchemaVersion : UInt64 = 19
+    // 19 -> 20: RealmSpeechModSetting に targetSpeechEngineTypeArray を追加した。
+    //            「この読み替えをどの音声合成に適用するか」を、推測ではなくデータで持つため。
+    //            メンバの「追加」だけなのでデータ変換は不要(MigrateFunc への追記も不要)だが、
+    //            schemaVersion を上げないと既存の Realm が開けなくなる。
+    //            なお、この項目を知らない古いバージョンの端末が同じ iCloud に繋がっていると、
+    //            そちらが書き戻した時に中身が消える事がありうる。
+    //            消えても「空 = 未指定」となって従来どおりの推測に落ちるだけで、
+    //            読み替えが効かなくなったりはしない(次に編集または上書き登録すれば戻る)。
+    static let currentSchemaVersion : UInt64 = 20
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -2351,7 +2359,32 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
     
     static let anyTarget = "novelspeakerdata://any"
     let targetNovelIDArray = List<String>()
-    
+
+    /// この読み替えをどの音声合成エンジンに適用するか(`SpeechEngineType` の rawValue)。
+    ///
+    /// **空 = 未指定**。これまでのバージョンで作られたデータは全部これになるので、
+    /// 空を「どのエンジンにも適用しない」と読んではいけない。
+    /// 空の時は従来どおり「標準の読み替え辞書と値が一致すれば AVSpeechSynthesizer 専用」
+    /// という推測に落とす(StoryTextClassifier 参照)。
+    /// 利用者が明示的に「全部に適用する」を選んだ場合は `.any` が入る。
+    ///
+    /// Int で持っているのは、このクラスが `@objc dynamic` の旧記法で書かれていて
+    /// `PersistableEnum`(`List<SpeechEngineType>`)を使えないため。
+    /// 読み書きは下の `speechEngineTypes` を通す。
+    let targetSpeechEngineTypeArray = List<Int>()
+
+    /// 上を `SpeechEngineType` として読み書きする。
+    /// 知らない値(新しいバージョンで付いたもの)は読み出し時に落とすが、
+    /// 保存されている値自体は消さない。
+    var speechEngineTypes: [SpeechEngineType] {
+        return targetSpeechEngineTypeArray.compactMap { SpeechEngineType(rawValue: $0) }
+    }
+    /// Realm の書き込みトランザクションの中から呼ぶ事。
+    func setSpeechEngineTypes(_ types: [SpeechEngineType]) {
+        targetSpeechEngineTypeArray.removeAll()
+        targetSpeechEngineTypeArray.append(objectsIn: types.map { $0.rawValue })
+    }
+
     func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {
         return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
             return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)

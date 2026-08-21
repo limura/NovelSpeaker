@@ -19,6 +19,10 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
     var beforeText = ""
     var afterText = ""
     var isUseRegexp = false
+    /// この読み替えをどの音声合成に適用するか。
+    /// 画面には**実際に効いている値**を出す(データが空の場合は、
+    /// 従来の推測(標準の読み替え辞書と一致すれば端末の音声のみ)を解決した結果)。
+    var targetEngineTypes:[SpeechEngineType] = []
     var targetNovelIDSet:Set<String> = Set<String>()
     let speaker = SpeechBlockSpeaker()
 
@@ -79,6 +83,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 before = targetSetting.before
                 after = targetSetting.after
                 isUseRegularExpression = targetSetting.isUseRegularExpression
+                self.targetEngineTypes = Self.effectiveSpeechEngineTypes(of: targetSetting)
                 for novelID in targetSetting.targetNovelIDArray {
                     self.targetNovelIDSet.insert(novelID)
                 }
@@ -86,6 +91,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 before = targetSpeechModSettingBeforeString ?? ""
                 after = ""
                 isUseRegularExpression = false
+                // 新規追加は、断りなく片方だけに絞られていると分かりにくいので全部に適用する。
+                self.targetEngineTypes = SpeechEngineType.selectableTypes
             }
         }
         self.beforeText = before
@@ -158,6 +165,25 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             nextViewController.IsUseAnyNovelID = self.isUseAnyNovelID
             self.navigationController?.pushViewController(nextViewController, animated: true)
         })
+        if VoicevoxCore.isAvailableOnThisOS {
+            self.form.last!
+            <<< MultipleSelectorRow<String>("TargetSpeechEngineRow") { row in
+                row.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineTitle", comment: "適用する音声合成")
+                row.selectorTitle = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineTitle", comment: "適用する音声合成")
+                row.options = SpeechEngineType.selectableTypes.map({ $0.localizedName })
+                row.value = Set(self.targetEngineTypes.flatMap({ type -> [String] in
+                    // 「すべて」は、選択画面では全部にチェックが入っている状態として見せる。
+                    if type == .any { return SpeechEngineType.selectableTypes.map({ $0.localizedName }) }
+                    return [type.localizedName]
+                }))
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.accessibilityHint = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineHint", comment: "この読み替えを、どの音声合成で読み上げる時に使うかを選びます。")
+            }.onChange({ row in
+                let selected = row.value ?? []
+                self.targetEngineTypes = SpeechEngineType.selectableTypes.filter({ selected.contains($0.localizedName) })
+            })
+        }
+        self.form.last!
         <<< TextRow("BeforeTestTextRow") {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_BeforeSampleTitle", comment: "読み替え前")
             if self.isUseRegexp {
@@ -235,6 +261,15 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 }
                 setting.after = self.afterText
                 setting.isUseRegularExpression = self.isUseRegexp
+                // ★ここは「変更された時だけ書く」ではいけない。
+                //
+                // 対象エンジンをデータとして持っていなかった頃のエントリは、
+                // 「標準の読み替え辞書と before/after/正規表現フラグが一致するか」で
+                // 端末の音声専用かどうかを推測していた。そのため**読み替え後を1文字直すと
+                // 一致しなくなり、黙って全エンジン向けに変わっていた**。
+                // 保存の度に、今画面に出ている(=実際に効いている)値を書き込む事で、
+                // 編集しても対象が勝手に変わらないようにする。
+                setting.setSpeechEngineTypes(Self.normalizeForStorage(self.targetEngineTypes))
                 setting.targetNovelIDArray.removeAll()
                 for novelID in self.targetNovelIDSet {
                     setting.targetNovelIDArray.append(novelID)
@@ -257,8 +292,48 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
     }
     */
     
+    /// 保存されている値から、実際に効いている対象エンジンを求める。
+    ///
+    /// 空 = 未指定。その場合は従来どおり
+    /// 「標準の読み替え辞書と値が一致すれば端末の音声のみ」という推測に落とす
+    /// (StoryTextClassifier と同じ判断をしないと、画面と実際の挙動がずれる)。
+    static func effectiveSpeechEngineTypes(of setting: RealmSpeechModSetting) -> [SpeechEngineType] {
+        let stored = setting.speechEngineTypes
+        if stored.isEmpty == false {
+            if stored.contains(.any) { return SpeechEngineType.selectableTypes }
+            return stored
+        }
+        let key = NovelSpeakerUtility.DefaultSpeechModKey(before: setting.before, after: setting.after, isRegexp: setting.isUseRegularExpression)
+        if NovelSpeakerUtility.GetDefaultSpeechModKeySet().contains(key) {
+            return [.avSpeechSynthesizer]
+        }
+        return SpeechEngineType.selectableTypes
+    }
+
+    /// 保存する形にする。全部選ばれているなら `.any` 1つにまとめる。
+    ///
+    /// 「今ある全部」を並べて保存すると、将来エンジンが増えた時に
+    /// **その新しいエンジンだけ除外された状態**になってしまう。
+    /// 「すべて」と言われたものは「すべて」として保存する。
+    static func normalizeForStorage(_ types: [SpeechEngineType]) -> [SpeechEngineType] {
+        if types.contains(.any) { return [.any] }
+        if Set(types) == Set(SpeechEngineType.selectableTypes) { return [.any] }
+        return types
+    }
+
     func validateDataAndAlert(before:String, after:String, isUseRegexp:Bool) -> Bool {
         form.validate()
+        if VoicevoxCore.isAvailableOnThisOS, targetEngineTypes.isEmpty {
+            DispatchQueue.main.async {
+                NiftyUtility.EasyDialogOneButton(
+                    viewController: self,
+                    title: NSLocalizedString("CreateSpeechModSettingViewControllerSwift_ValidateTargetSpeechEngineFailedTitle", comment: "適用する音声合成が選ばれていません"),
+                    message: NSLocalizedString("CreateSpeechModSettingViewControllerSwift_ValidateTargetSpeechEngineMessage", comment: "どの音声合成にも適用しない読み替えは、何もしないのと同じになります。"),
+                    buttonTitle: NSLocalizedString("OK_button", comment: "OK"),
+                    buttonAction: nil)
+            }
+            return false
+        }
         if !validateBeforeString(text: before, isUseRegexp: isUseRegexp) {
             DispatchQueue.main.async {
                 NiftyUtility.EasyDialogOneButton(

@@ -125,6 +125,25 @@ class NovelSpeakerUtility: NSObject {
         let after:String
         let targetNovelUrlArray:[String]?
         let isRegexp:Bool?
+        /// この読み替えをどのエンジンに適用するか。
+        /// "any" / "AVSpeechSynthesizer" / "VOICEVOX" を並べる。
+        ///
+        /// **未指定は「まだ確認していない」を意味する。**
+        /// 標準の読み替え辞書は AVSpeechSynthesizer の癖を避けるために作られたものが多く、
+        /// VOICEVOX でも問題ないかは1件ずつ聞いて確かめている最中である。
+        /// 未指定を「全エンジン」と読むと、まだ確認していないものが一斉に
+        /// VOICEVOX へ適用されてしまうので、そうはしない(空のまま保存し、
+        /// 従来どおりの推測に任せる)。
+        let targetSpeechEngineTypeArray:[String]?
+
+        /// 上を列挙型にしたもの。知らない綴りは捨てる。
+        var speechEngineTypes:[SpeechEngineType] {
+            guard let array = targetSpeechEngineTypeArray else { return [] }
+            return array.compactMap { text in
+                if text == "any" { return SpeechEngineType.any }
+                return SpeechEngineType(typeString: text)
+            }
+        }
     }
     
     // 標準の読み替え辞書(バンドルの DefaultSpeechModList.json)の (before, after, isRegexp) を
@@ -262,9 +281,15 @@ class NovelSpeakerUtility: NSObject {
                     let after = modSetting.after
                     let targetNovelIDArray = targetNovelURLArrayToNovelIDArrayWith(novelIDArray: novelIDArray, urlArray: modSetting.targetNovelUrlArray)
                     
+                    let engineTypes = modSetting.speechEngineTypes
                     if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
                         setting.after = after
                         setting.isUseRegularExpression = modSetting.isRegexp ?? false
+                        // 未指定(=まだ確認していない)なら、こちらで持っている指定は消さない。
+                        // 利用者が自分で選んだ内容を、辞書の更新で黙って捨てないため。
+                        if engineTypes.isEmpty == false {
+                            setting.setSpeechEngineTypes(engineTypes)
+                        }
                         if targetNovelIDArray.count > 0 {
                             setting.targetNovelIDArray.removeAll()
                             setting.targetNovelIDArray.append(objectsIn: targetNovelIDArray)
@@ -275,6 +300,7 @@ class NovelSpeakerUtility: NSObject {
                     speechModSetting.before = before
                     speechModSetting.after = after
                     speechModSetting.isUseRegularExpression = modSetting.isRegexp ?? false
+                    speechModSetting.setSpeechEngineTypes(engineTypes)
                     if targetNovelIDArray.count > 0 {
                         speechModSetting.targetNovelIDArray.append(objectsIn: targetNovelIDArray)
                     }else{
@@ -1360,6 +1386,15 @@ class NovelSpeakerUtility: NSObject {
                         }
                     }
                 }
+                // 古いバックアップにはこの項目が無い。その場合は空のままにする
+                // (空 = 未指定で、従来どおりの推測に落ちる)。
+                mod.targetSpeechEngineTypeArray.removeAll()
+                if let engineTypeArray = speechMod.object(forKey: "targetSpeechEngineTypeArray") as? NSArray {
+                    for rawValue in engineTypeArray {
+                        guard let rawValue = (rawValue as? NSNumber)?.intValue else { continue }
+                        mod.targetSpeechEngineTypeArray.append(rawValue)
+                    }
+                }
                 realm.add(mod, update: .modified)
             }
         }
@@ -2284,7 +2319,8 @@ class NovelSpeakerUtility: NSObject {
                     "afterString": setting.after,
                     "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate),
                     "isUseRegularExpression": setting.isUseRegularExpression,
-                    "targetNovelIDArray": Array(setting.targetNovelIDArray)
+                    "targetNovelIDArray": Array(setting.targetNovelIDArray),
+                    "targetSpeechEngineTypeArray": Array(setting.targetSpeechEngineTypeArray)
                 ]
             }
             return result

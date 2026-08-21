@@ -75,6 +75,8 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isUseRegularExpression = obj.isUseRegularExpression
             newObj.targetNovelIDArray.removeAll()
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
+            newObj.targetSpeechEngineTypeArray.removeAll()
+            newObj.targetSpeechEngineTypeArray.append(objectsIn: obj.targetSpeechEngineTypeArray)
             to.add(newObj, update: .modified)
             try to.commitWrite()
         }

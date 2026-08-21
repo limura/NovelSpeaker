@@ -42,7 +42,7 @@ class VoicevoxBlockSplitReproTest: XCTestCase {
     func testDefaultDictionaryModIsSkippedForVoicevox() {
         let text = "をタップすることで実際に読み替えが行われた"
         // 「実際」→「"実際"」(標準辞書由来を想定して AVSpeechSynthesizer 専用にする)
-        let avSpeechOnlyMod = SpeechModSetting(before: "実際", after: "\"実際\"", isUseRegularExpression: false, targetSpeechEngineTypeArray: ["AVSpeechSynthesizer"])
+        let avSpeechOnlyMod = SpeechModSetting(before: "実際", after: "\"実際\"", isUseRegularExpression: false, targetSpeechEngineTypeArray: [.avSpeechSynthesizer])
 
         // VOICEVOX話者: 標準辞書modは適用されない → 発話テキストに " が入らない
         let voicevoxBlocks = StoryTextClassifier.CategorizeStoryText(

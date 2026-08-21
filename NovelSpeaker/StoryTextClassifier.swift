@@ -81,22 +81,70 @@ struct SpeechWaitConfig {
         self.delayTimeInSec = delayTimeInSec
     }
 }
+/// 読み替えを適用する音声合成エンジン。
+///
+/// 話者設定の `type` は文字列("AVSpeechSynthesizer" / "VOICEVOX")だが、
+/// **保存と受け渡しはこの列挙型で行う**。
+/// 文字列のまま持たせると、綴りの違う値や知らない値がそのまま入ってしまい、
+/// 「どのエンジンにも一致しないので何にも適用されない」読み替えを作れてしまう。
+///
+/// Realm には rawValue(Int)の配列として保存する。
+/// `RealmSpeechModSetting` は `@objc dynamic` の旧記法で書かれていて、
+/// `PersistableEnum`(`List<SpeechEngineType>`)は `@Persisted` 記法とセットでないと
+/// 使えず、1つのクラスで両方の記法は混ぜられないため。
+enum SpeechEngineType: Int, CaseIterable {
+    /// どのエンジンにも適用する、と明示的に指定した状態。
+    ///
+    /// 「空配列」と同じ意味に見えるが、区別が要る。
+    /// 空配列は「まだ何も指定されていない」で、標準の読み替え辞書由来なら
+    /// AVSpeechSynthesizer 専用として扱う(=これまでの挙動)。
+    /// 利用者が自分で「全部に適用する」と選んだ場合は、それが上書きされては困る。
+    case any = 0
+    case avSpeechSynthesizer = 1
+    case voicevox = 2
+
+    /// 話者設定の `type` に入っている文字列。`any` は特定のエンジンを指さないので nil。
+    var typeString: String? {
+        switch self {
+        case .any: return nil
+        case .avSpeechSynthesizer: return "AVSpeechSynthesizer"
+        case .voicevox: return "VOICEVOX"
+        }
+    }
+
+    init?(typeString: String) {
+        switch typeString {
+        case "AVSpeechSynthesizer": self = .avSpeechSynthesizer
+        case "VOICEVOX": self = .voicevox
+        default: return nil
+        }
+    }
+
+    /// 利用者に選ばせる対象(`any` は「全部選んだ」状態として組み立てるので出さない)。
+    static var selectableTypes: [SpeechEngineType] { return [.avSpeechSynthesizer, .voicevox] }
+
+    /// 画面に出す名前。
+    var localizedName: String {
+        switch self {
+        case .any: return NSLocalizedString("SpeechEngineType_Any", comment: "すべて")
+        case .avSpeechSynthesizer: return NSLocalizedString("SpeechEngineType_AVSpeechSynthesizer", comment: "端末の音声(AVSpeechSynthesizer)")
+        case .voicevox: return NSLocalizedString("SpeechEngineType_VOICEVOX", comment: "VOICEVOX")
+        }
+    }
+}
+
 struct SpeechModSetting {
     let before : String
     let after : String
     let isUseRegularExpression : Bool
-    // この読み替えをどの音声合成エンジン(type)向けに適用するかの一覧。
-    // 空配列 = 「どのエンジンにも適用する」(未設定扱い)。
-    // 特定のエンジン type("AVSpeechSynthesizer" / "VOICEVOX" 等)を列挙すると、
-    // そのエンジンの話者のブロックにのみ適用される。
+    // この読み替えをどの音声合成エンジン向けに適用するかの一覧。
+    // 空配列 = 未指定(どのエンジンにも適用する)。
     //
     // 標準の読み替え辞書(DefaultSpeechModList.json)由来のエントリは、AVSpeechSynthesizer が
     // 前後の文字に影響されて変な読み方をするのを避けるためのもの(例: 「実際」→「"実際"」で囲う等)が
-    // 多く、VOICEVOX 等にそのまま適用すると余計な記号(")が入って不自然な分割・発話を招くため、
-    // ["AVSpeechSynthesizer"] を指定して VOICEVOX 等には適用しないようにする。
-    // ユーザー追加の読み替えやルビ由来の読み替えは空配列(=全エンジン)にしておく。
-    // (将来は読み替え辞書のデータ自体にこの対象エンジン情報を持たせるのが正しい)
-    let targetSpeechEngineTypeArray : [String]
+    // 多く、VOICEVOX 等にそのまま適用すると余計な記号(")が入って不自然な分割・発話を招く。
+    // そういうものは `.avSpeechSynthesizer` だけを指定して VOICEVOX には適用しない。
+    let targetSpeechEngineTypeArray : [SpeechEngineType]
 
     // before / after の文字数を最初に1回だけ数えて持っておく。
     //
@@ -112,17 +160,22 @@ struct SpeechModSetting {
     // 指定した話者エンジンtypeにこの読み替えを適用すべきか。
     func isAppliedTo(speechEngineType:String) -> Bool {
         if targetSpeechEngineTypeArray.isEmpty { return true } // 未設定=全エンジン
-        return targetSpeechEngineTypeArray.contains(speechEngineType)
+        if targetSpeechEngineTypeArray.contains(.any) { return true }
+        // 知らないエンジンなら適用する側に倒す。
+        // 落とす側に倒すと、新しいエンジンが増えた時に、そのエンジンでだけ
+        // 読み替えが全部効かなくなる(利用者からは原因の分からない不具合に見える)。
+        guard let type = SpeechEngineType(typeString: speechEngineType) else { return true }
+        return targetSpeechEngineTypeArray.contains(type)
     }
 
     #if !os(watchOS)
-    init(from:RealmSpeechModSetting, targetSpeechEngineTypeArray:[String] = []) {
+    init(from:RealmSpeechModSetting, targetSpeechEngineTypeArray:[SpeechEngineType] = []) {
         // Realm から来た String は NSString のまま橋渡しされている事があり、
         // その状態だと .count や比較が極端に遅い。ここで素の Swift String に写しておく。
         self.init(before: String(from.before), after: String(from.after), isUseRegularExpression: from.isUseRegularExpression, targetSpeechEngineTypeArray: targetSpeechEngineTypeArray)
     }
     #endif
-    init(before:String, after:String, isUseRegularExpression:Bool, targetSpeechEngineTypeArray:[String] = []) {
+    init(before:String, after:String, isUseRegularExpression:Bool, targetSpeechEngineTypeArray:[SpeechEngineType] = []) {
         self.before = before
         self.after = after
         self.isUseRegularExpression = isUseRegularExpression
@@ -454,8 +507,20 @@ class StoryTextClassifier {
             var shared:[SpeechModSetting] = []
             var specific:[String:[SpeechModSetting]] = [:]
             for realmModSetting in realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false") {
-                let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
-                let targetEngines:[String] = defaultSpeechModKeySet.contains(key) ? ["AVSpeechSynthesizer"] : []
+                // データとして持っていればそれを使う。
+                // 持っていない(=これまでのバージョンで作られた)場合だけ、
+                // 「標準の読み替え辞書と値が一致するなら AVSpeechSynthesizer 専用」という
+                // 従来の推測に落とす。項目を足しただけでは既存のデータは空になるので、
+                // ここで従来の挙動に落とさないと、確認していない読み替えが
+                // 一斉に VOICEVOX へ適用されてしまう。
+                let stored = realmModSetting.speechEngineTypes
+                let targetEngines:[SpeechEngineType]
+                if stored.isEmpty {
+                    let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
+                    targetEngines = defaultSpeechModKeySet.contains(key) ? [.avSpeechSynthesizer] : []
+                } else {
+                    targetEngines = stored
+                }
                 let setting = SpeechModSetting(from: realmModSetting, targetSpeechEngineTypeArray: targetEngines)
                 if realmModSetting.targetNovelIDArray.contains(RealmSpeechModSetting.anyTarget) {
                     shared.append(setting)
