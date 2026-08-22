@@ -261,7 +261,7 @@ actor VoicevoxCore {
         guard VoicevoxDiskCacheStore.shared.contains(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key) == false else {
             // 合成し終えてから「既にあった」と分かった = この1本は作らなくてよかった。
             // 裏の作り足しと再生側が同じブロックを同時に作っていると、ここが増える。
-            VoicevoxCPUUsageReporter.shared.noteDuplicateSynthesis()
+            VoicevoxCPUUsageReporter.shared.noteDuplicateSynthesis(by: .playback)
             return
         }
         // 優先度を落とし過ぎない。3コアを合成で埋め切っている間 .utility は後回しにされ続け、
@@ -880,6 +880,11 @@ actor VoicevoxCore {
         if let cached = peekCache(key: key) {
             return cached
         }
+        // 裏の作り足しが、待っている間にディスクへ置いていった可能性もある。
+        // メモリだけを見ていると、それを見落として同じ物をもう一度作る事になる。
+        if let disk = peekDiskCache(text: text, styleId: styleId) {
+            return disk
+        }
         // 再生に必要な合成でも、CPU予算を超えたまま突入すると強制終了される
         // (殺されると再生そのものが止まるので、無音より重い)。先行合成より多くの
         // 予算を使ってよいが、上限は守る。
@@ -1036,8 +1041,19 @@ actor VoicevoxCore {
     /// 合成結果をメモリキャッシュには入れない。事前生成は本文を延々と舐めていくので、
     /// 入れると再生に必要な物を押し出してしまう。作った物はディスクに置かれ、
     /// 再生時はそちらから読まれる。
-    func synthesizeForDiskCache(text: String, styleId: UInt32) async throws -> Data {
+    /// - Parameter isStillNeeded: 重いC呼び出しに入る**直前**に、まだ作る必要があるかを問い合わせる。
+    ///   false を返したら合成せず nil を返す。
+    ///
+    ///   呼び出し側で先に確かめても足りない。ここには
+    ///   「再生側の合成が終わるまで待つ」(最大30秒)と actor の順番待ちがあり、
+    ///   **待っている間に再生側が同じブロックを作り終えている**。
+    ///   実機ログでは合成のちょうど半分がこれで二度手間になっていた。
+    func synthesizeForDiskCache(text: String, styleId: UInt32,
+                                isStillNeeded: (@Sendable () -> Bool)? = nil) async throws -> Data? {
         await waitWhilePlaybackSynthesisIsPending()
+        // 待ちが明けた今の状態で確かめる。
+        if peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil { return nil }
+        if let isStillNeeded, isStillNeeded() == false { return nil }
         return try await performSynthesizeWithinBudget(text: text, styleId: styleId, limitRatio: Self.prefetchCPULimitRatio)
     }
 
@@ -1156,7 +1172,8 @@ final class VoicevoxCore {
         throw VoicevoxCoreError.notSetUp
     }
 
-    func synthesizeForDiskCache(text: String, styleId: UInt32) async throws -> Data {
+    func synthesizeForDiskCache(text: String, styleId: UInt32,
+                                isStillNeeded: (@Sendable () -> Bool)? = nil) async throws -> Data? {
         throw VoicevoxCoreError.notSetUp
     }
 

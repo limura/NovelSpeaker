@@ -79,6 +79,10 @@ final class VoicevoxCPUUsageReporter {
         var diskHits = 0
         /// 合成し終えてから「既にディスクにあった」と分かった回数(=二度手間)。
         var duplicateSyntheses = 0
+        /// そのうち再生側が作った分(裏の作り足しに先を越されていた)。
+        var duplicatesByPlayback = 0
+        /// そのうち裏の作り足しが作った分(再生側に先を越されていた)。
+        var duplicatesByGenerator = 0
     }
     private var summary = Summary()
     /// 直近に再生した時の速度倍率(VOICEVOX は常に等速で合成し、再生側で速度を変えている)。
@@ -101,10 +105,22 @@ final class VoicevoxCPUUsageReporter {
     /// 生成が実時間の1.5倍で回っているのに貯金が増えない、という状態は
     /// 「遅い」のではなく「同じ物を二度作っている」でも説明がつく。
     /// この二つを分けるにはこれを数えるしかない。
-    func noteDuplicateSynthesis() {
+    func noteDuplicateSynthesis(by side: DuplicateSide) {
         lock.lock()
         summary.duplicateSyntheses += 1
+        switch side {
+        case .playback: summary.duplicatesByPlayback += 1
+        case .generator: summary.duplicatesByGenerator += 1
+        }
         lock.unlock()
+    }
+
+    /// どちらが無駄撃ちしたのか。直し方が変わるので分けて数える。
+    enum DuplicateSide {
+        /// 再生側(先行合成・再生時の合成)が作ったが、既に作り足しが作っていた。
+        case playback
+        /// 裏の作り足しが作ったが、既に再生側が作っていた。
+        case generator
     }
 
     /// 再生のたびに、その時の速度倍率を教えてもらう。
@@ -272,8 +288,9 @@ final class VoicevoxCPUUsageReporter {
         let durationText = duration >= 60
             ? String(format: "%.0f分", duration / 60)
             : String(format: "%.0f秒", duration)
-        let message = String(format: "[VOICEVOX CPU] この%@で %d本(二度手間 %d本) / 貯めてあった分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
-                             durationText, current.count, current.duplicateSyntheses, current.diskHits,
+        let message = String(format: "[VOICEVOX CPU] この%@で %d本(二度手間 %d本: 再生側 %d / 作り足し %d) / 貯めてあった分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
+                             durationText, current.count, current.duplicateSyntheses,
+                             current.duplicatesByPlayback, current.duplicatesByGenerator, current.diskHits,
                              averageSpeed, slowestSpeed, playbackRate,
                              Self.thermalStateText(thermalState))
         return (message, [
@@ -289,6 +306,10 @@ final class VoicevoxCPUUsageReporter {
             "playbackRate": AnyCodable(String(format: "%.2f", playbackRate)),
             "diskCacheHits": AnyCodable("\(current.diskHits)"),
             "duplicateSyntheses": AnyCodable("\(current.duplicateSyntheses)"),
+            "duplicatesByPlayback": AnyCodable("\(current.duplicatesByPlayback)"),
+            "duplicatesByGenerator": AnyCodable("\(current.duplicatesByGenerator)"),
+            // どのビルドで取ったログなのかが後から分からないと、直した効果を確かめられない。
+            "appBuild": AnyCodable(Self.appBuildText),
             "parallelism": AnyCodable(current.wallSeconds > 0 ? String(format: "%.2f", current.cpuSeconds / current.wallSeconds) : "-"),
             "waitedSeconds": AnyCodable(String(format: "%.1f", current.waitedSeconds)),
             "thermalState": AnyCodable(Self.thermalStateText(thermalState)),
@@ -297,6 +318,14 @@ final class VoicevoxCPUUsageReporter {
             "threadCount": AnyCodable("\(VoicevoxCore.activeCPUNumThreads)"),
         ])
     }
+
+    /// 「バージョン(ビルド番号)」。どのビルドのログなのかを見分けるために残す。
+    static let appBuildText: String = {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(version)(\(build))"
+    }()
 
     static func thermalStateText(_ state: ProcessInfo.ThermalState) -> String {
         switch state {

@@ -273,11 +273,23 @@ final class VoicevoxCacheGenerator {
                 if let cause = Self.currentStopCause() { return .limitReached(cause) }
 
                 do {
-                    let wav = try await VoicevoxCore.shared.synthesizeForDiskCache(text: target.text, styleId: target.styleId)
-                    // 合成している間に再生側が同じブロックを作って置いていった可能性がある。
-                    // その場合この1本は丸ごと無駄なので、数えておく(貯金が増えない原因の切り分け用)。
+                    // 合成の直前にもう一度確かめてもらう。ここへ来るまでに
+                    // 「再生側の合成待ち」(最大30秒)と actor の順番待ちがあり、
+                    // その間に再生側が同じブロックを作り終えている事があるため。
+                    let key = target.key
+                    let wav = try await VoicevoxCore.shared.synthesizeForDiskCache(
+                        text: target.text, styleId: target.styleId,
+                        isStillNeeded: {
+                            VoicevoxDiskCacheStore.shared.contains(novelID: novelID, chapterNumber: chapterNumber, key: key) == false
+                        })
+                    guard let wav else {
+                        // 待っている間に出来上がっていた。作らずに次へ進む。
+                        generatedCount += 1
+                        continue
+                    }
+                    // それでも重なった分(合成中に置かれた物)は数えておく。
                     if VoicevoxDiskCacheStore.shared.contains(novelID: novelID, chapterNumber: chapterNumber, key: target.key) {
-                        VoicevoxCPUUsageReporter.shared.noteDuplicateSynthesis()
+                        VoicevoxCPUUsageReporter.shared.noteDuplicateSynthesis(by: .generator)
                     }
                     let encoded = try VoicevoxAudioCompressor.encode(wav: wav)
                     // ★「作って」と言われた分だけを作成済みとして残す。
