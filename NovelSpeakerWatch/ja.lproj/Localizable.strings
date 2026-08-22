@@ -148,8 +148,8 @@
 "Watch_AX_Menu" = "メニュー";
 "Watch_AX_PrevChapter" = "前の章へ";
 "Watch_AX_NextChapter" = "次の章へ";
-"Watch_AX_SkipBackward" = "少し戻る";
-"Watch_AX_SkipForward" = "少し進む";
+"Watch_AX_SkipBackward" = "少し戻す";
+"Watch_AX_SkipForward" = "少し進める";
 "Watch_AX_Play" = "再生";
 "Watch_AX_Pause" = "一時停止";
 "Watch_AX_SourceBadgeHint" = "読み上げ先(iPhoneまたはWatch)を切り替えます";

@@ -15,21 +15,8 @@
 "Close_button" = "Close";
 //"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
 
-"WatchOS_NowloadingText" = "Loading...";
-"WatchOS_NovelSupportMenuView_StorySelector" = "Chapter selection";
-"WatchOS_NovelSupportMenuView_VolumeControl" = "Volume control";
 
-"SpeakPitchSettingView_NoTitleStringAlert" = "No title string.";
-"SpeakPitchSettingView_AlreadyExistingSetting" = "Setting already exists.";
-"SpeakPitchSettingView_AppendFailed." = "Voice setting append failed.";
-"SpeakPitchSettingView_AppendSuccess" = "Voice setting append Success.";
-"CreateSpeechModSettingView_ReadItForAAAinBBB" = "Pronounce \"%@\" as \"%@\"";
-"CreateSpeechModSettingView_ERROR_NoStringSetting" = "Missing input or output.";
-"CreateSpeechModSettingView_SettingFailed" = "Setting failed.";
-"DownloadStatusViewController_ThereIsNoThingDownloading" = "There is nothing downloading.";
-"DownloadStatusViewController_WaitingDownloading" = "Awaits downloading";
 
-"GlobalDataSingleton_CanNotGetValidNCODE" = "Invalid NCODE";
 "GlobalDataSingleton_AlreadyDownloaded" = "Already Downloaded";
 "GlobalDataSingleton_NoPlaing" = "Nothing is Playing";
 "GlobalDataSingleton_Conversation1" = "Conversation 1";
@@ -49,13 +36,6 @@
 "GlobalDataSingleton_AnnounceStopedByTimer" = "The maximum reading time limit has reached. Reading paused";
 "GlobalDataSingleton_NotificationRequestAuthorizationMessage" = "Background activity permission required for automatic download and updates.";
 
-"NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed to add the novel into download queue.";
-"NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
-"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "The novel was added to download queue.";
-"NarouSearchResultTableViewController_SearchResult" = "Search result";
-"NarouSearchViewController_SearchTitle_Searching" = "Searching";
-"NarouSearchViewController_SearchMessage_NowSearching" = "Now searching";
-"NarouSearchViewController_NarouSearchTabDeletedAnnounceText" = "Notice of the end of the \"Search\" tab.\n\nAs notified from before, the \"Search\" tab related functions have been removed. Please use \"Web import\" function from now on. Please use the search page on the side where \"let's become a novelist\". The novel imported by the \"Web import\" function is almost as easy to use as the novel imported via \"Search\". How to import a novel on the \"Web import\" tab is roughly.\n\n Set the text of the novel you want to import displayed, and then press the \"Import\" button on the lower right.\n\nIt can be done by things. Please refer to the \"Web取込機能について\" page at the bottom of the support site for details on how to import novels using the \"Web Import\" function.";
 
 
 "PickerViewDialog_DoneKeyboardBarItem" = "done";
@@ -68,17 +48,17 @@
 "SettingsTableViewController_Information_ShowOutdatedInformation" = "Check previous notifications";
 "SettingsTableViewController_Information_PastInformationTitle" = "Previous notifications";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "Quality of reading voice";
-"SettingTableViewController_CorrectionOfTheReading" = "Corrections for pronounciation";
+"SettingTableViewController_CorrectionOfTheReading" = "Corrections for pronunciation";
 "SettingTableViewController_SettingOfTheTextSize" = "Text display settings";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "Setting for punctuation delays";
 "SettingTableViewController_MaxSpeechTime" = "Maximum reading time limit";
-"SettingTableViewController_AddDefaultCorrectionOfTheReading" = "Add default correction to pronounciation";
+"SettingTableViewController_AddDefaultCorrectionOfTheReading" = "Add default correction to pronunciation";
 "SettingTableViewController_GetNcodeDownloadURLScheme" = "Create backup";
-"SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "Added a standard pronounciation dictionary.";
+"SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "Added a standard pronunciation dictionary.";
 "SettingTableViewController_NoContentHave" = "There are no novels in the bookshelf";
 "SettingTableViewController_ShareNcodeListURLScheme" = "Bookshelf backup URL generated.";
 "SettingTableViewController_ConfirmAddDefaultSpeechModSetting" = "Confirm";
-"SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "Proceed to overwrite the pronounciation corrections to deafult?";
+"SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "Proceed to overwrite the pronunciation corrections to deafult?";
 "SettingTableViewController_GoToReleaseLog" = "Update log";
 "SettingTableViewController_CreateNewUserText" = "Create a novel";
 "SettingTableViewController_RightNotation" = "Copyrights";
@@ -91,17 +71,17 @@
 "SettingTableViewController_OverrideRubyIsDisabled" = "Ruby will read when available: Disabled";
 "SettingTableViewController_OverrideRuby" = "Ruby will read when available";
 "SettingTableView_SendEmailForBackupTitle" = "Backup for NovelSpeaker";
-"SettingTableView_SendEmailForBackupBody" = "Loading the attached file will regenerate the Novel list and the corrections for pronounciation.";
+"SettingTableView_SendEmailForBackupBody" = "Loading the attached file will regenerate the Novel list and the corrections for pronunciation.";
 "SettingTableViewController_EditNotRubyStringTitle" = "Decides if Ruby takes over.";
-"SettingTableViewController_EditNotRubyStringHint" = "If ruby only emphsizes here, then the original pronounciation would be spoken";
+"SettingTableViewController_EditNotRubyStringHint" = "If ruby only emphsizes here, then the original pronunciation would be spoken";
 "SettingTableViewController_EditNotRubyStringPlaceHolder" = "・";
 "SettingTableViewController_ForceSiteInfoReload" = "Force reload SiteInfo";
 "SettingTableViewController_ShowDebugLog" = "Show debug log";
 "SettingTableViewController_GoToSupportSite" = "NovelSpeaker support site";
 "SettingTableViewController_SendBugReport" = "Send inquiries to developers via E-mail";
 "SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "Display bookmarks on the Bookshelf";
-"SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "Long press only pops: corrections for pronounciation";
-"SettingTableViewController_ShortSkipIsEnabled" = "Replace Next chapter and previous chapter in the control center  with fastward and rewind.";
+"SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "Long press only pops: corrections for pronunciation";
+"SettingTableViewController_ShortSkipIsEnabled" = "Replace the next/previous chapter buttons in Control Center with skip forward / skip backward.";
 "SettingTableViewController_PlaybackDurationIsEnabled" = "Display remaining time in the control center. (Approximation only)";
 "SettingTableViewController_DarkThemeIsEnabled" = "Dark Theme";
 "SettingTableViewController_PageTurningSoundIsEnabled" = "Sounds effect when turning pages";
@@ -197,8 +177,8 @@
 "SettingsViewController_UploadAllDataToiCloud_iCloudNotEnabled_Message" = "Not currently using iCloud.";
 "SettingsViewController_UploadAllDataToiCloud_Message" = "I started uploading all my data to iCloud. The more data you have, the longer it will take to complete the upload.";
 "SettingsViewController_iCloudPullWithRefreshiCloudStatus" = "Reload all data on iCloud";
-"SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message" = "Would you like to reload all the data on iCloud?\nIf you perform this operation, all the data saved on iCloud will be reloaded, so if the amount of data saved on iCloud is large, it will take a considerable amount of time.";
-"SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message" = "Started reloading iCloud data.";
+"SettingsViewController_iCloudPullWithRefreshiCloudStatus_Confirm_Message" = "Would you like to reload all the data on iCloud?\nIf you perform this operation, all the data saved on iCloud will be reloaded, so if the amount of data saved on iCloud is large, it will take a considerable amount of time.";
+"SettingsViewController_iCloudPullWithRefreshiCloudStatus_Starting_Message" = "Started reloading iCloud data.";
 "SettingsViewController_isUseWebSearchTabDisabledSite_Title" = "Show hidden sites on the Web Search tab";
 "SettingsViewController_isDebugMenuAlreadyEnabled_Title" = "Always turn on this debug menu";
 "SettingsViewController_DontUsallyUseSection_Title" = "Things you don't normally need to use";
@@ -208,8 +188,8 @@
 "SettingsTableViewController_AppInformation" = "Notification of in-app error";
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "Notification of in-app error (including for debugging)";
 "SettingTableViewController_AppInformation_IncludeForDebug_OutputByJSON" = "Notification of in-app error(JSON)";
-"SettingsTableViewController_AppInformation_ClearButtonTitle" = "Clear notification";
-"SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "Copy notification";
+"SettingsTableViewController_AppInformation_ClearButtonTitle" = "Clear all in-app error notifications";
+"SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "Copy all in-app error notifications";
 
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "Confirm when deleting a novel";
 "SettingTableViewController_RepeatTypeTitle" = "Operation at the end of playback";
@@ -325,7 +305,6 @@
 "NovelSpeakerBackup_RemovingStoryFiles" = "Step 3/3\r\nIn post-processing";
 "NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage" = "\nDue to the large number of files in the backup file being expanded, the progress (% display) may point to an incorrect value.";
     
-"EditUserBookViewController_ConfirmDeleteThisChapter" = "Delete this chapter. Will that be all right?";
 
 "EditBookViewController_TitleText" = "Name";
 "EditBookViewController_EntryButtonTitle" = "Register";
@@ -374,13 +353,12 @@
 "SpeechViewController_TweetMessage" = "%@ %@ #narou #NovelSpeaker %@ %@";
 "SpeechViewController_NoTwitterAccount_Title" = "No Twitter Accounts linked";
 "SpeechViewController_NoTwitterAccount_Message" = "There are no Twitter accounts linked. You can add or create a Twitter account in Settings.";
-"SpeechViewController_AddSpeechModSettings" = "Add corrections for pronounciation";
+"SpeechViewController_AddSpeechModSettings" = "Add corrections for pronunciation";
 "SpeechViewController_SpeakAlertVoiceOver" = "VoiceOver is active. Proceed to read?";
 "SpeechViewController_SpeakAlertVoiceOverMessage" = "There would be two lawers of voice played if proceeded.";
 
-"SpeechViewController_loading" = "loading...";
-"SpeechViewController_AnnounceSeekForward" = "Fast forward";
-"SpeechViewController_AnnounceSeekBackward" = "Rewind";
+"SpeechViewController_AnnounceSeekForward" = "Skip forward";
+"SpeechViewController_AnnounceSeekBackward" = "Skip backward";
 "SpeechViewController_UnknownErrorForShare" = "Could not share due to an unknown error.";
 "SpeechViewController_CheckSpeechTextDialogTitle" = "The string used for reading is as follows.";
 "SpeechViewController_AddCheckSpeechText" = "Check the translated text used for speech";
@@ -400,8 +378,8 @@
 "SpeechViewController_WebPageButton_VoiceOverTitle" = "Open in web import tab";
 "SpeechViewController_PreviousChapterButton_VoiceOverTitle" = "Previous page";
 "SpeechViewController_NextChapterButton_VoiceOverTitle" = "Next page";
-"SpeechViewController_SkipBackwardButtonTitle" = "Rewind";
-"SpeechViewController_SkipForwardButtonTitle" = "A little ahead";
+"SpeechViewController_SkipBackwardButtonTitle" = "Skip backward";
+"SpeechViewController_SkipForwardButtonTitle" = "Skip forward";
 "SpeechViewController_ShowTableOfContentsButtonTitle" = "table of contents";
 "SpeechViewController_SelectFolder_Title" = "Select a folder to play continuously";
 "SpeechViewController_NotUseNextSpeechNovel" = "Continue without using playback";
@@ -410,7 +388,7 @@
 "SpeechViewController_SearchByTextButton_AccessibilityLabel" = "Search within the page";
 "SpeechViewController_KeyboardShortcut_StartStopSpeech_Title" = "Speech start/stop";
 "SpeechViewController_LoadingFailed_GlobalStateIsNull" = "Failed to load text. Failed to load global settings.";
-"SpeechViewController_LoadingFailed_GlobalStateIsNull" = "Failed to load text. Could not load novel page.";
+"SpeechViewController_LoadingFailed_StoryIsNull" = "Failed to load text. Could not load novel page.";
 "SpeechViewController_SearchButton_AccessibilityLabel" = "Search";
 "SpeechViewController_RefreshButton_AccessibilityLabel" = "Check for updates to this novel";
 "SpeechViewController_moreButton_AccessibilityLabel" = "Show hidden menu items";
@@ -433,25 +411,10 @@
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated" = "Speech types while waiting changed to \"%@\".";
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed" = "Failed changing Speech types while waiting.";
 
-"NarouSerchViewController_OrderNew" = "New";
 "NarouSerchViewController_OrderOver-allJudgment" = "Over-all Rating in Descend order";
 "NarouSerchViewController_OrderOver-allJudgmentAsc" = "Over-all Rating in Ascend order";
-"NarouSerchViewController_OrderNumberOfCoverBookmark" = "In bookmark counts order";
-"NarouSerchViewController_NumberOfReview" = "In review counts order ";
-"NarouSerchViewController_NumberOfImpression" = "In impression review counts order";
-"NarouSerchViewController_NumberOfEvaluator" = "Rating counts in Descend order";
-"NarouSerchViewController_NumberOfEvaluatorAsc" = "Rating counts in Ascend order";
-"NarouSerchViewController_OrderNumberOfWeeklyUniqueUser" = "Weekly subscription counts";
-"NarouSerchViewController_OrderStoryLength" = "Book length in descending order";
-"NarouSerchViewController_OrderStoryLengthAsc" = "Book length in ascending order";
-"NarouSerchViewController_OrderOlder" = "In old to new order";
 
-"NarouSearchResultDetailViewController_GoToMypage" = "The writer's page";
-"NarouSearchResultDetailViewController_GoToMyPageMessage" = "Proceed to the writer's page?";
 
-"EditUserBookViewContoller_InputTextHeare" = "Input text here";
-"EditUserBookViewController_AddNewStoryFailed" = "Chapter add failed.";
-"NarouSearchViewController_DoneKeyboardBarItem" = "Done";
 
 "NovelDetailViewController_PageTitle" ="Novel detail";
 "NovelDetailViewController_NovelLoadFailed" = "Failed to get novel information.";
@@ -590,7 +553,7 @@
 "BugReportViewController_SendBugReport_Procedure" = "Procedure";
 "BugReportViewController_ErrorDialog" = "Error";
 "BugReportViewController_InformationForIsNeedResponse" = "In case reply is permitted, the developer may reply to the sender's mail address from the developer. Reply may be delayed. Also, please note that if you do not receive mail from @gmail.com, you will not receive a reply.";
-"BugReportViewController_HiddenImportantInformationSectionHeader" = "Information";
+"BugReportViewController_HiddenImportantInformationSectionHeader" = "Information from the developer";
 "BugReportViewController_SendNewFeatureMailInformation" = "\r\n\r\n===============\r\nPlease do not edit the line below this.\r\n";
 "BugReportViewController_SendNewFeatureMailSubject" = "NovelSpeaker Proposal of new function";
 "BugReportViewController_NoDescriptionOfTheNewFeature" = "The content of your proposal is empty";
@@ -620,18 +583,6 @@
 "BugReportViewController_IsAppendTargetNovelStoryText_Title" = "Attach the text of the novel where the problem occurs (If the text of the novel is involved, such as when the reading is strange, we recommend contacting us via ON)";
 "BugReportViewController_UpdateVersionAlivedMessage" = "It seems that the version registered in the AppStore is different from the version of NovelSpeaker you are currently running. Before contacting us, please update NovelSpeaker from the AppStore app and check if the problem still occurs before contacting us.\n\nIf this message continues to appear even after updating, it may be due to an older version of iOS (or iPadOS). We are very sorry, but please understand that we cannot provide support to those who are already using an OS that cannot be updated any further.";
 
-"NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
-"NarouSearchResultDetailViewControllerSwift_Writer" = "Writer";
-"NarouSearchResultDetailViewControllerSwift_Title" = "Title";
-"NarouSearchResultDetailViewControllerSwift_UpdateDate" = "UpdateDate";
-"NarouSearchResultDetailViewControllerSwift_Point" = "Point";
-"NarouSearchResultDetailViewControllerSwift_Storys" = "Chapters";
-"NarouSearchResultDetailViewControllerSwift_Bookmark_num" = "Bookmark num";
-"NarouSearchResultDetailViewControllerSwift_Point_mean" = "Point mean";
-"NarouSearchResultDetailViewControllerSwift_Point_count" = "Point count";
-"NarouSearchResultDetailViewControllerSwift_Keyword" = "Keyword";
-"NarouSearchResultDetailViewControllerSwift_Story" = "Introduction";
-"NarouSearchResultDetailViewControllerSwift_IsEnd" = "Still releasing";
 "NarouSearchResultDetailViewControllerSwift_IsEnd=0" = "Completed or short story";
 "NarouSearchResultDetailViewControllerSwift_IsEnd=1" = "Serializing";
 "NarouSearchResultDetailViewControllerSwift_IsEnd=0&genelral_all_no>1" = "Completed";
@@ -657,7 +608,6 @@
 "MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Title" = "iCloud is not available";
 "MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Message" = "It seems that iCloud is not available, but it is started using iCloud. It seems that the data on the iCloud side stored inside does not exist or has disappeared, so set it not to use iCloud before starting it.";
 "MigrationViewController_InvalidiCloudStatus_UnknowniCloudError" = "Unknown iCloud status error";
-"MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Title" = "iCloud is not available";
 "MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Title" = "iCloud is not available";
 "MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message" = "It seems that iCloud is not available, but it is started using iCloud. If you continue to use it as it is, the operation may become unstable when iCloud becomes available later (We can not handle the malfunction in such a case. Please be aware in advance). Would you like to start with the settings to use iCloud as it is?";
 "MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_ConvertToLocalButton" = "Start after changing the settings so that iCloud is not used";
@@ -950,8 +900,8 @@
 "SpeechViewButtonType_Backup" = "Back up this novel";
 "SpeechViewButtonSettingsViewController_Title" = "Settings for the buttons displayed in the upper right corner of the novel text screen";
 "SpeechViewButtonType_Detail" = "Show novel detail";
-"SpeechViewButtonType_SkipBackward" = "Rewind a little (during playback)";
-"SpeechViewButtonType_SkipForward" = "Advance a little (during playback)";
+"SpeechViewButtonType_SkipBackward" = "Skip backward (during playback)";
+"SpeechViewButtonType_SkipForward" = "Skip forward (during playback)";
 "SpeechViewButtonType_ShowTableOfContents" = "Table of Contents";
 "SpeechViewButtonType_AddPageToOtherNovel" = "Add this page to another novel";
 "SpeechViewButtonType_VoicevoxCacheGeneration" = "Pre-generate speech";
@@ -1024,8 +974,8 @@
 "MenuButtonHandler_StartStopShortcutKey_Title" = "Play/Pause";
 "MenuBarButtonHandler_NextShortcutKey_Title" = "Next page";
 "MenuBarButtonHandler_PreviousShortcutKey_Title" = "Previous page";
-"MenuBarButtonHandler_SkipForwardShortcutKey_Title" = "Forward";
-"MenuBarButtonHandler_SkipBackwardShortcutKey_Title" = "Backward";
+"MenuBarButtonHandler_SkipForwardShortcutKey_Title" = "Skip forward";
+"MenuBarButtonHandler_SkipBackwardShortcutKey_Title" = "Skip backward";
 "MenuBarButtonHandler_ControlMenu_Title" = "Playback control";
 
 "RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidNovelID" = "Invalid NovelID specified";

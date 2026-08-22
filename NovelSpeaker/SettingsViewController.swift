@@ -2181,13 +2181,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     return
                 }
                 DispatchQueue.main.async {
-                    NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す"), message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloud上のデータを全て読み込み直しますか？\nこの操作を行うとiCloud上に保存されているデータを全て読み込み直す事になりますので、iCloud上に保存されているデータの量が多い場合はかなりの時間がかかる事になります。"), button1Title: nil, button1Action: nil, button2Title: nil) {
+                    NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す"), message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Confirm_Message", comment: "iCloud上のデータを全て読み込み直しますか？\nこの操作を行うとiCloud上に保存されているデータを全て読み込み直す事になりますので、iCloud上に保存されているデータの量が多い場合はかなりの時間がかかる事になります。"), button1Title: nil, button1Action: nil, button2Title: nil) {
                         RealmObserverHandler.shared.AnnounceStopObservers()
                         RealmUtil.stopSyncEngine()
                         RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
                         RealmObserverHandler.shared.AnnounceRestartObservers()
                         try! RealmUtil.EnableSyncEngine()
-                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloudのデータを読み込み直しはじめました。"), buttonTitle: nil, buttonAction: nil)
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Starting_Message", comment: "iCloudのデータを読み込み直しはじめました。"), buttonTitle: nil, buttonAction: nil)
                     }
                 }
             })

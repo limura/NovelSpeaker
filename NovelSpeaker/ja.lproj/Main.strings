@@ -120,12 +120,12 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 "g0W-gO-BlM.text" = "-";
 
 /* Class = "IBUINavigationItem"; title = "読みの修正"; ObjectID = "iy0-Ki-xeS"; */
-"iy0-Ki-xeS.title" = "読みの修正";
+"iy0-Ki-xeS.title" = "読み替え辞書";
 
 "PxM-wl-qYW.title" = "小説本文表示画面の設定";
 
 /* Class = "IBUINavigationItem"; title = "読みの修正詳細"; ObjectID = "jOk-mr-1xo"; */
-"jOk-mr-1xo.title" = "読みの修正詳細";
+"jOk-mr-1xo.title" = "読み替え辞書の詳細";
 
 /* Class = "IBUIButton"; normalTitle = "確定"; ObjectID = "kRa-jS-1YP"; */
 "kRa-jS-1YP.normalTitle" = "確定";

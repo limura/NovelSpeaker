@@ -131,7 +131,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }else{
                     self.applyStoryText(
                         text: NSLocalizedString(
-                            "SpeechViewController_LoadingFailed_GlobalStateIsNull",
+                            "SpeechViewController_LoadingFailed_StoryIsNull",
                             comment: "本文の読み込みに失敗しました。小説のページを読み込めませんでした。"
                         )
                     )
