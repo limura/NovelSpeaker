@@ -162,10 +162,6 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
         return audioProvider.memoryAudio(key: key)
     }
 
-    nonisolated private func storeCache(key: String, data: Data) {
-        audioProvider.storeToMemory(key: key, data: data)
-    }
-
     /// 指定テキストが先行合成済みなら、その WAV のバイト数を返す(未合成なら nil)。
     /// 「未再生の貯金が何秒あるか」を数えるために使う。actorへ入らず参照できる。
     nonisolated func cachedWavByteCount(text: String, styleId: UInt32) -> Int? {
@@ -199,10 +195,6 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     /// 既にディスクに作ってあるか(音声そのものは読まない)。
     nonisolated func isStoredOnDisk(text: String, styleId: UInt32) -> Bool {
         return audioProvider.isStoredOnDisk(key: Self.cacheKey(text: text, styleId: styleId))
-    }
-
-    nonisolated private func peekDiskCache(text: String, styleId: UInt32) -> Data? {
-        return audioProvider.diskAudio(key: Self.cacheKey(text: text, styleId: styleId))
     }
 
     /// 合成できた音声をディスクにも積む。行列のワーカーが、合成の完了直後に呼ぶ。
