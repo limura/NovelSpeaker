@@ -531,12 +531,12 @@ class StoryTextClassifier {
 
         private func buildModSettingsIfNeeded(realm:Realm) {
             guard sharedIndexedNonRegexpModArray == nil else { return }
-            let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
+            let defaultSpeechModEngineTypes = NovelSpeakerUtility.GetDefaultSpeechModEngineTypes()
             var shared:[SpeechModSetting] = []
             var specific:[String:[SpeechModSetting]] = [:]
             for realmModSetting in realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false") {
                 let targetEngines = NovelSpeakerUtility.EffectiveSpeechEngineTypes(
-                    of: realmModSetting, defaultSpeechModKeySet: defaultSpeechModKeySet)
+                    of: realmModSetting, defaultSpeechModEngineTypes: defaultSpeechModEngineTypes)
                 let setting = SpeechModSetting(from: realmModSetting, targetSpeechEngineTypeArray: targetEngines)
                 if realmModSetting.targetNovelIDArray.contains(RealmSpeechModSetting.anyTarget) {
                     shared.append(setting)

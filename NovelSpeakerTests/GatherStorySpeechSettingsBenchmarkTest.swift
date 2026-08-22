@@ -163,10 +163,10 @@ class GatherStorySpeechSettingsBenchmarkTest: XCTestCase {
 
         // 従来の経路(全部まとめて渡す)を組み立て直す
         let oldSettings = RealmUtil.RealmBlock { realm -> StoryTextClassifier.StorySpeechSettings in
-            let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
+            let defaultSpeechModEngineTypes = NovelSpeakerUtility.GetDefaultSpeechModEngineTypes()
             let mods = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: novelID)?.map { realmModSetting -> NovelSpeaker.SpeechModSetting in
-                let key = NovelSpeakerUtility.DefaultSpeechModKey(before: realmModSetting.before, after: realmModSetting.after, isRegexp: realmModSetting.isUseRegularExpression)
-                let targetEngines:[SpeechEngineType] = defaultSpeechModKeySet.contains(key) ? [.avSpeechSynthesizer] : []
+                let targetEngines = NovelSpeakerUtility.EffectiveSpeechEngineTypes(
+                    of: realmModSetting, defaultSpeechModEngineTypes: defaultSpeechModEngineTypes)
                 return NovelSpeaker.SpeechModSetting(from: realmModSetting, targetSpeechEngineTypeArray: targetEngines)
             } ?? []
             return StoryTextClassifier.StorySpeechSettings(

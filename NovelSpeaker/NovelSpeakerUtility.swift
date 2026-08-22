@@ -146,28 +146,53 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
-    // 標準の読み替え辞書(バンドルの DefaultSpeechModList.json)の (before, after, isRegexp) を
-    // まとめたキー集合。Realm 上のエントリが標準辞書由来かどうかを値一致で判定するために使う。
-    // (標準辞書と利用者の追加分は同じ Realm テーブルに混ざって保存されており、区別する印が
-    //  無いため。将来的には読み替え辞書自体に対象エンジンの情報を持たせるのが正しい)
+    // 標準の読み替え辞書(バンドルの DefaultSpeechModList.json)の (before, after, isRegexp) から
+    // 「適用する音声合成」への対応表。
+    //
+    // 標準辞書と利用者の追加分は同じ Realm テーブルに混ざって保存されていて区別する印が無いため、
+    // 値の一致で「標準辞書由来か」を判定している。
+    // 対応表にしてあるのは、**JSON に書かれたタグをそのまま使う**ため。
+    // これにより、既存の利用者のデータを書き換えなくても
+    // 「この読み替えは VOICEVOX でも大丈夫」という判定を配れる
+    // (書き換えると数千件が一斉に iCloud へ上がる事になる)。
+    //
     // 5000件超あり毎回作るのは無駄なので一度だけ構築してキャッシュする。ここでは(ネットワークに
     // 出る可能性のある getSpeechModSettings ではなく)確実にバンドルの JSON だけを読む。
-    private static var cachedDefaultSpeechModKeySet: Set<String>? = nil
+    private static var cachedDefaultSpeechModEngineTypes: [String:[SpeechEngineType]]? = nil
     static func DefaultSpeechModKey(before:String, after:String, isRegexp:Bool) -> String {
         return "\(isRegexp ? "1" : "0")\t\(before)\t\(after)"
     }
-    static func GetDefaultSpeechModKeySet() -> Set<String> {
-        if let cached = cachedDefaultSpeechModKeySet { return cached }
-        var keySet = Set<String>()
+    static func GetDefaultSpeechModEngineTypes() -> [String:[SpeechEngineType]] {
+        if let cached = cachedDefaultSpeechModEngineTypes { return cached }
+        var result:[String:[SpeechEngineType]] = [:]
         if let path = Bundle.main.path(forResource: "DefaultSpeechModList", ofType: "json"),
            let handle = FileHandle(forReadingAtPath: path),
-           let result = try? JSONDecoder().decode([SpeechModSetting].self, from: handle.readDataToEndOfFile()) {
-            for modSetting in result {
-                keySet.insert(DefaultSpeechModKey(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isRegexp ?? false))
+           let decoded = try? JSONDecoder().decode([SpeechModSetting].self, from: handle.readDataToEndOfFile()) {
+            for modSetting in decoded {
+                let key = DefaultSpeechModKey(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isRegexp ?? false)
+                result[key] = modSetting.speechEngineTypes
             }
         }
-        cachedDefaultSpeechModKeySet = keySet
-        return keySet
+        cachedDefaultSpeechModEngineTypes = result
+        return result
+    }
+
+    /// 読み替え後に、VOICEVOX に渡すと読み上げられてしまう記号が入っているか。
+    ///
+    /// 標準の読み替え辞書には「実際」→「"実際"」のように**引用符で囲う**細工が
+    /// 1000件以上あり、端末の音声が前後の文字に引きずられて変な読み方をするのを
+    /// 避けるためのものである。VOICEVOX にそのまま渡すと引用符が読まれたり
+    /// 分割がおかしくなったりする。
+    ///
+    /// 標準辞書のものは JSON のタグで判定できるが、利用者が自分で足した物や
+    /// 標準辞書を編集した物には印が無い。同じ細工をしている可能性が高いので、
+    /// 指定が無い場合は VOICEVOX に当てない側へ倒す。
+    /// 当てたい人は「適用する音声合成」で選べば、そちらが優先される。
+    ///
+    /// 実際に入っている記号を数えたところ、引用符(1061件)以外は
+    /// 空白・「！」「？」「々」「・」といった読み上げても問題の無いものだけだった。
+    static func containsAVSpeechOnlyDecoration(after:String) -> Bool {
+        return after.contains("\"")
     }
 
     /// 保存されている指定と、標準の読み替え辞書からの推測を合わせた、
@@ -181,14 +206,28 @@ class NovelSpeakerUtility: NSObject {
     /// 同じ判断をする場所が3箇所(読み上げ・Apple Watchへの転送・編集画面)あり、
     /// ばらけると画面と実際の挙動がずれるので、ここに寄せてある。
     ///
-    /// - Parameter defaultSpeechModKeySet: 何度も呼ぶ場合に外から渡す(5000件超あるため)。
+    /// - Parameter defaultSpeechModEngineTypes: 何度も呼ぶ場合に外から渡す(5000件超あるため)。
     static func EffectiveSpeechEngineTypes(of setting: RealmSpeechModSetting,
-                                           defaultSpeechModKeySet: Set<String>? = nil) -> [SpeechEngineType] {
+                                           defaultSpeechModEngineTypes: [String:[SpeechEngineType]]? = nil) -> [SpeechEngineType] {
         let stored = setting.speechEngineTypes
         if stored.isEmpty == false { return stored }
-        let keySet = defaultSpeechModKeySet ?? GetDefaultSpeechModKeySet()
+        let map = defaultSpeechModEngineTypes ?? GetDefaultSpeechModEngineTypes()
         let key = DefaultSpeechModKey(before: setting.before, after: setting.after, isRegexp: setting.isUseRegularExpression)
-        return keySet.contains(key) ? [.avSpeechSynthesizer] : []
+        if let tagged = map[key] {
+            // 標準の読み替え辞書に同じ内容がある。
+            // タグが付いていればそれに従う。
+            if tagged.isEmpty == false { return tagged }
+            // 付いていない = **まだ VOICEVOX で確かめていない**。
+            // 「全部に適用」と読むと、確認していない物が一斉に VOICEVOX へ当たるので、
+            // 従来どおり端末の音声だけにしておく。
+            return [.avSpeechSynthesizer]
+        }
+        // 利用者が自分で足した物(または標準辞書を編集した物)。
+        // 引用符で囲う類の細工が入っていたら、VOICEVOX には当てない。
+        if containsAVSpeechOnlyDecoration(after: String(setting.after)) {
+            return [.avSpeechSynthesizer]
+        }
+        return []
     }
 
     /// 「読みの修正」から VOICEVOX のユーザー辞書を組み立て直し、必要なら反映する。
@@ -199,11 +238,11 @@ class NovelSpeakerUtility: NSObject {
         guard VoicevoxCore.isAvailableOnThisOS else { return }
         var entries:[VoicevoxUserDictionaryEntry] = []
         RealmUtil.RealmBlock { (realm) -> Void in
-            let defaultSpeechModKeySet = GetDefaultSpeechModKeySet()
+            let defaultSpeechModEngineTypes = GetDefaultSpeechModEngineTypes()
             guard let settings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
             for setting in settings {
                 guard setting.voicevoxPronunciation.count > 0 else { continue }
-                let engineTypes = EffectiveSpeechEngineTypes(of: setting, defaultSpeechModKeySet: defaultSpeechModKeySet)
+                let engineTypes = EffectiveSpeechEngineTypes(of: setting, defaultSpeechModEngineTypes: defaultSpeechModEngineTypes)
                 guard let entry = VoicevoxUserDictionaryBuilder.entry(
                     before: String(setting.before),
                     after: String(setting.after),

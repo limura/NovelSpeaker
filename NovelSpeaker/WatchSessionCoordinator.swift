@@ -1071,13 +1071,13 @@ class WatchSessionCoordinator: NSObject {
             }
             settings.waitConfigs = waitConfigs
             // 読み替え辞書。標準辞書由来のエントリは AVSpeechSynthesizer 専用マークを引き継ぐ
-            let defaultSpeechModKeySet = NovelSpeakerUtility.GetDefaultSpeechModKeySet()
+            let defaultSpeechModEngineTypes = NovelSpeakerUtility.GetDefaultSpeechModEngineTypes()
             if let modSettings = RealmSpeechModSetting.SearchSettingsFor(realm: realm, novelID: globalOnlyNovelID) {
                 for modSetting in modSettings {
                     // 転送するのは文字列。時計側のアプリが古いままの事があるので、
                     // 数値ではなく自分で意味の分かる形で送る。
                     let targetEngines = NovelSpeakerUtility.EffectiveSpeechEngineTypes(
-                        of: modSetting, defaultSpeechModKeySet: defaultSpeechModKeySet)
+                        of: modSetting, defaultSpeechModEngineTypes: defaultSpeechModEngineTypes)
                         .map { $0.typeString ?? "any" }
                     settings.speechMods.append(WatchSpeechSettings.Mod(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isUseRegularExpression, targetEngines: targetEngines))
                 }

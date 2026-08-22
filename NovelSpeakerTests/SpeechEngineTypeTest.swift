@@ -125,4 +125,45 @@ class SpeechEngineTypeTest: XCTestCase {
         }
         XCTAssertEqual(decoded[0].speechEngineTypes, [.voicevox])
     }
+    // MARK: - 指定が無い時に何が効くか
+
+    // ★ここを間違えると被害が大きいので、実データで確かめる。
+    //
+    // 対象エンジンをデータで持つ前に作られた読み替えは全部「指定なし」になる。
+    // その時に何が効くかは、標準の読み替え辞書のタグと読み替え後の中身で決まる。
+
+    private func effectiveTypes(before: String, after: String, isRegexp: Bool = false,
+                                stored: [SpeechEngineType] = []) -> [SpeechEngineType] {
+        let setting = RealmSpeechModSetting()
+        setting.before = before
+        setting.after = after
+        setting.isUseRegularExpression = isRegexp
+        setting.targetSpeechEngineTypeArray.append(objectsIn: stored.map({ $0.rawValue }))
+        return NovelSpeakerUtility.EffectiveSpeechEngineTypes(of: setting)
+    }
+
+    // 自分で選んだ指定が最優先。推測に上書きされてはいけない。
+    func testStoredValueWins() {
+        XCTAssertEqual(effectiveTypes(before: "実際", after: "\"実際\"", stored: [.any]), [.any])
+        XCTAssertEqual(effectiveTypes(before: "橋", after: "ハシ", stored: [.voicevox]), [.voicevox])
+    }
+
+    // ★利用者が自分で足した読み替えでも、引用符で囲う細工が入っていたら
+    // VOICEVOX には当てない。標準辞書と同じ細工をしている可能性が高く、
+    // そのまま渡すと引用符が読まれてしまう。
+    func testQuotedReplacementIsKeptAwayFromVoicevox() {
+        XCTAssertEqual(effectiveTypes(before: "ほげ", after: "\"ほげ\""), [.avSpeechSynthesizer])
+    }
+
+    // 普通の読み替えは今までどおり全部に適用する(空 = 未指定 = すべて)。
+    func testPlainUserReplacementAppliesToEveryEngine() {
+        XCTAssertEqual(effectiveTypes(before: "ほげ", after: "ホゲ"), [])
+    }
+
+    // 標準の読み替え辞書に同じ内容がある場合。
+    // タグが付いていなければ「まだ VOICEVOX で確かめていない」ので端末の音声だけ。
+    func testUntaggedDefaultEntryStaysOnAVSpeechSynthesizer() {
+        // バンドルの JSON に必ずある物(サンプルとして先頭に置かれている)。
+        XCTAssertEqual(effectiveTypes(before: "黒剣", after: "コッケン"), [.avSpeechSynthesizer])
+    }
 }
