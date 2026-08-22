@@ -199,9 +199,9 @@ func repeatTypeLocalizedName(_ type: WatchRepeatSpeechType) -> String {
     case .noRepeat:
         return NSLocalizedString("Watch_RepeatType_NoRepeat", comment: "そのまま停止する")
     case .rewindToFirstStory:
-        return NSLocalizedString("Watch_RepeatType_RewindToFirstStory", comment: "最初の章から再生し直す")
+        return NSLocalizedString("Watch_RepeatType_RewindToFirstStory", comment: "最初のページから再生し直す")
     case .rewindToThisStory:
-        return NSLocalizedString("Watch_RepeatType_RewindToThisStory", comment: "現在の章を再生し直す")
+        return NSLocalizedString("Watch_RepeatType_RewindToThisStory", comment: "現在のページを再生し直す")
     case .goToNextLikeNovel:
         return NSLocalizedString("Watch_RepeatType_GoToNextLikeNovel", comment: "別のお気に入り小説を再生")
     case .goToNextSameFolderdNovel:
@@ -486,7 +486,7 @@ struct CacheManagementView: View {
     }
 
     private func detailText(novelID: String) -> String {
-        let chapters = String(format: NSLocalizedString("Watch_Cache_ChapterCount", comment: "%d章"), session.storedChapterCounts[novelID] ?? 0)
+        let chapters = String(format: NSLocalizedString("Watch_Cache_ChapterCount", comment: "%dページ"), session.storedChapterCounts[novelID] ?? 0)
         guard let lastPlayed = session.lastPlayedDates[novelID] else {
             return String(format: NSLocalizedString("Watch_Cache_Detail_NeverPlayed", comment: "%@ · Watchで未再生"), chapters)
         }

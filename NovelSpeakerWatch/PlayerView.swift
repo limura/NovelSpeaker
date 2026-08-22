@@ -37,7 +37,7 @@ struct PlayerView: View {
 
             HStack(spacing: 8) {
                 chapterButton(systemName: "backward.end",
-                              accessibilityLabel: NSLocalizedString("Watch_AX_PrevChapter", comment: "前の章へ")) {
+                              accessibilityLabel: NSLocalizedString("Watch_AX_PrevChapter", comment: "前のページへ")) {
                     if isWatchSource {
                         player.moveChapter(offset: -1)
                     } else {
@@ -51,7 +51,7 @@ struct PlayerView: View {
                     .minimumScaleFactor(0.5)
                     .frame(maxWidth: .infinity)
                 chapterButton(systemName: "forward.end",
-                              accessibilityLabel: NSLocalizedString("Watch_AX_NextChapter", comment: "次の章へ")) {
+                              accessibilityLabel: NSLocalizedString("Watch_AX_NextChapter", comment: "次のページへ")) {
                     if isWatchSource {
                         player.moveChapter(offset: 1)
                     } else {
@@ -233,7 +233,7 @@ struct PlayerView: View {
     }
 
     private var chapterLabel: String {
-        let progressFormat = NSLocalizedString("Watch_Player_ChapterProgress", comment: "%1$d/%2$d章 · %3$d%%")
+        let progressFormat = NSLocalizedString("Watch_Player_ChapterProgress", comment: "%1$d/%2$d · %3$d%%")
         if isWatchSource {
             guard !player.novelID.isEmpty else { return "-" }
             return String(format: progressFormat, player.chapterNumber, player.chapterCount, Int(player.progress * 100))
@@ -242,7 +242,7 @@ struct PlayerView: View {
         if state.chapterCount > 0 {
             return String(format: progressFormat, state.chapterNumber, state.chapterCount, Int(state.progress * 100))
         }
-        return String(format: NSLocalizedString("Watch_Player_ChapterOnly", comment: "第%d章"), state.chapterNumber)
+        return String(format: NSLocalizedString("Watch_Player_ChapterOnly", comment: "%dページ目"), state.chapterNumber)
     }
 
     @ViewBuilder private var statusBadge: some View {

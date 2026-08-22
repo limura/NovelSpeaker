@@ -238,18 +238,18 @@ struct TextPageView: View {
                     .font(.system(size: 11))
                     .foregroundStyle(textColor.opacity(0.6))
                 if hasPreviousChapter {
-                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_PrevChapter", comment: "◀ 前の章"),
-                                      accessibilityLabel: NSLocalizedString("Watch_AX_PrevChapter", comment: "前の章へ"),
+                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_PrevChapter", comment: "◀ 前のページ"),
+                                      accessibilityLabel: NSLocalizedString("Watch_AX_PrevChapter", comment: "前のページへ"),
                                       offset: -1)
                 }
                 paragraphList(textColor: textColor, highlightColor: highlightColor, highlight: highlight)
                 if hasNextChapter {
-                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_NextChapter", comment: "次の章へ ▶"),
-                                      accessibilityLabel: NSLocalizedString("Watch_AX_NextChapter", comment: "次の章へ"),
+                    chapterMoveButton(label: NSLocalizedString("Watch_TextPage_NextChapter", comment: "次のページ ▶"),
+                                      accessibilityLabel: NSLocalizedString("Watch_AX_NextChapter", comment: "次のページへ"),
                                       offset: 1)
                 }
             } else {
-                Text(String(format: NSLocalizedString("Watch_TextPage_ChapterNotTransferred", comment: "この章(%d章)はまだWatchに転送されていません。"), target.chapter))
+                Text(String(format: NSLocalizedString("Watch_TextPage_ChapterNotTransferred", comment: "%dページ目はまだWatchに転送されていません。"), target.chapter))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 transferNowButton(novelID: target.novelID)

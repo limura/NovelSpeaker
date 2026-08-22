@@ -638,7 +638,7 @@ final class WatchSpeechPlayer: NSObject, ObservableObject {
         case .rewindToFirstStory:
             guard let firstChapter = NovelStorage.firstStoredChapter(novelID: novelID) else { break }
             announceIfEnabled(settings: settings,
-                              text: NSLocalizedString("Watch_SpeechPlayer_RewindFirstStory", comment: "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。")) { [weak self] in
+                              text: NSLocalizedString("Watch_SpeechPlayer_RewindFirstStory", comment: "読み上げが最後に達したため、最初のページに戻って再生を繰り返します。")) { [weak self] in
                 guard let self = self, self.isPlaying else { return }
                 guard self.applyChapter(firstChapter, location: 0) else {
                     self.finishPlaybackAtEnd()

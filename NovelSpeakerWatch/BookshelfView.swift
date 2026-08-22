@@ -62,7 +62,7 @@ enum WatchBookshelfSortType: String, CaseIterable {
         case .lastReadDateWithFolder:
             return NSLocalizedString("Watch_BookshelfSort_LastReadWithFolder", comment: "小説を開いた日時順(フォルダ分類版)")
         case .unreadChapterCount:
-            return NSLocalizedString("Watch_BookshelfSort_UnreadChapterCount", comment: "未読章数別")
+            return NSLocalizedString("Watch_BookshelfSort_UnreadChapterCount", comment: "未読ページ数別")
         case .watchTransferState:
             return NSLocalizedString("Watch_BookshelfSort_WatchTransferState", comment: "Apple Watch転送状況別")
         }
@@ -401,9 +401,9 @@ struct BookshelfView: View {
             return lastChapter - readingChapter
         }
         let buckets: [(title: String, lowerBound: Int)] = [
-            (NSLocalizedString("Watch_UnreadBucket_100Plus", comment: "未読 100章以上"), 100),
-            (NSLocalizedString("Watch_UnreadBucket_10To99", comment: "未読 10〜99章"), 10),
-            (NSLocalizedString("Watch_UnreadBucket_1To9", comment: "未読 1〜9章"), 1),
+            (NSLocalizedString("Watch_UnreadBucket_100Plus", comment: "未読 100ページ以上"), 100),
+            (NSLocalizedString("Watch_UnreadBucket_10To99", comment: "未読 10〜99ページ"), 10),
+            (NSLocalizedString("Watch_UnreadBucket_1To9", comment: "未読 1〜9ページ"), 1),
             (NSLocalizedString("Watch_UnreadBucket_CaughtUp", comment: "追いついている"), 0),
         ]
         var bucketNovels: [[WatchNovelSummary]] = Array(repeating: [], count: buckets.count)
@@ -476,7 +476,7 @@ struct BookshelfView: View {
         // 行をひとまとまりにして「◯◯、12冊」と読ませる。
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(group.name), " + String(format: NSLocalizedString(
-            "Watch_Bookshelf_GroupNovelCountFormat", comment: "%d冊"), group.novels.count))
+            "Watch_Bookshelf_GroupNovelCountFormat", comment: "%d件"), group.novels.count))
     }
 
     private var syncingRow: some View {
@@ -679,7 +679,7 @@ struct BookshelfNovelList: View {
 
     private func transferButtonLabel(novel: WatchNovelSummary) -> String {
         if let storedCount = session.storedChapterCounts[novel.novelID] {
-            return String(format: NSLocalizedString("Watch_Bookshelf_TransferUpdates", comment: "更新分を転送 (%1$d→%2$d章)"), storedCount, novel.chapterCount)
+            return String(format: NSLocalizedString("Watch_Bookshelf_TransferUpdates", comment: "更新分を転送 (%1$d→%2$dページ)"), storedCount, novel.chapterCount)
         }
         return NSLocalizedString("Watch_Bookshelf_TransferBody", comment: "本文をWatchへ転送")
     }
@@ -693,7 +693,7 @@ struct BookshelfNovelList: View {
 
     private func chapterText(novel: WatchNovelSummary) -> String {
         if novel.chapterCount > 0 {
-            return String(format: NSLocalizedString("Watch_Bookshelf_ChapterProgress", comment: "%1$d/%2$d章"), novel.readingChapterNumber, novel.chapterCount)
+            return String(format: NSLocalizedString("Watch_Bookshelf_ChapterProgress", comment: "%1$d/%2$dページ"), novel.readingChapterNumber, novel.chapterCount)
         }
         return ""
     }
