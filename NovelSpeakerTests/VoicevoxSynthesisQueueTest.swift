@@ -213,6 +213,39 @@ class VoicevoxSynthesisQueueTest: XCTestCase {
         XCTAssertTrue(queue.isInFlight(text: "合成中", styleId: 3), "横取りしても合成中のままであるべき")
     }
 
+    // 待っている間に別経路(読み上げの裏で走る作り足し)が同じブロックを作り終えたら、
+    // 重いC呼び出しには入らない事。
+    //
+    // 実機ログでは、合成の**ちょうど半分**が「作り終えてから既にあったと分かる」
+    // 二度手間になっていた(132本中66本、108本中54本…)。積む時にしか
+    // 確かめていなかったため、順番待ちの間に作られた物を見落としていた。
+    func testIsStillNeededBecomesFalseWhenAnotherPathFinishedItWhileWaiting() {
+        var synthesized: Set<String> = []
+        let queue = VoicevoxSynthesisQueue(capacity: 8) { text, styleId in
+            return synthesized.contains(VoicevoxSynthesisQueue.key(text: text, styleId: styleId))
+        }
+        queue.enqueue(blockIndex: 1, text: "重なるブロック", styleId: 3)
+        guard let request = queue.takeNext() else {
+            XCTFail("取り出せるはず"); return
+        }
+        XCTAssertTrue(queue.isStillNeeded(request), "まだ誰も作っていないなら合成してよい")
+
+        // 順番待ちの間に、裏の作り足しが同じブロックを作り終えた。
+        synthesized.insert(VoicevoxSynthesisQueue.key(text: "重なるブロック", styleId: 3))
+        XCTAssertFalse(queue.isStillNeeded(request), "既に出来ている物をもう一度作ってはいけない")
+    }
+
+    // 停止/シークで用済みになった物も、同じ入口で弾かれる事。
+    func testIsStillNeededBecomesFalseAfterCancelAll() {
+        let queue = makeQueue()
+        queue.enqueue(blockIndex: 1, text: "捨てられる", styleId: 3)
+        guard let request = queue.takeNext() else {
+            XCTFail("取り出せるはず"); return
+        }
+        queue.cancelAll()
+        XCTAssertFalse(queue.isStillNeeded(request), "世代が変わった予約は合成しない")
+    }
+
     // ロックで守られている事の最低限の確認(複数スレッドから同時に叩いても壊れない)。
     func testConcurrentAccessDoesNotCorruptTheQueue() {
         let queue = makeQueue(capacity: 64)

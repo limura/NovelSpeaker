@@ -155,6 +155,19 @@ final class VoicevoxSynthesisQueue {
     }
 
     /// cancelAll() より前に取り出した(=もう不要な)合成かどうか。
+    /// 取り出した1件を、これから重いC呼び出しに入れてよいか。
+    ///
+    /// 積んだ時点で未合成でも、順番を待っている間に別の経路
+    /// (読み上げの裏で走っている作り足し)が同じブロックを作り終えている事がある。
+    /// 作り足しは再生位置から前へ進むので、待ち行列とは必ず重なる。
+    /// 積む時にしか確かめていなかったため、実機では合成の**ちょうど半分**が
+    /// 「作り終えてから、既にあったと分かる」二度手間になっていた。
+    func isStillNeeded(_ request: Request) -> Bool {
+        // キャッシュ参照はロックの外で行う(enqueue と同じ理由)。
+        if isAlreadySynthesized(request.text, request.styleId) { return false }
+        return isStale(request) == false
+    }
+
     func isStale(_ request: Request) -> Bool {
         lock.lock()
         defer { lock.unlock() }

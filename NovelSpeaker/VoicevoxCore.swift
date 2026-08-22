@@ -264,7 +264,11 @@ actor VoicevoxCore {
             VoicevoxCPUUsageReporter.shared.noteDuplicateSynthesis()
             return
         }
-        Task(priority: .utility) {
+        // 優先度を落とし過ぎない。3コアを合成で埋め切っている間 .utility は後回しにされ続け、
+        // 「作ったのにディスクに現れない」時間が伸びる。その間は作り足し側から見て
+        // 「まだ無い」ままなので、同じブロックをもう一度作ってしまう。
+        // 圧縮は合成の 0.62% しかかからないので、少し上げても再生を邪魔しない。
+        Task(priority: .medium) {
             do {
                 let encoded = try VoicevoxAudioCompressor.encode(wav: wav)
                 try VoicevoxDiskCacheStore.shared.store(
@@ -1042,7 +1046,9 @@ actor VoicevoxCore {
         // 順番待ちの間に読み上げが停止/シークされていたら、重いC呼び出しには入らず捨てる。
         // これをしないと、停止後も延々と(実機で16分=983秒の先行合成完了ログを確認)
         // 合成され続け、CPU/電池を浪費してしまう。
-        if synthesisQueue.isStale(request) {
+        // 停止/シークで用済みになっていないか、待っている間に別経路(裏の作り足し)が
+        // 同じ物を作り終えていないかを、重いC呼び出しの直前にもう一度確かめる。
+        if synthesisQueue.isStillNeeded(request) == false {
             synthesisQueue.complete(request)
             return
         }

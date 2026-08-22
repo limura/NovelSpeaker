@@ -264,6 +264,12 @@ final class VoicevoxCacheGenerator {
                     generatedCount += 1
                     continue
                 }
+                // 再生側が作った物は、まずメモリに入り、ディスクへは少し遅れて書かれる。
+                // ディスクだけを見ていると、その間に同じブロックを作り直してしまう。
+                if VoicevoxCore.shared.cachedWavByteCount(text: target.text, styleId: target.styleId) != nil {
+                    generatedCount += 1
+                    continue
+                }
                 if let cause = Self.currentStopCause() { return .limitReached(cause) }
 
                 do {
