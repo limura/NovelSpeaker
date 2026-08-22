@@ -1001,6 +1001,11 @@ actor VoicevoxCore {
         // (「前景で再生開始 → ロック → 電源を抜く」で全コアのまま走り続けると
         //  背面CPU上限で強制終了されるので、取り零しは許容できない)。
         applyThreadCountIfNeeded()
+        // 合成の入口はここ一箇所しか無いので、ここで「同じ物を二度作っていないか」を見張る。
+        // 同じ鍵を二度合成したら、それは条件に依らず必ず無駄撃ちである
+        // (詳細は VoicevoxRepeatedSynthesisDetector.swift)。
+        VoicevoxRepeatedSynthesisDetector.shared.noteSynthesisStarting(
+            key: VoicevoxDiskCacheStore.key(text: text, styleId: styleId))
         let texts = chunkedTextsForBudget(text: text, limitRatio: limitRatio)
         var wavs: [Data] = []
         for (index, chunk) in texts.enumerated() {

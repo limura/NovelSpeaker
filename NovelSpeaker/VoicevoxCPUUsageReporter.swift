@@ -288,11 +288,16 @@ final class VoicevoxCPUUsageReporter {
         let durationText = duration >= 60
             ? String(format: "%.0f分", duration / 60)
             : String(format: "%.0f秒", duration)
-        let message = String(format: "[VOICEVOX CPU] この%@で %d本(二度手間 %d本: 再生側 %d / 作り足し %d) / 貯めてあった分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
+        let baseMessage = String(format: "[VOICEVOX CPU] この%@で %d本(二度手間 %d本: 再生側 %d / 作り足し %d) / 貯めてあった分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
                              durationText, current.count, current.duplicateSyntheses,
                              current.duplicatesByPlayback, current.duplicatesByGenerator, current.diskHits,
                              averageSpeed, slowestSpeed, playbackRate,
                              Self.thermalStateText(thermalState))
+        let health = VoicevoxRepeatedSynthesisDetector.shared
+        let message = health.isHealthy()
+            ? baseMessage
+            : baseMessage + String(format: "\n※ 同じ本文の作り直しが %.0f%% あります(仕組みの不具合の可能性)",
+                                   health.repeatedRatio * 100)
         return (message, [
             "durationSeconds": AnyCodable(String(format: "%.0f", max(elapsed, 0))),
             "synthesisCount": AnyCodable("\(current.count)"),
@@ -308,6 +313,9 @@ final class VoicevoxCPUUsageReporter {
             "duplicateSyntheses": AnyCodable("\(current.duplicateSyntheses)"),
             "duplicatesByPlayback": AnyCodable("\(current.duplicatesByPlayback)"),
             "duplicatesByGenerator": AnyCodable("\(current.duplicatesByGenerator)"),
+            // 起動してからここまでの、同じ本文を作り直した割合。
+            // 熱にも端末の速さにも依らない値なので、これ一つで仕組みの健康が分かる。
+            "repeatedSynthesisRatio": AnyCodable(String(format: "%.2f", VoicevoxRepeatedSynthesisDetector.shared.repeatedRatio)),
             // どのビルドで取ったログなのかが後から分からないと、直した効果を確かめられない。
             "appBuild": AnyCodable(Self.appBuildText),
             "parallelism": AnyCodable(current.wallSeconds > 0 ? String(format: "%.2f", current.cpuSeconds / current.wallSeconds) : "-"),
