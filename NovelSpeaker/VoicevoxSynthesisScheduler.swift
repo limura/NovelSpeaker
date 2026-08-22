@@ -67,9 +67,10 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
         /// メモリ層にあれば WAV を返す。
         let peekMemory: @Sendable (Request) -> Data?
         /// ディスク層にあれば(圧縮された)音声を返す。
-        let peekDisk: @Sendable (Request) -> Data?
+        /// 作り足しの要求には置き場所(再生中とは別の話の事がある)が付いてくる。
+        let peekDisk: @Sendable (Request, FillDestination?) -> Data?
         /// ディスク層にあるか(音声そのものは読まない)。
-        let isOnDisk: @Sendable (Request) -> Bool
+        let isOnDisk: @Sendable (Request, FillDestination?) -> Bool
         /// 先行合成の完成品をメモリ層へ置く。
         let storeToMemory: @Sendable (Request, Data) -> Void
         /// 完成品をディスク層へ置く(置くかどうか・どの区画かの判断も含めて任せる)。
@@ -335,26 +336,28 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
 
         // 既に出来ている物は作らない(これが「同じ鍵を二度合成しない」の実体)。
         if let wav = storage.peekMemory(request) {
+            // 先に行列から外して結果を渡す(外した後に来た要求は新しい1件として扱われる)。
+            let flags = resolve(entry, with: .success(wav))
             // 作り足しとして頼まれていた(=ディスクに置いてほしい)なら、
             // メモリの完成品を写すだけで済む。合成し直す必要は無い。
-            if let destination = currentFillDestination(of: entry), storage.isOnDisk(request) == false {
+            if let destination = flags.fillDestination, storage.isOnDisk(request, destination) == false {
                 storage.storeToDisk(request, wav, destination)
             }
-            resolve(entry, with: .success(wav))
             return
         }
+        let destination = currentFillDestination(of: entry)
         if hasWaiters(entry) {
-            if let data = storage.peekDisk(request) {
+            if let data = storage.peekDisk(request, destination) {
                 resolve(entry, with: .success(data))
                 return
             }
-        } else if storage.isOnDisk(request) {
+        } else if storage.isOnDisk(request, destination) {
             // 誰も音声そのものを待っていないなら、有無の確認だけで済ませる
             // (先行合成の予約が、待っている間にディスクへ置かれていた場合)。
             // 確認してから外すまでの間に待ち人が現れたら、この近道は使えない
             // (何も渡さずに外すと、その人が永遠に待つ事になる)ので読み直す。
             if resolveIfNoWaiters(entry) { return }
-            if let data = storage.peekDisk(request) {
+            if let data = storage.peekDisk(request, destination) {
                 resolve(entry, with: .success(data))
                 return
             }

@@ -136,11 +136,11 @@ private final class SchedulerFakeStores: @unchecked Sendable {
                 lock.lock(); defer { lock.unlock() }
                 return memoryUnsafe[request.key]
             },
-            peekDisk: { [self] request in
+            peekDisk: { [self] request, _ in
                 lock.lock(); defer { lock.unlock() }
                 return diskUnsafe[request.key]
             },
-            isOnDisk: { [self] request in
+            isOnDisk: { [self] request, _ in
                 lock.lock(); defer { lock.unlock() }
                 return diskUnsafe[request.key] != nil
             },

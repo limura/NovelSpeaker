@@ -264,53 +264,19 @@ final class VoicevoxCacheGenerator {
                     generatedCount += 1
                     continue
                 }
-                // 再生側が作った物は、まずメモリに入り、ディスクへは少し遅れて書かれる。
-                // ディスクだけを見ていると、その間に同じブロックを作り直してしまう。
-                if VoicevoxCore.shared.cachedWavByteCount(text: target.text, styleId: target.styleId) != nil {
-                    generatedCount += 1
-                    continue
-                }
                 if let cause = Self.currentStopCause() { return .limitReached(cause) }
 
-                // 再生側が今まさに同じブロックを作っているなら、そちらに任せて先へ進む。
-                // 再生側が作った物もディスクに置かれるので、取りこぼしにはならない。
-                if VoicevoxSynthesisInProgress.shared.isInProgress(key: target.key, by: .playback) {
-                    generatedCount += 1
-                    continue
-                }
                 do {
-                    // 合成の直前にもう一度確かめてもらう。ここへ来るまでに
-                    // 「再生側の合成待ち」(最大30秒)と actor の順番待ちがあり、
-                    // その間に再生側が同じブロックを作り終えている事があるため。
-                    let key = target.key
-                    VoicevoxSynthesisInProgress.shared.begin(key: key, side: .generator)
-                    defer { VoicevoxSynthesisInProgress.shared.end(key: key) }
-                    let wav = try await VoicevoxCore.shared.synthesizeForDiskCache(
+                    // 合成そのものは、再生側と共通の一本の待ち行列に頼む(優先度は最も低い)。
+                    // 同じブロックを先行合成や再生側が作りかけていれば、その完成に相乗りする
+                    // ので、二度手間は起きない。出来た物は行列のワーカーが指定の置き場所
+                    // (「作って」と言われた分だけ作成済み、それ以外は一時分)へ置き終えてから
+                    // 戻ってくる。ここで自分で合成も保存もしないので、
+                    // 「作り終えたのに、まだ見えない」隙も生まれない。
+                    try await VoicevoxCore.shared.synthesizeForBackgroundFill(
                         text: target.text, styleId: target.styleId,
-                        isStillNeeded: {
-                            VoicevoxDiskCacheStore.shared.contains(novelID: novelID, chapterNumber: chapterNumber, key: key) == false
-                        })
-                    guard let wav else {
-                        // 待っている間に出来上がっていた。作らずに次へ進む。
-                        generatedCount += 1
-                        continue
-                    }
-                    // それでも重なった分(合成中に置かれた物)は数えておく。
-                    if VoicevoxDiskCacheStore.shared.contains(novelID: novelID, chapterNumber: chapterNumber, key: target.key) {
-                        VoicevoxCPUUsageReporter.shared.noteDuplicateSynthesis(by: .generator)
-                    }
-                    let encoded = try VoicevoxAudioCompressor.encode(wav: wav)
-                    // ★「作って」と言われた分だけを作成済みとして残す。
-                    // 読み上げの裏で足りない分を作っているだけの時は一時分に置き、
-                    // 聴き終わった所から自動で消えるようにする。
-                    try VoicevoxDiskCacheStore.shared.store(
-                        novelID: novelID,
-                        chapterNumber: chapterNumber,
-                        key: target.key,
-                        data: encoded,
-                        durationSeconds: VoicevoxAudioCompressor.durationSeconds(wav: wav),
-                        area: runningMode == .manual ? .permanent : .temporary
-                    )
+                        novelID: novelID, chapterNumber: chapterNumber,
+                        isPermanent: runningMode == .manual)
                 } catch {
                     // 1ブロックの失敗で全体を止めない(記号だけのブロック等で形態素解析に
                     // 失敗する事がある)。数十分かけた生成が1件で止まる方が困る。

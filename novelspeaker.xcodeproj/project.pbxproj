@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		00AD409A746B0F07C88B8A0D /* VoicevoxCoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F380DAEC93EA2F37A0EF6D /* VoicevoxCoreTest.swift */; };
 		010402AF8041E33C87D76346 /* VoicevoxVoiceModelFileInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8ACD829CC876FC0650DFD61 /* VoicevoxVoiceModelFileInspector.swift */; };
-		01171759589A89414AC9E4F0 /* VoicevoxSynthesisQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A37EE6BCDC13FCBB27851C4B /* VoicevoxSynthesisQueue.swift */; };
 		03769EE92DAF16F7AE4552B4 /* WatchSpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B20E49D521B34FB248A1E17 /* WatchSpeechPlayer.swift */; };
 		0613A55AAEA3E316EF451788 /* VoicevoxBlockSplitReproTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F2CDCDF8C81C79ACE6686E /* VoicevoxBlockSplitReproTest.swift */; };
 		08A73FC021BA44FB814310FD /* VoicevoxCacheGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A83DEE9D4BBB50A38A451A /* VoicevoxCacheGeneration.swift */; };
@@ -269,7 +268,6 @@
 		6D1274BA6573EFA624CDCFC9 /* StoryTextClassifierVoicevoxTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B2CD3363998B01E4E4027 /* StoryTextClassifierVoicevoxTest.swift */; };
 		6D4A29E31BE0C9FA5DAA1774 /* VoicevoxSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E06129237E488639738552 /* VoicevoxSpeaker.swift */; };
 		701F2368A47FB44C1488A3E3 /* WatchComplicationUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97242EA9E9218DC1412D42B8 /* WatchComplicationUpdater.swift */; };
-		70A1426C5C519C884090FA9C /* VoicevoxSynthesisQueueTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80BC9B618C9872B38770260 /* VoicevoxSynthesisQueueTest.swift */; };
 		74A345783A019E4116C6DA25 /* VoicevoxRepeatedSynthesisDetectorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1432CF80AF69140A2EF902 /* VoicevoxRepeatedSynthesisDetectorTest.swift */; };
 		72653C5EE18819783F5A464D /* VoicevoxVoiceModelFileInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8ACD829CC876FC0650DFD61 /* VoicevoxVoiceModelFileInspector.swift */; };
 		732C6A22DD96E9D5C72B3AE8 /* VoicevoxTemporaryAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0AAB5480B6AAABB68745C9 /* VoicevoxTemporaryAudio.swift */; };
@@ -349,7 +347,6 @@
 		D924890D876C8508F198D957 /* VoicevoxVoiceModelConsentDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D3325A00DB14B7690632BD2 /* VoicevoxVoiceModelConsentDialog.swift */; };
 		D931CA1746CEB0D4FA9B5329 /* StoryTextClassifierSpeechModOrderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F9326089771117B629E422 /* StoryTextClassifierSpeechModOrderTest.swift */; };
 		DA7280085D32604744E10CB4 /* VoicevoxVoiceModelConsent.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADBFF389808124C39F9F4868 /* VoicevoxVoiceModelConsent.swift */; };
-		DB2361CE5C59A20FDA4A0EBF /* VoicevoxSynthesisQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A37EE6BCDC13FCBB27851C4B /* VoicevoxSynthesisQueue.swift */; };
 		DC297D28E34220ABD8745C84 /* VoicevoxAudioFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAF99D8484030AFE6D2591F /* VoicevoxAudioFormat.swift */; };
 		DCA91F6657AEDEB5C4677DC8 /* VoicevoxCacheAutoGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE496F7C7C71EF42457B67EA /* VoicevoxCacheAutoGeneration.swift */; };
 		DCAD5465EEE86E8FABA071CB /* VoicevoxCacheLimits.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AFA0E9D0F3FBD892093F10 /* VoicevoxCacheLimits.swift */; };
@@ -789,7 +786,6 @@
 		9D1F29DF1B7FA5B4102C34EE /* ja */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A15BD0C4E7F2A9310DDE41AB /* AVSpeechModDelayBlockSplitTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AVSpeechModDelayBlockSplitTest.swift; sourceTree = "<group>"; };
 		A1CBDB5062E188A966D653F3 /* VoicevoxCPUGovernorTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCPUGovernorTest.swift; sourceTree = "<group>"; };
-		A37EE6BCDC13FCBB27851C4B /* VoicevoxSynthesisQueue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxSynthesisQueue.swift; sourceTree = "<group>"; };
 		A5F0F8961F9E3850CE109BA6 /* SpeechViewBottomButtonBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechViewBottomButtonBar.swift; sourceTree = "<group>"; };
 		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A85C14F65B4FF85FBE10F560 /* VoicevoxStyleSelectViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxStyleSelectViewController.swift; sourceTree = "<group>"; };
@@ -808,7 +804,6 @@
 		B4A83DEE9D4BBB50A38A451A /* VoicevoxCacheGeneration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheGeneration.swift; sourceTree = "<group>"; };
 		B63C772BD7864F00126B3F3A /* WatchComplicationData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchComplicationData.swift; sourceTree = "<group>"; };
 		E6C2672C699346ABAAC08AE4 /* VoicevoxSynthesisSchedulerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2A185A2E5141B1A59BA65C /* VoicevoxSynthesisSchedulerTest.swift */; };
-		B80BC9B618C9872B38770260 /* VoicevoxSynthesisQueueTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxSynthesisQueueTest.swift; sourceTree = "<group>"; };
 		6B2A185A2E5141B1A59BA65C /* VoicevoxSynthesisSchedulerTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxSynthesisSchedulerTest.swift; sourceTree = "<group>"; };
 		8B1432CF80AF69140A2EF902 /* VoicevoxRepeatedSynthesisDetectorTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxRepeatedSynthesisDetectorTest.swift; sourceTree = "<group>"; };
 		BBB05391867F910CC2BC3C5D /* open_jtalk_dic_utf_8-1.11 */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder; name = "open_jtalk_dic_utf_8-1.11"; path = "dict/open_jtalk_dic_utf_8-1.11"; sourceTree = "<group>"; };
@@ -1235,7 +1230,6 @@
 				C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */,
 				C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */,
 				C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */,
-				A37EE6BCDC13FCBB27851C4B /* VoicevoxSynthesisQueue.swift */,
 				B3D03DF00B669D2554B298C2 /* VoicevoxCPUGovernor.swift */,
 				C1BF95C17C6DB7DAF15306D9 /* VoicevoxChunkedSynthesis.swift */,
 				BC1322C2A2308E379873B8B4 /* VoicevoxWavCache.swift */,
@@ -1310,7 +1304,6 @@
 				A15BD0C4E7F2A9310DDE41AB /* AVSpeechModDelayBlockSplitTest.swift */,
 				4C3ED71F9D6BC0F10D8A1784 /* VoicevoxPrefetchThrottleTest.swift */,
 				6DEB7EA1A9446792E82C7E6E /* VoicevoxPrefetchLeadTest.swift */,
-				B80BC9B618C9872B38770260 /* VoicevoxSynthesisQueueTest.swift */,
 				6B2A185A2E5141B1A59BA65C /* VoicevoxSynthesisSchedulerTest.swift */,
 				8B1432CF80AF69140A2EF902 /* VoicevoxRepeatedSynthesisDetectorTest.swift */,
 				A1CBDB5062E188A966D653F3 /* VoicevoxCPUGovernorTest.swift */,
@@ -1932,7 +1925,6 @@
 				C0DE10000000000000000002 /* WatchWidgetURL.swift in Sources */,
 				C0DE10000000000000000022 /* WatchNovelSummaryStore.swift in Sources */,
 				ABB3BD15F8A34D4D9C0A7AE9 /* VoicevoxPrefetchThrottle.swift in Sources */,
-				DB2361CE5C59A20FDA4A0EBF /* VoicevoxSynthesisQueue.swift in Sources */,
 				0ED4D1CDDA5D3A5ACBD2B00C /* VoicevoxCPUGovernor.swift in Sources */,
 				5CFC2855CE2854F99EA56E06 /* VoicevoxChunkedSynthesis.swift in Sources */,
 				54E2EAD37829101F34EB999D /* VoicevoxWavCache.swift in Sources */,
@@ -2082,7 +2074,6 @@
 				52C4EB6B45D5A6AB28D271B6 /* WatchSessionCoordinator.swift in Sources */,
 				AED424F441112BFA57EC12F4 /* WatchSpeechSettings.swift in Sources */,
 				FC5D9F103C975C9375485032 /* VoicevoxPrefetchThrottle.swift in Sources */,
-				01171759589A89414AC9E4F0 /* VoicevoxSynthesisQueue.swift in Sources */,
 				651EA366A179A2194B1FF9F7 /* VoicevoxCPUGovernor.swift in Sources */,
 				F758E2D2D483A52E97D6AE71 /* VoicevoxChunkedSynthesis.swift in Sources */,
 				B556D02EBF654B4E13FBAB78 /* VoicevoxWavCache.swift in Sources */,
@@ -2145,7 +2136,6 @@
 				A15BD0C4E7F2A9310DDE41AA /* AVSpeechModDelayBlockSplitTest.swift in Sources */,
 				B8775A68DCE0CF19D6174BD8 /* VoicevoxPrefetchThrottleTest.swift in Sources */,
 				A970528BD4010E7297EBB877 /* VoicevoxPrefetchLeadTest.swift in Sources */,
-				70A1426C5C519C884090FA9C /* VoicevoxSynthesisQueueTest.swift in Sources */,
 				74A345783A019E4116C6DA25 /* VoicevoxRepeatedSynthesisDetectorTest.swift in Sources */,
 				095DAF051152FD8D2C41DDBB /* VoicevoxCPUGovernorTest.swift in Sources */,
 				BB1F82F2E2563D9F41FFC710 /* VoicevoxChunkedSynthesisTest.swift in Sources */,
