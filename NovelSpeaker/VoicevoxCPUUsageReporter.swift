@@ -77,10 +77,20 @@ final class VoicevoxCPUUsageReporter {
         var slowestSpeed: Double = .greatestFiniteMagnitude
     }
     private var summary = Summary()
+    /// 直近に再生した時の速度倍率(VOICEVOX は常に等速で合成し、再生側で速度を変えている)。
+    /// 生成速度がこれを下回っている間は、貯金は必ず減っていく。
+    private var lastPlaybackRate: Double = 0
     private var lastSummaryReportedAt: Double? = nil
     private var lastSummaryThermalState: ProcessInfo.ThermalState? = nil
 
     private init() {}
+
+    /// 再生のたびに、その時の速度倍率を教えてもらう。
+    func notePlaybackRate(_ rate: Double) {
+        lock.lock()
+        defer { lock.unlock() }
+        lastPlaybackRate = rate
+    }
 
     /// プロセス全体の、直近 `windowSeconds` の CPU 使用率。
     ///
@@ -233,8 +243,9 @@ final class VoicevoxCPUUsageReporter {
         lastSummaryThermalState = thermalState
         let averageSpeed = current.wallSeconds > 0 ? current.audioSeconds / current.wallSeconds : 0
         let slowestSpeed = current.slowestSpeed == .greatestFiniteMagnitude ? averageSpeed : current.slowestSpeed
-        let message = String(format: "[VOICEVOX CPU] この %.0f分で %d本 / 平均 %.2f倍速(最も遅い時で %.2f倍速) / 熱 %@",
-                             max(elapsed, 0) / 60, current.count, averageSpeed, slowestSpeed,
+        let playbackRate = lastPlaybackRate
+        let message = String(format: "[VOICEVOX CPU] この %.0f分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
+                             max(elapsed, 0) / 60, current.count, averageSpeed, slowestSpeed, playbackRate,
                              Self.thermalStateText(thermalState))
         return (message, [
             "durationSeconds": AnyCodable(String(format: "%.0f", max(elapsed, 0))),
@@ -245,6 +256,8 @@ final class VoicevoxCPUUsageReporter {
             "cpuSeconds": AnyCodable(String(format: "%.1f", current.cpuSeconds)),
             "averageGenerationSpeed": AnyCodable(String(format: "%.2f", averageSpeed)),
             "slowestGenerationSpeed": AnyCodable(String(format: "%.2f", slowestSpeed)),
+            // 生成速度がこれを下回っている間は、貯金は減り続ける。
+            "playbackRate": AnyCodable(String(format: "%.2f", playbackRate)),
             "parallelism": AnyCodable(current.wallSeconds > 0 ? String(format: "%.2f", current.cpuSeconds / current.wallSeconds) : "-"),
             "waitedSeconds": AnyCodable(String(format: "%.1f", current.waitedSeconds)),
             "thermalState": AnyCodable(Self.thermalStateText(thermalState)),
