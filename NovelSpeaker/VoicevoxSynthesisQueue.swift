@@ -32,9 +32,9 @@ final class VoicevoxSynthesisQueue {
         fileprivate var key: String { return VoicevoxSynthesisQueue.key(text: text, styleId: styleId) }
     }
 
-    /// キャッシュのキー(VoicevoxCore の先行合成キャッシュと同一の形式)。
+    /// キャッシュのキー(メモリ・ディスクと同一。鍵は一つだけにする)。
     static func key(text: String, styleId: UInt32) -> String {
-        return "\(styleId)::\(text)"
+        return VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
     }
 
     private let lock = NSLock()

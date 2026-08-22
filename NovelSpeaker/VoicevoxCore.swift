@@ -178,7 +178,7 @@ actor VoicevoxCore {
     /// 指定テキストが先行合成済みなら、その WAV のバイト数を返す(未合成なら nil)。
     /// 「未再生の貯金が何秒あるか」を数えるために使う。actorへ入らず参照できる。
     nonisolated func cachedWavByteCount(text: String, styleId: UInt32) -> Int? {
-        return wavCache.byteCount(key: Self.prefetchKey(text: text, styleId: styleId))
+        return wavCache.byteCount(key: Self.cacheKey(text: text, styleId: styleId))
     }
 
     nonisolated private func clearCache() {
@@ -374,7 +374,7 @@ actor VoicevoxCore {
 
     private init() {
         synthesisQueueStorage = VoicevoxSynthesisQueue(capacity: Self.maxPendingPrefetchCount) { [unowned self] text, styleId in
-            if self.peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil { return true }
+            if self.peekCache(key: Self.cacheKey(text: text, styleId: styleId)) != nil { return true }
             // 既にディスクに作ってあるものは合成し直さない。
             // ここを見ないと、事前生成しておいたのに再生の度に先行合成が走り、
             // ディスクキャッシュがあってもCPUを使ってしまう。
@@ -519,9 +519,9 @@ actor VoicevoxCore {
         }
         userDict = dict
         // ★メモリキャッシュを捨てる。
-        // ディスク側の鍵には辞書の署名が入っているので、辞書を変えれば自然に別物になるが、
-        // メモリ側の鍵は「話者::本文」だけで辞書を見ていない。捨てないと、
-        // 読みを直した直後のその箇所が、古い読みのまま鳴り続ける事になる。
+        // 鍵には辞書の署名が入っているので、辞書を変えれば古い音声には二度と
+        // 当たらなくなる(古い読みのまま鳴り続ける事はない)。ただし当たらない
+        // エントリが場所だけ取り続けるので、まとめて捨てて空ける。
         clearCache()
         if entries.isEmpty == false {
             AppInformationLogger.AddLog(message: "VoicevoxCore: ユーザー辞書を登録しました(\(addedCount)語・受け付けられなかったもの \(rejectedCount)語)", isForDebug: true)
@@ -743,8 +743,14 @@ actor VoicevoxCore {
         return UInt32(voiceIdentifier ?? "") ?? 0
     }
 
-    private static func prefetchKey(text: String, styleId: UInt32) -> String {
-        return "\(styleId)::\(text)"
+    /// キャッシュの鍵。**メモリもディスクも同じ鍵を使う。**
+    ///
+    /// 以前はメモリ側だけ「話者::本文」という別の形式を使っていて、
+    /// ユーザー辞書(読みの修正)を見ていなかった。同じ音声を指す名前が
+    /// 二つあると、片方だけ直して片方が古いまま、という壊れ方をする
+    /// (実際に、読みを直しても古い読みのまま鳴り続ける不具合になった)。
+    static func cacheKey(text: String, styleId: UInt32) -> String {
+        return VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
     }
 
     /// 実際にC APIを叩いてテキストをWAV(24kHz/mono/16bit, ヘッダ付き)のバイト列に合成する。
@@ -825,7 +831,7 @@ actor VoicevoxCore {
     /// 数秒待たされる、という現象を確認したため)。cache MISS の場合のみ actor 隔離の
     /// 低速パスに委譲する。
     nonisolated func synthesize(text: String, styleId: UInt32) async throws -> Data {
-        let key = Self.prefetchKey(text: text, styleId: styleId)
+        let key = Self.cacheKey(text: text, styleId: styleId)
         if let cached = peekCache(key: key) {
             // 再生に使い終わった事を記録する。キャッシュが上限に達した時、
             // これが付いている物から先に捨てる(付いていない=まだ再生していない物を
@@ -1078,7 +1084,7 @@ actor VoicevoxCore {
                                 isStillNeeded: (@Sendable () -> Bool)? = nil) async throws -> Data? {
         await waitWhilePlaybackSynthesisIsPending()
         // 待ちが明けた今の状態で確かめる。
-        if peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil { return nil }
+        if peekCache(key: Self.cacheKey(text: text, styleId: styleId)) != nil { return nil }
         if let isStillNeeded, isStillNeeded() == false { return nil }
         return try await performSynthesizeWithinBudget(text: text, styleId: styleId, limitRatio: Self.prefetchCPULimitRatio)
     }
@@ -1105,7 +1111,7 @@ actor VoicevoxCore {
         defer { VoicevoxSynthesisInProgress.shared.end(key: prefetchDiskKey) }
         do {
             let data = try await performSynthesizeWithinBudget(text: request.text, styleId: request.styleId, limitRatio: Self.prefetchCPULimitRatio)
-            storeCache(key: Self.prefetchKey(text: request.text, styleId: request.styleId), data: data)
+            storeCache(key: Self.cacheKey(text: request.text, styleId: request.styleId), data: data)
             storeToDiskCacheIfNeeded(text: request.text, styleId: request.styleId, wav: data)
         } catch {
             AppInformationLogger.AddLog(message: "VoicevoxCore: prefetch failed: \(error.localizedDescription)", appendix: [
@@ -1154,7 +1160,7 @@ actor VoicevoxCore {
 
     // テスト専用: 指定テキストが先行合成キャッシュに乗っているかどうか(進行中/未着手は含まない)。
     nonisolated func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool {
-        return peekCache(key: Self.prefetchKey(text: text, styleId: styleId)) != nil
+        return peekCache(key: Self.cacheKey(text: text, styleId: styleId)) != nil
     }
 }
 
