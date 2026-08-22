@@ -25,6 +25,9 @@
 //  を1行にして「アプリ内エラーのお知らせ(デバッグ用)」に残す。
 //
 //  常時ログを吐くと邪魔なので、**「今までで一番悪かった時」だけ**を残す。
+//  ただしそれだけだと、使用率が頭打ちになった後に一行も出なくなる。
+//  そこで**一定時間ごと(と熱状態が変わった時)に、その間の平均を1行だけ**足す。
+//  「熱を持ってから何倍速で作れていたのか」は、そこにしか残らない。
 //
 //  ここで dedupeKey は使えない。AppInformationLogger の dedupe は
 //  「最初のログの内容を残して回数だけ増やす」実装なので、
@@ -59,6 +62,23 @@ final class VoicevoxCPUUsageReporter {
     private var reportedWorstUtilization: Double = 0
     /// 一度も記録していない間は、最初の1件を必ず残す(仕組みが動いている事の確認用)。
     private var hasReportedOnce = false
+
+    /// 定期の要約の間隔。
+    static let summaryIntervalSeconds: Double = 300
+
+    /// 前回の要約から今までの積み上げ。
+    private struct Summary {
+        var count = 0
+        var characterCount = 0
+        var audioSeconds: Double = 0
+        var wallSeconds: Double = 0
+        var cpuSeconds: Double = 0
+        var waitedSeconds: Double = 0
+        var slowestSpeed: Double = .greatestFiniteMagnitude
+    }
+    private var summary = Summary()
+    private var lastSummaryReportedAt: Double? = nil
+    private var lastSummaryThermalState: ProcessInfo.ThermalState? = nil
 
     private init() {}
 
@@ -106,6 +126,22 @@ final class VoicevoxCPUUsageReporter {
                 waitedSeconds: Double,
                 isCPULimitApplied: Bool,
                 now: Double = ProcessInfo.processInfo.systemUptime) {
+        let thermalState = ProcessInfo.processInfo.thermalState
+        lock.lock()
+        summary.count += 1
+        summary.characterCount += characterCount
+        summary.audioSeconds += audioSeconds
+        summary.wallSeconds += actualWallSeconds
+        summary.cpuSeconds += actualCPUSeconds
+        summary.waitedSeconds += waitedSeconds
+        if actualWallSeconds > 0 {
+            summary.slowestSpeed = min(summary.slowestSpeed, audioSeconds / actualWallSeconds)
+        }
+        lock.unlock()
+        if let (message, appendix) = makeSummaryLog(now: now, thermalState: thermalState) {
+            AppInformationLogger.AddLogWithStruct(message: message, appendix: appendix, isForDebug: VoicevoxDiagnostics.isForDebug)
+        }
+
         guard let utilization = currentUtilization(at: now) else { return }
 
         lock.lock()
@@ -140,7 +176,7 @@ final class VoicevoxCPUUsageReporter {
                 "isBackground": AnyCodable(monitor.isBackground ? "true" : "false"),
                 "isOnExternalPower": AnyCodable(monitor.isOnExternalPower ? "true" : "false"),
                 "isLowPowerMode": AnyCodable(ProcessInfo.processInfo.isLowPowerModeEnabled ? "true" : "false"),
-                "thermalState": AnyCodable(Self.thermalStateText(ProcessInfo.processInfo.thermalState)),
+                "thermalState": AnyCodable(Self.thermalStateText(thermalState)),
                 "threadCount": AnyCodable("\(VoicevoxCore.activeCPUNumThreads)"),
                 "characterCount": AnyCodable("\(characterCount)"),
                 "estimatedCPUSeconds": AnyCodable(String(format: "%.2f", estimatedCPUSeconds)),
@@ -166,6 +202,56 @@ final class VoicevoxCPUUsageReporter {
         samples.removeAll()
         reportedWorstUtilization = 0
         hasReportedOnce = false
+        summary = Summary()
+        lastSummaryReportedAt = nil
+        lastSummaryThermalState = nil
+    }
+
+    /// 定期の要約を出すべきなら、その1行を作って返す(呼び出し側でログに出す)。
+    ///
+    /// 最悪値方式だけだと、**使用率が頭打ちになった後は一行も出なくなる**。
+    /// 実際 2026-08-22 の前景・電源接続のログでは、開始3分で 296% に張り付いた後
+    /// 57分間まったく記録が残らず、「熱が上がってから何倍速で作れていたのか」が
+    /// 分からなくなった。生成速度と熱状態は**平常時こそ**見たいので、
+    /// 熱状態が変わった時と、一定時間ごとに、その間の平均を1行だけ残す。
+    private func makeSummaryLog(now: Double, thermalState: ProcessInfo.ThermalState) -> (String, [String: AnyCodable])? {
+        lock.lock()
+        defer { lock.unlock() }
+        guard summary.count > 0 else { return nil }
+        let thermalChanged = lastSummaryThermalState != nil && lastSummaryThermalState != thermalState
+        let elapsed = now - (lastSummaryReportedAt ?? now)
+        if lastSummaryReportedAt == nil {
+            // 1本目は「いつから数え始めたか」を決めるだけ。ここで出しても 0分間の要約にしかならない。
+            lastSummaryReportedAt = now
+            lastSummaryThermalState = thermalState
+            return nil
+        }
+        guard thermalChanged || elapsed >= Self.summaryIntervalSeconds else { return nil }
+        let current = summary
+        summary = Summary()
+        lastSummaryReportedAt = now
+        lastSummaryThermalState = thermalState
+        let averageSpeed = current.wallSeconds > 0 ? current.audioSeconds / current.wallSeconds : 0
+        let slowestSpeed = current.slowestSpeed == .greatestFiniteMagnitude ? averageSpeed : current.slowestSpeed
+        let message = String(format: "[VOICEVOX CPU] この %.0f分で %d本 / 平均 %.2f倍速(最も遅い時で %.2f倍速) / 熱 %@",
+                             max(elapsed, 0) / 60, current.count, averageSpeed, slowestSpeed,
+                             Self.thermalStateText(thermalState))
+        return (message, [
+            "durationSeconds": AnyCodable(String(format: "%.0f", max(elapsed, 0))),
+            "synthesisCount": AnyCodable("\(current.count)"),
+            "characterCount": AnyCodable("\(current.characterCount)"),
+            "audioSeconds": AnyCodable(String(format: "%.1f", current.audioSeconds)),
+            "wallSeconds": AnyCodable(String(format: "%.1f", current.wallSeconds)),
+            "cpuSeconds": AnyCodable(String(format: "%.1f", current.cpuSeconds)),
+            "averageGenerationSpeed": AnyCodable(String(format: "%.2f", averageSpeed)),
+            "slowestGenerationSpeed": AnyCodable(String(format: "%.2f", slowestSpeed)),
+            "parallelism": AnyCodable(current.wallSeconds > 0 ? String(format: "%.2f", current.cpuSeconds / current.wallSeconds) : "-"),
+            "waitedSeconds": AnyCodable(String(format: "%.1f", current.waitedSeconds)),
+            "thermalState": AnyCodable(Self.thermalStateText(thermalState)),
+            "isBackground": AnyCodable(VoicevoxPrefetchThrottleMonitor.shared.isBackground ? "true" : "false"),
+            "isOnExternalPower": AnyCodable(VoicevoxPrefetchThrottleMonitor.shared.isOnExternalPower ? "true" : "false"),
+            "threadCount": AnyCodable("\(VoicevoxCore.activeCPUNumThreads)"),
+        ])
     }
 
     static func thermalStateText(_ state: ProcessInfo.ThermalState) -> String {
