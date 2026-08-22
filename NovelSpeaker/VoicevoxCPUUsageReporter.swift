@@ -75,6 +75,10 @@ final class VoicevoxCPUUsageReporter {
         var cpuSeconds: Double = 0
         var waitedSeconds: Double = 0
         var slowestSpeed: Double = .greatestFiniteMagnitude
+        /// ディスクに作ってあった物をそのまま鳴らせた回数(合成が要らなかった分)。
+        var diskHits = 0
+        /// 合成し終えてから「既にディスクにあった」と分かった回数(=二度手間)。
+        var duplicateSyntheses = 0
     }
     private var summary = Summary()
     /// 直近に再生した時の速度倍率(VOICEVOX は常に等速で合成し、再生側で速度を変えている)。
@@ -84,6 +88,24 @@ final class VoicevoxCPUUsageReporter {
     private var lastSummaryThermalState: ProcessInfo.ThermalState? = nil
 
     private init() {}
+
+    /// ディスクに作ってあった音声をそのまま使えた時に呼ぶ。
+    func noteDiskCacheHit() {
+        lock.lock()
+        summary.diskHits += 1
+        lock.unlock()
+    }
+
+    /// 合成し終えてから「それは既にディスクにあった」と分かった時に呼ぶ。
+    ///
+    /// 生成が実時間の1.5倍で回っているのに貯金が増えない、という状態は
+    /// 「遅い」のではなく「同じ物を二度作っている」でも説明がつく。
+    /// この二つを分けるにはこれを数えるしかない。
+    func noteDuplicateSynthesis() {
+        lock.lock()
+        summary.duplicateSyntheses += 1
+        lock.unlock()
+    }
 
     /// 再生のたびに、その時の速度倍率を教えてもらう。
     func notePlaybackRate(_ rate: Double) {
@@ -250,8 +272,9 @@ final class VoicevoxCPUUsageReporter {
         let durationText = duration >= 60
             ? String(format: "%.0f分", duration / 60)
             : String(format: "%.0f秒", duration)
-        let message = String(format: "[VOICEVOX CPU] この%@で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
-                             durationText, current.count, averageSpeed, slowestSpeed, playbackRate,
+        let message = String(format: "[VOICEVOX CPU] この%@で %d本(二度手間 %d本) / 貯めてあった分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
+                             durationText, current.count, current.duplicateSyntheses, current.diskHits,
+                             averageSpeed, slowestSpeed, playbackRate,
                              Self.thermalStateText(thermalState))
         return (message, [
             "durationSeconds": AnyCodable(String(format: "%.0f", max(elapsed, 0))),
@@ -264,6 +287,8 @@ final class VoicevoxCPUUsageReporter {
             "slowestGenerationSpeed": AnyCodable(String(format: "%.2f", slowestSpeed)),
             // 生成速度がこれを下回っている間は、貯金は減り続ける。
             "playbackRate": AnyCodable(String(format: "%.2f", playbackRate)),
+            "diskCacheHits": AnyCodable("\(current.diskHits)"),
+            "duplicateSyntheses": AnyCodable("\(current.duplicateSyntheses)"),
             "parallelism": AnyCodable(current.wallSeconds > 0 ? String(format: "%.2f", current.cpuSeconds / current.wallSeconds) : "-"),
             "waitedSeconds": AnyCodable(String(format: "%.1f", current.waitedSeconds)),
             "thermalState": AnyCodable(Self.thermalStateText(thermalState)),

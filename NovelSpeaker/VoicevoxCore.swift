@@ -238,7 +238,9 @@ actor VoicevoxCore {
     nonisolated private func peekDiskCache(text: String, styleId: UInt32) -> Data? {
         guard let context = diskCacheContext else { return nil }
         let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
-        return VoicevoxDiskCacheStore.shared.load(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key)
+        guard let data = VoicevoxDiskCacheStore.shared.load(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key) else { return nil }
+        VoicevoxCPUUsageReporter.shared.noteDiskCacheHit()
+        return data
     }
 
     /// 合成できた音声をディスクにも積む(有効な小説の時だけ)。
@@ -256,7 +258,12 @@ actor VoicevoxCore {
         // 上限に達していたら積まない(生成側と同じ線引き)。
         guard VoicevoxCacheGenerator.currentStopCause() == nil else { return }
         let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
-        guard VoicevoxDiskCacheStore.shared.contains(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key) == false else { return }
+        guard VoicevoxDiskCacheStore.shared.contains(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key) == false else {
+            // 合成し終えてから「既にあった」と分かった = この1本は作らなくてよかった。
+            // 裏の作り足しと再生側が同じブロックを同時に作っていると、ここが増える。
+            VoicevoxCPUUsageReporter.shared.noteDuplicateSynthesis()
+            return
+        }
         Task(priority: .utility) {
             do {
                 let encoded = try VoicevoxAudioCompressor.encode(wav: wav)

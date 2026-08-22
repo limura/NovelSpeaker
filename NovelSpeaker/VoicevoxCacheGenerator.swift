@@ -268,6 +268,11 @@ final class VoicevoxCacheGenerator {
 
                 do {
                     let wav = try await VoicevoxCore.shared.synthesizeForDiskCache(text: target.text, styleId: target.styleId)
+                    // 合成している間に再生側が同じブロックを作って置いていった可能性がある。
+                    // その場合この1本は丸ごと無駄なので、数えておく(貯金が増えない原因の切り分け用)。
+                    if VoicevoxDiskCacheStore.shared.contains(novelID: novelID, chapterNumber: chapterNumber, key: target.key) {
+                        VoicevoxCPUUsageReporter.shared.noteDuplicateSynthesis()
+                    }
                     let encoded = try VoicevoxAudioCompressor.encode(wav: wav)
                     // ★「作って」と言われた分だけを作成済みとして残す。
                     // 読み上げの裏で足りない分を作っているだけの時は一時分に置き、
