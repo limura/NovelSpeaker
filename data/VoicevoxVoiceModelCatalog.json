@@ -1,0 +1,2582 @@
+{
+  "formatVersion": 2,
+  "generatedAt": "2026-08-18T13:17:39Z",
+  "variants": [
+    {
+      "vvmFormatVersion": 1,
+      "vvmTag": "0.16.4",
+      "minimumCoreVersion": "0.16.0",
+      "termsPageURL": "https://github.com/VOICEVOX/voicevox_vvm/blob/0.16.4/README.md",
+      "voiceModels": [
+        {
+          "id": "0",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/0.vvm",
+          "byteSize": 58214379,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "四国めたん",
+              "uuid": "7ffcb7ce-00ec-4bdc-82cd-45a8889e43ff",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:四国めたん",
+              "policyText": "四国めたんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:四国めたん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/shikoku_metan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 2
+                },
+                {
+                  "name": "あまあま",
+                  "styleId": 0
+                },
+                {
+                  "name": "ツンツン",
+                  "styleId": 6
+                },
+                {
+                  "name": "セクシー",
+                  "styleId": 4
+                }
+              ]
+            },
+            {
+              "name": "ずんだもん",
+              "uuid": "388f246b-8c41-4ac1-8e2d-5d79f3ff56d9",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:ずんだもん",
+              "policyText": "ずんだもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ずんだもん」とそれぞれクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/zundamon/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 3
+                },
+                {
+                  "name": "あまあま",
+                  "styleId": 1
+                },
+                {
+                  "name": "ツンツン",
+                  "styleId": 7
+                },
+                {
+                  "name": "セクシー",
+                  "styleId": 5
+                }
+              ]
+            },
+            {
+              "name": "春日部つむぎ",
+              "uuid": "35b2c544-660e-401e-b503-0e14c635303a",
+              "version": "0.16.0",
+              "termsURL": "https://tsumugi-official.studio.site/rule",
+              "credit": "VOICEVOX:春日部つむぎ",
+              "policyText": "春日部つむぎの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:春日部つむぎ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://tsumugi-official.studio.site/rule",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kasukabe_tsumugi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 8
+                }
+              ]
+            },
+            {
+              "name": "雨晴はう",
+              "uuid": "3474ee95-c274-47f9-aa1a-8322163d96f1",
+              "version": "0.16.0",
+              "termsURL": "https://amehau.com/?page_id=225",
+              "credit": "VOICEVOX:雨晴はう",
+              "policyText": "雨晴はうの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:雨晴はう」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://amehau.com/?page_id=225",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/amehare_hau/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/1.vvm",
+          "byteSize": 59477413,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "冥鳴ひまり",
+              "uuid": "8eaad775-3119-417e-8cf4-2a10bfd592c8",
+              "version": "0.16.0",
+              "termsURL": "https://meimeihimari.wixsite.com/himari/terms-of-use",
+              "credit": "VOICEVOX:冥鳴ひまり",
+              "policyText": "冥鳴ひまりの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:冥鳴ひまり」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://meimeihimari.wixsite.com/himari/terms-of-use",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/meimei_himari/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 14
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/2.vvm",
+          "byteSize": 58214778,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "九州そら",
+              "uuid": "481fb609-6446-4870-9f46-90c4dd623403",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:九州そら",
+              "policyText": "九州そらの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:九州そら」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kyushu_sora/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 16
+                },
+                {
+                  "name": "あまあま",
+                  "styleId": 15
+                },
+                {
+                  "name": "ツンツン",
+                  "styleId": 18
+                },
+                {
+                  "name": "セクシー",
+                  "styleId": 17
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "3",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/3.vvm",
+          "byteSize": 61730024,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "波音リツ",
+              "uuid": "b1a81618-b27b-40d2-b0ea-27a9ad408c4b",
+              "version": "0.16.0",
+              "termsURL": "http://canon-voice.com/kiyaku.html",
+              "credit": "VOICEVOX:波音リツ",
+              "policyText": "波音リツの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:波音リツ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttp://canon-voice.com/kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/namine_ritsu/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 9
+                },
+                {
+                  "name": "クイーン",
+                  "styleId": 65
+                }
+              ]
+            },
+            {
+              "name": "中国うさぎ",
+              "uuid": "1f18ffc3-47ea-4ce0-9829-0576d03a7ec8",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:中国うさぎ",
+              "policyText": "中国うさぎの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:中国うさぎ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/chugoku_usagi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 61
+                },
+                {
+                  "name": "おどろき",
+                  "styleId": 62
+                },
+                {
+                  "name": "こわがり",
+                  "styleId": 63
+                },
+                {
+                  "name": "へろへろ",
+                  "styleId": 64
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "4",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/4.vvm",
+          "byteSize": 58211265,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "玄野武宏",
+              "uuid": "c30dc15a-0992-4f8d-8bb8-ad3b314e6a6f",
+              "version": "0.16.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:玄野武宏",
+              "policyText": "玄野武宏の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:玄野武宏」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kurono_takehiro/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 11
+                }
+              ]
+            },
+            {
+              "name": "剣崎雌雄",
+              "uuid": "1a17ca16-7ee5-4ea5-b191-2f02ace24d21",
+              "version": "0.16.0",
+              "termsURL": "https://frontier.creatia.cc/fanclubs/413/posts/4507",
+              "credit": "VOICEVOX:剣崎雌雄",
+              "policyText": "剣崎雌雄の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:剣崎雌雄」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://frontier.creatia.cc/fanclubs/413/posts/4507",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kenzaki_mesuo/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 21
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "5",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/5.vvm",
+          "byteSize": 56517330,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "四国めたん",
+              "uuid": "7ffcb7ce-00ec-4bdc-82cd-45a8889e43ff",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:四国めたん",
+              "policyText": "四国めたんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:四国めたん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/shikoku_metan/",
+              "styles": [
+                {
+                  "name": "ささやき",
+                  "styleId": 36
+                },
+                {
+                  "name": "ヒソヒソ",
+                  "styleId": 37
+                }
+              ]
+            },
+            {
+              "name": "ずんだもん",
+              "uuid": "388f246b-8c41-4ac1-8e2d-5d79f3ff56d9",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:ずんだもん",
+              "policyText": "ずんだもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ずんだもん」とそれぞれクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/zundamon/",
+              "styles": [
+                {
+                  "name": "ささやき",
+                  "styleId": 22
+                },
+                {
+                  "name": "ヒソヒソ",
+                  "styleId": 38
+                }
+              ]
+            },
+            {
+              "name": "九州そら",
+              "uuid": "481fb609-6446-4870-9f46-90c4dd623403",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:九州そら",
+              "policyText": "九州そらの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:九州そら」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kyushu_sora/",
+              "styles": [
+                {
+                  "name": "ささやき",
+                  "styleId": 19
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "6",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/6.vvm",
+          "byteSize": 58211181,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "No.7",
+              "uuid": "044830d2-f23b-44d6-ac0d-b5d733caa900",
+              "version": "0.16.0",
+              "termsURL": "https://voiceseven.com/#j0200",
+              "credit": "VOICEVOX:No.7",
+              "policyText": "個人がNo.7の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:No.7」とクレジットを記載すれば、非商用（同人利用や配信による収入はOK）で利用可能です。\nその他商用利用の場合は、「[No.7製作委員会](https://voiceseven.com/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://voiceseven.com/#j0200",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/number_seven/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 29
+                },
+                {
+                  "name": "アナウンス",
+                  "styleId": 30
+                },
+                {
+                  "name": "読み聞かせ",
+                  "styleId": 31
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "7",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/7.vvm",
+          "byteSize": 57232459,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "後鬼",
+              "uuid": "0f56c2f2-644c-49c9-8989-94e11f7129d0",
+              "version": "0.16.0",
+              "termsURL": "https://ついなちゃん.com/voicevox_terms/",
+              "credit": "VOICEVOX:後鬼",
+              "policyText": "個人が後鬼の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:後鬼」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし企業が携わる形で利用する場合は、「[【鬼っ子ハンターついなちゃん】プロジェクト](https://ついなちゃん.com/mail/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://ついなちゃん.com/voicevox_terms/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/goki/",
+              "styles": [
+                {
+                  "name": "人間ver.",
+                  "styleId": 27
+                },
+                {
+                  "name": "ぬいぐるみver.",
+                  "styleId": 28
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "8",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/8.vvm",
+          "byteSize": 58210984,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "WhiteCUL",
+              "uuid": "67d5d8da-acd7-4207-bb10-b5542d3a663b",
+              "version": "0.16.0",
+              "termsURL": "https://www.whitecul.com/guideline",
+              "credit": "VOICEVOX:WhiteCUL",
+              "policyText": "WhiteCULの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:WhiteCUL」とそれぞれクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.whitecul.com/guideline",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/white_cul/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 23
+                },
+                {
+                  "name": "たのしい",
+                  "styleId": 24
+                },
+                {
+                  "name": "かなしい",
+                  "styleId": 25
+                },
+                {
+                  "name": "びえーん",
+                  "styleId": 26
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "9",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/9.vvm",
+          "byteSize": 57235017,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "白上虎太郎",
+              "uuid": "e5020595-5c5d-4e87-b849-270a518d0dcf",
+              "version": "0.16.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:白上虎太郎",
+              "policyText": "白上虎太郎の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:白上虎太郎」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/shirakami_kotarou/",
+              "styles": [
+                {
+                  "name": "ふつう",
+                  "styleId": 12
+                },
+                {
+                  "name": "わーい",
+                  "styleId": 32
+                },
+                {
+                  "name": "びくびく",
+                  "styleId": 33
+                },
+                {
+                  "name": "おこ",
+                  "styleId": 34
+                },
+                {
+                  "name": "びえーん",
+                  "styleId": 35
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "10",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/10.vvm",
+          "byteSize": 57235185,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "玄野武宏",
+              "uuid": "c30dc15a-0992-4f8d-8bb8-ad3b314e6a6f",
+              "version": "0.16.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:玄野武宏",
+              "policyText": "玄野武宏の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:玄野武宏」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kurono_takehiro/",
+              "styles": [
+                {
+                  "name": "喜び",
+                  "styleId": 39
+                },
+                {
+                  "name": "ツンギレ",
+                  "styleId": 40
+                },
+                {
+                  "name": "悲しみ",
+                  "styleId": 41
+                }
+              ]
+            },
+            {
+              "name": "ちび式じい",
+              "uuid": "468b8e94-9da4-4f7a-8715-a22a48844f9e",
+              "version": "0.16.0",
+              "termsURL": "https://docs.google.com/presentation/d/1AcD8zXkfzKFf2ertHwWRwJuQXjNnijMxhz7AJzEkaI4",
+              "credit": "VOICEVOX:ちび式じい",
+              "policyText": "ちび式じいの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ちび式じい」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://docs.google.com/presentation/d/1AcD8zXkfzKFf2ertHwWRwJuQXjNnijMxhz7AJzEkaI4",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/chibishikiji/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 42
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "11",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/11.vvm",
+          "byteSize": 60231796,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "櫻歌ミコ",
+              "uuid": "0693554c-338e-4790-8982-b9c6d476dc69",
+              "version": "0.16.0",
+              "termsURL": "https://voicevox35miko.studio.site/rule",
+              "credit": "VOICEVOX:櫻歌ミコ",
+              "policyText": "櫻歌ミコの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:櫻歌ミコ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://voicevox35miko.studio.site/rule",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/ouka_miko/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 43
+                },
+                {
+                  "name": "第二形態",
+                  "styleId": 44
+                },
+                {
+                  "name": "ロリ",
+                  "styleId": 45
+                }
+              ]
+            },
+            {
+              "name": "ナースロボ＿タイプＴ",
+              "uuid": "882a636f-3bac-431a-966d-c5e6bba9f949",
+              "version": "0.16.0",
+              "termsURL": "https://www.krnr.top/rules",
+              "credit": "VOICEVOX:ナースロボ＿タイプＴ",
+              "policyText": "ナースロボ＿タイプＴの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ナースロボ＿タイプＴ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.krnr.top/rules",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nurserobo_typet/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 47
+                },
+                {
+                  "name": "楽々",
+                  "styleId": 48
+                },
+                {
+                  "name": "恐怖",
+                  "styleId": 49
+                },
+                {
+                  "name": "内緒話",
+                  "styleId": 50
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "12",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/12.vvm",
+          "byteSize": 58213390,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "†聖騎士 紅桜†",
+              "uuid": "471e39d2-fb11-4c8c-8d89-4b322d2498e0",
+              "version": "0.16.0",
+              "termsURL": "https://commons.nicovideo.jp/material/nc296132",
+              "credit": "VOICEVOX:†聖騎士 紅桜†",
+              "policyText": "†聖騎士 紅桜†の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:†聖騎士 紅桜†」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。\nhttps://commons.nicovideo.jp/material/nc296132",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/horinaito_benizakura/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 51
+                }
+              ]
+            },
+            {
+              "name": "雀松朱司",
+              "uuid": "0acebdee-a4a5-4e12-a695-e19609728e30",
+              "version": "0.16.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:雀松朱司",
+              "policyText": "雀松朱司の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:雀松朱司」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。\nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/wakamatsu_akashi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 52
+                }
+              ]
+            },
+            {
+              "name": "麒ヶ島宗麟",
+              "uuid": "7d1e7ba7-f957-40e5-a3fc-da49f769ab65",
+              "version": "0.16.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:麒ヶ島宗麟",
+              "policyText": "麒ヶ島宗麟の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:麒ヶ島宗麟」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。\nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kigashima_sourin/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 53
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "13",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/13.vvm",
+          "byteSize": 60231935,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "春歌ナナ",
+              "uuid": "ba5d2428-f7e0-4c20-ac41-9dd56e9178b4",
+              "version": "0.16.0",
+              "termsURL": "https://nanahira.jp/haruka_nana/guideline.html",
+              "credit": "VOICEVOX:春歌ナナ",
+              "policyText": "春歌ナナの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:春歌ナナ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nanahira.jp/haruka_nana/guideline.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/haruka_nana/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 54
+                }
+              ]
+            },
+            {
+              "name": "猫使アル",
+              "uuid": "00a5c10c-d3bd-459f-83fd-43180b521a44",
+              "version": "0.16.0",
+              "termsURL": "https://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "credit": "VOICEVOX:猫使アル",
+              "policyText": "猫使アルの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:猫使アル」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nekotsuka_aru/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 55
+                },
+                {
+                  "name": "おちつき",
+                  "styleId": 56
+                },
+                {
+                  "name": "うきうき",
+                  "styleId": 57
+                }
+              ]
+            },
+            {
+              "name": "猫使ビィ",
+              "uuid": "c20a2254-0349-4470-9fc8-e5c0f8cf3404",
+              "version": "0.16.0",
+              "termsURL": "https://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "credit": "VOICEVOX:猫使ビィ",
+              "policyText": "猫使ビィの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:猫使ビィ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nekotsuka_bi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 58
+                },
+                {
+                  "name": "おちつき",
+                  "styleId": 59
+                },
+                {
+                  "name": "人見知り",
+                  "styleId": 60
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "14",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/14.vvm",
+          "byteSize": 64664926,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "栗田まろん",
+              "uuid": "04dbd989-32d0-40b4-9e71-17c920f2a8a9",
+              "version": "0.16.0",
+              "termsURL": "https://aivoice.jp/character/maron/",
+              "credit": "VOICEVOX:栗田まろん",
+              "policyText": "栗田まろんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:栗田まろん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://aivoice.jp/character/maron/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kurita_maron/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 67
+                }
+              ]
+            },
+            {
+              "name": "あいえるたん",
+              "uuid": "dda44ade-5f9c-4a3a-9d2c-2a976c7476d9",
+              "version": "0.16.0",
+              "termsURL": "https://www.infiniteloop.co.jp/special/iltan/terms/",
+              "credit": "VOICEVOX:あいえるたん",
+              "policyText": "あいえるたんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:あいえるたん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.infiniteloop.co.jp/special/iltan/terms/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/aierutan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 68
+                }
+              ]
+            },
+            {
+              "name": "満別花丸",
+              "uuid": "287aa49f-e56b-4530-a469-855776c84a8d",
+              "version": "0.16.0",
+              "termsURL": "https://100hanamaru.wixsite.com/manbetsu-hanamaru/rule",
+              "credit": "VOICEVOX:満別花丸",
+              "policyText": "満別花丸の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:満別花丸」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://100hanamaru.wixsite.com/manbetsu-hanamaru/rule",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/manbetsu_hanamaru/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 69
+                },
+                {
+                  "name": "元気",
+                  "styleId": 70
+                },
+                {
+                  "name": "ささやき",
+                  "styleId": 71
+                },
+                {
+                  "name": "ぶりっ子",
+                  "styleId": 72
+                },
+                {
+                  "name": "ボーイ",
+                  "styleId": 73
+                }
+              ]
+            },
+            {
+              "name": "琴詠ニア",
+              "uuid": "97a4af4b-086e-4efd-b125-7ae2da85e697",
+              "version": "0.16.0",
+              "termsURL": "https://commons.nicovideo.jp/works/nc315435",
+              "credit": "VOICEVOX:琴詠ニア",
+              "policyText": "琴詠ニアの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:琴詠ニア」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://commons.nicovideo.jp/works/nc315435",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kotoyomi_nia/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 74
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "15",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/15.vvm",
+          "byteSize": 65647574,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "ずんだもん",
+              "uuid": "388f246b-8c41-4ac1-8e2d-5d79f3ff56d9",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:ずんだもん",
+              "policyText": "ずんだもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ずんだもん」とそれぞれクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/zundamon/",
+              "styles": [
+                {
+                  "name": "ヘロヘロ",
+                  "styleId": 75
+                },
+                {
+                  "name": "なみだめ",
+                  "styleId": 76
+                }
+              ]
+            },
+            {
+              "name": "青山龍星",
+              "uuid": "4f51116a-d9ee-4516-925d-21f183e2afad",
+              "version": "0.16.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:青山龍星",
+              "policyText": "個人が青山龍星の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:青山龍星」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし企業が携わる形で利用する場合は、「ななはぴ(https://v.seventhh.com/contact/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/aoyama_ryusei/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 13
+                },
+                {
+                  "name": "熱血",
+                  "styleId": 81
+                },
+                {
+                  "name": "不機嫌",
+                  "styleId": 82
+                },
+                {
+                  "name": "喜び",
+                  "styleId": 83
+                },
+                {
+                  "name": "しっとり",
+                  "styleId": 84
+                },
+                {
+                  "name": "かなしみ",
+                  "styleId": 85
+                },
+                {
+                  "name": "囁き",
+                  "styleId": 86
+                }
+              ]
+            },
+            {
+              "name": "もち子さん",
+              "uuid": "9f3ee141-26ad-437e-97bd-d22298d02ad2",
+              "version": "0.16.0",
+              "termsURL": "https://vtubermochio.wixsite.com/mochizora/利用規約",
+              "credit": "VOICEVOX:もち子(cv 明日葉よもぎ)",
+              "policyText": "個人がもち子さんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:もち子(cv 明日葉よもぎ)」とクレジットを記載すれば、\n音声作品・音声素材・ゲーム作品等を除いて商用・非商用で利用可能です。  \nただし企業が携わる形で利用する場合は、「[もちぞら模型店](https://vtubermochio.wixsite.com/mochizora/contact)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://vtubermochio.wixsite.com/mochizora/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/mochikosan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 20
+                },
+                {
+                  "name": "セクシー／あん子",
+                  "styleId": 66
+                },
+                {
+                  "name": "泣き",
+                  "styleId": 77
+                },
+                {
+                  "name": "怒り",
+                  "styleId": 78
+                },
+                {
+                  "name": "喜び",
+                  "styleId": 79
+                },
+                {
+                  "name": "のんびり",
+                  "styleId": 80
+                }
+              ]
+            },
+            {
+              "name": "小夜/SAYO",
+              "uuid": "a8cc6d22-aad0-4ab8-bf1e-2f843924164a",
+              "version": "0.16.0",
+              "termsURL": "https://316soramegu.wixsite.com/sayo-official/guideline",
+              "credit": "VOICEVOX:小夜/SAYO",
+              "policyText": "小夜/SAYOの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:小夜/SAYO」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://316soramegu.wixsite.com/sayo-official/guideline",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/sayo/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 46
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "16",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/16.vvm",
+          "byteSize": 58212115,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "後鬼",
+              "uuid": "0f56c2f2-644c-49c9-8989-94e11f7129d0",
+              "version": "0.16.0",
+              "termsURL": "https://ついなちゃん.com/voicevox_terms/",
+              "credit": "VOICEVOX:後鬼",
+              "policyText": "個人が後鬼の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:後鬼」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし企業が携わる形で利用する場合は、「[【鬼っ子ハンターついなちゃん】プロジェクト](https://ついなちゃん.com/mail/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://ついなちゃん.com/voicevox_terms/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/goki/",
+              "styles": [
+                {
+                  "name": "人間（怒り）ver.",
+                  "styleId": 87
+                },
+                {
+                  "name": "鬼ver.",
+                  "styleId": 88
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "17",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/17.vvm",
+          "byteSize": 58212482,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "Voidoll",
+              "uuid": "0ebe2c7d-96f3-4f0e-a2e3-ae13fe27c403",
+              "version": "0.16.0",
+              "termsURL": "https://blog.nicovideo.jp/niconews/224589.html",
+              "credit": "VOICEVOX:Voidoll(CV:丹下桜)",
+              "policyText": "個人がVoidollの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:Voidoll(CV:丹下桜)」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし法人による利用の場合は、個別に問い合わせ(https://qa.nicovideo.jp/)が必要です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://blog.nicovideo.jp/niconews/224589.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/voidoll/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 89
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "18",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/18.vvm",
+          "byteSize": 61399262,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "ぞん子",
+              "uuid": "0156da66-4300-474a-a398-49eb2e8dd853",
+              "version": "0.16.0",
+              "termsURL": "https://zonko.zone-energy.jp/guideline",
+              "credit": "VOICEVOX:ぞん子",
+              "policyText": "ぞん子の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ぞん子」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし商用利用の場合は、個別に問い合わせ(https://zonko.zone-energy.jp/contact)が必要です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zonko.zone-energy.jp/guideline",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/zonko/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 90
+                },
+                {
+                  "name": "低血圧",
+                  "styleId": 91
+                },
+                {
+                  "name": "覚醒",
+                  "styleId": 92
+                },
+                {
+                  "name": "実況風",
+                  "styleId": 93
+                }
+              ]
+            },
+            {
+              "name": "中部つるぎ",
+              "uuid": "4614a7de-9829-465d-9791-97eb8a5f9b86",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:中部つるぎ",
+              "policyText": "中部つるぎの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:中部つるぎ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/chubu_tsurugi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 94
+                },
+                {
+                  "name": "怒り",
+                  "styleId": 95
+                },
+                {
+                  "name": "ヒソヒソ",
+                  "styleId": 96
+                },
+                {
+                  "name": "おどおど",
+                  "styleId": 97
+                },
+                {
+                  "name": "絶望と敗北",
+                  "styleId": 98
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "19",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/19.vvm",
+          "byteSize": 59022148,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "離途",
+              "uuid": "3b91e034-e028-4acb-a08d-fbdcd207ea63",
+              "version": "0.16.0",
+              "termsURL": "https://litmus9.com/#/voicebank#rules",
+              "credit": "VOICEVOX:離途",
+              "policyText": "離途の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:離途」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://litmus9.com/#/voicebank#rules",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/rito/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 99
+                },
+                {
+                  "name": "シリアス",
+                  "styleId": 101
+                }
+              ]
+            },
+            {
+              "name": "黒沢冴白",
+              "uuid": "0b466290-f9b6-4718-8d37-6c0c81e824ac",
+              "version": "0.16.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:黒沢冴白",
+              "policyText": "黒沢冴白の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:黒沢冴白」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kurosawa_kohaku/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 100
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "20",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/20.vvm",
+          "byteSize": 59535608,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "ユーレイちゃん",
+              "uuid": "462cd6b4-c088-42b0-b357-3816e24f112e",
+              "version": "0.16.0",
+              "termsURL": "https://u-stella.co.jp/voicevox-ure-chan-tucumo-terms-of-use/",
+              "credit": "VOICEVOX:ユーレイちゃん(CV:神崎零)",
+              "policyText": "個人がユーレイちゃんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ユーレイちゃん(CV:神崎零)」とクレジットを記載すれば、非商用（同人利用や配信による収入は OK）で利用可能です。\nその他商用利用の場合は、「[ユーステラ](https://u-stella.co.jp/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://u-stella.co.jp/voicevox-ure-chan-tucumo-terms-of-use/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/yureichan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 102
+                },
+                {
+                  "name": "甘々",
+                  "styleId": 103
+                },
+                {
+                  "name": "哀しみ",
+                  "styleId": 104
+                },
+                {
+                  "name": "ささやき",
+                  "styleId": 105
+                },
+                {
+                  "name": "ツクモちゃん",
+                  "styleId": 106
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "21",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/21.vvm",
+          "byteSize": 62075160,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "猫使アル",
+              "uuid": "00a5c10c-d3bd-459f-83fd-43180b521a44",
+              "version": "0.16.0",
+              "termsURL": "https://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "credit": "VOICEVOX:猫使アル",
+              "policyText": "猫使アルの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:猫使アル」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nekotsuka_aru/",
+              "styles": [
+                {
+                  "name": "つよつよ",
+                  "styleId": 110
+                },
+                {
+                  "name": "へろへろ",
+                  "styleId": 111
+                }
+              ]
+            },
+            {
+              "name": "猫使ビィ",
+              "uuid": "c20a2254-0349-4470-9fc8-e5c0f8cf3404",
+              "version": "0.16.0",
+              "termsURL": "https://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "credit": "VOICEVOX:猫使ビィ",
+              "policyText": "猫使ビィの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:猫使ビィ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nekotsuka_bi/",
+              "styles": [
+                {
+                  "name": "つよつよ",
+                  "styleId": 112
+                }
+              ]
+            },
+            {
+              "name": "東北ずん子",
+              "uuid": "80802b2d-8c75-4429-978b-515105017010",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:東北ずん子",
+              "policyText": "東北ずん子の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:東北ずん子」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/tohoku_zunko/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 107
+                }
+              ]
+            },
+            {
+              "name": "東北きりたん",
+              "uuid": "1bd6b32b-d650-4072-bbe5-1d0ef4aaa28b",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:東北きりたん",
+              "policyText": "東北きりたんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:東北きりたん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/tohoku_kiritan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 108
+                }
+              ]
+            },
+            {
+              "name": "東北イタコ",
+              "uuid": "ab4c31a3-8769-422a-b412-708f5ae637e8",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:東北イタコ",
+              "policyText": "東北イタコの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:東北イタコ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/tohoku_itako/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 109
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "22",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/22.vvm",
+          "byteSize": 62289486,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "あんこもん",
+              "uuid": "3be49e15-34bb-48a0-9e2f-9b80c96e9905",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:あんこもん",
+              "policyText": "あんこもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:あんこもん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/ankomon/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 113
+                },
+                {
+                  "name": "つよつよ",
+                  "styleId": 114
+                },
+                {
+                  "name": "よわよわ",
+                  "styleId": 115
+                },
+                {
+                  "name": "けだるげ",
+                  "styleId": 116
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "23",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/23.vvm",
+          "byteSize": 59022909,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "あんこもん",
+              "uuid": "3be49e15-34bb-48a0-9e2f-9b80c96e9905",
+              "version": "0.16.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:あんこもん",
+              "policyText": "あんこもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:あんこもん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/ankomon/",
+              "styles": [
+                {
+                  "name": "ささやき",
+                  "styleId": 117
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "24",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.16.4/vvms/24.vvm",
+          "byteSize": 59024323,
+          "vvmFormatVersion": 1,
+          "speakers": [
+            {
+              "name": "夜語トバリ",
+              "uuid": "d3be2066-205b-47f6-8818-1d93a9ca9cef",
+              "version": "0.16.0",
+              "termsURL": "https://yogataritobari.studio.site/#rules",
+              "credit": "VOICEVOX:夜語トバリ",
+              "policyText": "夜語トバリの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:夜語トバリ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://yogataritobari.studio.site/#rules",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/yogatari_tobari/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 118
+                },
+                {
+                  "name": "明るい",
+                  "styleId": 119
+                },
+                {
+                  "name": "哀しみ",
+                  "styleId": 120
+                },
+                {
+                  "name": "呆れ",
+                  "styleId": 121
+                }
+              ]
+            },
+            {
+              "name": "暁記ミタマ",
+              "uuid": "aca7de06-9ff9-49a3-9f08-9d3bc19689e5",
+              "version": "0.16.0",
+              "termsURL": "https://yogataritobari.studio.site/#rules",
+              "credit": "VOICEVOX:暁記ミタマ",
+              "policyText": "暁記ミタマの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:暁記ミタマ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://yogataritobari.studio.site/#rules",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/akatsuki_mitama/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 122
+                },
+                {
+                  "name": "怒り",
+                  "styleId": 123
+                },
+                {
+                  "name": "哀しみ",
+                  "styleId": 124
+                },
+                {
+                  "name": "ささやき",
+                  "styleId": 125
+                }
+              ]
+            },
+            {
+              "name": "里石ユカ",
+              "uuid": "cc7baa71-6c74-4399-803b-b60576176a08",
+              "version": "0.16.0",
+              "termsURL": "https://satoishiyuka.wixsite.com/satoishi/kiyaku",
+              "credit": "VOICEVOX:里石ユカ（つぼみ）",
+              "policyText": "里石ユカ（つぼみ）の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:里石ユカ（つぼみ）」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://satoishiyuka.wixsite.com/satoishi/kiyaku",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/satoishi_yuka/",
+              "styles": [
+                {
+                  "name": "つぼみ",
+                  "styleId": 126
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "vvmFormatVersion": 2,
+      "vvmTag": "0.17.0",
+      "minimumCoreVersion": "0.17.0",
+      "termsPageURL": "https://github.com/VOICEVOX/voicevox_vvm/blob/0.17.0/README.md",
+      "voiceModels": [
+        {
+          "id": "0",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/0.vvm",
+          "byteSize": 59308488,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "四国めたん",
+              "uuid": "7ffcb7ce-00ec-4bdc-82cd-45a8889e43ff",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:四国めたん",
+              "policyText": "四国めたんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:四国めたん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/shikoku_metan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 2
+                },
+                {
+                  "name": "あまあま",
+                  "styleId": 0
+                },
+                {
+                  "name": "ツンツン",
+                  "styleId": 6
+                },
+                {
+                  "name": "セクシー",
+                  "styleId": 4
+                }
+              ]
+            },
+            {
+              "name": "ずんだもん",
+              "uuid": "388f246b-8c41-4ac1-8e2d-5d79f3ff56d9",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:ずんだもん",
+              "policyText": "ずんだもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ずんだもん」とそれぞれクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/zundamon/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 3
+                },
+                {
+                  "name": "あまあま",
+                  "styleId": 1
+                },
+                {
+                  "name": "ツンツン",
+                  "styleId": 7
+                },
+                {
+                  "name": "セクシー",
+                  "styleId": 5
+                }
+              ]
+            },
+            {
+              "name": "春日部つむぎ",
+              "uuid": "35b2c544-660e-401e-b503-0e14c635303a",
+              "version": "0.17.0",
+              "termsURL": "https://tsumugi-official.studio.site/rule",
+              "credit": "VOICEVOX:春日部つむぎ",
+              "policyText": "春日部つむぎの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:春日部つむぎ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://tsumugi-official.studio.site/rule",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kasukabe_tsumugi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 8
+                }
+              ]
+            },
+            {
+              "name": "雨晴はう",
+              "uuid": "3474ee95-c274-47f9-aa1a-8322163d96f1",
+              "version": "0.17.0",
+              "termsURL": "https://amehau.com/?page_id=225",
+              "credit": "VOICEVOX:雨晴はう",
+              "policyText": "雨晴はうの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:雨晴はう」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://amehau.com/?page_id=225",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/amehare_hau/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/1.vvm",
+          "byteSize": 60571189,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "冥鳴ひまり",
+              "uuid": "8eaad775-3119-417e-8cf4-2a10bfd592c8",
+              "version": "0.17.0",
+              "termsURL": "https://meimeihimari.wixsite.com/himari/terms-of-use",
+              "credit": "VOICEVOX:冥鳴ひまり",
+              "policyText": "冥鳴ひまりの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:冥鳴ひまり」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://meimeihimari.wixsite.com/himari/terms-of-use",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/meimei_himari/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 14
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/2.vvm",
+          "byteSize": 59308683,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "九州そら",
+              "uuid": "481fb609-6446-4870-9f46-90c4dd623403",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:九州そら",
+              "policyText": "九州そらの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:九州そら」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kyushu_sora/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 16
+                },
+                {
+                  "name": "あまあま",
+                  "styleId": 15
+                },
+                {
+                  "name": "ツンツン",
+                  "styleId": 18
+                },
+                {
+                  "name": "セクシー",
+                  "styleId": 17
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "3",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/3.vvm",
+          "byteSize": 63346737,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "波音リツ",
+              "uuid": "b1a81618-b27b-40d2-b0ea-27a9ad408c4b",
+              "version": "0.17.0",
+              "termsURL": "http://canon-voice.com/kiyaku.html",
+              "credit": "VOICEVOX:波音リツ",
+              "policyText": "波音リツの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:波音リツ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttp://canon-voice.com/kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/namine_ritsu/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 9
+                },
+                {
+                  "name": "クイーン",
+                  "styleId": 65
+                }
+              ]
+            },
+            {
+              "name": "中国うさぎ",
+              "uuid": "1f18ffc3-47ea-4ce0-9829-0576d03a7ec8",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:中国うさぎ",
+              "policyText": "中国うさぎの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:中国うさぎ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/chugoku_usagi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 61
+                },
+                {
+                  "name": "おどろき",
+                  "styleId": 62
+                },
+                {
+                  "name": "こわがり",
+                  "styleId": 63
+                },
+                {
+                  "name": "へろへろ",
+                  "styleId": 64
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "4",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/4.vvm",
+          "byteSize": 59304904,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "玄野武宏",
+              "uuid": "c30dc15a-0992-4f8d-8bb8-ad3b314e6a6f",
+              "version": "0.17.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:玄野武宏",
+              "policyText": "玄野武宏の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:玄野武宏」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kurono_takehiro/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 11
+                }
+              ]
+            },
+            {
+              "name": "剣崎雌雄",
+              "uuid": "1a17ca16-7ee5-4ea5-b191-2f02ace24d21",
+              "version": "0.17.0",
+              "termsURL": "https://frontier.creatia.cc/fanclubs/413/posts/4507",
+              "credit": "VOICEVOX:剣崎雌雄",
+              "policyText": "剣崎雌雄の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:剣崎雌雄」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://frontier.creatia.cc/fanclubs/413/posts/4507",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kenzaki_mesuo/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 21
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "5",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/5.vvm",
+          "byteSize": 57611312,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "四国めたん",
+              "uuid": "7ffcb7ce-00ec-4bdc-82cd-45a8889e43ff",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:四国めたん",
+              "policyText": "四国めたんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:四国めたん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/shikoku_metan/",
+              "styles": [
+                {
+                  "name": "ささやき",
+                  "styleId": 36
+                },
+                {
+                  "name": "ヒソヒソ",
+                  "styleId": 37
+                }
+              ]
+            },
+            {
+              "name": "ずんだもん",
+              "uuid": "388f246b-8c41-4ac1-8e2d-5d79f3ff56d9",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:ずんだもん",
+              "policyText": "ずんだもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ずんだもん」とそれぞれクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/zundamon/",
+              "styles": [
+                {
+                  "name": "ささやき",
+                  "styleId": 22
+                },
+                {
+                  "name": "ヒソヒソ",
+                  "styleId": 38
+                }
+              ]
+            },
+            {
+              "name": "九州そら",
+              "uuid": "481fb609-6446-4870-9f46-90c4dd623403",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:九州そら",
+              "policyText": "九州そらの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:九州そら」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kyushu_sora/",
+              "styles": [
+                {
+                  "name": "ささやき",
+                  "styleId": 19
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "6",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/6.vvm",
+          "byteSize": 59304854,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "No.7",
+              "uuid": "044830d2-f23b-44d6-ac0d-b5d733caa900",
+              "version": "0.17.0",
+              "termsURL": "https://voiceseven.com/#j0200",
+              "credit": "VOICEVOX:No.7",
+              "policyText": "個人がNo.7の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:No.7」とクレジットを記載すれば、非商用（同人利用や配信による収入はOK）で利用可能です。\nその他商用利用の場合は、「[No.7製作委員会](https://voiceseven.com/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://voiceseven.com/#j0200",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/number_seven/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 29
+                },
+                {
+                  "name": "アナウンス",
+                  "styleId": 30
+                },
+                {
+                  "name": "読み聞かせ",
+                  "styleId": 31
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "7",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/7.vvm",
+          "byteSize": 58326212,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "後鬼",
+              "uuid": "0f56c2f2-644c-49c9-8989-94e11f7129d0",
+              "version": "0.17.0",
+              "termsURL": "https://ついなちゃん.com/voicevox_terms/",
+              "credit": "VOICEVOX:後鬼",
+              "policyText": "個人が後鬼の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:後鬼」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし企業が携わる形で利用する場合は、「[【鬼っ子ハンターついなちゃん】プロジェクト](https://ついなちゃん.com/mail/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://ついなちゃん.com/voicevox_terms/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/goki/",
+              "styles": [
+                {
+                  "name": "人間ver.",
+                  "styleId": 27
+                },
+                {
+                  "name": "ぬいぐるみver.",
+                  "styleId": 28
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "8",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/8.vvm",
+          "byteSize": 59304782,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "WhiteCUL",
+              "uuid": "67d5d8da-acd7-4207-bb10-b5542d3a663b",
+              "version": "0.17.0",
+              "termsURL": "https://www.whitecul.com/guideline",
+              "credit": "VOICEVOX:WhiteCUL",
+              "policyText": "WhiteCULの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:WhiteCUL」とそれぞれクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.whitecul.com/guideline",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/white_cul/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 23
+                },
+                {
+                  "name": "たのしい",
+                  "styleId": 24
+                },
+                {
+                  "name": "かなしい",
+                  "styleId": 25
+                },
+                {
+                  "name": "びえーん",
+                  "styleId": 26
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "9",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/9.vvm",
+          "byteSize": 58328935,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "白上虎太郎",
+              "uuid": "e5020595-5c5d-4e87-b849-270a518d0dcf",
+              "version": "0.17.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:白上虎太郎",
+              "policyText": "白上虎太郎の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:白上虎太郎」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/shirakami_kotarou/",
+              "styles": [
+                {
+                  "name": "ふつう",
+                  "styleId": 12
+                },
+                {
+                  "name": "わーい",
+                  "styleId": 32
+                },
+                {
+                  "name": "びくびく",
+                  "styleId": 33
+                },
+                {
+                  "name": "おこ",
+                  "styleId": 34
+                },
+                {
+                  "name": "びえーん",
+                  "styleId": 35
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "10",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/10.vvm",
+          "byteSize": 58327087,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "玄野武宏",
+              "uuid": "c30dc15a-0992-4f8d-8bb8-ad3b314e6a6f",
+              "version": "0.17.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:玄野武宏",
+              "policyText": "玄野武宏の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:玄野武宏」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kurono_takehiro/",
+              "styles": [
+                {
+                  "name": "喜び",
+                  "styleId": 39
+                },
+                {
+                  "name": "ツンギレ",
+                  "styleId": 40
+                },
+                {
+                  "name": "悲しみ",
+                  "styleId": 41
+                }
+              ]
+            },
+            {
+              "name": "ちび式じい",
+              "uuid": "468b8e94-9da4-4f7a-8715-a22a48844f9e",
+              "version": "0.17.0",
+              "termsURL": "https://docs.google.com/presentation/d/1AcD8zXkfzKFf2ertHwWRwJuQXjNnijMxhz7AJzEkaI4",
+              "credit": "VOICEVOX:ちび式じい",
+              "policyText": "ちび式じいの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ちび式じい」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://docs.google.com/presentation/d/1AcD8zXkfzKFf2ertHwWRwJuQXjNnijMxhz7AJzEkaI4",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/chibishikiji/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 42
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "11",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/11.vvm",
+          "byteSize": 61687324,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "櫻歌ミコ",
+              "uuid": "0693554c-338e-4790-8982-b9c6d476dc69",
+              "version": "0.17.0",
+              "termsURL": "https://voicevox35miko.studio.site/rule",
+              "credit": "VOICEVOX:櫻歌ミコ",
+              "policyText": "櫻歌ミコの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:櫻歌ミコ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://voicevox35miko.studio.site/rule",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/ouka_miko/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 43
+                },
+                {
+                  "name": "第二形態",
+                  "styleId": 44
+                },
+                {
+                  "name": "ロリ",
+                  "styleId": 45
+                }
+              ]
+            },
+            {
+              "name": "ナースロボ＿タイプＴ",
+              "uuid": "882a636f-3bac-431a-966d-c5e6bba9f949",
+              "version": "0.17.0",
+              "termsURL": "https://www.krnr.top/rules",
+              "credit": "VOICEVOX:ナースロボ＿タイプＴ",
+              "policyText": "ナースロボ＿タイプＴの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ナースロボ＿タイプＴ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.krnr.top/rules",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nurserobo_typet/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 47
+                },
+                {
+                  "name": "楽々",
+                  "styleId": 48
+                },
+                {
+                  "name": "恐怖",
+                  "styleId": 49
+                },
+                {
+                  "name": "内緒話",
+                  "styleId": 50
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "12",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/12.vvm",
+          "byteSize": 59305189,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "†聖騎士 紅桜†",
+              "uuid": "471e39d2-fb11-4c8c-8d89-4b322d2498e0",
+              "version": "0.17.0",
+              "termsURL": "https://commons.nicovideo.jp/material/nc296132",
+              "credit": "VOICEVOX:†聖騎士 紅桜†",
+              "policyText": "†聖騎士 紅桜†の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:†聖騎士 紅桜†」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。\nhttps://commons.nicovideo.jp/material/nc296132",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/horinaito_benizakura/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 51
+                }
+              ]
+            },
+            {
+              "name": "雀松朱司",
+              "uuid": "0acebdee-a4a5-4e12-a695-e19609728e30",
+              "version": "0.17.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:雀松朱司",
+              "policyText": "雀松朱司の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:雀松朱司」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。\nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/wakamatsu_akashi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 52
+                }
+              ]
+            },
+            {
+              "name": "麒ヶ島宗麟",
+              "uuid": "7d1e7ba7-f957-40e5-a3fc-da49f769ab65",
+              "version": "0.17.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:麒ヶ島宗麟",
+              "policyText": "麒ヶ島宗麟の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:麒ヶ島宗麟」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。\nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kigashima_sourin/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 53
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "13",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/13.vvm",
+          "byteSize": 61686018,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "春歌ナナ",
+              "uuid": "ba5d2428-f7e0-4c20-ac41-9dd56e9178b4",
+              "version": "0.17.0",
+              "termsURL": "https://nanahira.jp/haruka_nana/guideline.html",
+              "credit": "VOICEVOX:春歌ナナ",
+              "policyText": "春歌ナナの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:春歌ナナ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nanahira.jp/haruka_nana/guideline.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/haruka_nana/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 54
+                }
+              ]
+            },
+            {
+              "name": "猫使アル",
+              "uuid": "00a5c10c-d3bd-459f-83fd-43180b521a44",
+              "version": "0.17.0",
+              "termsURL": "https://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "credit": "VOICEVOX:猫使アル",
+              "policyText": "猫使アルの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:猫使アル」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nekotsuka_aru/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 55
+                },
+                {
+                  "name": "おちつき",
+                  "styleId": 56
+                },
+                {
+                  "name": "うきうき",
+                  "styleId": 57
+                }
+              ]
+            },
+            {
+              "name": "猫使ビィ",
+              "uuid": "c20a2254-0349-4470-9fc8-e5c0f8cf3404",
+              "version": "0.17.0",
+              "termsURL": "https://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "credit": "VOICEVOX:猫使ビィ",
+              "policyText": "猫使ビィの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:猫使ビィ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nekotsuka_bi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 58
+                },
+                {
+                  "name": "おちつき",
+                  "styleId": 59
+                },
+                {
+                  "name": "人見知り",
+                  "styleId": 60
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "14",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/14.vvm",
+          "byteSize": 66281498,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "栗田まろん",
+              "uuid": "04dbd989-32d0-40b4-9e71-17c920f2a8a9",
+              "version": "0.17.0",
+              "termsURL": "https://aivoice.jp/character/maron/",
+              "credit": "VOICEVOX:栗田まろん",
+              "policyText": "栗田まろんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:栗田まろん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://aivoice.jp/character/maron/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kurita_maron/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 67
+                }
+              ]
+            },
+            {
+              "name": "あいえるたん",
+              "uuid": "dda44ade-5f9c-4a3a-9d2c-2a976c7476d9",
+              "version": "0.17.0",
+              "termsURL": "https://www.infiniteloop.co.jp/special/iltan/terms/",
+              "credit": "VOICEVOX:あいえるたん",
+              "policyText": "あいえるたんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:あいえるたん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.infiniteloop.co.jp/special/iltan/terms/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/aierutan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 68
+                }
+              ]
+            },
+            {
+              "name": "満別花丸",
+              "uuid": "287aa49f-e56b-4530-a469-855776c84a8d",
+              "version": "0.17.0",
+              "termsURL": "https://100hanamaru.wixsite.com/manbetsu-hanamaru/rule",
+              "credit": "VOICEVOX:満別花丸",
+              "policyText": "満別花丸の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:満別花丸」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://100hanamaru.wixsite.com/manbetsu-hanamaru/rule",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/manbetsu_hanamaru/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 69
+                },
+                {
+                  "name": "元気",
+                  "styleId": 70
+                },
+                {
+                  "name": "ささやき",
+                  "styleId": 71
+                },
+                {
+                  "name": "ぶりっ子",
+                  "styleId": 72
+                },
+                {
+                  "name": "ボーイ",
+                  "styleId": 73
+                }
+              ]
+            },
+            {
+              "name": "琴詠ニア",
+              "uuid": "97a4af4b-086e-4efd-b125-7ae2da85e697",
+              "version": "0.17.0",
+              "termsURL": "https://commons.nicovideo.jp/works/nc315435",
+              "credit": "VOICEVOX:琴詠ニア",
+              "policyText": "琴詠ニアの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:琴詠ニア」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://commons.nicovideo.jp/works/nc315435",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kotoyomi_nia/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 74
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "15",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/15.vvm",
+          "byteSize": 67265793,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "ずんだもん",
+              "uuid": "388f246b-8c41-4ac1-8e2d-5d79f3ff56d9",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:ずんだもん",
+              "policyText": "ずんだもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ずんだもん」とそれぞれクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/zundamon/",
+              "styles": [
+                {
+                  "name": "ヘロヘロ",
+                  "styleId": 75
+                },
+                {
+                  "name": "なみだめ",
+                  "styleId": 76
+                }
+              ]
+            },
+            {
+              "name": "青山龍星",
+              "uuid": "4f51116a-d9ee-4516-925d-21f183e2afad",
+              "version": "0.17.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:青山龍星",
+              "policyText": "個人が青山龍星の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:青山龍星」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし企業が携わる形で利用する場合は、「ななはぴ(https://v.seventhh.com/contact/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/aoyama_ryusei/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 13
+                },
+                {
+                  "name": "熱血",
+                  "styleId": 81
+                },
+                {
+                  "name": "不機嫌",
+                  "styleId": 82
+                },
+                {
+                  "name": "喜び",
+                  "styleId": 83
+                },
+                {
+                  "name": "しっとり",
+                  "styleId": 84
+                },
+                {
+                  "name": "かなしみ",
+                  "styleId": 85
+                },
+                {
+                  "name": "囁き",
+                  "styleId": 86
+                }
+              ]
+            },
+            {
+              "name": "もち子さん",
+              "uuid": "9f3ee141-26ad-437e-97bd-d22298d02ad2",
+              "version": "0.17.0",
+              "termsURL": "https://vtubermochio.wixsite.com/mochizora/利用規約",
+              "credit": "VOICEVOX:もち子(cv 明日葉よもぎ)",
+              "policyText": "個人がもち子さんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:もち子(cv 明日葉よもぎ)」とクレジットを記載すれば、\n音声作品・音声素材・ゲーム作品等を除いて商用・非商用で利用可能です。  \nただし企業が携わる形で利用する場合は、「[もちぞら模型店](https://vtubermochio.wixsite.com/mochizora/contact)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://vtubermochio.wixsite.com/mochizora/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/mochikosan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 20
+                },
+                {
+                  "name": "セクシー／あん子",
+                  "styleId": 66
+                },
+                {
+                  "name": "泣き",
+                  "styleId": 77
+                },
+                {
+                  "name": "怒り",
+                  "styleId": 78
+                },
+                {
+                  "name": "喜び",
+                  "styleId": 79
+                },
+                {
+                  "name": "のんびり",
+                  "styleId": 80
+                }
+              ]
+            },
+            {
+              "name": "小夜/SAYO",
+              "uuid": "a8cc6d22-aad0-4ab8-bf1e-2f843924164a",
+              "version": "0.17.0",
+              "termsURL": "https://316soramegu.wixsite.com/sayo-official/guideline",
+              "credit": "VOICEVOX:小夜/SAYO",
+              "policyText": "小夜/SAYOの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:小夜/SAYO」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://316soramegu.wixsite.com/sayo-official/guideline",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/sayo/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 46
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "16",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/16.vvm",
+          "byteSize": 59303880,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "後鬼",
+              "uuid": "0f56c2f2-644c-49c9-8989-94e11f7129d0",
+              "version": "0.17.0",
+              "termsURL": "https://ついなちゃん.com/voicevox_terms/",
+              "credit": "VOICEVOX:後鬼",
+              "policyText": "個人が後鬼の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:後鬼」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし企業が携わる形で利用する場合は、「[【鬼っ子ハンターついなちゃん】プロジェクト](https://ついなちゃん.com/mail/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://ついなちゃん.com/voicevox_terms/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/goki/",
+              "styles": [
+                {
+                  "name": "人間（怒り）ver.",
+                  "styleId": 87
+                },
+                {
+                  "name": "鬼ver.",
+                  "styleId": 88
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "17",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/17.vvm",
+          "byteSize": 59304258,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "Voidoll",
+              "uuid": "0ebe2c7d-96f3-4f0e-a2e3-ae13fe27c403",
+              "version": "0.17.0",
+              "termsURL": "https://blog.nicovideo.jp/niconews/224589.html",
+              "credit": "VOICEVOX:Voidoll(CV:丹下桜)",
+              "policyText": "個人がVoidollの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:Voidoll(CV:丹下桜)」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし法人による利用の場合は、個別に問い合わせ(https://qa.nicovideo.jp/)が必要です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://blog.nicovideo.jp/niconews/224589.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/voidoll/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 89
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "18",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/18.vvm",
+          "byteSize": 62519486,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "ぞん子",
+              "uuid": "0156da66-4300-474a-a398-49eb2e8dd853",
+              "version": "0.17.0",
+              "termsURL": "https://zonko.zone-energy.jp/guideline",
+              "credit": "VOICEVOX:ぞん子",
+              "policyText": "ぞん子の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ぞん子」とクレジットを記載すれば、商用・非商用で利用可能です。\nただし商用利用の場合は、個別に問い合わせ(https://zonko.zone-energy.jp/contact)が必要です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zonko.zone-energy.jp/guideline",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/zonko/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 90
+                },
+                {
+                  "name": "低血圧",
+                  "styleId": 91
+                },
+                {
+                  "name": "覚醒",
+                  "styleId": 92
+                },
+                {
+                  "name": "実況風",
+                  "styleId": 93
+                }
+              ]
+            },
+            {
+              "name": "中部つるぎ",
+              "uuid": "4614a7de-9829-465d-9791-97eb8a5f9b86",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:中部つるぎ",
+              "policyText": "中部つるぎの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:中部つるぎ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/chubu_tsurugi/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 94
+                },
+                {
+                  "name": "怒り",
+                  "styleId": 95
+                },
+                {
+                  "name": "ヒソヒソ",
+                  "styleId": 96
+                },
+                {
+                  "name": "おどおど",
+                  "styleId": 97
+                },
+                {
+                  "name": "絶望と敗北",
+                  "styleId": 98
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "19",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/19.vvm",
+          "byteSize": 60021787,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "離途",
+              "uuid": "3b91e034-e028-4acb-a08d-fbdcd207ea63",
+              "version": "0.17.0",
+              "termsURL": "https://litmus9.com/#/voicebank#rules",
+              "credit": "VOICEVOX:離途",
+              "policyText": "離途の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:離途」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://litmus9.com/#/voicebank#rules",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/rito/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 99
+                },
+                {
+                  "name": "シリアス",
+                  "styleId": 101
+                }
+              ]
+            },
+            {
+              "name": "黒沢冴白",
+              "uuid": "0b466290-f9b6-4718-8d37-6c0c81e824ac",
+              "version": "0.17.0",
+              "termsURL": "https://www.virvoxproject.com/voicevoxの利用規約",
+              "credit": "VOICEVOX:黒沢冴白",
+              "policyText": "黒沢冴白の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:黒沢冴白」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://www.virvoxproject.com/voicevoxの利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/kurosawa_kohaku/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 100
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "20",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/20.vvm",
+          "byteSize": 60535324,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "ユーレイちゃん",
+              "uuid": "462cd6b4-c088-42b0-b357-3816e24f112e",
+              "version": "0.17.0",
+              "termsURL": "https://u-stella.co.jp/voicevox-ure-chan-tucumo-terms-of-use/",
+              "credit": "VOICEVOX:ユーレイちゃん(CV:神崎零)",
+              "policyText": "個人がユーレイちゃんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:ユーレイちゃん(CV:神崎零)」とクレジットを記載すれば、非商用（同人利用や配信による収入は OK）で利用可能です。\nその他商用利用の場合は、「[ユーステラ](https://u-stella.co.jp/)」に対し事前確認を取る必要があります。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://u-stella.co.jp/voicevox-ure-chan-tucumo-terms-of-use/",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/yureichan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 102
+                },
+                {
+                  "name": "甘々",
+                  "styleId": 103
+                },
+                {
+                  "name": "哀しみ",
+                  "styleId": 104
+                },
+                {
+                  "name": "ささやき",
+                  "styleId": 105
+                },
+                {
+                  "name": "ツクモちゃん",
+                  "styleId": 106
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "21",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/21.vvm",
+          "byteSize": 63195138,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "猫使アル",
+              "uuid": "00a5c10c-d3bd-459f-83fd-43180b521a44",
+              "version": "0.17.0",
+              "termsURL": "https://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "credit": "VOICEVOX:猫使アル",
+              "policyText": "猫使アルの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:猫使アル」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nekotsuka_aru/",
+              "styles": [
+                {
+                  "name": "つよつよ",
+                  "styleId": 110
+                },
+                {
+                  "name": "へろへろ",
+                  "styleId": 111
+                }
+              ]
+            },
+            {
+              "name": "猫使ビィ",
+              "uuid": "c20a2254-0349-4470-9fc8-e5c0f8cf3404",
+              "version": "0.17.0",
+              "termsURL": "https://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "credit": "VOICEVOX:猫使ビィ",
+              "policyText": "猫使ビィの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:猫使ビィ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://nekotukarb.wixsite.com/nekonohako/利用規約",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/nekotsuka_bi/",
+              "styles": [
+                {
+                  "name": "つよつよ",
+                  "styleId": 112
+                }
+              ]
+            },
+            {
+              "name": "東北ずん子",
+              "uuid": "80802b2d-8c75-4429-978b-515105017010",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:東北ずん子",
+              "policyText": "東北ずん子の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:東北ずん子」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/tohoku_zunko/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 107
+                }
+              ]
+            },
+            {
+              "name": "東北きりたん",
+              "uuid": "1bd6b32b-d650-4072-bbe5-1d0ef4aaa28b",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:東北きりたん",
+              "policyText": "東北きりたんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:東北きりたん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/tohoku_kiritan/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 108
+                }
+              ]
+            },
+            {
+              "name": "東北イタコ",
+              "uuid": "ab4c31a3-8769-422a-b412-708f5ae637e8",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:東北イタコ",
+              "policyText": "東北イタコの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:東北イタコ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/tohoku_itako/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 109
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "22",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/22.vvm",
+          "byteSize": 63409684,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "あんこもん",
+              "uuid": "3be49e15-34bb-48a0-9e2f-9b80c96e9905",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:あんこもん",
+              "policyText": "あんこもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:あんこもん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/ankomon/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 113
+                },
+                {
+                  "name": "つよつよ",
+                  "styleId": 114
+                },
+                {
+                  "name": "よわよわ",
+                  "styleId": 115
+                },
+                {
+                  "name": "けだるげ",
+                  "styleId": 116
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "23",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/23.vvm",
+          "byteSize": 60022581,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "あんこもん",
+              "uuid": "3be49e15-34bb-48a0-9e2f-9b80c96e9905",
+              "version": "0.17.0",
+              "termsURL": "https://zunko.jp/con_ongen_kiyaku.html",
+              "credit": "VOICEVOX:あんこもん",
+              "policyText": "あんこもんの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:あんこもん」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://zunko.jp/con_ongen_kiyaku.html",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/ankomon/",
+              "styles": [
+                {
+                  "name": "ささやき",
+                  "styleId": 117
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "24",
+          "url": "https://raw.githubusercontent.com/VOICEVOX/voicevox_vvm/0.17.0/vvms/24.vvm",
+          "byteSize": 60024319,
+          "vvmFormatVersion": 2,
+          "speakers": [
+            {
+              "name": "夜語トバリ",
+              "uuid": "d3be2066-205b-47f6-8818-1d93a9ca9cef",
+              "version": "0.17.0",
+              "termsURL": "https://yogataritobari.studio.site/#rules",
+              "credit": "VOICEVOX:夜語トバリ",
+              "policyText": "夜語トバリの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:夜語トバリ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://yogataritobari.studio.site/#rules",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/yogatari_tobari/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 118
+                },
+                {
+                  "name": "明るい",
+                  "styleId": 119
+                },
+                {
+                  "name": "哀しみ",
+                  "styleId": 120
+                },
+                {
+                  "name": "呆れ",
+                  "styleId": 121
+                }
+              ]
+            },
+            {
+              "name": "暁記ミタマ",
+              "uuid": "aca7de06-9ff9-49a3-9f08-9d3bc19689e5",
+              "version": "0.17.0",
+              "termsURL": "https://yogataritobari.studio.site/#rules",
+              "credit": "VOICEVOX:暁記ミタマ",
+              "policyText": "暁記ミタマの音声ライブラリを用いて生成した音声は、\n「VOICEVOX:暁記ミタマ」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://yogataritobari.studio.site/#rules",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/akatsuki_mitama/",
+              "styles": [
+                {
+                  "name": "ノーマル",
+                  "styleId": 122
+                },
+                {
+                  "name": "怒り",
+                  "styleId": 123
+                },
+                {
+                  "name": "哀しみ",
+                  "styleId": 124
+                },
+                {
+                  "name": "ささやき",
+                  "styleId": 125
+                }
+              ]
+            },
+            {
+              "name": "里石ユカ",
+              "uuid": "cc7baa71-6c74-4399-803b-b60576176a08",
+              "version": "0.17.0",
+              "termsURL": "https://satoishiyuka.wixsite.com/satoishi/kiyaku",
+              "credit": "VOICEVOX:里石ユカ（つぼみ）",
+              "policyText": "里石ユカ（つぼみ）の音声ライブラリを用いて生成した音声は、\n「VOICEVOX:里石ユカ（つぼみ）」とクレジットを記載すれば、商用・非商用で利用可能です。\n\n利用規約の詳細は以下をご確認ください。  \nhttps://satoishiyuka.wixsite.com/satoishi/kiyaku",
+              "officialPageURL": "https://voicevox.hiroshiba.jp/product/satoishi_yuka/",
+              "styles": [
+                {
+                  "name": "つぼみ",
+                  "styleId": 126
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

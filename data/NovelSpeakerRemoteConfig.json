@@ -21,5 +21,6 @@
     "com.apple.neappprivacy",
     "t.co"
   ],
+  "voicevoxVoiceModelCatalogURL": "https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/VoicevoxVoiceModelCatalog.json",
   "latestVersion": "2.11.2"
 }
