@@ -263,3 +263,67 @@ class VoicevoxSynthesisQueueTest: XCTestCase {
         XCTAssertLessThanOrEqual(queue.pendingCount, 64)
     }
 }
+
+// 「今この音声を誰かが作っている」を共有する帳簿のテスト。
+//
+// 出来上がった物(メモリ・ディスク)だけを見ていると、
+// 「作り終えてからディスクに置き終わるまで」の隙に同じ物をもう一度作ってしまう。
+// 実機ログでは、作り足し側の確認を直した後もそれで合成の3〜5割が無駄になっていた。
+class VoicevoxSynthesisInProgressTest: XCTestCase {
+
+    override func setUp() {
+        super.setUp()
+        VoicevoxSynthesisInProgress.shared.removeAllForTesting()
+    }
+
+    // 相手が作っている事が分かる事。自分が作っている物は「相手が作っている」にはならない。
+    func testInProgressIsVisibleToTheOtherSideOnly() {
+        let ledger = VoicevoxSynthesisInProgress.shared
+        ledger.begin(key: "abc", side: .generator)
+        XCTAssertTrue(ledger.isInProgress(key: "abc", by: .generator))
+        XCTAssertFalse(ledger.isInProgress(key: "abc", by: .playback),
+                       "作り足しが作っている物を、再生側が作っている事にしてはいけない")
+        ledger.end(key: "abc")
+        XCTAssertFalse(ledger.isInProgress(key: "abc"))
+    }
+
+    // 合成中と書き出し中が重なるので、数で持つ事。
+    // 片方が終わっただけで「もう誰も作っていない」になると、その隙に二度手間が起きる。
+    func testOverlappingBeginsAreCounted() {
+        let ledger = VoicevoxSynthesisInProgress.shared
+        ledger.begin(key: "abc", side: .playback)   // 合成
+        ledger.begin(key: "abc", side: .playback)   // 書き出し
+        ledger.end(key: "abc")
+        XCTAssertTrue(ledger.isInProgress(key: "abc"), "まだ書き出しが残っているはず")
+        ledger.end(key: "abc")
+        XCTAssertFalse(ledger.isInProgress(key: "abc"))
+    }
+
+    // 出来上がったら待ちが明ける事。
+    func testWaitForCompletionReturnsWhenTheOtherSideFinishes() async {
+        let ledger = VoicevoxSynthesisInProgress.shared
+        ledger.begin(key: "abc", side: .generator)
+        Task {
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            ledger.end(key: "abc")
+        }
+        let completed = await ledger.waitForCompletion(key: "abc", timeoutSeconds: 5)
+        XCTAssertTrue(completed, "相手が作り終えたら待ちは明けるはず")
+    }
+
+    // 待ちきれなければ false(その時は自分で作るしかない)。
+    // ここで永遠に待つと、そのまま無音が伸びる。
+    func testWaitForCompletionGivesUpAfterTheTimeout() async {
+        let ledger = VoicevoxSynthesisInProgress.shared
+        ledger.begin(key: "abc", side: .generator)
+        let completed = await ledger.waitForCompletion(key: "abc", timeoutSeconds: 0.3)
+        XCTAssertFalse(completed, "待ちきれない時は諦めて自分で作れるようにする")
+        ledger.end(key: "abc")
+    }
+
+    // 知らない鍵の end で壊れない事。
+    func testEndOfUnknownKeyIsHarmless() {
+        VoicevoxSynthesisInProgress.shared.end(key: "知らない鍵")
+        XCTAssertFalse(VoicevoxSynthesisInProgress.shared.isInProgress(key: "知らない鍵"))
+    }
+}

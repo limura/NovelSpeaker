@@ -272,11 +272,19 @@ final class VoicevoxCacheGenerator {
                 }
                 if let cause = Self.currentStopCause() { return .limitReached(cause) }
 
+                // 再生側が今まさに同じブロックを作っているなら、そちらに任せて先へ進む。
+                // 再生側が作った物もディスクに置かれるので、取りこぼしにはならない。
+                if VoicevoxSynthesisInProgress.shared.isInProgress(key: target.key, by: .playback) {
+                    generatedCount += 1
+                    continue
+                }
                 do {
                     // 合成の直前にもう一度確かめてもらう。ここへ来るまでに
                     // 「再生側の合成待ち」(最大30秒)と actor の順番待ちがあり、
                     // その間に再生側が同じブロックを作り終えている事があるため。
                     let key = target.key
+                    VoicevoxSynthesisInProgress.shared.begin(key: key, side: .generator)
+                    defer { VoicevoxSynthesisInProgress.shared.end(key: key) }
                     let wav = try await VoicevoxCore.shared.synthesizeForDiskCache(
                         text: target.text, styleId: target.styleId,
                         isStillNeeded: {

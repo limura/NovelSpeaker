@@ -268,7 +268,11 @@ actor VoicevoxCore {
         // 「作ったのにディスクに現れない」時間が伸びる。その間は作り足し側から見て
         // 「まだ無い」ままなので、同じブロックをもう一度作ってしまう。
         // 圧縮は合成の 0.62% しかかからないので、少し上げても再生を邪魔しない。
+        // 書き終わるまでは、相手から見て「まだ無い」ままになる。
+        // その間に同じ物を作られないよう、書き出しの間も帳簿に載せておく。
+        VoicevoxSynthesisInProgress.shared.begin(key: key, side: .playback)
         Task(priority: .medium) {
+            defer { VoicevoxSynthesisInProgress.shared.end(key: key) }
             do {
                 let encoded = try VoicevoxAudioCompressor.encode(wav: wav)
                 try VoicevoxDiskCacheStore.shared.store(
@@ -885,6 +889,18 @@ actor VoicevoxCore {
         if let disk = peekDiskCache(text: text, styleId: styleId) {
             return disk
         }
+        // 作り足しが「今まさに」同じ物を作っている最中なら、出来上がりを待つ。
+        // 合成は直列なので、自分でも作ると相手の完了を待ってから自分の合成が始まり、
+        // 二回ぶん待つ事になる(そのぶんそのまま無音が伸びる)。
+        let diskKey = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
+        if VoicevoxSynthesisInProgress.shared.isInProgress(key: diskKey, by: .generator) {
+            if await VoicevoxSynthesisInProgress.shared.waitForCompletion(key: diskKey, timeoutSeconds: 30),
+               let disk = peekDiskCache(text: text, styleId: styleId) {
+                return disk
+            }
+        }
+        VoicevoxSynthesisInProgress.shared.begin(key: diskKey, side: .playback)
+        defer { VoicevoxSynthesisInProgress.shared.end(key: diskKey) }
         // 再生に必要な合成でも、CPU予算を超えたまま突入すると強制終了される
         // (殺されると再生そのものが止まるので、無音より重い)。先行合成より多くの
         // 予算を使ってよいが、上限は守る。
@@ -1068,6 +1084,15 @@ actor VoicevoxCore {
             synthesisQueue.complete(request)
             return
         }
+        // 作り足しが同じ物を作っている最中なら、出来上がりを待たずに諦める。
+        // 先行合成なので、置かれた物を再生時にディスクから読めばよい。
+        let prefetchDiskKey = VoicevoxDiskCacheStore.key(text: request.text, styleId: request.styleId)
+        if VoicevoxSynthesisInProgress.shared.isInProgress(key: prefetchDiskKey, by: .generator) {
+            synthesisQueue.complete(request)
+            return
+        }
+        VoicevoxSynthesisInProgress.shared.begin(key: prefetchDiskKey, side: .playback)
+        defer { VoicevoxSynthesisInProgress.shared.end(key: prefetchDiskKey) }
         do {
             let data = try await performSynthesizeWithinBudget(text: request.text, styleId: request.styleId, limitRatio: Self.prefetchCPULimitRatio)
             storeCache(key: Self.prefetchKey(text: request.text, styleId: request.styleId), data: data)

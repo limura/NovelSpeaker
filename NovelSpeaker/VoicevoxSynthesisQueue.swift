@@ -200,3 +200,86 @@ final class VoicevoxSynthesisQueue {
         return inFlight[key] != nil
     }
 }
+
+/// 「今この音声を誰かが作っている」を、再生側と裏の作り足しの間で共有する帳簿。
+///
+/// なぜ要るのか:
+/// 合成そのものは actor で直列化されているので、二つが同時にC呼び出しへ入る事は無い。
+/// それでも二度手間は起きる。**作り終えてからディスクに置き終わるまでに間がある**ためで、
+/// その隙に相手が「まだ無い」と判断してもう一度作ってしまう。
+/// 実機ログでは、作り足し側の確認を直した後も合成の3〜5割が
+/// 「再生側の二度手間」として残っていた(84本中42本など)。
+///
+/// 出来上がった物(メモリ・ディスク)だけを見ていては塞げない。
+/// **これから作る物**も見えるようにする必要がある。
+final class VoicevoxSynthesisInProgress {
+
+    enum Side {
+        /// 再生側(先行合成・再生時の合成)。
+        case playback
+        /// 読み上げの裏で走っている作り足し。
+        case generator
+    }
+
+    static let shared = VoicevoxSynthesisInProgress()
+
+    private let lock = NSLock()
+    /// 同じ鍵に対して「合成中」と「書き出し中」が重なるので、数で持つ。
+    private var entries: [String: (side: Side, count: Int)] = [:]
+
+    /// 作り始める(または書き出し始める)。
+    func begin(key: String, side: Side) {
+        lock.lock()
+        defer { lock.unlock() }
+        if let existing = entries[key] {
+            entries[key] = (existing.side, existing.count + 1)
+        } else {
+            entries[key] = (side, 1)
+        }
+    }
+
+    /// 終わった事を伝える。
+    func end(key: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let existing = entries[key] else { return }
+        if existing.count <= 1 {
+            entries.removeValue(forKey: key)
+        } else {
+            entries[key] = (existing.side, existing.count - 1)
+        }
+    }
+
+    /// その鍵を、指定した側が今作っているか。
+    func isInProgress(key: String, by side: Side) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return entries[key]?.side == side
+    }
+
+    func isInProgress(key: String) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return entries[key] != nil
+    }
+
+    /// 出来上がるまで待つ。待ちきれなければ false(その時は自分で作るしかない)。
+    ///
+    /// 待つ方が速い。合成は直列なので、自分でも作ると
+    /// 「相手の完了を待ってから自分の合成」= 二回ぶん待つ事になる。
+    func waitForCompletion(key: String, timeoutSeconds: Double, pollSeconds: Double = 0.1) async -> Bool {
+        let maxCount = max(1, Int(timeoutSeconds / pollSeconds))
+        for _ in 0..<maxCount {
+            if isInProgress(key: key) == false { return true }
+            try? await Task.sleep(nanoseconds: UInt64(pollSeconds * 1_000_000_000))
+        }
+        return false
+    }
+
+    /// テスト用。
+    func removeAllForTesting() {
+        lock.lock()
+        defer { lock.unlock() }
+        entries.removeAll()
+    }
+}
