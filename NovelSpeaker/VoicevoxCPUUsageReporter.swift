@@ -244,8 +244,14 @@ final class VoicevoxCPUUsageReporter {
         let averageSpeed = current.wallSeconds > 0 ? current.audioSeconds / current.wallSeconds : 0
         let slowestSpeed = current.slowestSpeed == .greatestFiniteMagnitude ? averageSpeed : current.slowestSpeed
         let playbackRate = lastPlaybackRate
-        let message = String(format: "[VOICEVOX CPU] この %.0f分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
-                             max(elapsed, 0) / 60, current.count, averageSpeed, slowestSpeed, playbackRate,
+        // 熱状態が変わった直後は数十秒しか溜まっていない事があるので、その時は秒で書く
+        //(「この 0分で」になってしまうため)。
+        let duration = max(elapsed, 0)
+        let durationText = duration >= 60
+            ? String(format: "%.0f分", duration / 60)
+            : String(format: "%.0f秒", duration)
+        let message = String(format: "[VOICEVOX CPU] この%@で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
+                             durationText, current.count, averageSpeed, slowestSpeed, playbackRate,
                              Self.thermalStateText(thermalState))
         return (message, [
             "durationSeconds": AnyCodable(String(format: "%.0f", max(elapsed, 0))),
