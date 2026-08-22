@@ -137,7 +137,7 @@ final class VoicevoxCacheAutoGeneration {
     /// 後半は概算で、部分的にしか出来ていないページを丸ごと数えてしまうが、
     /// 生成は前から順に埋めていくので、そういうページは境目の1つだけになる
     /// (=多く見積もってもそのページ1つぶん)。
-    private func contiguousLeadSeconds(context: VoicevoxCore.DiskCacheContext) -> Double {
+    private func contiguousLeadSeconds(context: VoicevoxAudioProvider.DiskCacheContext) -> Double {
         let store = VoicevoxDiskCacheStore.shared
         let speaker = StorySpeaker.shared.speaker
         let blocks = speaker.speechBlockArray

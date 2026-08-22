@@ -148,41 +148,32 @@ actor VoicevoxCore {
     // 一度ロードした声モデルのVVMパスの集合(再ロードによる数百ms級の待ちを避けるため)
     private var loadedVvmPaths: Set<String> = []
 
-    // 先行合成キャッシュ: 現在再生中のブロックより先のブロックを、再生が追いつく前に
-    // バックグラウンドで合成しておくためのもの(VOICEVOX_IOS_INTEGRATION.md §6-2の
-    // SynthesisWorker/PCMキャッシュ相当)。VOICEVOXはブロック全体を一括合成してから
-    // 再生を始める方式で、ブロックを再生している間に次のブロックの合成が終わっていないと
-    // 発話と発話の間に無音の間ができてしまうため、これを埋める。
-    // key は synthesizePrefetchKey(text:styleId:) で作る。
+    // 合成済み音声の置き場所(メモリ→ディスクの探索順)はこの層に隠されている。
+    // 参照の入り口を一つに絞る事で「片方の置き場所だけ見て、もう片方を見落とす」を
+    // 構造的に無くす(詳細は VoicevoxAudioProvider.swift)。
     //
-    // このキャッシュ本体だけは actor 隔離ではなく専用ロックで守る(nonisolated(unsafe))。
-    // 理由: actor 隔離のままだと、既にキャッシュ済みで即返せるはずの参照(cache HIT)ですら、
-    // actor が他の(無関係で低優先度な)先行合成を実行中だとその完了までactorへ入れず
-    // 待たされてしまう。実機ログで「既に合成済みの短い会話文なのに、何秒も先の長い
-    // 段落の先行合成が終わるまでHITログすら出ない」という現象として確認した
-    // (キャッシュそのものは十分前に用意できていたのに、参照するための「actorの順番待ち」
-    //  だけで無音になっていた)。読み出しをロックだけで完結させる事で、この種の待ちを無くす。
-    // 追い出しの順序が要点なので、実体は VoicevoxWavCache に切り出してある。
-    // 会話文の相槌等の短い文字列が再利用されるので、エントリ数は多めに持つ。
-    nonisolated let wavCache = VoicevoxWavCache(entryCapacity: 64, totalByteLimit: 16 * 1024 * 1024)
+    // actor 隔離ではなくロックだけで完結する。actor 隔離のままだと、既にキャッシュ済みで
+    // 即返せるはずの参照(cache HIT)ですら、actor が他の(無関係で低優先度な)先行合成を
+    // 実行中だとその完了までactorへ入れず待たされてしまうため。
+    nonisolated let audioProvider = VoicevoxAudioProvider()
 
     // actorへ入らずに(=今actorが何をしていても待たされずに)呼べるよう、あえて nonisolated。
     nonisolated private func peekCache(key: String) -> Data? {
-        return wavCache.peek(key: key)
+        return audioProvider.memoryAudio(key: key)
     }
 
     nonisolated private func storeCache(key: String, data: Data) {
-        wavCache.store(key: key, data: data)
+        audioProvider.storeToMemory(key: key, data: data)
     }
 
     /// 指定テキストが先行合成済みなら、その WAV のバイト数を返す(未合成なら nil)。
     /// 「未再生の貯金が何秒あるか」を数えるために使う。actorへ入らず参照できる。
     nonisolated func cachedWavByteCount(text: String, styleId: UInt32) -> Int? {
-        return wavCache.byteCount(key: Self.cacheKey(text: text, styleId: styleId))
+        return audioProvider.memoryByteCount(key: Self.cacheKey(text: text, styleId: styleId))
     }
 
     nonisolated private func clearCache() {
-        wavCache.clear()
+        audioProvider.clearMemory()
     }
 
     // MARK: - ディスクキャッシュ(2層目)
@@ -196,51 +187,22 @@ actor VoicevoxCore {
     // どの小説のどの話を再生中かは VoicevoxCore からは分からないので、
     // 再生側(StorySpeaker)が話を切り替える度にここへ教える。
 
-    struct DiskCacheContext {
-        let novelID: String
-        let chapterNumber: Int
-
-        /// ディスクへ書き足してよいか(利用者がその小説でキャッシュ生成を有効にしている時だけ true)。
-        /// 普通に聴いているだけで断りなくストレージを使い始めない、という線引き。
-        ///
-        /// ここは保持せず、その都度調べる。読み上げ中の小説について後から生成を
-        /// 有効にする(詳細画面から「生成する」を押す)事があり、作った時点の値を
-        /// 覚えていると、その回の読み上げでは一切ディスクに積まれなくなる。
-        var isWritable: Bool {
-            return VoicevoxCacheGenerationState.shared.isEnabled(novelID: novelID)
-        }
-    }
-
-    private let diskCacheContextLock = NSLock()
-    nonisolated(unsafe) private var diskCacheContextUnsafe: DiskCacheContext?
-
-    nonisolated var diskCacheContext: DiskCacheContext? {
-        diskCacheContextLock.lock()
-        defer { diskCacheContextLock.unlock() }
-        return diskCacheContextUnsafe
+    nonisolated var diskCacheContext: VoicevoxAudioProvider.DiskCacheContext? {
+        return audioProvider.diskCacheContext
     }
 
     /// 今どの小説のどの話を読んでいるかを教える(nil で解除)。
     nonisolated func setDiskCacheContext(novelID: String?, chapterNumber: Int) {
-        let context: DiskCacheContext? = novelID.map { DiskCacheContext(novelID: $0, chapterNumber: chapterNumber) }
-        diskCacheContextLock.lock()
-        diskCacheContextUnsafe = context
-        diskCacheContextLock.unlock()
+        audioProvider.setDiskCacheContext(novelID: novelID, chapterNumber: chapterNumber)
     }
 
     /// 既にディスクに作ってあるか(音声そのものは読まない)。
     nonisolated func isStoredOnDisk(text: String, styleId: UInt32) -> Bool {
-        guard let context = diskCacheContext else { return false }
-        let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
-        return VoicevoxDiskCacheStore.shared.contains(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key)
+        return audioProvider.isStoredOnDisk(key: Self.cacheKey(text: text, styleId: styleId))
     }
 
     nonisolated private func peekDiskCache(text: String, styleId: UInt32) -> Data? {
-        guard let context = diskCacheContext else { return nil }
-        let key = VoicevoxDiskCacheStore.key(text: text, styleId: styleId)
-        guard let data = VoicevoxDiskCacheStore.shared.load(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key) else { return nil }
-        VoicevoxCPUUsageReporter.shared.noteDiskCacheHit()
-        return data
+        return audioProvider.diskAudio(key: Self.cacheKey(text: text, styleId: styleId))
     }
 
     /// 合成できた音声をディスクにも積む(有効な小説の時だけ)。
@@ -374,11 +336,10 @@ actor VoicevoxCore {
 
     private init() {
         synthesisQueueStorage = VoicevoxSynthesisQueue(capacity: Self.maxPendingPrefetchCount) { [unowned self] text, styleId in
-            if self.peekCache(key: Self.cacheKey(text: text, styleId: styleId)) != nil { return true }
-            // 既にディスクに作ってあるものは合成し直さない。
+            // 既にディスクに作ってあるものも合成し直さない。
             // ここを見ないと、事前生成しておいたのに再生の度に先行合成が走り、
             // ディスクキャッシュがあってもCPUを使ってしまう。
-            return self.isStoredOnDisk(text: text, styleId: styleId)
+            return self.audioProvider.isAvailable(key: Self.cacheKey(text: text, styleId: styleId))
         }
     }
 
@@ -809,7 +770,7 @@ actor VoicevoxCore {
     /// ログ用: 現在キャッシュ(先行合成済み)として持っている音声の合計秒数。
     /// 「あとどれだけ貯金があるか」を実機ログで見るために使う。
     nonisolated func cachedAudioSecondsForLogging() -> Double {
-        return wavCache.totalAudioSeconds()
+        return audioProvider.memoryAudioSecondsForLogging()
     }
 
     // ログ用に先頭数文字だけ見えるようにする(全文は長すぎて読みにくいため)。
@@ -832,18 +793,17 @@ actor VoicevoxCore {
     /// 低速パスに委譲する。
     nonisolated func synthesize(text: String, styleId: UInt32) async throws -> Data {
         let key = Self.cacheKey(text: text, styleId: styleId)
-        if let cached = peekCache(key: key) {
-            // 再生に使い終わった事を記録する。キャッシュが上限に達した時、
-            // これが付いている物から先に捨てる(付いていない=まだ再生していない物を
-            // 捨てると、用意できていたのに再生直前で消える事になる)。
-            wavCache.markPlayed(key: key)
-            return cached
-        }
         // メモリに無くても、事前に作ってディスクに貯めてあれば、そこから即座に返せる。
         // 背面バッテリーでは実時間合成が原理的に不可能(必要CPU率128〜226%に対し使えるのは80%)
-        // なので、無音を無くせるのは実質この経路だけ。
-        if let disk = peekDiskCache(text: text, styleId: styleId) {
-            return disk
+        // なので、背面での無音を無くせるのは実質ディスクの経路だけ。
+        if let hit = audioProvider.audio(key: key) {
+            if hit.source == .memory {
+                // 再生に使い終わった事を記録する。キャッシュが上限に達した時、
+                // これが付いている物から先に捨てる(付いていない=まだ再生していない物を
+                // 捨てると、用意できていたのに再生直前で消える事になる)。
+                audioProvider.markPlayed(key: key)
+            }
+            return hit.data
         }
         // ここに来た = 再生が必要な時点で先行合成が間に合っていなかった。
         // その待ち時間がそのまま無音の長さになる(VoicevoxSilenceReporter が拾う)。
