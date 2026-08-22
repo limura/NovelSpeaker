@@ -82,6 +82,10 @@ final class AppLaunchCoordinator: NSObject {
                 // ディスクキャッシュの鍵にはこれが混ざるので、この後の後始末や
                 // setUp より**前**に済ませておかないと、鍵の食い違いで
                 // 作り置きを取り違える(古い方を消してしまう)。
+                // 配布されている音声モデルの一覧を取り直す。
+                // 新しいキャラが増えた時にアプリの更新を待たせないため。
+                // 取れなくても同梱の一覧を使うので、ここで失敗しても支障は無い。
+                await VoicevoxVoiceModelCatalogLoader.refreshRemoteFile()
                 NovelSpeakerUtility.ReloadVoicevoxUserDictionary()
                 let staleAudio = VoicevoxDiskCacheStore.shared.removeOutdatedLayouts()
                 if staleAudio > 0 {

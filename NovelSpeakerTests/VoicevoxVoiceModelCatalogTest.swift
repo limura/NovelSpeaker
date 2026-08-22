@@ -291,4 +291,23 @@ class VoicevoxVoiceModelCatalogTest: XCTestCase {
         XCTAssertNil(VoicevoxVoiceModelCatalogLoader.decode(Data("これはJSONではない".utf8)))
         XCTAssertNil(VoicevoxVoiceModelCatalogLoader.decode(Data("{}".utf8)))
     }
+    // MARK: - 配布されているカタログの取り込み
+
+    // ★キャッシュの名前に形式の版が入っている事。
+    //
+    // キャッシュはファイル名だけで識別される。カタログの形を変えた時に
+    // 名前を変えないと、古い形の中身を新しいコードが読もうとして
+    // 毎回デコードに失敗し、「取ってきているのに永遠に使われない」状態になる。
+    func testRemoteCacheFileNameIsVersioned() {
+        let name = VoicevoxVoiceModelCatalogLoader.remoteCacheFileName
+        XCTAssertTrue(name.contains("\(VoicevoxVoiceModelCatalogFile.supportedFormatVersion)"),
+                      "キャッシュ名に形式の版が入っていない: \(name)")
+    }
+
+    // 取ってきた物が無くても、同梱の物で動く事。
+    // 取得元が落ちていても VOICEVOX が使えなくなってはいけない。
+    func testPreferredCatalogFallsBackToEmbedded() {
+        XCTAssertNotNil(VoicevoxVoiceModelCatalogLoader.preferredCatalog(),
+                        "同梱のカタログだけでも一式が取れるべき")
+    }
 }

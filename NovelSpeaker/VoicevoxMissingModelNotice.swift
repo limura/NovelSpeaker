@@ -35,8 +35,7 @@ enum VoicevoxMissingModelNotice {
         if let style = VoicevoxCore.cachedStyles.first(where: { $0.styleId == styleId }) {
             return "\(style.speakerName) - \(style.name)"
         }
-        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferred(
-                embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil) else { return nil }
+        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferredCatalog() else { return nil }
         return catalog.entry(forStyleId: styleId)?.displayName
     }
 

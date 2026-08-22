@@ -185,6 +185,94 @@ enum VoicevoxVoiceModelCatalogLoader {
         return candidate.catalog(readableVvmFormatVersions: readableVvmFormatVersions) != nil
     }
 
+    // 取得まわりは iOS 側だけ。時計にはカタログを取ってくる仕組みも
+    // NovelSpeakerUtility も無いので、同梱の物だけを使う。
+    #if !os(watchOS)
+    /// 取ってきたカタログを置いておく場所。
+    ///
+    /// **名前に形式の版を入れてある。** キャッシュはファイル名だけで識別されるので、
+    /// カタログの形が変わった時に名前を変えないと、古い形の中身を新しいコードが
+    /// 読もうとして毎回デコードに失敗する事になる。
+    static var remoteCacheFileName: String {
+        return "VoicevoxVoiceModelCatalogCache-format\(VoicevoxVoiceModelCatalogFile.supportedFormatVersion)"
+    }
+
+    /// 取ってきて置いてあるカタログ。**使ってよい物でなければ nil を返す。**
+    ///
+    /// 判定を通さずに返すと、このアプリのコアが読めない形式しか載っていない
+    /// カタログで 1.4GB の取得をさせる事になる(isUsable のコメント参照)。
+    static func loadCachedRemoteFile() -> VoicevoxVoiceModelCatalogFile? {
+        guard let data = NiftyUtility.GetCachedHttpGetCachedData(
+                url: URL(string: "https://example.invalid/")!,   // キャッシュはファイル名だけで引く
+                cacheFileName: remoteCacheFileName,
+                expireTimeinterval: nil),
+              let candidate = decode(data),
+              isUsable(candidate) else { return nil }
+        return candidate
+    }
+
+    /// 実際に使うべき一式。同梱と、取ってきた物のうち良い方を選ぶ。
+    ///
+    /// 画面から呼ぶのはこれ1つ。取得はアプリ起動時に済ませてあり、
+    /// ここでは置いてある物を読むだけなので、通信は起きない。
+    static func preferredCatalog(readableVvmFormatVersions: Set<Int> = readableVvmFormatVersions)
+        -> VoicevoxVoiceModelCatalog? {
+        return preferred(embedded: loadEmbeddedFile(),
+                         remote: loadCachedRemoteFile(),
+                         readableVvmFormatVersions: readableVvmFormatVersions)
+    }
+
+    /// 配布されているカタログを取り直す(古くなっていれば)。
+    ///
+    /// 置き場所は RemoteConfig の `voicevoxVoiceModelCatalogURL` で指定する。
+    /// 指定が無ければ何もしない(同梱の物を使い続ける)。
+    ///
+    /// ★取ってきた物が使える物でなければ、置き換えない。
+    /// 公式が新しい形式へ進んだ時に、このアプリのコアが読める一式が
+    /// 落ちているカタログが配られる事があり得る。そのまま受け入れると、
+    /// 利用者は開けないVVMを取得する事になる。
+    static func refreshRemoteFile() async {
+        let config = await NovelSpeakerUtility.GetNovelSpeakerRemoteConfigAsync()
+        guard let urlString = config.voicevoxVoiceModelCatalogURL,
+              let url = URL(string: urlString) else { return }
+        let expireTimeInterval:TimeInterval = 60 * 60 * 24
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            var isResumed = false
+            func finish() {
+                guard isResumed == false else { return }
+                isResumed = true
+                continuation.resume()
+            }
+            NiftyUtility.FileCachedHttpGet(url: url, cacheFileName: remoteCacheFileName, expireTimeinterval: expireTimeInterval) { data in
+                guard let candidate = decode(data) else {
+                    AppInformationLogger.AddLog(message: "VOICEVOX: 配布されている音声モデルの一覧を読めませんでした", isForDebug: true)
+                    finish()
+                    return false // 置き換えない
+                }
+                guard isUsable(candidate) else {
+                    // このアプリのコアが読める一式が入っていない。
+                    // 受け入れると、開けないVVMを取得させる事になる。
+                    AppInformationLogger.AddLog(message: "VOICEVOX: 配布されている音声モデルの一覧に、このアプリで読める形式がありませんでした", isForDebug: true)
+                    finish()
+                    return false // 置き換えない
+                }
+                finish()
+                return true
+            } failedAction: { _ in
+                finish()
+            }
+        }
+    }
+
+    #else
+    /// 時計では同梱の物だけを使う。
+    static func preferredCatalog(readableVvmFormatVersions: Set<Int> = readableVvmFormatVersions)
+        -> VoicevoxVoiceModelCatalog? {
+        return preferred(embedded: loadEmbeddedFile(), remote: nil,
+                         readableVvmFormatVersions: readableVvmFormatVersions)
+    }
+    #endif
+
     /// 同梱と取得済みのうち、実際に使うべき一式を返す。
     static func preferred(embedded: VoicevoxVoiceModelCatalogFile?,
                           remote: VoicevoxVoiceModelCatalogFile?,

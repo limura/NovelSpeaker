@@ -93,8 +93,7 @@ enum VoicevoxVoiceModelConsentDialog {
         guard VoicevoxCore.cachedStyles.contains(where: { $0.styleId == styleId }) == false else {
             return false
         }
-        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferred(
-                embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil),
+        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferredCatalog(),
               let entry = catalog.entry(forStyleId: styleId) else {
             NiftyUtility.EasyDialogBuilder(viewController)
                 .title(title: NSLocalizedString("VoicevoxConsent_UnknownStyleTitle", comment: "この話者は使えません"))

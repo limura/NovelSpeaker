@@ -30,8 +30,7 @@ class VoicevoxVoiceModelManageViewController: UITableViewController, UISearchRes
     override func viewDidLoad() {
         super.viewDidLoad()
         title = NSLocalizedString("VoicevoxVoiceModelManage_Title", comment: "VOICEVOXの音声モデル")
-        catalog = VoicevoxVoiceModelCatalogLoader.preferred(
-            embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil)
+        catalog = VoicevoxVoiceModelCatalogLoader.preferredCatalog()
 
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false

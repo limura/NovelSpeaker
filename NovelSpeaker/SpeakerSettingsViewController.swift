@@ -61,8 +61,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
     /// これが無いと「(未取得) スタイル番号 37」としか出せず、
     /// 誰を選んでいたのか利用者に分からない。
     static func catalogStyleLabel(for styleId: UInt32) -> String? {
-        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferred(
-            embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil),
+        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferredCatalog(),
               let entry = catalog.entry(forStyleId: styleId) else { return nil }
         return entry.displayName
     }

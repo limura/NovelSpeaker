@@ -41,8 +41,7 @@ class VoicevoxStyleSelectViewController: UITableViewController, UISearchResultsU
     override func viewDidLoad() {
         super.viewDidLoad()
         title = NSLocalizedString("SpeakSettingsViewController_VoicevoxStyleTitle", comment: "VOICEVOX話者")
-        catalog = VoicevoxVoiceModelCatalogLoader.preferred(
-            embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil)
+        catalog = VoicevoxVoiceModelCatalogLoader.preferredCatalog()
 
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false

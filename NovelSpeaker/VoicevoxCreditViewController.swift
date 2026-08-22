@@ -33,8 +33,7 @@ class VoicevoxCreditViewController: UITableViewController {
     }
 
     private func reload() {
-        let catalog = VoicevoxVoiceModelCatalogLoader.preferred(
-            embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil)
+        let catalog = VoicevoxVoiceModelCatalogLoader.preferredCatalog()
         let stored = Set(VoicevoxVoiceModelStore.shared.storedModelIDs(
             readableFormats: VoicevoxVoiceModelCatalogLoader.readableVvmFormatVersions).keys)
         entries = VoicevoxCreditList.entries(catalog: catalog, storedModelIDs: stored)

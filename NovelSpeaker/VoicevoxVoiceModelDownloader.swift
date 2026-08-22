@@ -237,8 +237,7 @@ extension VoicevoxVoiceModelDownloader: URLSessionDownloadDelegate {
 
     private func expectedStyleIds(forModelID modelID: String) -> Set<UInt32> {
         // カタログから引き直す。待ち行列は状態だけを持ち、内容は持たない。
-        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferred(
-            embedded: VoicevoxVoiceModelCatalogLoader.loadEmbeddedFile(), remote: nil,
+        guard let catalog = VoicevoxVoiceModelCatalogLoader.preferredCatalog(
             readableVvmFormatVersions: readableFormats),
               let model = catalog.model(withID: modelID) else { return [] }
         return Set(model.allStyleIds)
