@@ -518,6 +518,11 @@ actor VoicevoxCore {
             voicevox_user_dict_delete(previous)
         }
         userDict = dict
+        // ★メモリキャッシュを捨てる。
+        // ディスク側の鍵には辞書の署名が入っているので、辞書を変えれば自然に別物になるが、
+        // メモリ側の鍵は「話者::本文」だけで辞書を見ていない。捨てないと、
+        // 読みを直した直後のその箇所が、古い読みのまま鳴り続ける事になる。
+        clearCache()
         if entries.isEmpty == false {
             AppInformationLogger.AddLog(message: "VoicevoxCore: ユーザー辞書を登録しました(\(addedCount)語・受け付けられなかったもの \(rejectedCount)語)", isForDebug: true)
         }
