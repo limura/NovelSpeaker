@@ -74,6 +74,35 @@ class GatherStorySpeechSettingsBenchmarkTest: XCTestCase {
         NSLog("NovelSpeaker.Benchmark: %@ = %.1f ms", label, elapsed * 1000)
     }
 
+    /// 「適用する音声合成」の指定が入っているかどうかで、組み立ての時間がどれだけ違うか。
+    ///
+    /// 指定が無いと、1件ごとに標準の読み替え辞書との照合用の鍵
+    /// (読み替え前・後を繋いだ文字列)を作って引く事になる。
+    /// これは**ページをめくる度に**5000件ぶん走るので、
+    /// 一度だけ書き換えて指定を入れておく価値があるかどうかをここで測る。
+    func testGatherCostWithAndWithoutStoredEngineTypes() throws {
+        prepareRealm(novelCount: 1, speechModCount: 5000, sectionConfigCount: 5)
+        let novelID = "\(Self.novelIDPrefix)0"
+
+        measureSeconds("指定なし(毎回、標準辞書と照合する)", iterations: 5) {
+            RealmUtil.RealmBlock { realm in
+                _ = StoryTextClassifier.GatherStorySpeechSettings(realm: realm, novelID: novelID)
+            }
+        }
+
+        RealmUtil.Write { realm in
+            for mod in realm.objects(RealmSpeechModSetting.self).filter("before BEGINSWITH %@", "計測用読み替え") {
+                mod.setSpeechEngineTypes([.any])
+            }
+        }
+
+        measureSeconds("指定あり(照合しない)", iterations: 5) {
+            RealmUtil.RealmBlock { realm in
+                _ = StoryTextClassifier.GatherStorySpeechSettings(realm: realm, novelID: novelID)
+            }
+        }
+    }
+
     /// 1作品ぶんの設定組み立てに、どれだけ掛かるか。
     func testGatherCostWithRealisticData() throws {
         prepareRealm(novelCount: 10, speechModCount: 5000, sectionConfigCount: 5)

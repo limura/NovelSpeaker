@@ -42,6 +42,9 @@ final class AppLaunchCoordinator: NSObject {
         NovelSpeakerUtility.CleanBackupFolder()
         ImportFromWebPageViewController.ClearDownloadTemporaryDirectory()
         NovelSpeakerUtility.SetInitialAvailableMemory()
+        // 読み替えの「適用する音声合成」を一度だけ書き込む。
+        // 読み上げの組み立てより先に済ませておく(組み立て側の照合を減らすのが目的なので)。
+        NovelSpeakerUtility.MigrateSpeechModEngineTypesIfNeeded()
         // 強制終了された時に失った読み上げ位置を、控えから書き戻す。
         // 書き戻しはここ(起動時)の1回だけで、それ以外の場面の挙動は変わらない。
         applyReadingPositionBreadcrumbIfNeeded()

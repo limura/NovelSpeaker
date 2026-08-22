@@ -166,4 +166,89 @@ class SpeechEngineTypeTest: XCTestCase {
         // バンドルの JSON に必ずある物(サンプルとして先頭に置かれている)。
         XCTAssertEqual(effectiveTypes(before: "黒剣", after: "コッケン"), [.avSpeechSynthesizer])
     }
+    // MARK: - 一度だけの書き込み
+
+    // ★利用者が自分で選んだ指定を潰してはいけない。
+    func testMigrationDoesNotTouchExplicitChoices() {
+        let before = "移行テスト用-自分で選んだ-\(UUID().uuidString)"
+        RealmUtil.Write { realm in
+            let setting = RealmSpeechModSetting()
+            setting.before = before
+            setting.after = "\"かっこつき\""   // 判定なら端末の音声だけになる内容
+            setting.setSpeechEngineTypes([.voicevox])
+            realm.add(setting, update: .modified)
+        }
+        defer { deleteSetting(before: before) }
+
+        UserDefaults.standard.set(0, forKey: NovelSpeakerUtility.speechModEngineTypeMigrationVersionKey)
+        NovelSpeakerUtility.MigrateSpeechModEngineTypesIfNeeded()
+
+        RealmUtil.RealmBlock { realm in
+            guard let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) else {
+                XCTFail("消えている")
+                return
+            }
+            XCTAssertEqual(setting.speechEngineTypes, [.voicevox], "自分で選んだ指定が上書きされている")
+        }
+    }
+
+    // 指定の無い物には、判定した結果が書き込まれる。
+    // 「すべて」の時も空のままにしない(空だと次も照合してしまう)。
+    func testMigrationWritesTheInferredValue() {
+        let plain = "移行テスト用-ふつう-\(UUID().uuidString)"
+        let quoted = "移行テスト用-かっこ-\(UUID().uuidString)"
+        RealmUtil.Write { realm in
+            let a = RealmSpeechModSetting()
+            a.before = plain
+            a.after = "フツウ"
+            realm.add(a, update: .modified)
+            let b = RealmSpeechModSetting()
+            b.before = quoted
+            b.after = "\"かっこつき\""
+            realm.add(b, update: .modified)
+        }
+        defer {
+            deleteSetting(before: plain)
+            deleteSetting(before: quoted)
+        }
+
+        UserDefaults.standard.set(0, forKey: NovelSpeakerUtility.speechModEngineTypeMigrationVersionKey)
+        NovelSpeakerUtility.MigrateSpeechModEngineTypesIfNeeded()
+
+        RealmUtil.RealmBlock { realm in
+            XCTAssertEqual(RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: plain)?.speechEngineTypes,
+                           [.any], "「すべて」も明示的に書かれるべき")
+            XCTAssertEqual(RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: quoted)?.speechEngineTypes,
+                           [.avSpeechSynthesizer], "引用符入りは端末の音声だけになるべき")
+        }
+    }
+
+    // 一度走ったら二度と走らない。
+    func testMigrationRunsOnlyOnce() {
+        UserDefaults.standard.set(0, forKey: NovelSpeakerUtility.speechModEngineTypeMigrationVersionKey)
+        NovelSpeakerUtility.MigrateSpeechModEngineTypesIfNeeded()
+        XCTAssertEqual(UserDefaults.standard.integer(forKey: NovelSpeakerUtility.speechModEngineTypeMigrationVersionKey),
+                       NovelSpeakerUtility.speechModEngineTypeMigrationVersion)
+
+        let before = "移行テスト用-二度目-\(UUID().uuidString)"
+        RealmUtil.Write { realm in
+            let setting = RealmSpeechModSetting()
+            setting.before = before
+            setting.after = "フツウ"
+            realm.add(setting, update: .modified)
+        }
+        defer { deleteSetting(before: before) }
+        NovelSpeakerUtility.MigrateSpeechModEngineTypesIfNeeded()
+        RealmUtil.RealmBlock { realm in
+            XCTAssertTrue(RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before)?.speechEngineTypes.isEmpty ?? false,
+                          "済んでいるのにもう一度書き込んでいる")
+        }
+    }
+
+    private func deleteSetting(before: String) {
+        RealmUtil.Write { realm in
+            guard let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) else { return }
+            realm.delete(setting)
+        }
+    }
 }

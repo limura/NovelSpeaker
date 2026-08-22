@@ -266,6 +266,55 @@ class NovelSpeakerUtility: NSObject {
         }
     }
 
+    /// 「適用する音声合成」を、既存の読み替えに一度だけ書き込む。
+    ///
+    /// 指定が無い読み替えは、その都度「標準の読み替え辞書と同じ内容か」を
+    /// 照合して判定している。この照合は**ページをめくる度に**全件ぶん走る
+    /// (5000件で母艦16.6ms・全体の7%。遅い端末ではその数倍)。
+    /// 一度データに書いてしまえば照合そのものが要らなくなる。
+    ///
+    /// iCloud への上りは1回のトランザクションにまとめれば
+    /// 1回の CKModifyRecordsOperation で済む(IceCream が300件ずつに割って送る)。
+    ///
+    /// **既に指定がある読み替えには触らない。** 利用者が自分で選んだ物を上書きしない。
+    ///
+    /// 走った後も判定の仕組み自体は残してある。古い版の端末から iCloud 経由で
+    /// 指定の無いレコードが降りてくる事があるため。
+    static let speechModEngineTypeMigrationVersionKey = "SpeechModEngineTypeMigrationVersion"
+    /// 標準の読み替え辞書のタグを取り込んだ回数。
+    /// タグ付けが進んで配り直したくなったら上げる事になるが、その時は
+    /// 「利用者が自分で選んだ物をどう見分けるか」を先に決める必要がある
+    /// (今の形では見分けられないので、上げると利用者の選択を潰してしまう)。
+    static let speechModEngineTypeMigrationVersion = 1
+    static func MigrateSpeechModEngineTypesIfNeeded() {
+        let defaults = UserDefaults.standard
+        guard defaults.integer(forKey: speechModEngineTypeMigrationVersionKey) < speechModEngineTypeMigrationVersion else { return }
+        let engineTypeMap = GetDefaultSpeechModEngineTypes()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let settings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
+            var writeTargets:[(setting: RealmSpeechModSetting, types: [SpeechEngineType])] = []
+            for setting in settings {
+                guard setting.targetSpeechEngineTypeArray.isEmpty else { continue }
+                let effective = EffectiveSpeechEngineTypes(of: setting, defaultSpeechModEngineTypes: engineTypeMap)
+                // 判定の結果が「すべて」の時は、空のままにせず .any を入れる。
+                // 空のままだと次も照合してしまう(それを無くすための書き込みなので)。
+                writeTargets.append((setting, effective.isEmpty ? [.any] : effective))
+            }
+            guard writeTargets.isEmpty == false else { return }
+            // ★1回のトランザクションにまとめる事。
+            // IceCream は書き込み1回につき1回だけ CloudKit へ送るので、
+            // 分けて書くとその回数だけ通信が走る。
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                for target in writeTargets {
+                    target.setting.setSpeechEngineTypes(target.types)
+                }
+            }
+            AppInformationLogger.AddLog(message: "読み替えの「適用する音声合成」を書き込みました(\(writeTargets.count)件)", isForDebug: true)
+        }
+        defaults.set(speechModEngineTypeMigrationVersion, forKey: speechModEngineTypeMigrationVersionKey)
+        defaults.synchronize()
+    }
+
     static func getSpeechModSettings(completion:([SpeechModSetting])->Void) {
         var speechModSettings:[SpeechModSetting]? = nil
         RealmUtil.RealmBlock { (realm) -> Void in
