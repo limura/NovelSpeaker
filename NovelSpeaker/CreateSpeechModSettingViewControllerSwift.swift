@@ -262,6 +262,27 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         }.onCellSelection({ (_, _) in
             self.runTest()
         })
+        // ★この画面だけは「押すまで保存されない」。
+        //
+        // 他の設定画面の多くは触った時点で効くので、ここも同じだと思って
+        // タブを切り替えると「直したはずの読みで喋らない」と見える。
+        // それでも押すまで保存しないのは、編集の途中経過を書けないため:
+        //
+        //  1. 「読み替え前」が主キーそのもの。before が変わっていると
+        //     元のエントリを delete して作り直すので、1文字ごとに保存すると
+        //     「Ｓ」「ＳＡ」「ＳＡＮ」…が全部登録され、元は最初の1文字で消える。
+        //  2. 保存すると RealmSettingChanged が飛び、この画面は
+        //     それを受けて自分で pop する(registNotificationCenter)。
+        //     編集中に保存すると、編集中に画面が閉じる事になる。
+        //  3. 編集の途中は必ず不正な状態を通過する
+        //     (空文字列・書きかけの正規表現は必ず一度は壊れている)。
+        //  4. 「対象の小説が0件なら削除しますか」という破壊的な分岐がここにある。
+        //  5. 保存の度に辞書を全件組み立て直して VOICEVOX に登録し直し、
+        //     iCloud にも飛ぶ(5000件超で数百ms)。
+        //
+        // 1〜4 は「1文字ごとの保存」だけを否定するので、
+        // 「画面を離れた時に1回だけ保存」にするなら全部かわせる。
+        // 変えたくなった時のために書いておく。
         <<< ButtonRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_ApplyButtonTitle", comment: "保存する")
         }.onCellSelection({ (_, _) in
