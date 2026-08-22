@@ -10,11 +10,11 @@
 "Watch_Bookshelf_Title" = "本棚";
 "Watch_Bookshelf_EmptyMessage" = "iPhoneの ことせかい を一度起動すると、本棚がここに表示されます。";
 "Watch_Bookshelf_GoToPlayer" = "再生画面へ移動";
-"Watch_Bookshelf_TransferUpdates" = "更新分を転送 (%1$d→%2$d章)";
+"Watch_Bookshelf_TransferUpdates" = "更新分を転送 (%1$d→%2$dページ)";
 "Watch_Bookshelf_TransferBody" = "本文をWatchへ転送";
 "Watch_Bookshelf_UpdatedOnPhone" = "この小説はiPhone側で更新されています。";
 "Watch_Bookshelf_NotTransferred" = "この小説の本文はまだWatchにありません。";
-"Watch_Bookshelf_ChapterProgress" = "%1$d/%2$d章";
+"Watch_Bookshelf_ChapterProgress" = "%1$d/%2$dページ";
 "Watch_Bookshelf_Sort_Title" = "順番";
 "Watch_BookshelfSort_PhoneOrder" = "iPhoneと同じ";
 "Watch_BookshelfSort_Writer" = "作者名順";
@@ -28,7 +28,7 @@
 "Watch_BookshelfSort_CreatedDate" = "本棚登録順";
 "Watch_BookshelfSort_PageCount" = "ページ数順";
 "Watch_BookshelfSort_LastReadWithFolder" = "小説を開いた日時順(フォルダ分類版)";
-"Watch_BookshelfSort_UnreadChapterCount" = "未読章数別";
+"Watch_BookshelfSort_UnreadChapterCount" = "未読ページ数別";
 "Watch_BookshelfSort_WatchTransferState" = "Apple Watch転送状況別";
 "Watch_WatchBucket_Transferred" = "Apple Watchに転送済み";
 "Watch_WatchBucket_NotTransferred" = "未転送";
@@ -43,9 +43,9 @@
 "Watch_Bucket_UpTo6MonthsAgo" = "6ヶ月前まで";
 "Watch_Bucket_UpTo1YearAgo" = "1年前まで";
 "Watch_Bucket_BeforeThat" = "それ以前";
-"Watch_UnreadBucket_100Plus" = "未読 100章以上";
-"Watch_UnreadBucket_10To99" = "未読 10〜99章";
-"Watch_UnreadBucket_1To9" = "未読 1〜9章";
+"Watch_UnreadBucket_100Plus" = "未読 100ページ以上";
+"Watch_UnreadBucket_10To99" = "未読 10〜99ページ";
+"Watch_UnreadBucket_1To9" = "未読 1〜9ページ";
 "Watch_UnreadBucket_CaughtUp" = "追いついている";
 
 /* iPhone との通信 */
@@ -60,8 +60,8 @@
 "Watch_Player_SourceWatch" = "Watchで聴く(単体再生)";
 "Watch_Player_NoNovelSelected_ChooseFromBookshelf" = "小説が選ばれていません。本棚から小説を選んでください。";
 "Watch_Player_BodyNotTransferred" = "この小説の本文がWatchに転送されていません。本棚の小説をタップして転送してから、もう一度お試しください。";
-"Watch_Player_ChapterProgress" = "%1$d/%2$d章 · %3$d%%";
-"Watch_Player_ChapterOnly" = "第%d章";
+"Watch_Player_ChapterProgress" = "%1$d/%2$d · %3$d%%";
+"Watch_Player_ChapterOnly" = "%dページ目";
 "Watch_Player_Badge_PlayingOnWatch" = "Watchで再生中";
 "Watch_Player_Badge_WatchStandaloneMode" = "Watch単体モード";
 "Watch_Player_Badge_Connecting" = "接続中…";
@@ -75,12 +75,12 @@
 /* 本文ページ */
 "Watch_TextPage_Title" = "本文";
 "Watch_TextPage_NovelNotTransferred" = "「%@」の本文はまだWatchに転送されていません。";
-"Watch_TextPage_ChapterNotTransferred" = "この章(%d章)はまだWatchに転送されていません。";
+"Watch_TextPage_ChapterNotTransferred" = "%dページ目はまだWatchに転送されていません。";
 "Watch_TextPage_TransferNow" = "この小説の本文を同期";
 "Watch_TextPage_Transferring" = "iPhoneから転送中…";
 "Watch_TextPage_TransferringProgress" = "iPhoneから転送中… (%1$d/%2$d)";
-"Watch_TextPage_PrevChapter" = "◀ 前の章";
-"Watch_TextPage_NextChapter" = "次の章へ ▶";
+"Watch_TextPage_PrevChapter" = "◀ 前のページ";
+"Watch_TextPage_NextChapter" = "次のページ ▶";
 "Watch_TextPage_CannotSeekWhilePhonePlaying" = "iPhoneで再生中は位置を指定できません。一時停止してからやり直してください。";
 
 /* 便利機能 */
@@ -103,7 +103,7 @@
 "Watch_Cache_Done" = "完了";
 "Watch_Cache_Retransfer" = "本文を転送し直す";
 "Watch_Cache_RemoveFromWatch" = "Watchから削除";
-"Watch_Cache_ChapterCount" = "%d章";
+"Watch_Cache_ChapterCount" = "%dページ";
 "Watch_Cache_Detail_NeverPlayed" = "%@ · Watchで未再生";
 "Watch_Cache_Detail_PlayedToday" = "%@ · 今日再生";
 "Watch_Cache_Detail_PlayedDaysAgo" = "%1$@ · %2$d日前に再生";
@@ -120,7 +120,7 @@
 "Watch_SpeechPlayer_AudioRouteFailed" = "オーディオ出力先に接続できませんでした。%@";
 "Watch_SpeechPlayer_SpeechStoppedByEnd" = "読み上げが最後に達しました。";
 "Watch_SpeechPlayer_SpeechNextNovelFormat" = "読み上げが最後に達したため、次に %@ を再生します。";
-"Watch_SpeechPlayer_RewindFirstStory" = "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。";
+"Watch_SpeechPlayer_RewindFirstStory" = "読み上げが最後に達したため、最初のページに戻って再生を繰り返します。";
 
 /* 発話の速度・音量 */
 "Watch_SpeechConfig_Title" = "速度と音量";
@@ -134,8 +134,8 @@
 "Watch_RepeatConfig_LoopTitle" = "次の小説の選択方式";
 "Watch_RepeatConfig_Note" = "Watch単体モードでの連続再生の対象になるのは、Watchに転送済みの小説だけです。変更は iPhone の設定に保存されます。";
 "Watch_RepeatType_NoRepeat" = "そのまま停止する";
-"Watch_RepeatType_RewindToFirstStory" = "最初の章から再生し直す";
-"Watch_RepeatType_RewindToThisStory" = "現在の章を再生し直す";
+"Watch_RepeatType_RewindToFirstStory" = "最初のページから再生し直す";
+"Watch_RepeatType_RewindToThisStory" = "現在のページを再生し直す";
 "Watch_RepeatType_GoToNextLikeNovel" = "別のお気に入り小説を再生";
 "Watch_RepeatType_GoToNextSameFolderdNovel" = "同じフォルダの別の小説を再生";
 "Watch_RepeatType_GoToNextSelectedFolderdNovel" = "指定フォルダの別の小説を再生";
@@ -146,8 +146,8 @@
 
 /* VoiceOver 用ラベル */
 "Watch_AX_Menu" = "メニュー";
-"Watch_AX_PrevChapter" = "前の章へ";
-"Watch_AX_NextChapter" = "次の章へ";
+"Watch_AX_PrevChapter" = "前のページへ";
+"Watch_AX_NextChapter" = "次のページへ";
 "Watch_AX_SkipBackward" = "少し戻す";
 "Watch_AX_SkipForward" = "少し進める";
 "Watch_AX_Play" = "再生";
@@ -175,5 +175,5 @@
 "Watch_Color_navy" = "紺色";
 "Watch_Color_sepia" = "セピア";
 
-/* 本棚の分類の行の冊数(VoiceOver で「12」とだけ読まれないようにする) */
-"Watch_Bookshelf_GroupNovelCountFormat" = "%d冊";
+/* 本棚の分類の行の件数(VoiceOver で「12」とだけ読まれないようにする) */
+"Watch_Bookshelf_GroupNovelCountFormat" = "%d件";

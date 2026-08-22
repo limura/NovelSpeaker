@@ -776,7 +776,7 @@
 "BookShelfRATreeViewController_WatchBucket_Transferred" = "Apple Watchに転送済み";
 "BookShelfRATreeViewController_WatchBucket_NotTransferred" = "未転送";
 "BookShelfTreeViewController_checkboxselected_SendToAppleWatch" = "Apple Watchへ転送";
-"BookShelfTreeViewController_checkboxselected_SendToAppleWatch_QueuedFormat" = "%d冊の小説をApple Watchへの転送キューに追加しました。Watch側への反映には少し時間がかかることがあります。";
+"BookShelfTreeViewController_checkboxselected_SendToAppleWatch_QueuedFormat" = "%d件の小説をApple Watchへの転送キューに追加しました。Watch側への反映には少し時間がかかることがあります。";
 "BookShelfTreeViewController_checkboxselected_SendToAppleWatch_Failed" = "Apple Watchへ転送できませんでした。Apple Watch側のことせかいを一度起動してから、もう一度お試しください。";
 "BookShelfTreeViewController_FilterButton_AccessibilityLabel" = "絞り込み";
 "BookShelfTreeViewController_FilterPopup_Title" = "絞り込み";
@@ -788,7 +788,7 @@
 "BookShelfTreeViewController_FilterPopup_WatchTransferred" = "転送済み";
 "BookShelfTreeViewController_FilterPopup_WatchNotTransferredSegment" = "未転送";
 "BookShelfTreeViewController_FilterPopup_WatchNotTransferred" = "Watch未転送";
-"BookShelfTreeViewController_FilterPopup_CountFormat" = "対象: %d冊";
+"BookShelfTreeViewController_FilterPopup_CountFormat" = "対象: %d件";
 "BookShelfTreeViewController_FilterPopup_Apply" = "適用";
 "BookShelfTreeViewController_FilterPopup_Clear" = "絞り込みを解除";
 "BookShelfTreeViewController_FilterPopup_SummaryPrefix" = "絞り込み: ";
@@ -1101,8 +1101,8 @@
 "WatchSessionCoordinator_ErrorNovelIDMissing" = "novelID がありません";
 "WatchSessionCoordinator_ErrorInvalidArguments" = "引数が不正です";
 "WatchSessionCoordinator_ErrorWatchAppNotInstalled" = "Watchアプリが未インストール扱いになっています。Watch側の ことせかい を一度削除して、iPhoneのWatchアプリの「利用可能なApp」からインストールし直すと直ることがあります。";
-"WatchSessionCoordinator_ErrorNoNextChapter" = "次の章はありません";
-"WatchSessionCoordinator_ErrorNoPreviousChapter" = "前の章はありません";
+"WatchSessionCoordinator_ErrorNoNextChapter" = "次のページはありません";
+"WatchSessionCoordinator_ErrorNoPreviousChapter" = "前のページはありません";
 "WatchSessionCoordinator_ErrorNovelNotFound" = "小説が見つかりません";
 
 // 設定タブのデバッグメニュー(Apple Watch連携の診断)
@@ -1280,7 +1280,7 @@
 "VoicevoxCacheManage_DeleteSelected" = "選択を削除";
 "VoicevoxCacheManage_NoNovelSelected" = "削除する小説が選ばれていません。";
 "VoicevoxCacheManage_DeleteSelectedTitle" = "選んだ音声を削除";
-"VoicevoxCacheManage_DeleteSelectedMessageFormat" = "%1$d作品の音声(%2$@)を削除します。\n\n削除しても本文は消えません。";
+"VoicevoxCacheManage_DeleteSelectedMessageFormat" = "%1$d件の小説の音声(%2$@)を削除します。\n\n削除しても本文は消えません。";
 "VoicevoxCacheManage_SizeTextFormat" = "%1$@ぶん / %2$@";
 "VoicevoxCacheManage_GeneratingRowFormat" = "▶ 生成中: %@";
 "VoicevoxCacheManage_TotalSectionTitle" = "合計";
@@ -1297,7 +1297,7 @@
 "VoicevoxCacheManage_RemoveAllTitle" = "事前生成音声を全て削除";
 "VoicevoxCacheManage_RemoveAllMessageFormat" = "事前生成音声(%@)を全て削除します。\n\n削除しても本文は消えません。";
 "VoicevoxCacheManage_NoStoredAudio" = "事前生成音声がありません。";
-"VoicevoxCacheManage_ScanningFormat" = "今の設定で使われない音声を探しています……\n(%1$d作品・%2$dページ)";
+"VoicevoxCacheManage_ScanningFormat" = "今の設定で使われない音声を探しています……\n(小説%1$d件・%2$dページ)";
 "VoicevoxCacheManage_NoUnusedAudio" = "今の設定で使われない音声はありませんでした。";
 "VoicevoxCacheManage_UnusedTitle" = "今の設定で使われない音声";
 "VoicevoxCacheManage_UnusedMessageFormat" = "現在の発話設定では %@ の音声が使われません。\n\n削除しますか？\n(削除しても本文は消えません。必要になれば作り直せます)";

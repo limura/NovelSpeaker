@@ -81,7 +81,7 @@
 "SettingTableViewController_SendBugReport" = "Send inquiries to developers via E-mail";
 "SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "Display bookmarks on the Bookshelf";
 "SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "Long press only pops: corrections for pronunciation";
-"SettingTableViewController_ShortSkipIsEnabled" = "Replace the next/previous chapter buttons in Control Center with skip forward / skip backward.";
+"SettingTableViewController_ShortSkipIsEnabled" = "Replace the next/previous page buttons in Control Center with skip forward / skip backward.";
 "SettingTableViewController_PlaybackDurationIsEnabled" = "Display remaining time in the control center. (Approximation only)";
 "SettingTableViewController_DarkThemeIsEnabled" = "Dark Theme";
 "SettingTableViewController_PageTurningSoundIsEnabled" = "Sounds effect when turning pages";
@@ -195,7 +195,7 @@
 "SettingTableViewController_RepeatTypeTitle" = "Operation at the end of playback";
 "SettingTableViewController_RepeatType_NoRepeat" = "Stop";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "Play from the beginning";
-"SettingTableViewController_RepeatType_RewindToThisStory" = "Replay the current chapter";
+"SettingTableViewController_RepeatType_RewindToThisStory" = "Replay the current page";
 "SettingTableViewController_RepeatType_GoToNextLikeNovel" = "Play another favorite novel";
 "SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "Play another novel in the same folder";
 "SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel" = "Play another novel in the specified folder";
@@ -308,12 +308,12 @@
 
 "EditBookViewController_TitleText" = "Name";
 "EditBookViewController_EntryButtonTitle" = "Register";
-"EditBookViewController_AddNewChapterButtonTitle" = "Add chapter";
-"EditBookViewController_DeleteChapterButtonTitle" = "Delete chapter";
+"EditBookViewController_AddNewChapterButtonTitle" = "Add page";
+"EditBookViewController_DeleteChapterButtonTitle" = "Delete page";
 "EditBookViewController_StoryPlaceholderText" = "Enter the text here.";
-"EditBookViewController_ConifirmDeleteStory_Title" = "Delete this chapter";
+"EditBookViewController_ConifirmDeleteStory_Title" = "Delete this page";
 "EditBookViewController_ConifirmDeleteStory_Message" = "This operation is irreversible. Do you want to delete it?";
-"EditBookViewController_ConifirmDeleteStory_OKButton" = "Delete this chapter";
+"EditBookViewController_ConifirmDeleteStory_OKButton" = "Delete this page";
 "EditBookViewController_NowDeleting_Title" = "deleting...";
 "EditBookViewController_ConifirmDeleteStory_IsNeedConifirmSwitch_Message" = "Don't ask for confirmation for a while";
 "EditBookViewController_SpeakTestButton_AccesibilityLabel" = "start speak test";
@@ -368,11 +368,11 @@
 "SpeechViewController_CanNotGetStorys" = "I could not refer to the novel information.";
 "SpeechViewController_SearchDialogTitle" = "Search";
 "SpeechViewController_SearchDialogMessage" = "Search a phrase in the text";
-"SpeechViewController_SearchDialogPlaceholderText" = "Searching with an empty string will list all chapters";
+"SpeechViewController_SearchDialogPlaceholderText" = "Searching with an empty string will list all pages";
 "SpeechViewController_SearchDialog_NotFoundTitle" = "The specified phrase does not exist.";
 "SpeechViewController_NowSearchingTitle" = "Searching";
 "SpeechViewController_NowLoadingText" = "loading...";
-"SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated %d chapter on the other device";
+"SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated page %d on the other device";
 "SpeechViewController_WaitingSpeakerReady" = "Waiting for the speaker to be ready.";
 "SpeechViewController_CurrentWebPageButton_VoiceOverTitle" = "Open current page with Web import tab";
 "SpeechViewController_WebPageButton_VoiceOverTitle" = "Open in web import tab";
@@ -439,7 +439,7 @@
 "NovelDetailViewController_ActionSection_CopyNovelWriterNameButton" = "Copy the author name";
 "NovelDetailViewController_ActionSection_CopyNovelWriterNameDone_Message" = "I copied the author name";
 "NovelDetailViewController_ActionSection_CreateBackupForThisNovelButton" = "Create backup file for this novel";
-"NovelDetailViewController_ActionSection_SearchButton_Title" = "Search within this novel (searching without anything will display a list of chapters)";
+"NovelDetailViewController_ActionSection_SearchButton_Title" = "Search within this novel (searching without anything will display a list of pages)";
 "NovelDetailViewController_ActionSection_EditNovelButton" = "Edit this novel";
 "NovelDetailViewController_LikeLevelSwitchRowTitle" = "Favorite";
 "NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "Do not check for updates to this novel";
@@ -512,7 +512,7 @@
 "NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage" = "Possible causes such as the already registered novel.";
 "NiftyUtility_FailedAboutAddNewNovel_DuplicateNovelID_OpenNovelButton" = "Open existed novel";
 "NiftyUtility_AddNewNovelToBookshelfTitle" = "Add new novel to bookshelf";
-"NiftyUtility_AddNewNovelToBookshelfMessage" = "Continue downloading if there is a chapter that follows.";
+"NiftyUtility_AddNewNovelToBookshelfMessage" = "Continue downloading if there is a page that follows.";
 "NiftyUtility_ImportSeparatedContent" = "Split the text and import";
 "NiftyUtility_ImportError_SendProblemReportMessage" = "\n\nYou can also email the developer about the problematic novel. Please note that the information sent will contain information about the website you are trying to import this time, so if you are having trouble sending such information please do not report a problem.\n Also, we do not basically reply to this report. If you want a reply, please contact us from \"Settings\" -> \"Contact developer\".";
 "NiftyUtility_ImportError_SendProblemReportButton" = "Create report email";
@@ -595,7 +595,7 @@
 "FontSelectViewController_DefaultFontTitle" = "DefaultFont";
 
 "StorySpeaker_SpeechStopedAndSpeechNextStory_Format" = "Now that the reading has reached the end, it's time to play %@";
-"StorySpeaker_SpeechStopedAndRewindFirstStory" = "Since the reading has reached the end, go back to the first chapter and repeat the playback.";
+"StorySpeaker_SpeechStopedAndRewindFirstStory" = "Since the reading has reached the end, go back to the first page and repeat the playback.";
 "StorySpeaker_StartSpeechCountExceeded_in_iOS16.3_Announce" = "The amount of memory being used has increased, and we have determined that it will be forcibly terminated if this continues, so we will stop speaking. You can resume playback as it is, but it is recommended to quit the app once and then start playback again.";
 
 "CoreDataToRealmTool_DefaultSpeaker" = "Default";
@@ -719,7 +719,7 @@
 "BookShelfRATreeViewController_SortTypeUpdateDateWithFilder" = "Last download date (with folder)";
 "BookShelfRATreeViewController_SorteTypeCreatedDate" = "Bookshelf registration order";
 "BookShelfRATreeViewController_StoryTypeLastReadDate" = "Last read date";
-"BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber" = "Indicates a chapter where the reading position has not been downloaded. Do you try to download additional chapters of this novel?";
+"BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber" = "Indicates a page where the reading position has not been downloaded. Do you try to download additional pages of this novel?";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK" = "Download";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory" = "Open first story";
 "BookShelfRATreeViewController_NovelDeletingTitle" = "Deleting novel...";
@@ -775,11 +775,11 @@
 "BookShelfTreeViewController_MultiSelectFloatingViewController_BackNormalModeButtonLabel" = "< Back";
 "BookShelfRATreeViewController_SortTypePageCount" = "Page count order";
 "BookShelfRATreeViewController_SortTypeLastReadDateWithFolder" = "Last read date (with folders)";
-"BookShelfRATreeViewController_SortTypeUnreadChapterCount" = "Unread chapter count";
+"BookShelfRATreeViewController_SortTypeUnreadChapterCount" = "Unread page count";
 "BookShelfRATreeViewController_SortTypeAppleWatchTransferState" = "Apple Watch transfer state";
-"BookShelfRATreeViewController_UnreadBucket_100Plus" = "100+ chapters unread";
-"BookShelfRATreeViewController_UnreadBucket_10To99" = "10-99 chapters unread";
-"BookShelfRATreeViewController_UnreadBucket_1To9" = "1-9 chapters unread";
+"BookShelfRATreeViewController_UnreadBucket_100Plus" = "100+ pages unread";
+"BookShelfRATreeViewController_UnreadBucket_10To99" = "10-99 pages unread";
+"BookShelfRATreeViewController_UnreadBucket_1To9" = "1-9 pages unread";
 "BookShelfRATreeViewController_UnreadBucket_CaughtUp" = "Caught up";
 "BookShelfRATreeViewController_WatchBucket_Transferred" = "Transferred to Apple Watch";
 "BookShelfRATreeViewController_WatchBucket_NotTransferred" = "Not transferred";
@@ -894,7 +894,7 @@
 "SpeechViewButtonType_OpenWebPage" = "Open in Web import tab";
 "SpeechViewButtonType_Reload" = "Check for updates to the novel";
 "SpeechViewButtonType_Share" = "Share the URL of this novel";
-"SpeechViewButtonType_Search" = "Search in this novel (search without entering anything will display a list of chapters)";
+"SpeechViewButtonType_Search" = "Search in this novel (search without entering anything will display a list of pages)";
 "SpeechViewButtonType_Edit" = "Edit this novel";
 "SpeechViewButtonType_CopyTitle" = "Copy this novel title";
 "SpeechViewButtonType_Backup" = "Back up this novel";
@@ -1112,8 +1112,8 @@
 "WatchSessionCoordinator_ErrorNovelIDMissing" = "novelID is missing";
 "WatchSessionCoordinator_ErrorInvalidArguments" = "Invalid arguments";
 "WatchSessionCoordinator_ErrorWatchAppNotInstalled" = "The Watch app is being treated as not installed. Deleting NovelSpeaker on the Watch side and reinstalling it from \"Available Apps\" in the Watch app on the iPhone may fix this.";
-"WatchSessionCoordinator_ErrorNoNextChapter" = "There is no next chapter";
-"WatchSessionCoordinator_ErrorNoPreviousChapter" = "There is no previous chapter";
+"WatchSessionCoordinator_ErrorNoNextChapter" = "There is no next page";
+"WatchSessionCoordinator_ErrorNoPreviousChapter" = "There is no previous page";
 "WatchSessionCoordinator_ErrorNovelNotFound" = "The novel was not found";
 
 // Debug menu in the Settings tab (Apple Watch session diagnostics)

@@ -14,7 +14,7 @@
 "Watch_Bookshelf_TransferBody" = "Transfer Text to Watch";
 "Watch_Bookshelf_UpdatedOnPhone" = "This novel has been updated on the iPhone.";
 "Watch_Bookshelf_NotTransferred" = "The text of this novel is not on the Watch yet.";
-"Watch_Bookshelf_ChapterProgress" = "Ch. %1$d/%2$d";
+"Watch_Bookshelf_ChapterProgress" = "%1$d/%2$d pages";
 "Watch_Bookshelf_Sort_Title" = "Sort Order";
 "Watch_BookshelfSort_PhoneOrder" = "Same as iPhone";
 "Watch_BookshelfSort_Writer" = "Writer name";
@@ -28,7 +28,7 @@
 "Watch_BookshelfSort_CreatedDate" = "Bookshelf registration order";
 "Watch_BookshelfSort_PageCount" = "Page count order";
 "Watch_BookshelfSort_LastReadWithFolder" = "Last read date (with folders)";
-"Watch_BookshelfSort_UnreadChapterCount" = "Unread chapter count";
+"Watch_BookshelfSort_UnreadChapterCount" = "Unread page count";
 "Watch_BookshelfSort_WatchTransferState" = "Apple Watch transfer state";
 "Watch_WatchBucket_Transferred" = "Transferred to Apple Watch";
 "Watch_WatchBucket_NotTransferred" = "Not transferred";
@@ -43,9 +43,9 @@
 "Watch_Bucket_UpTo6MonthsAgo" = "Up to 6 months ago";
 "Watch_Bucket_UpTo1YearAgo" = "Up to a year ago";
 "Watch_Bucket_BeforeThat" = "More than a year ago";
-"Watch_UnreadBucket_100Plus" = "100+ chapters unread";
-"Watch_UnreadBucket_10To99" = "10-99 chapters unread";
-"Watch_UnreadBucket_1To9" = "1-9 chapters unread";
+"Watch_UnreadBucket_100Plus" = "100+ pages unread";
+"Watch_UnreadBucket_10To99" = "10-99 pages unread";
+"Watch_UnreadBucket_1To9" = "1-9 pages unread";
 "Watch_UnreadBucket_CaughtUp" = "Caught up";
 
 /* Communication with iPhone */
@@ -60,8 +60,8 @@
 "Watch_Player_SourceWatch" = "Listen on Watch (Standalone)";
 "Watch_Player_NoNovelSelected_ChooseFromBookshelf" = "No novel is selected. Choose a novel from the bookshelf.";
 "Watch_Player_BodyNotTransferred" = "The text of this novel has not been transferred to the Watch. Tap the novel in the bookshelf to transfer it, then try again.";
-"Watch_Player_ChapterProgress" = "Ch. %1$d/%2$d · %3$d%%";
-"Watch_Player_ChapterOnly" = "Chapter %d";
+"Watch_Player_ChapterProgress" = "%1$d/%2$d · %3$d%%";
+"Watch_Player_ChapterOnly" = "Page %d";
 "Watch_Player_Badge_PlayingOnWatch" = "Playing on Watch";
 "Watch_Player_Badge_WatchStandaloneMode" = "Watch Standalone Mode";
 "Watch_Player_Badge_Connecting" = "Connecting…";
@@ -75,7 +75,7 @@
 /* Text page */
 "Watch_TextPage_Title" = "Text";
 "Watch_TextPage_NovelNotTransferred" = "The text of \"%@\" has not been transferred to the Watch yet.";
-"Watch_TextPage_ChapterNotTransferred" = "This chapter (Ch. %d) has not been transferred to the Watch yet.";
+"Watch_TextPage_ChapterNotTransferred" = "Page %d has not been transferred to the Watch yet.";
 "Watch_TextPage_TransferNow" = "Sync This Novel's Text";
 "Watch_TextPage_Transferring" = "Transferring from iPhone…";
 "Watch_TextPage_TransferringProgress" = "Transferring from iPhone… (%1$d/%2$d)";
@@ -103,7 +103,7 @@
 "Watch_Cache_Done" = "Done";
 "Watch_Cache_Retransfer" = "Transfer Text Again";
 "Watch_Cache_RemoveFromWatch" = "Remove from Watch";
-"Watch_Cache_ChapterCount" = "%d chapters";
+"Watch_Cache_ChapterCount" = "%d pages";
 "Watch_Cache_Detail_NeverPlayed" = "%@ · Not played on Watch";
 "Watch_Cache_Detail_PlayedToday" = "%@ · Played today";
 "Watch_Cache_Detail_PlayedDaysAgo" = "%1$@ · Played %2$d days ago";
@@ -120,7 +120,7 @@
 "Watch_SpeechPlayer_AudioRouteFailed" = "Couldn't connect to an audio output. %@";
 "Watch_SpeechPlayer_SpeechStoppedByEnd" = "The Book ends here.";
 "Watch_SpeechPlayer_SpeechNextNovelFormat" = "Now that the reading has reached the end, it's time to play %@";
-"Watch_SpeechPlayer_RewindFirstStory" = "Since the reading has reached the end, go back to the first chapter and repeat the playback.";
+"Watch_SpeechPlayer_RewindFirstStory" = "Since the reading has reached the end, go back to the first page and repeat the playback.";
 
 /* Speech speed & volume */
 "Watch_SpeechConfig_Title" = "Speed & Volume";
@@ -135,7 +135,7 @@
 "Watch_RepeatConfig_Note" = "In Watch standalone mode, only novels transferred to the Watch are played continuously. Changes are saved to the settings on the iPhone.";
 "Watch_RepeatType_NoRepeat" = "Stop";
 "Watch_RepeatType_RewindToFirstStory" = "Play from the beginning";
-"Watch_RepeatType_RewindToThisStory" = "Replay the current chapter";
+"Watch_RepeatType_RewindToThisStory" = "Replay the current page";
 "Watch_RepeatType_GoToNextLikeNovel" = "Play another favorite novel";
 "Watch_RepeatType_GoToNextSameFolderdNovel" = "Play another novel in the same folder";
 "Watch_RepeatType_GoToNextSelectedFolderdNovel" = "Play another novel in the specified folder";
@@ -146,8 +146,8 @@
 
 /* VoiceOver labels */
 "Watch_AX_Menu" = "Menu";
-"Watch_AX_PrevChapter" = "Previous chapter";
-"Watch_AX_NextChapter" = "Next chapter";
+"Watch_AX_PrevChapter" = "Previous page";
+"Watch_AX_NextChapter" = "Next page";
 "Watch_AX_SkipBackward" = "Skip backward";
 "Watch_AX_SkipForward" = "Skip forward";
 "Watch_AX_Play" = "Play";

@@ -9,7 +9,7 @@
 "Phone_Widget_Launcher_Name" = "アプリの起動";
 "Phone_Widget_Launcher_Desc" = "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。";
 "Phone_Widget_Launcher_OpenApp" = "アプリを開く";
-"Phone_Widget_Launcher_Stats_Format" = "本棚 %1$d冊・更新あり %2$d冊";
+"Phone_Widget_Launcher_Stats_Format" = "本棚 %1$d件・更新あり %2$d件";
 
 /* 設定可能ウィジェット「指定小説の再生を開始」 */
 "Phone_Widget_PlayNovel_Name" = "指定小説の再生を開始";
