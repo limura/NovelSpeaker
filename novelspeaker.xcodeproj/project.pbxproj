@@ -741,7 +741,9 @@
 		D655DCC8F6CF39F7F5B04702 /* VoicevoxWedgeDetectionTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxWedgeDetectionTest.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F708192A3B4C5D6 /* SpeechEngineTypeTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechEngineTypeTest.swift; sourceTree = "<group>"; };
 		708192A3B4C5D6E7F8091223 /* VoicevoxUserDictionaryTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxUserDictionaryTest.swift; sourceTree = "<group>"; };
+		965A700D346C4946904A989C /* VoicevoxAccentPreviewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D0C5A347DC413FB147F28F /* VoicevoxAccentPreviewTest.swift */; };
 		92A3B4C5D6E7F80912233445 /* VoicevoxAccentTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxAccentTest.swift; sourceTree = "<group>"; };
+		E1D0C5A347DC413FB147F28F /* VoicevoxAccentPreviewTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxAccentPreviewTest.swift; sourceTree = "<group>"; };
 		7BB43007BECF1CD28FDC0B33 /* ReadingPositionBreadcrumbTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadingPositionBreadcrumbTest.swift; sourceTree = "<group>"; };
 		4213CD6FDBD3F7B69BBCB39D /* SpeechViewBottomButtonSettingsViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechViewBottomButtonSettingsViewController.swift; sourceTree = "<group>"; };
 		470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1334,6 +1336,7 @@
 				2B3C4D5E6F708192A3B4C5D6 /* SpeechEngineTypeTest.swift */,
 				708192A3B4C5D6E7F8091223 /* VoicevoxUserDictionaryTest.swift */,
 				92A3B4C5D6E7F80912233445 /* VoicevoxAccentTest.swift */,
+				E1D0C5A347DC413FB147F28F /* VoicevoxAccentPreviewTest.swift */,
 				7BB43007BECF1CD28FDC0B33 /* ReadingPositionBreadcrumbTest.swift */,
 				2CE631518568C841DC83936B /* VoicevoxTemporaryAudioTest.swift */,
 			);
@@ -2120,6 +2123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				965A700D346C4946904A989C /* VoicevoxAccentPreviewTest.swift in Sources */,
 				E6C2672C699346ABAAC08AE4 /* VoicevoxSynthesisSchedulerTest.swift in Sources */,
 				210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */,
 				21A55E292F179C00004FAAB5 /* NovelDownloaderMissingChapterTests.swift in Sources */,

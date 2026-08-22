@@ -257,9 +257,10 @@ class NovelSpeakerUtility: NSObject {
         guard VoicevoxUserDictionary.shared.replace(with: entries) else { return }
         let applied = VoicevoxUserDictionary.shared.entries
         // 読み方が変わったので、作り置き済みの音声のうち影響を受ける物は使えない。
-        // ディスクの方は鍵に署名が入っているので自然に使われなくなる(古い物は
-        // 「今の設定で使われない音声」として管理画面から消せる)。
-        // メモリ側の鍵には署名が入っていないので、ここで捨てる。
+        // 鍵には辞書の署名が入っているので、作ってある音声は自然に使われなくなる
+        // (古い物は「今の設定で使われない音声」として管理画面から消せる)。
+        // ただし**待機中の先行合成が持っている鍵は、変える前の辞書で作った物**なので、
+        // そのまま作らせても二度と使われない音になる。ここで捨てる。
         VoicevoxCore.shared.schedulePrefetchCacheClear()
         Task {
             await VoicevoxCore.shared.applyUserDictionary(applied)

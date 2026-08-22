@@ -438,6 +438,9 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     func applyUserDictionary(_ entries: [VoicevoxUserDictionaryEntry]) {
         guard let openJTalk = openJTalk else { return }
         guard let dict = voicevox_user_dict_new() else { return }
+        // 並びと重複を先に均しておく。この同じ列を「今入っている辞書」として
+        // 記録するので、呼び出し側の並べ方で鍵が変わってしまわないようにする。
+        let entries = VoicevoxUserDictionaryBuilder.deduplicated(entries)
         var addedCount = 0
         var rejectedCount = 0
         for entry in entries {
@@ -478,6 +481,15 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
             voicevox_user_dict_delete(previous)
         }
         userDict = dict
+        // ★「今 VOICEVOX に入っている辞書」を記録する。
+        //
+        // キャッシュの鍵にはこの辞書の署名が混ざる。記録しないと、
+        // **鍵が音を作った条件を表さなくなる**。
+        // アクセントの聞き比べは辞書を一時的に差し替えて鳴らすので、
+        // ここを記録していないと4つのアクセントが全部同じ鍵になり、
+        // 最初に作った音が使い回されて「どれも同じに聞こえる」事になる
+        // (実機で確認・VoicevoxAccentPreviewTest)。
+        VoicevoxUserDictionary.shared.replace(with: entries)
         // ★メモリキャッシュを捨てる。
         // 鍵には辞書の署名が入っているので、辞書を変えれば古い音声には二度と
         // 当たらなくなる(古い読みのまま鳴り続ける事はない)。ただし当たらない
@@ -879,8 +891,11 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
         // 合成の入口はここ一箇所しか無いので、ここで「同じ物を二度作っていないか」を見張る。
         // 同じ鍵を二度合成したら、それは条件に依らず必ず無駄撃ちである
         // (詳細は VoicevoxRepeatedSynthesisDetector.swift)。
-        VoicevoxRepeatedSynthesisDetector.shared.noteSynthesisStarting(
-            key: VoicevoxDiskCacheStore.key(text: text, styleId: styleId))
+        if VoicevoxRepeatedSynthesisDetector.shared.noteSynthesisStarting(
+            key: VoicevoxDiskCacheStore.key(text: text, styleId: styleId)) {
+            // 「いつ作り直したか」が分かるよう、区間ごとの集計にも入れる。
+            VoicevoxCPUUsageReporter.shared.noteRepeatedSynthesis()
+        }
         let texts = chunkedTextsForBudget(text: text, limitRatio: limitRatio)
         var wavs: [Data] = []
         for (index, chunk) in texts.enumerated() {

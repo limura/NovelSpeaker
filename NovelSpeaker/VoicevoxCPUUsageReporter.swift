@@ -83,6 +83,8 @@ final class VoicevoxCPUUsageReporter {
         var duplicatesByPlayback = 0
         /// そのうち裏の作り足しが作った分(再生側に先を越されていた)。
         var duplicatesByGenerator = 0
+        /// この区間で「この起動では二度目以降」の本文を合成した回数。
+        var repeatedSyntheses = 0
     }
     private var summary = Summary()
     /// 直近に再生した時の速度倍率(VOICEVOX は常に等速で合成し、再生側で速度を変えている)。
@@ -92,6 +94,19 @@ final class VoicevoxCPUUsageReporter {
     private var lastSummaryThermalState: ProcessInfo.ThermalState? = nil
 
     private init() {}
+
+    /// 同じ本文を作り直した(この起動で二度目以降だった)時に呼ぶ。
+    ///
+    /// ★区間ごとに数える。VoicevoxRepeatedSynthesisDetector が持っているのは
+    /// 起動してからの通算なので、それだけを載せると
+    /// 「いつ作り直しが起きたのか」が読めない(実機ログで 12%→18%→21% と
+    /// 通算値が上がっていくのを見て、どの時間帯の話なのか特定できなかった)。
+    /// 他の数字と同じ区間で数えれば、その場で何が起きていたかと突き合わせられる。
+    func noteRepeatedSynthesis() {
+        lock.lock()
+        summary.repeatedSyntheses += 1
+        lock.unlock()
+    }
 
     /// ディスクに作ってあった音声をそのまま使えた時に呼ぶ。
     func noteDiskCacheHit() {
@@ -293,11 +308,14 @@ final class VoicevoxCPUUsageReporter {
                              current.duplicatesByPlayback, current.duplicatesByGenerator, current.diskHits,
                              averageSpeed, slowestSpeed, playbackRate,
                              Self.thermalStateText(thermalState))
-        let health = VoicevoxRepeatedSynthesisDetector.shared
-        let message = health.isHealthy()
-            ? baseMessage
-            : baseMessage + String(format: "\n※ 同じ本文の作り直しが %.0f%% あります(仕組みの不具合の可能性)",
-                                   health.repeatedRatio * 100)
+        // 作り直しの割合も、他の数字と同じ区間で見る。
+        // 巻き戻して聴き直した分もここに乗るので、割合だけでは不具合と断じられない。
+        // 「いつ起きたか」が分かれば、その時刻の他のログと突き合わせて判断できる。
+        let repeatedRatio = current.count > 0 ? Double(current.repeatedSyntheses) / Double(current.count) : 0
+        let message = (current.count >= 20 && repeatedRatio >= VoicevoxRepeatedSynthesisDetector.unhealthyRatio)
+            ? baseMessage + String(format: "\n※ この間に同じ本文を %d本 作り直しています(%.0f%%)。巻き戻して聴き直した分でなければ、仕組みの不具合の可能性があります",
+                                   current.repeatedSyntheses, repeatedRatio * 100)
+            : baseMessage
         return (message, [
             "durationSeconds": AnyCodable(String(format: "%.0f", max(elapsed, 0))),
             "synthesisCount": AnyCodable("\(current.count)"),
@@ -313,9 +331,10 @@ final class VoicevoxCPUUsageReporter {
             "duplicateSyntheses": AnyCodable("\(current.duplicateSyntheses)"),
             "duplicatesByPlayback": AnyCodable("\(current.duplicatesByPlayback)"),
             "duplicatesByGenerator": AnyCodable("\(current.duplicatesByGenerator)"),
-            // 起動してからここまでの、同じ本文を作り直した割合。
-            // 熱にも端末の速さにも依らない値なので、これ一つで仕組みの健康が分かる。
-            "repeatedSynthesisRatio": AnyCodable(String(format: "%.2f", VoicevoxRepeatedSynthesisDetector.shared.repeatedRatio)),
+            // この区間で同じ本文を作り直した本数と、起動してからの通算の割合。
+            // 熱にも端末の速さにも依らない値なので、仕組みの健康はここで分かる。
+            "repeatedSyntheses": AnyCodable("\(current.repeatedSyntheses)"),
+            "repeatedSynthesisRatioSinceLaunch": AnyCodable(String(format: "%.2f", VoicevoxRepeatedSynthesisDetector.shared.repeatedRatio)),
             // どのビルドで取ったログなのかが後から分からないと、直した効果を確かめられない。
             "appBuild": AnyCodable(Self.appBuildText),
             "parallelism": AnyCodable(current.wallSeconds > 0 ? String(format: "%.2f", current.cpuSeconds / current.wallSeconds) : "-"),
