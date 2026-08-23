@@ -70,6 +70,76 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         engine.attach(timePitch)
         // ここでは接続しない(このタイミングでの適切なフォーマットが分からないため)。
         // 実際のバッファが得られた時点(playBuffer)でそのフォーマットに合わせて接続する。
+        registerAudioGraphNotifications()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    // MARK: - 再生の足元が崩れた時
+
+    // ★AVAudioEngine は、外の都合で勝手に止まる事がある。
+    //
+    // 止まると、撃ってあるバッファの再生完了コールバックが**二度と来ない**。
+    // このスピーカーは次のブロックへ進む合図をそれ一本に頼っているので、
+    // 気づかないと「音は出ないのに再生中のつもりで固まる」という
+    // 一番分かりにくい壊れ方になる(アラームで実際に踏んだ)。
+    //
+    // 割り込み(アラーム・電話・他アプリ)は StorySpeaker がまとめて面倒を見ている
+    // (エンジンによらず同じ扱いにしたいので、あちらが持ち場)。
+    // ここで見るのは、そこに乗らない「グラフだけが壊れる」2つ:
+    //
+    //  - 出力先が変わった(AirPods が繋がった・CarPlay・Bluetooth の切り替え等)。
+    //    エンジンは自分で止まり、接続も切れる。抜けた時は StorySpeaker が
+    //    止めて少し戻してくれるが、**挿さった時**は誰も何もしていなかった。
+    //  - メディアサービスの再起動。音まわりが丸ごと作り直される。
+    //
+    // どちらも、繋ぎ直して**今のブロックを頭から鳴らし直す**。
+    // 途中から再開する手段が無い(撃ったバッファのどこまで鳴ったか分からない)ため、
+    // 少し戻って聞き直す形にする。ヘッドフォンが抜けた時に25文字戻すのと同じ考え方。
+    private func registerAudioGraphNotifications() {
+        let center = NotificationCenter.default
+        center.addObserver(self, selector: #selector(audioEngineConfigurationDidChange(notification:)),
+                           name: .AVAudioEngineConfigurationChange, object: nil)
+        center.addObserver(self, selector: #selector(mediaServicesWereReset(notification:)),
+                           name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+    }
+
+    @objc private func audioEngineConfigurationDidChange(notification: Notification) {
+        // 他の話者のエンジンの分まで拾わないよう、自分の物だけを見る。
+        guard (notification.object as AnyObject?) === engine else { return }
+        DispatchQueue.main.async {
+            self.restartCurrentSpeechAfterAudioGraphBreak(reason: "音の出力先が変わった")
+        }
+    }
+
+    @objc private func mediaServicesWereReset(notification: Notification) {
+        DispatchQueue.main.async {
+            self.restartCurrentSpeechAfterAudioGraphBreak(reason: "メディアサービスが再起動した")
+        }
+    }
+
+    /// 壊れたグラフを捨てて、今読んでいたブロックを頭から鳴らし直す。
+    private func restartCurrentSpeechAfterAudioGraphBreak(reason: String) {
+        // 鳴っていなかったなら何もしない。
+        // (一時停止中・停止済みも含む。停止は Stop() が世代を進めて始末してある)
+        guard m_IsUtteranceActive, m_IsPaused == false, isUsingFallbackSpeaker == false else { return }
+        let text = currentSpeechText
+        guard text.isEmpty == false else { return }
+        AppInformationLogger.AddLog(
+            message: "VoicevoxSpeaker: \(reason)ので、今のブロックを鳴らし直します",
+            isForDebug: true)
+        // ユーザー操作ではないが、ここでの無音は「作り置きが足りない」せいではないので
+        // 無音の計測からは外す(原因の切り分けが濁るため)。
+        VoicevoxSilenceReporter.shared.notePlaybackInterrupted()
+        stopProgressReporting()
+        playerNode.stop()
+        // 出力フォーマットが変わっている可能性があるので、繋ぎ直させる。
+        connectedFormat = nil
+        // performSpeech が世代を進めるので、古いバッファの完了通知が今さら来ても無視される。
+        // 音声はキャッシュから返るのが普通なので、合成し直しにはならない。
+        performSpeech(text: text)
     }
 
     private func ensureGraphConnected(format: AVAudioFormat) throws {

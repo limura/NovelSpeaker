@@ -381,6 +381,11 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
         center.removeObserver(self)
     }
     
+    // ★「割り込まれた時にどうするか」の判断は StorySpeaker が持っている。
+    // アラームや電話は VOICEVOX でも起きるので、エンジンごとに違う振る舞いに
+    // なっていると追えなくなるため、あちらでまとめて止める/戻すを決めている。
+    // ここでやるのは、その判断が届く前に音を止めておく事だけ。
+    // (StorySpeaker が止めた後なら pause/continue はどちらも空振りする)
     @objc func sessionDidInterrupt(notification:Notification) {
         guard let interruptType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber, let type = AVAudioSession.InterruptionType(rawValue: interruptType.uintValue) else { return }
         switch type {
@@ -530,6 +535,11 @@ class Speaker_WithoutWillSpeakRange: NSObject, AVSpeechSynthesizerDelegate {
         center.removeObserver(self)
     }
     
+    // ★「割り込まれた時にどうするか」の判断は StorySpeaker が持っている。
+    // アラームや電話は VOICEVOX でも起きるので、エンジンごとに違う振る舞いに
+    // なっていると追えなくなるため、あちらでまとめて止める/戻すを決めている。
+    // ここでやるのは、その判断が届く前に音を止めておく事だけ。
+    // (StorySpeaker が止めた後なら pause/continue はどちらも空振りする)
     @objc func sessionDidInterrupt(notification:Notification) {
         guard let interruptType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber, let type = AVAudioSession.InterruptionType(rawValue: interruptType.uintValue) else { return }
         switch type {
