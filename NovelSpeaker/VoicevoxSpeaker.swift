@@ -18,9 +18,11 @@ import AVFoundation
 class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     let styleId: UInt32
 
-    private let engine = AVAudioEngine()
-    private let playerNode = AVAudioPlayerNode()
-    private let timePitch = AVAudioUnitTimePitch()
+    // メディアサービスの再起動で作り直す必要があるので let にはできない
+    // (再起動すると、これらは全て無効なオブジェクトになる。reloadSynthesizer() 参照)。
+    private var engine = AVAudioEngine()
+    private var playerNode = AVAudioPlayerNode()
+    private var timePitch = AVAudioUnitTimePitch()
 
     private var m_Pitch: Float = 1.0
     private var m_Rate: Float = AVSpeechUtteranceDefaultSpeechRate
@@ -88,32 +90,27 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     //
     // 割り込み(アラーム・電話・他アプリ)は StorySpeaker がまとめて面倒を見ている
     // (エンジンによらず同じ扱いにしたいので、あちらが持ち場)。
-    // ここで見るのは、そこに乗らない「グラフだけが壊れる」2つ:
+    // メディアサービスの再起動も StorySpeaker が持ち場(音まわりを丸ごと作り直す
+    // 必要があり、話者だけでは完結しないため。reloadSynthesizer() で呼ばれる)。
+    // ここで見るのは、そこに乗らない「グラフだけが壊れる」もの:
     //
     //  - 出力先が変わった(AirPods が繋がった・CarPlay・Bluetooth の切り替え等)。
     //    エンジンは自分で止まり、接続も切れる。抜けた時は StorySpeaker が
     //    止めて少し戻してくれるが、**挿さった時**は誰も何もしていなかった。
-    //  - メディアサービスの再起動。音まわりが丸ごと作り直される。
     //
-    // どちらも、繋ぎ直して**今のブロックを頭から鳴らし直す**。
+    // 繋ぎ直して**今のブロックを頭から鳴らし直す**。
     // 途中から再開する手段が無い(撃ったバッファのどこまで鳴ったか分からない)ため、
     // 少し戻って聞き直す形にする。ヘッドフォンが抜けた時に25文字戻すのと同じ考え方。
     private func registerAudioGraphNotifications() {
         let center = NotificationCenter.default
         center.addObserver(self, selector: #selector(audioEngineConfigurationDidChange(notification:)),
                            name: .AVAudioEngineConfigurationChange, object: nil)
-        center.addObserver(self, selector: #selector(mediaServicesWereReset(notification:)),
-                           name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
     }
 
     @objc private func audioEngineConfigurationDidChange(notification: Notification) {
         // 他の話者のエンジンの分まで拾わないよう、自分の物だけを見る。
         guard (notification.object as AnyObject?) === engine else { return }
         scheduleRestartAfterAudioGraphBreak(reason: "音の出力先が変わった")
-    }
-
-    @objc private func mediaServicesWereReset(notification: Notification) {
-        scheduleRestartAfterAudioGraphBreak(reason: "メディアサービスが再起動した")
     }
 
     /// ★すぐには鳴らし直さず、ひと呼吸おいてから判断する。
@@ -495,9 +492,30 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         return m_IsPaused
     }
 
+    /// ★音まわりのオブジェクトを作り直す。
+    ///
+    /// 普段は必要ない(VOICEVOX には AVSpeechSynthesizer のような
+    /// 「同一プロセス内でエンジンが固着する」問題が無く、AVAudioEngine は使い回せる)。
+    ///
+    /// 要るのは**メディアサービスが再起動した時**。iOS の音を一手に扱っている
+    /// mediaserverd が落ちて再起動すると、AVAudioEngine も AVAudioPlayerNode も
+    /// AVAudioUnit も**全て無効なオブジェクトになる**。
+    /// 繋ぎ直しても無効なノードのままなので、捨てて作り直すしかない。
+    /// (呼ぶのは StorySpeaker。セッションの設定し直しと順番を合わせる必要があるため)
     func reloadSynthesizer() {
-        // VOICEVOXは AVSpeechSynthesizer のような「同一プロセス内でエンジンが固着する」問題が無いため
-        // 何もしない(AVAudioEngineはこのインスタンスの生存期間中使い回す)。
+        generation += 1
+        m_IsUtteranceActive = false
+        m_IsPaused = false
+        stopProgressReporting()
+        engine.stop()
+        engine = AVAudioEngine()
+        playerNode = AVAudioPlayerNode()
+        timePitch = AVAudioUnitTimePitch()
+        engine.attach(playerNode)
+        engine.attach(timePitch)
+        // 繋ぎ直しは、次に鳴らすバッファのフォーマットが分かってから(init と同じ)。
+        connectedFormat = nil
+        fallbackSpeaker?.reloadSynthesizer()
     }
 
     private func value_ClampedPitch(_ value: Float) -> Float {

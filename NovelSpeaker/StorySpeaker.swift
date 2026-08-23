@@ -319,6 +319,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let center = NotificationCenter.default
         center.addObserver(self, selector: #selector(audioSessionDidInterrupt(notification:)), name: AVAudioSession.interruptionNotification, object: nil)
         center.addObserver(self, selector: #selector(didChangeAudioSessionRoute(notification:)), name:    AVAudioSession.routeChangeNotification, object: nil)
+        center.addObserver(self, selector: #selector(mediaServicesWereReset(notification:)), name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
     }
     func unregistAudioNotifications() {
         let center = NotificationCenter.default
@@ -529,6 +530,52 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
+    /// ★iOS の音を一手に扱っている mediaserverd が落ちて再起動した時。
+    ///
+    /// アプリの落ち度ではなく OS 側の事故だが、壊れ方が広い。再起動すると
+    ///   ・AVAudioSession の設定(カテゴリ・モード・有効/無効)が初期値に戻る
+    ///   ・AVAudioEngine / AVAudioPlayerNode / AVAudioUnit が全て無効になる
+    ///   ・AVSpeechSynthesizer も無効になる
+    ///   ・ダミー音の AVAudioPlayer も無効になる
+    /// ので、繋ぎ直しでは足りず、**捨てて作り直す**しかない(Apple の案内も同じ)。
+    ///
+    /// 気づかずに放置すると「以後この起動では二度と音が鳴らない」になる。
+    /// 頻度は低いが、起きた時の壊れ方が全部なので拾っておく。
+    ///
+    /// 割り込み(アラーム等)と違い、音を横取りした相手が居るわけではないので、
+    /// 作り直した後は読んでいた続きから再開してよい
+    /// (shouldResume を待つ相手が居ない)。
+    @objc func mediaServicesWereReset(notification:Notification) {
+        DispatchQueue.main.async {
+            let wasSpeaking = self.isPlayng
+            AppInformationLogger.AddLog(
+                message: "[読み上げ] 音まわりのシステムが再起動したので、作り直しました"
+                    + (wasSpeaking ? "(読み上げは続きから再開します)" : ""),
+                isForDebug: false)
+            RealmUtil.RealmBlock { (realm) -> Void in
+                // セッションはもう有効ではないので、落としに行く必要は無い。
+                self.StopSpeech(realm: realm, stopAudioSession: false)
+            }
+            // 無効になったオブジェクトを捨てる。
+            self.dummySoundLooper.discardPlayer()
+            self.speaker.reloadSynthesizer()
+            StorySpeaker.currentActive = false
+            // 「設定されない値」に戻して、モードを必ず入れ直させる
+            // (再起動でOS側の設定は消えているのに、こちらの控えだけが残っていると
+            //  「同じだから設定不要」と判断して入れ直さなくなる)。
+            StorySpeaker.currentMode = AVAudioSession.Mode.spokenAudio
+            StorySpeaker.audioSessionDeactivateGeneration += 1
+            // カテゴリとモードは初期値に戻っているので入れ直す。
+            self.audioSessionInit(isActive: false)
+            guard wasSpeaking else { return }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false,
+                                 callerInfo: "mediaServicesWereReset()",
+                                 isNeedRepeatSpeech: self.isNeedRepeatSpeech)
+            }
+        }
+    }
+
     func isCarPlayConnected() -> Bool {
         return AVAudioSession.sharedInstance().currentRoute.outputs.contains(where: { $0.portType == .carAudio })
     }

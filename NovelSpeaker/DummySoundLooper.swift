@@ -66,6 +66,17 @@ class DummySoundLooper: NSObject {
         }
     }
     
+    /// ★持っている AVAudioPlayer を捨てる(次の startPlay で作り直させる)。
+    ///
+    /// メディアサービスが再起動すると、この AVAudioPlayer も無効なオブジェクトになる。
+    /// 作り直さないと、以後ダミー音が鳴らず、背面での読み上げが続かなくなる。
+    @objc public func discardPlayer(){
+        dispatchQueue.async {
+            self.audioPlayer?.stop()
+            self.audioPlayer = nil
+        }
+    }
+
     @objc public func stopPlay(){
         dispatchQueue.async {
             if !self.isPlaying() {
