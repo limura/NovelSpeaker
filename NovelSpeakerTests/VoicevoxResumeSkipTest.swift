@@ -98,6 +98,19 @@ class VoicevoxResumeSkipTest: XCTestCase {
         XCTAssertFalse(VoicevoxSpeaker.isPlaybackCutShort(expectedSeconds: 0, elapsedSeconds: 0))
     }
 
+    // ★「途中で止められた」と見た後、鳴らし直しを待ちすぎない事。
+    //
+    // 待つだけにしていたら、鳴らし直しが来ないまま⏸で止まった(実機で確認)。
+    // 出口の時間が繋ぎ直しより短いと、今度は出力先の切り替えでブロックが飛ぶ。
+    // その間に入っている事を固定しておく。
+    func testCutShortGraceOutlastsTheReconnectDelay() {
+        XCTAssertGreaterThan(VoicevoxSpeaker.cutShortRecoveryGraceSeconds,
+                             VoicevoxSpeaker.restartDelayAfterAudioGraphBreakForTesting,
+                             "繋ぎ直しが間に合う前に先へ進むと、出力先の切り替えでブロックが飛ぶ")
+        XCTAssertLessThan(VoicevoxSpeaker.cutShortRecoveryGraceSeconds, 10,
+                          "長すぎると、止まったように見える時間が長くなる")
+    }
+
     // 少し手前から鳴らすための重なりは、0 では無い事
     // (ぴったりの位置から鳴らすと、推定位置の誤差で語の途中から始まる)。
     func testResumeOverlapIsNotZero() {

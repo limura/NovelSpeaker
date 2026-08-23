@@ -179,6 +179,14 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     /// 切り替えにかかる時間の全部は待たない。
     private static let restartDelayAfterAudioGraphBreak: TimeInterval = 1.0
 
+    /// 「途中で止められた」と見た後、鳴らし直しを待つ時間。
+    /// これを過ぎたら、読み終えた事にして先へ進む(待ち続けると⏸のまま固まるため)。
+    /// **必ず restartDelayAfterAudioGraphBreak より長くする事。**
+    /// 短いと、経路の繋ぎ直しが間に合う前に先へ進んでしまい、
+    /// 出力先を切り替えた時のブロック飛ばしが元に戻る。
+    static let cutShortRecoveryGraceSeconds: TimeInterval = 2.5
+    static var restartDelayAfterAudioGraphBreakForTesting: TimeInterval { return restartDelayAfterAudioGraphBreak }
+
     private func scheduleRestartAfterAudioGraphBreak(reason: String) {
         let myGeneration = generation
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.restartDelayAfterAudioGraphBreak) { [weak self] in
@@ -366,7 +374,6 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                 if Self.isPlaybackCutShort(expectedSeconds: expectedPlaybackSeconds, elapsedSeconds: elapsed) {
                     // 途中で止められた。ここまでを控えて、鳴らし直しに備える。
                     // 次のブロックへは進めない(進むと本文が飛ぶ)。
-                    // 鳴らし直しが来なくても、固着の見張りが拾って回復する。
                     self.noteInterruptedForResume()
                     self.stopProgressReporting()
                     AppInformationLogger.AddLog(
@@ -374,7 +381,40 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                         appendix: [
                             "expectedSeconds": String(format: "%.2f", expectedPlaybackSeconds),
                             "elapsedSeconds": String(format: "%.2f", elapsed),
+                            "engineIsRunning": "\(self.engine.isRunning)",
+                            "playerNodeIsPlaying": "\(self.playerNode.isPlaying)",
+                            "audioSessionIsOtherAudioPlaying": "\(AVAudioSession.sharedInstance().isOtherAudioPlaying)",
+                            "outputs": AVAudioSession.sharedInstance().currentRoute.outputs
+                                .map({ $0.portType.rawValue }).joined(separator: ","),
                         ], isForDebug: true)
+                    // ★必ず出口を用意する。
+                    //
+                    // 「鳴らし直しが来るはず」に賭けて待つだけにしていたが、
+                    // 実機で**来ないまま止まった**(2026-08-23、43分の連続再生の最後)。
+                    // 経路が切れた形跡が無いのに早く通知が来る事があるらしく、
+                    // その時は誰も鳴らし直さないので、⏸のまま二度と進まなくなる。
+                    //
+                    // 固着の見張りは当てにできない。あれは「speak した時から位置が進んだか」を
+                    // 見るので、少しでも鳴っていたブロックでは最初の確認で「動いている」と
+                    // 判断して見張りを降りてしまう。
+                    //
+                    // なので、ここで自分で待つ。来なければ読み終えた事にして先へ進む。
+                    // 途中までしか鳴っていない本文が少し飛ぶが、止まったままよりは遥かに良い。
+                    let waitingGeneration = myGeneration
+                    DispatchQueue.main.asyncAfter(deadline: .now() + Self.cutShortRecoveryGraceSeconds) { [weak self] in
+                        guard let self = self, waitingGeneration == self.generation else {
+                            // 世代が変わっている = 鳴らし直された(か、止められた)。何もしない。
+                            return
+                        }
+                        AppInformationLogger.AddLog(
+                            message: "VoicevoxSpeaker: 鳴らし直しが来なかったので、このブロックは読み終えた事にして先へ進みます",
+                            isForDebug: true)
+                        self.interruptedResumeText = ""
+                        self.interruptedResumeSeconds = 0
+                        self.m_IsUtteranceActive = false
+                        VoicevoxSilenceReporter.shared.notePlaybackEnded(intentionalDelay: 0)
+                        self.m_Delegate?.finishSpeak(isCancel: false, speechString: text)
+                    }
                     return
                 }
                 // このブロックの音声を撃ち終えた。次のブロックが来れば performSpeech で
