@@ -115,6 +115,25 @@ class VoicevoxCacheChurnTest: XCTestCase {
         XCTAssertEqual(lead, 10, accuracy: 0.01)
     }
 
+    // MARK: - 起動と停止の往復
+
+    // ★止める線と始める線をずらしてある事。
+    //
+    // 同じ線だと、閾値ちょうどで止まった直後に再生が少し進んで下回り、
+    // また始まって少し作っては止まる、を繰り返す
+    // (実機で30秒ごとに20分間で30往復した)。
+    func testGeneratorDoesNotRestartRightAfterReachingTheThreshold() {
+        let threshold = VoicevoxCacheLead.keepGeneratingBelowSeconds
+        // 閾値をちょっと下回っただけ = まだ始めない。
+        XCTAssertFalse(VoicevoxCacheLead.shouldResumeGenerating(contiguousLeadSeconds: threshold - 10),
+                       "止めた直後にまた始まってしまう")
+        // 十分に減ったら始める。
+        XCTAssertTrue(VoicevoxCacheLead.shouldResumeGenerating(contiguousLeadSeconds: threshold * 0.5))
+        // 走っている間は下限まで作り続ける(こちらは従来どおり)。
+        XCTAssertTrue(VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: threshold - 10))
+        XCTAssertFalse(VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: threshold + 10))
+    }
+
     // MARK: - B: 刈り取りが再生の目の前を消さない事
 
     // ★これから再生する所を刈り取らない事。

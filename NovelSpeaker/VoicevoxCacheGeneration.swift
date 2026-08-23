@@ -157,6 +157,21 @@ enum VoicevoxCacheLead {
         return shouldKeepGenerating(contiguousLeadSeconds: contiguousLeadSeconds, thresholdSeconds: keepGeneratingBelowSeconds)
     }
 
+    /// 一度止めた後、また作り始めてよいか。
+    ///
+    /// ★止める線と始める線をずらしてある(ヒステリシス)。
+    /// 同じ線で判断すると、閾値ちょうどで止まった直後に再生が少し進んで下回り、
+    /// また始まって少し作っては止まる、を繰り返す。
+    /// 実機では **30秒ごとに20分間で30往復**していた。
+    /// 作り足し自体は正しく働いているので害は小さいが、
+    /// 起動と停止のたびにブロック列を数え直すので無駄でしかない。
+    static let resumeGeneratingRatio = 0.8
+
+    static func shouldResumeGenerating(contiguousLeadSeconds: Double) -> Bool {
+        return shouldKeepGenerating(contiguousLeadSeconds: contiguousLeadSeconds,
+                                    thresholdSeconds: keepGeneratingBelowSeconds * resumeGeneratingRatio)
+    }
+
     /// 今の再生位置から先に、**途切れずに**貯めてある音声の秒数。
     ///
     /// 今読んでいるページの残りを1ブロックずつ数え、ページを跨いだ後は

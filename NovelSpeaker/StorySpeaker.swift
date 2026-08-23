@@ -471,6 +471,22 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
+    /// 中断される直前に読み上げていたか(アラームや電話が終わった後に戻すため)。
+    private var wasSpeakingBeforeInterruption = false
+
+    /// ★アラームや電話で音声セッションが取り上げられた時。
+    ///
+    /// 以前はダミー音の抑止しかしておらず、読み上げ自体は止めていなかった。
+    /// VOICEVOX は AVAudioEngine で鳴らしているため、中断されるとエンジンが止まり、
+    /// 撃ってあるバッファの再生完了コールバックが二度と来ない。
+    /// その結果、
+    ///   ・音は出ていないのに読み上げ位置だけが進む(位置は経過時間から按分しているため)
+    ///   ・次のブロックへ進めないまま固まる
+    ///   ・画面は「⏸」= 再生中のつもり、裏の作り足しも回りっぱなし
+    /// という、アラームを止めても戻ってこない状態になっていた(実機で確認)。
+    ///
+    /// 中断されたら素直に読み上げを止め、画面の状態と実際を合わせる。
+    /// 音声セッションは落とさない(すぐ戻せるように)。
     @objc func audioSessionDidInterrupt(notification:Notification) {
         guard let type = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber else {
             return
@@ -478,10 +494,38 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let typeIntValue = type.intValue
         let beganType = Int(AVAudioSession.InterruptionType.began.rawValue)
         let endedType = Int(AVAudioSession.InterruptionType.ended.rawValue)
-        if typeIntValue == beganType {
-            self.dummySoundLooper.stopPlay()
-        }else if typeIntValue == endedType {
-            self.dummySoundLooper.startPlay()
+        let options: AVAudioSession.InterruptionOptions
+        if let rawOptions = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? NSNumber {
+            options = AVAudioSession.InterruptionOptions(rawValue: rawOptions.uintValue)
+        } else {
+            options = []
+        }
+        // この通知が来るスレッドは決まっていないが、この先で Realm と画面を触るのでメインに寄せる。
+        DispatchQueue.main.async {
+            if typeIntValue == beganType {
+                self.dummySoundLooper.stopPlay()
+                self.wasSpeakingBeforeInterruption = self.isPlayng
+                guard self.wasSpeakingBeforeInterruption else { return }
+                AppInformationLogger.AddLog(
+                    message: "[読み上げ] 他の音(アラーム等)に割り込まれたので読み上げを止めました",
+                    isForDebug: true)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.StopSpeech(realm: realm, stopAudioSession: false)
+                }
+            } else if typeIntValue == endedType {
+                guard self.wasSpeakingBeforeInterruption else { return }
+                self.wasSpeakingBeforeInterruption = false
+                // 「戻してよい」とOSが言っている時だけ戻す。
+                // 言っていない時は止まったままだが、上で止めてある(=画面も「▶」)ので、
+                // 押せばそのまま続きから始まる。
+                guard options.contains(.shouldResume) else { return }
+                self.dummySoundLooper.startPlay()
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false,
+                                     callerInfo: "audioSessionDidInterrupt(ended)",
+                                     isNeedRepeatSpeech: self.isNeedRepeatSpeech)
+                }
+            }
         }
     }
     

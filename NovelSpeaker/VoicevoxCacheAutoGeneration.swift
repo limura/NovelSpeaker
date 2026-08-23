@@ -85,8 +85,14 @@ final class VoicevoxCacheAutoGeneration {
 
         let lead = contiguousLeadSeconds(context: context)
         logHeartbeatIfNeeded(leadSeconds: lead)
-        if VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: lead) {
-            if VoicevoxCacheGenerator.shared.runningNovelID != context.novelID {
+        let isAlreadyGenerating = VoicevoxCacheGenerator.shared.runningNovelID == context.novelID
+        // 走っている間は下限まで、止まっている間は下限より少し下まで待ってから始める。
+        // 同じ線で判断すると、閾値の周りで起動と停止を繰り返す(VoicevoxCacheLead 参照)。
+        let shouldGenerate = isAlreadyGenerating
+            ? VoicevoxCacheLead.shouldKeepGenerating(contiguousLeadSeconds: lead)
+            : VoicevoxCacheLead.shouldResumeGenerating(contiguousLeadSeconds: lead)
+        if shouldGenerate {
+            if isAlreadyGenerating == false {
                 AppInformationLogger.AddLog(message:
                     "[VOICEVOX音声生成] この先の貯金が \(VoicevoxCacheGenerationProgress.durationText(seconds: lead))"
                     + "(下限\(VoicevoxCacheLead.keepGeneratingBelowMinutes)分)なので、読み上げの裏で作り足します",

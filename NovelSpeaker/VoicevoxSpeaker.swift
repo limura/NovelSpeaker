@@ -168,10 +168,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     private func playBuffer(_ buffer: AVAudioPCMBuffer, generation myGeneration: Int, text: String) {
         guard myGeneration == generation else { return }
         do {
-            try ensureGraphConnected(format: buffer.format)
-            if !engine.isRunning {
-                try engine.start()
-            }
+            try startEngineIfNeeded(format: buffer.format)
         } catch {
             AppInformationLogger.AddLog(message: "VoicevoxSpeaker: AVAudioEngine start failed: \(error.localizedDescription)", appendix: [:], isForDebug: true)
             m_IsUtteranceActive = false
@@ -211,6 +208,27 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
             }
         }
         playerNode.play()
+    }
+
+    /// エンジンを鳴らせる状態にする。
+    ///
+    /// ★一度で諦めない。StorySpeaker.StartSpeech() は音声セッションの有効化を
+    /// 別のキューへ投げてから読み上げを始めるので、合成が速いと
+    /// **セッションが有効になる前に** ここへ来る事がある。
+    /// その時 engine.start() は失敗し、以前はそのまま「このブロックは中止」に
+    /// 落としていたため、再生ボタンを1回押しても何も始まらず、
+    /// もう一度押すと始まる(その頃にはセッションが有効になっている)という
+    /// 症状になっていた。アラームで中断された直後は特に踏みやすい。
+    /// 失敗したらセッションを有効にしてから、もう一度だけ試す。
+    private func startEngineIfNeeded(format: AVAudioFormat) throws {
+        try ensureGraphConnected(format: format)
+        if engine.isRunning { return }
+        do {
+            try engine.start()
+        } catch {
+            try AVAudioSession.sharedInstance().setActive(true)
+            try engine.start()
+        }
     }
 
     private func startProgressReporting(text: String, buffer: AVAudioPCMBuffer, generation myGeneration: Int) {
