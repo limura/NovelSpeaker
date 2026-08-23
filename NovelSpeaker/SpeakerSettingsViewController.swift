@@ -197,16 +197,17 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
     }
     
     func currentEngineType(targetID: String) -> String {
+        let fallback = SpeechEngineType.avSpeechSynthesizer.typeString ?? ""
         #if targetEnvironment(macCatalyst)
         if let row = self.form.rowBy(tag: "EngineTypeAlertRow-\(targetID)") as? PushRow<String> {
-            return row.value ?? "AVSpeechSynthesizer"
+            return row.value ?? fallback
         }
         #else
         if let row = self.form.rowBy(tag: "EngineTypeAlertRow-\(targetID)") as? AlertRow<String> {
-            return row.value ?? "AVSpeechSynthesizer"
+            return row.value ?? fallback
         }
         #endif
-        return "AVSpeechSynthesizer"
+        return fallback
     }
 
     func createSpeakSettingRows(currentSetting:RealmSpeakerSetting) -> Section {
@@ -416,12 +417,29 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         #endif
         engineTypeRow.title = NSLocalizedString("SpeakSettingsViewController_EngineTypeTitle", comment: "読み上げエンジン")
         engineTypeRow.selectorTitle = NSLocalizedString("SpeakSettingsViewController_EngineTypeDialogTitle", comment: "読み上げエンジンを選択してください")
-        var engineTypeOptions = ["AVSpeechSynthesizer"]
-        if VoicevoxCore.isAvailableOnThisOS {
-            engineTypeOptions.append("VOICEVOX")
+        // ★画面に出す名前は SpeechEngineType.localizedName から取る。
+        // 保存する値(Realm の type)とは別物なので、直に並べない事。
+        // 以前はここに "AVSpeechSynthesizer" と直書きしていたため、
+        // 読み替え辞書の対象エンジン選択(そちらは localizedName を使っている)と
+        // 同じ選択肢が別の文字で出ていた。
+        var engineTypes = SpeechEngineType.selectableTypes
+        if VoicevoxCore.isAvailableOnThisOS == false {
+            engineTypes.removeAll { $0 == .voicevox }
         }
+        let engineTypeOptions = engineTypes.compactMap({ $0.typeString })
         engineTypeRow.options = engineTypeOptions
-        engineTypeRow.value = engineTypeOptions.contains(currentSetting.type) ? currentSetting.type : "AVSpeechSynthesizer"
+        engineTypeRow.displayValueFor = { typeString in
+            guard let typeString = typeString else { return nil }
+            return SpeechEngineType(typeString: typeString)?.localizedName ?? typeString
+        }
+        engineTypeRow.value = engineTypeOptions.contains(currentSetting.type) ? currentSetting.type : SpeechEngineType.avSpeechSynthesizer.typeString
+        #if !targetEnvironment(macCatalyst)
+        // 「システムの音声」だけでは AVSpeechSynthesizer の事だと分からないので、
+        // 選ぶ場所で一度だけ添えておく(行の値としては出さない。VOICEVOX と字数が揃わなくなるため)。
+        engineTypeRow.onPresent({ (_, selector) in
+            selector.message = NSLocalizedString("SpeakSettingsViewController_EngineTypeDialogMessage", comment: "「システムの音声」は、OSが用意している読み上げ機能(AVSpeechSynthesizer)です。")
+        })
+        #endif
         engineTypeRow.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
             return self.hideCache[targetID] ?? false
         })

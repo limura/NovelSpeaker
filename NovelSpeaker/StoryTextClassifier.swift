@@ -127,7 +127,7 @@ enum SpeechEngineType: Int, CaseIterable {
     var localizedName: String {
         switch self {
         case .any: return NSLocalizedString("SpeechEngineType_Any", comment: "すべて")
-        case .avSpeechSynthesizer: return NSLocalizedString("SpeechEngineType_AVSpeechSynthesizer", comment: "端末の音声(AVSpeechSynthesizer)")
+        case .avSpeechSynthesizer: return NSLocalizedString("SpeechEngineType_AVSpeechSynthesizer", comment: "システムの音声")
         case .voicevox: return NSLocalizedString("SpeechEngineType_VOICEVOX", comment: "VOICEVOX")
         }
     }

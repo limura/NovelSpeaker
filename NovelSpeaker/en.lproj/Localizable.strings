@@ -622,6 +622,7 @@
 "SpeakSettingsViewController_VolumeTitle" = "Volume";
 "SpeakSettingsViewController_EngineTypeTitle" = "Speech Engine";
 "SpeakSettingsViewController_EngineTypeDialogTitle" = "Select a speech engine";
+"SpeakSettingsViewController_EngineTypeDialogMessage" = "\"System Voice\" is the speech synthesis built into the OS (AVSpeechSynthesizer). VOICEVOX synthesizes speech inside this app, using a voice model you have downloaded.";
 "SpeakSettingsViewController_VoicevoxStyleTitle" = "VOICEVOX Speaker";
 "SpeakSettingsViewController_VoicevoxStyleDialogTitle" = "Select a VOICEVOX speaker";
 "SpeakSettingsViewController_LangageTitle" = "Language";
@@ -1169,7 +1170,7 @@
 "VoicevoxCredit_Footer" = "Select a row to open that character's terms of use.";
 "VoicevoxCredit_Empty" = "No voice models have been downloaded.";
 "VoicevoxMissingModel_StyleNumberFormat" = "style number %u";
-"VoicevoxMissingModel_MessageFormat" = "The voice model for the VOICEVOX speaker \"%@\" is not on this device. That part was read with a device voice. The speaker setting is kept as it is, so downloading the voice model restores the original voice.";
+"VoicevoxMissingModel_MessageFormat" = "The voice model for the VOICEVOX speaker \"%@\" is not on this device. That part was read with the system voice. The speaker setting is kept as it is, so downloading the voice model restores the original voice.";
 "VoicevoxMissingModel_ActionTitle" = "Download the voice model";
 "VoicevoxAccent_TypeFlat" = "Flat";
 "VoicevoxAccent_TypeHead" = "Head-high";
@@ -1197,7 +1198,7 @@
 "CreateSpeechModSettingViewControllerSwift_VoicevoxAccentUnset" = "Not set";
 "CreateSpeechModSettingViewControllerSwift_VoicevoxAccentHint" = "Sets the reading and accent used when VOICEVOX reads this. A substitution alone cannot change the accent, so it is set here.";
 "SpeechEngineType_Any" = "All";
-"SpeechEngineType_AVSpeechSynthesizer" = "AVSpeechSynthesizer";
+"SpeechEngineType_AVSpeechSynthesizer" = "System Voice";
 "SpeechEngineType_VOICEVOX" = "VOICEVOX";
 "CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineTitle" = "Speech engines to apply to";
 "CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineHint" = "Chooses which speech engines this substitution is used for. Many of the standard pronunciation fixes exist to work around quirks of AVSpeechSynthesizer, and applying them to VOICEVOX can make it sound worse instead.";

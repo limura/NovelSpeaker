@@ -614,6 +614,7 @@
 "SpeakSettingsViewController_VolumeTitle" = "音量";
 "SpeakSettingsViewController_EngineTypeTitle" = "読み上げエンジン";
 "SpeakSettingsViewController_EngineTypeDialogTitle" = "読み上げエンジンを選択してください";
+"SpeakSettingsViewController_EngineTypeDialogMessage" = "「システムの音声」は、OSが用意している読み上げ機能(AVSpeechSynthesizer)です。VOICEVOX は、取得した音声モデルを使ってこのアプリの中で音声を合成します。";
 "SpeakSettingsViewController_VoicevoxStyleTitle" = "VOICEVOX話者";
 "SpeakSettingsViewController_VoicevoxStyleDialogTitle" = "VOICEVOXの話者を選択してください";
 "SpeakSettingsViewController_LangageTitle" = "言語";
@@ -1150,7 +1151,7 @@
 "VoicevoxCredit_Footer" = "行を選ぶと、そのキャラクターの利用規約を開きます。";
 "VoicevoxCredit_Empty" = "取得済みの音声モデルはありません。";
 "VoicevoxMissingModel_StyleNumberFormat" = "スタイル番号 %u";
-"VoicevoxMissingModel_MessageFormat" = "VOICEVOXの話者「%@」の音声モデルがこの端末にありません。その箇所は端末の音声で読み上げました。話者設定はそのままにしてあるので、音声モデルを取得すれば元の声に戻ります。";
+"VoicevoxMissingModel_MessageFormat" = "VOICEVOXの話者「%@」の音声モデルがこの端末にありません。その箇所はシステムの音声で読み上げました。話者設定はそのままにしてあるので、音声モデルを取得すれば元の声に戻ります。";
 "VoicevoxMissingModel_ActionTitle" = "音声モデルを取得する";
 "VoicevoxAccent_TypeFlat" = "平板";
 "VoicevoxAccent_TypeHead" = "頭高";
@@ -1178,7 +1179,7 @@
 "CreateSpeechModSettingViewControllerSwift_VoicevoxAccentUnset" = "未設定";
 "CreateSpeechModSettingViewControllerSwift_VoicevoxAccentHint" = "VOICEVOX で読み上げる時の読みとアクセントを指定します。読み替えだけではアクセントを変えられないため、こちらで指定します。";
 "SpeechEngineType_Any" = "すべて";
-"SpeechEngineType_AVSpeechSynthesizer" = "AVSpeechSynthesizer";
+"SpeechEngineType_AVSpeechSynthesizer" = "システムの音声";
 "SpeechEngineType_VOICEVOX" = "VOICEVOX";
 "CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineTitle" = "適用する音声合成";
 "CreateSpeechModSettingViewControllerSwift_TargetSpeechEngineHint" = "この読み替えを、どの読み上げエンジンで読み上げる時に使うかを選びます。標準の読み替え辞書には AVSpeechSynthesizer の癖を避けるために作られたものが多く、VOICEVOX に当てると逆におかしくなる事があります。";
