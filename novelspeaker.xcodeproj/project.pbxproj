@@ -1295,7 +1295,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */;
+			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "NovelSpeaker" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -2124,7 +2124,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.13.0;
+				CURRENT_PROJECT_VERSION = 2.13.1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2163,7 +2163,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2.13.0;
+				CURRENT_PROJECT_VERSION = 2.13.1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2298,7 +2298,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.13.0;
+				CURRENT_PROJECT_VERSION = 2.13.1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2336,7 +2336,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.13.0;
+				CURRENT_PROJECT_VERSION = 2.13.1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2505,7 +2505,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */ = {
+		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "NovelSpeaker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21F054F91917E0F200CC6BA9 /* Debug */,
