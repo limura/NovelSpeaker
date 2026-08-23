@@ -128,7 +128,24 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                            name: .AVAudioEngineConfigurationChange, object: nil)
     }
 
+    /// 直近で「出力先が変わった」通知が来た時刻(どの話者のエンジン宛かは問わない)。
+    ///
+    /// ★「途中で止められた」と見た時に、経路が切れたせいなのかを後から言えるようにするため。
+    /// 実機で、経路が切れた形跡が無いのに早く完了通知が来る事があり、原因が分からなかった。
+    /// 自分のエンジン宛かどうかで弾く前に記録するので、宛先の判定を間違えていた場合も残る。
+    private static let configurationChangeLock = NSLock()
+    private static var lastConfigurationChangeDate: Date?
+
+    private static func secondsSinceLastConfigurationChange() -> Double? {
+        configurationChangeLock.lock()
+        defer { configurationChangeLock.unlock() }
+        return lastConfigurationChangeDate.map { Date().timeIntervalSince($0) }
+    }
+
     @objc private func audioEngineConfigurationDidChange(notification: Notification) {
+        Self.configurationChangeLock.lock()
+        Self.lastConfigurationChangeDate = Date()
+        Self.configurationChangeLock.unlock()
         // 他の話者のエンジンの分まで拾わないよう、自分の物だけを見る。
         guard (notification.object as AnyObject?) === engine else { return }
         DispatchQueue.main.async {
@@ -386,6 +403,9 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                             "audioSessionIsOtherAudioPlaying": "\(AVAudioSession.sharedInstance().isOtherAudioPlaying)",
                             "outputs": AVAudioSession.sharedInstance().currentRoute.outputs
                                 .map({ $0.portType.rawValue }).joined(separator: ","),
+                            // 経路が切れたせいなのかどうか。無ければ、切れてはいない。
+                            "secondsSinceConfigurationChange": Self.secondsSinceLastConfigurationChange()
+                                .map({ String(format: "%.1f", $0) }) ?? "通知なし",
                         ], isForDebug: true)
                     // ★必ず出口を用意する。
                     //
