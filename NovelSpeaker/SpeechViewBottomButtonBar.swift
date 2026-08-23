@@ -28,12 +28,24 @@ class SpeechViewBottomButtonBar: UIView {
         setupView()
     }
 
+    // 縁取りと影の色を作るために applyThemeColor() で渡された本文の文字色を覚えておく。
+    private var themeForegroundColor:UIColor = UIColor.label
+
     private func setupView() {
         self.translatesAutoresizingMaskIntoConstraints = false
         self.layer.cornerRadius = 8
-        self.clipsToBounds = true
+        // 影を落とすので clipsToBounds は false にする。
+        // 背景色は layer に cornerRadius を付けた状態で描かれるので、角丸自体はこれで問題ない。
+        self.clipsToBounds = false
         // applyThemeColor() が呼ばれるまでの間も本文が透けないようにしておく。
         self.backgroundColor = UIColor.systemBackground
+        // 本文の背景色とボタン群の背景色が同じだと境界がわからなくなるため、
+        // 薄い縁取りと影を付けて浮いているように見せる。色は applyThemeColor() で本文の文字色から作る。
+        self.layer.borderWidth = 1.0
+        self.layer.shadowRadius = 4
+        self.layer.shadowOffset = CGSize(width: 0, height: 2)
+        self.layer.shadowOpacity = 0.25
+        updateBorderAndShadowColor()
 
         stackView.axis = .horizontal
         stackView.alignment = .center
@@ -70,7 +82,27 @@ class SpeechViewBottomButtonBar: UIView {
     func applyThemeColor(backgroundColor:UIColor, foregroundColor:UIColor) {
         // 本文の上に重なるので、下の文字が透けて読みにくくならないように不透明にする。
         self.backgroundColor = backgroundColor
+        self.themeForegroundColor = foregroundColor
+        updateBorderAndShadowColor()
         // ボタンの色は指定しない。画面右上のボタン群と同じく、
         // アプリ既定の tintColor(青)をそのまま使わせる。
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // 影の形を角丸に合わせる(描画も軽くなる)
+        self.layer.shadowPath = UIBezierPath(roundedRect: self.bounds, cornerRadius: self.layer.cornerRadius).cgPath
+        // ダークモード/ライトモードの切り替えでは CGColor は自動では変わらないので、
+        // レイアウトのタイミングで作り直しておく。
+        updateBorderAndShadowColor()
+    }
+
+    // 縁取りと影の色を本文の文字色から作る。
+    // 背景が明るい時は文字色が暗いので普通の影に、背景が暗い時は文字色が明るいので
+    // 薄く光っているように見えて、どちらでも境界がわかるようになる。
+    private func updateBorderAndShadowColor() {
+        let foregroundColor = self.themeForegroundColor.resolvedColor(with: self.traitCollection)
+        self.layer.borderColor = foregroundColor.withAlphaComponent(0.3).cgColor
+        self.layer.shadowColor = foregroundColor.cgColor
     }
 }
