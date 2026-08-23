@@ -61,9 +61,48 @@ enum VoicevoxTemporaryAudio {
     static func trimIfNeeded(novelID: String, playbackChapterNumber: Int? = nil) {
         let chapterNumber = playbackChapterNumber
             ?? VoicevoxCore.shared.diskCacheContext.flatMap { $0.novelID == novelID ? $0.chapterNumber : nil }
-        VoicevoxDiskCacheStore.shared.trimTemporary(novelID: novelID,
-                                                    keepingSeconds: budgetSeconds(),
-                                                    playbackChapterNumber: chapterNumber)
+        let freed = VoicevoxDiskCacheStore.shared.trimTemporary(novelID: novelID,
+                                                                keepingSeconds: budgetSeconds(),
+                                                                playbackChapterNumber: chapterNumber)
+        noteTrimmed(bytes: freed, playbackChapterNumber: chapterNumber)
+    }
+
+    // MARK: - 刈り取ったことの記録
+
+    // ★刈り取りは「何も起きていない」ようにしか見えない仕組みなので、
+    // 実機ログからは正しく働いたかどうかが分からなかった。
+    // 一方で、音声を1本置くたびに呼ばれるので毎回残すと埋まってしまう。
+    // 一定時間ぶんをまとめて、たまに1行だけ残す。
+    private static let reportIntervalSeconds: Double = 300
+    private static let reportLock = NSLock()
+    private static var pendingFreedBytes: Int64 = 0
+    private static var pendingTrimCount = 0
+    private static var lastReportDate = Date.distantPast
+
+    private static func noteTrimmed(bytes: Int64, playbackChapterNumber: Int?) {
+        guard bytes > 0 else { return }
+        reportLock.lock()
+        pendingFreedBytes += bytes
+        pendingTrimCount += 1
+        let now = Date()
+        guard now.timeIntervalSince(lastReportDate) >= reportIntervalSeconds else {
+            reportLock.unlock()
+            return
+        }
+        lastReportDate = now
+        let freed = pendingFreedBytes
+        let count = pendingTrimCount
+        pendingFreedBytes = 0
+        pendingTrimCount = 0
+        reportLock.unlock()
+        AppInformationLogger.AddLog(
+            message: "[VOICEVOX音声生成] 一時分の刈り取り: この間に \(count)回 / 合計 \(freed / 1024 / 1024)MB を片付けました",
+            appendix: [
+                "freedBytes": "\(freed)",
+                "trimCount": "\(count)",
+                "playbackChapterNumber": playbackChapterNumber.map({ "\($0)" }) ?? "不明",
+                "budgetSeconds": String(format: "%.0f", budgetSeconds()),
+            ], isForDebug: true)
     }
 
     /// ★読み上げる小説が変わった時に呼ぶ。他の小説の一時分を捨てる。

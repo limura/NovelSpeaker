@@ -110,7 +110,28 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     @objc private func audioEngineConfigurationDidChange(notification: Notification) {
         // 他の話者のエンジンの分まで拾わないよう、自分の物だけを見る。
         guard (notification.object as AnyObject?) === engine else { return }
-        scheduleRestartAfterAudioGraphBreak(reason: "音の出力先が変わった")
+        DispatchQueue.main.async {
+            // ★繋ぎ直しは**必ず**やる。鳴らし直すかどうかとは別。
+            //
+            // 出力先が変わると、エンジンが止まるだけでなく**接続そのものが切れる**。
+            // 以前はここを「鳴らし直す」と一緒にしていたため、鳴らし直さない判断に
+            // なった時(このブロックを撃ち終えていた等)に connectedFormat が古いままになり、
+            // 次に鳴らす時 ensureGraphConnected が「同じフォーマットだから繋ぎ直し不要」と
+            // 判断して切れたままの接続で start してしまう。
+            // 実機では「Bluetooth を繋ぐと⏸のまま止まり、再生ボタンを押しても鳴らない」
+            // (何度か押すとようやく鳴る)という形で出た。
+            self.connectedFormat = nil
+            if self.engine.isRunning {
+                self.engine.stop()
+            }
+            AppInformationLogger.AddLog(
+                message: "VoicevoxSpeaker: 音の出力先が変わったので、再生の経路を繋ぎ直します",
+                appendix: [
+                    "isUtteranceActive": "\(self.m_IsUtteranceActive)",
+                    "isPaused": "\(self.m_IsPaused)",
+                ], isForDebug: true)
+            self.scheduleRestartAfterAudioGraphBreak(reason: "音の出力先が変わった")
+        }
     }
 
     /// ★すぐには鳴らし直さず、ひと呼吸おいてから判断する。
@@ -152,8 +173,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         VoicevoxSilenceReporter.shared.notePlaybackInterrupted()
         stopProgressReporting()
         playerNode.stop()
-        // 出力フォーマットが変わっている可能性があるので、繋ぎ直させる。
-        connectedFormat = nil
+        // (繋ぎ直しの指示は、この呼び出しの前に済ませてある)
         // performSpeech が世代を進めるので、古いバッファの完了通知が今さら来ても無視される。
         // 音声はキャッシュから返るのが普通なので、合成し直しにはならない。
         performSpeech(text: text)
@@ -308,14 +328,34 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     /// 症状になっていた。アラームで中断された直後は特に踏みやすい。
     /// 失敗したらセッションを有効にしてから、もう一度だけ試す。
     private func startEngineIfNeeded(format: AVAudioFormat) throws {
-        try ensureGraphConnected(format: format)
-        if engine.isRunning { return }
         do {
+            try ensureGraphConnected(format: format)
+            if engine.isRunning { return }
             try engine.start()
         } catch {
-            try AVAudioSession.sharedInstance().setActive(true)
+            // ここへ来る理由は2つある。
+            //  ・音声セッションがまだ有効になっていない(StartSpeech が別キューで有効化するため)
+            //  ・グラフが壊れている(出力先の変更やメディアサービスの再起動)
+            // どちらか分からないので、両方やってからもう一度だけ試す。
+            AppInformationLogger.AddLog(
+                message: "VoicevoxSpeaker: 再生の開始に失敗したので、経路を作り直して試し直します: \(error.localizedDescription)",
+                isForDebug: true)
+            try? AVAudioSession.sharedInstance().setActive(true)
+            rebuildAudioGraph()
+            try ensureGraphConnected(format: format)
             try engine.start()
         }
+    }
+
+    /// エンジンとノードを捨てて作り直す。接続は次に鳴らす時に張り直される。
+    private func rebuildAudioGraph() {
+        engine.stop()
+        engine = AVAudioEngine()
+        playerNode = AVAudioPlayerNode()
+        timePitch = AVAudioUnitTimePitch()
+        engine.attach(playerNode)
+        engine.attach(timePitch)
+        connectedFormat = nil
     }
 
     private func startProgressReporting(text: String, buffer: AVAudioPCMBuffer, generation myGeneration: Int) {
@@ -507,14 +547,7 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         m_IsUtteranceActive = false
         m_IsPaused = false
         stopProgressReporting()
-        engine.stop()
-        engine = AVAudioEngine()
-        playerNode = AVAudioPlayerNode()
-        timePitch = AVAudioUnitTimePitch()
-        engine.attach(playerNode)
-        engine.attach(timePitch)
-        // 繋ぎ直しは、次に鳴らすバッファのフォーマットが分かってから(init と同じ)。
-        connectedFormat = nil
+        rebuildAudioGraph()
         fallbackSpeaker?.reloadSynthesizer()
     }
 

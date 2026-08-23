@@ -817,6 +817,21 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     /// 読み上げ開始位置を speechBlockArray の index で指示します
+    /// ★今読んでいるブロックの**先頭**に戻す(ブロックそのものは変えない)。
+    ///
+    /// 割り込み(アラーム等)から戻る時に使う。
+    /// 途中の位置から再開すると、その位置から末尾までが「別の本文」になるため
+    /// VOICEVOX の作り置きが当たらず、合成のやり直しになって
+    /// 「アラームを止めた瞬間には声が出ない」という間が空く。
+    /// ブロックの頭からなら本文が一致するので、貯めてある音声がそのまま使えて即座に鳴る。
+    /// 数秒ぶん重ねて聞き直す形になるが、割り込みの前後は聞き逃している事が多いので
+    /// そちらの方が都合が良い(ヘッドフォンが抜けた時に25文字戻すのと同じ考え方)。
+    func RewindToCurrentBlockStart() {
+        currentBlockDisplayOffset = 0
+        currentBlockSpeechOffset = 0
+        currentSpeakingLocation = currentDisplayStringOffset
+    }
+
     @discardableResult
     func SetSpeechBlockIndex(index:Int) -> Bool {
         if index < 0 || speechBlockArray.count <= index { return false }

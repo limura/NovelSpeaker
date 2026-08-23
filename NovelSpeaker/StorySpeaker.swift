@@ -524,7 +524,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 // 押せばそのまま続きから始まる。
                 guard options.contains(.shouldResume) else { return }
                 self.dummySoundLooper.startPlay()
+                // ★ブロックの頭から鳴らし直す。
+                // 途中の位置から再開すると、その位置から末尾までが「別の本文」になり、
+                // VOICEVOX の作り置きが当たらず合成のやり直しになる
+                // (実機で「アラームを止めた瞬間には声が出ない」として確認)。
+                self.speaker.RewindToCurrentBlockStart()
                 RealmUtil.RealmBlock { (realm) -> Void in
+                    self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false,
                                      callerInfo: "audioSessionDidInterrupt(ended)",
                                      isNeedRepeatSpeech: self.isNeedRepeatSpeech)
