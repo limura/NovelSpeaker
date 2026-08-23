@@ -512,6 +512,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 AppInformationLogger.AddLog(
                     message: "[読み上げ] 他の音(アラーム等)に割り込まれたので読み上げを止めました",
                     isForDebug: true)
+                // ★止める前に、どこまで鳴っていたかを控えさせる。
+                // 戻る時はブロックの頭から頼み直す(そうしないと作り置きが当たらない)が、
+                // 鳴らす時にここまで音声を飛ばすので、聞き直しは数秒で済む。
+                self.speaker.noteInterruptedForResume()
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.StopSpeech(realm: realm, stopAudioSession: false)
                 }

@@ -32,6 +32,17 @@ protocol SpeechEngineSpeaking: AnyObject {
     func isPaused() -> Bool
     func reloadSynthesizer()
     var isSpeechKicked:Bool { get }
+    /// 割り込み(アラーム等)で止められた事を伝える。
+    /// 次に**同じ本文**を頼まれた時、頭からではなく止まった所の少し手前から鳴らすための控え。
+    /// 途中の位置から頼み直すと本文が変わって作り置きが当たらなくなるので、
+    /// 「頼むのはブロック丸ごと・鳴らす時に飛ばす」という形にしてある。
+    func noteInterruptedForResume()
+}
+
+extension SpeechEngineSpeaking {
+    // 途中から鳴らし直せるのは、音声をバッファとして持っている VOICEVOX だけ。
+    // AVSpeechSynthesizer は合成と再生が一体で、途中から鳴らす手段が無い。
+    func noteInterruptedForResume() {}
 }
 
 // Speaker が「発話直前にオーディオセッションを整える」ために使う最小の抽象。

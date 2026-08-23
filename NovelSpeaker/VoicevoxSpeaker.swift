@@ -49,6 +49,27 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
 
     // 現在再生中(または直前に再生した)テキスト。finishSpeak の speechString に使う。
     private var currentSpeechText: String = ""
+
+    // MARK: - 割り込みから戻る時に、頭まで巻き戻らないための控え
+    //
+    // 割り込み(アラーム等)は、ブロックの途中で音を奪っていく。
+    // 途中の位置から頼み直すと「その位置から末尾まで」が別の本文になり、
+    // 作り置きが当たらず合成のやり直しになる(=止めた瞬間に声が出ない)。
+    // かといってブロックの頭から鳴らすと、長いブロックでは200文字ほど聞き直す事になる。
+    // そこで **頼むのはブロック丸ごと(作り置きが当たる)・鳴らす時に音声を飛ばす** 形にする。
+    /// 今鳴らしている音声の、等速での長さ。
+    private var currentAudioSeconds: Double = 0
+    /// 今鳴らしている音声を、頭から何秒ぶん飛ばして鳴らし始めたか(等速換算)。
+    private var currentSkippedSeconds: Double = 0
+    /// 鳴らし始めた時刻。
+    private var currentPlaybackStartDate: Date?
+    /// 割り込みで止まった本文(これと同じ本文を次に頼まれたら飛ばす)。
+    private var interruptedResumeText: String = ""
+    /// 割り込みで止まった位置(等速換算の秒)。ここから少し手前を鳴らし始める。
+    private var interruptedResumeSeconds: Double = 0
+    /// 止まった所より手前に戻す量。少し重ねた方が話の繋がりが取れる。
+    private static let resumeOverlapSeconds: Double = 2.0
+    static var resumeOverlapSecondsForTesting: Double { return resumeOverlapSeconds }
     // Stop() やエンジン破棄との競合を避けるための世代カウンタ。
     private var generation: Int = 0
     private var progressTimer: Timer?
@@ -144,10 +165,20 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     /// あちらの判断が landing してから見れば、止まっていれば
     /// 下の guard で何もしない事になり、**止めると決めた側が必ず勝つ**。
     ///
-    /// 待っている間の無音は、どのみち鳴らし直すので体感は変わらない。
+    /// ★もう一つ、待つ事に意味がある。
+    ///
+    /// 出力先の切り替えは瞬時ではなく、古い経路が死んでから新しい経路が
+    /// 鳴り出すまでに数秒かかる(実機で Bluetooth イヤホンを繋いだ時に3〜4秒)。
+    /// その間に鳴らし直しても、鳴らした先が死んでいるので本文が聞こえないまま流れる。
+    /// **どのみち音は出ない時間**なので、少し待ってから鳴らし直す方が
+    /// 無音の長さは変わらずに、聞き逃す本文だけが減る。
+    /// ただし長く待ちすぎると、経路が生きた後の分がそのまま無音になるので、
+    /// 切り替えにかかる時間の全部は待たない。
+    private static let restartDelayAfterAudioGraphBreak: TimeInterval = 1.0
+
     private func scheduleRestartAfterAudioGraphBreak(reason: String) {
         let myGeneration = generation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.restartDelayAfterAudioGraphBreak) { [weak self] in
             guard let self = self, myGeneration == self.generation else { return }
             self.restartCurrentSpeechAfterAudioGraphBreak(reason: reason)
         }
@@ -292,13 +323,34 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         timePitch.pitch = Self.timePitchCents(fromPitchMultiplier: m_Pitch)
         playerNode.volume = max(0.0, min(1.0, m_Volume))
 
+        // 割り込みから戻ってきた時は、止まった所の少し手前まで音声を飛ばす。
+        // (合成はブロック丸ごとで頼んでいるので、ここまでは作り置きがそのまま当たっている)
+        let totalAudioSeconds = Double(buffer.frameLength) / max(1, buffer.format.sampleRate)
+        var skippedSeconds = 0.0
+        var playbackBuffer = buffer
+        if text == interruptedResumeText {
+            let target = max(0, interruptedResumeSeconds - Self.resumeOverlapSeconds)
+            // 末尾ぎりぎりまで飛ばすと一瞬で終わってしまうので、少しは残す。
+            if target > 0, target < totalAudioSeconds - Self.resumeOverlapSeconds,
+               let trimmed = Self.buffer(buffer, skippingSeconds: target) {
+                playbackBuffer = trimmed
+                skippedSeconds = target
+            }
+            interruptedResumeText = ""
+            interruptedResumeSeconds = 0
+        }
+        currentAudioSeconds = totalAudioSeconds
+        currentSkippedSeconds = skippedSeconds
+        currentPlaybackStartDate = Date()
+
         // 直前に鳴らし終えてから、ここで実際に音が出るまでが「意図しない無音」。
         // 話者をまたいでも拾えるよう、起点は VoicevoxSilenceReporter 側で持っている。
         VoicevoxSilenceReporter.shared.notePlaybackStarting()
 
-        startProgressReporting(text: text, buffer: buffer, generation: myGeneration)
+        startProgressReporting(text: text, buffer: playbackBuffer, generation: myGeneration,
+                               skippedSeconds: skippedSeconds, totalAudioSeconds: totalAudioSeconds)
 
-        playerNode.scheduleBuffer(buffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
+        playerNode.scheduleBuffer(playbackBuffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
             DispatchQueue.main.async {
                 guard let self = self, myGeneration == self.generation else { return }
                 // このブロックの音声を撃ち終えた。次のブロックが来れば performSpeech で
@@ -358,10 +410,18 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         connectedFormat = nil
     }
 
-    private func startProgressReporting(text: String, buffer: AVAudioPCMBuffer, generation myGeneration: Int) {
+    /// - Parameters:
+    ///   - buffer: 実際に鳴らすバッファ(飛ばした後の残り)。
+    ///   - skippedSeconds: 頭から飛ばした秒数(等速換算)。
+    ///   - totalAudioSeconds: 飛ばす前の全体の長さ(等速換算)。
+    private func startProgressReporting(text: String, buffer: AVAudioPCMBuffer, generation myGeneration: Int,
+                                        skippedSeconds: Double = 0, totalAudioSeconds: Double = 0) {
         stopProgressReporting()
         let cumulativeWeights = Self.cumulativeSpeechWeights(for: text)
         guard let totalWeight = cumulativeWeights.last, totalWeight > 0, buffer.format.sampleRate > 0 else { return }
+        // 音声を飛ばした分だけ、読み上げ位置の推定も進んだ所から始める。
+        // (飛ばしたのに位置が頭を指すと、ハイライトが本文とずれる)
+        let skippedFraction = totalAudioSeconds > 0 ? min(1.0, max(0.0, skippedSeconds / totalAudioSeconds)) : 0
         // frameLength/sampleRate は等速(1倍)での音声長。実際の再生は timePitch.rate 倍速で行われるため、
         // 実際の再生時間は (等速長 / 再生倍率) になる。ここで倍率を割らずに等速長のまま進捗を按分すると、
         // 例えば2倍速では実際は半分の時間で再生が終わるのに表示上の位置は半分までしか進まない
@@ -381,7 +441,8 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
                 return
             }
             let elapsed = Date().timeIntervalSince(startDate)
-            let fraction = min(1.0, max(0.0, elapsed / duration))
+            let remainingFraction = min(1.0, max(0.0, elapsed / duration))
+            let fraction = skippedFraction + remainingFraction * (1.0 - skippedFraction)
             let targetWeight = fraction * totalWeight
             // cumulativeWeights[i] は「文字 i まで読み終えた時点」の累積重み。
             // targetWeight を超える最初の文字を「今読んでいる位置」とみなす。
@@ -567,6 +628,74 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         guard multiplier > 0 else { return 0 }
         let cents = 1200.0 * log2(Double(multiplier))
         return Float(max(-2400.0, min(2400.0, cents)))
+    }
+
+    /// 頭から指定秒数ぶんを落とした音声を作る。作れなければ nil。
+    ///
+    /// 中身をコピーするだけ。format を変えないので、そのまま同じ経路に流せる。
+    /// (テストから叩けるように internal にしてある)
+    static func buffer(_ source: AVAudioPCMBuffer, skippingSeconds seconds: Double) -> AVAudioPCMBuffer? {
+        let sampleRate = source.format.sampleRate
+        guard sampleRate > 0, seconds > 0 else { return nil }
+        let skipFrames = AVAudioFrameCount(seconds * sampleRate)
+        guard skipFrames > 0, skipFrames < source.frameLength else { return nil }
+        let remaining = source.frameLength - skipFrames
+        guard let result = AVAudioPCMBuffer(pcmFormat: source.format, frameCapacity: remaining) else { return nil }
+        result.frameLength = remaining
+        let channelCount = Int(source.format.channelCount)
+        if let from = source.floatChannelData, let to = result.floatChannelData {
+            for channel in 0..<channelCount {
+                let stride = source.stride
+                for frame in 0..<Int(remaining) {
+                    to[channel][frame * stride] = from[channel][(frame + Int(skipFrames)) * stride]
+                }
+            }
+        } else if let from = source.int16ChannelData, let to = result.int16ChannelData {
+            for channel in 0..<channelCount {
+                let stride = source.stride
+                for frame in 0..<Int(remaining) {
+                    to[channel][frame * stride] = from[channel][(frame + Int(skipFrames)) * stride]
+                }
+            }
+        } else if let from = source.int32ChannelData, let to = result.int32ChannelData {
+            for channel in 0..<channelCount {
+                let stride = source.stride
+                for frame in 0..<Int(remaining) {
+                    to[channel][frame * stride] = from[channel][(frame + Int(skipFrames)) * stride]
+                }
+            }
+        } else {
+            return nil
+        }
+        return result
+    }
+
+    /// ★割り込みで止められた。次に同じ本文を頼まれたら、ここまで音声を飛ばす。
+    ///
+    /// 飛ばす量は「経過時間から見た今の位置」で決める。
+    /// VOICEVOX には再生位置を教えてくれる口が無いので、
+    /// 読み上げ位置の推定と同じく鳴らし始めからの経過時間で測る(数百ミリ秒の誤差はある)。
+    /// 少し手前(resumeOverlapSeconds)から鳴らすので、多少ずれても話は繋がる。
+    func noteInterruptedForResume() {
+        guard isUsingFallbackSpeaker == false,
+              m_IsUtteranceActive,
+              currentSpeechText.isEmpty == false,
+              let startDate = currentPlaybackStartDate else {
+            interruptedResumeText = ""
+            interruptedResumeSeconds = 0
+            return
+        }
+        let playbackRate = max(0.0001, Double(timePitch.rate))
+        let playedAudioSeconds = Date().timeIntervalSince(startDate) * playbackRate
+        let position = currentSkippedSeconds + playedAudioSeconds
+        // 鳴り終わっているなら、次のブロックへ進むだけなので控えは要らない。
+        guard position < currentAudioSeconds else {
+            interruptedResumeText = ""
+            interruptedResumeSeconds = 0
+            return
+        }
+        interruptedResumeText = currentSpeechText
+        interruptedResumeSeconds = max(0, position)
     }
 
     private static func pcmBuffer(fromWavData data: Data) throws -> AVAudioPCMBuffer {
