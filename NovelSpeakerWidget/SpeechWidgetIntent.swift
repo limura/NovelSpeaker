@@ -12,10 +12,23 @@
 
 import AppIntents
 
+//  文言は WidgetLocalizable.strings に置いてある(Localizable.strings ではない)。
+//
+//  この場所の AppIntents はアプリ本体とウィジェット拡張の**両方**にコンパイルされ、
+//  LocalizedStringResource は実行時に Bundle.main を見る。
+//  拡張側の Localizable.strings に置くと、アプリ本体プロセス(ショートカット等)からは
+//  鍵がそのまま表示されてしまう。かといって同じ文字列をアプリ側にも複製すると、
+//  今度は片方だけ直る事故が起きる。
+//  そこで **1つの .strings を両方のターゲットに入れて**、表の名前で参照している。
+//
+//  以前は日本語のリテラルをそのまま鍵にしていた(英語側だけ対訳表を持っていた)。
+//  日本語を直すと鍵が変わって英語が黙って外れるうえ、同じ文言が
+//  Localizable.strings とリテラルに散らばって、実際にずれ始めていた。
+
 @available(iOS 17.0, *)
 struct PhoneSpeechToggleIntent: AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "再生または停止"
-    static var description = IntentDescription("ことせかい を開かずに、読み上げの再生・停止をします。")
+    static var title = LocalizedStringResource("Phone_Widget_PlayToggle_Name", table: "WidgetLocalizable")
+    static var description = IntentDescription(LocalizedStringResource("Phone_Widget_PlayToggle_Desc", table: "WidgetLocalizable"))
 
     func perform() async throws -> some IntentResult {
         #if NOVELSPEAKER_WIDGET_EXTENSION
@@ -33,8 +46,8 @@ struct PhoneSpeechToggleIntent: AudioPlaybackIntent {
 /// openAppWhenRun でアプリを開くだけ(iOS では有効。watchOS では無視されたのと違う)
 @available(iOS 17.0, *)
 struct PhoneOpenAppIntent: AppIntent {
-    static var title: LocalizedStringResource = "アプリの起動"
-    static var description = IntentDescription("ことせかい を開きます。")
+    static var title = LocalizedStringResource("Phone_Widget_Launcher_Name", table: "WidgetLocalizable")
+    static var description = IntentDescription(LocalizedStringResource("Phone_Widget_Launcher_ControlDesc", table: "WidgetLocalizable"))
     static var openAppWhenRun: Bool = true
 
     func perform() async throws -> some IntentResult {
@@ -48,8 +61,8 @@ struct PhoneOpenAppIntent: AppIntent {
 /// novelID を手入力しても意味が無いので isDiscoverable は切っておく
 @available(iOS 17.0, *)
 struct PhonePlayNovelIntent: AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "指定小説の再生を開始"
-    static var description = IntentDescription("指定した小説の読み上げを、ことせかい を開かずに開始します。")
+    static var title = LocalizedStringResource("Phone_Widget_PlayNovel_Name", table: "WidgetLocalizable")
+    static var description = IntentDescription(LocalizedStringResource("Phone_Widget_PlayNovel_ControlDesc", table: "WidgetLocalizable"))
     static var isDiscoverable: Bool = false
 
     @Parameter(title: "novelID")

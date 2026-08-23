@@ -318,7 +318,8 @@
 		C0DE20000000000000000013 /* NovelSpeakerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000002 /* NovelSpeakerWidget.swift */; };
 		C0DE20000000000000000014 /* WidgetPlaybackHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */; };
 		C0DE20000000000000000015 /* NovelSpeakerWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		C0DE20000000000000000016 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* Localizable.strings */; };
+		C0DE20000000000000000016 /* WidgetLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* WidgetLocalizable.strings */; };
+		C0DE20000000000000000017 /* WidgetLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* WidgetLocalizable.strings */; };
 		C0DE20000000000000000051 /* PhoneWidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */; };
 		C0DE20000000000000000052 /* PhoneWidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */; };
 		C0DE20000000000000000053 /* PhonePlayNovelWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */; };
@@ -830,8 +831,8 @@
 		C0DE20000000000000000003 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetPlaybackHandler.swift; sourceTree = "<group>"; };
-		C0DE20000000000000000007 /* ja */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
-		C0DE20000000000000000008 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0DE20000000000000000007 /* ja */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/WidgetLocalizable.strings; sourceTree = "<group>"; };
+		C0DE20000000000000000008 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/WidgetLocalizable.strings; sourceTree = "<group>"; };
 		C0DE20000000000000000041 /* PhoneWidgetDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneWidgetDataStore.swift; sourceTree = "<group>"; };
 		C0DE20000000000000000042 /* PhonePlayNovelWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhonePlayNovelWidget.swift; sourceTree = "<group>"; };
 		C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneWidgetDataUpdater.swift; sourceTree = "<group>"; };
@@ -1453,7 +1454,7 @@
 				C0DE20000000000000000044 /* Assets.xcassets */,
 				C0DE20000000000000000003 /* Info.plist */,
 				C0DE20000000000000000045 /* NovelSpeakerWidget.entitlements */,
-				C0DE20000000000000000006 /* Localizable.strings */,
+				C0DE20000000000000000006 /* WidgetLocalizable.strings */,
 			);
 			path = NovelSpeakerWidget;
 			sourceTree = "<group>";
@@ -1712,6 +1713,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE20000000000000000017 /* WidgetLocalizable.strings in Resources */,
 				21429D84209F45E3001426F5 /* nc48625.m4a in Resources */,
 				21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */,
 				21D3979F1FC95CBB0018F883 /* earth@3x.png in Resources */,
@@ -1798,7 +1800,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DE20000000000000000055 /* Assets.xcassets in Resources */,
-				C0DE20000000000000000016 /* Localizable.strings in Resources */,
+				C0DE20000000000000000016 /* WidgetLocalizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2344,13 +2346,13 @@
 			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
-		C0DE20000000000000000006 /* Localizable.strings */ = {
+		C0DE20000000000000000006 /* WidgetLocalizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				C0DE20000000000000000007 /* ja */,
 				C0DE20000000000000000008 /* en */,
 			);
-			name = Localizable.strings;
+			name = WidgetLocalizable.strings;
 			sourceTree = "<group>";
 		};
 		DD14CAE2CFE5EE392C56AF56 /* Localizable.strings */ = {

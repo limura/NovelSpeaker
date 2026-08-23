@@ -19,25 +19,25 @@ import SwiftUI
 import AppIntents
 
 struct PhoneActionGroupConfigurationIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "操作をまとめて配置"
-    static var description = IntentDescription("再生・停止、アプリの起動、小説2冊の再生開始を1つのウィジェットに並べます。")
+    static var title = LocalizedStringResource("Phone_Widget_ActionGroup_Name", table: "WidgetLocalizable")
+    static var description = IntentDescription(LocalizedStringResource("Phone_Widget_ActionGroup_Desc", table: "WidgetLocalizable"))
 
-    @Parameter(title: "小説1")
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Novel1", table: "WidgetLocalizable"))
     var novel1: PhonePlayNovelChoice?
 
-    @Parameter(title: "小説1のアイコン", default: .play)
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Novel1Icon", table: "WidgetLocalizable"), default: .play)
     var icon1: PhonePlayNovelWidgetIcon
 
-    @Parameter(title: "小説1の色", default: .blue)
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Novel1Color", table: "WidgetLocalizable"), default: .blue)
     var color1: PhonePlayNovelWidgetColor
 
-    @Parameter(title: "小説2")
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Novel2", table: "WidgetLocalizable"))
     var novel2: PhonePlayNovelChoice?
 
-    @Parameter(title: "小説2のアイコン", default: .play)
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Novel2Icon", table: "WidgetLocalizable"), default: .play)
     var icon2: PhonePlayNovelWidgetIcon
 
-    @Parameter(title: "小説2の色", default: .green)
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Novel2Color", table: "WidgetLocalizable"), default: .green)
     var color2: PhonePlayNovelWidgetColor
 }
 
@@ -95,7 +95,7 @@ struct PhoneActionGroupWidgetView: View {
     @Environment(\.colorScheme) private var colorScheme
     let entry: PhoneActionGroupEntry
 
-    private var appName: String { NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい") }
+    private var appName: String { NSLocalizedString("Phone_Widget_AppName", tableName: "WidgetLocalizable", bundle: .main, comment: "ことせかい") }
 
     private var whiteFG: Bool { PhoneWidgetTheme.usesWhiteForeground(renderingMode: renderingMode, colorScheme: colorScheme) }
     private var subtleStyle: AnyShapeStyle { whiteFG ? AnyShapeStyle(.white.opacity(0.85)) : AnyShapeStyle(.secondary) }
@@ -104,8 +104,8 @@ struct PhoneActionGroupWidgetView: View {
         VStack(spacing: 6) {
             HStack(alignment: .top, spacing: 8) {
                 // 再生・停止
-                cell(caption: NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止"),
-                     accessibilityLabel: NSLocalizedString("Phone_Widget_PlayToggle_Name", comment: "再生または停止")) {
+                cell(caption: NSLocalizedString("Phone_Widget_PlayToggle_Short", tableName: "WidgetLocalizable", bundle: .main, comment: "再生・停止"),
+                     accessibilityLabel: NSLocalizedString("Phone_Widget_PlayToggle_Name", tableName: "WidgetLocalizable", bundle: .main, comment: "再生または停止")) {
                     Button(intent: PhoneSpeechToggleIntent()) {
                         PhoneActionGlyphView(badgeSystemName: "playpause.fill", badgeColor: .orange, brandStyle: whiteFG)
                     }
@@ -113,7 +113,7 @@ struct PhoneActionGroupWidgetView: View {
                 }
                 // アプリの起動
                 cell(caption: appName,
-                     accessibilityLabel: NSLocalizedString("Phone_Widget_Launcher_Name", comment: "アプリの起動")) {
+                     accessibilityLabel: NSLocalizedString("Phone_Widget_Launcher_Name", tableName: "WidgetLocalizable", bundle: .main, comment: "アプリの起動")) {
                     Button(intent: PhoneOpenAppIntent()) {
                         PhoneBrandGlyph(forceTemplate: whiteFG)
                     }
@@ -163,8 +163,8 @@ struct PhoneActionGroupWidgetView: View {
         } else {
             // 未選択。タップはボタンにせず通常のアプリ起動にしておく
             // (ギャラリーのプレビューでは機能の見本として選択アイコンを出す)
-            cell(caption: NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択"),
-                 accessibilityLabel: NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", comment: "ウィジェットの編集で小説を選択してください")) {
+            cell(caption: NSLocalizedString("Phone_Widget_PlayNovel_Unset", tableName: "WidgetLocalizable", bundle: .main, comment: "小説を選択"),
+                 accessibilityLabel: NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", tableName: "WidgetLocalizable", bundle: .main, comment: "ウィジェットの編集で小説を選択してください")) {
                 PhoneActionGlyphView(badgeSystemName: entry.isPreview ? slot.iconSystemName : "gearshape.fill", badgeColor: slot.tint, brandStyle: whiteFG)
             }
         }
@@ -178,8 +178,8 @@ struct PhoneActionGroupWidget: Widget {
                                provider: PhoneActionGroupProvider()) { entry in
             PhoneActionGroupWidgetView(entry: entry)
         }
-        .configurationDisplayName(NSLocalizedString("Phone_Widget_ActionGroup_Name", comment: "操作をまとめて配置"))
-        .description(NSLocalizedString("Phone_Widget_ActionGroup_Desc", comment: "再生・停止、アプリの起動、選んだ小説2冊の再生開始を1つのウィジェットに並べます。"))
+        .configurationDisplayName(NSLocalizedString("Phone_Widget_ActionGroup_Name", tableName: "WidgetLocalizable", bundle: .main, comment: "操作をまとめて配置"))
+        .description(NSLocalizedString("Phone_Widget_ActionGroup_Desc", tableName: "WidgetLocalizable", bundle: .main, comment: "再生・停止、アプリの起動、選んだ小説2冊の再生開始を1つのウィジェットに並べます。"))
         .supportedFamilies([.systemSmall])
     }
 }

@@ -8,12 +8,15 @@
 /* アプリの起動(ランチャー) */
 "Phone_Widget_Launcher_Name" = "アプリの起動";
 "Phone_Widget_Launcher_Desc" = "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。";
+/* コントロール(ロック画面下部・コントロールセンター)用。絵の下に1行しか入らないので短い方 */
+"Phone_Widget_Launcher_ControlDesc" = "ことせかい を開きます。";
 "Phone_Widget_Launcher_OpenApp" = "アプリを開く";
 "Phone_Widget_Launcher_Stats_Format" = "本棚 %1$d件・更新あり %2$d件";
 
 /* 設定可能ウィジェット「指定小説の再生を開始」 */
 "Phone_Widget_PlayNovel_Name" = "指定小説の再生を開始";
 "Phone_Widget_PlayNovel_Desc" = "指定した小説の読み上げを、ことせかい を開かずに開始します。小説の候補は最近読んだ順に並びます。";
+"Phone_Widget_PlayNovel_ControlDesc" = "指定した小説の読み上げを、ことせかい を開かずに開始します。";
 "Phone_Widget_PlayNovel_Unset" = "小説を選択";
 "Phone_Widget_PlayNovel_UnsetHint" = "ウィジェットの編集で小説を選択してください";
 "Phone_Widget_PlayNovel_TapHint" = "タップで再生を開始";
@@ -21,6 +24,29 @@
 /* 4枠アクションウィジェット */
 "Phone_Widget_ActionGroup_Name" = "操作をまとめて配置";
 "Phone_Widget_ActionGroup_Desc" = "再生・停止、アプリの起動、選んだ小説2冊の再生開始を1つのウィジェットに並べます。";
+
+/* ウィジェットを編集する時に出る、設定項目の名前(AppIntents 側) */
+"Phone_Widget_Config_Novel" = "小説";
+"Phone_Widget_Config_Icon" = "アイコン";
+"Phone_Widget_Config_Color" = "色";
+"Phone_Widget_Config_Novel1" = "小説1";
+"Phone_Widget_Config_Novel1Icon" = "小説1のアイコン";
+"Phone_Widget_Config_Novel1Color" = "小説1の色";
+"Phone_Widget_Config_Novel2" = "小説2";
+"Phone_Widget_Config_Novel2Icon" = "小説2のアイコン";
+"Phone_Widget_Config_Novel2Color" = "小説2の色";
+"Phone_Widget_Config_Icon_Play" = "再生(▶)";
+"Phone_Widget_Config_Icon_Book" = "本";
+"Phone_Widget_Config_Icon_Bookmark" = "しおり";
+"Phone_Widget_Config_Icon_Headphones" = "ヘッドフォン";
+"Phone_Widget_Config_Icon_Star" = "星";
+"Phone_Widget_Config_Icon_Sparkles" = "きらめき";
+"Phone_Widget_Config_Color_Orange" = "オレンジ";
+"Phone_Widget_Config_Color_Red" = "赤";
+"Phone_Widget_Config_Color_Purple" = "紫";
+"Phone_Widget_Config_Color_Blue" = "青";
+"Phone_Widget_Config_Color_Teal" = "ティール";
+"Phone_Widget_Config_Color_Green" = "緑";
 
 /* VoiceOver 用 */
 "Phone_Widget_PlayNovel_AccessibilityFormat" = "%@ の再生を開始";

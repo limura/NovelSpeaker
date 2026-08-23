@@ -22,7 +22,7 @@ import AppIntents
 
 /// 選べる小説(App Group の要約ストアから供給)
 struct PlayNovelChoice: AppEntity {
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "小説")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Watch_Widget_Config_Novel"))
     static var defaultQuery = PlayNovelChoiceQuery()
 
     var id: String   // novelID
@@ -50,14 +50,14 @@ struct PlayNovelChoiceQuery: EntityQuery {
 enum PlayNovelWidgetIcon: String, AppEnum {
     case play, book, bookmark, headphones, star, sparkles
 
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "アイコン")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Watch_Widget_Config_Icon"))
     static var caseDisplayRepresentations: [PlayNovelWidgetIcon: DisplayRepresentation] = [
-        .play:       DisplayRepresentation(title: "再生(▶)"),
-        .book:       DisplayRepresentation(title: "本"),
-        .bookmark:   DisplayRepresentation(title: "しおり"),
-        .headphones: DisplayRepresentation(title: "ヘッドフォン"),
-        .star:       DisplayRepresentation(title: "星"),
-        .sparkles:   DisplayRepresentation(title: "きらめき"),
+        .play:       DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Icon_Play")),
+        .book:       DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Icon_Book")),
+        .bookmark:   DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Icon_Bookmark")),
+        .headphones: DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Icon_Headphones")),
+        .star:       DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Icon_Star")),
+        .sparkles:   DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Icon_Sparkles")),
     ]
 
     var systemName: String {
@@ -76,14 +76,14 @@ enum PlayNovelWidgetIcon: String, AppEnum {
 enum PlayNovelWidgetColor: String, AppEnum {
     case orange, red, purple, blue, teal, green
 
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "色")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Watch_Widget_Config_Color"))
     static var caseDisplayRepresentations: [PlayNovelWidgetColor: DisplayRepresentation] = [
-        .orange: DisplayRepresentation(title: "オレンジ"),
-        .red:    DisplayRepresentation(title: "赤"),
-        .purple: DisplayRepresentation(title: "紫"),
-        .blue:   DisplayRepresentation(title: "青"),
-        .teal:   DisplayRepresentation(title: "ティール"),
-        .green:  DisplayRepresentation(title: "緑"),
+        .orange: DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Color_Orange")),
+        .red:    DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Color_Red")),
+        .purple: DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Color_Purple")),
+        .blue:   DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Color_Blue")),
+        .teal:   DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Color_Teal")),
+        .green:  DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Color_Green")),
     ]
 
     var color: Color {
@@ -99,16 +99,16 @@ enum PlayNovelWidgetColor: String, AppEnum {
 }
 
 struct PlayNovelConfigurationIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "この小説を再生"
-    static var description = IntentDescription("指定した小説を、現在の発話元(iPhone/Watch単体)で再生します。")
+    static var title = LocalizedStringResource("Watch_Widget_PlayNovel_Name")
+    static var description = IntentDescription(LocalizedStringResource("Watch_Widget_PlayNovel_Desc"))
 
-    @Parameter(title: "小説")
+    @Parameter(title: LocalizedStringResource("Watch_Widget_Config_Novel"))
     var novel: PlayNovelChoice?
 
-    @Parameter(title: "アイコン", default: .play)
+    @Parameter(title: LocalizedStringResource("Watch_Widget_Config_Icon"), default: .play)
     var icon: PlayNovelWidgetIcon
 
-    @Parameter(title: "色", default: .orange)
+    @Parameter(title: LocalizedStringResource("Watch_Widget_Config_Color"), default: .orange)
     var color: PlayNovelWidgetColor
 }
 
@@ -263,8 +263,8 @@ struct PlayNovelComplication: Widget {
                                provider: PlayNovelProvider()) { entry in
             PlayNovelComplicationView(entry: entry)
         }
-        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayNovel_Name", comment: "この小説を再生"))
-        .description(NSLocalizedString("Watch_Widget_PlayNovel_Desc", comment: "指定した小説を再生します。"))
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayNovel_Name", comment: "指定小説の再生を開始"))
+        .description(NSLocalizedString("Watch_Widget_PlayNovel_Desc", comment: "指定した小説を、現在の発話元(iPhone/Watch単体)で再生します。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular])
     }
 }

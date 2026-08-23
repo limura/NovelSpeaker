@@ -21,7 +21,7 @@ import AppIntents
 
 /// 選べる小説(App Group の共有ストアから供給)
 struct PhonePlayNovelChoice: AppEntity {
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "小説")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Phone_Widget_Config_Novel", table: "WidgetLocalizable"))
     static var defaultQuery = PhonePlayNovelChoiceQuery()
 
     var id: String   // novelID
@@ -49,14 +49,14 @@ struct PhonePlayNovelChoiceQuery: EntityQuery {
 enum PhonePlayNovelWidgetIcon: String, AppEnum {
     case play, book, bookmark, headphones, star, sparkles
 
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "アイコン")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Phone_Widget_Config_Icon", table: "WidgetLocalizable"))
     static var caseDisplayRepresentations: [PhonePlayNovelWidgetIcon: DisplayRepresentation] = [
-        .play:       DisplayRepresentation(title: "再生(▶)"),
-        .book:       DisplayRepresentation(title: "本"),
-        .bookmark:   DisplayRepresentation(title: "しおり"),
-        .headphones: DisplayRepresentation(title: "ヘッドフォン"),
-        .star:       DisplayRepresentation(title: "星"),
-        .sparkles:   DisplayRepresentation(title: "きらめき"),
+        .play:       DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Icon_Play", table: "WidgetLocalizable")),
+        .book:       DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Icon_Book", table: "WidgetLocalizable")),
+        .bookmark:   DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Icon_Bookmark", table: "WidgetLocalizable")),
+        .headphones: DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Icon_Headphones", table: "WidgetLocalizable")),
+        .star:       DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Icon_Star", table: "WidgetLocalizable")),
+        .sparkles:   DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Icon_Sparkles", table: "WidgetLocalizable")),
     ]
 
     var systemName: String {
@@ -75,14 +75,14 @@ enum PhonePlayNovelWidgetIcon: String, AppEnum {
 enum PhonePlayNovelWidgetColor: String, AppEnum {
     case orange, red, purple, blue, teal, green
 
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "色")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Phone_Widget_Config_Color", table: "WidgetLocalizable"))
     static var caseDisplayRepresentations: [PhonePlayNovelWidgetColor: DisplayRepresentation] = [
-        .orange: DisplayRepresentation(title: "オレンジ"),
-        .red:    DisplayRepresentation(title: "赤"),
-        .purple: DisplayRepresentation(title: "紫"),
-        .blue:   DisplayRepresentation(title: "青"),
-        .teal:   DisplayRepresentation(title: "ティール"),
-        .green:  DisplayRepresentation(title: "緑"),
+        .orange: DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Color_Orange", table: "WidgetLocalizable")),
+        .red:    DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Color_Red", table: "WidgetLocalizable")),
+        .purple: DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Color_Purple", table: "WidgetLocalizable")),
+        .blue:   DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Color_Blue", table: "WidgetLocalizable")),
+        .teal:   DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Color_Teal", table: "WidgetLocalizable")),
+        .green:  DisplayRepresentation(title: LocalizedStringResource("Phone_Widget_Config_Color_Green", table: "WidgetLocalizable")),
     ]
 
     var color: Color {
@@ -98,16 +98,16 @@ enum PhonePlayNovelWidgetColor: String, AppEnum {
 }
 
 struct PhonePlayNovelConfigurationIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "指定小説の再生を開始"
-    static var description = IntentDescription("指定した小説の読み上げを、ことせかい を開かずに開始します。")
+    static var title = LocalizedStringResource("Phone_Widget_PlayNovel_Name", table: "WidgetLocalizable")
+    static var description = IntentDescription(LocalizedStringResource("Phone_Widget_PlayNovel_ControlDesc", table: "WidgetLocalizable"))
 
-    @Parameter(title: "小説")
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Novel", table: "WidgetLocalizable"))
     var novel: PhonePlayNovelChoice?
 
-    @Parameter(title: "アイコン", default: .play)
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Icon", table: "WidgetLocalizable"), default: .play)
     var icon: PhonePlayNovelWidgetIcon
 
-    @Parameter(title: "色", default: .orange)
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Color", table: "WidgetLocalizable"), default: .orange)
     var color: PhonePlayNovelWidgetColor
 }
 
@@ -172,9 +172,9 @@ struct PhonePlayNovelWidgetView: View {
     private var displayTitle: String {
         if let title = entry.title { return title }
         if entry.isPreview {
-            return NSLocalizedString("Phone_Widget_PlayNovel_Name", comment: "指定小説の再生を開始")
+            return NSLocalizedString("Phone_Widget_PlayNovel_Name", tableName: "WidgetLocalizable", bundle: .main, comment: "指定小説の再生を開始")
         }
-        return NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択")
+        return NSLocalizedString("Phone_Widget_PlayNovel_Unset", tableName: "WidgetLocalizable", bundle: .main, comment: "小説を選択")
     }
 
     // 単色系(ロック画面)では色分けが効かないのでシステムに任せ、フルカラーのみ選択色を適用する
@@ -222,7 +222,7 @@ struct PhonePlayNovelWidgetView: View {
                             .gaugeStyle(.accessoryLinearCapacity)
                             .tint(iconTint)
                     } else {
-                        Text(NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", comment: "長押しなどの編集で小説を選択"))
+                        Text(NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", tableName: "WidgetLocalizable", bundle: .main, comment: "長押しなどの編集で小説を選択"))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
@@ -250,11 +250,11 @@ struct PhonePlayNovelWidgetView: View {
                         .gaugeStyle(.accessoryLinearCapacity)
                         .tint(whiteFG ? .white : iconTint)
                     Spacer(minLength: 0)
-                    Text(NSLocalizedString("Phone_Widget_PlayNovel_TapHint", comment: "タップで再生を開始"))
+                    Text(NSLocalizedString("Phone_Widget_PlayNovel_TapHint", tableName: "WidgetLocalizable", bundle: .main, comment: "タップで再生を開始"))
                         .font(.caption2)
                         .foregroundStyle(subtleStyle)
                 } else {
-                    Text(NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", comment: "長押しなどの編集で小説を選択"))
+                    Text(NSLocalizedString("Phone_Widget_PlayNovel_UnsetHint", tableName: "WidgetLocalizable", bundle: .main, comment: "長押しなどの編集で小説を選択"))
                         .font(.caption2)
                         .foregroundStyle(subtleStyle)
                         .multilineTextAlignment(.center)
@@ -273,8 +273,8 @@ struct PhonePlayNovelWidget: Widget {
                                provider: PhonePlayNovelProvider()) { entry in
             PhonePlayNovelWidgetView(entry: entry)
         }
-        .configurationDisplayName(NSLocalizedString("Phone_Widget_PlayNovel_Name", comment: "指定小説の再生を開始"))
-        .description(NSLocalizedString("Phone_Widget_PlayNovel_Desc", comment: "指定した小説の読み上げを、ことせかい を開かずに開始します。小説の候補は最近読んだ順に並びます。"))
+        .configurationDisplayName(NSLocalizedString("Phone_Widget_PlayNovel_Name", tableName: "WidgetLocalizable", bundle: .main, comment: "指定小説の再生を開始"))
+        .description(NSLocalizedString("Phone_Widget_PlayNovel_Desc", tableName: "WidgetLocalizable", bundle: .main, comment: "指定した小説の読み上げを、ことせかい を開かずに開始します。小説の候補は最近読んだ順に並びます。"))
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
     }
 }
@@ -284,10 +284,10 @@ struct PhonePlayNovelWidget: Widget {
 /// コントロールの設定 intent(小説の選択のみ。アイコン・色はコントロールでは選べない)
 @available(iOSApplicationExtension 18.0, *)
 struct PhonePlayNovelControlIntent: ControlConfigurationIntent {
-    static var title: LocalizedStringResource = "指定小説の再生を開始"
-    static var description = IntentDescription("指定した小説の読み上げを、ことせかい を開かずに開始します。")
+    static var title = LocalizedStringResource("Phone_Widget_PlayNovel_Name", table: "WidgetLocalizable")
+    static var description = IntentDescription(LocalizedStringResource("Phone_Widget_PlayNovel_ControlDesc", table: "WidgetLocalizable"))
 
-    @Parameter(title: "小説")
+    @Parameter(title: LocalizedStringResource("Phone_Widget_Config_Novel", table: "WidgetLocalizable"))
     var novel: PhonePlayNovelChoice?
 }
 
@@ -318,7 +318,7 @@ struct PhonePlayNovelControl: ControlWidget {
             // ことせかいグリフ+▶の合成カスタムシンボル
             ControlWidgetButton(action: PhonePlayNovelIntent(novelID: value.novelID ?? "")) {
                 Label {
-                    Text(value.title ?? NSLocalizedString("Phone_Widget_PlayNovel_Unset", comment: "小説を選択"))
+                    Text(value.title ?? NSLocalizedString("Phone_Widget_PlayNovel_Unset", tableName: "WidgetLocalizable", bundle: .main, comment: "小説を選択"))
                 } icon: {
                     if value.novelID == nil {
                         Image(systemName: "gearshape.fill")
@@ -328,7 +328,7 @@ struct PhonePlayNovelControl: ControlWidget {
                 }
             }
         }
-        .displayName("指定小説の再生を開始")
-        .description("指定した小説の読み上げを、ことせかい を開かずに開始します。")
+        .displayName(LocalizedStringResource("Phone_Widget_PlayNovel_Name", table: "WidgetLocalizable"))
+        .description(LocalizedStringResource("Phone_Widget_PlayNovel_ControlDesc", table: "WidgetLocalizable"))
     }
 }

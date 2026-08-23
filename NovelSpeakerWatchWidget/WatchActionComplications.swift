@@ -27,10 +27,10 @@ import AppIntents
 /// 色が変わるだけでカラー文字盤での複数配置時の視認性が格段に上がるため選べるようにする。
 /// 実行用の intent ではない(操作は widgetURL)。色の enum は「この小説を再生」と共用
 struct ActionColorConfigurationIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "色の設定"
-    static var description = IntentDescription("機能アイコンの色を選べます。")
+    static var title = LocalizedStringResource("Watch_Widget_Config_ColorSetting_Name")
+    static var description = IntentDescription(LocalizedStringResource("Watch_Widget_Config_ColorSetting_Desc"))
 
-    @Parameter(title: "色", default: .orange)
+    @Parameter(title: LocalizedStringResource("Watch_Widget_Config_Color"), default: .orange)
     var color: PlayNovelWidgetColor
 }
 
@@ -215,7 +215,7 @@ struct PlayPauseComplication: Widget {
             ActionComplicationView(entry: entry, badgeSystemName: "playpause.fill",
                                    action: .togglePlayPause, usesNovelTitleLabel: true)
         }
-        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayToggle_Name", comment: "再生・一時停止"))
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayToggle_Name", comment: "再生または停止"))
         .description(NSLocalizedString("Watch_Widget_PlayToggle_Desc", comment: "タップで ことせかい を開き、再生/一時停止を切り替えます。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner])
     }
@@ -229,7 +229,7 @@ struct TextPageComplication: Widget {
             ActionComplicationView(entry: entry, badgeSystemName: "book.fill",
                                    action: .openTextPage, usesNovelTitleLabel: true)
         }
-        .configurationDisplayName(NSLocalizedString("Watch_Widget_TextPage_Name", comment: "本文ページ"))
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_TextPage_Name", comment: "Watchアプリの本文画面"))
         .description(NSLocalizedString("Watch_Widget_TextPage_Desc", comment: "タップで ことせかい の本文ページを開きます。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner])
     }
@@ -243,7 +243,7 @@ struct CheckUpdatesComplication: Widget {
             ActionComplicationView(entry: entry, badgeSystemName: "arrow.clockwise",
                                    action: .checkUpdatesAll, usesNovelTitleLabel: false)
         }
-        .configurationDisplayName(NSLocalizedString("Watch_Widget_CheckUpdates_Name", comment: "更新確認"))
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_CheckUpdates_Name", comment: "全小説の更新確認を開始"))
         .description(NSLocalizedString("Watch_Widget_CheckUpdates_Desc", comment: "タップで ことせかい を開き、すべての小説の更新を確認します。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner])
     }
@@ -260,7 +260,7 @@ struct PlayOnWatchComplication: Widget {
                                    action: .playOnWatch, usesNovelTitleLabel: true,
                                    baseSystemName: "applewatch")
         }
-        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayOnWatch_Name", comment: "ことせかい Watchで再生"))
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayOnWatch_Name", comment: "Watchで再生開始"))
         .description(NSLocalizedString("Watch_Widget_PlayOnWatch_Desc", comment: "タップで ことせかい を開き、Watch単体再生に切り替えて再生を開始します。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner])
     }
@@ -276,7 +276,7 @@ struct PlayOnPhoneComplication: Widget {
                                    action: .playOnPhone, usesNovelTitleLabel: true,
                                    baseSystemName: "iphone")
         }
-        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayOnPhone_Name", comment: "ことせかい iPhoneで再生"))
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_PlayOnPhone_Name", comment: "iPhoneで再生開始"))
         .description(NSLocalizedString("Watch_Widget_PlayOnPhone_Desc", comment: "タップで ことせかい を開き、iPhoneでの再生に切り替えて再生を開始します。"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner])
     }
@@ -290,13 +290,13 @@ struct PlayOnPhoneComplication: Widget {
 enum ActionSlotKind: String, AppEnum {
     case playToggle, playOnWatch, playOnPhone, textPage, checkUpdates
 
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "操作")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Watch_Widget_Config_Action"))
     static var caseDisplayRepresentations: [ActionSlotKind: DisplayRepresentation] = [
-        .playToggle:   DisplayRepresentation(title: "再生・停止"),
-        .playOnWatch:  DisplayRepresentation(title: "Watchで再生"),
-        .playOnPhone:  DisplayRepresentation(title: "iPhoneで再生"),
-        .textPage:     DisplayRepresentation(title: "本文ページ"),
-        .checkUpdates: DisplayRepresentation(title: "更新確認"),
+        .playToggle:   DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Action_PlayToggle")),
+        .playOnWatch:  DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Action_PlayOnWatch")),
+        .playOnPhone:  DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Action_PlayOnPhone")),
+        .textPage:     DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Action_TextPage")),
+        .checkUpdates: DisplayRepresentation(title: LocalizedStringResource("Watch_Widget_Config_Action_CheckUpdates")),
     ]
 
     var badgeSystemName: String {
@@ -344,16 +344,16 @@ enum ActionSlotKind: String, AppEnum {
 
 /// アクション3枠の設定
 struct ActionGroupConfigurationIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "3つの操作"
-    static var description = IntentDescription("3つの枠に置く操作を選べます。")
+    static var title = LocalizedStringResource("Watch_Widget_ActionGroup_Name")
+    static var description = IntentDescription(LocalizedStringResource("Watch_Widget_Config_ActionGroup_Desc"))
 
-    @Parameter(title: "左の操作", default: .playToggle)
+    @Parameter(title: LocalizedStringResource("Watch_Widget_Config_Action_Left"), default: .playToggle)
     var slot1: ActionSlotKind
 
-    @Parameter(title: "中央の操作", default: .playOnWatch)
+    @Parameter(title: LocalizedStringResource("Watch_Widget_Config_Action_Center"), default: .playOnWatch)
     var slot2: ActionSlotKind
 
-    @Parameter(title: "右の操作", default: .checkUpdates)
+    @Parameter(title: LocalizedStringResource("Watch_Widget_Config_Action_Right"), default: .checkUpdates)
     var slot3: ActionSlotKind
 }
 
@@ -380,7 +380,7 @@ struct ActionGroupProvider: AppIntentTimelineProvider {
         }
         // 旧 watchOS では既定構成のプリセットを1つ返す
         return [AppIntentRecommendation(intent: ActionGroupConfigurationIntent(),
-                                        description: Text(NSLocalizedString("Watch_Widget_ActionGroup_Name", comment: "ことせかい 3つの操作")))]
+                                        description: Text(NSLocalizedString("Watch_Widget_ActionGroup_Name", comment: "3種の操作を設定")))]
     }
 
     private func entry(for configuration: ActionGroupConfigurationIntent) -> ActionGroupEntry {
@@ -424,7 +424,7 @@ struct ActionGroupComplication: Widget {
                                provider: ActionGroupProvider()) { entry in
             ActionGroupComplicationView(entry: entry)
         }
-        .configurationDisplayName(NSLocalizedString("Watch_Widget_ActionGroup_Name", comment: "ことせかい 3つの操作"))
+        .configurationDisplayName(NSLocalizedString("Watch_Widget_ActionGroup_Name", comment: "3種の操作を設定"))
         .description(NSLocalizedString("Watch_Widget_ActionGroup_Desc", comment: "選んだ3つの操作を並べて置けます。"))
         .supportedFamilies([.accessoryRectangular])
     }

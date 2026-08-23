@@ -13,9 +13,9 @@
 "Watch_Widget_CheckUpdates_Name" = "全小説の更新確認を開始";
 "Watch_Widget_CheckUpdates_Desc" = "タップで ことせかい を開き、すべての小説の更新を確認します。";
 
-/* 設定可能ウィジェット「この小説を再生」(第2弾) */
+/* 設定可能ウィジェット「指定小説の再生を開始」(第2弾) */
 "Watch_Widget_PlayNovel_Name" = "指定小説の再生を開始";
-"Watch_Widget_PlayNovel_Desc" = "指定した小説を再生します。小説の候補は最近読んだ順に並びます。";
+"Watch_Widget_PlayNovel_Desc" = "指定した小説を、現在の発話元(iPhone/Watch単体)で再生します。小説の候補は最近読んだ順に並びます。";
 "Watch_Widget_PlayNovel_Unset" = "小説を選択";
 "Watch_Widget_PlayNovel_RecommendFormat" = "小説を再生: %@";
 
@@ -28,6 +28,36 @@
 /* アクション3枠(AccessoryWidgetGroup) */
 "Watch_Widget_ActionGroup_Name" = "3種の操作を設定";
 "Watch_Widget_ActionGroup_Desc" = "選んだ3つの操作を並べて置けます。";
+
+/* コンプリケーションを編集する時に出る、設定項目の名前(AppIntents 側) */
+"Watch_Widget_Config_Novel" = "小説";
+"Watch_Widget_Config_Icon" = "アイコン";
+"Watch_Widget_Config_Color" = "色";
+"Watch_Widget_Config_Icon_Play" = "再生(▶)";
+"Watch_Widget_Config_Icon_Book" = "本";
+"Watch_Widget_Config_Icon_Bookmark" = "しおり";
+"Watch_Widget_Config_Icon_Headphones" = "ヘッドフォン";
+"Watch_Widget_Config_Icon_Star" = "星";
+"Watch_Widget_Config_Icon_Sparkles" = "きらめき";
+"Watch_Widget_Config_Color_Orange" = "オレンジ";
+"Watch_Widget_Config_Color_Red" = "赤";
+"Watch_Widget_Config_Color_Purple" = "紫";
+"Watch_Widget_Config_Color_Blue" = "青";
+"Watch_Widget_Config_Color_Teal" = "ティール";
+"Watch_Widget_Config_Color_Green" = "緑";
+"Watch_Widget_Config_ColorSetting_Name" = "色の設定";
+"Watch_Widget_Config_ColorSetting_Desc" = "機能アイコンの色を選べます。";
+"Watch_Widget_Config_ActionGroup_Desc" = "3つの枠に置く操作を選べます。";
+"Watch_Widget_Config_Action" = "操作";
+"Watch_Widget_Config_Action_Left" = "左の操作";
+"Watch_Widget_Config_Action_Center" = "中央の操作";
+"Watch_Widget_Config_Action_Right" = "右の操作";
+/* 3枠の選択肢。枠が狭いので、コンプリケーション名より短い言い方にしてある */
+"Watch_Widget_Config_Action_PlayToggle" = "再生・停止";
+"Watch_Widget_Config_Action_PlayOnWatch" = "Watchで再生";
+"Watch_Widget_Config_Action_PlayOnPhone" = "iPhoneで再生";
+"Watch_Widget_Config_Action_TextPage" = "本文ページ";
+"Watch_Widget_Config_Action_CheckUpdates" = "更新確認";
 
 /* 円形コンプリケーションの widgetLabel(小説名と読んでいる位置) */
 "Watch_Widget_TitleChapterFormat" = "%1$@・%2$@";

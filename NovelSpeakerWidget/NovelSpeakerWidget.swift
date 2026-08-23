@@ -93,7 +93,7 @@ struct PhoneLauncherControl: ControlWidget {
         StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.openApp3") {
             ControlWidgetButton(action: PhoneOpenAppIntent()) {
                 Label {
-                    Text("アプリの起動")
+                    Text(LocalizedStringResource("Phone_Widget_Launcher_Name", table: "WidgetLocalizable"))
                 } icon: {
                     // コントロールのアイコンは SF Symbol しか描画されない(PNG は「？」になる)ため、
                     // 元 SVG から起こしたカスタムシンボルを使う。
@@ -103,8 +103,8 @@ struct PhoneLauncherControl: ControlWidget {
                 }
             }
         }
-        .displayName("アプリの起動")
-        .description("ことせかい を開きます。")
+        .displayName(LocalizedStringResource("Phone_Widget_Launcher_Name", table: "WidgetLocalizable"))
+        .description(LocalizedStringResource("Phone_Widget_Launcher_ControlDesc", table: "WidgetLocalizable"))
     }
 }
 
@@ -231,8 +231,8 @@ struct PhoneLauncherWidget: Widget {
         StaticConfiguration(kind: "com.limuraproducts.novelspeaker.widget.launcher", provider: PhoneLauncherProvider()) { entry in
             PhoneLauncherWidgetView(entry: entry)
         }
-        .configurationDisplayName(NSLocalizedString("Phone_Widget_Launcher_Name", comment: "アプリの起動"))
-        .description(NSLocalizedString("Phone_Widget_Launcher_Desc", comment: "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。"))
+        .configurationDisplayName(NSLocalizedString("Phone_Widget_Launcher_Name", tableName: "WidgetLocalizable", bundle: .main, comment: "アプリの起動"))
+        .description(NSLocalizedString("Phone_Widget_Launcher_Desc", tableName: "WidgetLocalizable", bundle: .main, comment: "読んでいる小説の進捗を表示し、タップで ことせかい を開きます。"))
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
     }
 }
@@ -294,7 +294,7 @@ struct PhoneLauncherWidgetView: View {
             } else {
                 HStack(spacing: 8) {
                     PhoneBrandGlyph().frame(width: 28, height: 28)
-                    Text(NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
+                    Text(NSLocalizedString("Phone_Widget_AppName", tableName: "WidgetLocalizable", bundle: .main, comment: "ことせかい"))
                         .font(.headline)
                     Spacer(minLength: 0)
                 }
@@ -316,20 +316,20 @@ struct PhoneLauncherWidgetView: View {
                         .gaugeStyle(.accessoryLinearCapacity)
                         .tint(whiteFG ? .white : .orange)
                 } else {
-                    Text(NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
+                    Text(NSLocalizedString("Phone_Widget_AppName", tableName: "WidgetLocalizable", bundle: .main, comment: "ことせかい"))
                         .font(.caption)
                         .foregroundStyle(primaryStyle)
                 }
                 Spacer(minLength: 0)
                 if let stats = entry.stats {
-                    Text(String(format: NSLocalizedString("Phone_Widget_Launcher_Stats_Format", comment: "本棚 %1$d冊・更新あり %2$d冊"), stats.novelCount, stats.newArrivalCount))
+                    Text(String(format: NSLocalizedString("Phone_Widget_Launcher_Stats_Format", tableName: "WidgetLocalizable", bundle: .main, comment: "本棚 %1$d冊・更新あり %2$d冊"), stats.novelCount, stats.newArrivalCount))
                         .font(.caption2)
                         .foregroundStyle(subtleStyle)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
                 HStack(spacing: 3) {
-                    Text(NSLocalizedString("Phone_Widget_Launcher_OpenApp", comment: "アプリを開く"))
+                    Text(NSLocalizedString("Phone_Widget_Launcher_OpenApp", tableName: "WidgetLocalizable", bundle: .main, comment: "アプリを開く"))
                     Image(systemName: "arrow.up.forward.app")
                         .accessibilityHidden(true) // 隣の文字と同じ事しか言わない飾り
                 }
@@ -349,8 +349,8 @@ struct PhonePlayToggleWidget: Widget {
         StaticConfiguration(kind: "com.limuraproducts.novelspeaker.widget.playToggle", provider: PhoneLauncherProvider()) { entry in
             PhonePlayToggleWidgetView(entry: entry)
         }
-        .configurationDisplayName(NSLocalizedString("Phone_Widget_PlayToggle_Name", comment: "再生または停止"))
-        .description(NSLocalizedString("Phone_Widget_PlayToggle_Desc", comment: "ことせかい を開かずに、読み上げの再生・停止をします。"))
+        .configurationDisplayName(NSLocalizedString("Phone_Widget_PlayToggle_Name", tableName: "WidgetLocalizable", bundle: .main, comment: "再生または停止"))
+        .description(NSLocalizedString("Phone_Widget_PlayToggle_Desc", tableName: "WidgetLocalizable", bundle: .main, comment: "ことせかい を開かずに、読み上げの再生・停止をします。"))
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
     }
 }
@@ -392,11 +392,11 @@ struct PhonePlayToggleWidgetView: View {
                 PhoneActionGlyphView(badgeSystemName: "playpause.fill")
                     .frame(width: 30, height: 30)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(reading?.title ?? NSLocalizedString("Phone_Widget_AppName", comment: "ことせかい"))
+                    Text(reading?.title ?? NSLocalizedString("Phone_Widget_AppName", tableName: "WidgetLocalizable", bundle: .main, comment: "ことせかい"))
                         .font(.headline)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                    Text(NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止"))
+                    Text(NSLocalizedString("Phone_Widget_PlayToggle_Short", tableName: "WidgetLocalizable", bundle: .main, comment: "再生・停止"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -419,7 +419,7 @@ struct PhonePlayToggleWidgetView: View {
                         .tint(whiteFG ? .white : .orange)
                     Spacer(minLength: 0)
                 }
-                Text(NSLocalizedString("Phone_Widget_PlayToggle_Short", comment: "再生・停止"))
+                Text(NSLocalizedString("Phone_Widget_PlayToggle_Short", tableName: "WidgetLocalizable", bundle: .main, comment: "再生・停止"))
                     .font(.caption2)
                     .foregroundStyle(subtleStyle)
             }
@@ -438,7 +438,7 @@ struct PhonePlayToggleControl: ControlWidget {
         StaticControlConfiguration(kind: "com.limuraproducts.novelspeaker.widget.control.playToggle4") {
             ControlWidgetButton(action: PhoneSpeechToggleIntent()) {
                 Label {
-                    Text("再生または停止")
+                    Text(LocalizedStringResource("Phone_Widget_PlayToggle_Name", table: "WidgetLocalizable"))
                 } icon: {
                     // ことせかいグリフ+⏯の合成をカスタムシンボルとして生成したもの
                     // (くり抜きは SF Symbol の消去レイヤーで実現)
@@ -446,7 +446,7 @@ struct PhonePlayToggleControl: ControlWidget {
                 }
             }
         }
-        .displayName("再生または停止")
-        .description("ことせかい を開かずに、読み上げの再生・停止をします。")
+        .displayName(LocalizedStringResource("Phone_Widget_PlayToggle_Name", table: "WidgetLocalizable"))
+        .description(LocalizedStringResource("Phone_Widget_PlayToggle_Desc", table: "WidgetLocalizable"))
     }
 }

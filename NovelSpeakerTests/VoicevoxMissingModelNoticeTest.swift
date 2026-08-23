@@ -14,7 +14,10 @@ class VoicevoxMissingModelNoticeTest: XCTestCase {
     func testMessageSaysWhatHappenedAndHowToRecover() {
         let message = VoicevoxMissingModelNotice.message(styleId: 22, displayName: "ずんだもん - ささやき")
         XCTAssertTrue(message.contains("ずんだもん - ささやき"), message)
-        XCTAssertTrue(message.contains("端末の音声で読み上げました"), message)
+        // 代わりに読むエンジンの呼び名は SpeechEngineType 側に1つだけ持たせてあるので、
+        // 文面もそれと同じ言葉になっている事を見る(片方だけ直る事故を防ぐ)。
+        XCTAssertTrue(message.contains(SpeechEngineType.avSpeechSynthesizer.localizedName), message)
+        XCTAssertTrue(message.contains("読み上げました"), message)
         XCTAssertTrue(message.contains("話者設定はそのまま"), message)
         XCTAssertTrue(message.contains("元の声に戻ります"), message)
     }

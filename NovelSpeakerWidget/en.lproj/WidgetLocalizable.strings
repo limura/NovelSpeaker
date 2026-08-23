@@ -1,0 +1,52 @@
+/* iPhone-side widget extension localization (English) */
+
+"Phone_Widget_AppName" = "NovelSpeaker";
+"Phone_Widget_PlayToggle_Name" = "Play or Pause";
+"Phone_Widget_PlayToggle_Short" = "Play/Pause";
+"Phone_Widget_PlayToggle_Desc" = "Starts or stops speech without opening NovelSpeaker.";
+
+/* Launcher */
+"Phone_Widget_Launcher_Name" = "Open App";
+"Phone_Widget_Launcher_Desc" = "Shows the progress of the novel you are reading. Tap to open NovelSpeaker.";
+/* For Controls (lock screen / Control Center), where only one short line fits */
+"Phone_Widget_Launcher_ControlDesc" = "Opens NovelSpeaker.";
+"Phone_Widget_Launcher_OpenApp" = "Open App";
+"Phone_Widget_Launcher_Stats_Format" = "%1$d novels, %2$d updated";
+
+/* Configurable "Play Selected Novel" widget */
+"Phone_Widget_PlayNovel_Name" = "Start Playing Selected Novel";
+"Phone_Widget_PlayNovel_Desc" = "Starts playing the chosen novel without opening NovelSpeaker. Novel choices are listed by most recently read.";
+"Phone_Widget_PlayNovel_ControlDesc" = "Starts playing the chosen novel without opening NovelSpeaker.";
+"Phone_Widget_PlayNovel_Unset" = "Choose a novel";
+"Phone_Widget_PlayNovel_UnsetHint" = "Edit the widget to choose a novel";
+"Phone_Widget_PlayNovel_TapHint" = "Tap to start playing";
+
+/* 4-slot action widget */
+"Phone_Widget_ActionGroup_Name" = "Combined Actions";
+"Phone_Widget_ActionGroup_Desc" = "Places play/pause, open app, and two chosen novels in a single widget.";
+
+/* Names of the settings shown when editing a widget (AppIntents side) */
+"Phone_Widget_Config_Novel" = "Novel";
+"Phone_Widget_Config_Icon" = "Icon";
+"Phone_Widget_Config_Color" = "Color";
+"Phone_Widget_Config_Novel1" = "Novel 1";
+"Phone_Widget_Config_Novel1Icon" = "Icon for Novel 1";
+"Phone_Widget_Config_Novel1Color" = "Color for Novel 1";
+"Phone_Widget_Config_Novel2" = "Novel 2";
+"Phone_Widget_Config_Novel2Icon" = "Icon for Novel 2";
+"Phone_Widget_Config_Novel2Color" = "Color for Novel 2";
+"Phone_Widget_Config_Icon_Play" = "Play (▶)";
+"Phone_Widget_Config_Icon_Book" = "Book";
+"Phone_Widget_Config_Icon_Bookmark" = "Bookmark";
+"Phone_Widget_Config_Icon_Headphones" = "Headphones";
+"Phone_Widget_Config_Icon_Star" = "Star";
+"Phone_Widget_Config_Icon_Sparkles" = "Sparkles";
+"Phone_Widget_Config_Color_Orange" = "Orange";
+"Phone_Widget_Config_Color_Red" = "Red";
+"Phone_Widget_Config_Color_Purple" = "Purple";
+"Phone_Widget_Config_Color_Blue" = "Blue";
+"Phone_Widget_Config_Color_Teal" = "Teal";
+"Phone_Widget_Config_Color_Green" = "Green";
+
+/* For VoiceOver */
+"Phone_Widget_PlayNovel_AccessibilityFormat" = "Start playing %@";
