@@ -1,0 +1,19 @@
+*** Pods/IceCream/IceCream/Classes/CKRecordConvertible.swift.orig	Sun Aug 23 15:05:35 2026
+--- Pods/IceCream/IceCream/Classes/CKRecordConvertible.swift	Sun Aug 23 15:06:16 2026
+***************
+*** 56,62 ****
+          case .string:
+              if let primaryValueString = self[primaryKeyProperty.name] as? String {
+                  // For more: https://developer.apple.com/documentation/cloudkit/ckrecord/id/1500975-init
+!                 assert(primaryValueString.allSatisfy({ $0.isASCII }), "Primary value for CKRecord name must contain only ASCII characters")
+                  assert(primaryValueString.count <= 255, "Primary value for CKRecord name must not exceed 255 characters")
+                  assert(!primaryValueString.starts(with: "_"), "Primary value for CKRecord name must not start with an underscore")
+                  return CKRecord.ID(recordName: primaryValueString, zoneID: Self.zoneID)
+--- 56,62 ----
+          case .string:
+              if let primaryValueString = self[primaryKeyProperty.name] as? String {
+                  // For more: https://developer.apple.com/documentation/cloudkit/ckrecord/id/1500975-init
+!                 //assert(primaryValueString.allSatisfy({ $0.isASCII }), "Primary value for CKRecord name must contain only ASCII characters")
+                  assert(primaryValueString.count <= 255, "Primary value for CKRecord name must not exceed 255 characters")
+                  assert(!primaryValueString.starts(with: "_"), "Primary value for CKRecord name must not start with an underscore")
+                  return CKRecord.ID(recordName: primaryValueString, zoneID: Self.zoneID)
