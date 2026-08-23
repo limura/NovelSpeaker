@@ -156,6 +156,37 @@ enum VoicevoxCacheLead {
     static func shouldKeepGenerating(contiguousLeadSeconds: Double) -> Bool {
         return shouldKeepGenerating(contiguousLeadSeconds: contiguousLeadSeconds, thresholdSeconds: keepGeneratingBelowSeconds)
     }
+
+    /// 今の再生位置から先に、**途切れずに**貯めてある音声の秒数。
+    ///
+    /// 今読んでいるページの残りを1ブロックずつ数え、ページを跨いだ後は
+    /// 「そのページに貯めてある合計」を足していき、何も無いページで打ち切る。
+    /// 後半は概算で、部分的にしか出来ていないページを丸ごと数えてしまうが、
+    /// 生成は前から順に埋めていくので、そういうページは境目の1つだけになる
+    /// (=多く見積もってもそのページ1つぶん)。
+    ///
+    /// ブロック列の取り出し(StorySpeaker 依存)は呼ぶ側に置いてある。
+    /// この判断が狂うと作り足しが止まらなくなるので、ここだけはテストから叩けるようにしておく。
+    static func contiguousLeadSeconds(store: VoicevoxDiskCacheStore,
+                                      novelID: String,
+                                      chapterNumber: Int,
+                                      upcomingDurations: [Double?]) -> Double {
+        var lead = contiguousSeconds(upcomingDurations: upcomingDurations)
+
+        // このページの最後まで揃っている時だけ、次のページ以降も数える。
+        guard upcomingDurations.contains(where: { $0 == nil }) == false else { return lead }
+
+        var nextChapterNumber = chapterNumber + 1
+        while true {
+            let summary = store.summaryInAnyArea(novelID: novelID, chapterNumber: nextChapterNumber)
+            if summary.entryCount == 0 { break }
+            lead += summary.audioSeconds
+            nextChapterNumber += 1
+            // 何時間も先まで数えても判断は変わらないので、適当な所で切り上げる。
+            if lead >= keepGeneratingBelowSeconds { break }
+        }
+        return lead
+    }
 }
 
 /// どの小説でキャッシュ生成を有効にしているか。

@@ -256,12 +256,32 @@ final class VoicevoxDiskCacheStore {
 
     // MARK: - 集計
 
+    /// ★作らせた分だけを数える(管理画面の「作成済み」用)。
+    /// 一時分は「作らせた覚えの無い容量」なので、ここには混ぜない。
     func summary(novelID: String, chapterNumber: Int) -> VoicevoxDiskCacheSummary {
         let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber)
         lock.lock()
         let listing = listingUnsafe(directory: directory)
         lock.unlock()
         return Self.summarize(listing.values)
+    }
+
+    /// ★置き場所を問わず数える(「この先どれだけ再生ぶんが貯まっているか」用)。
+    ///
+    /// 再生する側から見れば作らせた分と一時分の区別は無いので、貯金の計算はこちらを使う。
+    /// 作らせた分だけを数えていたため、裏の作り足しが置いた分(一時分)が
+    /// 一切貯金に入らず、「15分貯まったら止める」に永遠に到達しない不具合になっていた
+    /// (実機で3時間半、作り足しが小説の最後まで走り続けた)。
+    func summaryInAnyArea(novelID: String, chapterNumber: Int) -> VoicevoxDiskCacheSummary {
+        var total = VoicevoxDiskCacheSummary.empty
+        for area in Area.allCases {
+            let directory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber, area: area)
+            lock.lock()
+            let listing = listingUnsafe(directory: directory)
+            lock.unlock()
+            total = total + Self.summarize(listing.values)
+        }
+        return total
     }
 
     func summary(novelID: String) -> VoicevoxDiskCacheSummary {
@@ -404,18 +424,29 @@ final class VoicevoxDiskCacheStore {
         return freed
     }
 
-    /// ★一時分を「新しい方から指定の秒数ぶん」だけ残して、古い物から捨てる。
+    /// ★一時分が予算を超えていたら、**再生位置から遠い所から**捨てる。
     ///
-    /// 再生位置との突き合わせはしない。作った順に古い物から消せば、
-    /// 結果として「聴き終わった所」から消える。
-    /// 読み上げの先へ作り足した分は作ったばかりなので新しく、自然に守られる。
-    /// (巻き戻しで聴き直す分だけ後ろに残す、という指定は呼び出し側の秒数で決める)
+    /// 更新時刻の古い順に消していた事があるが、それは踏んではいけない側だった。
+    /// 作り足しは前から順に書くので、**再生ヘッドのすぐ前が一番古い**。
+    /// 聴き終わった分を消し尽くすと、次に消えるのは「次に鳴らす1本」になり、
+    ///   消される → 再生側が作り直す → その書き込みがまた刈り取りを呼ぶ
+    /// という堂々巡りに入る(実機で、生成の6〜9割が作り直しに化けた)。
+    ///
+    /// なので捨てる順は話番号で決める:
+    ///   1. 今読んでいる話より前(聴き終わった分)を、遠い方から
+    ///   2. それでも収まらなければ、今読んでいる話より先を、遠い方から
+    ///   3. **今読んでいる話には手を付けない**(消せば必ず作り直しになるため)
+    /// 同じ話の中では、これまでどおり更新時刻の古い順(=前のブロックから)にする。
+    ///
+    /// - Parameter playbackChapterNumber: 今読んでいる話。分からない時(nil)は
+    ///   これまでどおり更新時刻の古い順に消す。
     /// - Returns: 消したバイト数。
     @discardableResult
-    func trimTemporary(novelID: String, keepingSeconds: Double) -> Int64 {
+    func trimTemporary(novelID: String, keepingSeconds: Double, playbackChapterNumber: Int? = nil) -> Int64 {
         struct Candidate {
             let url: URL
             let directory: URL
+            let chapterNumber: Int
             let modifiedAt: Date
             let durationSeconds: Double
             let byteCount: Int
@@ -433,6 +464,7 @@ final class VoicevoxDiskCacheStore {
                 candidates.append(Candidate(
                     url: url,
                     directory: directory,
+                    chapterNumber: chapterName,
                     modifiedAt: (attributes?[.modificationDate] as? Date) ?? Date.distantPast,
                     durationSeconds: parsed.durationSeconds,
                     byteCount: (attributes?[.size] as? Int) ?? 0))
@@ -441,10 +473,21 @@ final class VoicevoxDiskCacheStore {
         let total = candidates.reduce(0.0) { $0 + $1.durationSeconds }
         guard total > keepingSeconds else { return 0 }
 
-        // 古い順に、残す秒数を下回るまで捨てる。
+        let order: [Candidate]
+        if let playbackChapterNumber = playbackChapterNumber {
+            // 今読んでいる話は消さないので、候補から外す。
+            let behind = candidates.filter { $0.chapterNumber < playbackChapterNumber }
+                .sorted { ($0.chapterNumber, $0.modifiedAt) < ($1.chapterNumber, $1.modifiedAt) }
+            let ahead = candidates.filter { $0.chapterNumber > playbackChapterNumber }
+                .sorted { ($1.chapterNumber, $1.modifiedAt) < ($0.chapterNumber, $0.modifiedAt) }
+            order = behind + ahead
+        } else {
+            order = candidates.sorted { $0.modifiedAt < $1.modifiedAt }
+        }
+
         var remaining = total
         var freed: Int64 = 0
-        for candidate in candidates.sorted(by: { $0.modifiedAt < $1.modifiedAt }) {
+        for candidate in order {
             if remaining <= keepingSeconds { break }
             try? fileManager.removeItem(at: candidate.url)
             forgetListings(under: candidate.directory)

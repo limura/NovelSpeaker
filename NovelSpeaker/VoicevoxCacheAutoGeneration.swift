@@ -130,13 +130,10 @@ final class VoicevoxCacheAutoGeneration {
             ], isForDebug: VoicevoxDiagnostics.isForDebug)
     }
 
-    /// 今の再生位置から先に、**途切れずに**貯めてある音声の秒数。
+    /// 今の再生位置から先に、途切れずに貯めてある音声の秒数。
     ///
-    /// 今読んでいるページの残りを1ブロックずつ数え、ページを跨いだ後は
-    /// 「そのページに貯めてある合計」を足していき、何も無いページで打ち切る。
-    /// 後半は概算で、部分的にしか出来ていないページを丸ごと数えてしまうが、
-    /// 生成は前から順に埋めていくので、そういうページは境目の1つだけになる
-    /// (=多く見積もってもそのページ1つぶん)。
+    /// ブロック列の取り出しだけをここで行い、数える所は `VoicevoxCacheLead` に置いてある
+    /// (StorySpeaker に依存しない形にして、テストから叩けるようにするため)。
     private func contiguousLeadSeconds(context: VoicevoxAudioProvider.DiskCacheContext) -> Double {
         let store = VoicevoxDiskCacheStore.shared
         let speaker = StorySpeaker.shared.speaker
@@ -162,22 +159,11 @@ final class VoicevoxCacheAutoGeneration {
                 durations.append(store.durationSeconds(novelID: context.novelID, chapterNumber: context.chapterNumber, key: key))
             }
         }
-        var lead = VoicevoxCacheLead.contiguousSeconds(upcomingDurations: durations)
-
-        // このページの最後まで揃っている時だけ、次のページ以降も数える。
-        let hasGapInCurrentChapter = durations.contains(where: { $0 == nil })
-        guard hasGapInCurrentChapter == false else { return lead }
-
-        var chapterNumber = context.chapterNumber + 1
-        while true {
-            let summary = store.summary(novelID: context.novelID, chapterNumber: chapterNumber)
-            if summary.entryCount == 0 { break }
-            lead += summary.audioSeconds
-            chapterNumber += 1
-            // 何時間も先まで数えても判断は変わらないので、適当な所で切り上げる。
-            if lead >= VoicevoxCacheLead.keepGeneratingBelowSeconds { break }
-        }
-        return lead
+        return VoicevoxCacheLead.contiguousLeadSeconds(
+            store: store,
+            novelID: context.novelID,
+            chapterNumber: context.chapterNumber,
+            upcomingDurations: durations)
     }
 }
 #endif

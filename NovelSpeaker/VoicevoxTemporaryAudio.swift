@@ -54,9 +54,16 @@ enum VoicevoxTemporaryAudio {
         return max(behind + ahead, 60)
     }
 
-    /// 一時分が増え過ぎていたら、古い方から捨てる。
-    static func trimIfNeeded(novelID: String) {
-        VoicevoxDiskCacheStore.shared.trimTemporary(novelID: novelID, keepingSeconds: budgetSeconds())
+    /// 一時分が増え過ぎていたら、再生位置から遠い方を捨てる。
+    ///
+    /// 今どこを読んでいるかを必ず渡す事。渡さないと更新時刻の古い順に消える形に落ち、
+    /// 「次に鳴らす1本」を消しては作り直す堂々巡りに戻る(VoicevoxCacheChurnTest 参照)。
+    static func trimIfNeeded(novelID: String, playbackChapterNumber: Int? = nil) {
+        let chapterNumber = playbackChapterNumber
+            ?? VoicevoxCore.shared.diskCacheContext.flatMap { $0.novelID == novelID ? $0.chapterNumber : nil }
+        VoicevoxDiskCacheStore.shared.trimTemporary(novelID: novelID,
+                                                    keepingSeconds: budgetSeconds(),
+                                                    playbackChapterNumber: chapterNumber)
     }
 
     /// ★読み上げる小説が変わった時に呼ぶ。他の小説の一時分を捨てる。
