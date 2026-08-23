@@ -109,18 +109,38 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     @objc private func audioEngineConfigurationDidChange(notification: Notification) {
         // 他の話者のエンジンの分まで拾わないよう、自分の物だけを見る。
         guard (notification.object as AnyObject?) === engine else { return }
-        DispatchQueue.main.async {
-            self.restartCurrentSpeechAfterAudioGraphBreak(reason: "音の出力先が変わった")
-        }
+        scheduleRestartAfterAudioGraphBreak(reason: "音の出力先が変わった")
     }
 
     @objc private func mediaServicesWereReset(notification: Notification) {
-        DispatchQueue.main.async {
-            self.restartCurrentSpeechAfterAudioGraphBreak(reason: "メディアサービスが再起動した")
+        scheduleRestartAfterAudioGraphBreak(reason: "メディアサービスが再起動した")
+    }
+
+    /// ★すぐには鳴らし直さず、ひと呼吸おいてから判断する。
+    ///
+    /// 同じ出来事で StorySpeaker 側も動く事がある。
+    /// 例えばヘッドフォンが抜けた時、あちらは「止めて25文字戻す」と決めていて、
+    /// こちらへは同時にグラフが壊れた通知が来る。どちらが先に届くかは決まっていない。
+    /// 先にこちらが鳴らし直してしまうと、止めると決めた側の判断を一瞬だけ
+    /// 上書きしてしまう(抜いた直後に一声鳴る)。
+    /// あちらの判断が landing してから見れば、止まっていれば
+    /// 下の guard で何もしない事になり、**止めると決めた側が必ず勝つ**。
+    ///
+    /// 待っている間の無音は、どのみち鳴らし直すので体感は変わらない。
+    private func scheduleRestartAfterAudioGraphBreak(reason: String) {
+        let myGeneration = generation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self = self, myGeneration == self.generation else { return }
+            self.restartCurrentSpeechAfterAudioGraphBreak(reason: reason)
         }
     }
 
     /// 壊れたグラフを捨てて、今読んでいたブロックを頭から鳴らし直す。
+    ///
+    /// ★「止まっているなら何もしない」。
+    /// ヘッドフォンを挿し直した時に勝手に読み始めないのは、この guard による
+    /// (抜いた時点で StorySpeaker が止めているので、挿し直しでは既に止まっている)。
+    /// AVSpeechSynthesizer の頃と同じで、挿し直しでは再開しない。
     private func restartCurrentSpeechAfterAudioGraphBreak(reason: String) {
         // 鳴っていなかったなら何もしない。
         // (一時停止中・停止済みも含む。停止は Stop() が世代を進めて始末してある)
