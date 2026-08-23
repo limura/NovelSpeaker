@@ -149,33 +149,71 @@ class VoicevoxCacheChurnTest: XCTestCase {
                            writtenAt: base.addingTimeInterval(Double(chapterNumber) * 60))
         }
 
-        // 合計25分。10分ぶんだけ残す = 3話ぶんが消える。
-        // 今読んでいるのは3話なので、消えてよいのは 1話・2話(聴き終わった分)と
-        // 一番先の5話であって、3話・4話ではない。
+        // 今読んでいるのは3話。消せるのは 1・2・4・5話の合計20分。
+        // 10分に収めるので、聴き終わった分(1話・2話)を遠い方から捨てれば足りる。
         store.trimTemporary(novelID: novelID, keepingSeconds: 600, playbackChapterNumber: 3)
 
-        XCTAssertTrue(hasChapter(3), "今まさに読んでいる話が刈り取られている")
-        XCTAssertTrue(hasChapter(4), "次に読む話が刈り取られている")
         XCTAssertFalse(hasChapter(1), "一番後ろの聴き終わった分が残っている")
         XCTAssertFalse(hasChapter(2), "聴き終わった分が残っている")
-        XCTAssertFalse(hasChapter(5), "一番先の分が残っている")
+        XCTAssertTrue(hasChapter(3), "今まさに読んでいる話が刈り取られている")
+        XCTAssertTrue(hasChapter(4), "次に読む話が刈り取られている")
+        XCTAssertTrue(hasChapter(5), "この先の分は、聴き終わった分だけで足りるうちは消さない")
     }
 
-    // 聴き終わった分だけで収まるなら、先の分には手を付けない事。
-    func testTrimRemovesOnlyListenedChaptersWhenThatIsEnough() throws {
+    // ★聴き終わった分だけでは収まらない時は、この先の分を**遠い方から**捨てる。
+    // 近い方(次に読む話)から捨てると、再生が追いついた時に作り直しになる。
+    func testTrimRemovesTheFarthestAheadWhenListenedChaptersAreNotEnough() throws {
+        let base = Date(timeIntervalSince1970: 1_000_000)
+        // 聴き終わった分は無く、今の3話とこの先の4〜6話だけ。
+        for chapterNumber in 3...6 {
+            try putChapter(chapterNumber, seconds: 300,
+                           writtenAt: base.addingTimeInterval(Double(chapterNumber) * 60))
+        }
+
+        // 消せるのは 4・5・6話の15分。5分に収める = 遠い方から2話ぶん消える。
+        store.trimTemporary(novelID: novelID, keepingSeconds: 300, playbackChapterNumber: 3)
+
+        XCTAssertTrue(hasChapter(3), "今読んでいる話が刈り取られている")
+        XCTAssertTrue(hasChapter(4), "次に読む話が刈り取られている(作り直しになる)")
+        XCTAssertFalse(hasChapter(5))
+        XCTAssertFalse(hasChapter(6), "一番先の分が残っている")
+    }
+
+    // 収まっているなら何も消さない事。
+    func testTrimKeepsEverythingWhenTheDeletablePartFitsInTheBudget() throws {
         let base = Date(timeIntervalSince1970: 1_000_000)
         for chapterNumber in 1...5 {
             try putChapter(chapterNumber, seconds: 300,
                            writtenAt: base.addingTimeInterval(Double(chapterNumber) * 60))
         }
 
-        // 合計25分を20分に。1話(一番後ろ)だけ消えれば足りる。
+        // 消せるのは今読んでいる3話を除いた20分。予算20分なので何も消さない。
         store.trimTemporary(novelID: novelID, keepingSeconds: 1200, playbackChapterNumber: 3)
 
-        XCTAssertFalse(hasChapter(1))
-        for chapterNumber in 2...5 {
-            XCTAssertTrue(hasChapter(chapterNumber), "\(chapterNumber)話まで消えている")
+        for chapterNumber in 1...5 {
+            XCTAssertTrue(hasChapter(chapterNumber), "\(chapterNumber)話が消えている")
         }
+    }
+
+    // ★予算は「消せる物」だけで見る事。
+    //
+    // 今読んでいる話は消さないと決めてあるのに、予算の計算には入れていた。
+    // 実機では1話が約15分あり、予算(後ろ10分+先15分=25分)の大半を
+    // 消せない話が埋めてしまうので、作り足したばかりの**この先の分**が消され、
+    // 再生が追いつくとまた作り直す、という緩い堂々巡りになっていた。
+    func testBudgetIgnoresTheChapterBeingPlayed() throws {
+        let base = Date(timeIntervalSince1970: 1_000_000)
+        // 今読んでいる3話が15分。前後は合わせて10分しかない。
+        try putChapter(2, seconds: 300, writtenAt: base)
+        try putChapter(3, seconds: 900, writtenAt: base.addingTimeInterval(60))
+        try putChapter(4, seconds: 300, writtenAt: base.addingTimeInterval(120))
+
+        // 予算25分。消せる物は前後の10分だけなので、何も消す必要が無い。
+        store.trimTemporary(novelID: novelID, keepingSeconds: 1500, playbackChapterNumber: 3)
+
+        XCTAssertTrue(hasChapter(2), "聴き終わった分が消えている")
+        XCTAssertTrue(hasChapter(3))
+        XCTAssertTrue(hasChapter(4), "この先の分が消えている(作り直しになる)")
     }
 
     // 今の話だけで予算を超えていても、今の話は消さない
@@ -188,7 +226,9 @@ class VoicevoxCacheChurnTest: XCTestCase {
         store.trimTemporary(novelID: novelID, keepingSeconds: 600, playbackChapterNumber: 2)
 
         XCTAssertTrue(hasChapter(2), "今読んでいる話が丸ごと消えている")
-        XCTAssertFalse(hasChapter(1))
+        // 消せるのは1話の5分だけなので、予算(10分)に収まっていて消す必要が無い。
+        // 今読んでいる話が長い事に引きずられて、他が巻き添えで消えてはいけない。
+        XCTAssertTrue(hasChapter(1), "消せない話の長さに引きずられて、他が消えている")
     }
 
     // 再生位置が分からない時は、これまでどおり古い順に消す。

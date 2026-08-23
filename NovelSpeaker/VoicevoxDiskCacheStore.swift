@@ -470,10 +470,19 @@ final class VoicevoxDiskCacheStore {
                     byteCount: (attributes?[.size] as? Int) ?? 0))
             }
         }
-        let total = candidates.reduce(0.0) { $0 + $1.durationSeconds }
-        guard total > keepingSeconds else { return 0 }
-
+        // ★予算は「消せる物」だけで見る。今読んでいる話は消さないので数に入れない。
+        //
+        // 全部を数えていた頃は、話1つが長いと(実機で1話が約15分)、
+        // 消さないと決めた今の話だけで予算(後ろ10分+先15分=25分)の大半を埋めてしまい、
+        // 残りを聴き終わった分と**この先の分**で奪い合う形になっていた。
+        // 結果、作り足したばかりの先の分が消され、再生が追いつくとまた作り直す。
+        // ログでは「刈り取りが5分で40〜80回・4〜5MB」「貯金が12分→3分→48秒と痩せる」
+        // 「同じ本文の作り直しが増える」という形で出た。
+        //
+        // 今の話は再生が進めば自然に「聴き終わった分」に変わって消せるようになるので、
+        // 数に入れなくても増え続けはしない。
         let order: [Candidate]
+        let deletable: [Candidate]
         if let playbackChapterNumber = playbackChapterNumber {
             // 今読んでいる話は消さないので、候補から外す。
             let behind = candidates.filter { $0.chapterNumber < playbackChapterNumber }
@@ -481,9 +490,13 @@ final class VoicevoxDiskCacheStore {
             let ahead = candidates.filter { $0.chapterNumber > playbackChapterNumber }
                 .sorted { ($1.chapterNumber, $1.modifiedAt) < ($0.chapterNumber, $0.modifiedAt) }
             order = behind + ahead
+            deletable = order
         } else {
             order = candidates.sorted { $0.modifiedAt < $1.modifiedAt }
+            deletable = order
         }
+        let total = deletable.reduce(0.0) { $0 + $1.durationSeconds }
+        guard total > keepingSeconds else { return 0 }
 
         var remaining = total
         var freed: Int64 = 0
