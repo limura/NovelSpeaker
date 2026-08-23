@@ -443,6 +443,21 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         return escaped
     }
 
+    /// ★今、音声セッションを他所(音楽アプリ・アラーム・電話等)に取られている最中か。
+    ///
+    /// 立てるのは StorySpeaker(音声セッションの中断通知を受けている側)。
+    /// ここに置いてあるのは、SpeechBlockSpeaker が Watch 側のターゲットにも入っていて
+    /// StorySpeaker を参照できないため(Watch では誰も立てないので常に false = 従来どおり)。
+    ///
+    /// 何に使うか: 下の固着の見張りが、取られている間に「発話が止まっている」と
+    /// 判断して勝手に再生し直さないようにするため。再生し直すと音声セッションを
+    /// 奪い返してしまい、**利用者が今聴いている音楽アプリの再生を止める**事になる。
+    static private(set) var isAudioSessionInterrupted = false
+
+    static func setAudioSessionInterrupted(_ isInterrupted: Bool) {
+        isAudioSessionInterrupted = isInterrupted
+    }
+
     // synth wedge 検出(保険):
     // enqueueSpeechBlock で speak を投げたのに、一定時間経っても willSpeakRange が一度も来ず、
     // ブロックも進んでおらず、下層 synth も idle(発話中でも一時停止中でもない)なら、
@@ -484,6 +499,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // 停止/次の speak で世代が変わっていたら、この watcher はもう現役ではない
         //(「停止→同じブロックで再生し直し」をまたいだ誤回復を防ぐ)。
         func isStillWedged(_ self: SpeechBlockSpeaker) -> Bool {
+            // 音声セッションを他所に取られている最中は固着ではない(下と同じ理由)。
+            if SpeechBlockSpeaker.isAudioSessionInterrupted { return false }
             if self.speakGeneration != generation { return false }
             let progressed = self.willSpeakRangeCallCount != willSpeakRangeCountAtSpeak
             let blockMoved = self.currentSpeechBlockIndex != blockIndex
@@ -544,11 +561,16 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     ///   - didWillSpeakRangeProgress: 発話位置が進んだか。
     ///   - didBlockMove: 次のブロックへ移ったか。
     ///   - isPlaybackSynthesisPending: 再生に必要な合成が進行中か。
+    ///   - isAudioSessionInterrupted: 音声セッションを他所に取られている最中か。
     static func isVoicevoxWedged(isSpeaking: Bool,
                                  isSameGeneration: Bool,
                                  didWillSpeakRangeProgress: Bool,
                                  didBlockMove: Bool,
-                                 isPlaybackSynthesisPending: Bool) -> Bool {
+                                 isPlaybackSynthesisPending: Bool,
+                                 isAudioSessionInterrupted: Bool = false) -> Bool {
+        // ★取られている最中は固着ではない。ここで再生し直すと音声セッションを
+        // 奪い返してしまい、利用者が今聴いている音楽アプリの再生を止める事になる。
+        if isAudioSessionInterrupted { return false }
         if isSameGeneration == false { return false }
         if isSpeaking == false { return false }
         if didWillSpeakRangeProgress { return false }
@@ -578,7 +600,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
                 isSameGeneration: speaker.speakGeneration == generation,
                 didWillSpeakRangeProgress: speaker.willSpeakRangeCallCount != willSpeakRangeCountAtSpeak,
                 didBlockMove: speaker.currentSpeechBlockIndex != blockIndex,
-                isPlaybackSynthesisPending: VoicevoxCore.shared.isPlaybackSynthesisPending)
+                isPlaybackSynthesisPending: VoicevoxCore.shared.isPlaybackSynthesisPending,
+                isAudioSessionInterrupted: SpeechBlockSpeaker.isAudioSessionInterrupted)
         }
 
         func check() {

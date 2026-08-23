@@ -475,6 +475,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     /// 中断される直前に読み上げていたか(アラームや電話が終わった後に戻すため)。
     private var wasSpeakingBeforeInterruption = false
 
+
     /// ★アラームや電話で音声セッションが取り上げられた時。
     ///
     /// 以前はダミー音の抑止しかしておらず、読み上げ自体は止めていなかった。
@@ -504,6 +505,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         // この通知が来るスレッドは決まっていないが、この先で Realm と画面を触るのでメインに寄せる。
         DispatchQueue.main.async {
             if typeIntValue == beganType {
+                SpeechBlockSpeaker.setAudioSessionInterrupted(true)
                 self.dummySoundLooper.stopPlay()
                 self.wasSpeakingBeforeInterruption = self.isPlayng
                 guard self.wasSpeakingBeforeInterruption else { return }
@@ -514,6 +516,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     self.StopSpeech(realm: realm, stopAudioSession: false)
                 }
             } else if typeIntValue == endedType {
+                SpeechBlockSpeaker.setAudioSessionInterrupted(false)
                 guard self.wasSpeakingBeforeInterruption else { return }
                 self.wasSpeakingBeforeInterruption = false
                 // 「戻してよい」とOSが言っている時だけ戻す。

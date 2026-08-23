@@ -25,13 +25,37 @@ class VoicevoxWedgeDetectionTest: XCTestCase {
                           isSameGeneration: Bool = true,
                           didWillSpeakRangeProgress: Bool = false,
                           didBlockMove: Bool = false,
-                          isPlaybackSynthesisPending: Bool = false) -> Bool {
+                          isPlaybackSynthesisPending: Bool = false,
+                          isAudioSessionInterrupted: Bool = false) -> Bool {
         return SpeechBlockSpeaker.isVoicevoxWedged(
             isSpeaking: isSpeaking,
             isSameGeneration: isSameGeneration,
             didWillSpeakRangeProgress: didWillSpeakRangeProgress,
             didBlockMove: didBlockMove,
-            isPlaybackSynthesisPending: isPlaybackSynthesisPending)
+            isPlaybackSynthesisPending: isPlaybackSynthesisPending,
+            isAudioSessionInterrupted: isAudioSessionInterrupted)
+    }
+
+    // ★音楽アプリ等に音声セッションを取られている最中は固着ではない。
+    //
+    // 実機で確認された症状: ことせかい で読み上げ中に音楽アプリで再生を始めると、
+    // 15〜30秒ほどしてから ことせかい が「止まっている」と誤判断して再生し直し、
+    // 音声セッションを奪い返して**音楽アプリの再生を止めてしまう**。
+    // (利用者から見ると「再生ボタンを押したのに再生が始まらない」)
+    // 取られている間は、止まっているのが正常。
+    func testDoesNotFireWhileTheAudioSessionIsTakenByAnotherApp() {
+        XCTAssertFalse(isWedged(isAudioSessionInterrupted: true),
+                       "他アプリに音を取られている間に再生し直すと、そちらの再生を止めてしまう")
+    }
+
+    // 取られていない時は、これまでどおり検出する(上の逃げ道で全部素通りしない事)。
+    func testStillDetectsWhenTheSessionIsNotInterrupted() {
+        XCTAssertTrue(isWedged(isAudioSessionInterrupted: false))
+    }
+
+    // 既定は「取られていない」。誰も立てなければ従来どおり動く事。
+    func testInterruptedFlagDefaultsToFalse() {
+        XCTAssertFalse(SpeechBlockSpeaker.isAudioSessionInterrupted)
     }
 
     // ★実機で起きた状態。発話中のつもりで、何も進まず、合成もしていない。
