@@ -819,8 +819,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     /// 読み上げ開始位置を speechBlockArray の index で指示します
     /// 割り込みで止められた事を、下の話者に伝える。
     /// 次に同じ本文を頼まれた時に、頭からではなく止まった所の少し手前から鳴らすため。
-    func noteInterruptedForResume() {
-        speaker.noteInterruptedForResume()
+    @discardableResult
+    func noteInterruptedForResume() -> Bool {
+        return speaker.noteInterruptedForResume()
     }
 
     /// ★今読んでいるブロックの**先頭**に戻す(ブロックそのものは変えない)。

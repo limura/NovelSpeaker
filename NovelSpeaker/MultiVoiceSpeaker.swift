@@ -300,10 +300,14 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     }
 
     /// 割り込みで止められた事を、全ての話者に伝える。
-    func noteInterruptedForResume() {
+    /// 1つでも控えられたなら true(=ブロックの頭から頼み直してよい)。
+    @discardableResult
+    func noteInterruptedForResume() -> Bool {
+        var noted = false
         for (_, speaker) in self.speakerCache {
-            speaker.noteInterruptedForResume()
+            if speaker.noteInterruptedForResume() { noted = true }
         }
+        return noted
     }
     
     #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました

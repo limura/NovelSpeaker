@@ -82,6 +82,16 @@ final class VoicevoxCacheAutoGeneration {
             _ = running
             return
         }
+        // ★VOICEVOX で読むブロックが1つも無いなら、作る物が無い。
+        //
+        // 話者を全てシステムの音声にしていると、貯金は常に0秒(合成が要る所が無いので
+        // 数えるべき物が無い)になり、「足りないから作る」→「作る物が無いのですぐ終わる」
+        // を延々と繰り返していた。実機では、作成中の表示が点いては消えるのが
+        // 何度も見える形で出た(実際には何も作られていない)。
+        guard hasVoicevoxBlockAhead() else {
+            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "VOICEVOXで読む所が無いため")
+            return
+        }
 
         let lead = contiguousLeadSeconds(context: context)
         logHeartbeatIfNeeded(leadSeconds: lead)
@@ -134,6 +144,17 @@ final class VoicevoxCacheAutoGeneration {
                 "threadCount": "\(VoicevoxCore.activeCPUNumThreads)",
                 "thermalState": "\(ProcessInfo.processInfo.thermalState.rawValue)",
             ], isForDebug: VoicevoxDiagnostics.isForDebug)
+    }
+
+    /// この先に VOICEVOX で読むブロックがあるか。
+    ///
+    /// 話者の設定は小説単位なので、今のページに1つも無ければこの先も無いとみなしてよい。
+    private func hasVoicevoxBlockAhead() -> Bool {
+        let speaker = StorySpeaker.shared.speaker
+        let blocks = speaker.speechBlockArray
+        let startIndex = max(0, speaker.currentSpeechBlockIndex)
+        guard startIndex < blocks.count else { return false }
+        return blocks[startIndex...].contains(where: { $0.type == "VOICEVOX" })
     }
 
     /// 今の再生位置から先に、途切れずに貯めてある音声の秒数。

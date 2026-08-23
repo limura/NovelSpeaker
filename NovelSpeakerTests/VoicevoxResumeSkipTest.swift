@@ -65,6 +65,39 @@ class VoicevoxResumeSkipTest: XCTestCase {
         XCTAssertNil(VoicevoxSpeaker.buffer(source, skippingSeconds: 11))
     }
 
+    // MARK: - 鳴り切ったのか、途中で止められたのか
+
+    // ★AVAudioPlayerNode の完了通知は「止められた時」にも来る。
+    // 素直に受けると、そのブロックの残りを読み飛ばして次へ進んでしまう。
+    // 実機では Bluetooth を繋いだ瞬間に、鳴っていたブロックが丸ごと飛ぶ形で出た。
+    func testDetectsPlaybackStoppedInTheMiddle() {
+        XCTAssertTrue(VoicevoxSpeaker.isPlaybackCutShort(expectedSeconds: 10, elapsedSeconds: 3),
+                      "10秒鳴るはずが3秒で通知が来たなら、鳴り切ってはいない")
+    }
+
+    // 鳴り切った時は素通しする(でないと次のブロックへ進めず固着する)。
+    func testDoesNotFireWhenPlaybackFinished() {
+        XCTAssertFalse(VoicevoxSpeaker.isPlaybackCutShort(expectedSeconds: 10, elapsedSeconds: 10))
+        XCTAssertFalse(VoicevoxSpeaker.isPlaybackCutShort(expectedSeconds: 10, elapsedSeconds: 11))
+    }
+
+    // ★誤検出の方が害が大きいので、判定は緩めにしてある。
+    // 少しの早着(スケジューリングの誤差)で「止められた」と見てはいけない。
+    func testDoesNotFireOnSlightlyEarlyCallback() {
+        XCTAssertFalse(VoicevoxSpeaker.isPlaybackCutShort(expectedSeconds: 10, elapsedSeconds: 9.7))
+    }
+
+    // 短いブロックでは、割合だけで見ると誤検出する。絶対値でも見ている事。
+    func testDoesNotFireOnShortBlocks() {
+        XCTAssertFalse(VoicevoxSpeaker.isPlaybackCutShort(expectedSeconds: 0.4, elapsedSeconds: 0.1),
+                       "0.3秒の差で「止められた」と見ると、短いブロックで固着する")
+    }
+
+    // 長さが分からない時は素通し。
+    func testDoesNotFireWithoutAKnownDuration() {
+        XCTAssertFalse(VoicevoxSpeaker.isPlaybackCutShort(expectedSeconds: 0, elapsedSeconds: 0))
+    }
+
     // 少し手前から鳴らすための重なりは、0 では無い事
     // (ぴったりの位置から鳴らすと、推定位置の誤差で語の途中から始まる)。
     func testResumeOverlapIsNotZero() {

@@ -36,13 +36,20 @@ protocol SpeechEngineSpeaking: AnyObject {
     /// 次に**同じ本文**を頼まれた時、頭からではなく止まった所の少し手前から鳴らすための控え。
     /// 途中の位置から頼み直すと本文が変わって作り置きが当たらなくなるので、
     /// 「頼むのはブロック丸ごと・鳴らす時に飛ばす」という形にしてある。
-    func noteInterruptedForResume()
+    ///
+    /// - Returns: 控えられたか。**true の時だけ**、上位はブロックの頭から頼み直してよい。
+    ///   false の話者に頭から頼み直すと、飛ばす手段が無いので丸ごと聞き直しになる。
+    @discardableResult
+    func noteInterruptedForResume() -> Bool
 }
 
 extension SpeechEngineSpeaking {
     // 途中から鳴らし直せるのは、音声をバッファとして持っている VOICEVOX だけ。
     // AVSpeechSynthesizer は合成と再生が一体で、途中から鳴らす手段が無い。
-    func noteInterruptedForResume() {}
+    // (代わりに、途中の位置から頼み直しても合成のやり直しにはならないので、
+    //  上位は位置をそのままにして頼み直せばよい)
+    @discardableResult
+    func noteInterruptedForResume() -> Bool { return false }
 }
 
 // Speaker が「発話直前にオーディオセッションを整える」ために使う最小の抽象。

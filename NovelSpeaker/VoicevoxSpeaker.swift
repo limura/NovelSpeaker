@@ -141,6 +141,9 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
             // 判断して切れたままの接続で start してしまう。
             // 実機では「Bluetooth を繋ぐと⏸のまま止まり、再生ボタンを押しても鳴らない」
             // (何度か押すとようやく鳴る)という形で出た。
+            // ★ここまで鳴っていた事を、この時点で控える。
+            // 1秒待ってから控えると、その1秒ぶん先に進んだ事にされてしまう。
+            self.noteInterruptedForResume()
             self.connectedFormat = nil
             if self.engine.isRunning {
                 self.engine.stop()
@@ -350,9 +353,30 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         startProgressReporting(text: text, buffer: playbackBuffer, generation: myGeneration,
                                skippedSeconds: skippedSeconds, totalAudioSeconds: totalAudioSeconds)
 
+        let expectedPlaybackSeconds = Double(playbackBuffer.frameLength)
+            / max(1, playbackBuffer.format.sampleRate)
+            / max(0.0001, Double(timePitch.rate))
         playerNode.scheduleBuffer(playbackBuffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
             DispatchQueue.main.async {
                 guard let self = self, myGeneration == self.generation else { return }
+                // ★鳴り切ったのか、途中で止められたのかを見る。
+                // 止められた時にもこの通知は来るので、素直に受けると
+                // そのブロックの残りを読み飛ばして次へ進んでしまう。
+                let elapsed = self.currentPlaybackStartDate.map({ Date().timeIntervalSince($0) }) ?? expectedPlaybackSeconds
+                if Self.isPlaybackCutShort(expectedSeconds: expectedPlaybackSeconds, elapsedSeconds: elapsed) {
+                    // 途中で止められた。ここまでを控えて、鳴らし直しに備える。
+                    // 次のブロックへは進めない(進むと本文が飛ぶ)。
+                    // 鳴らし直しが来なくても、固着の見張りが拾って回復する。
+                    self.noteInterruptedForResume()
+                    self.stopProgressReporting()
+                    AppInformationLogger.AddLog(
+                        message: "VoicevoxSpeaker: 音声が途中で止められました(鳴らし直しを待ちます)",
+                        appendix: [
+                            "expectedSeconds": String(format: "%.2f", expectedPlaybackSeconds),
+                            "elapsedSeconds": String(format: "%.2f", elapsed),
+                        ], isForDebug: true)
+                    return
+                }
                 // このブロックの音声を撃ち終えた。次のブロックが来れば performSpeech で
                 // 再び true になる。次が無ければ(発話終了)これで false のままになる。
                 self.m_IsUtteranceActive = false
@@ -676,14 +700,21 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     /// VOICEVOX には再生位置を教えてくれる口が無いので、
     /// 読み上げ位置の推定と同じく鳴らし始めからの経過時間で測る(数百ミリ秒の誤差はある)。
     /// 少し手前(resumeOverlapSeconds)から鳴らすので、多少ずれても話は繋がる。
-    func noteInterruptedForResume() {
+    @discardableResult
+    func noteInterruptedForResume() -> Bool {
+        // 既に控えてあるなら上書きしない。
+        // 経路が切れた時は「バッファの完了通知」と「設定変更の通知」の両方から
+        // ここへ来るが、先に来た方(=実際に止まった時刻に近い方)を採りたい。
+        if interruptedResumeText == currentSpeechText, interruptedResumeText.isEmpty == false {
+            return true
+        }
         guard isUsingFallbackSpeaker == false,
               m_IsUtteranceActive,
               currentSpeechText.isEmpty == false,
               let startDate = currentPlaybackStartDate else {
             interruptedResumeText = ""
             interruptedResumeSeconds = 0
-            return
+            return false
         }
         let playbackRate = max(0.0001, Double(timePitch.rate))
         let playedAudioSeconds = Date().timeIntervalSince(startDate) * playbackRate
@@ -692,10 +723,32 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         guard position < currentAudioSeconds else {
             interruptedResumeText = ""
             interruptedResumeSeconds = 0
-            return
+            return false
         }
         interruptedResumeText = currentSpeechText
         interruptedResumeSeconds = max(0, position)
+        return true
+    }
+
+    /// 「鳴り切った」のか「途中で止められた」のか。
+    ///
+    /// ★AVAudioPlayerNode の完了通知(.dataPlayedBack)は、**止められた時にも来る**。
+    /// 出力先が変わってエンジンが止まった時もこれが来るので、素直に受けると
+    /// 「このブロックは読み終えた」と誤解して次のブロックへ進んでしまう。
+    /// 実機では Bluetooth を繋いだ瞬間に、鳴っていたブロックの残りが丸ごと
+    /// 読み飛ばされる形で出た。
+    ///
+    /// 鳴るはずの時間に対して明らかに早く来たなら、鳴り切ってはいない。
+    /// 判定を緩めにしてあるのは、誤って「途中で止められた」と見ると
+    /// 次のブロックへ進めなくなる(=固着する)ため。
+    /// - Parameters:
+    ///   - expectedSeconds: 鳴り切るのにかかるはずの実時間。
+    ///   - elapsedSeconds: 鳴らし始めてから完了通知が来るまでの実時間。
+    static func isPlaybackCutShort(expectedSeconds: Double, elapsedSeconds: Double) -> Bool {
+        guard expectedSeconds > 0 else { return false }
+        let shortfall = expectedSeconds - elapsedSeconds
+        // 絶対値でも割合でも足りない時だけ。短いブロックで誤判定しないように両方見る。
+        return shortfall > 0.5 && elapsedSeconds < expectedSeconds * 0.9
     }
 
     private static func pcmBuffer(fromWavData data: Data) throws -> AVAudioPCMBuffer {

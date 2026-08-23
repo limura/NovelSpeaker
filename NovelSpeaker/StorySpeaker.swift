@@ -475,6 +475,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     /// 中断される直前に読み上げていたか(アラームや電話が終わった後に戻すため)。
     private var wasSpeakingBeforeInterruption = false
 
+    /// 戻る時に、話者が「音声を止まった所まで飛ばせる」か。
+    /// 飛ばせる時だけブロックの頭から頼み直す(そうしないと丸ごと聞き直しになる)。
+    private var canSkipOnResume = false
+
 
     /// ★アラームや電話で音声セッションが取り上げられた時。
     ///
@@ -515,7 +519,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 // ★止める前に、どこまで鳴っていたかを控えさせる。
                 // 戻る時はブロックの頭から頼み直す(そうしないと作り置きが当たらない)が、
                 // 鳴らす時にここまで音声を飛ばすので、聞き直しは数秒で済む。
-                self.speaker.noteInterruptedForResume()
+                self.canSkipOnResume = self.speaker.noteInterruptedForResume()
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.StopSpeech(realm: realm, stopAudioSession: false)
                 }
@@ -528,11 +532,20 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 // 押せばそのまま続きから始まる。
                 guard options.contains(.shouldResume) else { return }
                 self.dummySoundLooper.startPlay()
-                // ★ブロックの頭から鳴らし直す。
-                // 途中の位置から再開すると、その位置から末尾までが「別の本文」になり、
-                // VOICEVOX の作り置きが当たらず合成のやり直しになる
+                // ★ブロックの頭から頼み直すのは、話者が「音声を飛ばせる」時だけ。
+                //
+                // VOICEVOX は、途中の位置から頼み直すとその位置から末尾までが
+                // 「別の本文」になって作り置きが当たらず、合成のやり直しになる
                 // (実機で「アラームを止めた瞬間には声が出ない」として確認)。
-                self.speaker.RewindToCurrentBlockStart()
+                // なのでブロック丸ごとで頼み直し、鳴らす時に止まった所まで飛ばしてもらう。
+                //
+                // システムの音声(AVSpeechSynthesizer)は合成と再生が一体で、
+                // 飛ばす手段が無い代わりに途中から頼んでも何の損も無い。
+                // ここで頭から頼み直すと、ただ丸ごと聞き直しになるだけなのでやらない。
+                if self.canSkipOnResume {
+                    self.speaker.RewindToCurrentBlockStart()
+                }
+                self.canSkipOnResume = false
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false,
