@@ -301,6 +301,10 @@ final class AppLaunchCoordinator: NSObject {
             return dict
         }
         dict["ok"] = true
+        // 実際に本文を取り出した SiteInfo。matchedSiteInfo(URLがマッチしただけ)とは別物で、
+        // usedFallbackSiteInfo が true なら「本命の pageElement が外れて //body が拾った」状態。
+        if let decodedBy = state.decodedSiteInfoName { dict["decodedBySiteInfo"] = decodedBy }
+        dict["usedFallbackSiteInfo"] = state.isDecodedByFallbackSiteInfo
         dict["present"] = [
             "content": (state.content?.isEmpty == false),
             "title": (state.title?.isEmpty == false),

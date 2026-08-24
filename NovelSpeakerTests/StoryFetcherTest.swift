@@ -894,6 +894,37 @@ class StoryFetcherTest: XCTestCase {
         XCTAssertTrue(reasons.contains("content (抽出できなかった)"))
     }
 
+    // 本命の SiteInfo が外れて //body のフォールバックが拾った時。
+    // author/tag だけ落ちるという紛らわしい形になるので、注記を先頭に足す。
+    func testJudgeFallbackSiteInfoAnnotatesNG() throws {
+        let (status, reasons) = ScrapeInspector.judge(
+            requireAuth: false, failMessage: nil,
+            evaluateFailures: ["author (抽出できなかった)", "tag (抽出できなかった)"],
+            decodedByFallbackSiteInfo: true)
+        XCTAssertEqual(status, .ng)
+        XCTAssertEqual(reasons.first, ScrapeInspector.reasonDecodedByFallbackSiteInfo)
+        XCTAssertTrue(reasons.contains("author (抽出できなかった)"))
+    }
+
+    // 期待が pageElement と title だけのサイトだと、フォールバックでも期待を満たしてしまう。
+    // それを黙って OK にすると SiteInfo の破損に気づけないので WARN に格上げする。
+    func testJudgeFallbackSiteInfoEscalatesOKtoWarn() throws {
+        let (status, reasons) = ScrapeInspector.judge(
+            requireAuth: false, failMessage: nil, evaluateFailures: [],
+            decodedByFallbackSiteInfo: true)
+        XCTAssertEqual(status, .warn)
+        XCTAssertEqual(reasons.first, ScrapeInspector.reasonDecodedByFallbackSiteInfo)
+    }
+
+    // 本命が拾えている時は今まで通り何も足さない。
+    func testJudgeWithoutFallbackIsUnchanged() throws {
+        let (status, reasons) = ScrapeInspector.judge(
+            requireAuth: false, failMessage: nil, evaluateFailures: [],
+            decodedByFallbackSiteInfo: false)
+        XCTAssertEqual(status, .ok)
+        XCTAssertTrue(reasons.isEmpty)
+    }
+
     func testJudgeForceErrorWithoutAuthIsNG() throws {
         // forceError(gate) が出たが [auth] でないなら NG(壊れている)。
         let (status, reasons) = ScrapeInspector.judge(requireAuth: false, failMessage: "ログインを促す画面が出ています。", evaluateFailures: [])

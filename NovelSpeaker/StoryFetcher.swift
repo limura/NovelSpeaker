@@ -35,6 +35,11 @@ struct StoryState : CustomStringConvertible {
     let forceClickButton: Element?
     #endif
     let forceErrorMessage: String?
+    // この状態の本文を実際に取り出した SiteInfo の表示名。判定と診断のためだけに持つ。
+    var decodedSiteInfoName: String? = nil
+    // 本文を取り出したのが組み込みフォールバック(//body)だったか。
+    // true = 本命の SiteInfo の pageElement が外れている、という意味になる。
+    var isDecodedByFallbackSiteInfo: Bool = false
     
     var IsNextAlive:Bool {
         get {
@@ -58,24 +63,24 @@ struct StoryState : CustomStringConvertible {
             previousContent = nil
         }
         #if !os(watchOS)
-        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, document: document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorMessage)
+        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, document: document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorMessage, decodedSiteInfoName: decodedSiteInfoName, isDecodedByFallbackSiteInfo: isDecodedByFallbackSiteInfo)
         #else
-        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, forceErrorMessage: forceErrorMessage)
+        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, forceErrorMessage: forceErrorMessage, decodedSiteInfoName: decodedSiteInfoName, isDecodedByFallbackSiteInfo: isDecodedByFallbackSiteInfo)
         #endif
     }
     
     func TitleChanged(title:String) -> StoryState {
         #if !os(watchOS)
-        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: self.previousContent, document: document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorMessage)
+        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: self.previousContent, document: document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorMessage, decodedSiteInfoName: decodedSiteInfoName, isDecodedByFallbackSiteInfo: isDecodedByFallbackSiteInfo)
         #else
-        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: self.previousContent, forceErrorMessage: forceErrorMessage)
+        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: self.previousContent, forceErrorMessage: forceErrorMessage, decodedSiteInfoName: decodedSiteInfoName, isDecodedByFallbackSiteInfo: isDecodedByFallbackSiteInfo)
         #endif
     }
     
     #if !os(watchOS)
     func transientDOMRetainedIfNeeded(document:Document?, nextButton: Element?, firstPageButton: Element?, forceClickButton: Element?, forceErrorMessage:String?) -> StoryState {
         let shouldRetainDOM = nextButton != nil || firstPageButton != nil || forceClickButton != nil
-        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, document: shouldRetainDOM ? document : nil, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorMessage)
+        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, document: shouldRetainDOM ? document : nil, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorMessage, decodedSiteInfoName: decodedSiteInfoName, isDecodedByFallbackSiteInfo: isDecodedByFallbackSiteInfo)
     }
     #endif
     
@@ -956,12 +961,18 @@ class StoryHtmlDecoder {
     static let NovelSpeakerSiteInfoJSONURL = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
     static let NovelSpeakerSiteInfoCSVURL = "https://docs.google.com/spreadsheets/d/1t2wFx8psbc4EZxlacCas6lknO1S_PW6wsR9Qxq7HEnM/pub?gid=0&single=true&output=csv"
 
+    // 組み込みフォールバック(//body)の目印。
+    // 本命の SiteInfo の pageElement が外れると黙ってこれが拾ってしまい、
+    // 「content と title は取れているのに author/tag だけ落ちる」という紛らわしい見え方になるので、
+    // 「フォールバックが拾った」事を後から判別できるように名前を付けておく。
+    static let fallbackBodySiteInfoResourceUrl = "fallbackSiteInfoArray(//body)"
+
     // シングルトンにしている。
     static let shared = StoryHtmlDecoder()
     private init(){
         fallbackSiteInfoArray = [
             //StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(@itemprop,'articleBody')"),
-            StorySiteInfo(id: UUID.init().uuidString, name: "default", pageElementV2: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil, isNeedWhitespaceSplitForTag: nil)
+            StorySiteInfo(id: UUID.init().uuidString, name: "default", pageElementV2: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: StoryHtmlDecoder.fallbackBodySiteInfoResourceUrl, overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil, isNeedWhitespaceSplitForTag: nil)
         ]
     }
     
@@ -1733,11 +1744,13 @@ class StoryFetcher {
                 nextButton: nextButton,
                 firstPageButton: firstPageButton,
                 forceClickButton: forceClickButton,
-                forceErrorMessage: forceErrorElementIsAlive_ErrorMessage
+                forceErrorMessage: forceErrorElementIsAlive_ErrorMessage,
+                decodedSiteInfoName: siteInfo.name,
+                isDecodedByFallbackSiteInfo: siteInfo.resourceUrl == StoryHtmlDecoder.fallbackBodySiteInfoResourceUrl
             ).transientDOMRetainedIfNeeded(document: currentState.document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorElementIsAlive_ErrorMessage)
             successAction?(nextState)
             #else
-            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: mergeTag(prevTagArray: currentState.tagArray, newTagArray: siteInfo.decodeTag(xmlDocument: htmlDocument)), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, forceErrorMessage: forceErrorElementIsAlive_ErrorMessage))
+            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: mergeTag(prevTagArray: currentState.tagArray, newTagArray: siteInfo.decodeTag(xmlDocument: htmlDocument)), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, forceErrorMessage: forceErrorElementIsAlive_ErrorMessage, decodedSiteInfoName: siteInfo.name, isDecodedByFallbackSiteInfo: siteInfo.resourceUrl == StoryHtmlDecoder.fallbackBodySiteInfoResourceUrl))
             #endif
             return
         }
@@ -2163,6 +2176,13 @@ class ScrapeInspector {
     static func reasonTimeout(seconds: Int) -> String {
         return String(format: NSLocalizedString("ScrapeInspector_Reason_Timeout", comment: "タイムアウト(%d秒以内に応答なし)"), seconds)
     }
+    // 本命の SiteInfo が外れて、組み込みの //body フォールバックが本文を拾った時の注記。
+    // この状態は「content と title だけ真、author/tag は偽」という紛らわしい見え方になる
+    // (フォールバックは pageElement=//body と title=//title しか持たず、author/tag を持たないため)。
+    // 黙っていると『author と tag の抽出だけ失敗した』と読めてしまうので、はっきり書く。
+    static var reasonDecodedByFallbackSiteInfo: String {
+        return NSLocalizedString("ScrapeInspector_Reason_FallbackSiteInfo", comment: "本文を拾ったのは組み込みの //body フォールバックです。このサイトの pageElement が外れています(title は <title> から取れるため content と title だけ真になります)")
+    }
 
     // 実遷移後URL(headless の現在URL)のホストが要求と変わったか。
     // 注意: state.url はリダイレクト後も要求URLのまま(ステイル)なので、ホスト比較には httpClient.GetCurrentURL() を使う。
@@ -2181,14 +2201,17 @@ class ScrapeInspector {
     //   hostChanged: 実遷移後URLのホストが要求と変わったか(別ホストの壁へ飛ばされた=未ログイン確定の信号)。
     // 思想: 『誤NGより検知漏れ』。未ログインの"確証"(別ホスト/robots)があるものは静かに SKIP、
     //       gate(forceError) も別ホストも無いのに [auth] で取れないものは『故障の可能性』として WARN で目立たせる。
-    static func judge(requireAuth: Bool, failMessage: String?, evaluateFailures: [String], hostChanged: Bool = false, unknownTokens: [String] = []) -> (status: Status, reasons: [String]) {
-        let base = judgeCore(requireAuth: requireAuth, failMessage: failMessage, evaluateFailures: evaluateFailures, hostChanged: hostChanged)
+    static func judge(requireAuth: Bool, failMessage: String?, evaluateFailures: [String], hostChanged: Bool = false, unknownTokens: [String] = [], decodedByFallbackSiteInfo: Bool = false) -> (status: Status, reasons: [String]) {
+        var result = judgeCore(requireAuth: requireAuth, failMessage: failMessage, evaluateFailures: evaluateFailures, hostChanged: hostChanged)
+        // 本命の SiteInfo が外れて //body が拾っている時は、期待を満たしていても知らせる。
+        // 期待が pageElement と title だけのサイトだと、SiteInfo が壊れていても OK に見えてしまうため。
+        if decodedByFallbackSiteInfo {
+            result = ((result.status == .ok) ? .warn : result.status, [reasonDecodedByFallbackSiteInfo] + result.reasons)
+        }
         // checkTargets に語彙外トークン(typoの可能性)があれば、黙って無視せず警告する。
         // 期待として効いていない＝検査が意図より弱い状態なので、OK でも WARN に格上げして気づけるようにする。
-        guard !unknownTokens.isEmpty else { return base }
-        let note = reasonUnknownTokens(unknownTokens)
-        let status: Status = (base.status == .ok) ? .warn : base.status
-        return (status, [note] + base.reasons)
+        guard !unknownTokens.isEmpty else { return result }
+        return ((result.status == .ok) ? .warn : result.status, [reasonUnknownTokens(unknownTokens)] + result.reasons)
     }
 
     private static func judgeCore(requireAuth: Bool, failMessage: String?, evaluateFailures: [String], hostChanged: Bool) -> (status: Status, reasons: [String]) {
@@ -2284,7 +2307,7 @@ class ScrapeInspector {
         fetch(target, { state in
             // state.url はリダイレクト後もステイルなので、実遷移後URLは httpClient.GetCurrentURL() で取る。
             let hostChanged = ScrapeInspector.isHostChanged(requested: target.url, final: self.fetcher.httpClient.GetCurrentURL())
-            let (status, reasons) = ScrapeInspector.judge(requireAuth: target.requireAuth, failMessage: nil, evaluateFailures: target.evaluate(state: state), hostChanged: hostChanged, unknownTokens: target.unknownTokens)
+            let (status, reasons) = ScrapeInspector.judge(requireAuth: target.requireAuth, failMessage: nil, evaluateFailures: target.evaluate(state: state), hostChanged: hostChanged, unknownTokens: target.unknownTokens, decodedByFallbackSiteInfo: state.isDecodedByFallbackSiteInfo)
             finish(status, reasons)
         }, { _, message in
             let hostChanged = ScrapeInspector.isHostChanged(requested: target.url, final: self.fetcher.httpClient.GetCurrentURL())

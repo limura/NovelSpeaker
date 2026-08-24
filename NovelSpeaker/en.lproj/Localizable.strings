@@ -1100,6 +1100,7 @@
 "ScrapeInspector_Reason_HostRedirect" = "Redirected to a different host (possibly not logged in / age verification)";
 "ScrapeInspector_Reason_AuthNoEvidence" = "Needs checking: could not fetch even though there is no proof of being logged out (no gate / host change). Check the login state or whether the import settings are broken.";
 "ScrapeInspector_Reason_UnknownTokens" = "Invalid token(s) in settings (typo?): %@";
+"ScrapeInspector_Reason_FallbackSiteInfo" = "The text was taken by the built-in //body fallback. This site's pageElement no longer matches (title still comes from <title>, so only content and title look present).";
 "ScrapeInspector_Reason_Timeout" = "Timeout (no response within %d seconds)";
 "ScrapeInspector_Reason_NotExtracted" = "%@ (could not be extracted)";
 "ScrapeInspector_Reason_MustBeEmptyButPresent" = "!%@ (should be empty but was extracted)";
