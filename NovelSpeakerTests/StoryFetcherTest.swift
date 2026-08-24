@@ -1171,4 +1171,72 @@ class StoryFetcherTest: XCTestCase {
         }
     }
 
+    // MARK: - EUC-JP の JIS X 0212(補助漢字)
+
+    // 「あ」+ SS3(0x8F)で始まる JIS X 0212 の「粼」(U+7CBC) + 「い」。
+    // livedoor NEWS のサイドバーに実際に来て、ページ全体の取り込みを潰した並び。
+    private var eucJPWithJISX0212Data: Data {
+        return Data([0xa4, 0xa2, 0x8f, 0xd3, 0xb8, 0xa4, 0xa4])
+    }
+
+    // 前提の確認。Foundation の EUC-JP は JIS X 0212 を扱えない。
+    // 後続が短いと nil を返し、後続が続くと **黙って化けた文字列を返す**(1バイト同期がずれる)。
+    // 後者が厄介で、失敗として観測できないまま壊れた本文が通ってしまう。
+    // この性質が変わったらこのテストが落ちて気づける(その時は iconv 経由の回り道を外してよい)。
+    func testFoundationBreaksEUCJPWithJISX0212() {
+        XCTAssertNil(String(data: eucJPWithJISX0212Data, encoding: .japaneseEUC),
+                     "Foundation が JIS X 0212 を読めるようになったなら、iconv 経由の回り道は要らなくなる")
+
+        var withTail = Data("<title>".utf8)
+        withTail.append(eucJPWithJISX0212Data)
+        withTail.append(Data("</title>".utf8))
+        let broken = String(data: withTail, encoding: .japaneseEUC)
+        XCTAssertNotNil(broken, "後続が続く場合は nil にならず、成功したふりをする")
+        XCTAssertNotEqual(broken, "<title>あ粼い</title>", "Foundation は同期を崩して別の文字に化けさせる")
+    }
+
+    func testDecodeStringUsingIconvReadsJISX0212() {
+        let decoded = NiftyUtility.decodeStringUsingIconv(data: eucJPWithJISX0212Data, encoding: .japaneseEUC)
+        XCTAssertEqual(decoded, "あ粼い")
+    }
+
+    // 取り違えたencodingで「それらしく」成功しては困る(候補総当たりが働かなくなる)。
+    func testDecodeStringUsingIconvReturnsNilForWrongEncoding() {
+        let utf8Data = "あいうえお".data(using: .utf8)!
+        XCTAssertNil(NiftyUtility.decodeStringUsingIconv(data: utf8Data, encoding: .japaneseEUC))
+    }
+
+    // tryDecodeToString が iconv まで降りて拾える事と、返す encoding が .utf8 である事。
+    // .japaneseEUC を返してしまうと、呼び出し側(Kanna の HTML(html:encoding:))が
+    // 再エンコードで同じ理由で落ちるので、ここは .utf8 でなければならない。
+    func testTryDecodeToStringRescuesJISX0212AndReportsUTF8() {
+        let (decoded, encoding) = NiftyUtility.tryDecodeToString(data: eucJPWithJISX0212Data, encoding: .japaneseEUC)
+        XCTAssertEqual(decoded, "あ粼い")
+        XCTAssertEqual(encoding, .utf8)
+    }
+
+    // JIS X 0212 を含まない普通の EUC-JP は、今まで通り Foundation 側で解決して encoding もそのまま返る。
+    func testTryDecodeToStringKeepsEncodingForPlainEUCJP() {
+        let data = "普通の日本語".data(using: .japaneseEUC)!
+        let (decoded, encoding) = NiftyUtility.tryDecodeToString(data: data, encoding: .japaneseEUC)
+        XCTAssertEqual(decoded, "普通の日本語")
+        XCTAssertEqual(encoding, .japaneseEUC)
+    }
+
+    // HTML 一式で、meta charset を見に行く経路まで含めて通る事の確認。
+    // 返ってきた encoding をそのまま Kanna に渡して解析できる所まで見る。
+    func testDecodeHTMLStringFromRescuesJISX0212HTML() throws {
+        var data = Data("<html><head><meta charset=\"EUC-JP\"><title>".data(using: .japaneseEUC)!)
+        data.append(eucJPWithJISX0212Data)
+        data.append("</title></head><body><p>本文</p></body></html>".data(using: .japaneseEUC)!)
+
+        let (html, encoding) = NiftyUtility.decodeHTMLStringFrom(data: data, headerEncoding: .japaneseEUC)
+        let decodedHTML = try XCTUnwrap(html)
+        XCTAssertTrue(decodedHTML.contains("あ粼い"))
+        XCTAssertEqual(encoding, .utf8)
+
+        let document = try HTML(html: decodedHTML, encoding: encoding ?? .utf8)
+        XCTAssertEqual(document.title, "あ粼い")
+    }
+
 }

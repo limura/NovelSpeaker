@@ -1052,18 +1052,111 @@ class NiftyUtility: NSObject {
         return String(decoding: data, as: UTF8.self)
     }
 
+    // EUC-JP の SS3(0x8F、JIS X 0212=補助漢字の開始)を含んでいるか。含むなら Foundation を信用してはいけない。
+    //
+    // Apple の EUC-JP デコーダは JIS X 0212 をまともに扱えず、**2通りの壊れ方**をする(2026-08-24 実測):
+    //   - 後続が短いと String(data:encoding:.japaneseEUC) が **文書まるごと nil** を返す
+    //   - 後続が続くと **黙って化けた文字列を返す**。1バイト同期がずれて、その先が別の漢字に化ける
+    //       "<title>あ粼い</title>" (EUC-JP) → "<title>あ粼犬ぜ/title>"
+    //     こちらは失敗として観測できないので、取り込んだ本文が静かに壊れる。
+    //   kCFStringEncodingEUC_JP でも ISO_2022_JP_2 でも同じで、Foundation 側に逃げ道は無い。
+    //
+    // EUC-JP で 0x8F は SS3 以外に現れない(第2バイト以降は 0xA1-0xFE の範囲)ので、
+    // 「0x8F を含む」= JIS X 0212 を含む(あるいはそもそも EUC-JP ではない)と見てよい。
+    // どちらにせよ Foundation より libiconv に先に聞くのが正しく、EUC-JP 以外の挙動は一切変わらない。
+    static func isEUCJPWithJISX0212(data:Data, encoding:String.Encoding?) -> Bool {
+        guard encoding == .japaneseEUC else { return false }
+        return data.contains(0x8F)
+    }
+
+    // libiconv を使って Data を String にします。変換できないバイトが1つでもあれば nil を返します(取りこぼしを黙って混ぜないため)。
+    //
+    // libiconv は JIS X 0212 を持っていて、iOS/iPadOS/watchOS/macOS の全SDKに同梱されている
+    // (`usr/lib/libiconv.tbd`)。Swift からは追加のリンク指定なしにそのまま呼べる。
+    //
+    // 返す String は Unicode なので「元の encoding」は意味を失います。呼び出し側は返ってきた文字列を
+    // 再度エンコードする(Kanna の HTML(html:encoding:) など)ので、**呼び出し側は .utf8 を使ってください**。
+    // 元の encoding をそのまま使うと、今度は再エンコードで同じ理由で落ちます。
+    static func decodeStringUsingIconv(data:Data, encoding:String.Encoding) -> String? {
+        if data.isEmpty { return "" }
+        let cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding.rawValue)
+        guard cfEncoding != kCFStringEncodingInvalidId,
+              let ianaName = CFStringConvertEncodingToIANACharSetName(cfEncoding) as String? else { return nil }
+        guard let converter = iconv_open("UTF-8", ianaName), converter != iconv_t(bitPattern: -1) else { return nil }
+        defer { iconv_close(converter) }
+
+        var input = [CChar](repeating: 0, count: data.count)
+        data.withUnsafeBytes { rawBuffer in
+            guard let base = rawBuffer.baseAddress else { return }
+            _ = memcpy(&input, base, data.count)
+        }
+        var outputBuffer = [CChar](repeating: 0, count: 64 * 1024)
+        var output = [UInt8]()
+        output.reserveCapacity(data.count + data.count / 2)
+
+        var inputIndex = 0
+        while inputIndex < input.count {
+            var inputRemaining = input.count - inputIndex
+            var outputRemaining = outputBuffer.count
+            var iconvErrno: Int32 = 0
+            let producedCount: Int = input.withUnsafeMutableBufferPointer { inputBase in
+                outputBuffer.withUnsafeMutableBufferPointer { outputBase -> Int in
+                    var inputPointer: UnsafeMutablePointer<CChar>? = inputBase.baseAddress! + inputIndex
+                    var outputPointer: UnsafeMutablePointer<CChar>? = outputBase.baseAddress!
+                    if iconv(converter, &inputPointer, &inputRemaining, &outputPointer, &outputRemaining) == -1 {
+                        iconvErrno = errno
+                    }
+                    inputIndex = inputPointer! - inputBase.baseAddress!
+                    return outputBase.count - outputRemaining
+                }
+            }
+            if producedCount > 0 {
+                output.append(contentsOf: outputBuffer[0 ..< producedCount].lazy.map { UInt8(bitPattern: $0) })
+            }
+            if iconvErrno == 0 { continue }
+            // E2BIG は出力バッファが一杯になっただけなので、書き出して続ける。
+            if iconvErrno == E2BIG { continue }
+            // EILSEQ(変換できない列) / EINVAL(途中で切れている) は「このencodingではない」とみなして諦める。
+            // ここで無理に読み飛ばすと、encoding を取り違えた時に化けた文字列を返してしまい、
+            // 後続の候補総当たりが働かなくなる。
+            return nil
+        }
+        return String(decoding: output, as: UTF8.self)
+    }
+
     static func tryDecodeToString(data:Data, encoding:String.Encoding?) -> (String?, String.Encoding?) {
         // UTF8 の時だけは問答無用でUTF8としてデコードする事にします。(変換できなかった文字は空白か何かに変わるはずです)
         if let encoding = encoding, encoding == .utf8 {
             return (forceDecodeToStringByUTF8(data: data), encoding)
         }
-        if let encoding = encoding, let string = String(data: data, encoding: encoding) {
-            return (string, encoding)
+        if let encoding = encoding {
+            // Foundation が壊す事が分かっている組み合わせ(EUC-JP × JIS X 0212)だけ、先に libiconv に聞く。
+            if isEUCJPWithJISX0212(data: data, encoding: encoding),
+               let string = decodeStringUsingIconv(data: data, encoding: encoding) {
+                return (string, .utf8)
+            }
+            if let string = String(data: data, encoding: encoding) {
+                return (string, encoding)
+            }
         }
         let targetEncodingArray:[String.Encoding] = [.utf8, .japaneseEUC, .shiftJIS, .iso2022JP]
         for encoding in targetEncodingArray {
+            if isEUCJPWithJISX0212(data: data, encoding: encoding),
+               let string = decodeStringUsingIconv(data: data, encoding: encoding) {
+                return (string, .utf8)
+            }
             if let string = String(data: data, encoding: encoding) {
                 return (string, encoding)
+            }
+        }
+        // Foundation ではどの候補でも駄目だった時の最後の砦。
+        // ここまで来ると従来は (nil, nil) = 完全な失敗だったので、拾えるなら拾って損はない。
+        if let encoding = encoding, let string = decodeStringUsingIconv(data: data, encoding: encoding) {
+            return (string, .utf8)
+        }
+        for encoding in targetEncodingArray {
+            if let string = decodeStringUsingIconv(data: data, encoding: encoding) {
+                return (string, .utf8)
             }
         }
         return (nil, nil)
@@ -1118,7 +1211,10 @@ class NiftyUtility: NSObject {
     //
     static func decodeHTMLStringFrom(data:Data, headerEncoding: String.Encoding?) -> (String?, String.Encoding?) {
         // headerEncoding で decode できるのならそれを信じます。(HTML の meta よりも優先します)
-        if let encoding = headerEncoding, let tmpString = String(data: data, encoding: encoding) {
+        // ただし EUC-JP に JIS X 0212 が混ざっている時だけは信じません。Foundation が
+        // 「成功したふりをして化けた文字列」を返すためで、ここで信じると静かに壊れた本文が通ってしまう。
+        if let encoding = headerEncoding, !isEUCJPWithJISX0212(data: data, encoding: encoding),
+           let tmpString = String(data: data, encoding: encoding) {
             return (tmpString, encoding)
         }
         // headerEncoding では駄目だったと仮定して、html meta encoding を取り出します。
