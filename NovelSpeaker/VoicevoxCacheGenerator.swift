@@ -261,6 +261,13 @@ final class VoicevoxCacheGenerator {
                 if runningMode == .manual { setIdleTimerDisabled(true) }
 
                 if VoicevoxDiskCacheStore.shared.contains(novelID: novelID, chapterNumber: chapterNumber, key: target.key) {
+                    // 既にある物を合成し直しはしないが、それが一時分だった場合は
+                    // 作らせた分へ移しておく(移さないと「作成済み」に数えられず、
+                    // 後で一時分の刈り取りに消されて、作ったはずの所に穴が空く)。
+                    if runningMode == .manual {
+                        VoicevoxDiskCacheStore.shared.promoteToPermanent(
+                            novelID: novelID, chapterNumber: chapterNumber, key: target.key)
+                    }
                     generatedCount += 1
                     continue
                 }

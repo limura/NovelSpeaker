@@ -228,6 +228,59 @@ final class VoicevoxDiskCacheStore {
         return nil
     }
 
+    /// ★一時分に既にある音声を、作らせた分へ移す。
+    ///
+    /// 利用者が「作って」と言った範囲が、読み上げの裏で作った一時分に
+    /// 既に出来ている事がある(貯金が15分ある所から作り始めた時など)。
+    /// 合成し直すのは無駄なので飛ばすが、**一時分に置いたままにすると**
+    ///  - 「作成済み」は作らせた分しか数えないので、その分が表示に出ない
+    ///  - 一時分なので後で刈り取りに消され、**作ったはずの所に穴が空く**
+    ///    (生成側は「出来ている」と見て通り過ぎているので、戻って来ない)
+    /// という事になる。同じディスクの中なのでファイルを移すだけで済む。
+    /// - Returns: 移したか(元から作らせた分にあった / 一時分にも無かった場合は false)。
+    @discardableResult
+    func promoteToPermanent(novelID: String, chapterNumber: Int, key: String) -> Bool {
+        let permanentDirectory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber, area: .permanent)
+        let temporaryDirectory = chapterDirectory(novelID: novelID, chapterNumber: chapterNumber, area: .temporary)
+
+        lock.lock()
+        if listingUnsafe(directory: permanentDirectory)[key] != nil {
+            lock.unlock()
+            return false
+        }
+        guard let entry = listingUnsafe(directory: temporaryDirectory)[key] else {
+            lock.unlock()
+            return false
+        }
+        lock.unlock()
+
+        do {
+            try prepareDirectories(novelID: novelID, chapterDirectory: permanentDirectory, area: .permanent)
+        } catch {
+            return false
+        }
+        let source = temporaryDirectory.appendingPathComponent(entry.fileName)
+        let destination = permanentDirectory.appendingPathComponent(entry.fileName)
+        if fileManager.fileExists(atPath: destination.path) {
+            try? fileManager.removeItem(at: destination)
+        }
+        do {
+            try fileManager.moveItem(at: source, to: destination)
+        } catch {
+            return false
+        }
+
+        lock.lock()
+        var temporaryListing = listingUnsafe(directory: temporaryDirectory)
+        temporaryListing.removeValue(forKey: key)
+        listings[temporaryDirectory.path] = temporaryListing
+        var permanentListing = listingUnsafe(directory: permanentDirectory)
+        permanentListing[key] = entry
+        listings[permanentDirectory.path] = permanentListing
+        lock.unlock()
+        return true
+    }
+
     /// 中身を読まずに有無だけを判定する(生成の再開時に「どこまで作れているか」を数えるため)。
     func contains(novelID: String, chapterNumber: Int, key: String) -> Bool {
         return Area.lookupOrder.contains { area in

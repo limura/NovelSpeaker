@@ -303,10 +303,16 @@ final class VoicevoxCPUUsageReporter {
         let durationText = duration >= 60
             ? String(format: "%.0f分", duration / 60)
             : String(format: "%.0f秒", duration)
-        let baseMessage = String(format: "[VOICEVOX CPU] この%@で %d本(二度手間 %d本: 再生側 %d / 作り足し %d) / 貯めてあった分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 熱 %@",
+        // 合成時間と待ち時間は、この2つが揃って初めて意味を持つ。
+        // 生成が追いつかない時に「CPU予算で待たされている」のか
+        // 「予約が枯れて手空きになっている」のかは、直し方が全く違う
+        // (前者は端末の能力の話、後者は積み方の話)。
+        // 付録にだけ入れていたら実機ログを読む時に見落としたので、行に出す。
+        let baseMessage = String(format: "[VOICEVOX CPU] この%@で %d本(二度手間 %d本: 再生側 %d / 作り足し %d) / 貯めてあった分で %d本 / 生成 %.2f倍速(最も遅い時で %.2f倍速) / 再生 %.2f倍速 / 合成 %.0f秒・待ち %.0f秒 / 熱 %@",
                              durationText, current.count, current.duplicateSyntheses,
                              current.duplicatesByPlayback, current.duplicatesByGenerator, current.diskHits,
                              averageSpeed, slowestSpeed, playbackRate,
+                             current.wallSeconds, current.waitedSeconds,
                              Self.thermalStateText(thermalState))
         // 作り直しの割合も、他の数字と同じ区間で見る。
         // 巻き戻して聴き直した分もここに乗るので、割合だけでは不具合と断じられない。
