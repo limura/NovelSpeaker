@@ -718,6 +718,7 @@
 "CreateSpeechModSettingViewControllerSwift_AfterSampleTitle" = "テスト用読み替え後";
 "CreateSpeechModSettingViewControllerSwift_TestButtonTitle" = "発音テスト";
 "CreateSpeechModSettingViewControllerSwift_ApplyButtonTitle" = "保存する";
+"CreateSpeechModSettingViewControllerSwift_Saved" = "保存しました";
 "CreateSpeechModSettingViewControllerSwift_ValidateBeforeFailedTitle" = "読み替え前の文字列に問題があります";
 "CreateSpeechModSettingViewControllerSwift_ValidateBeforeFieldMessage" = "空文字列であるか、正規表現に不備があるようです。";
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle" = "読み替え後の文字列に問題があります";

@@ -449,6 +449,87 @@ class NiftyUtility: NSObject {
     #endif
     
     #if !os(watchOS)
+    // 「保存しました」のような短いメッセージを、画面の下の方にすーっと出してすーっと消します。
+    // ダイアログと違って操作を止めない(タップも奪わない)ので、
+    // 「押した事は伝えたいけれど、画面はそのままにしておきたい」時に使います。
+    static let floatingMessageViewTag = 0x4D534747
+    public static func ShowFloatingMessage(viewController: UIViewController, message: String, showingSeconds: Double = 1.2) {
+        // UITableViewController のように view が UIScrollView な場合、
+        // そこに貼るとメッセージが本文と一緒にスクロールしてしまうので、親を辿ります。
+        var baseViewController = viewController
+        while baseViewController.view is UIScrollView, let parent = baseViewController.parent {
+            baseViewController = parent
+        }
+        guard let parentView = baseViewController.view else { return }
+        // 連打された時にメッセージが積み重ならないように、前のものは消しておきます。
+        parentView.viewWithTag(floatingMessageViewTag)?.removeFromSuperview()
+
+        // 影は角丸でクリップされると消えてしまうので、影を付ける入れ物と、
+        // 角丸でクリップする中身(ぼかし)とを分けています。
+        let containerView = UIView()
+        containerView.tag = floatingMessageViewTag
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.backgroundColor = .clear
+        containerView.alpha = 0
+        // メッセージが出ている間も裏側を操作できるようにしておきます。
+        containerView.isUserInteractionEnabled = false
+        containerView.layer.shadowColor = UIColor.black.cgColor
+        containerView.layer.shadowOpacity = 0.25
+        containerView.layer.shadowRadius = 6
+        containerView.layer.shadowOffset = CGSize(width: 0, height: 2)
+
+        let backgroundView = UIVisualEffectView(effect: UIBlurEffect(style: .systemChromeMaterial))
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundView.layer.cornerRadius = 16
+        backgroundView.layer.masksToBounds = true
+        backgroundView.layer.borderWidth = 1.0 / UIScreen.main.scale
+        backgroundView.layer.borderColor = UIColor.separator.cgColor
+        containerView.addSubview(backgroundView)
+
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = message
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.textColor = .label
+        label.font = UIFont.preferredFont(forTextStyle: .body)
+        label.adjustsFontForContentSizeCategory = true
+        backgroundView.contentView.addSubview(label)
+        parentView.addSubview(containerView)
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: backgroundView.contentView.topAnchor, constant: 12),
+            label.bottomAnchor.constraint(equalTo: backgroundView.contentView.bottomAnchor, constant: -12),
+            label.leadingAnchor.constraint(equalTo: backgroundView.contentView.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(equalTo: backgroundView.contentView.trailingAnchor, constant: -20),
+            backgroundView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            backgroundView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+            backgroundView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            containerView.centerXAnchor.constraint(equalTo: parentView.centerXAnchor),
+            containerView.bottomAnchor.constraint(equalTo: parentView.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            containerView.leadingAnchor.constraint(greaterThanOrEqualTo: parentView.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            containerView.trailingAnchor.constraint(lessThanOrEqualTo: parentView.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+        ])
+        parentView.layoutIfNeeded()
+        // VoiceOver 利用時は見た目では伝わらないので、読み上げてもらいます。
+        UIAccessibility.post(notification: .announcement, argument: message)
+
+        containerView.transform = CGAffineTransform(translationX: 0, y: 16)
+        UIView.animate(withDuration: 0.25, animations: {
+            containerView.alpha = 1
+            containerView.transform = .identity
+        }, completion: { _ in
+            UIView.animate(withDuration: 0.4, delay: showingSeconds, options: [], animations: {
+                containerView.alpha = 0
+                containerView.transform = CGAffineTransform(translationX: 0, y: 16)
+            }, completion: { _ in
+                containerView.removeFromSuperview()
+            })
+        })
+    }
+    #endif
+    
+    #if !os(watchOS)
     @discardableResult
     @objc public static func EasyDialogMessageDialog(viewController: UIViewController, message: String, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         return EasyDialogOneButton(viewController: viewController, title: nil, message: message, buttonTitle: nil, buttonAction: nil, completion: completion)

@@ -726,6 +726,7 @@
 "CreateSpeechModSettingViewControllerSwift_AfterSampleTitle" = "Test After";
 "CreateSpeechModSettingViewControllerSwift_TestButtonTitle" = "Test speech";
 "CreateSpeechModSettingViewControllerSwift_ApplyButtonTitle" = "Save";
+"CreateSpeechModSettingViewControllerSwift_Saved" = "Saved";
 "CreateSpeechModSettingViewControllerSwift_ValidateBeforeFailedTitle" = "There is a problem with the string before replacement";
 "CreateSpeechModSettingViewControllerSwift_ValidateBeforeFieldMessage" = "It seems to be an empty string or a defect in the regular expression.";
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle" = "There is a problem with the string after replacement";

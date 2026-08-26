@@ -218,6 +218,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                             self.navigationController?.popViewController(animated: true)
                         }
                 })
+                // 削除するかどうかを聞いている最中なので、ここで保存してしまわないようにします。
+                return
             }
             RealmUtil.Write { (realm) in
                 let setting:RealmSpeechModSetting
@@ -241,8 +243,16 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 }
                 realm.add(setting, update: .modified)
             }
+            // 保存しても一覧には戻りません。
+            // 小説本文画面と行き来して読み替えの結果を確認する時に、
+            // 毎回一覧から選び直さないと駄目、というのが面倒だったためです。
+            // 次にまた「保存する」を押した時に、今保存したものを編集し直せるように、
+            // 編集対象を今の「読み替え前」の文字列にしておきます。
+            // (これをやらないと、「読み替え前」を書き換えて2回保存した時に、
+            //  1回目に保存したものが消されずに残ってしまいます)
+            self.targetSpeechModSettingBeforeString = self.beforeText
             DispatchQueue.main.async {
-                self.navigationController?.popViewController(animated: true)
+                NiftyUtility.ShowFloatingMessage(viewController: self, message: NSLocalizedString("CreateSpeechModSettingViewControllerSwift_Saved", comment: "保存しました"))
             }
         })
     }
