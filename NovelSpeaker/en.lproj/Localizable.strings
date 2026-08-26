@@ -736,6 +736,9 @@
 
 "MultipleNovelIDSelectorViewController_Title" = "Select novel";
 "MultipleNovelIDSelectorViewController_SortButton" = "Sort";
+"MultipleNovelIDSelectorViewController_SelectedSectionHeader" = "Selected";
+"MultipleNovelIDSelectorViewController_UnselectedSectionHeader" = "Others";
+"MultipleNovelIDSelectorViewController_RegroupSelectedNovels" = "Move checked novels to top";
 
 "NovelDownloadQueue_DownloadFailedByErrorSiteInfo" = "It seems that the loading of SiteInfo is failing, so I give up the download";
 

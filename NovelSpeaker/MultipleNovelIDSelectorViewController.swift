@@ -43,12 +43,24 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
     var sortButton: UIBarButtonItem = UIBarButtonItem()
     // このピッカーで選べる並び替え(フォルダ分類・お気に入り・Webサイト等の集約系は除く)。
     static let selectableSortTypes: [NarouContentSortType] = [.NovelUpdatedAt, .Title, .Writer, .LastReadDate, .CreatedDate, .PageCount]
+    // チェック済みを上にまとめる時に使う、「並べ直した」時点でチェックが付いていた ID の集合。
+    // チェックのON/OFFでは更新しない(指の下で行が動いて隣の小説を誤って触ってしまうのを防ぐため)。
+    // Realm 由来(小説の追加・更新等)の再構築でも更新しない(ユーザ操作でないタイミングで並びが勝手に変わらないようにするため)。
+    // 更新するのは 画面を開いた時 / 並び替えを変えた時 / 検索を変えた時 / 「チェック済みを上にまとめ直す」を選んだ時 の4つだけ。
+    var pinnedNovelIDSet:Set<String> = []
+    // 現在表示している並び順。Realm 由来の再構築ではこの並びを維持し、増えた小説だけを末尾に足して、
+    // 減った小説は抜けるだけにする。
+    // (これが無いと、裏で小説が1つ更新されただけで「更新順」等の並びが動いてしまい、
+    //  チェックしようとしていた行が指の下から逃げる)
+    // pinnedNovelIDSet と同じタイミングでだけ捨てる(捨てると次の再構築で並び替え本来の順番に戻る)。
+    var displayedNovelIDOrder:[String] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = self.OverrideTitle ?? NSLocalizedString("MultipleNovelIDSelectorViewController_Title", comment: "小説を選択")
 
         self.sortType = MultipleNovelIDSelectorViewController.defaultSortType()
+        resetDisplayOrderSnapshot()
         createSelectorCells()
         // 文字ボタンだと横幅が足りず「…」に畳まれて存在に気づけないため、アイコンにする。
         // VoiceOver 用に accessibilityLabel には(アイコンにする前の)文字列を入れる。
@@ -58,6 +70,7 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
         self.sortButton.accessibilityLabel = sortButtonTitle()
         navigationItem.rightBarButtonItems = [filterButton, sortButton]
         registNotificationCenter()
+        RestartObservers()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
 
@@ -96,15 +109,17 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
     func observeNovelArray() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let allNovels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
-            self.novelArrayNotificationToken = allNovels.observe({ (change) in
+            self.novelArrayNotificationToken = allNovels.observe({ [weak self] (change) in
                 switch change {
                 case .initial(_):
                     break
-                case .update(_, let deletions, let insertions, let modifications):
-                    if deletions.count > 0 || insertions.count > 0 || modifications.count > 0 {
+                case .update(_, let deletions, let insertions, _):
+                    // 小説の増減の時だけ作り直す。
+                    // 変更(modifications)まで拾うと、ダウンロードで最終更新日時が書き変わる度に
+                    // 一覧を作り直す事になってしまう(この画面で表示している内容には影響しない)。
+                    if deletions.count > 0 || insertions.count > 0 {
                         DispatchQueue.main.async {
-                            self.form.removeAll()
-                            self.createSelectorCells()
+                            self?.rebuildSelectorCellsKeepingScrollPosition()
                         }
                     }
                 case .error(_):
@@ -117,14 +132,13 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
     func observeNovelTag() {
         RealmUtil.RealmBlock { realm in
             guard let allFolders = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
-            self.novelTagNotificationToken = allFolders.observe({ change in
+            self.novelTagNotificationToken = allFolders.observe({ [weak self] change in
                 switch change {
                 case .initial(_):
                     break
                 case .update(_, deletions: _, insertions: _, modifications: _):
                     DispatchQueue.main.async {
-                        self.form.removeAll()
-                        self.createSelectorCells()
+                        self?.rebuildSelectorCellsKeepingScrollPosition()
                     }
                 case .error(_):
                     break
@@ -133,23 +147,100 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
         }
     }
     
+    // Realm 側で小説が増減した時に呼ぶ。ユーザ操作ではないので、並び順(displayedNovelIDOrder)も
+    // スクロール位置も維持したまま、増減だけを反映する。
+    func rebuildSelectorCellsKeepingScrollPosition() {
+        let contentOffset = self.tableView.contentOffset
+        self.form.removeAll(keepingCapacity: true)
+        self.createSelectorCells()
+        self.tableView.layoutIfNeeded()
+        let minOffsetY = -self.tableView.adjustedContentInset.top
+        let maxOffsetY = max(minOffsetY, self.tableView.contentSize.height + self.tableView.adjustedContentInset.bottom - self.tableView.bounds.height)
+        self.tableView.contentOffset = CGPoint(x: contentOffset.x, y: min(max(contentOffset.y, minOffsetY), maxOffsetY))
+    }
+
+    // 「並べ直す」操作。チェック済みの集合を取り直し、維持していた並び順を捨てる。
+    // これを呼ばずに再構築した場合は、今表示されている並びがそのまま維持される。
+    func resetDisplayOrderSnapshot() {
+        self.pinnedNovelIDSet = self.SelectedNovelIDSet
+        self.displayedNovelIDOrder = []
+    }
+
+    // 維持している並び順に沿って並べ替える。今回初めて出てきた小説は末尾に置く。
+    // displayedNovelIDOrder が空の時(並べ直した直後)は並び替え本来の順番をそのまま使う。
+    func applyDisplayedOrder(_ novels:[RealmNovel]) -> [RealmNovel] {
+        if self.displayedNovelIDOrder.count <= 0 { return novels }
+        var novelIDToIndexTable:[String:Int] = [:]
+        for (index, novelID) in self.displayedNovelIDOrder.enumerated() {
+            novelIDToIndexTable[novelID] = index
+        }
+        var knownNovels:[(index:Int, novel:RealmNovel)] = []
+        var newNovels:[RealmNovel] = []
+        for novel in novels {
+            if let index = novelIDToIndexTable[novel.novelID] {
+                knownNovels.append((index: index, novel: novel))
+            }else{
+                newNovels.append(novel)
+            }
+        }
+        knownNovels.sort(by: { $0.index < $1.index })
+        return knownNovels.map({ $0.novel }) + newNovels
+    }
+
+    func createAnyNovelIDCheckRow() -> CheckRow {
+        return CheckRow(MultipleNovelIDSelectorViewController.AnyTypeTag) {
+            $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AnyTargetName", comment: "全ての小説")
+            $0.value = self.SelectedNovelIDSet.contains(MultipleNovelIDSelectorViewController.AnyTypeTag)
+        }.onChange({ (row) in
+            guard let value = row.value else { return }
+            if value {
+                self.SelectedNovelIDSet.insert(MultipleNovelIDSelectorViewController.AnyTypeTag)
+            }else{
+                self.SelectedNovelIDSet.remove(MultipleNovelIDSelectorViewController.AnyTypeTag)
+            }
+        })
+    }
+
+    func createNovelCheckRow(novel:RealmNovel, novelIDToFolderNameTable:[String:[String]]) -> CheckRow {
+        let novelID = novel.novelID
+        return CheckRow(novelID) {
+            $0.cellStyle = .subtitle
+            $0.title = novel.title
+            $0.value = self.SelectedNovelIDSet.contains(novelID)
+        }.onChange({ (row) in
+            guard let value = row.value else { return }
+            if value {
+                self.SelectedNovelIDSet.insert(novelID)
+            }else{
+                self.SelectedNovelIDSet.remove(novelID)
+            }
+        }).cellUpdate({ cell, row in
+            guard let folderNameArray = novelIDToFolderNameTable[novelID] else { return }
+            cell.detailTextLabel?.text = folderNameArray.joined(separator: ", ")
+        })
+    }
+
+    // 単一選択モード用の行。タップで即 singleSelectionHandler を呼ぶ(呼び出し側が確認ダイアログを出す)。
+    func createNovelLabelRow(novel:RealmNovel, novelIDToFolderNameTable:[String:[String]]) -> LabelRow {
+        let novelID = novel.novelID
+        return LabelRow(novelID) {
+            $0.cellStyle = .subtitle
+            $0.title = novel.title
+        }.cellUpdate({ cell, row in
+            cell.accessoryType = .disclosureIndicator
+            cell.textLabel?.numberOfLines = 0
+            if let folderNameArray = novelIDToFolderNameTable[novelID] {
+                cell.detailTextLabel?.text = folderNameArray.joined(separator: ", ")
+            }
+        }).onCellSelection({ [weak self] cell, row in
+            cell.setSelected(false, animated: true)
+            self?.singleSelectionHandler?(novelID)
+        })
+    }
+
     func createSelectorCells() {
-        let section = Section()
         RealmUtil.RealmBlock { (realm) -> Void in
             guard var allNovels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
-            if IsUseAnyNovelID {
-                section <<< CheckRow(MultipleNovelIDSelectorViewController.AnyTypeTag) {
-                    $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AnyTargetName", comment: "全ての小説")
-                    $0.value = self.SelectedNovelIDSet.contains(MultipleNovelIDSelectorViewController.AnyTypeTag)
-                }.onChange({ (row) in
-                    guard let value = row.value else { return }
-                    if value {
-                        self.SelectedNovelIDSet.insert(MultipleNovelIDSelectorViewController.AnyTypeTag)
-                    }else{
-                        self.SelectedNovelIDSet.remove(MultipleNovelIDSelectorViewController.AnyTypeTag)
-                    }
-                })
-            }
             if self.filterString.count > 0 {
                 allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", self.filterString, self.filterString)
             }
@@ -169,44 +260,55 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
                     }
                 }
             }
-            let sortedNovels = MultipleNovelIDSelectorViewController.applySort(results: allNovels, sortType: self.sortType).filter({ !self.ExcludeNovelIDSet.contains($0.novelID) })
-            for novel in sortedNovels {
-                let novelID = novel.novelID
-                if self.IsSingleSelection {
-                    // 単一選択: タップで即 singleSelectionHandler を呼ぶ(呼び出し側が確認ダイアログを出す)。
-                    section <<< LabelRow(novelID) {
-                        $0.cellStyle = .subtitle
-                        $0.title = novel.title
-                    }.cellUpdate({ cell, row in
-                        cell.accessoryType = .disclosureIndicator
-                        cell.textLabel?.numberOfLines = 0
-                        if let folderNameArray = novelIDToFolderNameTable[novelID] {
-                            cell.detailTextLabel?.text = folderNameArray.joined(separator: ", ")
-                        }
-                    }).onCellSelection({ [weak self] cell, row in
-                        cell.setSelected(false, animated: true)
-                        self?.singleSelectionHandler?(novelID)
-                    })
-                } else {
-                    section <<< CheckRow(novelID) {
-                        $0.cellStyle = .subtitle
-                        $0.title = novel.title
-                        $0.value = self.SelectedNovelIDSet.contains(novelID)
-                    }.onChange({ (row) in
-                        guard let value = row.value else { return }
-                        if value {
-                            self.SelectedNovelIDSet.insert(novelID)
-                        }else{
-                            self.SelectedNovelIDSet.remove(novelID)
-                        }
-                    }).cellUpdate({ cell, row in
-                        guard let folderNameArray = novelIDToFolderNameTable[novelID] else { return }
-                        cell.detailTextLabel?.text = folderNameArray.joined(separator: ", ")
-                    })
+            let sortedNovels = self.applyDisplayedOrder(MultipleNovelIDSelectorViewController.applySort(results: allNovels, sortType: self.sortType).filter({ !self.ExcludeNovelIDSet.contains($0.novelID) }))
+            self.displayedNovelIDOrder = sortedNovels.map({ $0.novelID })
+            if self.IsSingleSelection {
+                // 単一選択モードにはチェックが無いので上にまとめる対象も無い。
+                let section = Section()
+                for novel in sortedNovels {
+                    section <<< self.createNovelLabelRow(novel: novel, novelIDToFolderNameTable: novelIDToFolderNameTable)
+                }
+                self.form +++ section
+                return
+            }
+            // 「全ての小説」は常に一覧の一番上に置きたいので、どのセクションに入るかだけが変わるようにしておく。
+            let isAnyNovelIDPinned = self.IsUseAnyNovelID && self.pinnedNovelIDSet.contains(MultipleNovelIDSelectorViewController.AnyTypeTag)
+            let pinnedNovels = sortedNovels.filter({ self.pinnedNovelIDSet.contains($0.novelID) })
+            let unpinnedNovels = sortedNovels.filter({ !self.pinnedNovelIDSet.contains($0.novelID) })
+            if pinnedNovels.count <= 0 && !isAnyNovelIDPinned {
+                // 上にまとめる対象が無いならセクションを分けても意味が無いので、見出しの無い一枚の一覧にする。
+                let section = Section()
+                if self.IsUseAnyNovelID {
+                    section <<< self.createAnyNovelIDCheckRow()
+                }
+                for novel in unpinnedNovels {
+                    section <<< self.createNovelCheckRow(novel: novel, novelIDToFolderNameTable: novelIDToFolderNameTable)
+                }
+                self.form +++ section
+                return
+            }
+            let pinnedSection = Section(NSLocalizedString("MultipleNovelIDSelectorViewController_SelectedSectionHeader", comment: "選択中"))
+            let unpinnedSection = Section(NSLocalizedString("MultipleNovelIDSelectorViewController_UnselectedSectionHeader", comment: "その他"))
+            if self.IsUseAnyNovelID {
+                if isAnyNovelIDPinned {
+                    pinnedSection <<< self.createAnyNovelIDCheckRow()
+                }else{
+                    unpinnedSection <<< self.createAnyNovelIDCheckRow()
                 }
             }
+            for novel in pinnedNovels {
+                pinnedSection <<< self.createNovelCheckRow(novel: novel, novelIDToFolderNameTable: novelIDToFolderNameTable)
+            }
+            for novel in unpinnedNovels {
+                unpinnedSection <<< self.createNovelCheckRow(novel: novel, novelIDToFolderNameTable: novelIDToFolderNameTable)
+            }
+            if pinnedSection.count > 0 {
+                self.form +++ pinnedSection
+            }
+            if unpinnedSection.count > 0 {
+                self.form +++ unpinnedSection
+            }
         }
-        form +++ section
     }
 
     @objc func filterButtonClicked(sender: UIBarButtonItem) {
@@ -217,6 +319,7 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
             textFieldText: self.filterString,
             placeHolder: NSLocalizedString("BookShelfTableViewController_SearchMessage", comment: "小説名 と 作者名 が対象となります"), action: { (text) in
             self.filterString = text
+            self.resetDisplayOrderSnapshot()
             DispatchQueue.main.async {
                 self.form.removeAll(keepingCapacity: true)
                 self.createSelectorCells()
@@ -289,6 +392,20 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
     @objc func sortButtonClicked(sender: UIBarButtonItem) {
         EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { (vc) in
             let section = Section()
+            if !self.IsSingleSelection {
+                section <<< LabelRow() {
+                    $0.title = NSLocalizedString("MultipleNovelIDSelectorViewController_RegroupSelectedNovels", comment: "チェック済みを上にまとめ直す")
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.cell.accessibilityTraits = .button
+                }.onCellSelection({ [weak self] (_, _) in
+                    self?.resetDisplayOrderSnapshot()
+                    DispatchQueue.main.async {
+                        self?.form.removeAll(keepingCapacity: true)
+                        self?.createSelectorCells()
+                    }
+                    vc.close(animated: true, completion: nil)
+                })
+            }
             for type in MultipleNovelIDSelectorViewController.selectableSortTypes {
                 section <<< LabelRow() {
                     $0.title = MultipleNovelIDSelectorViewController.sortTypeDisplayString(type)
@@ -296,6 +413,7 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
                     $0.cell.accessibilityTraits = .button
                 }.onCellSelection({ [weak self] (_, _) in
                     self?.sortType = type
+                    self?.resetDisplayOrderSnapshot()
                     DispatchQueue.main.async {
                         self?.form.removeAll(keepingCapacity: true)
                         self?.createSelectorCells()

@@ -728,6 +728,9 @@
 
 "MultipleNovelIDSelectorViewController_Title" = "小説を選択";
 "MultipleNovelIDSelectorViewController_SortButton" = "並び替え";
+"MultipleNovelIDSelectorViewController_SelectedSectionHeader" = "選択中";
+"MultipleNovelIDSelectorViewController_UnselectedSectionHeader" = "その他";
+"MultipleNovelIDSelectorViewController_RegroupSelectedNovels" = "チェック済みを上にまとめ直す";
 
 "NovelDownloadQueue_DownloadFailedByErrorSiteInfo" = "SiteInfo の読み込みが失敗しているようなのでダウンロードを諦めます";
 
