@@ -245,11 +245,14 @@
 		21F563D11FD802400037F5D7 /* <@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CE1FD8023F0037F5D7 /* <@3x.png */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
 		25D77E5F09AE145575F3A2FA /* SpeechViewBottomButtonBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F0F8961F9E3850CE109BA6 /* SpeechViewBottomButtonBar.swift */; };
+		2C9F5918E9F2FD8DC21C237D /* RubyNotationSpeechModCreateViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC31D4537E36A4471843DE8 /* RubyNotationSpeechModCreateViewController.swift */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
+		314871F0CA138073EC18AAD9 /* RubyNotationExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D9E7872072721F56DE3624E /* RubyNotationExtractor.swift */; };
 		7C9DE7BAAB70B5E9B361ED74 /* SpeechViewBottomButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4213CD6FDBD3F7B69BBCB39D /* SpeechViewBottomButtonSettingsViewController.swift */; };
 		8261A40E09A2B1556BFC551B /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */; };
 		9CACC3CB8604EA2A797F6377 /* Pods_NovelSpeakerWatchApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */; };
 		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
+		A9CDC81183C0EBDA9C84BB1A /* RubyNotationExtractorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9414208124B38823950F2EF5 /* RubyNotationExtractorTest.swift */; };
 		C2296499CD866B828ADB93C5 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */; };
 /* End PBXBuildFile section */
 
@@ -600,6 +603,8 @@
 		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerURLDownloadExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DA0062504DB8C705E4A8D40 /* Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig"; sourceTree = "<group>"; };
+		9414208124B38823950F2EF5 /* RubyNotationExtractorTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RubyNotationExtractorTest.swift; sourceTree = "<group>"; };
+		9D9E7872072721F56DE3624E /* RubyNotationExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RubyNotationExtractor.swift; sourceTree = "<group>"; };
 		A5F0F8961F9E3850CE109BA6 /* SpeechViewBottomButtonBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechViewBottomButtonBar.swift; sourceTree = "<group>"; };
 		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -610,6 +615,7 @@
 		C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; sourceTree = "<group>"; };
 		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
 		E2EEF718C98FE410CD831ECB /* Pods-NovelSpeakerWatchApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp/Pods-NovelSpeakerWatchApp.release.xcconfig"; sourceTree = "<group>"; };
+		EAC31D4537E36A4471843DE8 /* RubyNotationSpeechModCreateViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RubyNotationSpeechModCreateViewController.swift; sourceTree = "<group>"; };
 		F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -903,6 +909,7 @@
 				216631E82688772600F80C1D /* ScrollPullAndFireHandler.swift */,
 				21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */,
 				21A97B452F7BBFC800DF9236 /* EurekaSupport.swift */,
+				9D9E7872072721F56DE3624E /* RubyNotationExtractor.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1050,6 +1057,7 @@
 				2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */,
 				21143D7F25B2DC390078C2BA /* DownloadTest.swift */,
 				21A55E282F179C00004FAAB5 /* NovelDownloaderMissingChapterTests.swift */,
+				9414208124B38823950F2EF5 /* RubyNotationExtractorTest.swift */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1100,6 +1108,7 @@
 				21E26FEA260E066F009018B6 /* SafeModeViewController.swift */,
 				215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */,
 				211B3E952FA0CABF00823EE3 /* NovelImportSettingSwiftUIView.swift */,
+				EAC31D4537E36A4471843DE8 /* RubyNotationSpeechModCreateViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1295,7 +1304,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "NovelSpeaker" */;
+			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -1760,6 +1769,8 @@
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
 				25D77E5F09AE145575F3A2FA /* SpeechViewBottomButtonBar.swift in Sources */,
 				7C9DE7BAAB70B5E9B361ED74 /* SpeechViewBottomButtonSettingsViewController.swift in Sources */,
+				314871F0CA138073EC18AAD9 /* RubyNotationExtractor.swift in Sources */,
+				2C9F5918E9F2FD8DC21C237D /* RubyNotationSpeechModCreateViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1772,6 +1783,7 @@
 				21143D8025B2DC390078C2BA /* DownloadTest.swift in Sources */,
 				212323F522B7049E00543543 /* RealmTests.swift in Sources */,
 				2104EDEF24B9E33F00E275D1 /* StoryFetcherTest.swift in Sources */,
+				A9CDC81183C0EBDA9C84BB1A /* RubyNotationExtractorTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2505,7 +2517,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "NovelSpeaker" */ = {
+		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21F054F91917E0F200CC6BA9 /* Debug */,

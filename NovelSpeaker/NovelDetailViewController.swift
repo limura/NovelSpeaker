@@ -597,54 +597,20 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     _ = NovelSpeakerUtility.UpdateOuterNovelFileAttirbuteOnlyNeedCheckUpdate(novelID: novelID, isNeedCheckUpdate: value ? false : true)
                 })
             }
-            /*
             settingSection <<< ButtonRow() {
-                $0.title = NSLocalizedString("NovelDetailViewController_AddRubyToSpeechModButtonTitle", comment: "小説中に出てくるルビ表記をこの小説用の読みの修正に上書き追加する")
+                $0.title = NSLocalizedString("NovelDetailViewController_CreateSpeechModFromRubyButtonTitle", comment: "ルビから読みの修正を作る")
                 $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (cellOf, row) in
-                let novelID = self.novelID
-                var result:[String:String] = [:]
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let storys = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.linkedStorysWith(realm: realm) else {
-                        DispatchQueue.main.async {
-                            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_CanNotGetNovelData", comment: "小説本文データの抽出に失敗しました。"))
-                        }
-                        return
-                    }
-                    for story in storys {
-                        let rubyDictionary =  NiftyUtility.FindRubyNotation(text: story.content)
-                        for (before, after) in rubyDictionary {
-                            result[before] = after
-                        }
-                    }
-                }
-                if result.count <= 0 {
-                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_RubyNotFound", comment: "有効なルビ表記を発見できませんでした。"))
-                    return
-                }
-                var message = ""
-                RealmUtil.Write(block: { (realm) in
-                    for (before, after) in result {
-                        if before.count <= 0 || after.count <= 0 { continue }
-                        let modSetting = RealmSpeechModSetting()
-                        modSetting.before = before
-                        modSetting.after = after
-                        modSetting.isUseRegularExpression = false
-                        modSetting.targetNovelIDArray.append(novelID)
-                        realm.add(modSetting, update: .modified)
-                        message += "\(before) → \(after)\n"
-                    }
-                })
-                DispatchQueue.main.async {
-                    NiftyUtility.EasyDialogBuilder(self)
-                    .title(title: NSLocalizedString("NovelDetailViewController_SpeechModAdded", comment: "この小説用に以下の読み替えを登録しました"))
-                    .textView(content: message.trimmingCharacters(in: .whitespacesAndNewlines), heightMultiplier: 0.7)
-                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                        dialog.dismiss(animated: true, completion: nil)
-                    }).build().show()
-                }
+            }.onCellSelection({ [weak self] (_, _) in
+                guard let self = self else { return }
+                let nextViewController = RubyNotationSpeechModCreateViewController()
+                nextViewController.novelID = self.novelID
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
             })
-            */
             settingSection <<< ButtonRow() {
                 $0.title = NSLocalizedString("NovelDetailViewController_AddToFolderButtonTitle", comment: "フォルダへ分類")
             }.onCellSelection({ (_, _) in
