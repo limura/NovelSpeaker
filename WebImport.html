@@ -123,7 +123,7 @@ Web取込機能はWeb上で発表される小説を読み込むために、以�
 これらは全てxpathを用いてHTML内の要素を抽出しています。
 このxpathの情報は「SiteInfo」と呼んでいるデータベースで管理されています。
 標準の SiteInfo は、ことせかい の開発者が管理している <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSO2KJvzC-2fkbbgWs6fW7btIBxLcz-l3X-6Q67JAO9sSmKwkhiT9gn2UJESC2YX6nCtCAXPD2sYYwF/pubhtml">Googleスプレッドシート</a> から配信されていて、アプリはこれを定期的にダウンロードして利用します。
-また、「設定タブ」→「最優先SiteInfoを編集・追加」を使うと、この標準データよりも優先して適用される SiteInfo を自分で書くこともできます(詳しくは<a href="#HowToContribute">後述</a>)。
+また、「設定タブ」→「最優先SiteInfoを編集・追加」を使うと、この標準データよりも優先して適用される SiteInfo を自分で書くこともできます(詳しくは<a href="#SiteInfoEditor">後述</a>)。
 </p>
 <p>
 (過去には wedata というサービス上の「ことせかいWebページ読み込み用情報」と「AutoPagerize」の二種類のデータベースを利用していましたが、wedata のサービス終了に伴い現在は利用していません。wedata のドメインは現在別のサイトになっていますのでご注意ください。)
@@ -138,7 +138,7 @@ Web取込機能はWeb上で発表される小説を読み込むために、以�
 <ul>
 <li>そのまま取り込んだ後に編集を行うことで回避する</li>
 <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSfECPGtWj2llP2A9faG-oDEdwces9NRh6FWuLf-fTFUWSvbPg/viewform">ご意見ご要望フォーム</a> に、問題となったURL等の情報を添えて、「対応できたら嬉しいです」と投書する</li>
-<li>自分で SiteInfo を書く(「設定タブ」→「最優先SiteInfoを編集・追加」。<a href="#HowToContribute">後述</a>)</li>
+<li>自分で SiteInfo を書く(「設定タブ」→「最優先SiteInfoを編集・追加」。<a href="#SiteInfoEditor">後述</a>)</li>
 </ul>
 という方法が考えられます(もっと素晴らしい方法があれば教えてください)。
 一つ目の方法は毎回の作業になりますのでちょっと手間がかかると思いますが、自分だけの範囲で完結しますので一人で済ませたい人にはいいかもしれません。
