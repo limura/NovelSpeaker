@@ -26,9 +26,11 @@
 	<li><a href="#ImportFromSafari">Safari からの取込</a></li>
 	<li><a href="#InternalWebImportSystem">Web取込機能の仕組み</a></li>
 	<li><a href="#DoesNotWorkSite">うまくいかないサイトについて</a></li>
-	<li><a href="#HowToContribute">ことせかいWebページ読み込み用情報 の編集について</a></li>
-	<li><a href="#HowToDebug">xpathのデバッグについて</a></li>
-  <li><a href="#SafariShareButtonToNovelSpeaker">Safari のシェアボタンから「ことせかい へ読み込む」が無くなってしまう事がある場合について</li>
+	<li><a href="#HowToContribute">SiteInfo(Webページ読み込み用情報) の編集について</a></li>
+	<li><a href="#SiteInfoEditor">「最優先SiteInfoを編集・追加」の使い方</a></li>
+	<li><a href="#PageElementV2">pageElementV2 の書き方</a></li>
+	<li><a href="#HowToDebug">編集内容の反映とキャッシュについて</a></li>
+  <li><a href="#SafariShareButtonToNovelSpeaker">Safari のシェアボタンから「ことせかい へ読み込む」が無くなってしまう事がある場合について</a></li>
 </ul>
 </div>
 
@@ -119,48 +121,115 @@ Web取込機能はWeb上で発表される小説を読み込むために、以�
 <li>小説の作者名を抜き出す</li>
 </ol>
 これらは全てxpathを用いてHTML内の要素を抽出しています。
-このxpathの情報は <a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a> と、<a href="http://wedata.net/databases/AutoPagerize/items">AutoPagerize</a> の二種類のデータベースを利用しています。
-前者の「ことせかいWebページ読み込み用情報」では4つ全ての情報を、後者の「AutoPagerize」では前半2つの情報が記述されています。なお、AutoPagerize のデータベースは ことせかい とは関係のない目的のデータベースで、ことせかい はその情報を使わせて頂いている側となります(wedataに登録されたデータはパブリック・ドメインとなるらしいので、有難く使わせて頂いています)。
+このxpathの情報は「SiteInfo」と呼んでいるデータベースで管理されています。
+標準の SiteInfo は、ことせかい の開発者が管理している <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSO2KJvzC-2fkbbgWs6fW7btIBxLcz-l3X-6Q67JAO9sSmKwkhiT9gn2UJESC2YX6nCtCAXPD2sYYwF/pubhtml">Googleスプレッドシート</a> から配信されていて、アプリはこれを定期的にダウンロードして利用します。
+また、「設定タブ」→「最優先SiteInfoを編集・追加」を使うと、この標準データよりも優先して適用される SiteInfo を自分で書くこともできます(詳しくは<a href="#HowToContribute">後述</a>)。
+</p>
+<p>
+(過去には wedata というサービス上の「ことせかいWebページ読み込み用情報」と「AutoPagerize」の二種類のデータベースを利用していましたが、wedata のサービス終了に伴い現在は利用していません。wedata のドメインは現在別のサイトになっていますのでご注意ください。)
 </p>
 </section>
 <section>
 <h3 id="DoesNotWorkSite">うまくいかないサイトについて</h3>
 <p>
-ところで、上記の2つのデータベースに登録されていないWebページについては先程の4つの仕組みがうまく機能しません。
+ところで、SiteInfo に登録されていないWebページについては先程の4つの仕組みがうまく機能しません。
 うまく機能しなかった場合は最初に挙げました動画の二つ目(うまくいかない場合)のように、表示されている全ての文字が取り込まれます。
 これをなんとかするには、
 <ul>
 <li>そのまま取り込んだ後に編集を行うことで回避する</li>
 <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSfECPGtWj2llP2A9faG-oDEdwces9NRh6FWuLf-fTFUWSvbPg/viewform">ご意見ご要望フォーム</a> に、問題となったURL等の情報を添えて、「対応できたら嬉しいです」と投書する</li>
-<li>自分でxpathをデータベース(<a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>)に登録する</li>
+<li>自分で SiteInfo を書く(「設定タブ」→「最優先SiteInfoを編集・追加」。<a href="#HowToContribute">後述</a>)</li>
 </ul>
 という方法が考えられます(もっと素晴らしい方法があれば教えてください)。
 一つ目の方法は毎回の作業になりますのでちょっと手間がかかると思いますが、自分だけの範囲で完結しますので一人で済ませたい人にはいいかもしれません。
 二つ目の方法は今後同じWebサイトを何度も使う場合には良いと考えられますし、他のユーザが同じWebサイトを取り込もうとした時にも効果が出ます。が、この方法を大量の人から受けると ことせかい の開発者が大変になります(ことせかい の開発者は一人なので限界がありますことをご了承ください)。
-三つ目の方法はxpathを書く技術とOpenIDが必要となりますが、どなたでも参加でき、今後同じWebサイトを取り込もうとする人にも効果のある良い方法です。編集作業自体に報酬は何も出ませんが、できましたらば、この手法で貢献して頂けると ことせかい の開発者としては嬉しいです。
+三つ目の方法は xpath を書く技術が必要となりますが、アプリ内だけで完結して、書いたその場で動作確認とその端末への適用ができます。さらに、うまく動いた SiteInfo を開発者に送って頂ければ標準の SiteInfo に反映できるかもしれず、そうなると今後同じWebサイトを取り込もうとする他のユーザにも効果が出ます。編集作業自体に報酬は何も出ませんが、できましたらば、この手法で貢献して頂けると ことせかい の開発者としては嬉しいです。
 </p>
 </section>
 <section>
-<h3 id="HowToContribute">ことせかいWebページ読み込み用情報 の編集について</h3>
+<h3 id="HowToContribute">SiteInfo(Webページ読み込み用情報) の編集について</h3>
 <p>
-以下に<a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>を編集しようとした時のガイドを書いておきます。
+以下に、SiteInfo を自分で編集しようとした時のガイドを書いておきます。
 </p>
-<p>2024/09/05 追記: Version 2.10.1 以降からは ことせかい用 の SiteInfo については Googleスプレッドシート側 での提供となりました。とはいえ、「設定タブ」→「内部データ参照用URLの設定」内の「ことせかい用SITEINFO」欄に指定するURLの先に設定する内容に関わることでもありますので、ここの記述は残しておきます。</p>
 <p>
-編集を行うには、OpenID と xpath を書く知識が必要です。また、編集作業に貢献していただいても ことせかい の開発者側からは特に何の報酬も出せません事は予めご承知おきください。
+まず、現在の SiteInfo の運用について説明しておきます。
+<ul>
+<li>標準の SiteInfo は、ことせかい の開発者だけが編集できる <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSO2KJvzC-2fkbbgWs6fW7btIBxLcz-l3X-6Q67JAO9sSmKwkhiT9gn2UJESC2YX6nCtCAXPD2sYYwF/pubhtml">Googleスプレッドシート</a> で管理・更新されていて、アプリはここから公開されているCSVを定期的にダウンロードして利用します(過去に利用していた wedata はサービス終了しており、ドメインも別のサイトになっているため現在は使われていません)。</li>
+<li>ユーザの側で SiteInfo を編集したい場合は、「設定タブ」→「最優先SiteInfoを編集・追加」を使います。ここで保存した SiteInfo はその端末で標準データより優先して適用されます。</li>
+<li>うまく動く SiteInfo が書けましたら、同じ画面の「CSVで書き出して共有(Export)」で書き出した内容を <a href="https://docs.google.com/forms/d/e/1FAIpQLSfECPGtWj2llP2A9faG-oDEdwces9NRh6FWuLf-fTFUWSvbPg/viewform">ご意見ご要望フォーム</a> 等で開発者に送って頂けると、標準の SiteInfo に反映できるかもしれません。編集作業に貢献していただいても ことせかい の開発者側からは特に何の報酬も出せません事は予めご承知おきください。</li>
+</ul>
 </p>
-<del><h4 id="WeData">wedata について</h4>
+<h4 id="SiteInfoColumns">SiteInfo の主な項目</h4>
 <p>
-<a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>は、<a href="http://wedata.net/">wedata</a>というサービスを利用させて頂いています。
-wedata は「Wikiのように誰でも書換えられるデータベースを作成するシステムです」と説明されています。詳しくはwedataサイトの<a href="http://wedata.net/help/about">wedataについて</a>を参照してください。
+SiteInfo の1エントリ(スプレッドシートの1行)は「あるWebサイトからどうやって小説を抜き出すか」の定義で、主に以下のような項目があります。
+どのページのどの部分を抜き出すかは、基本的に xpath で指定します(xpath については<a href="#xpath">後述</a>)。
+<ul>
+<li><code>url</code>: このエントリを適用するURLにマッチする正規表現。取り込もうとしているページのURLがこの正規表現にマッチした時に、そのエントリが使われます。</li>
+<li><code>pageElementV2</code>: 本文として取り込む部分の指定。少し特殊な書式なので<a href="#PageElementV2">後で詳しく説明します</a>。</li>
+<li><code>title</code> / <code>subtitle</code> / <code>author</code> / <code>tag</code>: それぞれ小説のタイトル・章のサブタイトル・作者名・タグを抜き出す xpath。</li>
+<li><code>nextLink</code>: 「次のページ」へのリンクを指す xpath。これが取れると続きのページを順次読み込めます。</li>
+<li><code>firstPageLink</code>: 目次ページ等から「最初のページ」へのリンクを指す xpath。</li>
+<li><code>isNeedHeadless</code>: JavaScript でページを描画するタイプのサイトで true にします(内部のWebブラウザで描画してから抜き出すようになります)。</li>
+</ul>
+このほかにも高度な項目(<code>waitSecondInHeadless</code>, <code>nextButton</code>, <code>injectStyle</code>, <code>checkTargets</code> 等)がありますが、まずは <code>url</code> と <code>pageElementV2</code>、必要なら <code>title</code> や <code>nextLink</code> あたりを書けば動くはずです。
 </p>
-<h4 id="OpenID">OpenID について</h4>
+<h4 id="SiteInfoEditor">「最優先SiteInfoを編集・追加」の使い方</h4>
 <p>
-OpenID は<a href="http://developer.hatena.ne.jp/ja/documents/other/apis/openid">はてな</a> などで取得することができます。
-どこか適切な所で取得してください。
+「設定タブ」→「最優先SiteInfoを編集・追加」を開くと、この端末で編集された「最優先SiteInfo」の一覧と、アプリに読み込まれている「標準データ」の一覧が表示されます。
+<ol>
+<li>既存のサイトの動作を直したい場合は、「標準データ」から目的のサイトを選びます(内容を引き継いで編集できます)。SiteInfo に無い新しいサイトに対応したい場合は、右上の「＋」で新規作成します。</li>
+<li>項目を書き換えます。標準データと異なる値になった項目には ⚠️ マークが付きますので、意図しない項目を書き換えていないかの確認に使ってください。</li>
+<li>「テスト用URL」に対象サイトの適当な小説ページのURLを1つ入れて、「この値で今すぐテスト」を押します。保存や本番データの書き換えをせずに、そのページから取得できる本文・タイトル等の値が表示されます。<code>pageElementV2</code> 等の書式ミスもここで警告として表示されます。</li>
+<li>うまく取れるようになったら「保存」します。以後、この端末ではこの内容が標準データより優先して適用されます。</li>
+<li>標準の動作に戻したい時は、一覧に戻って「編集」ボタンからその行を削除します。</li>
+</ol>
+なお、画面の一番上にも表示されますが、SiteInfo は下手に書き換えると ことせかい が正常に動作しなくなる可能性があります。何かおかしくなった場合は「最優先SiteInfo」の行を全て削除すれば標準の動作に戻ります。
 </p>
-</del>
-<p>2024/09/05 追記: 上記の通り、今では ことせかい用 の SiteInfo については wedata様 は利用していませんため、これらの記述については必要ありません。また、Googleスプレッドシートで運用しております ことせかい用 の SiteInfo の編集権限については、申請ベースで運用することとします。編集権限がほしい方は、アプリ内やサポートサイトからGoogleスプレッドシートを使いたいGoogleアカウントを添えてお問い合わせください。</p>
+<h4 id="PageElementV2">pageElementV2 の書き方</h4>
+<p>
+<code>pageElementV2</code> は「本文としてどの要素を取り込むか」を指定する項目で、以前の <code>pageElement</code> の後継です(スプレッドシート上の <code>pageElement</code> 列は旧バージョンのアプリ向けに <code>pageElementV2</code> から自動生成される数式列になっているので、編集するのは <code>pageElementV2</code> の方です)。
+書き方には次の2通りがあります。
+</p>
+<p>
+<b>1. 1行だけで書く場合</b>: 値の全体がそのまま本文の xpath として扱われます。従来の <code>pageElement</code> と同じです。複数の要素を取り込みたい場合は xpath を <code>|</code> で繋げます。
+<div><code>//div[@id='novel_honbun']</code></div>
+</p>
+<p>
+<b>2. 複数行で書く場合</b>: 「取り込み対象」を複数定義する書式になります。1行につき1つの取り込み対象を、
+<div><code>ID:日本語タイトル/English title=xpath</code></div>
+という形式で書きます。例えば標準データのハーメルン用エントリは以下のようになっています。
+<pre><code>1:本文/main content=//div[@id='honbun']
+2:前書き/Preface=//div[@id='maegaki']
+3:後書き/Afterword=//div[@id='atogaki']</code></pre>
+</p>
+<p>
+複数行で書くと、そのサイトの取り込み対象をユーザが選べるようになります。具体的には、
+<ul>
+<li>「設定タブ」→「Webサイト毎の取り込み対象を指定する」(取り込み対象が2つ以上定義されているサイトだけが一覧に出ます)</li>
+<li>小説の詳細画面の「この小説の取り込み対象を指定する」(小説ごとの指定。Webサイト毎の指定より優先されます)</li>
+</ul>
+に、各行のタイトル(「本文」「前書き」「後書き」等)がチェックリストとして表示され、例えば「前書きと後書きは読み上げたくない」といった希望に応じてユーザがそれぞれの取り込みのON/OFFを選べるようになります。
+</p>
+<p>
+書式の細かい規則は以下の通りです。誤解しやすいので気をつけてください。
+<ul>
+<li>1行だけか複数行かは「値の中に改行があるかどうか」だけで判定されます。改行が1つでもあると全ての行が <code>ID:タイトル=xpath</code> 形式である必要があります。逆に、1行だけで書く場合は xpath の途中で改行してはいけません。</li>
+<li><b>ID</b>: 行の最初の <code>:</code> より前の部分。空にはできず、<code>:</code> そのものを含められません。標準データでは <code>1</code>, <code>2</code>, <code>3</code> のような連番にしています。</li>
+<li><b>タイトル</b>: 最初の <code>:</code> から最初の <code>=</code> までの部分。<code>/</code> で区切って「日本語タイトル/英語タイトル」の順で書きます。英語タイトルは省略できます(その場合は英語UIでも日本語タイトルが表示されます)。この規則上、タイトルに <code>=</code> を、日本語タイトルに <code>/</code> を含めることはできません。</li>
+<li><b>xpath</b>: 最初の <code>=</code> から行末までの全部。xpath 自体に <code>=</code> や <code>:</code> が含まれるのは問題ありません。</li>
+<li>形式に合わない行は警告なく無視されます。SiteInfoエディタの「この値で今すぐテスト」を使うと、書式ミスが警告として表示されますので活用してください。</li>
+</ul>
+</p>
+<p>
+動作の仕組みと、書く時に注意して欲しい点も挙げておきます。
+<ul>
+<li>実際の本文抽出時には、選択されている対象の xpath を <code>|</code> で繋いだ1つの xpath として評価します。そのため、各行の xpath は <code>|</code> で結合されても壊れない式にしてください。</li>
+<li>ユーザが何も設定していない場合や、チェックを全て外した場合は「全ての対象を取り込む」扱いになります。</li>
+<li>SiteInfo 側に新しい ID の行が追加された場合、ユーザが設定画面で確認するまでは取り込み対象として扱われます(SiteInfo の更新で勝手に本文が欠けてしまわないようにするためです)。</li>
+<li>ユーザの選択は ID に紐付いて保存されます。そのため、<b>一度公開した ID は変えない</b>でください。ID を変えたり、複数行を1行に戻したりすると、ユーザの選択が引き継がれません(なお、1行だけで書いた場合は内部的には ID <code>1</code>・タイトル「本文」の取り込み対象1つとして扱われます)。</li>
+<li>取り込み対象やxpathの変更が既に取り込み済みの小説の本文に反映されるのは、次にその小説をダウンロードした時(再ダウンロードや続きの取得)からです。</li>
+</ul>
+</p>
 <h4 id="xpath">xpath について</h4>
 <p>
 xpath は XML や HTML の文書について、そのエレメント(特定の部分)を指定するための言語です。<a href="https://www.google.co.jp/search?q=xpath+%E6%9B%B8%E3%81%8D%E6%96%B9">「xpath 書き方」で検索</a> したりすると、ざっくりとした書き方とかは解るかと思います。
@@ -176,23 +245,22 @@ xpath の書き方について、私がやっている方法をざっと説明�
 <li>xpathを考えたら、Consoleに
 <div><code>document.evaluate("//ul[@class='about']", document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null).snapshotItem(0)</code></div>
 といった感じで入力して xpath を実際に動作させてみて選択されることを確認します(この例では "<code>//ul[@class='about']</code>" の部分が xpath です</li>
-<li>問題なく選択されているのを確認して、wedataの情報を更新します</li>
+<li>問題なく選択されているのを確認して、その xpath を SiteInfoエディタ(「最優先SiteInfoを編集・追加」)に書いて「この値で今すぐテスト」で確認します</li>
 </ol>
 パソコンで操作している場合、Webサイトによってはモバイル版のページを開かねばならないことに注意してください。
 </p>
-<h4 id="HowToDebug">xpathのデバッグについて</h4>
+<h4 id="HowToDebug">編集内容の反映とキャッシュについて</h4>
 <p>
-ことせかい のアプリ側では、毎回 wedata の情報を読み込んでしまうのは冗長であるということから、wedata から取得した情報は一定の時間(だいたい1日位)はlocalに保存されたキャッシュを参照するようにしています。
-そのため、<a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>を編集しても、すぐには反映されず、アプリ側での動作確認ができません。
-これを回避するには、ことせかい のデバッグモードをONにする必要があります。
-デバッグモードは、「設定タブ」の「ルビはルビだけ読む」のON/OFFを5回(ON→OFF→ONで2回と数えるなら10回)繰り返すことでONにすることができます。
-この、デバッグモードがONになった後に出てくる設定項目に、「SiteInfoを毎回読み直す」という項目があるので、それをONにすることで、毎回<a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>を読み直すようになります。
+「最優先SiteInfoを編集・追加」で保存した内容は、保存した時点からその端末で有効になります。また、同じ画面の「この値で今すぐテスト」も保存前の値でそのまま検査できますので、SiteInfo の動作確認のために特別なデバッグモード等は必要ありません。
 </p>
 <p>
-また、あまり使いやすいものではないかもしれませんが、デバッグモードがONになると、デバッグログを参照できます。一応、xpath周りのログもデバッグログには保存されますので、自分の書いたxpath情報がうまく実行されているかどうかを確認できるかもしれません。
+一方、標準の SiteInfo(Googleスプレッドシートから配信される分)は、毎回読み込んでしまうのは冗長であるということから、一定の時間(だいたい1日位)はlocalに保存されたキャッシュを参照するようにしています。標準データの更新をすぐに反映させたい場合は、「設定タブ」の「SiteInfoを読み直す」を使ってください。
 </p>
 <p>
-デバッグ機能をうまく使って<a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>を編集して頂けるととても助かります。よろしくお願いします。
+また、上級者向けの機能として、「設定タブ」→「内部データ参照用URLの設定」の「ことせかい用SITEINFO」欄に自前でホストしたCSVのURLを指定することで、標準の SiteInfo ごと差し替えることもできます。
+</p>
+<p>
+これらの機能をうまく使って SiteInfo を編集して頂き、うまく動いたものを開発者まで送って頂けるととても助かります。よろしくお願いします。
 </p>
 <h4 id="SafariShareButtonToNovelSpeaker">Safari のシェアボタンから「ことせかい へ読み込む」が無くなってしまう事がある場合について</h4>
 <p>こちらなのですが、iOS(又は iPad OS)を再起動すると直る事があるという話があるので、一度それを試してみて下さい。</p>
