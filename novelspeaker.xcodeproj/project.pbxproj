@@ -375,6 +375,9 @@
 		F80AF6E5872605AB8FDE3998 /* StoryTextClassifierBenchmarkTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C3B897863C317CAD1EB1D50 /* StoryTextClassifierBenchmarkTest.swift */; };
 		FB9ABC5E6FA631E314E5785D /* VoicevoxTestVoiceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A24C54D8CC9AC56EBA360F3 /* VoicevoxTestVoiceModel.swift */; };
 		FC5D9F103C975C9375485032 /* VoicevoxPrefetchThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */; };
+		2C9F5918E9F2FD8DC21C237D /* RubyNotationSpeechModCreateViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC31D4537E36A4471843DE8 /* RubyNotationSpeechModCreateViewController.swift */; };
+		314871F0CA138073EC18AAD9 /* RubyNotationExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D9E7872072721F56DE3624E /* RubyNotationExtractor.swift */; };
+		A9CDC81183C0EBDA9C84BB1A /* RubyNotationExtractorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9414208124B38823950F2EF5 /* RubyNotationExtractorTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -870,6 +873,9 @@
 		2FE5958115CEA05422000698 /* VoicevoxCPUUsageReporter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCPUUsageReporter.swift; sourceTree = "<group>"; };
 		F718E05AE23A99C36C6AC15F /* VoicevoxRepeatedSynthesisDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxRepeatedSynthesisDetector.swift; sourceTree = "<group>"; };
 		F8A7FEB0C160633879907522 /* WatchTextSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchTextSettings.swift; sourceTree = "<group>"; };
+		EAC31D4537E36A4471843DE8 /* RubyNotationSpeechModCreateViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RubyNotationSpeechModCreateViewController.swift; sourceTree = "<group>"; };
+		9D9E7872072721F56DE3624E /* RubyNotationExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RubyNotationExtractor.swift; sourceTree = "<group>"; };
+		9414208124B38823950F2EF5 /* RubyNotationExtractorTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RubyNotationExtractorTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1067,6 +1073,7 @@
 			children = (
 				21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */,
 				2104EDE824B985A100E275D1 /* StoryFetcher.swift */,
+				9D9E7872072721F56DE3624E /* RubyNotationExtractor.swift */,
 				21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */,
 				214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */,
 				2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */,
@@ -1351,6 +1358,7 @@
 				2CE631518568C841DC83936B /* VoicevoxTemporaryAudioTest.swift */,
 				439EC56C48ECAB606697B432 /* VoicevoxCacheChurnTest.swift */,
 				43A0F1C0B7E24D118A550001 /* VoicevoxPromoteToPermanentTest.swift */,
+				9414208124B38823950F2EF5 /* RubyNotationExtractorTest.swift */,
 				C10FBB53E074E9F9F1B02D42 /* VoicevoxResumeSkipTest.swift */,
 			);
 			path = NovelSpeakerTests;
@@ -1425,6 +1433,7 @@
 				212F6175258723C200822737 /* NovelLikeOrderSettingViewController.swift */,
 				21E26FEA260E066F009018B6 /* SafeModeViewController.swift */,
 				215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */,
+				EAC31D4537E36A4471843DE8 /* RubyNotationSpeechModCreateViewController.swift */,
 				211B3E952FA0CABF00823EE3 /* NovelImportSettingSwiftUIView.swift */,
 				4DEE51DD7300977AB98FF54D /* VoicevoxCacheManageViewController.swift */,
 				D0A098806FB1DD0B2419C081 /* VoicevoxCacheGenerationDialog.swift */,
@@ -1980,6 +1989,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				314871F0CA138073EC18AAD9 /* RubyNotationExtractor.swift in Sources */,
+				2C9F5918E9F2FD8DC21C237D /* RubyNotationSpeechModCreateViewController.swift in Sources */,
 				FE4A532FE638418FBCA44D21 /* VoicevoxSynthesisScheduler.swift in Sources */,
 				1CD224CEE27E4B3C86838236 /* VoicevoxAudioProvider.swift in Sources */,
 				C0DE20000000000000000011 /* SpeechWidgetIntent.swift in Sources */,
@@ -2137,6 +2148,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9CDC81183C0EBDA9C84BB1A /* RubyNotationExtractorTest.swift in Sources */,
 				965A700D346C4946904A989C /* VoicevoxAccentPreviewTest.swift in Sources */,
 				E6C2672C699346ABAAC08AE4 /* VoicevoxSynthesisSchedulerTest.swift in Sources */,
 				210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */,
