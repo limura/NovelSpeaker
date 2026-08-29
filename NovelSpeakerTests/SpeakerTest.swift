@@ -49,6 +49,10 @@ class SpeakerTest: XCTestCase {
         wait(for: [exp], timeout: 1.2)
     }
 
+    func testCarAudioIsExternalPlaybackRoute() {
+        XCTAssertTrue(StorySpeaker.isExternalPlaybackRoute(portTypes: [.carAudio]))
+    }
+
 }
 
 // ナビバー右上ボタン群のクリップ検出ロジック(NovelSpeakerUtility.UpperButtonBarLayout)の検証。

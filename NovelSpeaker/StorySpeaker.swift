@@ -452,6 +452,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         return AVAudioSession.sharedInstance().currentRoute.outputs.contains(where: { $0.portType == .carAudio })
     }
 
+    static func isExternalPlaybackRoute(portTypes:[AVAudioSession.Port]) -> Bool {
+        return portTypes.contains(where: {
+            $0 == .headphones
+                || $0 == .bluetoothA2DP
+                || $0 == .bluetoothHFP
+                || $0 == .carAudio
+        })
+    }
+
     private func audioRouteOutputSummary(outputs:[AVAudioSessionPortDescription]) -> String {
         if outputs.isEmpty { return "none" }
         return outputs.map { $0.portType.rawValue }.joined(separator: ",")
@@ -496,37 +505,27 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     }
     
     @objc func didChangeAudioSessionRoute(notification:Notification) {
-        func isJointHeadphone(outputs:[AVAudioSessionPortDescription]) -> Bool {
-            for desc in outputs {
-                if desc.portType == .headphones
-                    || desc.portType == .bluetoothA2DP
-                    || desc.portType == .bluetoothHFP {
-                    return true
-                }
-            }
-            return false
-        }
         guard let previousDesc = notification.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription else {
             return
         }
         let reasonNumber = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? NSNumber
         let reason = reasonNumber.flatMap { AVAudioSession.RouteChangeReason(rawValue: $0.uintValue) }
         let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
-        let isHeadphoneRouteChange = isJointHeadphone(outputs: outputs) || isJointHeadphone(outputs: previousDesc.outputs)
+        let isExternalRouteChange = Self.isExternalPlaybackRoute(portTypes: outputs.map { $0.portType }) || Self.isExternalPlaybackRoute(portTypes: previousDesc.outputs.map { $0.portType })
         let routeChangeStartedAt = Date()
         defer {
-            if isHeadphoneRouteChange {
+            if isExternalRouteChange {
                 var appendix = audioRouteChangeLogAppendix(previousOutputs: previousDesc.outputs, currentOutputs: outputs, reason: reason)
                 appendix["elapsedSec"] = String(format: "%.3f", Date().timeIntervalSince(routeChangeStartedAt))
                 AppInformationLogger.AddLog(message: "Bluetooth/ヘッドフォン関連の routeChange 処理を終了しました", appendix: appendix, isForDebug: true)
             }
         }
-        if isJointHeadphone(outputs: outputs) {
-            if !isJointHeadphone(outputs: previousDesc.outputs) {
+        if Self.isExternalPlaybackRoute(portTypes: outputs.map { $0.portType }) {
+            if !Self.isExternalPlaybackRoute(portTypes: previousDesc.outputs.map { $0.portType }) {
                 // ヘッドフォンが刺さった
             }
         }else{
-            if isJointHeadphone(outputs: previousDesc.outputs) {
+            if Self.isExternalPlaybackRoute(portTypes: previousDesc.outputs.map { $0.portType }) {
                 // ヘッドフォンが抜けた
                 let appendix = audioRouteChangeLogAppendix(previousOutputs: previousDesc.outputs, currentOutputs: outputs, reason: reason)
                 if self.isPlayng == false {
