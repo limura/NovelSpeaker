@@ -31,6 +31,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // StopSpeech() で実際に読み上げが止まった時のハンドラ
     let stopSpeechHandlerLockObject = NSObject()
     var stopSpeechHandler:(()->Void)? = nil
+    private var stopSpeechHandlerGeneration = 0
     
     override init() {
         super.init()
@@ -362,8 +363,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
 
     func StopSpeech(stopSpeechHandler:(()->Void)? = nil) {
+        var generation = 0
         objc_sync_enter(self.stopSpeechHandlerLockObject)
-        defer { objc_sync_exit(self.stopSpeechHandlerLockObject) }
         // idle 待ちの開始予約が残っていれば取り消す(停止が優先)。
         startWhenIdleWorkItem?.cancel()
         startWhenIdleWorkItem = nil
@@ -371,8 +372,39 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         //(停止区間をまたいだ誤回復を防ぐ)。
         speakGeneration += 1
         m_IsSpeaking = false
+        stopSpeechHandlerGeneration += 1
+        generation = stopSpeechHandlerGeneration
         self.stopSpeechHandler = stopSpeechHandler
+        objc_sync_exit(self.stopSpeechHandlerLockObject)
         speaker.Stop()
+        guard stopSpeechHandler != nil else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [weak self] in
+            guard let self = self else { return }
+            guard let handler = self.consumeStopSpeechHandlerIfNeeded(generation: generation) else { return }
+            let message = "stopSpeaking完了通知待ちタイムアウト: 停止後処理を継続します"
+            NSLog("NovelSpeaker.SynthWedge: \(message) generation=\(generation)")
+            AppInformationLogger.AddLog(message: message, appendix: [
+                "generation": "\(generation)",
+                "currentSpeechBlockIndex": "\(self.currentSpeechBlockIndex)",
+                "currentLocation": "\(self.currentLocation)",
+                "isSpeakingBySynthesizerState": "\(self.isSpeakingBySynthesizerState)",
+                "isPausedBySynthesizerState": "\(self.isPausedBySynthesizerState)",
+                "isAnySynthesizerActive": "\(self.isAnySynthesizerActive)",
+                "isMainThread": "\(Thread.isMainThread)",
+            ], isForDebug: true)
+            handler()
+        }
+    }
+
+    private func consumeStopSpeechHandlerIfNeeded(generation:Int? = nil) -> (() -> Void)? {
+        objc_sync_enter(self.stopSpeechHandlerLockObject)
+        defer { objc_sync_exit(self.stopSpeechHandlerLockObject) }
+        if let generation = generation, generation != stopSpeechHandlerGeneration {
+            return nil
+        }
+        let handler = self.stopSpeechHandler
+        self.stopSpeechHandler = nil
+        return handler
     }
 
     /// 読み上げ開始位置を指定します。範囲外を指定された場合は false を返します
@@ -442,10 +474,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // 読み上げを停止させられている場合は何もしません。
         // これは、Stop() した時でも finishSpeak() が呼び出されるためです。
         if m_IsSpeaking != true {
-            objc_sync_enter(self.stopSpeechHandlerLockObject)
-            defer { objc_sync_exit(self.stopSpeechHandlerLockObject) }
-            self.stopSpeechHandler?()
-            self.stopSpeechHandler = nil
+            let handler = consumeStopSpeechHandlerIfNeeded()
+            handler?()
             return
         }
         // ここに来た = synth が utterance を完了して次へ進む = 実際に発話が進んだという事。
@@ -495,12 +525,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func reloadSynthesizer() {
-        objc_sync_enter(self.stopSpeechHandlerLockObject)
-        defer { objc_sync_exit(self.stopSpeechHandlerLockObject) }
-        if let stopHandler = self.stopSpeechHandler {
-            stopHandler()
-            self.stopSpeechHandler = nil
-        }
+        let stopHandler = consumeStopSpeechHandlerIfNeeded()
+        stopHandler?()
         speaker.reloadSynthesizer()
     }
     #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました

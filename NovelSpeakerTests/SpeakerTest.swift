@@ -24,6 +24,31 @@ class SpeakerTest: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    func testStopSpeechHandlerRunsEvenWhenSynthesizerDoesNotSendCancelCallback() {
+        let exp = expectation(description: "stop handler should run without synthesizer callback")
+        speaker.m_IsSpeaking = true
+
+        speaker.StopSpeech {
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 1.2)
+    }
+
+    func testStopSpeechHandlerRunsOnlyOnceWhenCancelCallbackArrivesBeforeFallback() {
+        let exp = expectation(description: "stop handler should run once")
+        exp.expectedFulfillmentCount = 1
+        exp.assertForOverFulfill = true
+        speaker.m_IsSpeaking = true
+
+        speaker.StopSpeech {
+            exp.fulfill()
+        }
+        speaker.finishSpeak(isCancel: true, speechString: "")
+
+        wait(for: [exp], timeout: 1.2)
+    }
+
 }
 
 // ナビバー右上ボタン群のクリップ検出ロジック(NovelSpeakerUtility.UpperButtonBarLayout)の検証。
