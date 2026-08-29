@@ -6,8 +6,8 @@
 ## コミット運用
 
 - `git add` はパス指定で明示する。`git add -A` / `git add .` は使わない。
-- `NovelSpeaker/UpdateMemo.txt` は、明示的な指示がない限りコミットに含めない。
-  （リリース直前までユーザーが頻繁に書き換える作業ファイルのため）
+- `NovelSpeaker/UpdateMemo.txt` と `NovelSpeaker/ReleaseMemo.md` は、明示的な指示がない限り変更もコミットにも含めない。
+  （リリース直前までユーザーが頻繁に書き換える作業メモのため）
 - 未追跡の作業メモ（`TODO_*.md` など）や手元用スクリプト（`fetch_SiteInfo_tsv.sh` 等）はコミットに巻き込まない。
 - コミットメッセージは日本語で書く。
 - ブランチは普段どおり master に直接コミットする運用。

@@ -605,30 +605,88 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func isCarPlayConnected() -> Bool {
         return AVAudioSession.sharedInstance().currentRoute.outputs.contains(where: { $0.portType == .carAudio })
     }
+
+    static func isExternalPlaybackRoute(portTypes:[AVAudioSession.Port]) -> Bool {
+        return portTypes.contains(where: {
+            $0 == .headphones
+                || $0 == .bluetoothA2DP
+                || $0 == .bluetoothHFP
+                || $0 == .carAudio
+        })
+    }
+
+    private func audioRouteOutputSummary(outputs:[AVAudioSessionPortDescription]) -> String {
+        if outputs.isEmpty { return "none" }
+        return outputs.map { $0.portType.rawValue }.joined(separator: ",")
+    }
+
+    private func audioRouteChangeReasonDescription(_ reason:AVAudioSession.RouteChangeReason?) -> String {
+        guard let reason = reason else { return "nil" }
+        switch reason {
+        case .unknown:
+            return "unknown"
+        case .newDeviceAvailable:
+            return "newDeviceAvailable"
+        case .oldDeviceUnavailable:
+            return "oldDeviceUnavailable"
+        case .categoryChange:
+            return "categoryChange"
+        case .override:
+            return "override"
+        case .wakeFromSleep:
+            return "wakeFromSleep"
+        case .noSuitableRouteForCategory:
+            return "noSuitableRouteForCategory"
+        case .routeConfigurationChange:
+            return "routeConfigurationChange"
+        @unknown default:
+            return "unknown(\(reason.rawValue))"
+        }
+    }
+
+    private func audioRouteChangeLogAppendix(previousOutputs:[AVAudioSessionPortDescription], currentOutputs:[AVAudioSessionPortDescription], reason:AVAudioSession.RouteChangeReason?) -> [String:String] {
+        return [
+            "reason": audioRouteChangeReasonDescription(reason),
+            "previousOutputs": audioRouteOutputSummary(outputs: previousOutputs),
+            "currentOutputs": audioRouteOutputSummary(outputs: currentOutputs),
+            "storyID": storyID,
+            "currentLocation": "\(speaker.currentLocation)",
+            "isPlaying": "\(isPlayng)",
+            "currentActive": "\(StorySpeaker.currentActive)",
+            "currentMode": StorySpeaker.currentMode.rawValue,
+            "isMainThread": "\(Thread.isMainThread)",
+        ]
+    }
     
     @objc func didChangeAudioSessionRoute(notification:Notification) {
-        func isJointHeadphone(outputs:[AVAudioSessionPortDescription]) -> Bool {
-            for desc in outputs {
-                if desc.portType == .headphones
-                    || desc.portType == .bluetoothA2DP
-                    || desc.portType == .bluetoothHFP {
-                    return true
-                }
-            }
-            return false
-        }
         guard let previousDesc = notification.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription else {
             return
         }
+        let reasonNumber = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? NSNumber
+        let reason = reasonNumber.flatMap { AVAudioSession.RouteChangeReason(rawValue: $0.uintValue) }
         let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
-        if isJointHeadphone(outputs: outputs) {
-            if !isJointHeadphone(outputs: previousDesc.outputs) {
+        let isExternalRouteChange = Self.isExternalPlaybackRoute(portTypes: outputs.map { $0.portType }) || Self.isExternalPlaybackRoute(portTypes: previousDesc.outputs.map { $0.portType })
+        let routeChangeStartedAt = Date()
+        defer {
+            if isExternalRouteChange {
+                var appendix = audioRouteChangeLogAppendix(previousOutputs: previousDesc.outputs, currentOutputs: outputs, reason: reason)
+                appendix["elapsedSec"] = String(format: "%.3f", Date().timeIntervalSince(routeChangeStartedAt))
+                AppInformationLogger.AddLog(message: "Bluetooth/ヘッドフォン関連の routeChange 処理を終了しました", appendix: appendix, isForDebug: true)
+            }
+        }
+        if Self.isExternalPlaybackRoute(portTypes: outputs.map { $0.portType }) {
+            if !Self.isExternalPlaybackRoute(portTypes: previousDesc.outputs.map { $0.portType }) {
                 // ヘッドフォンが刺さった
             }
         }else{
-            if isJointHeadphone(outputs: previousDesc.outputs) {
+            if Self.isExternalPlaybackRoute(portTypes: previousDesc.outputs.map { $0.portType }) {
                 // ヘッドフォンが抜けた
-                if self.isPlayng == false { return }
+                let appendix = audioRouteChangeLogAppendix(previousOutputs: previousDesc.outputs, currentOutputs: outputs, reason: reason)
+                if self.isPlayng == false {
+                    AppInformationLogger.AddLog(message: "Bluetooth/ヘッドフォン出力切断を検出しましたが読み上げ中ではないため停止処理は行いません", appendix: appendix, isForDebug: true)
+                    return
+                }
+                AppInformationLogger.AddLog(message: "Bluetooth/ヘッドフォン出力切断により読み上げ停止処理を開始します", appendix: appendix, isForDebug: true)
                 NiftyUtility.DispatchSyncMainQueue {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         self.StopSpeech(realm: realm, stopAudioSession:true) {
@@ -857,6 +915,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }
         }catch{
             print("AVAudioSession setActive(\(isActive ? "true" : "false")) failed.")
+            AppInformationLogger.AddLog(message: "AVAudioSession setActive に失敗しました", appendix: [
+                "isActive": "\(isActive)",
+                "currentActive": "\(StorySpeaker.currentActive)",
+                "currentMode": StorySpeaker.currentMode.rawValue,
+                "error": error.localizedDescription,
+            ], isForDebug: true)
         }
     }
     
@@ -930,6 +994,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 StorySpeaker.audioSessionDeactivateGeneration += 1
             }catch(let err){
                 print("audioSession.setActive(false) failed: \(err.localizedDescription)")
+                AppInformationLogger.AddLog(message: "AVAudioSession deactivate に失敗しました", appendix: [
+                    "currentActive": "\(StorySpeaker.currentActive)",
+                    "currentMode": StorySpeaker.currentMode.rawValue,
+                    "error": err.localizedDescription,
+                ], isForDebug: true)
                 // deactivate に失敗した場合も synth は固着しうる(下で reloadSynthesizer している)ので、
                 // 他の synth も次の speak 直前に作り直されるよう世代を進めておく。
                 StorySpeaker.audioSessionDeactivateGeneration += 1
