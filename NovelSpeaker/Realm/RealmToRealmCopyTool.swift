@@ -80,6 +80,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.voicevoxPronunciation = obj.voicevoxPronunciation
             newObj.voicevoxAccentType = obj.voicevoxAccentType
             newObj.voicevoxWordPriority = obj.voicevoxWordPriority
+            newObj.voicevoxWordType = obj.voicevoxWordType
             to.add(newObj, update: .modified)
             try to.commitWrite()
         }

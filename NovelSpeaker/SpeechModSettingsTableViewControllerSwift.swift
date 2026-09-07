@@ -11,7 +11,14 @@ import RealmSwift
 
 class SpeechModSettingsTableViewControllerSwift: UITableViewController, RealmObserverResetDelegate {
     static let speechModSettingsTableViewDefaultCellID = "speechModSettingsTableViewDefaultCell"
+    private enum SpeechEngineFilter: Equatable {
+        case all
+        case system
+        case voicevox
+    }
+
     var m_FilterString = ""
+    private var m_FilterSpeechEngine: SpeechEngineFilter = .all
     var speechModSettingObserverToken:NotificationToken? = nil
     public var targetNovelID = RealmSpeechModSetting.anyTarget
 
@@ -29,10 +36,22 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, RealmObs
             self.title = NSLocalizedString("SpeechModSettingsTableViewControllerSwift_ThisNovelOnly", comment: "読みの修正(小説専用設定)")
         }
         
-        // 追加ボタンとEditボタンと検索ボタンをつけます。
+        // 追加・編集・検索は常に表示し、音声エンジンの絞り込みだけを
+        // フィルタアイコンのメニューへまとめる。検索が見た目から消えないようにする。
         let addButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.add, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.addButtonClicked))
-        let filterButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.search, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.filterButtonClicked))
-        navigationItem.rightBarButtonItems = [addButton, .fixedSpace(0), editButtonItem, .fixedSpace(0), filterButton]
+        let searchButton = UIBarButtonItem(
+            barButtonSystemItem: .search,
+            target: self,
+            action: #selector(SpeechModSettingsTableViewControllerSwift.filterButtonClicked))
+        let engineFilterButton = UIBarButtonItem(
+            image: UIImage(systemName: "line.3.horizontal.decrease.circle"),
+            style: .plain,
+            target: nil,
+            action: nil)
+        engineFilterButton.accessibilityLabel = NSLocalizedString("SpeechModSettingsTableView_FilterMenu", comment: "適用する音声合成で絞り込む")
+        engineFilterButton.accessibilityValue = speechEngineFilterAccessibilityValue()
+        engineFilterButton.menu = makeEngineFilterMenu()
+        navigationItem.rightBarButtonItems = [addButton, .fixedSpace(0), editButtonItem, .fixedSpace(0), searchButton, .fixedSpace(0), engineFilterButton]
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
@@ -222,6 +241,49 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, RealmObs
             })
             .build().show()
     }
+
+    private func makeEngineFilterMenu() -> UIMenu {
+        let allAction = UIAction(
+            title: NSLocalizedString("SpeechModSettingsTableView_FilterAll", comment: "すべて"),
+            state: m_FilterSpeechEngine == .all ? .on : .off) { [weak self] _ in
+                self?.setSpeechEngineFilter(.all)
+            }
+        let systemAction = UIAction(
+            title: NSLocalizedString("SpeechModSettingsTableView_FilterSystem", comment: "システムの音声"),
+            state: m_FilterSpeechEngine == .system ? .on : .off) { [weak self] _ in
+                self?.setSpeechEngineFilter(.system)
+            }
+        let voicevoxAction = UIAction(
+            title: NSLocalizedString("SpeechModSettingsTableView_FilterVoicevox", comment: "VOICEVOX"),
+            state: m_FilterSpeechEngine == .voicevox ? .on : .off) { [weak self] _ in
+                self?.setSpeechEngineFilter(.voicevox)
+            }
+        let engineMenu = UIMenu(
+            title: NSLocalizedString("SpeechModSettingsTableView_FilterMenu", comment: "適用する音声合成で絞り込む"),
+            options: .displayInline,
+            children: [allAction, systemAction, voicevoxAction])
+        return UIMenu(children: [engineMenu])
+    }
+
+    private func setSpeechEngineFilter(_ filter: SpeechEngineFilter) {
+        m_FilterSpeechEngine = filter
+        if let engineFilterButton = navigationItem.rightBarButtonItems?.last {
+            engineFilterButton.menu = makeEngineFilterMenu()
+            engineFilterButton.accessibilityValue = speechEngineFilterAccessibilityValue()
+        }
+        tableView.reloadData()
+    }
+
+    private func speechEngineFilterAccessibilityValue() -> String {
+        switch m_FilterSpeechEngine {
+        case .all:
+            return NSLocalizedString("SpeechModSettingsTableView_FilterAll", comment: "すべて")
+        case .system:
+            return NSLocalizedString("SpeechModSettingsTableView_FilterSystem", comment: "システムの音声")
+        case .voicevox:
+            return NSLocalizedString("SpeechModSettingsTableView_FilterVoicevox", comment: "VOICEVOX")
+        }
+    }
     
     func PushToCreateSpeechModSettingViewControllerSwift(modSetting:RealmSpeechModSetting?) {
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
@@ -239,13 +301,25 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, RealmObs
             speechModSettingArray = speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString)
         }
         speechModSettingArray = speechModSettingArray.sorted(byKeyPath: "before", ascending: false)
-        if self.targetNovelID == RealmSpeechModSetting.anyTarget || self.targetNovelID.count <= 0  {
-            return speechModSettingArray.filter({ (setting) -> Bool in
-                return true
-            })
-        }
+        let targetNovelID = self.targetNovelID
+        let targetAnyNovel = targetNovelID == RealmSpeechModSetting.anyTarget || targetNovelID.isEmpty
+        let speechEngineFilter = m_FilterSpeechEngine
+        let defaultSpeechModEngineTypes = NovelSpeakerUtility.GetDefaultSpeechModEngineTypes()
         return speechModSettingArray.filter({ (setting) -> Bool in
-            return setting.targetNovelIDArray.contains(self.targetNovelID)
+            let targetMatches = targetAnyNovel || setting.targetNovelIDArray.contains(targetNovelID)
+            guard targetMatches else { return false }
+            switch speechEngineFilter {
+            case .all:
+                return true
+            case .system:
+                let effective = NovelSpeakerUtility.EffectiveSpeechEngineTypes(
+                    of: setting, defaultSpeechModEngineTypes: defaultSpeechModEngineTypes)
+                return effective.isEmpty || effective.contains(.any) || effective.contains(.avSpeechSynthesizer)
+            case .voicevox:
+                let effective = NovelSpeakerUtility.EffectiveSpeechEngineTypes(
+                    of: setting, defaultSpeechModEngineTypes: defaultSpeechModEngineTypes)
+                return effective.isEmpty || effective.contains(.any) || effective.contains(.voicevox)
+            }
         })
     }
     

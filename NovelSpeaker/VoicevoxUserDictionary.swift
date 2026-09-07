@@ -45,6 +45,47 @@
 
 import Foundation
 
+/// VOICEVOX ユーザー辞書で選べる品詞。
+/// C API の値をそのまま Realm/JSON に保存するのではなく、画面と保存層で
+/// 安定して扱える名前を持たせ、登録時だけ C の列挙値へ戻す。
+enum VoicevoxUserDictionaryWordType: Int, CaseIterable {
+    case properNoun = 0
+    case commonNoun = 1
+    case verb = 2
+    case adjective = 3
+    case suffix = 4
+
+    init(rawValue: Int) {
+        switch rawValue {
+        case 1: self = .commonNoun
+        case 2: self = .verb
+        case 3: self = .adjective
+        case 4: self = .suffix
+        default: self = .properNoun
+        }
+    }
+
+    init(jsonName: String) {
+        switch jsonName {
+        case "一般名詞": self = .commonNoun
+        case "動詞": self = .verb
+        case "形容詞": self = .adjective
+        case "接尾辞": self = .suffix
+        default: self = .properNoun
+        }
+    }
+
+    var localizedName: String {
+        switch self {
+        case .properNoun: return NSLocalizedString("VoicevoxWordType_ProperNoun", comment: "固有名詞")
+        case .commonNoun: return NSLocalizedString("VoicevoxWordType_CommonNoun", comment: "一般名詞")
+        case .verb: return NSLocalizedString("VoicevoxWordType_Verb", comment: "動詞")
+        case .adjective: return NSLocalizedString("VoicevoxWordType_Adjective", comment: "形容詞")
+        case .suffix: return NSLocalizedString("VoicevoxWordType_Suffix", comment: "接尾辞")
+        }
+    }
+}
+
 /// VOICEVOX 本体のユーザー辞書に登録する1語。
 struct VoicevoxUserDictionaryEntry: Equatable {
     /// VOICEVOX が読む文字列。
@@ -60,6 +101,16 @@ struct VoicevoxUserDictionaryEntry: Equatable {
     /// 「黒剣騎士団」と「黒剣」の両方を登録した場合に長い方が勝つ保証は無い。
     /// 勝たせたい方はここを上げてもらう必要がある。
     let priority: Int
+    let wordType: VoicevoxUserDictionaryWordType
+
+    init(surface: String, pronunciation: String, accentType: Int, priority: Int,
+         wordType: VoicevoxUserDictionaryWordType = .properNoun) {
+        self.surface = surface
+        self.pronunciation = pronunciation
+        self.accentType = accentType
+        self.priority = priority
+        self.wordType = wordType
+    }
 
     /// 既定の優先度。VOICEVOX 側の既定値に合わせてある。
     static let defaultPriority = 5
@@ -88,7 +139,8 @@ enum VoicevoxUserDictionaryBuilder {
                       isAppliedToVoicevox: Bool,
                       pronunciation: String,
                       accentType: Int,
-                      priority: Int) -> VoicevoxUserDictionaryEntry? {
+                      priority: Int,
+                      wordType: VoicevoxUserDictionaryWordType = .properNoun) -> VoicevoxUserDictionaryEntry? {
         // ★VOICEVOX が対象でない行は、読みもアクセントも効かない。
         // 「適用する音声合成」で VOICEVOX を外した = この読みの修正は
         // VOICEVOX には効かない、という指定なので、その一部であるここも効かない。
@@ -110,7 +162,8 @@ enum VoicevoxUserDictionaryBuilder {
             pronunciation: pronunciation,
             accentType: max(0, accentType),
             priority: min(max(priority, VoicevoxUserDictionaryEntry.priorityRange.lowerBound),
-                          VoicevoxUserDictionaryEntry.priorityRange.upperBound))
+                          VoicevoxUserDictionaryEntry.priorityRange.upperBound),
+            wordType: wordType)
     }
 
     /// 同じ表記が複数あった場合に1つへ絞る(優先度の高い方を残す)。
@@ -140,7 +193,7 @@ enum VoicevoxUserDictionaryBuilder {
     static func signature(forText text: String, entries: [VoicevoxUserDictionaryEntry]) -> String {
         var parts: [String] = []
         for entry in entries where text.contains(entry.surface) {
-            parts.append("\(entry.surface)\u{1}\(entry.pronunciation)\u{1}\(entry.accentType)\u{1}\(entry.priority)")
+            parts.append("\(entry.surface)\u{1}\(entry.pronunciation)\u{1}\(entry.accentType)\u{1}\(entry.priority)\u{1}\(entry.wordType.rawValue)")
         }
         if parts.isEmpty { return "" }
         return parts.joined(separator: "\u{2}")
@@ -172,7 +225,7 @@ enum VoicevoxAccentDisplay {
     /// アクセント型の呼び名。
     ///
     /// 平板と尾高は**その語だけでは同じ音になる**(違うのは後ろに付く助詞が
-    /// 下がるかどうかだけ)。聞き比べてもらうには助詞を付けて鳴らす必要がある。
+    /// 下がるかどうかだけ)。聞き比べてもらうには助詞を付けて発話させる必要がある。
     static func typeName(accentType: Int, moraCount: Int) -> String {
         if accentType <= 0 { return NSLocalizedString("VoicevoxAccent_TypeFlat", comment: "平板") }
         if accentType == 1 { return NSLocalizedString("VoicevoxAccent_TypeHead", comment: "頭高") }
@@ -180,9 +233,9 @@ enum VoicevoxAccentDisplay {
         return NSLocalizedString("VoicevoxAccent_TypeMiddle", comment: "中高")
     }
 
-    /// 聞き比べる時に鳴らす文字列。
+    /// 聞き比べる時に発話させる文字列。
     ///
-    /// ★語を単独で鳴らしてはいけない。
+    /// ★語を単独で発話させてはいけない。
     /// 平板(0)と尾高(モーラ数と同じ値)は、その語だけでは**まったく同じ音**になる。
     /// 助詞を付けて初めて違いが出る(実物で確認済み・VoicevoxAccentTest)。
     static let previewParticle = "が"

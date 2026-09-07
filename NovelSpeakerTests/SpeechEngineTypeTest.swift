@@ -163,8 +163,9 @@ class SpeechEngineTypeTest: XCTestCase {
     // 標準の読み替え辞書に同じ内容がある場合。
     // タグが付いていなければ「まだ VOICEVOX で確かめていない」ので端末の音声だけ。
     func testUntaggedDefaultEntryStaysOnAVSpeechSynthesizer() {
-        // バンドルの JSON に必ずある物(サンプルとして先頭に置かれている)。
-        XCTAssertEqual(effectiveTypes(before: "黒剣", after: "コッケン"), [.avSpeechSynthesizer])
+        // バンドルの JSON にある、VOICEVOX の確認がまだ済んでいない物。
+        // 「黒剣」は現在 VOICEVOX 対象としてタグ付けされているため、別の未確認項目を使う。
+        XCTAssertEqual(effectiveTypes(before: "鶏ガラ", after: "トリガラ"), [.avSpeechSynthesizer])
     }
     // MARK: - 一度だけの書き込み
 
@@ -242,6 +243,29 @@ class SpeechEngineTypeTest: XCTestCase {
         RealmUtil.RealmBlock { realm in
             XCTAssertTrue(RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before)?.speechEngineTypes.isEmpty ?? false,
                           "済んでいるのにもう一度書き込んでいる")
+        }
+    }
+
+    // 既に VOICEVOX 対応版で移行済みなら、標準辞書の再解釈をしない。
+    func testMigrationDoesNotReinterpretStoredStandardChoice() {
+        let before = "あいつ等"
+        deleteSetting(before: before)
+        RealmUtil.Write { realm in
+            let setting = RealmSpeechModSetting()
+            setting.before = before
+            setting.after = "アイツラ"
+            setting.setSpeechEngineTypes([.avSpeechSynthesizer])
+            realm.add(setting, update: .modified)
+        }
+        defer { deleteSetting(before: before) }
+
+        UserDefaults.standard.set(NovelSpeakerUtility.speechModEngineTypeMigrationVersion,
+                                  forKey: NovelSpeakerUtility.speechModEngineTypeMigrationVersionKey)
+        NovelSpeakerUtility.MigrateSpeechModEngineTypesIfNeeded()
+
+        RealmUtil.RealmBlock { realm in
+            XCTAssertEqual(RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before)?.speechEngineTypes,
+                           [.avSpeechSynthesizer])
         }
     }
 

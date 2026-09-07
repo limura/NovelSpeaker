@@ -41,6 +41,14 @@ class VoicevoxUserDictionaryTest: XCTestCase {
         XCTAssertEqual(entry(before: "橋", after: "ハシ", isAppliedToVoicevox: true)?.surface, "橋")
     }
 
+    func testWordTypeIsPreservedForTheVoicevoxEntry() {
+        let result = VoicevoxUserDictionaryBuilder.entry(
+            before: "造作もない", after: "造作もない", isUseRegularExpression: false,
+            isAppliedToVoicevox: true, pronunciation: "ゾウサモナイ", accentType: 5,
+            priority: VoicevoxUserDictionaryEntry.preferredPriority, wordType: .adjective)
+        XCTAssertEqual(result?.wordType, .adjective)
+    }
+
     // ★VOICEVOX が対象でない行は、読みとアクセントも効かない。
     //
     // 「適用する音声合成」で VOICEVOX を外した = この読みの修正は VOICEVOX には

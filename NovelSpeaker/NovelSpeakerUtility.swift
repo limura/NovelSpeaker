@@ -135,6 +135,12 @@ class NovelSpeakerUtility: NSObject {
         /// VOICEVOX へ適用されてしまうので、そうはしない(空のまま保存し、
         /// 従来どおりの推測に任せる)。
         let targetSpeechEngineTypeArray:[String]?
+        /// VOICEVOX ユーザー辞書へ登録する読み・アクセント・品詞。すべて任意で、
+        /// 旧形式の辞書では未指定のまま従来どおり動作する。
+        let voicevoxPronunciation:String?
+        let voicevoxAccentType:Int?
+        let voicevoxWordPriority:Int?
+        let voicevoxWordType:String?
 
         /// 上を列挙型にしたもの。知らない綴りは捨てる。
         var speechEngineTypes:[SpeechEngineType] {
@@ -158,20 +164,35 @@ class NovelSpeakerUtility: NSObject {
     //
     // 5000件超あり毎回作るのは無駄なので一度だけ構築してキャッシュする。ここでは(ネットワークに
     // 出る可能性のある getSpeechModSettings ではなく)確実にバンドルの JSON だけを読む。
+    private static var cachedDefaultSpeechModSettings: [String:SpeechModSetting]? = nil
     private static var cachedDefaultSpeechModEngineTypes: [String:[SpeechEngineType]]? = nil
     static func DefaultSpeechModKey(before:String, after:String, isRegexp:Bool) -> String {
         return "\(isRegexp ? "1" : "0")\t\(before)\t\(after)"
     }
-    static func GetDefaultSpeechModEngineTypes() -> [String:[SpeechEngineType]] {
-        if let cached = cachedDefaultSpeechModEngineTypes { return cached }
-        var result:[String:[SpeechEngineType]] = [:]
+    /// バンドルした標準辞書を一度だけ読み込む。
+    ///
+    /// 起動時の移行と通常の読み上げ判定の両方で使う。ネットワーク上の標準辞書は
+    /// 設定画面の上書き用なので、起動時の一回限りの移行ではこちらを使って待たせない。
+    static func GetBundledDefaultSpeechModSettings() -> [String:SpeechModSetting] {
+        if let cached = cachedDefaultSpeechModSettings { return cached }
+        var result:[String:SpeechModSetting] = [:]
         if let path = Bundle.main.path(forResource: "DefaultSpeechModList", ofType: "json"),
            let handle = FileHandle(forReadingAtPath: path),
            let decoded = try? JSONDecoder().decode([SpeechModSetting].self, from: handle.readDataToEndOfFile()) {
             for modSetting in decoded {
                 let key = DefaultSpeechModKey(before: modSetting.before, after: modSetting.after, isRegexp: modSetting.isRegexp ?? false)
-                result[key] = modSetting.speechEngineTypes
+                result[key] = modSetting
             }
+        }
+        cachedDefaultSpeechModSettings = result
+        return result
+    }
+
+    static func GetDefaultSpeechModEngineTypes() -> [String:[SpeechEngineType]] {
+        if let cached = cachedDefaultSpeechModEngineTypes { return cached }
+        var result:[String:[SpeechEngineType]] = [:]
+        for (key, modSetting) in GetBundledDefaultSpeechModSettings() {
+            result[key] = modSetting.speechEngineTypes
         }
         cachedDefaultSpeechModEngineTypes = result
         return result
@@ -250,7 +271,8 @@ class NovelSpeakerUtility: NSObject {
                     isAppliedToVoicevox: engineTypes.isApplied(to: .voicevox),
                     pronunciation: String(setting.voicevoxPronunciation),
                     accentType: setting.voicevoxAccentType,
-                    priority: setting.voicevoxWordPriority) else { continue }
+                    priority: setting.voicevoxWordPriority,
+                    wordType: VoicevoxUserDictionaryWordType(rawValue: setting.voicevoxWordType)) else { continue }
                 entries.append(entry)
             }
         }
@@ -267,12 +289,13 @@ class NovelSpeakerUtility: NSObject {
         }
     }
 
-    /// 「適用する音声合成」を、既存の読み替えに一度だけ書き込む。
+    /// 「適用する音声合成」と VOICEVOX の標準読みを、既存の読み替えに一度だけ書き込む。
     ///
     /// 指定が無い読み替えは、その都度「標準の読み替え辞書と同じ内容か」を
     /// 照合して判定している。この照合は**ページをめくる度に**全件ぶん走る
     /// (5000件で母艦16.6ms・全体の7%。遅い端末ではその数倍)。
-    /// 一度データに書いてしまえば照合そのものが要らなくなる。
+    /// 一度データに書いてしまえば照合そのものが要らなくなる。VOICEVOX の読み・アクセントも
+    /// 標準値が未設定の旧レコードにだけ補う。
     ///
     /// iCloud への上りは1回のトランザクションにまとめれば
     /// 1回の CKModifyRecordsOperation で済む(IceCream が300件ずつに割って送る)。
@@ -282,35 +305,88 @@ class NovelSpeakerUtility: NSObject {
     /// 走った後も判定の仕組み自体は残してある。古い版の端末から iCloud 経由で
     /// 指定の無いレコードが降りてくる事があるため。
     static let speechModEngineTypeMigrationVersionKey = "SpeechModEngineTypeMigrationVersion"
-    /// 標準の読み替え辞書のタグを取り込んだ回数。
-    /// タグ付けが進んで配り直したくなったら上げる事になるが、その時は
-    /// 「利用者が自分で選んだ物をどう見分けるか」を先に決める必要がある
-    /// (今の形では見分けられないので、上げると利用者の選択を潰してしまう)。
-    static let speechModEngineTypeMigrationVersion = 1
+    /// 標準の読み替え辞書のタグと VOICEVOX の読みを取り込んだ回数。
+    /// 一度取り込んだ後は利用者が編集した値を守るため、同じ版では再実行しない。
+    ///
+    static let speechModEngineTypeMigrationVersion = 2
     static func MigrateSpeechModEngineTypesIfNeeded() {
         let defaults = UserDefaults.standard
         guard defaults.integer(forKey: speechModEngineTypeMigrationVersionKey) < speechModEngineTypeMigrationVersion else { return }
+        let bundledSettings = GetBundledDefaultSpeechModSettings()
         let engineTypeMap = GetDefaultSpeechModEngineTypes()
+        // 現行の標準辞書で after を変更した2件。旧版の標準値と一致する時だけ更新し、
+        // 利用者が別の after に編集した行はそのまま残す。
+        let legacyAfterUpdates:[String:(oldAfter:String, newAfter:String)] = [
+            "嗤い": ("わらい", "笑い"),
+            "天鈿女命": ("\"アマのウズメの尊\"", "アマのウズメの尊"),
+        ]
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let settings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
-            var writeTargets:[(setting: RealmSpeechModSetting, types: [SpeechEngineType])] = []
+            var engineWriteTargets:[(setting: RealmSpeechModSetting, types: [SpeechEngineType])] = []
+            var metadataWriteTargets:[(setting: RealmSpeechModSetting, modSetting: SpeechModSetting)] = []
+            var afterWriteTargets:[(setting: RealmSpeechModSetting, after: String)] = []
             for setting in settings {
-                guard setting.targetSpeechEngineTypeArray.isEmpty else { continue }
-                let effective = EffectiveSpeechEngineTypes(of: setting, defaultSpeechModEngineTypes: engineTypeMap)
-                // 判定の結果が「すべて」の時は、空のままにせず .any を入れる。
-                // 空のままだと次も照合してしまう(それを無くすための書き込みなので)。
-                writeTargets.append((setting, effective.isEmpty ? [.any] : effective))
-            }
-            guard writeTargets.isEmpty == false else { return }
-            // ★1回のトランザクションにまとめる事。
-            // IceCream は書き込み1回につき1回だけ CloudKit へ送るので、
-            // 分けて書くとその回数だけ通信が走る。
-            RealmUtil.WriteWith(realm: realm) { (realm) in
-                for target in writeTargets {
-                    target.setting.setSpeechEngineTypes(target.types)
+                let hadNoStoredEngineType = setting.targetSpeechEngineTypeArray.isEmpty
+                let currentKey = DefaultSpeechModKey(before: String(setting.before), after: String(setting.after), isRegexp: setting.isUseRegularExpression)
+                var bundledModSetting = bundledSettings[currentKey]
+                if bundledModSetting == nil,
+                   let update = legacyAfterUpdates[String(setting.before)],
+                   String(setting.after) == update.oldAfter {
+                    let newKey = DefaultSpeechModKey(before: String(setting.before), after: update.newAfter, isRegexp: setting.isUseRegularExpression)
+                    bundledModSetting = bundledSettings[newKey]
+                }
+                if hadNoStoredEngineType {
+                    let effective: [SpeechEngineType]
+                    if let bundledModSetting = bundledModSetting {
+                        effective = bundledModSetting.speechEngineTypes.isEmpty ? [.avSpeechSynthesizer] : bundledModSetting.speechEngineTypes
+                    } else {
+                        effective = EffectiveSpeechEngineTypes(of: setting, defaultSpeechModEngineTypes: engineTypeMap)
+                    }
+                    // 判定の結果が「すべて」の時は、空のままにせず .any を入れる。
+                    // 空のままだと次も照合してしまう(それを無くすための書き込みなので)。
+                    engineWriteTargets.append((setting, effective.isEmpty ? [.any] : effective))
+                }
+
+                if setting.voicevoxPronunciation.isEmpty,
+                   let modSetting = bundledModSetting,
+                   modSetting.voicevoxPronunciation?.isEmpty == false {
+                    // 読みが空の行だけを対象にする。既に画面で指定した読みは上書きしない。
+                    metadataWriteTargets.append((setting, modSetting))
+                }
+
+                if let update = legacyAfterUpdates[String(setting.before)], String(setting.after) == update.oldAfter {
+                    let newKey = DefaultSpeechModKey(before: String(setting.before), after: update.newAfter, isRegexp: setting.isUseRegularExpression)
+                    if bundledSettings[newKey] != nil {
+                        afterWriteTargets.append((setting, update.newAfter))
+                    }
                 }
             }
-            AppInformationLogger.AddLog(message: "読み替えの「適用する音声合成」を書き込みました(\(writeTargets.count)件)", isForDebug: true)
+            if engineWriteTargets.isEmpty == false || metadataWriteTargets.isEmpty == false || afterWriteTargets.isEmpty == false {
+                // ★1回のトランザクションにまとめる事。
+                // IceCream は書き込み1回につき1回だけ CloudKit へ送るので、
+                // 分けて書くとその回数だけ通信が走る。
+                RealmUtil.WriteWith(realm: realm) { (realm) in
+                    for target in engineWriteTargets {
+                        target.setting.setSpeechEngineTypes(target.types)
+                    }
+                    for target in metadataWriteTargets {
+                        guard let pronunciation = target.modSetting.voicevoxPronunciation else { continue }
+                        target.setting.voicevoxPronunciation = pronunciation
+                        target.setting.voicevoxAccentType = target.modSetting.voicevoxAccentType ?? 0
+                        target.setting.voicevoxWordPriority = target.modSetting.voicevoxWordPriority ?? VoicevoxUserDictionaryEntry.defaultPriority
+                        if let wordType = target.modSetting.voicevoxWordType {
+                            target.setting.voicevoxWordType = VoicevoxUserDictionaryWordType(jsonName: wordType).rawValue
+                        }
+                    }
+                    for target in afterWriteTargets {
+                        target.setting.after = target.after
+                    }
+                }
+            }
+            let count = engineWriteTargets.count + metadataWriteTargets.count + afterWriteTargets.count
+            if count > 0 {
+                AppInformationLogger.AddLog(message: "標準の読み替え設定を移行しました(\(count)件)", isForDebug: true)
+            }
         }
         defaults.set(speechModEngineTypeMigrationVersion, forKey: speechModEngineTypeMigrationVersionKey)
         defaults.synchronize()
@@ -412,6 +488,66 @@ class NovelSpeakerUtility: NSObject {
         }
         return Array(resultSet)
     }
+
+    /// 標準辞書と保存済みの読み替えが同じかを高速に照合するためのキー。
+    /// 配列の順番は意味を持たないので、エンジンは rawValue の昇順に正規化する。
+    private struct SpeechModSettingMatchKey: Hashable {
+        let before: String
+        let after: String
+        let isRegexp: Bool
+        let engineTypes: [Int]
+        let voicevoxPronunciation: String
+        let voicevoxAccentType: Int
+        let voicevoxWordPriority: Int
+        let voicevoxWordType: Int
+    }
+
+    private static func FullSpeechModSettingMatchKey(_ setting: SpeechModSetting) -> SpeechModSettingMatchKey {
+        let engineTypes: [Int] = setting.targetSpeechEngineTypeArray?.compactMap { value -> Int? in
+            if value == "any" { return SpeechEngineType.any.rawValue }
+            return SpeechEngineType(typeString: value)?.rawValue
+        }.sorted() ?? []
+        return SpeechModSettingMatchKey(
+            before: setting.before,
+            after: setting.after,
+            isRegexp: setting.isRegexp ?? false,
+            engineTypes: engineTypes,
+            voicevoxPronunciation: setting.voicevoxPronunciation ?? "",
+            voicevoxAccentType: setting.voicevoxAccentType ?? 0,
+            voicevoxWordPriority: setting.voicevoxWordPriority ?? VoicevoxUserDictionaryEntry.defaultPriority,
+            voicevoxWordType: setting.voicevoxWordType.map { VoicevoxUserDictionaryWordType(jsonName: $0).rawValue } ?? VoicevoxUserDictionaryWordType.properNoun.rawValue)
+    }
+
+    private static func FullSpeechModSettingMatchKey(_ setting: RealmSpeechModSetting) -> SpeechModSettingMatchKey {
+        return SpeechModSettingMatchKey(
+            before: String(setting.before),
+            after: String(setting.after),
+            isRegexp: setting.isUseRegularExpression,
+            engineTypes: Array(setting.targetSpeechEngineTypeArray).sorted(),
+            voicevoxPronunciation: String(setting.voicevoxPronunciation),
+            voicevoxAccentType: setting.voicevoxAccentType,
+            voicevoxWordPriority: setting.voicevoxWordPriority,
+            voicevoxWordType: setting.voicevoxWordType)
+    }
+
+    private static func LegacySpeechModSettingMatchKey(before: String, after: String, isRegexp: Bool) -> String {
+        return DefaultSpeechModKey(before: before, after: after, isRegexp: isRegexp)
+    }
+
+    private static func LegacySpeechModSettingMatchKey(_ setting: RealmSpeechModSetting) -> String {
+        return LegacySpeechModSettingMatchKey(before: String(setting.before), after: String(setting.after), isRegexp: setting.isUseRegularExpression)
+    }
+
+    /// 新しい VOICEVOX 項目がまだ無い旧レコードだけ、旧来の3項目照合を許す。
+    /// 読み・アクセント・優先度・品詞のいずれかを利用者が指定した行は、完全一致でのみ削除する。
+    private static func CanUseLegacySpeechModSettingMatch(_ setting: RealmSpeechModSetting) -> Bool {
+        return setting.targetSpeechEngineTypeArray.isEmpty
+            && setting.voicevoxPronunciation.isEmpty
+            && setting.voicevoxAccentType == 0
+            && setting.voicevoxWordPriority == VoicevoxUserDictionaryEntry.defaultPriority
+            && setting.voicevoxWordType == VoicevoxUserDictionaryWordType.properNoun.rawValue
+    }
+
     // 標準の読み替え辞書を上書き登録します。
     static func OverrideDefaultSpeechModSettingsWith(realm:Realm) {
         getSpeechModSettings { (speechModSettings) in
@@ -436,6 +572,18 @@ class NovelSpeakerUtility: NSObject {
                         if engineTypes.isEmpty == false {
                             setting.setSpeechEngineTypes(engineTypes)
                         }
+                        // 既に利用者がこの語の VOICEVOX 読みを編集している場合は、
+                        // 標準辞書の更新で上書きしない。旧版からの標準項目は空なので、
+                        // 初回導入分だけここで埋められる。
+                        if let pronunciation = modSetting.voicevoxPronunciation,
+                           setting.voicevoxPronunciation.isEmpty {
+                            setting.voicevoxPronunciation = pronunciation
+                            setting.voicevoxAccentType = modSetting.voicevoxAccentType ?? 0
+                            setting.voicevoxWordPriority = modSetting.voicevoxWordPriority ?? VoicevoxUserDictionaryEntry.defaultPriority
+                            if let wordType = modSetting.voicevoxWordType {
+                                setting.voicevoxWordType = VoicevoxUserDictionaryWordType(jsonName: wordType).rawValue
+                            }
+                        }
                         if targetNovelIDArray.count > 0 {
                             setting.targetNovelIDArray.removeAll()
                             setting.targetNovelIDArray.append(objectsIn: targetNovelIDArray)
@@ -447,6 +595,12 @@ class NovelSpeakerUtility: NSObject {
                     speechModSetting.after = after
                     speechModSetting.isUseRegularExpression = modSetting.isRegexp ?? false
                     speechModSetting.setSpeechEngineTypes(engineTypes)
+                    speechModSetting.voicevoxPronunciation = modSetting.voicevoxPronunciation ?? ""
+                    speechModSetting.voicevoxAccentType = modSetting.voicevoxAccentType ?? 0
+                    speechModSetting.voicevoxWordPriority = modSetting.voicevoxWordPriority ?? VoicevoxUserDictionaryEntry.defaultPriority
+                    if let wordType = modSetting.voicevoxWordType {
+                        speechModSetting.voicevoxWordType = VoicevoxUserDictionaryWordType(jsonName: wordType).rawValue
+                    }
                     if targetNovelIDArray.count > 0 {
                         speechModSetting.targetNovelIDArray.append(objectsIn: targetNovelIDArray)
                     }else{
@@ -464,18 +618,21 @@ class NovelSpeakerUtility: NSObject {
         getSpeechModSettings { (speechModSettings) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let allSpeechModSettings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
+                // 旧版の3項目照合を残しつつ、VOICEVOX の設定が違う利用者の行は消さない。
+                // 標準辞書側は Set にしておくので、5000件同士の二重ループにはしない。
+                let fullKeys = Set(speechModSettings.map { FullSpeechModSettingMatchKey($0) })
+                let legacyKeys = Set(speechModSettings.map {
+                    LegacySpeechModSettingMatchKey(before: $0.before, after: $0.after, isRegexp: $0.isRegexp ?? false)
+                })
                 var removeTargetArray:[RealmSpeechModSetting] = []
                 for targetSpeechModSetting in allSpeechModSettings {
-                    for modSetting in speechModSettings {
-                        let before = modSetting.before
-                        let after = modSetting.after
-                        let isUseRegularExpression = modSetting.isRegexp ?? false
-                        if targetSpeechModSetting.before == before && targetSpeechModSetting.after == after && targetSpeechModSetting.isUseRegularExpression == isUseRegularExpression {
-                            removeTargetArray.append(targetSpeechModSetting)
-                            break
-                        }
+                    if fullKeys.contains(FullSpeechModSettingMatchKey(targetSpeechModSetting))
+                        || (CanUseLegacySpeechModSettingMatch(targetSpeechModSetting)
+                            && legacyKeys.contains(LegacySpeechModSettingMatchKey(targetSpeechModSetting))) {
+                        removeTargetArray.append(targetSpeechModSetting)
                     }
                 }
+                guard removeTargetArray.isEmpty == false else { return }
                 RealmUtil.WriteWith(realm: realm) { (realm) in
                     for targetSpeechModSetting in removeTargetArray {
                         targetSpeechModSetting.delete(realm: realm)
@@ -1548,6 +1705,7 @@ class NovelSpeakerUtility: NSObject {
                 mod.voicevoxPronunciation = (speechMod.object(forKey: "voicevoxPronunciation") as? String) ?? ""
                 mod.voicevoxAccentType = (speechMod.object(forKey: "voicevoxAccentType") as? NSNumber)?.intValue ?? 0
                 mod.voicevoxWordPriority = (speechMod.object(forKey: "voicevoxWordPriority") as? NSNumber)?.intValue ?? VoicevoxUserDictionaryEntry.defaultPriority
+                mod.voicevoxWordType = (speechMod.object(forKey: "voicevoxWordType") as? NSNumber)?.intValue ?? VoicevoxUserDictionaryWordType.properNoun.rawValue
                 realm.add(mod, update: .modified)
             }
         }
@@ -2477,7 +2635,8 @@ class NovelSpeakerUtility: NSObject {
                     "targetSpeechEngineTypeArray": Array(setting.targetSpeechEngineTypeArray),
                     "voicevoxPronunciation": setting.voicevoxPronunciation,
                     "voicevoxAccentType": setting.voicevoxAccentType,
-                    "voicevoxWordPriority": setting.voicevoxWordPriority
+                    "voicevoxWordPriority": setting.voicevoxWordPriority,
+                    "voicevoxWordType": setting.voicevoxWordType
                 ]
             }
             return result

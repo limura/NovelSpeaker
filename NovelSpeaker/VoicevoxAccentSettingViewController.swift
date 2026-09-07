@@ -7,11 +7,11 @@
 //  ★数値では選べない。
 //  「橋」なのか「箸」なのかは無意識に言い分けているもので、
 //  「アクセント核は1です」と言われて分かる人はほとんどいない。
-//  候補を並べて、押したらその場で鳴らして、耳で選んでもらう。
+//  候補を並べて、押したらその場で発話させて、耳で選んでもらう。
 //
-//  ★候補を鳴らす時は助詞を付ける。
+//  ★候補を発話させる時は助詞を付ける。
 //  平板(0)と尾高(モーラ数と同じ値)は、その語だけでは**まったく同じ音**になる。
-//  違うのは後ろに付く助詞が下がるかどうかだけなので、単独で鳴らすと
+//  違うのは後ろに付く助詞が下がるかどうかだけなので、単独で発話させると
 //  「同じ音しか出ない」という状態になる(実物で確認済み・VoicevoxAccentTest)。
 //
 //  読み(カタカナ)は VOICEVOX 自身に出させる。同じ解析器が出した答えなので、
@@ -24,10 +24,15 @@ import Eureka
 protocol VoicevoxAccentSettingDelegate: AnyObject {
     /// - Parameters:
     ///   - pronunciation: VOICEVOX に渡す読み(カタカナ)。空 = この行では辞書を使わない。
-    func voicevoxAccentSettingDidChange(pronunciation: String, accentType: Int, priority: Int)
+    func voicevoxAccentSettingDidChange(pronunciation: String, accentType: Int, priority: Int, wordType: VoicevoxUserDictionaryWordType)
 }
 
 class VoicevoxAccentSettingViewController: FormViewController {
+
+    private enum WarningSeverity {
+        case error
+        case notice
+    }
 
     /// VOICEVOX が読む文字列(= 読み替え後)。
     /// この画面は「適用する音声合成」に VOICEVOX が入っている時にだけ開ける。
@@ -35,6 +40,7 @@ class VoicevoxAccentSettingViewController: FormViewController {
     var pronunciation: String = ""
     var accentType: Int = 0
     var priority: Int = VoicevoxUserDictionaryEntry.defaultPriority
+    var wordType: VoicevoxUserDictionaryWordType = .properNoun
     weak var delegate: VoicevoxAccentSettingDelegate?
 
     /// 今の読みを解析して得たモーラ列。候補の数はこれで決まる。
@@ -66,7 +72,7 @@ class VoicevoxAccentSettingViewController: FormViewController {
         super.viewWillDisappear(animated)
         speaker.StopSpeech()
         restoreDictionaryIfNeeded()
-        delegate?.voicevoxAccentSettingDidChange(pronunciation: pronunciation, accentType: accentType, priority: priority)
+        delegate?.voicevoxAccentSettingDidChange(pronunciation: pronunciation, accentType: accentType, priority: priority, wordType: wordType)
     }
 
     // MARK: - VOICEVOX に読ませる
@@ -167,14 +173,62 @@ class VoicevoxAccentSettingViewController: FormViewController {
             // 元の色へ戻されるので、実機では黒いままだった。
             // systemRed は暗い配色でも読める色に iOS が自動で切り替える。
             cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.textColor = .systemRed
-            cell.textLabel?.font = UIFont.boldSystemFont(ofSize: UIFont.preferredFont(forTextStyle: .body).pointSize)
+            cell.textLabel?.textColor = self.warningSeverity == .error
+                ? .systemRed
+                : UIColor.systemRed.withAlphaComponent(0.62)
+            let warningFontSize = UIFont.preferredFont(forTextStyle: .body).pointSize
+            cell.textLabel?.font = self.warningSeverity == .error
+                ? UIFont.boldSystemFont(ofSize: warningFontSize)
+                : UIFont.systemFont(ofSize: warningFontSize)
             cell.textLabel?.adjustsFontForContentSizeCategory = true
         })
         <<< ButtonRow() {
             $0.title = NSLocalizedString("VoicevoxAccentSettingViewController_LoadFromVoicevox", comment: "VOICEVOX の読み方を取り込む")
         }.onCellSelection({ [weak self] _, _ in
             self?.refreshFromVoicevox(loadPronunciationIfEmpty: false, forceLoadPronunciation: true)
+        })
+
+        form +++ Section(NSLocalizedString("VoicevoxAccentSettingViewController_WordTypeSectionHeader", comment: "品詞")) {
+            $0.footer = HeaderFooterView(stringLiteral: NSLocalizedString("VoicevoxAccentSettingViewController_WordTypeFooter", comment: "品詞は語の区切りや前後とのつながりに影響します。通常は固有名詞のままで構いません。"))
+        }
+        <<< PushRow<String>("WordTypeRow") {
+            $0.title = NSLocalizedString("VoicevoxAccentSettingViewController_WordTypeTitle", comment: "品詞")
+            $0.options = VoicevoxUserDictionaryWordType.allCases.map { $0.localizedName }
+            $0.value = wordType.localizedName
+        }.onChange({ [weak self] row in
+            guard let self = self, let value = row.value,
+                  let index = row.options?.firstIndex(of: value) else { return }
+            let selected = VoicevoxUserDictionaryWordType(rawValue: index)
+            self.wordType = selected
+            if self.pronunciation.isEmpty == false {
+                self.updateRegistrableWarning()
+            }
+        })
+
+        form +++ Section(NSLocalizedString("VoicevoxAccentSettingViewController_ContextSectionHeader", comment: "文の中で確認")) {
+            $0.footer = HeaderFooterView(stringLiteral: NSLocalizedString("VoicevoxAccentSettingViewController_ContextFooter", comment: "前後の文章を入れると、登録した読みが文の中で実際に使われるか確認できます。"))
+        }
+        <<< TextRow("ContextSentenceRow") {
+            $0.title = NSLocalizedString("VoicevoxAccentSettingViewController_ContextSentenceTitle", comment: "確認する文章")
+            $0.value = surface
+            $0.cell.textField.clearButtonMode = .always
+            $0.cell.textField.borderStyle = .roundedRect
+        }.onChange({ [weak self] _ in
+            guard let self = self, let resultRow = self.form.rowBy(tag: "ContextResultRow") else { return }
+            resultRow.hidden = true
+            resultRow.evaluateHidden()
+        })
+        <<< ButtonRow("ContextCheckButton") {
+            $0.title = NSLocalizedString("VoicevoxAccentSettingViewController_ContextCheckButton", comment: "文の中で確認")
+        }.onCellSelection({ [weak self] _, _ in self?.analyzeContextSentence() })
+        <<< ButtonRow("ContextSpeakButton") {
+            $0.title = NSLocalizedString("VoicevoxAccentSettingViewController_ContextSpeakButton", comment: "この文を発話させる")
+        }.onCellSelection({ [weak self] _, _ in self?.speakContextSentence() })
+        <<< LabelRow("ContextResultRow") {
+            $0.hidden = true
+        }.cellUpdate({ cell, _ in
+            cell.textLabel?.numberOfLines = 0
+            cell.textLabel?.textColor = .secondaryLabel
         })
 
         form +++ accentSection()
@@ -194,6 +248,9 @@ class VoicevoxAccentSettingViewController: FormViewController {
             self.priority = (row.value == options.last)
                 ? VoicevoxUserDictionaryEntry.preferredPriority
                 : VoicevoxUserDictionaryEntry.defaultPriority
+            if self.pronunciation.isEmpty == false {
+                self.updateRegistrableWarning()
+            }
         })
     }
 
@@ -202,7 +259,7 @@ class VoicevoxAccentSettingViewController: FormViewController {
     private func accentSection() -> Section {
         let section = Section(NSLocalizedString("VoicevoxAccentSettingViewController_AccentSectionHeader", comment: "アクセント")) {
             $0.tag = Self.accentSectionTag
-            $0.footer = HeaderFooterView(stringLiteral: NSLocalizedString("VoicevoxAccentSettingViewController_AccentFooter", comment: "行を選ぶと、その読み方で鳴らします。「が」を付けて鳴らしているのは、平板と尾高が語だけでは同じ音になるためです。"))
+            $0.footer = HeaderFooterView(stringLiteral: NSLocalizedString("VoicevoxAccentSettingViewController_AccentFooter", comment: "行を選ぶと、その読み方で発話させます。「が」を付けて発話させているのは、平板と尾高が語だけでは同じ音になるためです。"))
         }
         accentRows.removeAll()
         let candidates = VoicevoxAccentDisplay.candidates(moraCount: moras.count)
@@ -225,7 +282,11 @@ class VoicevoxAccentSettingViewController: FormViewController {
                     comment: "%1$@型 %2$@"),
                     VoicevoxAccentDisplay.typeName(accentType: candidate, moraCount: moras.count),
                     moras.joined())
-                row.cell.accessibilityHint = NSLocalizedString("VoicevoxAccentSettingViewController_CandidateHint", comment: "選ぶと、この読み方で鳴らします。")
+                row.cell.accessibilityHint = NSLocalizedString("VoicevoxAccentSettingViewController_CandidateHint", comment: "選ぶと、この読み方で発話させます。")
+                row.cell.accessibilityTraits = [.button]
+                if candidate == accentType {
+                    row.cell.accessibilityTraits.insert(.selected)
+                }
             }.onCellSelection({ [weak self] _, _ in
                 guard let self = self else { return }
                 self.accentType = candidate
@@ -264,22 +325,134 @@ class VoicevoxAccentSettingViewController: FormViewController {
                 // 待っている間に書き換わっていたら、古い結果は捨てる。
                 guard self.pronunciation.trimmingCharacters(in: .whitespacesAndNewlines) == pronunciation else { return }
                 self.isRegistrable = canRegister
-                self.setWarning(hidden: canRegister)
+                self.setWarning(hidden: canRegister, message: NSLocalizedString(
+                    "VoicevoxAccentSettingViewController_NotRegistrableWarning",
+                    comment: "この読みは VOICEVOX に受け付けてもらえません。アクセントの指定が効かないので、カタカナで入力し直してください。"),
+                    severity: .error)
+                if canRegister { self.checkDictionaryEffectiveness(pronunciation: pronunciation) }
             }
         }
     }
 
-    private func setWarning(hidden: Bool) {
+    /// 登録自体は受け付けられても、この語だけの解析ではその登録が
+    /// 採用されないことがある。前後の文脈で採用される可能性があるため、注意として示す。
+    private func checkDictionaryEffectiveness(pronunciation: String) {
+        let surface = self.surface.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard surface.isEmpty == false else { return }
+        let entry = VoicevoxUserDictionaryEntry(surface: surface, pronunciation: pronunciation,
+                                                accentType: accentType,
+                                                priority: priority,
+                                                wordType: wordType)
+        let entriesToRestore = savedDictionaryEntries
+        var entries = savedDictionaryEntries.filter { $0.surface != surface }
+        entries.append(entry)
+        Task { [weak self] in
+            await VoicevoxCore.shared.applyUserDictionary(entries)
+            let actual = (try? await VoicevoxCore.shared.analyze(text: surface))?.kana ?? ""
+            let effective = Self.normalizedKana(actual) == Self.normalizedKana(pronunciation)
+            await VoicevoxCore.shared.applyUserDictionary(entriesToRestore)
+            await MainActor.run {
+                guard let self = self, self.pronunciation.trimmingCharacters(in: .whitespacesAndNewlines) == pronunciation else { return }
+                if !effective {
+                    let message: String
+                    if actual.isEmpty {
+                        message = NSLocalizedString(
+                            "VoicevoxAccentSettingViewController_NotEffectiveWarning",
+                            comment: "この読みは登録できますが、この語だけの解析では指定した読みが採用されませんでした。優先度や品詞、前後の文脈によって採用される場合もあるため、文の中で確認してください。")
+                    } else {
+                        message = String(format: NSLocalizedString(
+                            "VoicevoxAccentSettingViewController_NotEffectiveWithActualReadingWarning",
+                            comment: "入力した読みとは異なり、VOICEVOX が単独解析で採用した読みを表示する警告"), actual)
+                    }
+                    self.setWarning(hidden: false, message: message,
+                        severity: .notice)
+                }
+            }
+        }
+    }
+
+    private static func normalizedKana(_ kana: String) -> String {
+        kana.replacingOccurrences(of: "ー", with: "").replacingOccurrences(of: "ウ", with: "オ")
+    }
+
+    private func contextPreviewEntries() -> [VoicevoxUserDictionaryEntry] {
+        var entries = savedDictionaryEntries.filter { $0.surface != surface }
+        if pronunciation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            entries.append(VoicevoxUserDictionaryEntry(surface: surface, pronunciation: pronunciation,
+                                                        accentType: accentType, priority: priority, wordType: wordType))
+        }
+        return entries
+    }
+
+    private func analyzeContextSentenceValue(sentence: String) async -> String? {
+        await VoicevoxCore.shared.applyUserDictionary(contextPreviewEntries())
+        return (try? await VoicevoxCore.shared.analyze(text: sentence))?.map { phrase in
+            VoicevoxAccentDisplay.markedKana(moras: VoicevoxAccentDisplay.moras(fromKatakana: phrase.kana), accentType: phrase.accent)
+        }.joined(separator: " / ")
+    }
+
+    @MainActor
+    private func showContextResult(_ result: String?, for sentence: String) {
+        guard let resultRow = form.rowBy(tag: "ContextResultRow") as? LabelRow else { return }
+        guard let currentRow = form.rowBy(tag: "ContextSentenceRow") as? TextRow,
+              (currentRow.value ?? "").trimmingCharacters(in: .whitespacesAndNewlines) == sentence else { return }
+        resultRow.title = result ?? ""
+        resultRow.hidden = Condition(booleanLiteral: result?.isEmpty != false)
+        resultRow.evaluateHidden()
+        resultRow.updateCell()
+        resultRow.cell.accessibilityLabel = result ?? ""
+    }
+
+    private func analyzeContextSentence() {
+        guard let row = form.rowBy(tag: "ContextSentenceRow") as? TextRow else { return }
+        let sentence = (row.value ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard sentence.isEmpty == false else { return }
+        isPreviewDictionaryApplied = true
+        Task { [weak self] in
+            let result = await self?.analyzeContextSentenceValue(sentence: sentence)
+            await MainActor.run {
+                self?.showContextResult(result, for: sentence)
+            }
+        }
+    }
+
+    private func speakContextSentence() {
+        guard let row = form.rowBy(tag: "ContextSentenceRow") as? TextRow else { return }
+        let sentence = (row.value ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard sentence.isEmpty == false else { return }
+        isPreviewDictionaryApplied = true
+        Task { [weak self] in
+            guard let self = self else { return }
+            // 発話前に同じ辞書で解析する。これで解析結果の表示と発話が別々の
+            // ボタン操作にならず、発話にも選択中のアクセントが確実に反映される。
+            let result = await self.analyzeContextSentenceValue(sentence: sentence)
+            await MainActor.run {
+                self.showContextResult(result, for: sentence)
+                self.speak(text: sentence)
+            }
+        }
+    }
+
+    private var warningSeverity: WarningSeverity = .error
+
+    private func setWarning(hidden: Bool, message: String? = nil, severity: WarningSeverity = .error) {
         guard let row = form.rowBy(tag: "PronunciationWarningRow") else { return }
-        guard row.isHidden != hidden else { return }
-        row.hidden = Condition(booleanLiteral: hidden)
-        row.evaluateHidden()
+        warningSeverity = severity
+        if let message = message { row.title = message }
+        if row.isHidden != hidden {
+            row.hidden = Condition(booleanLiteral: hidden)
+            row.evaluateHidden()
+        }
         row.updateCell()
     }
 
     private func updateAccentCheckmarks() {
         for (row, candidate) in accentRows {
             row.cell.accessoryType = (candidate == accentType) ? .checkmark : .none
+            row.cell.accessibilityTraits = [.button]
+            if candidate == accentType {
+                row.cell.accessibilityTraits.insert(.selected)
+            }
         }
     }
 
@@ -292,9 +465,9 @@ class VoicevoxAccentSettingViewController: FormViewController {
 
     // MARK: - 聞き比べ
 
-    /// 選んだアクセントで鳴らす。
+    /// 選んだアクセントで発話させる。
     ///
-    /// 保存前に鳴らすので、本来の辞書を**一時的に**差し替える。
+    /// 保存前に発話させるので、本来の辞書を**一時的に**差し替える。
     /// 画面を離れる時に必ず戻す(戻し忘れると、保存していない設定のまま
     /// 読み上げが続いてしまう)。
     private func preview(accentType: Int) {
@@ -304,7 +477,8 @@ class VoicevoxAccentSettingViewController: FormViewController {
         entries.append(VoicevoxUserDictionaryEntry(surface: text,
                                                    pronunciation: text,
                                                    accentType: accentType,
-                                                   priority: VoicevoxUserDictionaryEntry.preferredPriority))
+                                                   priority: VoicevoxUserDictionaryEntry.preferredPriority,
+                                                   wordType: wordType))
         isPreviewDictionaryApplied = true
         let previewText = VoicevoxAccentDisplay.previewText(kana: text)
         Task { [weak self] in
@@ -318,7 +492,7 @@ class VoicevoxAccentSettingViewController: FormViewController {
             DispatchQueue.main.async {
                 NiftyUtility.EasyDialogMessageDialog(
                     viewController: self,
-                    message: NSLocalizedString("VoicevoxAccentSettingViewController_NoVoiceModel", comment: "音声モデルが1つも取得されていないため、鳴らして確かめる事ができません。読みとアクセントの設定はそのまま保存できます。"))
+                    message: NSLocalizedString("VoicevoxAccentSettingViewController_NoVoiceModel", comment: "音声モデルが1つも取得されていないため、発話させて確かめる事ができません。読みとアクセントの設定はそのまま保存できます。"))
             }
             return
         }
@@ -341,7 +515,7 @@ class VoicevoxAccentSettingViewController: FormViewController {
         if let defaultSpeaker = defaultSpeaker, defaultSpeaker.type == "VOICEVOX" {
             return defaultSpeaker
         }
-        // 既定が VOICEVOX でないなら、取得済みの話者の1人目で鳴らす。
+        // 既定が VOICEVOX でないなら、取得済みの話者の1人目で発話させる。
         guard let style = VoicevoxCore.cachedStyles.first else { return nil }
         return SpeakerSetting(type: "VOICEVOX", voiceIdentifier: "\(style.styleId)")
     }

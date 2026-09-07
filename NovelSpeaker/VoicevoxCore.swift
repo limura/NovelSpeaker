@@ -452,6 +452,13 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
             let result = entry.surface.withCString { surfacePointer -> VoicevoxResultCode in
                 return entry.pronunciation.withCString { pronunciationPointer -> VoicevoxResultCode in
                     var word = voicevox_user_dict_word_make(surfacePointer, pronunciationPointer, UInt(entry.accentType))
+                    switch entry.wordType {
+                    case .properNoun: word.word_type = VOICEVOX_USER_DICT_WORD_TYPE_PROPER_NOUN
+                    case .commonNoun: word.word_type = VOICEVOX_USER_DICT_WORD_TYPE_COMMON_NOUN
+                    case .verb: word.word_type = VOICEVOX_USER_DICT_WORD_TYPE_VERB
+                    case .adjective: word.word_type = VOICEVOX_USER_DICT_WORD_TYPE_ADJECTIVE
+                    case .suffix: word.word_type = VOICEVOX_USER_DICT_WORD_TYPE_SUFFIX
+                    }
                     word.priority = UInt8(entry.priority)
                     var uuid = (UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
                                 UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0))
@@ -485,7 +492,7 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
         //
         // キャッシュの鍵にはこの辞書の署名が混ざる。記録しないと、
         // **鍵が音を作った条件を表さなくなる**。
-        // アクセントの聞き比べは辞書を一時的に差し替えて鳴らすので、
+        // アクセントの聞き比べは辞書を一時的に差し替えて発話させるので、
         // ここを記録していないと4つのアクセントが全部同じ鍵になり、
         // 最初に作った音が使い回されて「どれも同じに聞こえる」事になる
         // (実機で確認・VoicevoxAccentPreviewTest)。

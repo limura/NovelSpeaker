@@ -94,6 +94,8 @@ final class MemoryTraceLogger {
     //            isSpeechViewBottomButtonOverlapsChapterBar を追加した。
     //            メンバの「追加」だけなのでデータ変換は不要(MigrateFunc への追記も不要)だが、
     //            schemaVersion を上げないと既存の Realm が開けなくなる。
+    // 21 -> 22: RealmSpeechModSetting に voicevoxWordType を追加した。
+    //            VOICEVOX ユーザー辞書へ登録する品詞を指定できるようにするため。
     // 20 -> 21: RealmSpeechModSetting に voicevoxPronunciation / voicevoxAccentType /
     //            voicevoxWordPriority を追加した。VOICEVOX 本体のユーザー辞書へ登録して
     //            アクセントまで指定できるようにするため(置換ではアクセントを変えられない)。
@@ -106,7 +108,7 @@ final class MemoryTraceLogger {
     //            そちらが書き戻した時に中身が消える事がありうる。
     //            消えても「空 = 未指定」となって従来どおりの推測に落ちるだけで、
     //            読み替えが効かなくなったりはしない(次に編集または上書き登録すれば戻る)。
-    static let currentSchemaVersion : UInt64 = 21
+    static let currentSchemaVersion : UInt64 = 22
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -2407,6 +2409,8 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
     /// Open JTalk は長い語が自動的に勝つ仕組みではないので、
     /// 「黒剣騎士団」と「黒剣」のように登録語同士が食い合う時に要る。
     @objc dynamic var voicevoxWordPriority : Int = VoicevoxUserDictionaryEntry.defaultPriority
+    /// VOICEVOX ユーザー辞書の品詞。0 = 固有名詞(従来の既定値)。
+    @objc dynamic var voicevoxWordType : Int = VoicevoxUserDictionaryWordType.properNoun.rawValue
 
     func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {
         return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in

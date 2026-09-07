@@ -28,6 +28,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
     var voicevoxPronunciation = ""
     var voicevoxAccentType = 0
     var voicevoxWordPriority = VoicevoxUserDictionaryEntry.defaultPriority
+    var voicevoxWordType = VoicevoxUserDictionaryWordType.properNoun
     let speaker = SpeechBlockSpeaker()
 
     override func viewDidLoad() {
@@ -94,6 +95,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 self.voicevoxPronunciation = String(targetSetting.voicevoxPronunciation)
                 self.voicevoxAccentType = targetSetting.voicevoxAccentType
                 self.voicevoxWordPriority = targetSetting.voicevoxWordPriority
+                self.voicevoxWordType = VoicevoxUserDictionaryWordType(rawValue: targetSetting.voicevoxWordType)
                 for novelID in targetSetting.targetNovelIDArray {
                     self.targetNovelIDSet.insert(novelID)
                 }
@@ -223,6 +225,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 nextViewController.pronunciation = self.voicevoxPronunciation
                 nextViewController.accentType = self.voicevoxAccentType
                 nextViewController.priority = self.voicevoxWordPriority
+                nextViewController.wordType = self.voicevoxWordType
                 nextViewController.delegate = self
                 self.navigationController?.pushViewController(nextViewController, animated: true)
             })
@@ -340,6 +343,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 setting.voicevoxPronunciation = self.voicevoxPronunciation
                 setting.voicevoxAccentType = self.voicevoxAccentType
                 setting.voicevoxWordPriority = self.voicevoxWordPriority
+                setting.voicevoxWordType = self.voicevoxWordType.rawValue
                 setting.targetNovelIDArray.removeAll()
                 for novelID in self.targetNovelIDSet {
                     setting.targetNovelIDArray.append(novelID)
@@ -426,10 +430,11 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         row.updateCell()
     }
 
-    func voicevoxAccentSettingDidChange(pronunciation: String, accentType: Int, priority: Int) {
+    func voicevoxAccentSettingDidChange(pronunciation: String, accentType: Int, priority: Int, wordType: VoicevoxUserDictionaryWordType) {
         self.voicevoxPronunciation = pronunciation
         self.voicevoxAccentType = accentType
         self.voicevoxWordPriority = priority
+        self.voicevoxWordType = wordType
         DispatchQueue.main.async {
             self.updateVoicevoxAccentRowValue()
         }
