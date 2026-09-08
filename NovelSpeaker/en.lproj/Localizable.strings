@@ -1167,7 +1167,7 @@
 "VoicevoxVoiceModelManage_UsedByFormat" = "Used by speaker settings: %@";
 "VoicevoxVoiceModelManage_DeleteNotUsed" = "No speaker setting uses this voice model.";
 "VoicevoxVoiceModelManage_DeleteUsedFormat" = "Used by speaker settings: %@\nThe settings are kept as they are, so downloading again restores the original voice.";
-"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "Parts that already have pre-generated speech still play after deleting. Parts that do not cannot be read aloud until you download this voice model again.";
+"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "Parts that already have pre-generated speech still play after deleting. Parts that do not have pre-generated speech use the device's system voice until you download this voice model again.";
 "VoicevoxVoiceModelManage_DeleteTitle" = "Delete voice model";
 "VoicevoxVoiceModelManage_DeleteButton" = "Delete";
 "VoicevoxCredit_Title" = "VOICEVOX credit notice";

@@ -1148,7 +1148,7 @@
 "VoicevoxVoiceModelManage_UsedByFormat" = "使っている話者設定: %@";
 "VoicevoxVoiceModelManage_DeleteNotUsed" = "この音声モデルを使っている話者設定はありません。";
 "VoicevoxVoiceModelManage_DeleteUsedFormat" = "使っている話者設定: %@\n消しても設定はそのままにしておくので、取り直せば元の声に戻ります。";
-"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "事前生成音声がある箇所は、消した後もそのまま再生できます。作っていない箇所は、この音声モデルを取り直すまで読み上げできません。";
+"VoicevoxVoiceModelManage_DeleteWhatStillWorks" = "事前生成音声がある箇所は、消した後もそのまま再生できます。作っていない箇所は、音声モデルを取り直すまで端末の音声で読み上げます。";
 "VoicevoxVoiceModelManage_DeleteTitle" = "音声モデルを削除";
 "VoicevoxVoiceModelManage_DeleteButton" = "削除";
 "VoicevoxCredit_Title" = "VOICEVOX のクレジット表記";
