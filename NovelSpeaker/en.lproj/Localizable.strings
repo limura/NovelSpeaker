@@ -1417,25 +1417,47 @@
 "SettingsViewController_Section_Buttons" = "Buttons on the screen";
 "SettingsViewController_Section_About" = "About this app";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.13.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.14.0 (2.14.0)
 
-- In the \"Settings tab\" → \"Send inquiries to developers via E-mail\", the \"Select the novels in which the error occurs\" list can now be narrowed down by searching.
-- Added \"Select All\" to the menu that appears when you select text on the novel text screen.
-- Added an \"Add this page to another novel\" button to the buttons displayed in the upper right corner of the novel text screen.
-- Added \"Add this page to another novel\" and \"Append this novel to the end of another novel\" buttons to the \"Manipulation on this novel\" section of \"Novel detail\".
-- Added a button that clears the entered text (shown as an \"x\") to the text fields on the SiteInfo editing and testing screen in the \"Settings tab\" → \"Edit / add priority SiteInfo\".
-- While reading aloud, scrolling the text yourself now pauses the automatic scrolling to the speech position for a while.
-- Long pressing the text while reading aloud now shows \"Speak from here\".
-- Added \"Buttons shown at the bottom of the novel text screen\" to the \"Settings tab\".
-- Renamed \"Spacing between the buttons at the top right of the screen\" in the \"Settings tab\" to \"Spacing between the buttons on the novel text screen and the bookshelf screen\".
-- Added a confirmation to \"Clear notification\" in the \"Settings tab\" → \"Notification of in-app error\".
-- Fixed several problems with the buttons displayed in the upper right corner of the bookshelf screen and the novel text screen.
-- Fixed an issue where an unintended closing parenthesis could remain when importing text that uses ruby tags.
-- Added items that could not be configured before to \"Long press menu items left behind\", which appears when \"Long press only pops: corrections for pronounciation\" in the \"Settings tab\" is turned on.
+- Added VOICEVOX support
+- Added Apple Watch support
+- Added iPhone widgets
+- Changed the behavior in several situations where reading aloud stops for reasons other than user actions
+- In multi-novel selection interfaces, such as the “Apply to” list on the “Reading Correction Details” screen, made it possible to group checked novels near the top
+- Added “Create reading corrections from ruby” to the “Novel Details” screen
+- Added three folder-grouping modes and search filters to the bookshelf, and improved the performance of existing sorting operations
+- Under “Action when playback reaches the end,” added the ability to skip novels whose text is missing, as well as selection methods such as “Same folder”
+- Added headings to the items in the “Settings” tab and reorganized their order
+- Fixed an issue that could cause EUC-JP decoding to fail when the text contained JIS X 0212 (supplementary kanji)
+- Improved the behavior when reading aloud stops after a Bluetooth device is disconnected
+- Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
+- Fixed crashes that could occur when skipping across chapter boundaries
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.14.0 (2.14.0)
+
+Interface and internal behavior changes
+
+- Added VOICEVOX support
+- Added Apple Watch support
+- Added iPhone widgets
+- Changed the behavior in several situations where reading aloud stops for reasons other than user actions
+- In multi-novel selection interfaces, such as the “Apply to” list on the “Reading Correction Details” screen, made it possible to group checked novels near the top
+- Added “Create reading corrections from ruby” to the “Novel Details” screen
+- Added three folder-grouping modes and search filters to the bookshelf, and improved the performance of existing sorting operations
+- Under “Action when playback reaches the end,” added the ability to skip novels whose text is missing, as well as selection methods such as “Same folder”
+- Added headings to the items in the “Settings” tab and reorganized their order
+
+Bug fixes
+
+- Fixed an issue that could cause EUC-JP decoding to fail when the text contained JIS X 0212 (supplementary kanji)
+- Improved the behavior when reading aloud stops after a Bluetooth device is disconnected
+- Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
+- Fixed crashes that could occur when skipping across chapter boundaries
+
+
 Version 2.13.0
 
 Changes in interface/internal operation

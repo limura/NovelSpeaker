@@ -4570,3 +4570,114 @@ Fixing the problem
 - Fixed several problems with the buttons displayed in the upper right corner of the bookshelf screen and the novel text screen.
 - Fixed an issue where an unintended closing parenthesis could remain when importing text that uses ruby tags.
 - Added items that could not be configured before to "Long press menu items left behind", which appears when "Long press only pops: corrections for pronounciation" in the "Settings tab" is turned on.
+
+
+# Version 2.14.0 (2.14.0)
+
+インタフェース・内部動作の変更
+
+- VOICEVOX 対応を追加
+- Apple Watch 対応を追加
+- iPhone ウィジェットを追加
+- ユーザからの操作以外の発話が停止するタイミングなどでの挙動をいくつか変更
+- 「読みの修正詳細」画面の「適用対象」などの小説のリストから複数の小説を選択するインタフェースで、チェックのついている小説などを画面上部にまとめるように
+- 「小説の詳細」画面に「ルビから読みの修正を作る」を追加
+- 本棚のフォルダ分類3種と検索絞り込みの追加+高速化
+- 「再生が末尾に達した時の動作」で本文が消えた小説を読み飛ばす+「同じフォルダ」等の選択方式追加
+- 「設定タブ」の項目に見出しを付けて並びを整理
+
+問題の修正
+
+- JIS X 0212(補助漢字)を含む EUC-JP のデコードに失敗する可能性があった問題を修正
+- Bluetooth の切断時に読み上げが停止した時の挙動を少し改善
+- 本棚の日付フォルダ分類でフォルダ内が古い順になっていた問題の修正
+- 章を跨いだスキップ操作でクラッシュする場合があった問題の修正
+
+以下にざっくりと説明していきます。
+
+- VOICEVOX 対応を追加
+
+VOICEVOX core を利用させていただいて、ことせかい で VOICEVOX の音声を利用できるようにしました。
+「設定タブ」→「発話設定」の項目に「読み上げエンジン」が追加されました。ここで VOICEVOX を選択することで、「VOICEVOX 話者」を選択することができるようになります。
+VOICEVOX での発話周りはCPU負荷が高く、長時間連続して動作させようとするとそのCPU負荷により熱を持ってしまいその熱を出させないようにするためにCPU性能を発揮できなくなることや、電源に接続されていない場合やバックグラウンド動作をしている場合などではCPUの性能を一部しか使えないなどの制約があるため、今現在発売されている多くの端末では発話させる速度よりも生成される速度の方が遅くなる場合が多くなっています。
+そのため、そのような場合には発話速度を遅くして対応していただくか、事前生成音声の生成を行うことで回避していただくような形になっています。
+詳しい利用方法については「はじめに ことせかい の使い方」に追記しましたのでそちらをご参照ください。
+
+- Apple Watch 対応を追加
+
+Apple Watch にコンパニオンアプリを追加する形で実装しました。
+こちらのコンパニオンアプリを使うことで、Watch から iPhone上 の ことせかい の制御や、Watch 単体での小説の発話などができるようになります。
+コンプリケーションへの対応もいくつか入れていますのでご利用ください。
+
+- iPhone ウィジェットを追加
+
+Apple Watch のコンプリケーションで実行できるような機能をウィジェットとしても実装しました。特定の小説の読み上げを開始したりするようなウィジェットを設置することができるようになったりします。
+ロック画面やコントロールセンター側のウィジェットとしてもいくつかの機能が登録できるようにしています。
+なお、コントロールセンターでのウィジェットは iOS 18 以降の機能となります。
+
+- ユーザからの操作以外の発話が停止するタイミングなどでの挙動をいくつか変更
+
+仕掛けてあるタイマーが鳴ったり電話がかかってきたり、音楽アプリで音楽を再生し始めたりといったタイミングで ことせかい 側の発話が停止されるような時の対応を少し変更しています。
+
+- 「読みの修正詳細」画面の「適用対象」などの小説のリストから複数の小説を選択するインタフェースで、チェックのついている小説などを画面上部にまとめるように
+
+リストを開いた時には既に選択されているものが見やすい位置に出てくるようになり、選択済みの小説を発見しやすくなります。
+
+- 「小説の詳細」画面に「ルビから読みの修正を作る」を追加
+
+その小説の本文中に出てくるルビ表記から「読み替え辞書」を抽出して登録できるようにするためのものです。
+文章量やルビの量が多い小説の場合には抽出に時間がかかるかもしれません。
+
+- 本棚のフォルダ分類3種と検索絞り込みの追加+高速化
+
+「本棚画面」右上の「順番」ボタンでのフォルダ分類を増やして、高速化しています。
+
+- 「再生が末尾に達した時の動作」で本文が消えた小説を読み飛ばす+「同じフォルダ」等の選択方式追加
+
+何らかの問題で本文が存在しない小説があった場合にそこで発話が終了していたのを修正しています。
+
+- 「設定タブ」の項目に見出しを付けて並びを整理
+
+こちらは「設定タブ」の項目がたくさん増えてしまって見辛くなっていたので、少しでも見やすくしようと足掻いた感じになります。
+なお、階層化してしまうと発見しづらくなると考えたため、一覧で表示される状態のままにしてあります。
+
+- JIS X 0212(補助漢字)を含む EUC-JP のデコードに失敗する可能性があった問題を修正
+
+EUC-JP で記述されているWebページの取り込み失敗や文字化けが減るはずです。
+
+- Bluetooth の切断時に読み上げが停止した時の挙動を少し改善
+
+発話中に Bluetooth機器 を取り外した場合の挙動で、発話開始位置を少し戻す処理が働かない場合があった問題の修正をしています。
+また、車載オーディオも Bluetooth機器 と同じ扱いにするようにしました。
+
+- 本棚の日付フォルダ分類でフォルダ内が古い順になっていた問題の修正
+
+これはそのままの意味ですね。
+
+- 章を跨いだスキップ操作でクラッシュする場合があった問題の修正
+
+これは章を跨いだところで発話させながら「少し前へ進む」や「少し後ろへ戻る」を交互に連打しているとアプリが強制終了するパターンがありました。
+
+以上となります。
+
+
+# Version 2.14.0 (2.14.0)
+
+Interface and internal behavior changes
+
+- Added VOICEVOX support
+- Added Apple Watch support
+- Added iPhone widgets
+- Changed the behavior in several situations where reading aloud stops for reasons other than user actions
+- In multi-novel selection interfaces, such as the “Apply to” list on the “Reading Correction Details” screen, made it possible to group checked novels near the top
+- Added “Create reading corrections from ruby” to the “Novel Details” screen
+- Added three folder-grouping modes and search filters to the bookshelf, and improved the performance of existing sorting operations
+- Under “Action when playback reaches the end,” added the ability to skip novels whose text is missing, as well as selection methods such as “Same folder”
+- Added headings to the items in the “Settings” tab and reorganized their order
+
+Bug fixes
+
+- Fixed an issue that could cause EUC-JP decoding to fail when the text contained JIS X 0212 (supplementary kanji)
+- Improved the behavior when reading aloud stops after a Bluetooth device is disconnected
+- Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
+- Fixed crashes that could occur when skipping across chapter boundaries
