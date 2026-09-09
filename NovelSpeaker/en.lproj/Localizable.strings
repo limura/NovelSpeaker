@@ -1432,6 +1432,7 @@
 - Improved the behavior when reading aloud stops after a Bluetooth device is disconnected
 - Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
 - Fixed crashes that could occur when skipping across chapter boundaries
+- Fixed a crash when creating backup data via “Create backup” in the “Settings” tab.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -1456,6 +1457,7 @@ Bug fixes
 - Improved the behavior when reading aloud stops after a Bluetooth device is disconnected
 - Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
 - Fixed crashes that could occur when skipping across chapter boundaries
+- Fixed a crash when creating backup data via “Create backup” in the “Settings” tab.
 
 
 Version 2.13.0

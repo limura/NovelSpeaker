@@ -4592,6 +4592,7 @@ Fixing the problem
 - Bluetooth の切断時に読み上げが停止した時の挙動を少し改善
 - 本棚の日付フォルダ分類でフォルダ内が古い順になっていた問題の修正
 - 章を跨いだスキップ操作でクラッシュする場合があった問題の修正
+- 「設定タブ」→「バックアップ用データの生成」でバックアップデータを生成しようとすると強制終了していた問題を修正
 
 以下にざっくりと説明していきます。
 
@@ -4658,6 +4659,10 @@ EUC-JP で記述されているWebページの取り込み失敗や文字化け�
 
 これは章を跨いだところで発話させながら「少し前へ進む」や「少し後ろへ戻る」を交互に連打しているとアプリが強制終了するパターンがありました。
 
+- 「設定タブ」→「バックアップ用データの生成」でバックアップデータを生成しようとすると強制終了していた問題を修正
+
+これもそのままですね。
+
 以上となります。
 
 
@@ -4681,3 +4686,4 @@ Bug fixes
 - Improved the behavior when reading aloud stops after a Bluetooth device is disconnected
 - Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
 - Fixed crashes that could occur when skipping across chapter boundaries
+- Fixed a crash when creating backup data via “Create backup” in the “Settings” tab.
