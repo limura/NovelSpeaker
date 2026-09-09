@@ -2087,8 +2087,8 @@ class NovelSpeakerUtility: NSObject {
                 if let scrollFollowSuspendSecond = dic.object(forKey: "scrollFollowSuspendSecond") as? NSNumber {
                     globalState.scrollFollowSuspendSecond = min(RealmGlobalState.scrollFollowSuspendSecondMax, max(0, scrollFollowSuspendSecond.intValue))
                 }
-                if let speechViewBottomButtonSettingArrayData = dic.object(forKey: "speechViewBottomButtonSettingArrayData") as? Data {
-                    globalState.speechViewBottomButtonSettingArrayData = speechViewBottomButtonSettingArrayData
+                if let speechViewBottomButtonSettingArrayData = dic.object(forKey: "speechViewBottomButtonSettingArrayData") as? String, let data = Data(base64Encoded: speechViewBottomButtonSettingArrayData) {
+                    globalState.speechViewBottomButtonSettingArrayData = data
                 }
                 if let isSpeechViewBottomButtonOverlapsChapterBar = dic.object(forKey: "isSpeechViewBottomButtonOverlapsChapterBar") as? NSNumber {
                     globalState.isSpeechViewBottomButtonOverlapsChapterBar = isSpeechViewBottomButtonOverlapsChapterBar.boolValue
@@ -2776,7 +2776,7 @@ class NovelSpeakerUtility: NSObject {
                 "isDynamicNovelDownloadThrottleEnabled": globalState.isDynamicNovelDownloadThrottleEnabled,
                 "baseMaxConcurrentNovelDownloadCount": globalState.baseMaxConcurrentNovelDownloadCount,
                 "scrollFollowSuspendSecond": globalState.scrollFollowSuspendSecond,
-                "speechViewBottomButtonSettingArrayData": globalState.speechViewBottomButtonSettingArrayData,
+                "speechViewBottomButtonSettingArrayData": globalState.speechViewBottomButtonSettingArrayData.base64EncodedString(),
                 "isSpeechViewBottomButtonOverlapsChapterBar": globalState.isSpeechViewBottomButtonOverlapsChapterBar,
                 "supportRotationMask": NovelSpeakerUtility.supportRotationMask.rawValue,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
