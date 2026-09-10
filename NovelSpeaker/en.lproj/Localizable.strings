@@ -1433,11 +1433,12 @@
 - Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
 - Fixed crashes that could occur when skipping across chapter boundaries
 - Fixed a crash when creating backup data via “Create backup” in the “Settings” tab.
+- Fixed an issue that caused the app to crash when opening “Specify the portion of each website to be included.” from the “Settings” tab.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
-Version 2.14.0 (2.14.0)
+Version 2.14.0
 
 Interface and internal behavior changes
 
@@ -1458,7 +1459,7 @@ Bug fixes
 - Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
 - Fixed crashes that could occur when skipping across chapter boundaries
 - Fixed a crash when creating backup data via “Create backup” in the “Settings” tab.
-
+- Fixed an issue that caused the app to crash when opening “Specify the portion of each website to be included.” from the “Settings” tab.
 
 Version 2.13.0
 

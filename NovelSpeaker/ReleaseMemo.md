@@ -4572,7 +4572,7 @@ Fixing the problem
 - Added items that could not be configured before to "Long press menu items left behind", which appears when "Long press only pops: corrections for pronounciation" in the "Settings tab" is turned on.
 
 
-# Version 2.14.0 (2.14.0)
+# Version 2.14.0
 
 インタフェース・内部動作の変更
 
@@ -4593,6 +4593,7 @@ Fixing the problem
 - 本棚の日付フォルダ分類でフォルダ内が古い順になっていた問題の修正
 - 章を跨いだスキップ操作でクラッシュする場合があった問題の修正
 - 「設定タブ」→「バックアップ用データの生成」でバックアップデータを生成しようとすると強制終了していた問題を修正
+- 「設定タブ」→「Webサイト毎の取込対象を指定する」を開こうとすると強制終了する問題を修正
 
 以下にざっくりと説明していきます。
 
@@ -4660,13 +4661,14 @@ EUC-JP で記述されているWebページの取り込み失敗や文字化け�
 これは章を跨いだところで発話させながら「少し前へ進む」や「少し後ろへ戻る」を交互に連打しているとアプリが強制終了するパターンがありました。
 
 - 「設定タブ」→「バックアップ用データの生成」でバックアップデータを生成しようとすると強制終了していた問題を修正
+- 「設定タブ」→「Webサイト毎の取込対象を指定する」を開こうとすると強制終了する問題を修正
 
-これもそのままですね。
+これらもそのままですね。
 
 以上となります。
 
 
-# Version 2.14.0 (2.14.0)
+# Version 2.14.0
 
 Interface and internal behavior changes
 
@@ -4687,3 +4689,4 @@ Bug fixes
 - Fixed an issue where novels inside date-based bookshelf folders were ordered from oldest to newest
 - Fixed crashes that could occur when skipping across chapter boundaries
 - Fixed a crash when creating backup data via “Create backup” in the “Settings” tab.
+- Fixed an issue that caused the app to crash when opening “Specify the portion of each website to be included.” from the “Settings” tab.
