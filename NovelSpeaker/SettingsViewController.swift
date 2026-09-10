@@ -57,7 +57,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         guard let siteInfo = siteInfoArray.first else { return }
         let swiftUIView = RealmUtil.RealmBlock { realm in
             let setting = RealmNovelImportSetting.GetNovelImportSetting(realm: realm, scopeType: scopeType, siteInfoId: siteInfo.id, novelID: novelID)
-            return NovelImportSettingTargetSelectionView(site: siteInfo, scopeType: scopeType, novelID: novelID, setting: setting?.thaw()).environment(\.realmConfiguration, realm.configuration)
+            return NovelImportSettingTargetSelectionView(site: siteInfo, scopeType: scopeType, novelID: novelID, setting: setting?.thaw(), dismissOnRealmSettingChanged: true).environment(\.realmConfiguration, realm.configuration)
         }
         let hostingController = UIHostingController(rootView: swiftUIView)
         self.navigationController?.pushViewController(hostingController, animated: true)

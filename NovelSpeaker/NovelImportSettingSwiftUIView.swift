@@ -96,16 +96,19 @@ struct NovelImportSettingTargetSelectionView: View {
     let site: StorySiteInfo
     let scopeType: RealmNovelImportSetting.ScopeType
     let novelID: String?
+    let dismissOnRealmSettingChanged: Bool
+    @Environment(\.presentationMode) var presentationMode
 
     // 特定の1つのオブジェクトを監視対象として受け取る
     // ObservedObjectにすることで、内部の targets (List) の変更が確実に反映されます
     @ObservedObject var setting: RealmNovelImportSetting
 
     // 設定がない場合（新規用）を考慮してイニシャライザを調整する場合
-    init(site: StorySiteInfo, scopeType: RealmNovelImportSetting.ScopeType = .site, novelID: String? = nil, setting: RealmNovelImportSetting?) {
+    init(site: StorySiteInfo, scopeType: RealmNovelImportSetting.ScopeType = .site, novelID: String? = nil, setting: RealmNovelImportSetting?, dismissOnRealmSettingChanged: Bool = false) {
         self.site = site
         self.scopeType = scopeType
         self.novelID = novelID
+        self.dismissOnRealmSettingChanged = dismissOnRealmSettingChanged
         if let managedSetting = setting {
             self.setting = managedSetting
         } else {
@@ -165,6 +168,10 @@ struct NovelImportSettingTargetSelectionView: View {
         }
         .onAppear {
             normalizeSelectionIfNeeded()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name.NovelSpeaker.RealmSettingChanged)) { _ in
+            guard dismissOnRealmSettingChanged else { return }
+            presentationMode.wrappedValue.dismiss()
         }
         .navigationTitle(site.name ?? "-")
     }
