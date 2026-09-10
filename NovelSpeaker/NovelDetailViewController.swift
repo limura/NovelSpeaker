@@ -639,7 +639,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     let uniqueSiteInfoArray = Dictionary(siteInfoArray.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.map { $0 }
                     guard !uniqueSiteInfoArray.isEmpty else { return }
                     let swiftUIView = RealmUtil.RealmBlock { realm in
-                        return NovelImportSettingSwiftUIView(sites: uniqueSiteInfoArray, scopeType: .novel, novelID: self.novelID).environment(\.realmConfiguration, realm.configuration)
+                        return NovelImportSettingSwiftUIView(sites: uniqueSiteInfoArray, scopeType: .novel, novelID: self.novelID, realmConfiguration: realm.configuration).environment(\.realmConfiguration, realm.configuration)
                     }
                     let hostingController = UIHostingController(rootView: swiftUIView)
                     self.navigationController?.pushViewController(hostingController, animated: true)

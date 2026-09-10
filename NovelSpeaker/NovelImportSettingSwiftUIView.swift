@@ -23,14 +23,16 @@ struct NovelImportSettingSwiftUIView: View {
     let sites: [StorySiteInfo]
     let scopeType: RealmNovelImportSetting.ScopeType
     let novelID: String?
-    @ObservedResults(RealmNovelImportSetting.self) var settings
+    @ObservedResults var settings: Results<RealmNovelImportSetting>
     @Environment(\.realmConfiguration) var realmConfig
+    @Environment(\.presentationMode) var presentationMode
     @State private var effectiveSelectedCounts:[String:Int] = [:]
 
-    init(sites: [StorySiteInfo], scopeType: RealmNovelImportSetting.ScopeType = .site, novelID: String? = nil) {
+    init(sites: [StorySiteInfo], scopeType: RealmNovelImportSetting.ScopeType = .site, novelID: String? = nil, realmConfiguration: Realm.Configuration) {
         self.sites = sites
         self.scopeType = scopeType
         self.novelID = novelID
+        self._settings = ObservedResults(RealmNovelImportSetting.self, configuration: realmConfiguration)
     }
 
     var body: some View {
@@ -62,6 +64,11 @@ struct NovelImportSettingSwiftUIView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NovelImportSettingSwiftUIView.settingDidChangeNotification)) { _ in
             refreshEffectiveSelectedCounts()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name.NovelSpeaker.RealmSettingChanged)) { _ in
+            // ObservedResults keeps the configuration captured at initialization.
+            // Leave this screen before the app switches to the other Realm.
+            presentationMode.wrappedValue.dismiss()
         }
     }
 

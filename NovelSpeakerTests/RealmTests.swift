@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import RealmSwift
 @testable import NovelSpeaker
 
 class RealmTests: XCTestCase {
@@ -53,6 +54,40 @@ class RealmTests: XCTestCase {
     func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
+    }
+
+    // NovelImportSettingSwiftUIView の init 前に ObservedResults が default Realm を
+    // 開かず、init に渡した Realm.Configuration を使うことを確認する。
+    func testNovelImportSettingSwiftUIViewUsesConfigurationPassedToInit() throws {
+        let originalDefaultConfiguration = Realm.Configuration.defaultConfiguration
+        defer {
+            Realm.Configuration.defaultConfiguration = originalDefaultConfiguration
+        }
+
+        let defaultIdentifier = "RealmTests.default.\(UUID().uuidString)"
+        let passedIdentifier = "RealmTests.passed.\(UUID().uuidString)"
+
+        let defaultConfiguration = Realm.Configuration(inMemoryIdentifier: defaultIdentifier)
+        var passedConfiguration = Realm.Configuration(inMemoryIdentifier: passedIdentifier)
+        passedConfiguration.schemaVersion = RealmUtil.currentSchemaVersion
+        passedConfiguration.migrationBlock = RealmUtil.MigrateFunc
+
+        // default Realm と init に渡す Realm に、あえて別のデータを入れる。
+        Realm.Configuration.defaultConfiguration = defaultConfiguration
+        let defaultRealm = try Realm(configuration: defaultConfiguration)
+        try defaultRealm.write {
+            defaultRealm.add(RealmNovelImportSetting.Create(scopeType: .site, siteInfoId: "default", novelID: nil))
+        }
+
+        let passedRealm = try Realm(configuration: passedConfiguration)
+        try passedRealm.write {
+            passedRealm.add(RealmNovelImportSetting.Create(scopeType: .site, siteInfoId: "passed", novelID: nil))
+        }
+
+        let view = NovelImportSettingSwiftUIView(sites: [], realmConfiguration: passedConfiguration)
+        let settingIDs = Array(view.settings.map(\.id))
+
+        XCTAssertEqual(settingIDs, ["site:passed"])
     }
 
     func testPerformanceExample() {
