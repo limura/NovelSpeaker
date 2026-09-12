@@ -1262,7 +1262,7 @@
 "VoicevoxStyleSelect_DownloadableRowHint" = "Select to show the terms of use and download the voice model. The detail button opens the official character page.";
 
 "VoicevoxCacheManageViewController_NoNovelMatchesFormat" = "No novel matches \"%@\"";
-"AppInformationLogger_SameLogFoundMessage_Format" = "%@ notices with the same content";
+"AppInformationLogger_SameLogFoundMessage_Format" = "%d notices with the same content";
 "BookShelfTreeViewController_checkboxselected_AssignUniqueSpeechMod" = "Assign a separate pronunciation dictionary to the selected novels";
 "Cancel" = "Cancel";
 "EditBookViewController_SubTitleTextField_AccesibilityLabel" = "Subtitle";

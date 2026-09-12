@@ -1243,7 +1243,7 @@
 "VoicevoxStyleSelect_DownloadableRowHint" = "選ぶと利用規約を出して音声モデルを取得します。詳細ボタンで公式サイトの紹介ページを開きます。";
 
 "VoicevoxCacheManageViewController_NoNovelMatchesFormat" = "「%@」に一致する小説はありません";
-"AppInformationLogger_SameLogFoundMessage_Format" = "同じ内容のお知らせが %@ 件ありました";
+"AppInformationLogger_SameLogFoundMessage_Format" = "同じ内容のお知らせが %d 件ありました";
 "BookShelfTreeViewController_checkboxselected_AssignUniqueSpeechMod" = "選択した小説に個別の読み替え辞書を割り当てる";
 "Cancel" = "キャンセル";
 "EditBookViewController_SubTitleTextField_AccesibilityLabel" = "副題";

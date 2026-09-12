@@ -316,7 +316,7 @@ class AppInformationLogger : NSObject {
                 sameLogIsForDebug = prevLog.isForDebug
             }else{
                 if sameCount > 1 {
-                    result.append(AppInformationLog(message: String(format: NSLocalizedString("AppInformationLogger_SameLogFoundMessage_Format", comment: "%d回同じメッセージが繰り返されています。"), sameCount), date: sameLogDate, appendix: [:], isForDebug: sameLogIsForDebug, file: log.file, line: log.line, function: log.function))
+                    result.append(AppInformationLog(message: String(format: NSLocalizedString("AppInformationLogger_SameLogFoundMessage_Format", comment: "%d回同じメッセージが繰り返されています。"), Int32(sameCount)), date: sameLogDate, appendix: [:], isForDebug: sameLogIsForDebug, file: log.file, line: log.line, function: log.function))
                 }
                 sameCount = 1
                 prevLog = log
