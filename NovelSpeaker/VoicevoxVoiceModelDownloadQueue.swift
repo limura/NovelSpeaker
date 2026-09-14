@@ -49,6 +49,30 @@ enum VoicevoxVoiceModelDownloadPolicy {
     /// 取得後もこれだけは空けておく。使い切ると端末全体が不調になるため。
     static let minimumFreeBytesAfterDownload: Int64 = 500 * 1024 * 1024
 
+    /// URLSessionのタスクに渡す通信設定を、リクエストへ反映する。
+    /// URLSessionTask作成後は allowsCellularAccess を変更できないため、
+    /// 設定変更時はこの値で新しいリクエストを作る。
+    static func urlRequest(url: URL, allowsCellularAccess: Bool) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.allowsCellularAccess = allowsCellularAccess
+        return request
+    }
+
+    static func needsCellularAccessReconfiguration(
+        currentTaskAllowsCellularAccess: Bool?,
+        desiredAllowsCellularAccess: Bool) -> Bool {
+        guard let currentTaskAllowsCellularAccess = currentTaskAllowsCellularAccess else {
+            return true
+        }
+        return currentTaskAllowsCellularAccess != desiredAllowsCellularAccess
+    }
+
+    static func canUseResumeData(
+        resumeDataAllowsCellularAccess: Bool,
+        desiredAllowsCellularAccess: Bool) -> Bool {
+        resumeDataAllowsCellularAccess == desiredAllowsCellularAccess
+    }
+
     static func blocker(byteSize: Int64,
                         isAlreadyStored: Bool,
                         isOnCellular: Bool,
@@ -94,10 +118,25 @@ final class VoicevoxVoiceModelDownloadQueue {
     /// - Returns: 実際に積んだら true
     @discardableResult
     func enqueue(_ request: VoicevoxVoiceModelDownloadRequest) -> Bool {
+        return enqueue(request, atFront: false)
+    }
+
+    /// 取得を先頭に戻して積み直す。通信設定の変更でタスクを作り直す時に使う。
+    @discardableResult
+    func enqueueAtFront(_ request: VoicevoxVoiceModelDownloadRequest) -> Bool {
+        return enqueue(request, atFront: true)
+    }
+
+    @discardableResult
+    private func enqueue(_ request: VoicevoxVoiceModelDownloadRequest, atFront: Bool) -> Bool {
         lock.lock(); defer { lock.unlock() }
         if active?.modelID == request.modelID { return false }
         if waiting.contains(where: { $0.modelID == request.modelID }) { return false }
-        waiting.append(request)
+        if atFront {
+            waiting.insert(request, at: 0)
+        } else {
+            waiting.append(request)
+        }
         progress[request.modelID] = .queued
         return true
     }

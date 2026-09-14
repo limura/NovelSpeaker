@@ -14,7 +14,8 @@
 //  (URLSession から切り離してテストできるようにするため)。
 //  ここはその判断に従って実際に投げる係。
 //
-//  **モバイル通信の扱いは OS に任せる。** allowsCellularAccess = false にしておけば、
+//  **モバイル通信の扱いは OS に任せる。** リクエストの
+//  allowsCellularAccess = false にしておけば、
 //  background session は Wi-Fi に繋がるまで**待ってくれる**(失敗にならない)。
 //  自前で回線を監視して止めるより確実で、繋がった瞬間に勝手に再開する。
 //
@@ -36,7 +37,13 @@ final class VoicevoxVoiceModelDownloader: NSObject {
     /// モバイル通信でも取得してよいか。既定は Wi-Fi のみ。
     static var allowsCellularAccess: Bool {
         get { return UserDefaults.standard.bool(forKey: allowsCellularAccessKey) }
-        set { UserDefaults.standard.set(newValue, forKey: allowsCellularAccessKey) }
+        set {
+            let changed = Self.allowsCellularAccess != newValue
+            UserDefaults.standard.set(newValue, forKey: allowsCellularAccessKey)
+            if changed {
+                Self.shared.applyCellularAccessPolicyIfNeeded()
+            }
+        }
     }
     private static let allowsCellularAccessKey = "VoicevoxVoiceModelDownloadAllowsCellular"
 
@@ -50,16 +57,32 @@ final class VoicevoxVoiceModelDownloader: NSObject {
     /// 走っているタスクを、途中で止められるように覚えておく。
     private let taskLock = NSLock()
     private var activeTask: URLSessionDownloadTask?
+    private var activeRequest: VoicevoxVoiceModelDownloadRequest?
     /// 中断からの再開に使うデータ(取得先が Range に対応していれば OS が作る)。
-    private var resumeDataByModelID: [String: Data] = [:]
+    private struct ResumeData {
+        let data: Data
+        let allowsCellularAccess: Bool
+    }
+    private var resumeDataByModelID: [String: ResumeData] = [:]
+
+    /// 通信設定の変更でキャンセルしたタスク。通常の失敗として扱わず、
+    /// キャンセル完了後に新しい設定で作り直す。
+    private struct PolicyReconfiguration {
+        let request: VoicevoxVoiceModelDownloadRequest
+        var cancellationCallbackReceived = false
+        var taskDidComplete = false
+    }
+    private var policyReconfigurations: [Int: PolicyReconfiguration] = [:]
 
     private lazy var session: URLSession = {
         let configuration = URLSessionConfiguration.background(withIdentifier: Self.sessionIdentifier)
         // 電池と通信量に優しくしてもらう。急ぐ物ではない。
         configuration.isDiscretionary = false
         configuration.sessionSendsLaunchEvents = true
-        configuration.allowsCellularAccess = Self.allowsCellularAccess
-        configuration.waitsForConnectivity = true
+        // 回線の許可・禁止はタスクごとの URLRequest で決める。
+        // ここを設定値にすると、設定変更後も既存の background session に
+        // 古い値が残り、新しいタスクまでセルラー通信できなくなる。
+        configuration.allowsCellularAccess = true
         return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }()
 
@@ -83,6 +106,106 @@ final class VoicevoxVoiceModelDownloader: NSObject {
                 self.startNextIfPossible()
             }
         }
+    }
+
+    /// 設定変更後も既存タスクに古い通信許可が残らないようにする。
+    /// URLSessionTask の allowsCellularAccess は後から変更できないため、
+    /// 途中データを残してタスクを作り直す。
+    private func applyCellularAccessPolicyIfNeeded() {
+        taskLock.lock()
+        let task = activeTask
+        let request = activeRequest
+        let isReconfiguring = policyReconfigurations.isEmpty == false
+        taskLock.unlock()
+
+        guard isReconfiguring == false else { return }
+        guard let task = task, let request = request else {
+            startNextIfPossible()
+            return
+        }
+        guard VoicevoxVoiceModelDownloadPolicy.needsCellularAccessReconfiguration(
+            currentTaskAllowsCellularAccess: task.currentRequest?.allowsCellularAccess,
+            desiredAllowsCellularAccess: Self.allowsCellularAccess) else {
+            return
+        }
+
+        let taskIdentifier = task.taskIdentifier
+        taskLock.lock()
+        policyReconfigurations[taskIdentifier] = PolicyReconfiguration(request: request)
+        taskLock.unlock()
+
+        // 通信許可が変わるため、resume data は新しい設定では使わない。
+        // 取得先が Range 対応でも、resume data 内の古い request を
+        // そのまま使うと古い通信許可が残る可能性があるため。
+        _ = queue.cancel(modelID: request.modelID)
+        task.cancel(byProducingResumeData: { [weak self] _ in
+            self?.policyCancellationCallbackReceived(taskIdentifier: taskIdentifier)
+        })
+        notifyChanged()
+    }
+
+    private func policyCancellationCallbackReceived(taskIdentifier: Int) {
+        var requestToRestart: VoicevoxVoiceModelDownloadRequest?
+        taskLock.lock()
+        if var reconfiguration = policyReconfigurations[taskIdentifier] {
+            reconfiguration.cancellationCallbackReceived = true
+            if reconfiguration.taskDidComplete {
+                policyReconfigurations.removeValue(forKey: taskIdentifier)
+                requestToRestart = reconfiguration.request
+            } else {
+                policyReconfigurations[taskIdentifier] = reconfiguration
+            }
+        }
+        taskLock.unlock()
+
+        if let requestToRestart = requestToRestart {
+            restartAfterPolicyChange(taskIdentifier: taskIdentifier, request: requestToRestart)
+        }
+    }
+
+    private func policyTaskDidComplete(taskIdentifier: Int) -> Bool {
+        var isPolicyReconfiguration = false
+        var requestToRestart: VoicevoxVoiceModelDownloadRequest?
+        taskLock.lock()
+        if var reconfiguration = policyReconfigurations[taskIdentifier] {
+            isPolicyReconfiguration = true
+            reconfiguration.taskDidComplete = true
+            if reconfiguration.cancellationCallbackReceived {
+                policyReconfigurations.removeValue(forKey: taskIdentifier)
+                requestToRestart = reconfiguration.request
+            } else {
+                policyReconfigurations[taskIdentifier] = reconfiguration
+            }
+        }
+        taskLock.unlock()
+
+        if let requestToRestart = requestToRestart {
+            restartAfterPolicyChange(taskIdentifier: taskIdentifier, request: requestToRestart)
+        }
+        return isPolicyReconfiguration
+    }
+
+    private func restartAfterPolicyChange(
+        taskIdentifier: Int,
+        request: VoicevoxVoiceModelDownloadRequest) {
+        // 通信設定が変わったため、古い設定で作られた resume data は捨てる。
+        resumeDataByModelID.removeValue(forKey: request.modelID)
+        taskLock.lock()
+        if activeTask?.taskIdentifier == taskIdentifier {
+            activeTask = nil
+            activeRequest = nil
+        } else if activeTask == nil && activeRequest?.modelID == request.modelID {
+            activeRequest = nil
+        }
+        taskLock.unlock()
+
+        // キャンセルと完了通知が競合した場合、既に保存済みになっている
+        // 可能性がある。二重取得はしない。
+        if store.isStored(modelID: request.modelID, readableFormats: readableFormats) == false {
+            _ = queue.enqueueAtFront(request)
+        }
+        notifyChanged()
+        startNextIfPossible()
     }
 
     // MARK: - 積む / 取り消す
@@ -117,6 +240,7 @@ final class VoicevoxVoiceModelDownloader: NSObject {
             taskLock.lock()
             let task = activeTask
             activeTask = nil
+            activeRequest = nil
             taskLock.unlock()
             task?.cancel()
         }
@@ -129,6 +253,7 @@ final class VoicevoxVoiceModelDownloader: NSObject {
         taskLock.lock()
         let task = activeTask
         activeTask = nil
+        activeRequest = nil
         taskLock.unlock()
         task?.cancel()
         notifyChanged()
@@ -136,13 +261,17 @@ final class VoicevoxVoiceModelDownloader: NSObject {
 
     private func startNextIfPossible() {
         guard let request = queue.startNext() else { return }
-        var urlRequest = URLRequest(url: request.url)
-        urlRequest.allowsCellularAccess = Self.allowsCellularAccess
+        let allowsCellularAccess = Self.allowsCellularAccess
+        let urlRequest = VoicevoxVoiceModelDownloadPolicy.urlRequest(
+            url: request.url, allowsCellularAccess: allowsCellularAccess)
 
         let task: URLSessionDownloadTask
         // 途中まで落ちていれば、そこから再開する(取得先は Range に対応している)。
-        if let resumeData = resumeDataByModelID.removeValue(forKey: request.modelID) {
-            task = session.downloadTask(withResumeData: resumeData)
+        if let resumeData = resumeDataByModelID.removeValue(forKey: request.modelID),
+           VoicevoxVoiceModelDownloadPolicy.canUseResumeData(
+               resumeDataAllowsCellularAccess: resumeData.allowsCellularAccess,
+               desiredAllowsCellularAccess: allowsCellularAccess) {
+            task = session.downloadTask(withResumeData: resumeData.data)
         } else {
             task = session.downloadTask(with: urlRequest)
         }
@@ -150,6 +279,7 @@ final class VoicevoxVoiceModelDownloader: NSObject {
         task.taskDescription = request.modelID
         taskLock.lock()
         activeTask = task
+        activeRequest = request
         taskLock.unlock()
         task.resume()
         notifyChanged()
@@ -200,18 +330,36 @@ extension VoicevoxVoiceModelDownloader: URLSessionDownloadDelegate {
                 message: "VOICEVOXの音声モデル \(modelID).vvm の取得に失敗しました: \(Self.describe(storeError: error))",
                 isForDebug: true)
         }
-        taskLock.lock(); activeTask = nil; taskLock.unlock()
+        taskLock.lock()
+        if activeTask?.taskIdentifier == downloadTask.taskIdentifier {
+            activeTask = nil
+            activeRequest = nil
+        }
+        taskLock.unlock()
         notifyChanged()
         startNextIfPossible()
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let modelID = task.taskDescription else { return }
+        if policyTaskDidComplete(taskIdentifier: task.taskIdentifier) {
+            // 設定変更に伴うキャンセル。失敗表示や queue.fail は行わない。
+            taskLock.lock()
+            if activeTask?.taskIdentifier == task.taskIdentifier {
+                activeTask = nil
+            }
+            taskLock.unlock()
+            notifyChanged()
+            return
+        }
         guard let error = error else { return } // 成功時は didFinishDownloadingTo で処理済み
         let nsError = error as NSError
+        let resumeData = nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
         // 途中まで落ちていれば取っておく。次に積まれた時、そこから再開できる。
-        if let resumeData = nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
-            resumeDataByModelID[modelID] = resumeData
+        if let resumeData = resumeData {
+            resumeDataByModelID[modelID] = ResumeData(
+                data: resumeData,
+                allowsCellularAccess: task.currentRequest?.allowsCellularAccess ?? Self.allowsCellularAccess)
         }
         if nsError.code == NSURLErrorCancelled {
             // 利用者が取り消した。失敗としては記録しない。
@@ -222,7 +370,12 @@ extension VoicevoxVoiceModelDownloader: URLSessionDownloadDelegate {
                 message: "VOICEVOXの音声モデル \(modelID).vvm の取得に失敗しました: \(error.localizedDescription)",
                 isForDebug: true)
         }
-        taskLock.lock(); activeTask = nil; taskLock.unlock()
+        taskLock.lock()
+        if activeTask?.taskIdentifier == task.taskIdentifier {
+            activeTask = nil
+            activeRequest = nil
+        }
+        taskLock.unlock()
         notifyChanged()
         startNextIfPossible()
     }

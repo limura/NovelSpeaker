@@ -35,6 +35,42 @@ class VoicevoxVoiceModelDownloadQueueTest: XCTestCase {
                 isOnCellular: true, allowsCellular: true, freeBytes: 10_000_000_000))
     }
 
+    func testDownloadRequestDisallowsCellularAccessWhenDisabled() {
+        let request = VoicevoxVoiceModelDownloadPolicy.urlRequest(
+            url: URL(string: "https://example.com/0.vvm")!, allowsCellularAccess: false)
+
+        XCTAssertFalse(request.allowsCellularAccess)
+    }
+
+    func testDownloadRequestAllowsCellularAccessWhenEnabled() {
+        let request = VoicevoxVoiceModelDownloadPolicy.urlRequest(
+            url: URL(string: "https://example.com/0.vvm")!, allowsCellularAccess: true)
+
+        XCTAssertTrue(request.allowsCellularAccess)
+    }
+
+    func testCellularAccessReconfigurationIsNeededWhenPolicyChanges() {
+        XCTAssertTrue(VoicevoxVoiceModelDownloadPolicy.needsCellularAccessReconfiguration(
+            currentTaskAllowsCellularAccess: false, desiredAllowsCellularAccess: true))
+        XCTAssertTrue(VoicevoxVoiceModelDownloadPolicy.needsCellularAccessReconfiguration(
+            currentTaskAllowsCellularAccess: true, desiredAllowsCellularAccess: false))
+        XCTAssertFalse(VoicevoxVoiceModelDownloadPolicy.needsCellularAccessReconfiguration(
+            currentTaskAllowsCellularAccess: false, desiredAllowsCellularAccess: false))
+        XCTAssertTrue(VoicevoxVoiceModelDownloadPolicy.needsCellularAccessReconfiguration(
+            currentTaskAllowsCellularAccess: nil, desiredAllowsCellularAccess: false))
+    }
+
+    func testResumeDataIsUsedOnlyWithTheSameCellularPolicy() {
+        XCTAssertTrue(VoicevoxVoiceModelDownloadPolicy.canUseResumeData(
+            resumeDataAllowsCellularAccess: false, desiredAllowsCellularAccess: false))
+        XCTAssertTrue(VoicevoxVoiceModelDownloadPolicy.canUseResumeData(
+            resumeDataAllowsCellularAccess: true, desiredAllowsCellularAccess: true))
+        XCTAssertFalse(VoicevoxVoiceModelDownloadPolicy.canUseResumeData(
+            resumeDataAllowsCellularAccess: false, desiredAllowsCellularAccess: true))
+        XCTAssertFalse(VoicevoxVoiceModelDownloadPolicy.canUseResumeData(
+            resumeDataAllowsCellularAccess: true, desiredAllowsCellularAccess: false))
+    }
+
     // ★空き容量を使い切らない事。
     // ファイルの大きさぶんだけでなく、余白を残して判断する。
     func testNotEnoughSpaceIsBlocked() {
@@ -96,6 +132,18 @@ class VoicevoxVoiceModelDownloadQueueTest: XCTestCase {
             queue.finish(modelID: next.modelID)
         }
         XCTAssertEqual(order, ["3", "1", "2"])
+    }
+
+    // 通信設定の変更で作り直す物は、待ち行列の先頭から再開する。
+    func testEnqueueAtFront() {
+        let queue = VoicevoxVoiceModelDownloadQueue()
+        queue.enqueue(request("0"))
+        queue.enqueue(request("5"))
+
+        XCTAssertTrue(queue.enqueueAtFront(request("3")))
+        XCTAssertEqual(queue.startNext()?.modelID, "3")
+        queue.finish(modelID: "3")
+        XCTAssertEqual(queue.startNext()?.modelID, "0")
     }
 
     // 同じ物を二重に積まない。
