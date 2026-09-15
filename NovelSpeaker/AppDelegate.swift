@@ -9,7 +9,9 @@ import UIKit
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
+    #if targetEnvironment(macCatalyst)
+    static var isHeadlessLaunch = false
+    #endif
 
     func application(
         _ application: UIApplication,
@@ -21,6 +23,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // runPreflight() より前に出すのは、検査エンジンが CloudKit を必要とせず、
         // かつ headless 起動(cron/launchd)では iCloud コンテナ初期化が落ちうるため。
         if AppLaunchCoordinator.runScrapeInspectionCLIIfRequested() {
+            Self.isHeadlessLaunch = true
             return true
         }
         #endif
@@ -28,37 +31,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         guard AppLaunchCoordinator.runPreflight() else {
             return false
         }
-
-        let topLevelViewController = AppLaunchCoordinator.createInitialRootViewController()
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = topLevelViewController
-        window?.makeKeyAndVisible()
-        AppLaunchCoordinator.runPostLaunch(rootViewController: topLevelViewController)
-
         return true
-    }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        NSLog("application did enter background.")
-        GlobalDataSingleton.getInstance()?.saveContext()
-        RealmUtil.SetCheckCloudDataIsValidInterrupt(isInterrupt: true)
-        NovelDownloadQueue.shared.scheduleBackgroundProcess()
-        // ホーム画面に戻る=ウィジェットが見える直前なので、進捗表示などを更新しておく
-        PhoneWidgetDataUpdater.update()
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        NSLog("application did become active.")
-        NovelDownloadQueue.shared.ClearDownloadCountBadge()
-        StorySpeaker.becomeActiveHandle()
-        NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
-        if RealmUtil.IsUseCloudRealm() {
-            RealmUtil.CloudPull()
-        }
-        WebSpeechViewController.instance?.RedisplayWebView()
-        // バックグラウンド中に完了した栞・小説切替の書き込みを取りこぼしていても
-        // ここで追いつく(デバウンス発火前にサスペンドした場合など)
-        PhoneWidgetDataUpdater.update()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -74,14 +47,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             Thread.sleep(forTimeInterval: 3.0)
         }
         RealmUtil.sync()
-    }
-
-    func application(
-        _ app: UIApplication,
-        open url: URL,
-        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-    ) -> Bool {
-        NovelSpeakerUtility.ProcessURL(url: url)
     }
 
     /// 背面で走らせていた取得(VOICEVOXの音声モデル)が終わって、OS がアプリを起こしてきた。

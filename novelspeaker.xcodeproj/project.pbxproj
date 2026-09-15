@@ -332,6 +332,7 @@
 		C0DE20000000000000000054 /* PhoneWidgetDataUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */; };
 		C0DE20000000000000000055 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000044 /* Assets.xcassets */; };
 		C0DE20000000000000000056 /* PhoneActionGroupWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */; };
+		C0DE20000000000000000058 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000057 /* SceneDelegate.swift */; };
 		C2A2E6FEDE90E092AEFFFD65 /* VoicevoxPrefetchTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062FAB1C5C7A8DFB5D0EC781 /* VoicevoxPrefetchTest.swift */; };
 		C875C16EF28FF3982772157B /* ReadingPositionBreadcrumb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EBC32A63BC1FD853CFE592 /* ReadingPositionBreadcrumb.swift */; };
 		CA1D2F02A9C8695E62850AB4 /* VoicevoxVoiceModelManageList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB41B674B2D408A2B02E3AB /* VoicevoxVoiceModelManageList.swift */; };
@@ -845,6 +846,7 @@
 		C0DE20000000000000000044 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C0DE20000000000000000045 /* NovelSpeakerWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerWidget.entitlements; sourceTree = "<group>"; };
 		C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneActionGroupWidget.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000057 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		C10FBB53E074E9F9F1B02D42 /* VoicevoxResumeSkipTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxResumeSkipTest.swift; sourceTree = "<group>"; };
 		C12C975773BB39B575CEC322 /* VoicevoxStyleSelection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxStyleSelection.swift; sourceTree = "<group>"; };
 		C1BF95C17C6DB7DAF15306D9 /* VoicevoxChunkedSynthesis.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxChunkedSynthesis.swift; sourceTree = "<group>"; };
@@ -1224,6 +1226,7 @@
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
 				21038DD92F7000010072B3B9 /* AppDelegate.swift */,
+				C0DE20000000000000000057 /* SceneDelegate.swift */,
 				21038DD62F6FF0010072B3B9 /* AppLaunchCoordinator.swift */,
 				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
 				21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */,
@@ -1547,8 +1550,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21F054FB1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeaker" */;
 			buildPhases = (
-				E57E8C0BFEA7E8CFEF8BFD44 /* VOICEVOX カタログの点検 */,
 				E09854C708603E180E1222AF /* [CP] Check Pods Manifest.lock */,
+				E57E8C0BFEA7E8CFEF8BFD44 /* VOICEVOX カタログの点検 */,
 				21F054C51917E0F200CC6BA9 /* Sources */,
 				21F054C61917E0F200CC6BA9 /* Frameworks */,
 				21F054C71917E0F200CC6BA9 /* Resources */,
@@ -2041,6 +2044,7 @@
 				218E81FC251997E30041A1B5 /* RemoteDataURLSettingViewController.swift in Sources */,
 				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
 				21038DD82F7000010072B3B9 /* AppDelegate.swift in Sources */,
+				C0DE20000000000000000058 /* SceneDelegate.swift in Sources */,
 				21038DD72F6FF0010072B3B9 /* AppLaunchCoordinator.swift in Sources */,
 				21A2CDBB2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
