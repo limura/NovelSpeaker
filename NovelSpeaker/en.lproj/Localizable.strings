@@ -6,6 +6,12 @@
   Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 */
 
+"BackupAppIntent_CreateBackup_Title" = "Create a NovelSpeaker backup";
+"BackupAppIntent_CreateBackup_Description" = "Export the NovelSpeaker bookshelf and settings to a backup file.";
+"BackupAppIntent_CreateBackup_IncludeStoryContent" = "Include novel text";
+"BackupAppIntent_CreateBackup_ShortTitle" = "Create backup";
+"BackupAppIntent_CreateBackup_Failed" = "The NovelSpeaker backup could not be created.";
+
 "OK_button" = "OK";
 "DownloadButton" = "Download";
 "Setings_button" = "Settings";

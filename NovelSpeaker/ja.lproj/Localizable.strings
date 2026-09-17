@@ -6,6 +6,12 @@
   Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 */
 
+"BackupAppIntent_CreateBackup_Title" = "ことせかい のバックアップを作成";
+"BackupAppIntent_CreateBackup_Description" = "ことせかい の本棚と設定をバックアップファイルに書き出します。";
+"BackupAppIntent_CreateBackup_IncludeStoryContent" = "小説本文を含める";
+"BackupAppIntent_CreateBackup_ShortTitle" = "バックアップを作成";
+"BackupAppIntent_CreateBackup_Failed" = "ことせかい のバックアップを作成できませんでした。";
+
 "OK_button" = "OK";
 "DownloadButton" = "Download";
 "Setings_button" = "設定";

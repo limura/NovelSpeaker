@@ -323,6 +323,7 @@
 		C0DE20000000000000000012 /* SpeechWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000001 /* SpeechWidgetIntent.swift */; };
 		C0DE20000000000000000013 /* NovelSpeakerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000002 /* NovelSpeakerWidget.swift */; };
 		C0DE20000000000000000014 /* WidgetPlaybackHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */; };
+		C0DE20000000000000000071 /* BackupAppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000070 /* BackupAppIntent.swift */; };
 		C0DE20000000000000000015 /* NovelSpeakerWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C0DE20000000000000000016 /* WidgetLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* WidgetLocalizable.strings */; };
 		C0DE20000000000000000017 /* WidgetLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* WidgetLocalizable.strings */; };
@@ -847,6 +848,7 @@
 		C0DE20000000000000000045 /* NovelSpeakerWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerWidget.entitlements; sourceTree = "<group>"; };
 		C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneActionGroupWidget.swift; sourceTree = "<group>"; };
 		C0DE20000000000000000057 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		C0DE20000000000000000070 /* BackupAppIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupAppIntent.swift; sourceTree = "<group>"; };
 		C10FBB53E074E9F9F1B02D42 /* VoicevoxResumeSkipTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxResumeSkipTest.swift; sourceTree = "<group>"; };
 		C12C975773BB39B575CEC322 /* VoicevoxStyleSelection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxStyleSelection.swift; sourceTree = "<group>"; };
 		C1BF95C17C6DB7DAF15306D9 /* VoicevoxChunkedSynthesis.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxChunkedSynthesis.swift; sourceTree = "<group>"; };
@@ -1246,6 +1248,7 @@
 				16E06129237E488639738552 /* VoicevoxSpeaker.swift */,
 				86DEB6F3AC6354016F30B111 /* WatchSessionCoordinator.swift */,
 				C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */,
+				C0DE20000000000000000070 /* BackupAppIntent.swift */,
 				C0DE20000000000000000043 /* PhoneWidgetDataUpdater.swift */,
 				C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */,
 				B3D03DF00B669D2554B298C2 /* VoicevoxCPUGovernor.swift */,
@@ -2081,6 +2084,7 @@
 				A3B4C5D6E7F8091223344556 /* VoicevoxAccentSettingViewController.swift in Sources */,
 				21A97B462F7BBFC800DF9236 /* EurekaSupport.swift in Sources */,
 				21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */,
+				C0DE20000000000000000071 /* BackupAppIntent.swift in Sources */,
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
 				21E26FEB260E066F009018B6 /* SafeModeViewController.swift in Sources */,
 				214141D01FC0A1C30076DEC2 /* NiftyUtility.swift in Sources */,
