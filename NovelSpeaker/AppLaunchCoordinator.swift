@@ -12,6 +12,12 @@ import FTLinearActivityIndicator
 final class AppLaunchCoordinator: NSObject {
     @objc(runPreflight)
     static func runPreflight() -> Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-UITestingAllowRotation") {
+            NovelSpeakerUtility.supportRotationMask = .all
+        }
+        #endif
+
         guard NovelSpeakerUtility.CheckRealmReadable() else {
             fatalError("Realm is not readable at launch")
         }

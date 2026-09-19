@@ -75,6 +75,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         supportedInterfaceOrientationsFor window: UIWindow?
     ) -> UIInterfaceOrientationMask {
-        NovelSpeakerUtility.supportRotationMask
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-UITestingAllowRotation") {
+            return .all
+        }
+        #endif
+        return NovelSpeakerUtility.supportRotationMask
     }
 }
