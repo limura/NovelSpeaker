@@ -485,7 +485,6 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             }else{
                 heightAnchor = baseView.heightAnchor.constraint(greaterThanOrEqualToConstant: 1)
             }
-            
             NSLayoutConstraint.activate([
                 baseView.leadingAnchor.constraint(equalTo: dialog.view.leadingAnchor, constant: 24),
                 baseView.trailingAnchor.constraint(equalTo: dialog.view.trailingAnchor, constant: -24),
@@ -662,7 +661,6 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
     private var views: [UIView]!
     private var forKeyboardConstraint: NSLayoutConstraint!
     private var forTextViewConstraintArray: [NSLayoutConstraint]!
-    
     public func show(completion:(()->Void)? = nil) {
         builder.targetViewController?.present(self, animated: false, completion: {
             self.builder.focusKeyboard()
@@ -673,15 +671,31 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
     // キーボードが開いた時にかなりあやしい感じでウィンドウのサイズを変更します。
     func keyboardWillShow(notification:Notification){
         if let dic = notification.userInfo {
-            if let value = dic[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-                // キーボードが出てきたときに余った表示領域の高さを手に入れます
-                let height = UIScreen.main.bounds.height - value.cgRectValue.minY
+            let keyboardFrameEnd = (dic[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
+
+            if let keyboardFrameEnd = keyboardFrameEnd {
+                // キーボード通知の矩形はdialogの座標系へ変換してから扱います。
+                let keyboardFrameInDialog = view.convert(keyboardFrameEnd, from: nil)
+                let dialogKeyboardIntersection = view.bounds.intersection(keyboardFrameInDialog)
+                let hasKeyboardArea = keyboardFrameEnd.width > 0 && keyboardFrameEnd.height > 0
+                let intersectsDialog = !dialogKeyboardIntersection.isNull &&
+                    dialogKeyboardIntersection.width > 0 &&
+                    dialogKeyboardIntersection.height > 0
+
+                guard hasKeyboardArea && intersectsDialog else {
+                    restoreKeyboardLayoutConstraints()
+                    return
+                }
+
+                // キーボードが実際にdialogへ重なっている部分の高さを使います。
+                let height = dialogKeyboardIntersection.height
+                let centerYConstant = -height / 2
                 if forKeyboardConstraint != nil {
                     NSLayoutConstraint.deactivate([forKeyboardConstraint])
                 }
                 // 新しい中央の場所をそれっぽく設定します
                 if let baseView = baseView {
-                    forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: -height / 2)
+                    forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: centerYConstant)
                     NSLayoutConstraint.activate([forKeyboardConstraint])
                 }
                 // TextView は「ユーザが思い描いた感じで画面の大半を専有している」と仮定して、
@@ -712,30 +726,36 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                         self.view.layoutIfNeeded()
                     })
                 }
+
             }
         }
     }
+
+    private func restoreKeyboardLayoutConstraints() {
+        if forKeyboardConstraint != nil {
+            NSLayoutConstraint.deactivate([forKeyboardConstraint])
+        }
+        if let baseView = baseView {
+            forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: 0)
+            NSLayoutConstraint.activate([forKeyboardConstraint])
+        }
+        if forTextViewConstraintArray != nil {
+            NSLayoutConstraint.deactivate(forTextViewConstraintArray)
+        }
+        forTextViewConstraintArray = []
+        for view in views {
+            if let view = view as? EasyDialogCustomUITextView {
+                let layout = NSLayoutConstraint.init(item: view, attribute: .height, relatedBy: .equal, toItem: baseView, attribute: .height, multiplier: view.heightMultiplier, constant: 0)
+                layout.priority = UILayoutPriority(rawValue: 999)
+                forTextViewConstraintArray.append(layout)
+            }
+        }
+        NSLayoutConstraint.activate(forTextViewConstraintArray)
+    }
+
     func keyboardWillHide(notification:Notification){
         if let dic = notification.userInfo {
-            if forKeyboardConstraint != nil {
-                NSLayoutConstraint.deactivate([forKeyboardConstraint])
-            }
-            if let baseView = baseView {
-                forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: 0)
-                NSLayoutConstraint.activate([forKeyboardConstraint])
-            }
-            if forTextViewConstraintArray != nil {
-                NSLayoutConstraint.deactivate(forTextViewConstraintArray)
-            }
-            forTextViewConstraintArray = []
-            for view in views {
-                if let view = view as? EasyDialogCustomUITextView {
-                    let layout = NSLayoutConstraint.init(item: view, attribute: .height, relatedBy: .equal, toItem: baseView, attribute: .height, multiplier: view.heightMultiplier, constant: 0)
-                    layout.priority = UILayoutPriority(rawValue: 999)
-                    forTextViewConstraintArray.append(layout)
-                }
-            }
-            NSLayoutConstraint.activate(forTextViewConstraintArray)
+            restoreKeyboardLayoutConstraints()
             if let duration = dic[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval {
                 UIView.animate(withDuration: duration, animations: {
                     self.view.layoutIfNeeded()
@@ -766,7 +786,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
     }
-    
+
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if let textField = textField as? EasyDialogCustomUITextField {
             if let handler = textField.shouldReturnEventHander {
