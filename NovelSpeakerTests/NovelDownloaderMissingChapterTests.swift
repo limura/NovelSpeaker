@@ -12,10 +12,10 @@ import RealmSwift
 @testable import NovelSpeaker
 
 final class NovelDownloaderMissingChapterTests: XCTestCase {
-    /// 用意していただく「1〜15 まで連番で本文を返す URL」
+    /// 用意していただく「1〜17 まで連番で本文を返す URL」
     private let testNovelURLString = "https://limura.github.io/NovelSpeaker/topics/jp/00001.html"
     private var testNovelID: String { return testNovelURLString }
-    private let testChapterRange = 1...15
+    private let testChapterRange = 1...17
 
     private func chapterUrl(_ chapterNumber: Int) -> String {
         return "https://limura.github.io/NovelSpeaker/topics/jp/\(String(format: "%05d", chapterNumber)).html"
@@ -40,7 +40,7 @@ final class NovelDownloaderMissingChapterTests: XCTestCase {
             let novel = RealmNovel()
             novel.novelID = testNovelID
             novel.url = testNovelURLString
-            novel.title = "Test Novel 1-15"
+            novel.title = "Test Novel 1-17"
             realm.add(novel, update: .modified)
         }
 
@@ -67,8 +67,8 @@ final class NovelDownloaderMissingChapterTests: XCTestCase {
         try super.tearDownWithError()
     }
 
-    // 1. まっさらな状態から 1〜15 を取り込めること
-    func testDownloadFromEmptyCreates1to15() throws {
+    // 1. まっさらな状態から 1〜17 を取り込めること
+    func testDownloadFromEmptyCreates1to17() throws {
         let exp = expectation(description: "download completes")
 
         let fetcher = StoryFetcher()
@@ -90,7 +90,7 @@ final class NovelDownloaderMissingChapterTests: XCTestCase {
 
         wait(for: [exp], timeout: 60.0)
 
-        // 1〜15 が揃っているかチェック
+        // 1〜17 が揃っているかチェック
         RealmUtil.RealmBlock { realm in
             let matrix = RealmStoryBulk.GetAllChapterNumberFor(realm: realm, novelID: self.testNovelID)
             let all = Array(matrix.joined())
@@ -98,7 +98,7 @@ final class NovelDownloaderMissingChapterTests: XCTestCase {
         }
     }
 
-    // 2. 途中が歯抜け(1,2,3,6,7)の状態から再ダウンロードすると 1〜15 が揃い、
+    // 2. 途中が歯抜け(1,2,3,6,7)の状態から再ダウンロードすると 1〜17 が揃い、
     //    既存の章の内容は上書きされないこと
     func testDownloadFromMissingMiddleFills4and5WithoutOverwriting() throws {
         // 事前に 1,2,3,6,7 だけ入れておく（ユーザが編集済みの内容を想定）
@@ -170,7 +170,7 @@ final class NovelDownloaderMissingChapterTests: XCTestCase {
         }
 
         // アクセスされたURLが期待範囲内であることを確認
-        let expectedChapterSet = Set(([3, 4, 5] + Array(7...16)).map({ self.chapterUrl($0) }))
+        let expectedChapterSet = Set(([3, 4, 5] + Array(7...18)).map({ self.chapterUrl($0) }))
         let accessedSet = Set(accessedUrls)
         let unexpected = accessedSet.subtracting(expectedChapterSet).sorted()
         let missing = expectedChapterSet.subtracting(accessedSet).sorted()
@@ -178,9 +178,9 @@ final class NovelDownloaderMissingChapterTests: XCTestCase {
         XCTAssertTrue(missing.isEmpty, "missing accesses: \(missing)")
     }
 
-    // 3. すでに 1〜15 が揃っている状態で再ダウンロードしても 1〜15 のまま変わらないこと
+    // 3. すでに 1〜17 が揃っている状態で再ダウンロードしても 1〜17 のまま変わらないこと
     func testDownloadWhenAlreadyCompleteDoesNotDuplicate() throws {
-        // 事前に 1〜15 を全部入れておく
+        // 事前に 1〜17 を全部入れておく
         RealmUtil.Write { realm in
             var stories: [NovelSpeaker.Story] = []
             for ch in self.testChapterRange {
@@ -220,7 +220,7 @@ final class NovelDownloaderMissingChapterTests: XCTestCase {
         RealmUtil.RealmBlock { realm in
             let matrix = RealmStoryBulk.GetAllChapterNumberFor(realm: realm, novelID: self.testNovelID)
             let all = Array(matrix.joined())
-            // 件数と内容が 1〜15 のままか
+            // 件数と内容が 1〜17 のままか
             XCTAssertEqual(all.count, self.testChapterRange.count)
             XCTAssertEqual(all.sorted(), Array(self.testChapterRange))
         }
