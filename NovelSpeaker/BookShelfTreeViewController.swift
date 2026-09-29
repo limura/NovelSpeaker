@@ -122,7 +122,6 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         StoryHtmlDecoder.shared.LoadSiteInfoIfNeeded()
 
         tableView.register(UINib(nibName: BookShelfTreeViewCell.id, bundle: nil), forCellReuseIdentifier: String(describing: BookShelfTreeViewCell.self))
-        
 
         // このタイミングで StorySpeaker のインスタンスを作っておきます。
         // Realm observe が走るので、main thread で作っておかねばならぬらしい(´・ω・`)
@@ -235,10 +234,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // 画面に入り直すたびに実測上限をリセットしてから測り直す(誤検出で縮んだままの固着を防ぐ)。
-        self.resetUpperButtonFittedSlotLimit()
-        // 画面表示が完了し customView がナビバーに載ったこのタイミングで実測補正する(主トリガ)。
-        self.scheduleUpperButtonTrim()
+        self.invalidateUpperButtonLayout()
+        self.assinButtons()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -254,9 +251,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        self.updateLeftBarButtonWidth()
         self.assinButtons()
-        self.scheduleUpperButtonTrim()
     }
 
     override func didReceiveMemoryWarning() {
@@ -304,6 +299,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     private func updateEditButtonTitle() {
         let title = isEditing ? NSLocalizedString("BookShelfTreeViewController_EditToggleButton_Done", comment: "完了") : NSLocalizedString("BookShelfTreeViewController_EditToggleButton_Edit", comment: "編集")
         editToggleButton.setTitle(title, for: .normal)
+        self.assignRightBarButtons()
     }
 
     func createBarButtonItem(image: UIImage?, action: Selector, accessibilityLabel: String) -> UIButton {
@@ -1119,7 +1115,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                                 NovelSpeakerUtility.CreateNovelOnlyBackup(novelIDArray: checkedNovelIDArray, viewController: self) { (fileUrl, fileName) in
                                     DispatchQueue.main.async {
                                         let activityViewController = UIActivityViewController(activityItems: [fileUrl], applicationActivities: nil)
-                                        let frame = UIScreen.main.bounds
+                                        let frame = self.view.bounds
                                         activityViewController.popoverPresentationController?.sourceView = self.view
                                         activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
                                         self.present(activityViewController, animated: true, completion: nil)
@@ -2179,27 +2175,21 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
-            // 間隔が変わると使える幅も変わるので、作り直しフラグを立て、実測上限もリセットして測り直す。
-            self.isUpperRightButtonsChanged = true
-            self.resetUpperButtonFittedSlotLimit()
-            self.updateLeftBarButtonWidth()
+            // 間隔が変わると使える幅も変わるので、作り直しフラグを立て、幅予算を更新する。
+            self.invalidateUpperButtonLayout()
             self.assinButtons()
-            self.scheduleUpperButtonTrim()
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BookshelfRightTopButtonTitleChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
-            // ボタンの表示/非表示が変わったので、実測上限もリセットして作り直し+trim をやり直す。
-            self.resetUpperButtonFittedSlotLimit()
-            self.isUpperRightButtonsChanged = true
+            // ボタンの表示/非表示が変わったので、幅予算とメニューを更新する。
+            self.invalidateUpperButtonLayout()
             self.assinButtons()
-            self.scheduleUpperButtonTrim()
         }
-        // Dynamic Type の文字サイズ変更で使える幅が変わるので、実測上限をリセットして測り直す。
+        // Dynamic Type の文字サイズ変更で使える幅が変わるので、幅予算を更新する。
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
-            self.resetUpperButtonFittedSlotLimit()
+            self.invalidateUpperButtonLayout()
             self.assignRightBarButtons()
-            self.scheduleUpperButtonTrim()
         }
     }
 
@@ -2280,6 +2270,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     for property in propertyArray {
                         if property.name == "bookshelfViewButtonSettingArrayData" {
                             DispatchQueue.main.async {
+                                self.invalidateUpperButtonLayout()
                                 self.assinButtons()
                             }
                         }
@@ -2336,335 +2327,326 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         registNovelTagObserver()
     }
     
-    var currentWindowWidth:CGFloat = 0.0
-    // 右上ボタン群を「実レイアウト後に実測してはみ出したら『…』へ追い出す」ための状態
-    // (読書画面 SpeechViewController と同一の仕組み。詳細は NovelSpeakerUtility.UpperButtonBarLayout 参照)。
-    weak var upperButtonContainerView: UIView? = nil
-    weak var upperButtonStackView: UIStackView? = nil
-    var upperButtonFittedSlotLimit: Int? = nil
-    var upperButtonFittedSlotLimitWidth: CGFloat = -1
-    // trim のデバウンス用: 直前の実測結果(読書画面 SpeechViewController と同じ)。
-    var upperButtonTrimPendingMeasure: (n: Int, overflow: CGFloat)? = nil
-    // 現在のボタン群を組み立てた時の間隔設定。設定変更(間隔)を検知して作り直すために保持する。
-    var currentBarButtonItemSpacing: CGFloat = -1
+    // ボタン群の再利用用。配置結果を次回の幅計算には戻さない。
+    weak var upperButtonContainerView: UIView?
+    weak var upperButtonStackView: UIStackView?
+    private var upperButtonWidthConstraint: NSLayoutConstraint?
+    private var searchWidthConstraint: NSLayoutConstraint?
+    private var leadingStack: UIStackView?
+    private var leadingContainer: UIView?
+    private var leadingWidthConstraint: NSLayoutConstraint?
+    private let bookshelfTitleLabel = UILabel()
+    private let suppressedTitleView = UIView(frame: .zero)
+    private var isAssigningUpperButtons = false
+    var currentUpperButtonBarLayoutSignature: String?
 
-    // 実測で決めたスロット上限をリセットして、次のレイアウトで再見積もり+再実測させる。
-    // 回転・文字サイズ変更・画面への入り直しで呼ぶ(「一度縮んだら戻らない」の防止)。
-    func resetUpperButtonFittedSlotLimit() {
-        if self.upperButtonFittedSlotLimit == nil { return }
-        self.upperButtonFittedSlotLimit = nil
-        self.upperButtonFittedSlotLimitWidth = -1
-        self.upperButtonTrimPendingMeasure = nil
+    func invalidateUpperButtonLayout() {
         self.isUpperRightButtonsChanged = true
+    }
+
+    /// 左右のボタン・中央タイトル/タブが使う領域を先に予約する。
+    /// タブの推定値とUIKitの公開フレームは区別し、非接続のtabBarは座標変換しない。
+    private func upperButtonBudget() -> (usable: CGRect, center: CGRect?, titleWidth: CGFloat, searchPreferred: CGFloat, searchMaximum: CGFloat, signature: String)? {
+        guard let window = viewIfLoaded?.window,
+              let bar = navigationController?.navigationBar,
+              bar.window === window, bar.bounds.width > 1 else { return nil }
+        let safe = bar.bounds.inset(by: bar.safeAreaInsets)
+        // カスタム内容の外側にUIKitが置く余白も予約する（実測値ではなく方針値）。
+        let edge: CGFloat = 24
+        let usable = safe.insetBy(dx: edge, dy: 0)
+        guard usable.width > 0 else { return nil }
+        let metrics = UIFontMetrics(forTextStyle: .headline)
+        let titleFont = UIFont.preferredFont(forTextStyle: .headline, compatibleWith: traitCollection)
+        self.bookshelfTitleLabel.font = titleFont
+        self.bookshelfTitleLabel.text = self.title
+        let titleWidth = ceil(self.bookshelfTitleLabel.intrinsicContentSize.width)
+        var center: CGRect?
+        var centerSource = "app-leading-title"
+        if #available(iOS 18.0, *),
+           traitCollection.userInterfaceIdiom == .pad,
+           traitCollection.horizontalSizeClass == .regular,
+           !NovelSpeakerUtility.IsNeedOverrideTabBarTraits(),
+           let tabs = tabBarController?.tabBar {
+            let frame: CGRect? = tabs.window === window && !tabs.isHidden
+                ? tabs.convert(tabs.bounds, to: bar) : nil
+            if let frame, frame.intersects(bar.bounds), frame.minX > safe.minX,
+               frame.maxX < safe.maxX, frame.width > 1 {
+                center = frame
+                centerSource = "public-tab-frame"
+            } else {
+                // 上部タブの公開tabBarが非接続になるOSでは、タイトルと余白から保守的に予約。
+                // 正確な可視幅ではない。Dynamic Type/言語変更で見積もりも更新する。
+                let font = UIFont.preferredFont(forTextStyle: .headline, compatibleWith: traitCollection)
+                let itemPadding = metrics.scaledValue(for: 40, compatibleWith: traitCollection)
+                let titles = tabs.items?.map { $0.title ?? "" } ?? []
+                let estimate = titles.reduce(CGFloat(16)) {
+                    $0 + ceil(($1 as NSString).size(withAttributes: [.font: font]).width) + itemPadding
+                }
+                let width = max(titleWidth, estimate)
+                center = CGRect(x: safe.midX - width / 2, y: bar.bounds.minY,
+                                width: width, height: bar.bounds.height)
+                centerSource = "estimated-tab-titles"
+            }
+        }
+        let searchPreferred = ceil(searchButton.unconstrainedIntrinsicContentSize.width)
+        // 短い検索表示を優先し、空き幅が増えても伸ばさない。空文字時は intrinsic 幅を使う。
+        let maximum = metrics.scaledValue(for: 88, compatibleWith: traitCollection)
+        let signature = "safe=\(safe) usable=\(usable) center=\(String(describing: center)) source=\(centerSource) titleWidth=\(titleWidth) searchPreferred=\(searchPreferred) searchMaximum=\(maximum) category=\(traitCollection.preferredContentSizeCategory.rawValue)"
+        return (usable, center, titleWidth, searchPreferred, maximum, signature)
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        // 回転等で使える幅が変わるので、実測上限を捨てて新しい幅で再見積もり+再実測する
-        self.resetUpperButtonFittedSlotLimit()
+        // 回転完了時のNavigationBarで左右の予約幅を更新する。
+        self.invalidateUpperButtonLayout()
         coordinator.animate(alongsideTransition: nil) { _ in
             self.assignRightBarButtons()
-            self.scheduleUpperButtonTrim()
         }
     }
 
     func assignRightBarButtons() {
-        DispatchQueue.main.async {
-            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
-            if abs(self.currentWindowWidth - nowWidth) < 0.0001 && self.isUpperRightButtonsChanged == false {
-                // 横幅もボタンも変わってなければすることはないはず
-                return
+        guard !isAssigningUpperButtons else { return }
+        isAssigningUpperButtons = true
+        defer { isAssigningUpperButtons = false }
+        guard let budget = self.upperButtonBudget() else { return }
+        let spacing = max(0, CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing()))
+        let layoutSignature = budget.signature + " spacing=\(spacing) edit=\(self.editToggleButton.title(for: .normal) ?? "")"
+        guard self.isUpperRightButtonsChanged ||
+              self.currentUpperButtonBarLayoutSignature != layoutSignature else { return }
+        self.currentUpperButtonBarLayoutSignature = layoutSignature
+        self.isUpperRightButtonsChanged = false
+        let buttonSettingArray = RealmUtil.RealmBlock { (realm) -> [BookshelfViewButtonSetting] in
+            guard let settingArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetBookshelfViewButtonSetting() else { return BookshelfViewButtonSetting.defaultSetting }
+            return settingArray
+        }
+        var barButtonItemArray:[UIButton] = []
+        for buttonSetting in buttonSettingArray {
+            if buttonSetting.isOn == false { continue }
+            switch buttonSetting.type {
+            case .downloadStatus:
+                let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(self.downloadStatusButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_downloadStatusButton_AccessibilityLabel", comment: "ダウンロード状態の表示"))
+                barButtonItemArray.append(button)
+                break
+            case .edit:
+                barButtonItemArray.append(self.editToggleButton)
+            case .switchFolder:
+                barButtonItemArray.append(self.switchFolderButton)
+            case .order:
+                let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.up.arrow.down"), action: #selector(self.sortTypeSelectButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"))
+                barButtonItemArray.append(button)
+            case .reload:
+                let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), action: #selector(self.refreshButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_refreshButton_AccessibilityLabel", comment: "小説の更新確認"))
+                barButtonItemArray.append(button)
+            case .search:
+                break
+            case .iCloudPull:
+                let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.down"), action: #selector(self.iCloudPullButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始"))
+                button.isEnabled = RealmUtil.IsUseCloudRealm()
+                self.iCloudPullButton = button
+                barButtonItemArray.append(button)
+            case .iCloudPush:
+                let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.up"), action: #selector(self.iCloudPushButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始"))
+                button.isEnabled = RealmUtil.IsUseCloudRealm()
+                self.iCloudPushButton = button
+                barButtonItemArray.append(button)
+            case .stopDownload:
+                let button = self.createBarButtonItem(image: UIImage(systemName: "pause.circle"), action: #selector(self.stopDownloadButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止"))
+                self.stopDownloadButton = button
+                barButtonItemArray.append(button)
+            case .multiSelect:
+                let button = self.createBarButtonItem(image: UIImage(systemName: "checkmark.square"), action: #selector(self.toggleCheckboxesButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel", comment: "選択"))
+                self.toggleCheckboxButton = button
+                self.updateChecboxButtonImage()
+                barButtonItemArray.append(button)
+                break
             }
-            let buttonSettingArray = RealmUtil.RealmBlock { (realm) -> [BookshelfViewButtonSetting] in
-                guard let settingArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetBookshelfViewButtonSetting() else { return BookshelfViewButtonSetting.defaultSetting }
-                return settingArray
+        }
+        let allButtons = barButtonItemArray
+        // 画像ボタンは28pt固定、文字ボタンは現在の文字幅で見積もる。
+        let widths = allButtons.map { button -> CGFloat in
+            if button === self.editToggleButton {
+                return ceil(max(0, button.intrinsicContentSize.width))
             }
-            var barButtonItemArray:[UIButton] = []
-            for buttonSetting in buttonSettingArray {
-                if buttonSetting.isOn == false { continue }
-                switch buttonSetting.type {
-                case .downloadStatus:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "waveform.badge.magnifyingglass"), action: #selector(self.downloadStatusButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_downloadStatusButton_AccessibilityLabel", comment: "ダウンロード状態の表示"))
-                    barButtonItemArray.append(button)
-                    break
-                case .edit:
-                    barButtonItemArray.append(self.editToggleButton)
-                case .switchFolder:
-                    barButtonItemArray.append(self.switchFolderButton)
-                case .order:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.up.arrow.down"), action: #selector(self.sortTypeSelectButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"))
-                    barButtonItemArray.append(button)
-                case .reload:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), action: #selector(self.refreshButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_refreshButton_AccessibilityLabel", comment: "小説の更新確認"))
-                    barButtonItemArray.append(button)
-                case .search:
-                    break
-                case .iCloudPull:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.down"), action: #selector(self.iCloudPullButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始"))
-                    button.isEnabled = RealmUtil.IsUseCloudRealm()
-                    self.iCloudPullButton = button
-                    barButtonItemArray.append(button)
-                case .iCloudPush:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "icloud.and.arrow.up"), action: #selector(self.iCloudPushButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始"))
-                    button.isEnabled = RealmUtil.IsUseCloudRealm()
-                    self.iCloudPushButton = button
-                    barButtonItemArray.append(button)
-                case .stopDownload:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "pause.circle"), action: #selector(self.stopDownloadButtonClicked), accessibilityLabel: NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止"))
-                    self.stopDownloadButton = button
-                    barButtonItemArray.append(button)
-                case .multiSelect:
-                    let button = self.createBarButtonItem(image: UIImage(systemName: "checkmark.square"), action: #selector(self.toggleCheckboxesButtonTapped), accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_ToggleCheckboxButton_AccessibilityLabel", comment: "選択"))
-                    self.toggleCheckboxButton = button
-                    self.updateChecboxButtonImage()
-                    barButtonItemArray.append(button)
-                    break
+            return 28
+        }
+        let allocation = UpperButtonBarBudget.allocate(
+            usable: budget.usable, center: budget.center, titleWidth: budget.titleWidth,
+            searchPreferred: budget.searchPreferred, searchMaximum: budget.searchMaximum,
+            filterWidth: 36, gap: 12, buttonWidths: widths, spacing: spacing)
+        let selection = allocation.selection
+        self.searchButton.maxWidth = allocation.searchWidth
+        if let constraint = self.searchWidthConstraint {
+            constraint.constant = allocation.searchWidth
+        } else {
+            let constraint = self.searchButton.widthAnchor.constraint(equalToConstant: allocation.searchWidth)
+            constraint.priority = UILayoutPriority(999)
+            constraint.isActive = true
+            self.searchWidthConstraint = constraint
+        }
+        self.assignLeftBarButtons(showsInlineTitle: budget.center == nil,
+                                  searchWidth: allocation.searchWidth, titleWidth: budget.titleWidth)
+        var visibleButtons = Array(allButtons[selection.visible])
+        let overflowButtons = Array(allButtons[selection.overflow])
+        if !overflowButtons.isEmpty {
+            let actions = overflowButtons.map { button in
+                UIAction(title: button.accessibilityLabel ?? button.title(for: .normal) ?? "",
+                         image: button.image(for: .normal),
+                         attributes: button.isEnabled ? [] : [.disabled]) { _ in
+                    button.sendActions(for: .touchUpInside)
                 }
             }
-            let spacing:CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
-            var maxButtons: Int = {
-                let isPad = self.traitCollection.userInterfaceIdiom == .pad
-                // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
-                let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
-                let containerMaxWidth = nowWidth * ((isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.50)
 
-                let buttonWidth: CGFloat = 28
+            let menu = UIMenu(children: actions)
 
-                let totalUnitWidth = buttonWidth + spacing
+            let moreButton = UIButton(type: .system)
+            moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+            moreButton.menu = menu
+            moreButton.showsMenuAsPrimaryAction = true
+            moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
+            // 他のボタンと同じ 28pt 固定にする。これが無いと「…」だけ intrinsic 幅
+            // (Dynamic Type で変動)になり、幅見積もり(28pt×個数)と実レイアウトがズレる。
+            moreButton.translatesAutoresizingMaskIntoConstraints = false
+            let moreWidthConstraint = moreButton.widthAnchor.constraint(equalToConstant: 28)
+            moreWidthConstraint.priority = UILayoutPriority(999)
+            let moreHeightConstraint = moreButton.heightAnchor.constraint(equalToConstant: 28)
+            moreHeightConstraint.priority = UILayoutPriority(999)
+            NSLayoutConstraint.activate([moreWidthConstraint, moreHeightConstraint])
 
-                return max(1, Int(floor((containerMaxWidth + spacing) / totalUnitWidth)))
-            }()
-            // 同じ画面幅で「実測の結果ここまでしか入らない」と判明していれば、その上限まで下げる。
-            // (見積もりが実レイアウトで溢れる=クリップするのを確実に防ぐための頭打ち。
-            //  trimUpperButtonsToFitIfNeeded が設定する)
-            if let fittedLimit = self.upperButtonFittedSlotLimit, abs(self.upperButtonFittedSlotLimitWidth - nowWidth) < 0.5 {
-                maxButtons = min(maxButtons, fittedLimit)
+            visibleButtons.insert(moreButton, at: 0)
+        }
+
+        let container: UIView
+        let stack: UIStackView
+        let isNewContainer = self.upperButtonContainerView == nil
+        if let existingContainer = self.upperButtonContainerView,
+           let existingStack = self.upperButtonStackView {
+            container = existingContainer
+            stack = existingStack
+            for button in stack.arrangedSubviews {
+                stack.removeArrangedSubview(button)
+                button.removeFromSuperview()
             }
-            // VoiceOver 環境下 であれば重なってしまってもよしとする
-            if UIAccessibility.isVoiceOverRunning {
-                // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
-                //maxButtons = 999
-            }
-            
-            let allButtons = barButtonItemArray
-            guard let lastButton = allButtons.last else { return }
-
-            var visibleButtons: [UIButton] = []
-            var overflowButtons: [UIButton] = []
-
-            if allButtons.count <= maxButtons {
-                visibleButtons = allButtons
-            } else {
-                // lastButton を除いた残り
-                let others = Array(allButtons.dropLast())
-
-                // 表示可能数から lastButton と overflow 分を引く
-                let capacityForOthers = maxButtons - 2
-
-                if capacityForOthers > 0 {
-                    // 後ろから優先して残す
-                    let kept = others.suffix(capacityForOthers)
-                    overflowButtons = Array(others.prefix(others.count - kept.count))
-                    visibleButtons = Array(kept) + [lastButton]
-                } else {
-                    overflowButtons = others
-                    visibleButtons = [lastButton]
-                }
-            }
-            if !overflowButtons.isEmpty {
-                let actions = overflowButtons.map { button in
-                    UIAction(title: button.accessibilityLabel ?? "",
-                             image: button.image(for: .normal)) { _ in
-                        button.sendActions(for: .touchUpInside)
-                    }
-                }
-
-                let menu = UIMenu(children: actions)
-
-                let moreButton = UIButton(type: .system)
-                moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-                moreButton.menu = menu
-                moreButton.showsMenuAsPrimaryAction = true
-                moreButton.accessibilityLabel = NSLocalizedString("SpeechViewController_moreButton_AccessibilityLabel", comment: "隠れたメニュー項目を表示する")
-                // 他のボタンと同じ 28pt 固定にする。これが無いと「…」だけ intrinsic 幅
-                // (Dynamic Type で変動)になり、幅見積もり(28pt×個数)と実レイアウトがズレる。
-                moreButton.translatesAutoresizingMaskIntoConstraints = false
-                let moreWidthConstraint = moreButton.widthAnchor.constraint(equalToConstant: 28)
-                moreWidthConstraint.priority = UILayoutPriority(999)
-                let moreHeightConstraint = moreButton.heightAnchor.constraint(equalToConstant: 28)
-                moreHeightConstraint.priority = UILayoutPriority(999)
-                NSLayoutConstraint.activate([moreWidthConstraint, moreHeightConstraint])
-
-                visibleButtons.insert(moreButton, at: 0)
-            }
-
-            func isSameAction(lhs: UIButton, rhs: UIButton) -> Bool {
-                let event = UIControl.Event.touchUpInside // 判定したいイベントを指定
-                
-                let lhsTargets = lhs.allTargets
-                let rhsTargets = rhs.allTargets
-                
-                // ターゲットの数が違う場合は不一致
-                guard lhsTargets == rhsTargets else { return false }
-                
-                // 各ターゲットに対するアクション名を比較
-                for target in lhsTargets {
-                    let lhsActions = lhs.actions(forTarget: target, forControlEvent: event)
-                    let rhsActions = rhs.actions(forTarget: target, forControlEvent: event)
-                    if lhsActions != rhsActions { return false }
-                }
-                
-                return true
-            }
-            // 幅が前回と同じで、同じアクションのボタンが、同じ間隔で入っているならすることはないはず。
-            // (間隔設定を変えた時に反映されるよう spacing も一致条件に加える)
-            let epsilon: CGFloat = 0.000001
-            if abs(self.currentWindowWidth - nowWidth) < epsilon && abs(self.currentBarButtonItemSpacing - spacing) < epsilon {
-                if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
-                    let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
-                    let buttons = visibleButtons
-                    let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
-                    if isIdentical {
-                        return
-                    }
-                }
-            }
-            self.currentWindowWidth = nowWidth
-            self.currentBarButtonItemSpacing = spacing
-            self.isUpperRightButtonsChanged = false
-
-            let stack = UIStackView()
+        } else {
+            container = UIView()
+            container.translatesAutoresizingMaskIntoConstraints = false
+            stack = UIStackView()
             stack.axis = .horizontal
             stack.alignment = .center
-            stack.spacing = spacing
             stack.translatesAutoresizingMaskIntoConstraints = false
-            stack.setContentCompressionResistancePriority(.required, for: .horizontal)
-            for button in visibleButtons {
-                stack.addArrangedSubview(button)
-            }
-            
-            let container = UIView()
-            container.translatesAutoresizingMaskIntoConstraints = false
-                let isPad = self.traitCollection.userInterfaceIdiom == .pad
-            let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
-            let maxWidth = UIScreen.main.bounds.width * ((isPad && (isUpperTabBarDisabled != true)) ? 0.30 : 0.76)
-            //container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
-            let widthConstraint = container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth)
-            widthConstraint.priority = UILayoutPriority(999)
-            widthConstraint.isActive = true
             container.addSubview(stack)
-            let barItem = UIBarButtonItem(customView: container)
+            let width = container.widthAnchor.constraint(equalToConstant: selection.width)
+            width.priority = UILayoutPriority(999)
+            width.isActive = true
+            self.upperButtonWidthConstraint = width
             NSLayoutConstraint.activate([
                 stack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
                 stack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
                 stack.topAnchor.constraint(equalTo: container.topAnchor),
                 stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
             ])
-            self.navigationItem.rightBarButtonItem = barItem
-            // viewDidLayoutSubviews で実測補正するために参照を控えておく
             self.upperButtonContainerView = container
             self.upperButtonStackView = stack
-            // customView がナビバーに取り込まれて実フレームが確定するのは次のレイアウト後なので、
-            // 遅延+数回リトライで確実に実測補正する(読書画面 SpeechViewController と同じ理由)。
-            self.scheduleUpperButtonTrim()
         }
-    }
-
-    // まだ実測できないうちは短い間隔で数回だけ再試行する(読書画面 SpeechViewController と同じ)。
-    func scheduleUpperButtonTrim(attempt: Int = 0) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + (attempt == 0 ? 0 : 0.15)) { [weak self] in
-            guard let self = self else { return }
-            if self.trimUpperButtonsToFitIfNeeded() == false && attempt < 10 {
-                self.scheduleUpperButtonTrim(attempt: attempt + 1)
-            }
-        }
-    }
-
-    // 右上ボタン群が実際のナビバー幅に収まっているかを実レイアウト後に実測し、はみ出して
-    // いる(=最右がクリップされて消える)場合は表示スロット数を1段階減らして溢れ分を「…」へ
-    // 追い出す。収まるまで繰り返し呼ばれて収束する。読書画面と同一の仕組み。
-    // 戻り値: 実測できたら true、まだ測れなければ false(呼び出し側が再試行)。
-    @discardableResult
-    func trimUpperButtonsToFitIfNeeded() -> Bool {
-        if self.navigationController?.transitionCoordinator != nil { return false }
-        guard let stack = self.upperButtonStackView,
-              let navBar = self.navigationController?.navigationBar,
-              navBar.window != nil else { return false }
-        let n = stack.arrangedSubviews.count
-        // 「…」+ 保護対象1個 の 2個未満はこれ以上減らせない
-        guard n >= 2 else { return true }
-
-        guard let overflow = NovelSpeakerUtility.UpperButtonBarLayout.rightmostButtonOverflow(navBar: navBar, stack: stack, container: self.upperButtonContainerView) else { return false }
-
-        if overflow > 0.5 {
-            // 過渡レイアウトの誤検出を防ぐため、2回連続で同じはみ出しを観測した時だけ削る(デバウンス)。
-            guard let pending = self.upperButtonTrimPendingMeasure, pending.n == n, abs(pending.overflow - overflow) < 0.5 else {
-                self.upperButtonTrimPendingMeasure = (n, overflow)
-                return false // 再試行(次の実測)で確認する
-            }
-            self.upperButtonTrimPendingMeasure = nil
-            let newLimit = n - 1
-            if self.upperButtonFittedSlotLimit == nil || newLimit < (self.upperButtonFittedSlotLimit ?? Int.max) || abs(self.upperButtonFittedSlotLimitWidth - self.currentWindowWidth) >= 0.5 {
-                self.upperButtonFittedSlotLimit = newLimit
-                self.upperButtonFittedSlotLimitWidth = self.currentWindowWidth
-                self.isUpperRightButtonsChanged = true
-                self.assignRightBarButtons()
-            }
+        stack.spacing = spacing
+        self.upperButtonWidthConstraint?.constant = selection.width
+        for button in visibleButtons { stack.addArrangedSubview(button) }
+        // customViewとbar itemは保持し、内容と幅だけを更新する。
+        guard isNewContainer else { return }
+        let barItem = UIBarButtonItem(customView: container)
+        if #available(iOS 26.0, *) {
+            // iOS 26以降は、1個の customView を右BarButtonItemに入れると、
+            // NavigationBarがそれ全体をシステムの「…」へ折りたたむことがある。
+            // 内部のUIButton/UIMenuはUIKitから見えないため、その「…」からは操作できない。
+            // pinnedTrailingGroup はシステムoverflowの対象外なので、ボタン群を一体のまま
+            // 上部右端へ固定する。
+            self.navigationItem.rightBarButtonItem = nil
+            self.navigationItem.pinnedTrailingGroup = UIBarButtonItemGroup.fixedGroup(representativeItem: nil, items: [barItem])
         } else {
-            self.upperButtonTrimPendingMeasure = nil
-        }
-        return true
-    }
-
-    func assignLeftBarButtons() {
-        DispatchQueue.main.async {
-            let ep: CGFloat = 0.000001
-            if let searchButton = self.navigationItem.leftBarButtonItem?.customView as? MaxWidthButton, abs(searchButton.maxWidth - self.searchButton.maxWidth) < ep {
-                return
-            }
-            if self.filterBarButtonItem == nil {
-                let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), style: .plain, target: self, action: #selector(self.filterButtonClicked))
-                barButtonItem.accessibilityLabel = NSLocalizedString("BookShelfTreeViewController_FilterButton_AccessibilityLabel", comment: "絞り込み")
-                self.filterBarButtonItem = barButtonItem
-            }
-            var leftBarButtonItems = [UIBarButtonItem(customView: self.searchButton)]
-            if let filterBarButtonItem = self.filterBarButtonItem {
-                leftBarButtonItems.append(filterBarButtonItem)
-            }
-            self.navigationItem.leftBarButtonItems = leftBarButtonItems
-        }
-    }
-    /// 検索文字列の変更などで左バーボタンのサイズが変わった後、
-    /// バーボタンを作り直して UINavigationBar に再レイアウトさせる。
-    /// (customView のサイズだけ変えるとナビバーのタッチ判定領域が古いままになり、
-    /// 右上のボタン群が押せなくなることがあるため)
-    func forceReassignLeftBarButtons() {
-        DispatchQueue.main.async {
-            self.navigationItem.leftBarButtonItems = nil
-            self.assignLeftBarButtons()
+            self.navigationItem.rightBarButtonItem = barItem
         }
     }
 
-    var currentleftBarButtonWidth:CGFloat = 0.0
-    func updateLeftBarButtonWidth() {
-        guard let navBar = navigationController?.navigationBar else { return }
-        let isPad = traitCollection.userInterfaceIdiom == .pad
-        let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits()
-        // 隣に置いた絞り込み(ファネル)ボタンのぶんだけ検索ボタンの上限幅を狭める
-        let filterButtonWidth:CGFloat = 50.0
-        searchButton.maxWidth = max(80.0, navBar.bounds.width * ((isPad && (isUpperTabBarDisabled != true)) ? 0.20 : 0.4) - filterButtonWidth)
-        let epsilon: CGFloat = 0.000001
-        if abs(currentleftBarButtonWidth - searchButton.maxWidth) < epsilon {
-            return
+    func assignLeftBarButtons(showsInlineTitle: Bool, searchWidth: CGFloat, titleWidth: CGFloat) {
+        // 幅は内部の配置結果ではなく、今回の配分値から直接渡す。
+        let width = searchWidth + 8 + 28 + (showsInlineTitle ? 12 + titleWidth : 0)
+        if leadingStack == nil {
+            let filter = self.createBarButtonItem(
+                image: UIImage(systemName: "line.3.horizontal.decrease.circle"),
+                action: #selector(self.filterButtonClicked),
+                accessibilityLabel: NSLocalizedString("BookShelfTreeViewController_FilterButton_AccessibilityLabel", comment: "絞り込み"))
+            self.filterButton = filter
+            let stack = UIStackView(arrangedSubviews: [self.searchButton, filter, self.bookshelfTitleLabel])
+            stack.axis = .horizontal
+            stack.alignment = .center
+            stack.spacing = 8
+            stack.setCustomSpacing(12, after: filter)
+            self.bookshelfTitleLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+            self.bookshelfTitleLabel.accessibilityTraits = .header
+            self.leadingStack = stack
+            let container = UIView()
+            container.translatesAutoresizingMaskIntoConstraints = false
+            stack.translatesAutoresizingMaskIntoConstraints = false
+            container.addSubview(stack)
+            let widthConstraint = container.widthAnchor.constraint(equalToConstant: width)
+            widthConstraint.priority = UILayoutPriority(999)
+            widthConstraint.identifier = "BookshelfLeadingWidth"
+            NSLayoutConstraint.activate([
+                widthConstraint,
+                stack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                stack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                stack.topAnchor.constraint(equalTo: container.topAnchor),
+                stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+            ])
+            self.leadingContainer = container
+            self.leadingWidthConstraint = widthConstraint
+            let item = UIBarButtonItem(customView: container)
+            if #available(iOS 27.0, *) {
+                // 優先度は省略禁止ではない。省略時の操作も下のmenuRepresentationで用意する。
+                item.visibilityPriority = .high
+            }
+            if #available(iOS 16.0, *) {
+                // fixedはカスタマイズによる移動/削除を禁止する指定であり、固定表示ではない。
+                let group = UIBarButtonItemGroup.fixedGroup(representativeItem: nil, items: [item])
+                self.navigationItem.leadingItemGroups = [group]
+                self.updateLeadingMenuRepresentation()
+            } else {
+                self.navigationItem.leftBarButtonItem = item
+            }
+            self.updateFilterButtonState()
         }
-        print("updateLeftBarButtonWidth: \(currentleftBarButtonWidth) -> \(searchButton.maxWidth)")
-        currentleftBarButtonWidth = searchButton.maxWidth
-        searchButton.invalidateIntrinsicContentSize()
+        self.bookshelfTitleLabel.isHidden = !showsInlineTitle
+        self.leadingWidthConstraint?.constant = width
+        if showsInlineTitle {
+            // title文字列自体は残し、次画面の戻るボタンやアクセシビリティに利用できるようにする。
+            if navigationItem.titleView !== suppressedTitleView {
+                navigationItem.titleView = suppressedTitleView
+            }
+        } else if navigationItem.titleView === suppressedTitleView {
+            navigationItem.titleView = nil
+        }
     }
-    
+
+    /// customViewの内部のUIButtonはUIKitの自動メニューには展開されないため明示する。
+    private func updateLeadingMenuRepresentation() {
+        guard #available(iOS 16.0, *),
+              let group = navigationItem.leadingItemGroups.first else { return }
+        let search = UIAction(
+            title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"),
+            image: UIImage(systemName: "magnifyingglass")) { [weak self] _ in
+                guard let self = self else { return }
+                self.searchButtonClicked(sender: self.searchButton)
+            }
+        let filter = UIAction(
+            title: filterButton?.accessibilityLabel ?? NSLocalizedString("BookShelfTreeViewController_FilterButton_AccessibilityLabel", comment: "絞り込み"),
+            image: filterButton?.image(for: .normal)) { [weak self] _ in
+                guard let self = self else { return }
+                self.filterButtonClicked(sender: self.filterButton as Any)
+            }
+        group.menuRepresentation = UIMenu(options: .displayInline, children: [search, filter])
+    }
+
     func assinButtons() {
         assignRightBarButtons()
-        assignLeftBarButtons()
     }
 
     func showVersionUpNotice(){
@@ -2897,7 +2879,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                 self.reloadAllData(doScroll: true)
             }
             // ボタンタイトル変更で幅が変わるので、ナビバーに再レイアウトさせる(タッチ判定ずれ対策)
-            self.forceReassignLeftBarButtons()
+            self.invalidateUpperButtonLayout()
+            self.assinButtons()
             dialog.dismiss(animated: false, completion: nil)
         }
         if let parent = self.parent {
@@ -2915,7 +2898,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
     }
 
-    var filterBarButtonItem:UIBarButtonItem? = nil
+    private var filterButton: UIButton?
 
     /// 絞り込みの適用状態をボタンアイコンへ反映する。
     /// navigationItem.prompt でのサマリー表示は「iPhoneで回転するまで出ない」
@@ -2924,8 +2907,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     func updateFilterButtonState() {
         DispatchQueue.main.async {
             let isActive = self.bookShelfFilterCondition.isActive
-            self.filterBarButtonItem?.image = UIImage(systemName: isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
-            self.filterBarButtonItem?.accessibilityLabel = isActive ? self.filterSummaryText() : NSLocalizedString("BookShelfTreeViewController_FilterButton_AccessibilityLabel", comment: "絞り込み")
+            self.filterButton?.setImage(UIImage(systemName: isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle"), for: .normal)
+            self.filterButton?.accessibilityLabel = isActive ? self.filterSummaryText() : NSLocalizedString("BookShelfTreeViewController_FilterButton_AccessibilityLabel", comment: "絞り込み")
+            self.updateLeadingMenuRepresentation()
             self.navigationItem.prompt = nil
         }
     }

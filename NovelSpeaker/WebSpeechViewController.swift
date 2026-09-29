@@ -103,11 +103,11 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var upperButtonTrimPendingMeasure: (n: Int, overflow: CGFloat)? = nil
     // 現在のボタン群を組み立てた時の間隔設定。設定変更(間隔)を検知して作り直すために保持する。
     var currentBarButtonItemSpacing: CGFloat = -1
+    var currentUpperButtonBarLayoutSignature: String?
 
     // 実測で決めたスロット上限をリセットして、次のレイアウトで再見積もり+再実測させる。
     // 回転・文字サイズ変更・画面への入り直しで呼ぶ(「一度縮んだら戻らない」の防止)。
     func resetUpperButtonFittedSlotLimit() {
-        if self.upperButtonFittedSlotLimit == nil { return }
         self.upperButtonFittedSlotLimit = nil
         self.upperButtonFittedSlotLimitWidth = -1
         self.upperButtonTrimPendingMeasure = nil
@@ -174,10 +174,14 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.scheduleUpperButtonTrim()
     }
 
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // 画面に入り直すたびに実測上限をリセットしてから測り直す(誤検出で縮んだままの固着を防ぐ)。
         self.resetUpperButtonFittedSlotLimit()
+        // 画面が一度ナビゲーション階層から外れている間に設定変更が起きても、
+        // 表示復帰後に現在のボタン設定で確実に再構築する。
+        self.forceUpdateUpperButtons()
         // 画面表示が完了し customView がナビバーに載ったこのタイミングで実測補正する(主トリガ)。
         self.scheduleUpperButtonTrim()
     }
@@ -1197,32 +1201,30 @@ body.NovelSpeakerBody {
 
     func assignUpperButtons(novelID: String, novelType: NovelType, aliveButtonSettings:[SpeechViewButtonSetting]) {
         DispatchQueue.main.async {
-            let nowWidth = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.bounds.width ?? UIScreen.main.bounds.width
-            if abs(self.currentWindowWidth - nowWidth) < 0.0001 && self.isUpperRightButtonsChanged == false {
+            guard let view = self.viewIfLoaded, let window = view.window else {
+                return
+            }
+            let nowWidth = window.bounds.width
+            guard nowWidth > 1 else { return }
+            let measuredCapacity = NovelSpeakerUtility.UpperButtonBarLayout.measuredAvailableWidth(viewController: self, leadingReservedWidth: 88)
+            let layoutSignature = measuredCapacity?.signature ?? "fallback-width=\(nowWidth)"
+            if let currentSignature = self.currentUpperButtonBarLayoutSignature,
+               currentSignature != layoutSignature {
+                self.resetUpperButtonFittedSlotLimit()
+            }
+            if abs(self.currentWindowWidth - nowWidth) < 0.0001 && self.isUpperRightButtonsChanged == false && self.currentUpperButtonBarLayoutSignature == layoutSignature {
                 return
             }
             let barButtonArray = self.createSpeechViewButtonArray(novelID: novelID, novelType: novelType, aliveButtonSettings: aliveButtonSettings, buttonSize: 28, isForBottomBar: false)
 
             let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
+            let buttonWidth: CGFloat = 28
+            let totalUnitWidth = buttonWidth + spacing
             // 見積もりは通常の本文画面(SpeechViewController)と完全に同一にする。
             // (以前は WebView 側だけ 0.30/nowWidth 基準で、iPad 縦だと通常版より多く見積もって
             //  「…」が中央タブに潜って押せなくなっていた。飯村さん報告 2026-07-09)
             var maxButtons: Int = {
-                let isPad = self.traitCollection.userInterfaceIdiom == .pad
-                // ウインドウモードにおいて、画面の半分以下の幅だとタブバーは下になるぽい？のでそう判定させます
-                let isUpperTabBarDisabled = NovelSpeakerUtility.IsNeedOverrideTabBarTraits() || (nowWidth < (UIScreen.main.bounds.width / 2))
-
-                let buttonWidth: CGFloat = 28
-                let totalUnitWidth = buttonWidth + spacing
-
-                // 本文画面ではタイトルを潰してでもボタン数を優先する。タイトル幅は引かず、
-                // iPad で上部タブバーがある場合のみ控えめな割合を絶対上限にする。
-                let backButtonAndMargins: CGFloat = 88
-                let widthFraction: CGFloat = (isPad && (isUpperTabBarDisabled != true)) ? 0.25 : 0.76
-                let containerHardCap = UIScreen.main.bounds.width * widthFraction
-
-                let usableWidth = nowWidth - backButtonAndMargins
-                let containerMaxWidth = max(totalUnitWidth, min(usableWidth, containerHardCap))
+                let containerMaxWidth = max(totalUnitWidth, measuredCapacity?.width ?? max(0, nowWidth - 88))
 
                 return max(1, Int(floor((containerMaxWidth + spacing) / totalUnitWidth)))
             }()
@@ -1292,7 +1294,7 @@ body.NovelSpeakerBody {
 
             func isSameAction(lhs: UIButton, rhs: UIButton) -> Bool {
                 let event = UIControl.Event.touchUpInside // 判定したいイベントを指定
-                
+
                 let lhsTargets = lhs.allTargets
                 let rhsTargets = rhs.allTargets
                 
@@ -1305,6 +1307,11 @@ body.NovelSpeakerBody {
                     let rhsActions = rhs.actions(forTarget: target, forControlEvent: event)
                     if lhsActions != rhsActions { return false }
                 }
+
+                // 「…」ボタンはcontrol targetを持たないため、メニュー項目も同一性に含める。
+                let lhsMenuTitles = lhs.menu?.children.map(\.title)
+                let rhsMenuTitles = rhs.menu?.children.map(\.title)
+                guard lhsMenuTitles == rhsMenuTitles else { return false }
                 
                 return true
             }
@@ -1312,7 +1319,8 @@ body.NovelSpeakerBody {
             // (間隔設定を変えた時に反映されるよう spacing も一致条件に加える)
             let epsilon: CGFloat = 0.000001
             if abs(self.currentWindowWidth - nowWidth) < epsilon && abs(self.currentBarButtonItemSpacing - spacing) < epsilon {
-                if let currentStackView = self.navigationItem.rightBarButtonItem?.customView?.subviews.first as? UIStackView {
+                let currentBarCustomView = NovelSpeakerUtility.UpperButtonBarLayout.rightBarCustomView(for: self.navigationItem)
+                if let currentStackView = currentBarCustomView?.subviews.first as? UIStackView {
                     let subviews = currentStackView.arrangedSubviews.compactMap { $0 as? UIButton }
                     let buttons = visibleButtons
                     let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
@@ -1323,6 +1331,7 @@ body.NovelSpeakerBody {
             }
             self.currentWindowWidth = nowWidth
             self.currentBarButtonItemSpacing = spacing
+            self.currentUpperButtonBarLayoutSignature = layoutSignature
             self.isUpperRightButtonsChanged = false
 
             let stack = UIStackView()
@@ -1336,7 +1345,7 @@ body.NovelSpeakerBody {
             
             let container = UIView()
             container.translatesAutoresizingMaskIntoConstraints = false
-            let maxWidth = UIScreen.main.bounds.width * 0.76
+            let maxWidth = max(totalUnitWidth, measuredCapacity?.width ?? max(0, nowWidth - 88))
             container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
             container.addSubview(stack)
             let barItem = UIBarButtonItem(customView: container)
@@ -1347,7 +1356,17 @@ body.NovelSpeakerBody {
                 stack.topAnchor.constraint(equalTo: container.topAnchor),
                 stack.bottomAnchor.constraint(equalTo: container.bottomAnchor)
             ])
-            self.navigationItem.rightBarButtonItem = barItem
+            if #available(iOS 26.0, *) {
+                // iOS 26以降は、1個の customView を右BarButtonItemに入れると、
+                // NavigationBarがそれ全体をシステムの「…」へ折りたたむことがある。
+                // 内部のUIButton/UIMenuはUIKitから見えないため、その「…」からは操作できない。
+                // pinnedTrailingGroup はシステムoverflowの対象外なので、ボタン群を一体のまま
+                // 上部右端へ固定する。
+                self.navigationItem.rightBarButtonItem = nil
+                self.navigationItem.pinnedTrailingGroup = UIBarButtonItemGroup.fixedGroup(representativeItem: nil, items: [barItem])
+            } else {
+                self.navigationItem.rightBarButtonItem = barItem
+            }
             // viewDidLayoutSubviews / viewDidAppear で実測補正するために参照を控えておく
             self.upperButtonContainerView = container
             self.upperButtonStackView = stack
@@ -1411,7 +1430,7 @@ body.NovelSpeakerBody {
         NovelSpeakerUtility.CreateNovelOnlyBackup(novelIDArray: [novelID], viewController: self) { (fileUrl, fileName) in
             DispatchQueue.main.async {
                 let activityViewController = UIActivityViewController(activityItems: [fileUrl], applicationActivities: nil)
-                let frame = UIScreen.main.bounds
+                let frame = self.view.bounds
                 activityViewController.popoverPresentationController?.sourceView = self.view
                 activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
                 self.present(activityViewController, animated: true, completion: nil)

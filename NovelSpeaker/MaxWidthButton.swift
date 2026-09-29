@@ -7,7 +7,13 @@
 //
 
 final class MaxWidthButton: UIButton {
-    var maxWidth: CGFloat = .greatestFiniteMagnitude
+    var maxWidth: CGFloat = .greatestFiniteMagnitude {
+        didSet {
+            if oldValue != maxWidth { invalidateIntrinsicContentSize() }
+        }
+    }
+
+    var unconstrainedIntrinsicContentSize: CGSize { super.intrinsicContentSize }
 
     override var intrinsicContentSize: CGSize {
         let size = super.intrinsicContentSize

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E929B0010000000000000001 /* UpperButtonBarBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E929B0010000000000000002 /* UpperButtonBarBudget.swift */; };
+		E929B0010000000000000003 /* UpperButtonBarBudgetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E929B0010000000000000004 /* UpperButtonBarBudgetTest.swift */; };
 		00AD409A746B0F07C88B8A0D /* VoicevoxCoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F380DAEC93EA2F37A0EF6D /* VoicevoxCoreTest.swift */; };
 		010402AF8041E33C87D76346 /* VoicevoxVoiceModelFileInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8ACD829CC876FC0650DFD61 /* VoicevoxVoiceModelFileInspector.swift */; };
 		03769EE92DAF16F7AE4552B4 /* WatchSpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B20E49D521B34FB248A1E17 /* WatchSpeechPlayer.swift */; };
@@ -480,6 +482,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E929B0010000000000000002 /* UpperButtonBarBudget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpperButtonBarBudget.swift; sourceTree = "<group>"; };
+		E929B0010000000000000004 /* UpperButtonBarBudgetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpperButtonBarBudgetTest.swift; sourceTree = "<group>"; };
 		0164B2D4D5F2582B7B2AC42F /* PlayerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		02D79F5F7738BA23A29226D5 /* VoicevoxVoiceModelCatalogTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxVoiceModelCatalogTest.swift; sourceTree = "<group>"; };
 		06076A26E3F2A63F31621D0B /* VoicevoxCacheLimitsTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheLimitsTest.swift; sourceTree = "<group>"; };
@@ -1150,6 +1154,7 @@
 				21D9C1662652602900CC5AE9 /* WebSpeechViewTool.swift */,
 				216631E82688772600F80C1D /* ScrollPullAndFireHandler.swift */,
 				21038DD32F55CE770072B3B9 /* MaxWidthButton.swift */,
+				E929B0010000000000000002 /* UpperButtonBarBudget.swift */,
 				21A97B452F7BBFC800DF9236 /* EurekaSupport.swift */,
 			);
 			name = Tools;
@@ -1348,6 +1353,7 @@
 				212323F422B7049E00543543 /* RealmTests.swift */,
 				210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */,
 				2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */,
+				E929B0010000000000000004 /* UpperButtonBarBudgetTest.swift */,
 				21143D7F25B2DC390078C2BA /* DownloadTest.swift */,
 				21A55E282F179C00004FAAB5 /* NovelDownloaderMissingChapterTests.swift */,
 				C2F380DAEC93EA2F37A0EF6D /* VoicevoxCoreTest.swift */,
@@ -2086,6 +2092,7 @@
 				21D7B10F256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
 				2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */,
 				21038DD52F55CE7C0072B3B9 /* MaxWidthButton.swift in Sources */,
+				E929B0010000000000000001 /* UpperButtonBarBudget.swift in Sources */,
 				212E41352CFC3C9500E7901C /* TraitOverrideTabBarController.swift in Sources */,
 				21CCE43A2C26D73800D62564 /* BookShelfTreeViewController.swift in Sources */,
 				216631EB268E9C9300F80C1D /* MenuButtonHandler.swift in Sources */,
@@ -2231,6 +2238,7 @@
 				21143D8025B2DC390078C2BA /* DownloadTest.swift in Sources */,
 				212323F522B7049E00543543 /* RealmTests.swift in Sources */,
 				2104EDEF24B9E33F00E275D1 /* StoryFetcherTest.swift in Sources */,
+				E929B0010000000000000003 /* UpperButtonBarBudgetTest.swift in Sources */,
 				00AD409A746B0F07C88B8A0D /* VoicevoxCoreTest.swift in Sources */,
 				8CC1B5ACF8E4D1F21B79627E /* VoicevoxSpeakerTest.swift in Sources */,
 				6D1274BA6573EFA624CDCFC9 /* StoryTextClassifierVoicevoxTest.swift in Sources */,

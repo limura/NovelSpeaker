@@ -4408,11 +4408,79 @@ class NovelSpeakerUtility: NSObject {
     // そこで viewDidLayoutSubviews で実レイアウト後にこのヘルパで実残り幅を測り、はみ出して
     // いれば1スロットずつ減らして溢れ分を「…」オーバーフローへ退避させ、収束させる。
     enum UpperButtonBarLayout {
+        static func rightBarCustomView(for navigationItem: UINavigationItem) -> UIView? {
+            if let customView = navigationItem.rightBarButtonItem?.customView {
+                return customView
+            }
+            if #available(iOS 16.0, *) {
+                return navigationItem.pinnedTrailingGroup?.barButtonItems.first?.customView
+            }
+            return nil
+        }
+
+        // NavigationBar上で右側のcustomViewに割り当てられる幅を実測する。
+        // UIScreen.main.bounds は、iPadのウインドウやDuoの開閉状態では対象Viewの
+        // 座標系と一致しないため、ここではNavigationBarと同じWindow内の値だけを使う。
+        static func measuredAvailableWidth(viewController: UIViewController, leadingReservedWidth: CGFloat, gap: CGFloat = 4) -> (width: CGFloat, signature: String)? {
+            guard let view = viewController.viewIfLoaded,
+                  let window = view.window,
+                  let navigationBar = viewController.navigationController?.navigationBar,
+                  navigationBar.window === window,
+                  navigationBar.bounds.width > 1,
+                  navigationBar.bounds.height > 1 else {
+                return nil
+            }
+
+            let safeAreaRight = max(0, navigationBar.safeAreaInsets.right)
+            let rightEdge = max(navigationBar.bounds.minX, navigationBar.bounds.maxX - safeAreaRight)
+            var leftEdge = max(navigationBar.bounds.minX, leadingReservedWidth)
+
+            // 検索ボタンなど、左側のcustomViewが実レイアウト済みならその右端を使う。
+            // 初回レイアウト前は frame が0になるため、呼び出し側の保守的な値を残す。
+            let leftBarFrames = viewController.navigationItem.leftBarButtonItems?.compactMap { item -> CGRect? in
+                guard let customView = item.customView, customView.bounds.width > 1 else { return nil }
+                return customView.convert(customView.bounds, to: navigationBar)
+            } ?? []
+            if let leftBarMaxX = leftBarFrames.map(\.maxX).max() {
+                leftEdge = max(leftEdge, leftBarMaxX + gap)
+            }
+
+            // iPadの上部TabBarがNavigationBar中央を占有する場合は、そこを
+            // ボタン群が横切らないようにTabBarの右端を左側の境界として扱う。
+            // Duoの右側縦TabBarはsafeAreaRight側にあるため、この条件から除外される。
+            let tabFrame: CGRect? = {
+                guard let tabBarController = viewController.tabBarController else { return nil }
+                let tabBar = tabBarController.tabBar
+                return tabBar.convert(tabBar.bounds, to: navigationBar)
+            }()
+            if let tabFrame,
+               tabFrame.width > 1,
+               tabFrame.height > 1,
+               tabFrame.intersects(navigationBar.bounds),
+               tabFrame.minX > leftEdge,
+               tabFrame.maxX <= rightEdge + 0.5 {
+                leftEdge = max(leftEdge, tabFrame.maxX + gap)
+            }
+
+            let width = max(0, rightEdge - leftEdge)
+            let signature = [
+                NSCoder.string(for: navigationBar.bounds),
+                String(format: "safeRight=%.2f", safeAreaRight),
+                String(format: "left=%.2f", leftEdge),
+                String(format: "right=%.2f", rightEdge),
+                tabFrame.map { NSCoder.string(for: $0) } ?? "tab=nil",
+                leftBarFrames.map { NSCoder.string(for: $0) }.joined(separator: ",")
+            ].joined(separator: "|")
+            return (width, signature)
+        }
+
         // 右ボタン群がナビバーに収まりきらないと、UIKit は状況により2通りの潰し方をする:
         //   (A) スピル … ボタン群がナビバー右端を越えて配置され、最右ボタンが黙ってクリップされる
-        //   (B) 圧縮   … コンテナ幅上限やスタックの制約でボタンが 28pt 未満に押し潰される
-        // どちらも「保護対象である最右ボタン(28pt 制約)が、本来の 28pt でフル表示できていない」ことに
-        // 帰着するので、**最右ボタン1個のフレームだけ**から両方を判定する。
+        //   (B) 圧縮   … コンテナ幅上限やスタックの制約で各ボタンの必要幅未満に押し潰される
+        // スピルは最右ボタン1個のフレームだけから判定できる。
+        // 圧縮については、ボタンの種類によって intrinsic width が異なるため、全ボタンを
+        // 28pt とみなしてはいけない。例えば「編集」のようなタイトルボタンは通常でも
+        // 24pt台になることがあり、28pt固定で比較すると正常な状態を過剰に削ってしまう。
         //
         // 重要: 個数×28pt の合計幅(requiredSpan)方式は使わない。オーバーフローの「…」ボタンは 28pt 制約が
         // 無く intrinsic 幅(≒23pt)なので、合計方式だと「収まっているのに圧縮」と誤検出して過剰に削る
@@ -4429,21 +4497,25 @@ class NovelSpeakerUtility: NSObject {
                   container.window === navWindow else { return nil }
             guard let last = stack.arrangedSubviews.last else { return nil }
             let lastInBar = last.convert(last.bounds, to: navBar)
-            // まだレイアウトされていない(幅がほぼ0)なら測定不能とみなす
-            guard lastInBar.width > 1 else { return nil }
+            // 回転・Duoの開閉途中は、UIKitがcustomViewを数ptまで一時的に潰すことがある。
+            // これは最終レイアウトではないため、幅だけでなく高さも含めて通常サイズに近い
+            // フレームになるまで測定不能として再試行する。
+            guard lastInBar.width >= 20, lastInBar.height >= 20 else { return nil }
 
-            // 使用可能右端は「バーの物理右端(bounds.width)」を基準にする。
-            // layoutMargins.trailing を差し引いてはいけない: UIKit が customView を置く位置は
-            // マージンの内側とは限らず(実機 iPad ではマージン20の外側=バー右端から14ptに配置、
-            // シミュレータではマージン0)、マージンを引くと「正常に見えているのに右端を越えている」
-            // と定常的に誤判定して 2 個まで削り続ける(実機でのみ再現した不具合の真因)。
-            // クリップとして実害があるのは「バーの物理右端を越えて描画が切れる」ことだけ。
-            let usableRightEdge = navBar.bounds.width
+            // 使用可能右端は、layoutMarginsではなくNavigationBarのboundsとsafe areaから求める。
+            // UIKitがcustomViewを置く位置はlayoutMarginsの内側とは限らないため、
+            // layoutMargins.trailingを引くと「正常に見えているのに右端を越えている」と
+            // 誤判定してボタンを削り続けることがある。一方、Duoの右側TabBarのように
+            // NavigationBarのsafe area外へはみ出す領域は描画可能領域に含めない。
+            let usableRightEdge = navBar.bounds.maxX - max(0, navBar.safeAreaInsets.right)
             // (A) スピル: 最右ボタンが使用可能右端をどれだけ越えているか
             let spill = lastInBar.maxX - usableRightEdge
-            // (B) 圧縮: 最右ボタン(本来 28pt)が実際にどれだけ 28pt 未満に潰されているか。
-            //   テキストボタン等で本来 28pt より広いものは負(=圧縮なし)になり安全側。
-            let compression = buttonWidth - lastInBar.width
+            // (B) 圧縮: 最右ボタンが自身の intrinsic width 未満に潰されているか。
+            //   ボタンごとに必要幅が異なるため、28pt固定では比較しない。
+            //   intrinsic width が取得できないカスタムViewだけは従来の既定値を使う。
+            let intrinsicWidth = last.intrinsicContentSize.width
+            let expectedWidth = intrinsicWidth.isFinite && intrinsicWidth > 1 ? intrinsicWidth : buttonWidth
+            let compression = expectedWidth - lastInBar.width
             return max(spill, compression)
         }
     }
