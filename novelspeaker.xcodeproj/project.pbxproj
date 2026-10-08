@@ -326,7 +326,6 @@
 		C0DE20000000000000000012 /* SpeechWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000001 /* SpeechWidgetIntent.swift */; };
 		C0DE20000000000000000013 /* NovelSpeakerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000002 /* NovelSpeakerWidget.swift */; };
 		C0DE20000000000000000014 /* WidgetPlaybackHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000005 /* WidgetPlaybackHandler.swift */; };
-		C0DE20000000000000000071 /* BackupAppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000070 /* BackupAppIntent.swift */; };
 		C0DE20000000000000000015 /* NovelSpeakerWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000004 /* NovelSpeakerWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C0DE20000000000000000016 /* WidgetLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* WidgetLocalizable.strings */; };
 		C0DE20000000000000000017 /* WidgetLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000006 /* WidgetLocalizable.strings */; };
@@ -337,6 +336,7 @@
 		C0DE20000000000000000055 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000044 /* Assets.xcassets */; };
 		C0DE20000000000000000056 /* PhoneActionGroupWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000046 /* PhoneActionGroupWidget.swift */; };
 		C0DE20000000000000000058 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000057 /* SceneDelegate.swift */; };
+		C0DE20000000000000000071 /* BackupAppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE20000000000000000070 /* BackupAppIntent.swift */; };
 		C2A2E6FEDE90E092AEFFFD65 /* VoicevoxPrefetchTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062FAB1C5C7A8DFB5D0EC781 /* VoicevoxPrefetchTest.swift */; };
 		C875C16EF28FF3982772157B /* ReadingPositionBreadcrumb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EBC32A63BC1FD853CFE592 /* ReadingPositionBreadcrumb.swift */; };
 		CA1D2F02A9C8695E62850AB4 /* VoicevoxVoiceModelManageList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB41B674B2D408A2B02E3AB /* VoicevoxVoiceModelManageList.swift */; };
@@ -1491,7 +1491,6 @@
 			children = (
 				DE0994DE76BAD0F28F2B25FD /* NovelSpeakerUITests.swift */,
 			);
-			name = NovelSpeakerUITests;
 			path = NovelSpeakerUITests;
 			sourceTree = "<group>";
 		};
@@ -2735,8 +2734,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeaker-Bridging-Header.h";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeaker-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

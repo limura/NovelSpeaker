@@ -37,6 +37,13 @@
   `xcodebuild -workspace novelspeaker.xcworkspace -scheme NovelSpeaker -destination 'platform=iOS Simulator,name=iPhone 16' -configuration Debug build CODE_SIGNING_ALLOWED=NO`
 - 単体テストのスキームは `NovelSpeakerTests`（`NovelSpeaker` スキームはテストアクション未設定）。
   `-only-testing:NovelSpeakerTests/StoryFetcherTest` のように絞れる。
+- 「CLI ではテストできない」と結論する前に、使用中のXcodeと利用可能なSimulator destinationを確認する。
+  複数のXcodeがある環境では、Simulator runtimeを持つXcodeを `DEVELOPER_DIR` で明示し、同じDeveloper directory内の `xcodebuild` を使う。
+  例（Xcode 27.1 beta環境）:
+  `DEVELOPER_DIR=/Applications/Xcode-27.1-beta.app/Contents/Developer /Applications/Xcode-27.1-beta.app/Contents/Developer/usr/bin/xcodebuild -workspace novelspeaker.xcworkspace -scheme NovelSpeakerTests -destination 'platform=iOS Simulator,name=iPhone Duo' -derivedDataPath /private/tmp/NovelSpeakerDerivedData -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO test`
+- iPhone DuoのようなペアSimulatorでテストが停止する、同じcompanion deviceに複数のproxyがあるというXcode警告が出る場合は、まず `-parallel-testing-enabled NO` で直列実行する。診断中は `-quiet` を付けず、テスト進捗と最後に開始したテストを記録する。
+- CoreSimulatorへのアクセスがsandboxに拒否された場合は、CLIでは実行不能と決めつけず、同じコマンドを必要な権限付きで再試行する。ChatGPTアプリの追加設定ではなく、コマンド実行時の権限承認で解決できる場合がある。
+- UIテストは別スキーム `NovelSpeakerUITests` で実行する。アプリプロセスにはXCTestの環境変数やクラスが渡らないことがあるため、UIテスト起動時にアプリ側のテスト用起動フラグが正しく認識されるか確認する。UIテストがアプリ起動直後に落ちた場合は、画面上のassertionより先にSimulatorのクラッシュレポートを調べる。
 - `NovelSpeakerTests/DownloadTest.swift` の pixiv 系テストは pixiv.net への実ネットワークアクセスを伴う統合テストで、
   オフライン/CI 環境では落ちる（コード変更とは無関係なことが多い）。
 
@@ -47,6 +54,8 @@
 - 特定の端末名だけを原因とみなさず、メモリ容量・OS・CPU・機能利用状況などの共通条件で比較する。
 
 ## 設計メモ
+
+- SiteInfoをURLから作成・修正するときは、[SiteInfo作成方針.md](SiteInfo作成方針.md) を読む。ユーザーの本文判定・XPathの簡略化・検証方針を記録している。
 
 - `StoryState.CreateNextState()` が `document` / 各ボタン(`nextButton` 等)を次状態に引き継ぐのは**意図的**。
   ボタン送り(ボタンをクリックしないと次ページに行けない)サイトのために必要（commit 4494851）。
