@@ -8,6 +8,7 @@
 
 import XCTest
 import UIKit
+import WebKit
 import AVFoundation
 import RealmSwift
 @testable import NovelSpeaker
@@ -224,5 +225,50 @@ class RubyTagConvertTest: XCTestCase {
         let html = "<ruby>漢字<rt>かんじ</rt></ruby>"
         let result = NiftyUtility.ConvertRubyTagToVerticalBarRubyText(htmlString: html)
         XCTAssertEqual(result, "|漢字(かんじ)", "rp 無しの素朴なルビも変換できること")
+    }
+}
+
+private final class BottomControlsTestWebController: WebSpeechViewController {
+    override func loadView() {
+        view = UIView(frame: CGRect(x: 0, y: 0, width: 375, height: 667))
+        createUIComponents(webView: CustomWKWebView(frame: .zero, configuration: WKWebViewConfiguration()))
+    }
+    override func viewDidLoad() {}
+    override func viewWillAppear(_ animated: Bool) {}
+    override func viewDidAppear(_ animated: Bool) {}
+    override func viewWillDisappear(_ animated: Bool) {}
+    override func viewDidDisappear(_ animated: Bool) {}
+    override func viewDidLayoutSubviews() {}
+}
+
+final class WebReaderBottomControlsTest: XCTestCase {
+    func testFullscreenHidesBottomBarAndReplacementUntilRestored() {
+        let reader = BottomControlsTestWebController()
+        reader.loadViewIfNeeded()
+        let bar = SpeechViewBottomButtonBar()
+        reader.view.addSubview(bar)
+        reader.bottomButtonBar = bar
+        reader.hideTopAndDownComponents(animated: false)
+        XCTAssertTrue(bar.isHidden)
+        XCTAssertTrue(reader.isReaderInterfaceHidden)
+        let replacement = SpeechViewBottomButtonBar()
+        reader.view.addSubview(replacement)
+        reader.bottomButtonBar = replacement
+        XCTAssertTrue(replacement.isHidden, "再生成したバーも全画面状態を維持する")
+        reader.displayTopAndDownComponents(animated: false)
+        XCTAssertFalse(replacement.isHidden)
+        XCTAssertFalse(reader.isReaderInterfaceHidden)
+    }
+
+    func testEnabledVoicevoxButtonIsCreatedForBothLocationsAndOffIsRespected() {
+        let reader = BottomControlsTestWebController()
+        for bottom in [true, false] {
+            let enabled = reader.createSpeechViewButtonArray(novelID: "test", novelType: .UserCreated, aliveButtonSettings: [SpeechViewButtonSetting(type: .voicevoxCacheGeneration, isOn: true)], buttonSize: 28, isForBottomBar: bottom)
+            XCTAssertEqual(enabled.count, 1)
+            XCTAssertNotNil(enabled.first?.image(for: .normal))
+            XCTAssertEqual(enabled.first?.actions(forTarget: reader, forControlEvent: .touchUpInside), ["voicevoxCacheGenerationButtonClicked:"])
+            let disabled = reader.createSpeechViewButtonArray(novelID: "test", novelType: .UserCreated, aliveButtonSettings: [SpeechViewButtonSetting(type: .voicevoxCacheGeneration, isOn: false)], buttonSize: 28, isForBottomBar: bottom)
+            XCTAssertTrue(disabled.isEmpty)
+        }
     }
 }

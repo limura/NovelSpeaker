@@ -63,7 +63,12 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var speakFromHereLongPressRecognizer:UILongPressGestureRecognizer? = nil
 
     // 画面下部のボタン群(右上のボタン群とは独立した設定。既定では何も表示しない)
-    var bottomButtonBar:SpeechViewBottomButtonBar? = nil
+    private(set) var isReaderInterfaceHidden = false
+    var bottomButtonBar:SpeechViewBottomButtonBar? = nil {
+        didSet { bottomButtonBar?.isHidden = isReaderInterfaceHidden }
+    }
+    var voicevoxCacheGenerationButtonItem: UIButton? = nil
+    var bottomVoicevoxCacheGenerationButtonItem: UIButton? = nil
     var bottomStartStopButton:UIButton? = nil
     var bottomSkipBackwardButton:UIButton? = nil
     var bottomSkipForwardButton:UIButton? = nil
@@ -198,6 +203,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
     
     func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: VoicevoxCacheGenerator.progressDidChangeNotification, queue: .main) { [weak self] _ in
+            guard let self = self else { return }
+            let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.targetStoryID ?? StorySpeaker.shared.storyID)
+            let image = UIImage(systemName: VoicevoxCacheGenerator.shared.runningNovelID == novelID ? "v.circle.fill" : "v.circle")
+            self.voicevoxCacheGenerationButtonItem?.setImage(image, for: .normal)
+            self.bottomVoicevoxCacheGenerationButtonItem?.setImage(image, for: .normal)
+        }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
             // 間隔が変わると使える幅も変わるので、作り直しフラグを立て、実測上限もリセットして測り直す。
@@ -258,6 +270,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             self.bottomStartStopButton = nil
             self.bottomSkipBackwardButton = nil
             self.bottomSkipForwardButton = nil
+            self.bottomVoicevoxCacheGenerationButtonItem = nil
             if info.settings.contains(where: { $0.isOn }) == false { return }
 
             let buttons = self.createSpeechViewButtonArray(novelID: info.novelID, novelType: info.novelType, aliveButtonSettings: info.settings, buttonSize: 28, isForBottomBar: true)
@@ -574,6 +587,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
 
     func hideTopAndDownComponents(animated:Bool = false, animateCompletion: (()->Void)? = nil) {
+        isReaderInterfaceHidden = true
+        bottomButtonBar?.isHidden = true
         if let bottomConstraint = self.previousChapterBottomConstraint {
             bottomConstraint.isActive = false
         }
@@ -602,6 +617,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.assignDisplayToToggleInterfaceButton()
     }
     func displayTopAndDownComponents(animated:Bool = false, animateCompletion: (()->Void)? = nil) {
+        isReaderInterfaceHidden = false
+        bottomButtonBar?.isHidden = false
         if let topConstraint = self.previousChapterTopConstraint {
             topConstraint.isActive = false
         }
@@ -1187,6 +1204,15 @@ body.NovelSpeakerBody {
                     accessibilityLabel: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
                 )
                 barButtonArray.append(button)
+            case .voicevoxCacheGeneration:
+                let button = createBarButtonItem(
+                    image: UIImage(systemName: VoicevoxCacheGenerator.shared.runningNovelID == novelID ? "v.circle.fill" : "v.circle"),
+                    action: #selector(self.voicevoxCacheGenerationButtonClicked(_:)),
+                    accessibilityLabel: NSLocalizedString("SpeechViewButtonType_VoicevoxCacheGeneration", comment: "事前生成音声を作る")
+                )
+                if isForBottomBar { self.bottomVoicevoxCacheGenerationButtonItem = button }
+                else { self.voicevoxCacheGenerationButtonItem = button }
+                barButtonArray.append(button)
             case .speechStop:
                 let button = createBarButtonItem(image: UIImage(systemName: "play.fill"), action: #selector(self.startStopButtonClicked(_:)), accessibilityLabel: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"))
                 if isForBottomBar { self.bottomStartStopButton = button } else { self.startStopButton = button }
@@ -1423,6 +1449,12 @@ body.NovelSpeakerBody {
     }
 
     //MARK: @objc Delegate methods
+    @objc func voicevoxCacheGenerationButtonClicked(_ sender: Any) {
+        let storyID = targetStoryID ?? StorySpeaker.shared.storyID
+        guard !storyID.isEmpty else { return }
+        VoicevoxCacheGenerationDialog.present(on: self, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))
+    }
+
     @objc func backupButtonClicked(_ sender: UIBarButtonItem) {
         let storyID = StorySpeaker.shared.storyID
         guard storyID.count > 0 else { return }
