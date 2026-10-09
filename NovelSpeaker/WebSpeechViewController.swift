@@ -781,7 +781,9 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.chapterPositionLabel.backgroundColor = backgroundColor
         self.chapterPositionLabel.textColor = foregroundColor
         self.tabBarController?.tabBar.barTintColor = backgroundColor
-        self.tabBarController?.tabBar.backgroundColor = backgroundColor
+        // タブの背景色はbarTintColorに任せる。UIViewの背景を塗ると、
+        // 側面表示でタブや戻るボタンの上に不透明な領域が残る。
+        self.tabBarController?.tabBar.backgroundColor = .clear
         self.navigationController?.navigationBar.barTintColor = backgroundColor
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
         // ステータスバーの色を指定する

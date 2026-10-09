@@ -228,6 +228,68 @@ class RubyTagConvertTest: XCTestCase {
     }
 }
 
+// 実際のテーマ適用・復帰処理を検証。読み込み/読み上げの副作用のみ除く。
+private class ThemeTestSpeechController: SpeechViewController {
+    override func loadView() {
+        view = UIView()
+        let text = UITextView(); view.addSubview(text); textView = text
+        let previous = UIButton(); view.addSubview(previous); previousChapterButton = previous
+        let next = UIButton(); view.addSubview(next); nextChapterButton = next
+        let slider = UISlider(); view.addSubview(slider); chapterSlider = slider
+        let label = UILabel(); view.addSubview(label); chapterPositionLabel = label
+    }
+    override func viewDidLoad() {}
+    override func viewWillAppear(_ animated: Bool) {}
+    override func viewDidAppear(_ animated: Bool) {}
+    override func viewWillDisappear(_ animated: Bool) {}
+    override func viewDidDisappear(_ animated: Bool) {}
+}
+private class ThemeTestWebController: WebSpeechViewController {
+    override func loadView() { view = UIView() }
+    override func viewDidLoad() {}
+    override func viewWillAppear(_ animated: Bool) {}
+    override func viewDidAppear(_ animated: Bool) {}
+    override func viewWillDisappear(_ animated: Bool) {}
+    override func viewDidDisappear(_ animated: Bool) {}
+}
+class TabBarThemeRegressionTest: XCTestCase {
+    func testReaderThemeAndRestoreInLightAndDark() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            for reader in [ThemeTestSpeechController(), ThemeTestWebController()] as [UIViewController] {
+                reader.loadViewIfNeeded()
+                let nav = UINavigationController(rootViewController: reader)
+                let tabs = UITabBarController(); tabs.viewControllers = [nav]
+                tabs.overrideUserInterfaceStyle = style
+                let window = UIWindow(frame: UIScreen.main.bounds)
+                window.rootViewController = tabs; window.makeKeyAndVisible()
+                defer { window.isHidden = true; window.rootViewController = nil }
+                for background in [UIColor.white, .black, UIColor(red: 0.24, green: 0.12, blue: 0.4, alpha: 1)] {
+                    if let text = reader as? SpeechViewController {
+                        text.applyThemeColor(backgroundColor: background, foregroundColor: .yellow, indicatorStyle: .white, barStyle: .black)
+                        let expectedTextView = UITextView(); expectedTextView.backgroundColor = background
+                        XCTAssertEqual(text.textView.backgroundColor, expectedTextView.backgroundColor)
+                        XCTAssertEqual(text.textView.textColor, .yellow)
+                    } else if let web = reader as? WebSpeechViewController {
+                        web.applyThemeColor(backgroundColor: background, foregroundColor: .yellow, indicatorStyle: .white, barStyle: .black)
+                    }
+                    XCTAssertEqual(reader.view.backgroundColor, background)
+                    XCTAssertEqual(tabs.tabBar.barTintColor, background)
+                    XCTAssertEqual(tabs.tabBar.backgroundColor?.cgColor.alpha, 0)
+                    XCTAssertFalse(tabs.tabBar.isHidden)
+                    XCTAssertEqual(nav.navigationBar.standardAppearance.backgroundColor, background)
+                    XCTAssertEqual(nav.navigationBar.scrollEdgeAppearance?.backgroundColor, background)
+                }
+                if let text = reader as? SpeechViewController { text.resumeTheme() }
+                if let web = reader as? WebSpeechViewController { web.resumeTheme() }
+                XCTAssertEqual(reader.view.backgroundColor, .systemBackground)
+                XCTAssertEqual(tabs.tabBar.barTintColor, .systemBackground)
+                XCTAssertEqual(tabs.tabBar.backgroundColor?.cgColor.alpha, 0)
+                XCTAssertFalse(tabs.tabBar.isHidden)
+            }
+        }
+    }
+}
+
 private final class BottomControlsTestWebController: WebSpeechViewController {
     override func loadView() {
         view = UIView(frame: CGRect(x: 0, y: 0, width: 375, height: 667))
