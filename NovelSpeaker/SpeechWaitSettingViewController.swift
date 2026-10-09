@@ -15,6 +15,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
     var testText:String = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     let speaker = SpeechBlockSpeaker()
     var hideCache:[String:Bool] = [:]
+    private var isUpdatingWaitControls = false
     
     var speechWaitSettingNotificationToken:NotificationToken? = nil
     var globalStateNotificationToken:NotificationToken? = nil
@@ -31,8 +32,10 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
             }
             speaker.StopSpeech()
             let defaultSpeaker = SpeakerSetting(from: speakerSetting)
-            let waitConfig = SpeechWaitConfig(from: delaySetting)
-            speaker.SetText(content: text, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [waitConfig], sortedSpeechModArray: [])
+            let waitSettings = StoryTextClassifier.ResolveSpeechWaitSettings(
+                waitConfigList: [SpeechWaitConfig(from: delaySetting)],
+                useExperimentalWait: globalState.isSpeechWaitSettingUseExperimentalWait)
+            speaker.SetText(content: text, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: waitSettings.waitConfigs, speechModArray: waitSettings.mods)
             speaker.StartSpeech()
         }
     }
@@ -124,13 +127,38 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
         row.updateCell()
     }
     
+    private func updateWaitControls(targetText: String, value: Double) {
+        guard !isUpdatingWaitControls, value.isFinite else { return }
+        isUpdatingWaitControls = true
+        defer { isUpdatingWaitControls = false }
+        let seconds = (min(5, max(0, value)) * 100).rounded() / 100
+        RealmUtil.RealmBlock { realm in
+            guard let setting = RealmSpeechWaitConfig.SearchFromWith(realm: realm, targetText: targetText) else { return }
+            if setting.delayTimeInSec != Float(seconds) {
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speechWaitSettingNotificationToken, self.globalStateNotificationToken]) { _ in
+                    setting.delayTimeInSec = Float(seconds)
+                }
+            }
+            self.updateTestText(targetString: setting.targetText)
+            self.updateTitleCell(speechWaitConfig: setting)
+        }
+        if let slider = form.rowBy(tag: "DelayTimeSliderRow-\(targetText)") as? SliderRow {
+            slider.value = Float(seconds)
+            slider.updateCell()
+        }
+        if let stepper = form.rowBy(tag: "DelayTimeStepperRow-\(targetText)") as? StepperRow {
+            stepper.value = seconds
+            stepper.updateCell()
+        }
+    }
+
     func createSpeechWaitCells(speechWaitSetting:RealmSpeechWaitConfig) -> Section {
         let targetText = speechWaitSetting.targetText
         let section = Section()
         return section
         <<< LabelRow("TitleLabelRow-\(targetText)") {
             $0.title = speechWaitSetting.targetText.replacingOccurrences(of: "\n", with: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"))
-            $0.value = "\(String(format: "%.1f", speechWaitSetting.delayTimeInSec))"
+            $0.value = "\(String(format: "%.2f", speechWaitSetting.delayTimeInSec))"
         }.onCellSelection({ (_, _) in
             if let isHide = self.hideCache[targetText] {
                 self.hideCache[targetText] = !isHide
@@ -147,6 +175,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
             for tag in [
                 //"SpeechWaitSettingTextRow-\(targetText)",
                 "DelayTimeSliderRow-\(targetText)",
+                "DelayTimeStepperRow-\(targetText)",
                 "SpeechTestButtonRow-\(targetText)",
                 "RemoveButtonRow-\(targetText)"
                 ] {
@@ -157,30 +186,34 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
                 row.updateCell()
             }
         })
-        <<< StepperRow("DelayTimeSliderRow-\(targetText)") {
-            $0.value = Double(speechWaitSetting.delayTimeInSec)
-            $0.cell.stepper.minimumValue = 0.0
-            $0.cell.stepper.maximumValue = 5.0
-            $0.cell.stepper.stepValue = 0.1
+        <<< SliderRow("DelayTimeSliderRow-\(targetText)") {
+            $0.value = speechWaitSetting.delayTimeInSec
+            $0.cell.slider.minimumValue = 0
+            $0.cell.slider.maximumValue = 5
+            $0.steps = 50 // 0.1秒刻みで大まかに調整する。
+            $0.shouldHideValue = false
+            $0.displayValueFor = { value in value.map { String(format: "%.2f", $0) } }
             $0.title = NSLocalizedString("SpeechWaitSettingViewController_DelayTimeTitle", comment: "間の時間")
-            $0.hidden = Condition.function(["TitleLabelRow-\(targetText)"], { (form) -> Bool in
-                return self.hideCache[targetText] ?? true
+            $0.hidden = Condition.function(["TitleLabelRow-\(targetText)"], { _ in
+                self.hideCache[targetText] ?? true
             })
-        }.onChange({ (row) in
-            RealmUtil.RealmBlock { (realm) -> Void in
-                guard let value = row.value, let setting = RealmSpeechWaitConfig.SearchFromWith(realm: realm, targetText: targetText) else {
-                    return
-                }
-                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speechWaitSettingNotificationToken, self.globalStateNotificationToken]) { (realm) in
-                    var floatValue = Float(value)
-                    if fabsf(floatValue - 0.0) < Float.ulpOfOne {
-                        floatValue = 0.0
-                    }
-                    setting.delayTimeInSec = floatValue
-                }
-                self.updateTestText(targetString: setting.targetText)
-                self.updateTitleCell(speechWaitConfig: setting)
-            }
+        }.onChange({ row in
+            guard let value = row.value else { return }
+            self.updateWaitControls(targetText: targetText, value: Double(value))
+        })
+        <<< StepperRow("DelayTimeStepperRow-\(targetText)") {
+            $0.value = Double(speechWaitSetting.delayTimeInSec)
+            $0.cell.stepper.minimumValue = 0
+            $0.cell.stepper.maximumValue = 5
+            $0.cell.stepper.stepValue = 0.01
+            $0.displayValueFor = { value in value.map { String(format: "%.2f", $0) } }
+            $0.title = NSLocalizedString("SpeechWaitSettingViewController_DelayTimeTitle", comment: "間の時間")
+            $0.hidden = Condition.function(["TitleLabelRow-\(targetText)"], { _ in
+                self.hideCache[targetText] ?? true
+            })
+        }.onChange({ row in
+            guard let value = row.value else { return }
+            self.updateWaitControls(targetText: targetText, value: value)
         })
         <<< ButtonRow("SpeechTestButtonRow-\(targetText)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")

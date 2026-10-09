@@ -991,7 +991,7 @@ class StoryTextClassifier {
         if currentTextStartIndex < content.endIndex {
             let currentSpeaker = speakerList.last?.speakerSetting ?? defaultSpeaker
             let displayText = String(content[currentTextStartIndex..<content.endIndex])
-            let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeaker, waitConfig: currentWaitconfig)
+            let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeaker, waitConfig: nil)
             result.append(contentsOf: newBlockArray)
         }
         let combinedResult = ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: result, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, splitTargetLastLetters: withMoreSplitTargets)
@@ -1294,6 +1294,23 @@ class StoryTextClassifier {
     nonisolated(unsafe) private static var isDataShapeLogged = false
     static func resetSpeechSettingsDataShapeLog() { isDataShapeLogged = false }
 
+    // 通常の読み上げと発音テストで、間の方式を共通に解決する。
+    static func ResolveSpeechWaitSettings(waitConfigList: [SpeechWaitConfig], useExperimentalWait: Bool)
+        -> (waitConfigs: [SpeechWaitConfig], mods: [SpeechModSetting]) {
+        guard useExperimentalWait else { return (waitConfigList, []) }
+        let mods = waitConfigList.compactMap { config -> SpeechModSetting? in
+            let count = Int(config.delayTimeInSec * 10)
+            guard count > 0 else { return nil }
+            return SpeechModSetting(before: config.targetText,
+                after: "。" + String(repeating: "_。", count: count), isUseRegularExpression: false,
+                targetSpeechEngineTypeArray: [.avSpeechSynthesizer])
+        }
+        return (waitConfigList.map {
+            SpeechWaitConfig(targetText: $0.targetText, delayTimeInSec: $0.delayTimeInSec,
+                targetSpeechEngineTypeArray: [.voicevox])
+        }, mods)
+    }
+
     static func GatherStorySpeechSettings(novelID:String) -> StorySpeechSettings {
         return RealmUtil.RealmBlock { (realm) -> StorySpeechSettings in
             return GatherStorySpeechSettings(realm: realm, novelID: novelID)
@@ -1356,22 +1373,10 @@ class StoryTextClassifier {
                 waitConfigList = Array(allWaitConfigList)
             }
             var speechModSettingList:[SpeechModSetting] = []
-            // 非推奨型の読み替えはシステム音声だけに適用する。
-            // VOICEVOX は設定方式に関わらず、標準型の再生後の待機を使う。
-            if let isWaitExperimentalWait = RealmGlobalState.GetInstanceWith(realm: realm)?.isSpeechWaitSettingUseExperimentalWait, isWaitExperimentalWait == true {
-                for waitConfig in waitConfigList {
-                    let count = Int(waitConfig.delayTimeInSec * 10)
-                    if count <= 0 { continue }
-                    let modSetting = RealmSpeechModSetting()
-                    modSetting.before = waitConfig.targetText
-                    modSetting.after = "。" + String(repeating: "_。", count: count)
-                    modSetting.isUseRegularExpression = false
-                    speechModSettingList.append(SpeechModSetting(from: modSetting, targetSpeechEngineTypeArray: [.avSpeechSynthesizer]))
-                }
-                waitConfigList = waitConfigList.map {
-                    SpeechWaitConfig(targetText: $0.targetText, delayTimeInSec: $0.delayTimeInSec, targetSpeechEngineTypeArray: [.voicevox])
-                }
-            }
+            let waitSettings = ResolveSpeechWaitSettings(waitConfigList: waitConfigList,
+                useExperimentalWait: RealmGlobalState.GetInstanceWith(realm: realm)?.isSpeechWaitSettingUseExperimentalWait == true)
+            waitConfigList = waitSettings.waitConfigs
+            speechModSettingList = waitSettings.mods
             
             // 正規表現周りでゴニョゴニョする奴や、
             // URLを読まないようにするなどといった動的に読み替え辞書を生成するのはここでやります。

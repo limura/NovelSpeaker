@@ -560,3 +560,66 @@ final class RequiredSettingsRepairTest: XCTestCase {
         XCTAssertNil(row.cell.detailTextLabel?.text)
     }
 }
+
+final class SpeechCompletionWaitTest: XCTestCase {
+    func testCompletionWaitsAndRunsOnce() {
+        let waiter = SpeechCompletionWait()
+        let done = expectation(description: "wait finished")
+        let start = ProcessInfo.processInfo.systemUptime
+        waiter.start(seconds: 0.03) {
+            XCTAssertGreaterThanOrEqual(ProcessInfo.processInfo.systemUptime - start, 0.03)
+            XCTAssertFalse(waiter.isActive)
+            done.fulfill()
+        }
+        XCTAssertTrue(waiter.isActive)
+        wait(for: [done], timeout: 1)
+    }
+    func testCancelPreventsCompletion() {
+        let waiter = SpeechCompletionWait()
+        let unwanted = expectation(description: "cancelled completion")
+        unwanted.isInverted = true
+        waiter.start(seconds: 0.01) { unwanted.fulfill() }
+        waiter.cancel()
+        XCTAssertFalse(waiter.isActive)
+        wait(for: [unwanted], timeout: 0.06)
+    }
+    func testPauseRetainsWaitUntilResume() {
+        let waiter = SpeechCompletionWait()
+        let done = expectation(description: "resumed completion")
+        var resumedAt: TimeInterval = 0
+        waiter.start(seconds: 0.03) {
+            XCTAssertGreaterThanOrEqual(ProcessInfo.processInfo.systemUptime - resumedAt, 0.02)
+            done.fulfill()
+        }
+        waiter.pause()
+        XCTAssertTrue(waiter.isPaused)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
+            XCTAssertTrue(waiter.isActive)
+            resumedAt = ProcessInfo.processInfo.systemUptime
+            waiter.resume()
+        }
+        wait(for: [done], timeout: 1)
+    }
+    func testStandardTestTextPreservesCommaDelay() {
+        let speaker = SpeechBlockSpeaker()
+        let settings = StoryTextClassifier.ResolveSpeechWaitSettings(
+            waitConfigList: [SpeechWaitConfig(targetText: "、", delayTimeInSec: 3.5)], useExperimentalWait: false)
+        speaker.SetText(content: "ここに書いた文を、テストで読み上げます", withMoreSplitTargets: [],
+            moreSplitMinimumLetterCount: Int.max, defaultSpeaker: SpeakerSetting(), sectionConfigList: [],
+            waitConfigList: settings.waitConfigs, speechModArray: settings.mods)
+        XCTAssertEqual(speaker.speechBlockArray.count, 2)
+        XCTAssertEqual(speaker.speechBlockArray.first?.speechText, "ここに書いた文を、")
+        XCTAssertEqual(speaker.speechBlockArray.first?.delay, 3.5)
+        XCTAssertEqual(speaker.speechBlockArray.last?.delay, 0)
+    }
+    func testExperimentalTestTextUsesReplacement() {
+        let speaker = SpeechBlockSpeaker()
+        let settings = StoryTextClassifier.ResolveSpeechWaitSettings(
+            waitConfigList: [SpeechWaitConfig(targetText: "、", delayTimeInSec: 0.1)], useExperimentalWait: true)
+        speaker.SetText(content: "ここに書いた文を、テストで読み上げます", withMoreSplitTargets: [],
+            moreSplitMinimumLetterCount: Int.max, defaultSpeaker: SpeakerSetting(), sectionConfigList: [],
+            waitConfigList: settings.waitConfigs, speechModArray: settings.mods)
+        XCTAssertEqual(speaker.speechText, "ここに書いた文を。_。テストで読み上げます")
+        XCTAssertTrue(speaker.speechBlockArray.allSatisfy { $0.delay == 0 })
+    }
+}

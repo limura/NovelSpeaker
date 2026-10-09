@@ -271,7 +271,58 @@ class Speaker_Original: NSObject, AVSpeechSynthesizerDelegate {
 }
 #endif // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
 
+// synth の最後の postUtteranceDelay は無視されるため、完了通知をアプリ側で遅らせる。
+// 待機中も発話中として扱い、停止は予約を取り消し、一時停止は残り時間を保存する。
+final class SpeechCompletionWait {
+    private var workItem: DispatchWorkItem?
+    private var completion: (() -> Void)?
+    private var deadline: TimeInterval = 0
+    private var remaining: TimeInterval = 0
+    private var generation = 0
+    private(set) var isPaused = false
+    var isActive: Bool { completion != nil }
+
+    func start(seconds: TimeInterval, completion: @escaping () -> Void) {
+        cancel()
+        self.completion = completion
+        remaining = max(0, seconds)
+        schedule()
+    }
+    private func schedule() {
+        deadline = ProcessInfo.processInfo.systemUptime + remaining
+        let currentGeneration = generation
+        let item = DispatchWorkItem { [weak self] in
+            guard let self = self, self.generation == currentGeneration, !self.isPaused else { return }
+            let callback = self.completion
+            self.cancel()
+            callback?()
+        }
+        workItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + remaining, execute: item)
+    }
+    func pause() {
+        guard isActive, !isPaused else { return }
+        remaining = max(0, deadline - ProcessInfo.processInfo.systemUptime)
+        isPaused = true
+        generation += 1
+        workItem?.cancel()
+    }
+    func resume() {
+        guard isActive, isPaused else { return }
+        isPaused = false
+        schedule()
+    }
+    func cancel() {
+        generation += 1
+        workItem?.cancel()
+        workItem = nil
+        completion = nil
+        isPaused = false
+    }
+}
+
 class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
+    private let completionWait = SpeechCompletionWait()
     var synthesizer = AVSpeechSynthesizer()
     var m_Voice:AVSpeechSynthesisVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
     var m_Pitch:Float = 1.0
@@ -302,6 +353,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
         if NiftyUtility.isTesting() {
             return
         }
+        completionWait.cancel()
         isSpeechKicked = true
         // アプリ全体の不変条件:「オーディオセッションが deactivate された状態/それをまたいだ synth への
         // speak」が固着(synth wedge)の根本原因。全 speak はこの Speech() を通るので、ここで是正する。
@@ -321,20 +373,24 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
         utt.voice = m_Voice
         utt.pitchMultiplier = m_Pitch
         utt.rate = m_Rate
-        utt.postUtteranceDelay = m_Delay
         utt.volume = max(0.0, min(1.0, m_Volume))
         synthesizer.speak(utt)
     }
     
     func Stop() {
+        let wasWaiting = completionWait.isActive
+        completionWait.cancel()
         synthesizer.stopSpeaking(at: .immediate)
+        if wasWaiting { delegate?.finishSpeak(isCancel: true, speechString: "") }
     }
     
     func Pause() {
+        if completionWait.isActive { completionWait.pause(); return }
         synthesizer.pauseSpeaking(at: .immediate)
     }
     
     func Resume() {
+        if completionWait.isActive { completionWait.resume(); return }
         synthesizer.continueSpeaking()
     }
     
@@ -417,9 +473,18 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
     }
     
     @objc func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        delegate?.finishSpeak(isCancel: false, speechString: utterance.speechString)
+        let seconds = max(0, m_Delay)
+        guard seconds > 0 else {
+            delegate?.finishSpeak(isCancel: false, speechString: utterance.speechString)
+            return
+        }
+        completionWait.start(seconds: seconds) { [weak self] in
+            guard let self = self else { return }
+            self.delegate?.finishSpeak(isCancel: false, speechString: utterance.speechString)
+        }
     }
     @objc func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        completionWait.cancel()
         delegate?.finishSpeak(isCancel: true, speechString: utterance.speechString)
     }
 
@@ -432,16 +497,17 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
     #endif
     
     func isSpeaking() -> Bool {
-        return self.synthesizer.isSpeaking
+        return completionWait.isActive || self.synthesizer.isSpeaking
     }
     
     func reloadSynthesizer() {
+        completionWait.cancel()
         synthesizer = AVSpeechSynthesizer()
         synthesizer.delegate = self
     }
     
     func isPaused() -> Bool {
-        return self.synthesizer.isPaused
+        return completionWait.isPaused || self.synthesizer.isPaused
     }
 }
 #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
