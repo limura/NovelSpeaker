@@ -15,6 +15,96 @@ import RealmSwift
 import AVFoundation
 
 class NovelSpeakerUtility: NSObject {
+    enum RequiredSettingsStatus: Equatable {
+        case ready
+        case needsRepair
+        case requiresDecision(String)
+    }
+
+    struct RequiredSettingsRepairResult {
+        var createdRecords = 0
+        var updatedReferences = 0
+        var decisionKey: String?
+        var changed: Bool { createdRecords > 0 || updatedReferences > 0 }
+    }
+
+    // 読み取り専用。空の任意設定を欠落とみなさず、必須の参照だけを検査する。
+    static func requiredSettingsStatus(realm: Realm) -> RequiredSettingsStatus {
+        let state = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID)
+        if state?.isDeleted == true { return .requiresDecision("RequiredSettingsRepair_DeletedGlobal") }
+        let base = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
+        if state?.defaultDisplaySettingWith(realm: realm) == nil,
+           realm.objects(RealmDisplaySetting.self).filter("isDeleted = false").isEmpty,
+           realm.object(ofType: RealmDisplaySetting.self, forPrimaryKey: base) != nil {
+            return .requiresDecision("RequiredSettingsRepair_DeletedStandard")
+        }
+        if state?.defaultSpeakerWith(realm: realm) == nil,
+           realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false").isEmpty,
+           realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: base) != nil {
+            return .requiresDecision("RequiredSettingsRepair_DeletedStandard")
+        }
+        guard let state = state,
+              state.defaultDisplaySettingWith(realm: realm) != nil,
+              state.defaultSpeakerWith(realm: realm) != nil else { return .needsRepair }
+        return .ready
+    }
+
+    // getterからは呼ばない。呼出し元が選んだ同一Realmで再検査してから書き込む。
+    static func repairRequiredSettings(realm: Realm) throws -> RequiredSettingsRepairResult {
+        var result = RequiredSettingsRepairResult()
+        func repairInTransaction() {
+            switch requiredSettingsStatus(realm: realm) {
+            case .ready: return
+            case .requiresDecision(let key): result.decisionKey = key; return
+            case .needsRepair: break
+            }
+            let state: RealmGlobalState
+            if let existing = RealmGlobalState.GetInstanceWith(realm: realm) {
+                state = existing
+            } else {
+                state = RealmGlobalState()
+                realm.add(state)
+                result.createdRecords += 1
+            }
+            let base = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
+            if state.defaultDisplaySettingWith(realm: realm) == nil {
+                let setting: RealmDisplaySetting
+                if let existing = realm.objects(RealmDisplaySetting.self).filter("isDeleted = false").sorted(byKeyPath: "name").first {
+                    setting = existing
+                } else {
+                    setting = RealmDisplaySetting()
+                    setting.name = base
+                    realm.add(setting)
+                    result.createdRecords += 1
+                }
+                state.defaultDisplaySettingID = setting.name
+                result.updatedReferences += 1
+            }
+            if state.defaultSpeakerWith(realm: realm) == nil {
+                let setting: RealmSpeakerSetting
+                if let existing = realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false").sorted(byKeyPath: "name").first {
+                    setting = existing
+                } else {
+                    setting = RealmSpeakerSetting()
+                    setting.name = base
+                    realm.add(setting)
+                    result.createdRecords += 1
+                }
+                state.defaultSpeakerID = setting.name
+                result.updatedReferences += 1
+            }
+        }
+        if requiredSettingsStatus(realm: realm) == .ready { return result }
+        if realm.isInWriteTransaction { repairInTransaction() }
+        else { try realm.write { repairInTransaction() } }
+        return result
+    }
+
+    static func repairRequiredSettingsAtLaunch(realm: Realm, isCloud: Bool) throws -> RequiredSettingsRepairResult {
+        guard !isCloud else { return RequiredSettingsRepairResult() }
+        return try repairRequiredSettings(realm: realm)
+    }
+
     static let privacyPolicyURL = URL(string: "https://limura.github.io/NovelSpeaker/PrivacyPolicy.txt")
     static let privacyPolicyKey = "NovelSpeaker_ReadedPrivacyPolicy"
     static let UserCreatedContentPrefix = "https://novelspeaker.example.com/UserCreatedContent/"
@@ -657,6 +747,7 @@ class NovelSpeakerUtility: NSObject {
     }
     
     // 指定された realm に、必須データが入っているか否かを判定します。
+
     static func CheckDefaultSettingsAlive(realm:Realm) -> Bool {
         // 中身が無い事にはできない物について判定して、それが一つでもあったら必須データは入っていないと判定します。
         guard let globalState = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID) else { return false }
@@ -672,9 +763,24 @@ class NovelSpeakerUtility: NSObject {
     }
     // 標準設定を入れます。結構時間かかるのでバックグラウンドで行われます
     @objc static func InsertDefaultSettingsIfNeeded() {
+        // cloudは未取得と欠落を区別できないため、設定画面からの手動修復のみ。
+        guard !RealmUtil.IsUseCloudRealm() else { return }
+        var isNewLocalDatabase = false
+        do {
+            let realm = try RealmUtil.GetLocalRealm()
+            isNewLocalDatabase = realm.isEmpty
+            let result = try repairRequiredSettingsAtLaunch(realm: realm, isCloud: false)
+            if result.decisionKey != nil { return }
+        } catch {
+            NSLog("Required settings startup repair failed")
+            return
+        }
+        // 従来の任意設定の初期投入は、新規DBにだけ行う。既存DBの空設定は維持する。
+        guard isNewLocalDatabase else { return }
         DispatchQueue.global(qos: .utility).async {
-            RealmUtil.RealmBlock { (realm) -> Void in
-                if CheckDefaultSettingsAlive(realm: realm) { return }
+            guard !RealmUtil.IsUseCloudRealm(), let realm = try? RealmUtil.GetLocalRealm() else { return }
+            do {
+                // 必須設定は同期補完済み。ここは新規DBの初期投入だけを行う。
                 let globalState:RealmGlobalState
                 if let tmpGlobalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                     globalState = tmpGlobalState

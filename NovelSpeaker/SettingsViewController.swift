@@ -20,6 +20,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     var notificationTokens:[NSObjectProtocol] = []
     
     var globalDataNotificationToken:NotificationToken? = nil
+    private var requiredSettingsNotificationTokens: [NotificationToken] = []
+    private(set) var isRequiredSettingsRepairPending = false
+    static let requiredSettingsRepairRowTag = "RequiredSettingsRepair"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +36,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         addNotificationCenter()
+        updateRequiredSettingsRepairRow()
     }
     
     func handleAppInformationLogAction(action: AppInformationLogAction) {
@@ -75,6 +79,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func StopObservers(){
         globalDataNotificationToken = nil
+        requiredSettingsNotificationTokens.removeAll()
 
     }
     func RestartObservers(){
@@ -84,6 +89,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func registerObserver() {
         RealmUtil.RealmBlock { (realm) -> Void in
+            requiredSettingsNotificationTokens.removeAll()
+            func changed() {
+                DispatchQueue.main.async { [weak self] in self?.updateRequiredSettingsRepairRow() }
+            }
+            requiredSettingsNotificationTokens = [
+                realm.objects(RealmGlobalState.self).observe { _ in changed() },
+                realm.objects(RealmDisplaySetting.self).observe { _ in changed() },
+                realm.objects(RealmSpeakerSetting.self).observe { _ in changed() }
+            ]
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm) {
                 self.globalDataNotificationToken = globalData.observe({ (change) in
                     switch change {
@@ -155,6 +169,104 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
 
     func removeNotificationCenter(){
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
+    }
+
+    func requiredSettingsStatusForUI() -> NovelSpeakerUtility.RequiredSettingsStatus {
+        return RealmUtil.RealmBlock { NovelSpeakerUtility.requiredSettingsStatus(realm: $0) }
+    }
+
+    func makeRequiredSettingsRepairRow() -> ButtonRow {
+        return ButtonRow(Self.requiredSettingsRepairRowTag) {
+            $0.cellStyle = .subtitle
+            let status = self.requiredSettingsStatusForUI()
+            $0.title = NSLocalizedString("RequiredSettingsRepair_Title", comment: "必須設定を修復する")
+            $0.disabled = Condition(booleanLiteral: self.isRequiredSettingsRepairPending || status == .ready)
+            $0.value = status == .ready ? NSLocalizedString("RequiredSettingsRepair_NotNeeded", comment: "修復の必要はありません") : nil
+            $0.cell.textLabel?.numberOfLines = 0
+        }.onCellSelection { [weak self] _, _ in self?.confirmRequiredSettingsRepair() }
+        .cellUpdate { cell, row in
+            cell.height = { UITableView.automaticDimension }
+            cell.textLabel?.textAlignment = .left
+            cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .body)
+            cell.textLabel?.adjustsFontForContentSizeCategory = true
+            cell.textLabel?.numberOfLines = 0
+            cell.textLabel?.lineBreakMode = .byWordWrapping
+            cell.detailTextLabel?.text = row.value
+            cell.detailTextLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+            cell.detailTextLabel?.adjustsFontForContentSizeCategory = true
+            cell.detailTextLabel?.numberOfLines = 0
+            cell.detailTextLabel?.lineBreakMode = .byWordWrapping
+            cell.detailTextLabel?.textColor = .gray
+            if row.isDisabled { cell.textLabel?.textColor = .gray }
+        }
+    }
+
+    func updateRequiredSettingsRepairRow() {
+        guard let row = form.rowBy(tag: Self.requiredSettingsRepairRowTag) as? ButtonRow else { return }
+        let status = requiredSettingsStatusForUI()
+        row.title = NSLocalizedString("RequiredSettingsRepair_Title", comment: "必須設定を修復する")
+        row.disabled = Condition(booleanLiteral: isRequiredSettingsRepairPending || status == .ready)
+        row.value = status == .ready
+            ? NSLocalizedString("RequiredSettingsRepair_NotNeeded", comment: "修復の必要はありません") : nil
+        row.evaluateDisabled()
+        row.updateCell()
+    }
+
+    func confirmRequiredSettingsRepair() {
+        guard !isRequiredSettingsRepairPending else { return }
+        let sourceIsCloud = RealmUtil.IsUseCloudRealm()
+        let source = RealmUtil.RealmBlock { realm in
+            (NovelSpeakerUtility.requiredSettingsStatus(realm: realm), realm.configuration.fileURL)
+        }
+        if source.0 == .ready { updateRequiredSettingsRepairRow(); return }
+        if case .requiresDecision(let key) = source.0 {
+            NiftyUtility.EasyDialogOneButton(viewController: self, title: nil,
+                message: NSLocalizedString(key, comment: "自動で判断できない設定"), buttonTitle: nil, buttonAction: nil)
+            return
+        }
+        isRequiredSettingsRepairPending = true
+        updateRequiredSettingsRepairRow()
+        let message = NSLocalizedString(sourceIsCloud ? "RequiredSettingsRepair_CloudExplanation" : "RequiredSettingsRepair_LocalExplanation", comment: "必須設定の修復説明")
+        NiftyUtility.EasyDialogTwoButton(viewController: self,
+            title: NSLocalizedString("RequiredSettingsRepair_Title", comment: "必須設定を修復する"), message: message,
+            button1Title: NSLocalizedString("Cancel_button", comment: "キャンセル"), button1Action: { [weak self] in
+                self?.isRequiredSettingsRepairPending = false
+                self?.updateRequiredSettingsRepairRow()
+            }, button2Title: NSLocalizedString("RequiredSettingsRepair_Confirm", comment: "修復する"), button2Action: { [weak self] in
+                self?.performRequiredSettingsRepair(expectedCloud: sourceIsCloud, expectedURL: source.1)
+            })
+    }
+
+    private func performRequiredSettingsRepair(expectedCloud: Bool, expectedURL: URL?) {
+        defer {
+            isRequiredSettingsRepairPending = false
+            updateRequiredSettingsRepairRow()
+        }
+        var message: String
+        do {
+            guard RealmUtil.IsUseCloudRealm() == expectedCloud else {
+                throw NSError(domain: "RequiredSettingsRepairSourceChanged", code: 1)
+            }
+            let realm = try RealmUtil.GetRealm()
+            guard realm.configuration.fileURL == expectedURL else {
+                throw NSError(domain: "RequiredSettingsRepairSourceChanged", code: 1)
+            }
+            let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+            if let key = result.decisionKey {
+                message = NSLocalizedString(key, comment: "判断が必要")
+            } else if result.changed {
+                message = String(format: NSLocalizedString("RequiredSettingsRepair_Result", comment: "修復結果"), result.createdRecords, result.updatedReferences)
+                // 開いている本文・編集や再生を破棄しない。監視の完全な再登録は再起動で行う。
+                RestartObservers()
+                NovelSpeakerNotificationTool.AnnounceGlobalStateChanged()
+            } else {
+                message = NSLocalizedString("RequiredSettingsRepair_NotNeeded", comment: "修復の必要はありません")
+            }
+        } catch {
+            message = NSLocalizedString("RequiredSettingsRepair_Failed", comment: "保存先変更または書き込み失敗")
+        }
+        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: message,
+            buttonTitle: nil, buttonAction: nil)
     }
     
     func NewAppInformationAlive() {
@@ -1835,6 +1947,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             }
 
+            section <<< makeRequiredSettingsRepairRow()
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")

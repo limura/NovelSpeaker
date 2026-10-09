@@ -11,6 +11,7 @@ import UIKit
 import WebKit
 import AVFoundation
 import RealmSwift
+import Eureka
 @testable import NovelSpeaker
 
 class SpeakerTest: XCTestCase {
@@ -332,5 +333,230 @@ final class WebReaderBottomControlsTest: XCTestCase {
             let disabled = reader.createSpeechViewButtonArray(novelID: "test", novelType: .UserCreated, aliveButtonSettings: [SpeechViewButtonSetting(type: .voicevoxCacheGeneration, isOn: false)], buttonSize: 28, isForBottomBar: bottom)
             XCTAssertTrue(disabled.isEmpty)
         }
+    }
+}
+
+private final class RequiredSettingsTestController: SettingsViewController {
+    var testRealm: Realm!
+    override func loadView() { view = UIView() }
+    override func viewDidLoad() {}
+    override func requiredSettingsStatusForUI() -> NovelSpeakerUtility.RequiredSettingsStatus {
+        NovelSpeakerUtility.requiredSettingsStatus(realm: testRealm)
+    }
+}
+
+final class RequiredSettingsRepairTest: XCTestCase {
+    private func makeRealm() throws -> Realm {
+        try Realm(configuration: Realm.Configuration(inMemoryIdentifier: UUID().uuidString))
+    }
+
+    private func addState(_ realm: Realm, display: String = "missing-display", speaker: String = "voice") throws -> RealmGlobalState {
+        let state = RealmGlobalState()
+        state.defaultDisplaySettingID = display
+        state.defaultSpeakerID = speaker
+        try realm.write { realm.add(state) }
+        return state
+    }
+
+    private func addSpeaker(_ realm: Realm, name: String = "voice") throws -> RealmSpeakerSetting {
+        let setting = RealmSpeakerSetting()
+        setting.name = name
+        setting.type = "VOICEVOX"
+        setting.voiceIdentifier = "47"
+        setting.rate = 0.73
+        try realm.write { realm.add(setting) }
+        return setting
+    }
+
+    private func addDisplay(_ realm: Realm, name: String) throws -> RealmDisplaySetting {
+        let setting = RealmDisplaySetting()
+        setting.name = name
+        setting.textSizeValue = 79
+        setting.fontID = "preserve-font"
+        setting.lineSpacing = 12
+        setting.viewType = .webViewVertical
+        try realm.write { realm.add(setting) }
+        return setting
+    }
+
+    func testObservedAirLocalStateIsRepairedWithoutOptionalSeeding() throws {
+        let realm = try makeRealm()
+        let state = try addState(realm)
+        let speaker = try addSpeaker(realm)
+        // Airの観測: global有効、非空ID、display active/deleted共に0、旧health=true。
+        XCTAssertFalse(state.isDeleted)
+        XCTAssertFalse(state.defaultDisplaySettingID.isEmpty)
+        XCTAssertEqual(realm.objects(RealmDisplaySetting.self).count, 0)
+        XCTAssertTrue(NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm))
+        XCTAssertNil(state.defaultDisplaySettingWith(realm: realm))
+        let result = try NovelSpeakerUtility.repairRequiredSettingsAtLaunch(realm: realm, isCloud: false)
+        XCTAssertEqual(result.createdRecords, 1)
+        XCTAssertEqual(result.updatedReferences, 1)
+        XCTAssertEqual(NovelSpeakerUtility.requiredSettingsStatus(realm: realm), .ready)
+        XCTAssertEqual(realm.objects(RealmDisplaySetting.self).count, 1)
+        XCTAssertEqual(speaker.type, "VOICEVOX")
+        XCTAssertEqual(speaker.voiceIdentifier, "47")
+        XCTAssertEqual(speaker.rate, 0.73)
+        XCTAssertTrue(state.webImportBookmarkArray.isEmpty)
+        XCTAssertTrue(state.autoSplitStringList.isEmpty)
+        XCTAssertTrue(realm.objects(RealmSpeechSectionConfig.self).isEmpty)
+        XCTAssertTrue(realm.objects(RealmSpeechWaitConfig.self).isEmpty)
+        XCTAssertTrue(realm.objects(RealmSpeechModSetting.self).isEmpty)
+        XCTAssertFalse(try NovelSpeakerUtility.repairRequiredSettings(realm: realm).changed)
+    }
+
+    func testValidReferencesAndValuesStayUnchangedEvenWithEarlierNames() throws {
+        let realm = try makeRealm()
+        let state = try addState(realm, display: "z-display", speaker: "z-voice")
+        let display = try addDisplay(realm, name: "z-display")
+        let speaker = try addSpeaker(realm, name: "z-voice")
+        _ = try addDisplay(realm, name: "a-display")
+        _ = try addSpeaker(realm, name: "a-voice")
+        let date = display.createdDate
+        let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        XCTAssertFalse(result.changed)
+        XCTAssertEqual(state.defaultDisplaySettingID, "z-display")
+        XCTAssertEqual(state.defaultSpeakerID, "z-voice")
+        XCTAssertEqual(display.textSizeValue, 79)
+        XCTAssertEqual(display.fontID, "preserve-font")
+        XCTAssertEqual(display.lineSpacing, 12)
+        XCTAssertEqual(display.viewType, .webViewVertical)
+        XCTAssertEqual(display.createdDate, date)
+        XCTAssertEqual(speaker.type, "VOICEVOX")
+        XCTAssertEqual(speaker.voiceIdentifier, "47")
+        XCTAssertEqual(realm.objects(RealmDisplaySetting.self).count, 2)
+        XCTAssertEqual(realm.objects(RealmSpeakerSetting.self).count, 2)
+    }
+
+    func testMissingReferencesChooseNameAscendingWithoutIncreasingCount() throws {
+        let realm = try makeRealm()
+        let state = try addState(realm, speaker: "missing-voice")
+        _ = try addDisplay(realm, name: "z-display")
+        let chosenDisplay = try addDisplay(realm, name: "a-display")
+        _ = try addSpeaker(realm, name: "z-voice")
+        let chosenSpeaker = try addSpeaker(realm, name: "a-voice")
+        let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        XCTAssertEqual(result.createdRecords, 0)
+        XCTAssertEqual(result.updatedReferences, 2)
+        XCTAssertEqual(state.defaultDisplaySettingID, chosenDisplay.name)
+        XCTAssertEqual(state.defaultSpeakerID, chosenSpeaker.name)
+        XCTAssertEqual(chosenDisplay.textSizeValue, 79)
+        XCTAssertEqual(chosenSpeaker.type, "VOICEVOX")
+        XCTAssertEqual(realm.objects(RealmDisplaySetting.self).count, 2)
+        XCTAssertEqual(realm.objects(RealmSpeakerSetting.self).count, 2)
+        XCTAssertFalse(try NovelSpeakerUtility.repairRequiredSettings(realm: realm).changed)
+    }
+
+    func testMissingGlobalAdoptsOnlyExistingSettingsWithoutReplacingThem() throws {
+        let realm = try makeRealm()
+        let display = try addDisplay(realm, name: "only-display")
+        let speaker = try addSpeaker(realm, name: "only-voice")
+        let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        let state = try XCTUnwrap(RealmGlobalState.GetInstanceWith(realm: realm))
+        XCTAssertEqual(result.createdRecords, 1)
+        XCTAssertEqual(state.defaultDisplaySettingID, display.name)
+        XCTAssertEqual(state.defaultSpeakerID, speaker.name)
+        XCTAssertEqual(display.fontID, "preserve-font")
+        XCTAssertEqual(speaker.voiceIdentifier, "47")
+        XCTAssertEqual(realm.objects(RealmDisplaySetting.self).count, 1)
+        XCTAssertEqual(realm.objects(RealmSpeakerSetting.self).count, 1)
+    }
+
+    func testZeroSettingsCreatesOneEachAndSetsReferences() throws {
+        let realm = try makeRealm()
+        let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        XCTAssertEqual(result.createdRecords, 3)
+        XCTAssertEqual(result.updatedReferences, 2)
+        XCTAssertEqual(realm.objects(RealmGlobalState.self).count, 1)
+        XCTAssertEqual(realm.objects(RealmDisplaySetting.self).count, 1)
+        XCTAssertEqual(realm.objects(RealmSpeakerSetting.self).count, 1)
+        XCTAssertEqual(NovelSpeakerUtility.requiredSettingsStatus(realm: realm), .ready)
+        XCTAssertFalse(try NovelSpeakerUtility.repairRequiredSettings(realm: realm).changed)
+    }
+
+    func testEmptyReferencesSelectExistingRatherThanAddStandards() throws {
+        let realm = try makeRealm()
+        let state = try addState(realm, display: "", speaker: "")
+        _ = try addDisplay(realm, name: "user-display")
+        _ = try addSpeaker(realm, name: "user-voice")
+        let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        XCTAssertEqual(result.createdRecords, 0)
+        XCTAssertEqual(state.defaultDisplaySettingID, "user-display")
+        XCTAssertEqual(state.defaultSpeakerID, "user-voice")
+    }
+
+    func testDeletedReferencedRecordIsNotRevivedAndActiveOneIsAdopted() throws {
+        let realm = try makeRealm()
+        let state = try addState(realm, display: "deleted")
+        let deleted = try addDisplay(realm, name: "deleted")
+        try realm.write { deleted.isDeleted = true }
+        _ = try addDisplay(realm, name: "active")
+        _ = try addSpeaker(realm)
+        let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        XCTAssertEqual(result.createdRecords, 0)
+        XCTAssertEqual(state.defaultDisplaySettingID, "active")
+        XCTAssertTrue(deleted.isDeleted)
+        XCTAssertEqual(deleted.textSizeValue, 79)
+    }
+
+    func testDeletedGlobalRequiresDecisionWithoutAnyChanges() throws {
+        let realm = try makeRealm()
+        let state = try addState(realm)
+        try realm.write { state.isDeleted = true }
+        let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        XCTAssertEqual(result.decisionKey, "RequiredSettingsRepair_DeletedGlobal")
+        XCTAssertFalse(result.changed)
+        XCTAssertTrue(state.isDeleted)
+        XCTAssertTrue(realm.objects(RealmDisplaySetting.self).isEmpty)
+        XCTAssertTrue(realm.objects(RealmSpeakerSetting.self).isEmpty)
+    }
+
+    func testDeletedStandardCollisionDoesNotOverwriteOrPartiallyCreate() throws {
+        let realm = try makeRealm()
+        let base = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
+        let deleted = try addSpeaker(realm, name: base)
+        try realm.write { deleted.isDeleted = true }
+        let result = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        XCTAssertEqual(result.decisionKey, "RequiredSettingsRepair_DeletedStandard")
+        XCTAssertFalse(result.changed)
+        XCTAssertTrue(deleted.isDeleted)
+        XCTAssertEqual(deleted.voiceIdentifier, "47")
+        XCTAssertTrue(realm.objects(RealmGlobalState.self).isEmpty)
+        XCTAssertTrue(realm.objects(RealmDisplaySetting.self).isEmpty)
+    }
+
+    func testCloudLaunchDoesNotRepairMissingData() throws {
+        let realm = try makeRealm()
+        let state = try addState(realm)
+        _ = try addSpeaker(realm)
+        XCTAssertFalse(try NovelSpeakerUtility.repairRequiredSettingsAtLaunch(realm: realm, isCloud: true).changed)
+        XCTAssertEqual(state.defaultDisplaySettingID, "missing-display")
+        XCTAssertTrue(realm.objects(RealmDisplaySetting.self).isEmpty)
+    }
+
+    func testRepairRowIsAvailableWithoutGlobalAndUpdatesDisabledState() throws {
+        let realm = try makeRealm()
+        let controller = RequiredSettingsTestController()
+        controller.testRealm = realm
+        let row = controller.makeRequiredSettingsRepairRow()
+        controller.form +++ Section() <<< row
+        row.evaluateDisabled()
+        XCTAssertFalse(row.isDisabled)
+        _ = try NovelSpeakerUtility.repairRequiredSettings(realm: realm)
+        controller.updateRequiredSettingsRepairRow()
+        XCTAssertTrue(row.isDisabled)
+        XCTAssertEqual(row.value, NSLocalizedString("RequiredSettingsRepair_NotNeeded", comment: ""))
+        XCTAssertEqual(row.cell.textLabel?.text, NSLocalizedString("RequiredSettingsRepair_Title", comment: ""))
+        XCTAssertEqual(row.cell.detailTextLabel?.text, NSLocalizedString("RequiredSettingsRepair_NotNeeded", comment: ""))
+        XCTAssertTrue(row.cell.textLabel?.adjustsFontForContentSizeCategory == true)
+        XCTAssertTrue(row.cell.detailTextLabel?.adjustsFontForContentSizeCategory == true)
+        XCTAssertEqual(row.cell.detailTextLabel?.numberOfLines, 0)
+        XCTAssertEqual(row.cell.textLabel?.textColor, UIColor.gray)
+        let display = try XCTUnwrap(RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm))
+        try realm.write { realm.delete(display) }
+        controller.updateRequiredSettingsRepairRow()
+        XCTAssertFalse(row.isDisabled)
+        XCTAssertNil(row.value)
+        XCTAssertNil(row.cell.detailTextLabel?.text)
     }
 }

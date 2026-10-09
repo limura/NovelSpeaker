@@ -2809,3 +2809,14 @@ Version 2.6.3
 "RubyNotationSpeechModCreateViewController_RegisteredFormat" = "%d件登録しました";
 "RubyNotationSpeechModCreateViewController_NothingRegistered" = "既存の読み替えを残したので、何も登録していません";
 "RubyNotationSpeechModCreateViewController_RegisteredWithSkipFormat" = "%1$d件登録しました (%2$d件は既存の読み替えを残しました)";
+
+/* Required settings repair */
+"RequiredSettingsRepair_Title" = "必須設定を修復する";
+"RequiredSettingsRepair_NotNeeded" = "修復の必要はありません";
+"RequiredSettingsRepair_Confirm" = "修復する";
+"RequiredSettingsRepair_LocalExplanation" = "全体設定、既定の表示設定と話者設定を確認します。既定参照が無効なら名前順で最初の有効な設定を使い、有効な設定がない場合は初期値で1件作成します。使用する声や表示方式が変わる場合があります。既存の設定内容や小説は削除しません。";
+"RequiredSettingsRepair_CloudExplanation" = "iCloudの取得が終わっているかは確認できません。未取得の設定を補完する可能性があります。既定参照が無効なら名前順で最初の有効な設定を使い、有効な設定がない場合は初期値で1件作成します。使用する声や表示方式が変わる場合があり、変更は他の端末にも同期されます。既存の設定内容や小説は削除しません。";
+"RequiredSettingsRepair_Result" = "設定を%d件作成し、既定参照を%d件設定しました。開いている本文・編集や再生は維持しています。反映のため、編集内容を保存してからアプリを再起動してください。iCloudへの同期完了を示すものではありません。";
+"RequiredSettingsRepair_Failed" = "保存先が変わったか、設定の書き込みに失敗しました。現在の保存先を確認して、もう一度お試しください。";
+"RequiredSettingsRepair_DeletedGlobal" = "削除扱いの全体設定が残っています。値の復活や初期化は自動で判断できないため、修復は行いませんでした。";
+"RequiredSettingsRepair_DeletedStandard" = "標準と同じ名前の削除済み設定が残っています。復活や上書きは自動で判断できないため、修復は行いませんでした。";

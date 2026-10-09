@@ -2769,3 +2769,14 @@ First release.
 "RubyNotationSpeechModCreateViewController_RegisteredFormat" = "Added %d entries";
 "RubyNotationSpeechModCreateViewController_NothingRegistered" = "Kept the existing replacements, so nothing was added";
 "RubyNotationSpeechModCreateViewController_RegisteredWithSkipFormat" = "Added %1$d entries (kept the existing replacement for %2$d)";
+
+/* Required settings repair */
+"RequiredSettingsRepair_Title" = "Repair required settings";
+"RequiredSettingsRepair_NotNeeded" = "No repair is needed";
+"RequiredSettingsRepair_Confirm" = "Repair";
+"RequiredSettingsRepair_LocalExplanation" = "Check global settings and the default display and speaker settings. If a default reference is invalid, use the first active setting sorted by name. If none exists, create one with initial values. The voice or display mode may change. Existing settings and novels will not be deleted.";
+"RequiredSettingsRepair_CloudExplanation" = "Completion of iCloud downloads cannot be verified. Settings that have not arrived may be supplemented. If a default reference is invalid, use the first active setting sorted by name. If none exists, create one with initial values. The voice or display mode may change, and changes may sync to other devices. Existing settings and novels will not be deleted.";
+"RequiredSettingsRepair_Result" = "Created %d settings and set %d default references. Open reading and editing screens and playback are preserved. Save your edits, then restart the app to apply the settings. This does not confirm completion of iCloud synchronization.";
+"RequiredSettingsRepair_Failed" = "The data source changed or the settings could not be saved. Check the current data source and try again.";
+"RequiredSettingsRepair_DeletedGlobal" = "Deleted global settings still exist. Restoring or resetting their values requires a separate decision. No repair was made.";
+"RequiredSettingsRepair_DeletedStandard" = "A deleted setting has the same name as the standard setting. Restoring or overwriting it requires a separate decision. No repair was made.";
