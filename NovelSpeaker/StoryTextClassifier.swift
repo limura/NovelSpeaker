@@ -70,15 +70,18 @@ struct SpeakerSetting {
 struct SpeechWaitConfig {
     let targetText : String
     let delayTimeInSec : Float
+    let targetSpeechEngineTypeArray: [SpeechEngineType]
     #if !os(watchOS)
     init(from:RealmSpeechWaitConfig) {
         targetText = from.targetText
         delayTimeInSec = from.delayTimeInSec
+        targetSpeechEngineTypeArray = []
     }
     #endif
-    init(targetText:String, delayTimeInSec:Float) {
+    init(targetText:String, delayTimeInSec:Float, targetSpeechEngineTypeArray: [SpeechEngineType] = []) {
         self.targetText = targetText
         self.delayTimeInSec = delayTimeInSec
+        self.targetSpeechEngineTypeArray = targetSpeechEngineTypeArray
     }
 }
 /// 読み替えを適用する音声合成エンジン。
@@ -907,6 +910,8 @@ class StoryTextClassifier {
             currentWaitconfig = nil
             if let waitConfigList = indexedWaitConfigList[c] {
                 for waitSetting in waitConfigList {
+                    if let engine = SpeechEngineType(typeString: currentSpeakerSetting.speakerSetting.type),
+                       waitSetting.targetSpeechEngineTypeArray.isApplied(to: engine) == false { continue }
                     if waitSetting.delayTimeInSec > 0 && waitSetting.targetText.count > 0 && targetString.starts(with: waitSetting.targetText) {
                         currentWaitconfig = waitSetting
                         break
@@ -1351,7 +1356,8 @@ class StoryTextClassifier {
                 waitConfigList = Array(allWaitConfigList)
             }
             var speechModSettingList:[SpeechModSetting] = []
-            // 非推奨型であれば読み替え辞書に登録する形にします。
+            // 非推奨型の読み替えはシステム音声だけに適用する。
+            // VOICEVOX は設定方式に関わらず、標準型の再生後の待機を使う。
             if let isWaitExperimentalWait = RealmGlobalState.GetInstanceWith(realm: realm)?.isSpeechWaitSettingUseExperimentalWait, isWaitExperimentalWait == true {
                 for waitConfig in waitConfigList {
                     let count = Int(waitConfig.delayTimeInSec * 10)
@@ -1360,9 +1366,11 @@ class StoryTextClassifier {
                     modSetting.before = waitConfig.targetText
                     modSetting.after = "。" + String(repeating: "_。", count: count)
                     modSetting.isUseRegularExpression = false
-                    speechModSettingList.append(SpeechModSetting(from: modSetting))
+                    speechModSettingList.append(SpeechModSetting(from: modSetting, targetSpeechEngineTypeArray: [.avSpeechSynthesizer]))
                 }
-                waitConfigList = []
+                waitConfigList = waitConfigList.map {
+                    SpeechWaitConfig(targetText: $0.targetText, delayTimeInSec: $0.delayTimeInSec, targetSpeechEngineTypeArray: [.voicevox])
+                }
             }
             
             // 正規表現周りでゴニョゴニョする奴や、

@@ -9,6 +9,7 @@
 //
 
 import XCTest
+import RealmSwift
 @testable import NovelSpeaker
 
 class StoryTextClassifierVoicevoxTest: XCTestCase {
@@ -173,5 +174,45 @@ class StoryTextClassifierVoicevoxTest: XCTestCase {
         XCTAssertEqual(combined.count, 2, "delayを持つピースの後には別のピースを追加してはいけない")
         XCTAssertEqual(combined.first?.displayText, "ことせかいという名前は、")
         XCTAssertEqual(combined.first?.delay, 3.0)
+    }
+}
+
+final class StoryTextClassifierWaitEngineTest: XCTestCase {
+    func testExperimentalWaitUsesStandardDelayOnlyForVoicevox() throws {
+        let realm = try Realm(configuration: Realm.Configuration(inMemoryIdentifier: UUID().uuidString))
+        let state = RealmGlobalState()
+        state.isSpeechWaitSettingUseExperimentalWait = true
+        let wait = RealmSpeechWaitConfig()
+        wait.targetText = "、"
+        wait.delayTimeInSec = 0.35
+        let shortWait = RealmSpeechWaitConfig()
+        shortWait.targetText = "。"
+        shortWait.delayTimeInSec = 0.05
+        try realm.write { realm.add([state]); realm.add([wait, shortWait]) }
+        let settings = StoryTextClassifier.GatherStorySpeechSettings(realm: realm, novelID: "test")
+        let content = "本文、「会話、続き。」末尾。"
+        func classify(_ type: String) -> [CombinedSpeechBlock] {
+            let narrator = SpeakerSetting(type: type)
+            let dialogue = SpeakerSetting(type: type == "VOICEVOX" ? "AVSpeechSynthesizer" : "VOICEVOX")
+            return StoryTextClassifier.CategorizeStoryText(
+                content: content, withMoreSplitTargets: [], moreSplitMinimumLetterCount: 200,
+                defaultSpeaker: narrator,
+                sectionConfigList: [SpeechSectionConfig(startText: "「", endText: "」", speakerSetting: dialogue)],
+                waitConfigList: settings.waitConfigList,
+                indexedPreSortedSpeechModArray: settings.indexedPreSortedSpeechModArray,
+                contentDependentSpeechModArray: [])
+        }
+        for narratorType in ["VOICEVOX", "AVSpeechSynthesizer"] {
+            let blocks = classify(narratorType)
+            let voicevox = blocks.filter { $0.type == "VOICEVOX" }
+            let system = blocks.filter { $0.type == "AVSpeechSynthesizer" }
+            XCTAssertFalse(voicevox.isEmpty)
+            XCTAssertFalse(system.isEmpty)
+            XCTAssertFalse(voicevox.contains { $0.speechText.contains("_。") })
+            XCTAssertTrue(voicevox.contains { abs($0.delay - 0.35) < 0.00001 })
+            XCTAssertTrue(voicevox.contains { abs($0.delay - 0.05) < 0.00001 })
+            XCTAssertTrue(system.allSatisfy { $0.delay == 0 })
+            XCTAssertTrue(system.contains { $0.speechText.contains("。_。_。_。") })
+        }
     }
 }
