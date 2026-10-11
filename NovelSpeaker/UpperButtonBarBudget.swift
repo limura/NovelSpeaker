@@ -23,6 +23,20 @@ enum UpperButtonBarBudget {
         return floor(max(0, right - left - max(0, systemReserve)))
     }
 
+    struct TabSideSpaces: Equatable {
+        let leading: CGFloat
+        let trailing: CGFloat
+    }
+
+    // 中央の実占有領域を横切らない連続空間。戻る予約を右側から再度引かない。
+    static func tabSideSpaces(usable: CGRect, occupied: CGRect, gap: CGFloat = 12) -> TabSideSpaces {
+        guard usable.width > 0, occupied.width > 0, occupied.height > 0, occupied.intersects(usable) else {
+            return TabSideSpaces(leading: 0, trailing: 0)
+        }
+        return TabSideSpaces(leading: floor(max(0, min(occupied.minX, usable.maxX) - usable.minX - max(0, gap))),
+                             trailing: floor(max(0, usable.maxX - max(occupied.maxX, usable.minX) - max(0, gap))))
+    }
+
     struct Allocation {
         let searchWidth: CGFloat
         let trailingWidth: CGFloat
@@ -41,8 +55,9 @@ enum UpperButtonBarBudget {
         let trailing: CGFloat
         let selection: Selection
         if let center {
-            search = floor(max(0, min(preferred, center.minX - usable.minX - filterWidth - gap)))
-            trailing = floor(max(0, usable.maxX - center.maxX - gap))
+            let spaces = tabSideSpaces(usable: usable, occupied: center, gap: gap)
+            search = floor(max(0, min(preferred, spaces.leading - filterWidth)))
+            trailing = spaces.trailing
             selection = select(widths: buttonWidths, spacing: spacing, available: trailing)
         } else {
             let pool = max(0, usable.width - filterWidth - titleWidth - 2 * gap)

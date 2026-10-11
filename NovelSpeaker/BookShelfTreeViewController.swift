@@ -2362,7 +2362,10 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         let titleWidth = ceil(self.bookshelfTitleLabel.intrinsicContentSize.width)
         var center: CGRect?
         var centerSource = "app-leading-title"
-        if #available(iOS 18.0, *),
+        if let upper = NovelSpeakerUtility.UpperButtonBarLayout.upperTabBudget(viewController: self) {
+            center = upper.occupied
+            centerSource = "tree-upper"
+        } else if #available(iOS 18.0, *),
            traitCollection.userInterfaceIdiom == .pad,
            traitCollection.horizontalSizeClass == .regular,
            !NovelSpeakerUtility.IsNeedOverrideTabBarTraits(),

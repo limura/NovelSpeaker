@@ -15,6 +15,98 @@ import RealmSwift
 import AVFoundation
 
 class NovelSpeakerUtility: NSObject {
+    enum IPadUpperTabRegion {
+        case outsideGate
+        case lower
+        case upper(CGRect)
+        case unknown(String)
+    }
+
+    // 実タブ名を含む共通祖先のうち、全幅に広がる前の最も外側の狭い矩形を使う。
+    // private class名・child index・固定のタブ幅には依存しない。
+    static func iPadUpperTabRegion(controller: UIViewController) -> IPadUpperTabRegion {
+        guard #available(iOS 18.0, *), controller.traitCollection.userInterfaceIdiom == .pad,
+              !UserDefaults.standard.bool(forKey: IsNeedOverrideTabBarTraitsKey) else { return .outsideGate }
+        guard let window = controller.viewIfLoaded?.window,
+              let bar = controller.navigationController?.navigationBar, bar.window === window,
+              let tabs = controller.tabBarController else { return .unknown("notAttached") }
+        let names = Set(((tabs.viewControllers?.compactMap { $0.tabBarItem.title } ?? []) + tabs.tabs.map(\.title))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })
+        guard let root = tabs.viewIfLoaded, root.window === window else { return .unknown("notAttachedTabs") }
+        return findUpperTabRegion(in: root, excluding: [controller.view, bar], titles: names,
+                                  window: window, bar: bar, lowerTabBar: tabs.tabBar,
+                                  lineHeight: UIFont.preferredFont(forTextStyle: .headline,
+                                      compatibleWith: controller.traitCollection).lineHeight)
+    }
+
+    // UIKitの公開矩形だけを読む。root外の診断overlayや別windowは候補に入らない。
+    static func findUpperTabRegion(in root: UIView, excluding: [UIView], titles names: Set<String>,
+                                   window: UIWindow, bar: UINavigationBar, lowerTabBar: UITabBar,
+                                   lineHeight: CGFloat) -> IPadUpperTabRegion {
+        guard names.count >= 2 else { return .unknown("insufficientTabTitles") }
+        func rect(_ view: UIView) -> CGRect { view.convert(view.bounds, to: window) }
+        func visible(_ view: UIView) -> Bool {
+            let frame = rect(view)
+            guard view.window === window, frame.minX.isFinite, frame.minY.isFinite,
+                  frame.width.isFinite, frame.height.isFinite, frame.width > 1, frame.height > 1,
+                  window.bounds.contains(frame) else { return false }
+            var clip = rect(view)
+            var parent: UIView? = view
+            while let current = parent {
+                if current.isHidden || current.alpha < 0.01 { return false }
+                if current.clipsToBounds { clip = clip.intersection(rect(current)) }
+                parent = current.superview
+            }
+            return !clip.isNull && !clip.isEmpty
+        }
+        let nav = rect(bar)
+        guard nav.width > 1, nav.height > 1 else { return .unknown("zeroNavigationFrame") }
+        let upper = CGRect(x: window.bounds.minX, y: nav.minY, width: window.bounds.width,
+                           height: min(nav.height, lineHeight * 3))
+        var matches: [UILabel] = []
+        var lowerNames: Set<String> = []
+        var visited = 0
+        var truncated = false
+        func walk(_ view: UIView) {
+            guard visited < 1000 else { truncated = true; return }
+            visited += 1
+            // 本文・自前操作・ナビタイトルは探索対象にしない。
+            if excluding.contains(where: { $0 === view }) || view.isHidden || view.alpha < 0.01 ||
+                (view.accessibilityElementsHidden && !view.isUserInteractionEnabled) { return }
+            if let label = view as? UILabel, let text = label.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+               names.contains(text), visible(label) {
+                let position = rect(label)
+                if upper.contains(CGPoint(x: position.midX, y: position.midY)) { matches.append(label) }
+                else if position.midY > window.bounds.midY, lowerTabBar.window === window, !lowerTabBar.isHidden,
+                        rect(lowerTabBar).contains(CGPoint(x: position.midX, y: position.midY)) { lowerNames.insert(text) }
+            }
+            for child in view.subviews { walk(child) }
+        }
+        walk(root)
+        guard !truncated else { return .unknown("truncatedSearch") }
+        if matches.isEmpty && lowerNames == names { return .lower }
+        guard lowerNames.isEmpty, matches.count == names.count,
+              Set(matches.compactMap { $0.text?.trimmingCharacters(in: .whitespacesAndNewlines) }) == names else {
+            return .unknown("incompleteOrAmbiguousTitles")
+        }
+        var parent = matches[0].superview
+        var selected: CGRect?
+        while let candidate = parent {
+            if matches.allSatisfy({ $0.isDescendant(of: candidate) }), visible(candidate) {
+                let frame = rect(candidate)
+                // 全幅ancestor、内容領域、screen外は採用しない。339pt等の観測値は定数にしない。
+                if frame.minX > window.bounds.minX, frame.maxX < window.bounds.maxX,
+                   frame.height <= upper.height * 1.5, frame.intersects(upper) {
+                    if let previous = selected, !frame.contains(previous) { return .unknown("nonNestedGeometry") }
+                    selected = frame
+                } else if selected != nil { break }
+            }
+            parent = candidate.superview
+        }
+        guard let selected else { return .unknown("noCompactCommonAncestor") }
+        return .upper(bar.convert(selected, from: window))
+    }
+
     enum RequiredSettingsStatus: Equatable {
         case ready
         case needsRepair
@@ -4524,10 +4616,23 @@ class NovelSpeakerUtility: NSObject {
             return nil
         }
 
+        // 上部タブ検出成功時だけ3画面で共用する。取得値は保存せず、サイズ/タブ変更後も再検出。
+        // 外側24ptとタブとの12ptは既存の本棚配置方針。観測したタブ幅は定数にしない。
+        static func upperTabBudget(viewController: UIViewController)
+            -> (usable: CGRect, occupied: CGRect, spaces: UpperButtonBarBudget.TabSideSpaces, signature: String)? {
+            guard case let .upper(occupied) = NovelSpeakerUtility.iPadUpperTabRegion(controller: viewController),
+                  let bar = viewController.navigationController?.navigationBar else { return nil }
+            let usable = bar.bounds.inset(by: bar.safeAreaInsets).insetBy(dx: 24, dy: 0)
+            guard usable.width > 0, occupied.intersects(usable) else { return nil }
+            let spaces = UpperButtonBarBudget.tabSideSpaces(usable: usable, occupied: occupied)
+            let signature = "tree-upper usable=\(usable) occupied=\(occupied) leading=\(spaces.leading) trailing=\(spaces.trailing)"
+            return (usable, occupied, spaces, signature)
+        }
+
         // NavigationBar上で右側のcustomViewに割り当てられる幅を実測する。
         // UIScreen.main.bounds は、iPadのウインドウやDuoの開閉状態では対象Viewの
         // 座標系と一致しないため、ここではNavigationBarと同じWindow内の値だけを使う。
-        static func measuredAvailableWidth(viewController: UIViewController, leadingReservedWidth: CGFloat, gap: CGFloat = 4) -> (width: CGFloat, signature: String)? {
+        static func measuredAvailableWidth(viewController: UIViewController, leadingReservedWidth: CGFloat, gap: CGFloat = 4) -> (width: CGFloat, signature: String, isUpperTab: Bool)? {
             guard let view = viewController.viewIfLoaded,
                   let window = view.window,
                   let navigationBar = viewController.navigationController?.navigationBar,
@@ -4537,6 +4642,10 @@ class NovelSpeakerUtility: NSObject {
                 return nil
             }
 
+            if let upper = upperTabBudget(viewController: viewController) {
+                return (upper.spaces.trailing, upper.signature, true)
+            }
+            // 検出不能/対象外では従来の公開TabBar・戻る予約による動作を維持する。
             let safeAreaRight = max(0, navigationBar.safeAreaInsets.right)
             let rightEdge = max(navigationBar.bounds.minX, navigationBar.bounds.maxX - safeAreaRight)
             var leftEdge = max(navigationBar.bounds.minX, leadingReservedWidth)
@@ -4577,7 +4686,7 @@ class NovelSpeakerUtility: NSObject {
                 tabFrame.map { NSCoder.string(for: $0) } ?? "tab=nil",
                 leftBarFrames.map { NSCoder.string(for: $0) }.joined(separator: ",")
             ].joined(separator: "|")
-            return (width, signature)
+            return (width, signature, false)
         }
 
         // 右ボタン群がナビバーに収まりきらないと、UIKit は状況により2通りの潰し方をする:

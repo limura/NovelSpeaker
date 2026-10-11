@@ -683,10 +683,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             // compact幅は従来どおりsafe areaと公開TabBar領域で扱う。
             let systemReserve: CGFloat = self.traitCollection.horizontalSizeClass == .regular
                 ? metrics.scaledValue(for: 160, compatibleWith: self.traitCollection) : 0
-            let available = UpperButtonBarBudget.speechWidth(safe: safe, obstruction: obstruction,
+            let upper = NovelSpeakerUtility.UpperButtonBarLayout.upperTabBudget(viewController: self)
+            let available = upper?.spaces.trailing ?? UpperButtonBarBudget.speechWidth(safe: safe, obstruction: obstruction,
                                                             leadingReserve: reserve, systemReserve: systemReserve,
                                                             layoutFrame: layoutFrame, compactHeight: compactHeight)
-            let layoutSignature = "safe=\(safe) layoutFrame=\(layoutFrame) compactHeight=\(compactHeight) obstruction=\(String(describing: obstruction)) reserve=\(reserve) systemReserve=\(systemReserve) available=\(available)"
+            let layoutSignature = upper?.signature ?? "safe=\(safe) layoutFrame=\(layoutFrame) compactHeight=\(compactHeight) obstruction=\(String(describing: obstruction)) reserve=\(reserve) systemReserve=\(systemReserve) available=\(available)"
             if let currentSignature = self.currentUpperButtonBarLayoutSignature,
                currentSignature != layoutSignature {
                 self.invalidateUpperButtonBudget()

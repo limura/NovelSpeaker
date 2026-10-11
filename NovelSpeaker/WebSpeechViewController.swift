@@ -1274,7 +1274,9 @@ body.NovelSpeakerBody {
             var visibleButtons: [UIButton] = []
             var overflowButtons: [UIButton] = []
 
-            if allButtons.count <= maxButtons {
+            if maxButtons == 1 && allButtons.count > 1 && measuredCapacity?.isUpperTab == true {
+                overflowButtons = allButtons
+            } else if allButtons.count <= maxButtons {
                 visibleButtons = allButtons
             } else {
                 // lastButton を除いた残り
@@ -1353,6 +1355,11 @@ body.NovelSpeakerBody {
                     let buttons = visibleButtons
                     let isIdentical = subviews.count == buttons.count && zip(subviews, buttons).allSatisfy { isSameAction(lhs: $0, rhs: $1) }
                     if isIdentical {
+                        // 実測したタブ幅が変わっても表示列が同じなら、新しい予算で確定する。
+                        if measuredCapacity?.isUpperTab == true {
+                            self.currentUpperButtonBarLayoutSignature = layoutSignature
+                            self.isUpperRightButtonsChanged = false
+                        }
                         return
                     }
                 }

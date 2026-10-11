@@ -189,3 +189,116 @@ final class UpperButtonBarBudgetTest: XCTestCase {
         }
     }
 }
+
+final class UpperTabSideSpaceTest: XCTestCase {
+    func testObservedPortraitRegionKeepsEachSideSeparate() {
+        let spaces = UpperButtonBarBudget.tabSideSpaces(usable: CGRect(x: 20, y: 0, width: 780, height: 108),
+            occupied: CGRect(x: 240.5, y: 0, width: 339, height: 44))
+        XCTAssertEqual(spaces.leading, 208)
+        XCTAssertEqual(spaces.trailing, 208)
+    }
+
+    func testObservedLandscapeRegionDoesNotSubtractBackReserveFromTrailingSide() {
+        let spaces = UpperButtonBarBudget.tabSideSpaces(usable: CGRect(x: 20, y: 0, width: 1140, height: 108),
+            occupied: CGRect(x: 420.5, y: 0, width: 339, height: 44))
+        XCTAssertEqual(spaces.leading, 388)
+        XCTAssertEqual(spaces.trailing, 388)
+    }
+
+    func testNoSpaceAndInvalidGeometryDoNotExpandToFullWidth() {
+        let usable = CGRect(x: 0, y: 0, width: 320, height: 44)
+        XCTAssertEqual(UpperButtonBarBudget.tabSideSpaces(usable: usable, occupied: usable),
+                       .init(leading: 0, trailing: 0))
+        XCTAssertEqual(UpperButtonBarBudget.tabSideSpaces(usable: usable, occupied: .zero),
+                       .init(leading: 0, trailing: 0))
+        XCTAssertEqual(UpperButtonBarBudget.tabSideSpaces(usable: usable, occupied: CGRect(x: 10, y: 100, width: 100, height: 44)),
+                       .init(leading: 0, trailing: 0))
+    }
+}
+
+
+@MainActor
+final class UpperTabRegionDetectionTest: XCTestCase {
+    private let titles: Set<String> = ["Shelf", "Settings"]
+
+    private func fixture() -> (UIWindow, UIView, UINavigationBar, UITabBar, UIView) {
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 900, height: 1200))
+        window.isHidden = false
+        let root = UIView(frame: window.bounds)
+        window.addSubview(root)
+        let bar = UINavigationBar(frame: CGRect(x: 0, y: 30, width: 900, height: 100))
+        root.addSubview(bar)
+        let lower = UITabBar(frame: CGRect(x: 0, y: 1120, width: 900, height: 80))
+        root.addSubview(lower)
+        let outer = UIView(frame: CGRect(x: 290, y: 32, width: 320, height: 46))
+        let inner = UIView(frame: CGRect(x: 4, y: 0, width: 312, height: 46))
+        outer.addSubview(inner)
+        for (index, name) in titles.sorted().enumerated() {
+            let label = UILabel(frame: CGRect(x: 20 + index * 150, y: 10, width: 100, height: 22))
+            label.text = name
+            inner.addSubview(label)
+        }
+        root.addSubview(outer)
+        return (window, root, bar, lower, outer)
+    }
+
+    func testDetectsOuterRegionInBarCoordinatesAndRemeasuresAfterResize() throws {
+        let (window, root, bar, lower, outer) = fixture()
+        defer { window.isHidden = true }
+        func region() throws -> CGRect {
+            guard case let .upper(rect) = NovelSpeakerUtility.findUpperTabRegion(
+                in: root, excluding: [bar], titles: titles, window: window, bar: bar,
+                lowerTabBar: lower, lineHeight: 22) else { XCTFail("upper region missing"); return .zero }
+            return rect
+        }
+        XCTAssertEqual(try region(), CGRect(x: 290, y: 2, width: 320, height: 46))
+        window.frame.size.width = 1200
+        root.frame = window.bounds
+        bar.frame.size.width = 1200
+        outer.frame.origin.x = 440
+        XCTAssertEqual(try region(), CGRect(x: 440, y: 2, width: 320, height: 46))
+        let unrelated = UIView(frame: outer.frame)
+        let duplicate = UILabel(frame: unrelated.bounds)
+        duplicate.text = "Shelf"
+        unrelated.addSubview(duplicate)
+        window.addSubview(unrelated) // Tab controllerの外にあるoverlayは検索しない。
+        XCTAssertEqual(try region().minX, 440)
+    }
+
+    func testRejectsHiddenIncompleteAndAmbiguousTitles() {
+        let (window, root, bar, lower, outer) = fixture()
+        defer { window.isHidden = true }
+        func isUnknown() -> Bool {
+            if case .unknown = NovelSpeakerUtility.findUpperTabRegion(
+                in: root, excluding: [bar], titles: titles, window: window, bar: bar,
+                lowerTabBar: lower, lineHeight: 22) { return true }
+            return false
+        }
+        outer.isHidden = true
+        XCTAssertTrue(isUnknown())
+        outer.isHidden = false
+        let duplicate = UILabel(frame: CGRect(x: 310, y: 44, width: 100, height: 22))
+        duplicate.text = "Shelf"
+        root.addSubview(duplicate)
+        XCTAssertTrue(isUnknown())
+        duplicate.isHidden = true
+        XCTAssertFalse(isUnknown())
+        outer.subviews.first?.subviews.first?.removeFromSuperview()
+        XCTAssertTrue(isUnknown())
+    }
+
+    func testMeasuredRegionFitsMaximumSuffixAndRetainsEveryAction() {
+        for tabWidth in [CGFloat(280), 390, 500] {
+            let usable = CGRect(x: 24, y: 0, width: 786, height: 108)
+            let center = CGRect(x: 417 - tabWidth / 2, y: 0, width: tabWidth, height: 49)
+            let result = UpperButtonBarBudget.allocate(usable: usable, center: center,
+                titleWidth: 40, searchPreferred: 500, searchMaximum: 132,
+                filterWidth: 36, gap: 12, buttonWidths: Array(repeating: 28, count: 9), spacing: 8)
+            XCTAssertLessThanOrEqual(usable.minX + result.searchWidth + 36 + 12, center.minX)
+            XCTAssertLessThanOrEqual(center.maxX + 12 + result.selection.width, usable.maxX)
+            XCTAssertEqual(result.selection.visible.count + result.selection.overflow.count, 9)
+            XCTAssertFalse(result.selection.overflow.isEmpty)
+            XCTAssertGreaterThan(result.selection.width + 36, result.trailingWidth)
+        }
+    }
+}
