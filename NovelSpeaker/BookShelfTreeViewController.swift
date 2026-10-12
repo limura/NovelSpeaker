@@ -234,6 +234,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        self.upperRightEdgeProbe.restartAfterExternalEvent()
+        self.upperLeadingProbe.restartAfterExternalEvent()
         self.invalidateUpperButtonLayout()
         self.assinButtons()
     }
@@ -2175,12 +2177,16 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             // 間隔が変わると使える幅も変わるので、作り直しフラグを立て、幅予算を更新する。
             self.invalidateUpperButtonLayout()
             self.assinButtons()
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BookshelfRightTopButtonTitleChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             // ボタンの表示/非表示が変わったので、幅予算とメニューを更新する。
             self.invalidateUpperButtonLayout()
             self.assinButtons()
@@ -2188,6 +2194,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         // Dynamic Type の文字サイズ変更で使える幅が変わるので、幅予算を更新する。
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             self.invalidateUpperButtonLayout()
             self.assignRightBarButtons()
         }
@@ -2270,6 +2278,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
                     for property in propertyArray {
                         if property.name == "bookshelfViewButtonSettingArrayData" {
                             DispatchQueue.main.async {
+                                self.upperRightEdgeProbe.restartAfterExternalEvent()
+                                self.upperLeadingProbe.restartAfterExternalEvent()
                                 self.invalidateUpperButtonLayout()
                                 self.assinButtons()
                             }
@@ -2338,6 +2348,8 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
     private let bookshelfTitleLabel = UILabel()
     private let suppressedTitleView = UIView(frame: .zero)
     private var isAssigningUpperButtons = false
+    private let upperRightEdgeProbe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe()
+    private let upperLeadingProbe = NovelSpeakerUtility.UpperButtonBarLayout.LeadingProbe()
     var currentUpperButtonBarLayoutSignature: String?
 
     func invalidateUpperButtonLayout() {
@@ -2353,7 +2365,21 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         let safe = bar.bounds.inset(by: bar.safeAreaInsets)
         // カスタム内容の外側にUIKitが置く余白も予約する（実測値ではなく方針値）。
         let edge: CGFloat = 24
-        let usable = safe.insetBy(dx: edge, dy: 0)
+        let measuredRight = upperRightEdgeProbe.resolve(controller: self) { [weak self] in self?.assignRightBarButtons() }
+        guard measuredRight != nil || currentUpperButtonBarLayoutSignature == nil || upperRightEdgeProbe.usesBootstrap else {
+            return nil
+        }
+        let leading = upperLeadingProbe.resolve(controller: self, stableRightEdge: measuredRight) { [weak self] in self?.assignRightBarButtons() }
+        var usable = safe.insetBy(dx: edge, dy: 0)
+        if case .owned(let rect)? = leading {
+            // minXは配分結果のwidthから独立。現在のgroup.maxXを総予算から引かない。
+            let right = usable.maxX
+            usable.origin.x = max(safe.minX, rect.minX)
+            usable.size.width = max(0, right - usable.minX)
+        }
+        if let measuredRight {
+            usable.size.width = max(0, measuredRight - usable.minX)
+        }
         guard usable.width > 0 else { return nil }
         let metrics = UIFontMetrics(forTextStyle: .headline)
         let titleFont = UIFont.preferredFont(forTextStyle: .headline, compatibleWith: traitCollection)
@@ -2394,7 +2420,7 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
         let searchPreferred = ceil(searchButton.unconstrainedIntrinsicContentSize.width)
         // 短い検索表示を優先し、空き幅が増えても伸ばさない。空文字時は intrinsic 幅を使う。
         let maximum = metrics.scaledValue(for: 88, compatibleWith: traitCollection)
-        let signature = "safe=\(safe) usable=\(usable) center=\(String(describing: center)) source=\(centerSource) titleWidth=\(titleWidth) searchPreferred=\(searchPreferred) searchMaximum=\(maximum) category=\(traitCollection.preferredContentSizeCategory.rawValue)"
+        let signature = "safe=\(safe) usable=\(usable) center=\(String(describing: center)) source=\(centerSource) titleWidth=\(titleWidth) searchPreferred=\(searchPreferred) searchMaximum=\(maximum) category=\(traitCollection.preferredContentSizeCategory.rawValue) bootstrap=\(measuredRight == nil) leading=\(leading?.stabilityKey ?? "fallback")"
         return (usable, center, titleWidth, searchPreferred, maximum, signature)
     }
 
@@ -2476,7 +2502,9 @@ class BookShelfTreeViewController:UITableViewController, RealmObserverResetDeleg
             usable: budget.usable, center: budget.center, titleWidth: budget.titleWidth,
             searchPreferred: budget.searchPreferred, searchMaximum: budget.searchMaximum,
             filterWidth: 36, gap: 12, buttonWidths: widths, spacing: spacing)
-        let selection = allocation.selection
+        let selection = budget.signature.contains("bootstrap=true")
+            ? UpperButtonBarBudget.select(widths: widths, spacing: spacing, available: 28)
+            : allocation.selection
         self.searchButton.maxWidth = allocation.searchWidth
         if let constraint = self.searchWidthConstraint {
             constraint.constant = allocation.searchWidth

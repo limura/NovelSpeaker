@@ -1,8 +1,125 @@
 import Foundation
 
-/// UIKitの配置結果を入力に戻さない、上部ボタンの幅予算と選別。
+/// 右端の安定確認と、左側の予約を除いた上部ボタンの幅配分。
 /// 予約幅はアプリの配置方針であり、NavigationBarの内部余白を取得するAPIではない。
 enum UpperButtonBarBudget {
+    // 幅ではなく右端だけを比較する。内容を減らしても最大予算は縮まない。
+    struct StableRightEdge {
+        private var context: String?
+        private var previous: CGFloat?
+        mutating func observe(_ edge: CGFloat?, context: String) -> CGFloat? {
+            guard let edge, edge.isFinite else {
+                self.context = nil
+                previous = nil
+                return nil
+            }
+            let stable = self.context == context && previous == edge
+            self.context = context
+            previous = edge
+            return stable ? edge : nil
+        }
+    }
+
+    enum LeadingMeasurement: Equatable {
+        case noBack
+        case owned(CGRect)
+        case backSameRow(CGRect)
+        case backSeparateRow(CGRect)
+        // 戻るなしではない。完全探索で観測したcontrolが配分範囲外にある。
+        case observedOutsideRight(CGRect)
+
+        // 所有leftの幅は今回の配分結果。左anchorだけを安定確認し、縮小を最大予算へ反映しない。
+        var stabilityKey: String {
+            switch self {
+            case .noBack: return "noBack"
+            case .owned(let r): return "owned:\(r.minX),\(r.minY),\(r.height)"
+            case .backSameRow(let r): return "backSameRow:\(r)"
+            case .backSeparateRow(let r): return "backSeparateRow:\(r)"
+            case .observedOutsideRight(let r): return "observedOutsideRight:\(r)"
+            }
+        }
+    }
+
+    struct StableLeadingMeasurement {
+        private var context: String?
+        private var previous: String?
+        private var matches = 0
+        mutating func observe(_ value: LeadingMeasurement?, context: String) -> LeadingMeasurement? {
+            guard let value else { self.context = nil; previous = nil; matches = 0; return nil }
+            let key = value.stabilityKey
+            matches = self.context == context && previous == key ? matches + 1 : 1
+            self.context = context; previous = key
+            return matches >= 3 ? value : nil
+        }
+    }
+
+    // 観測した38/44/48ptの戻ると高さ21〜25.3ptのタイトルを区別する経験的guard。
+    // 未対応の大きさを戻ると推測せずfallbackへ渡す。UIKitの保証値ではない。
+    static func quantizedLeadingRect(_ rect: CGRect, scale: CGFloat) -> CGRect {
+        let scale = max(1, scale)
+        let x = (rect.minX * scale).rounded() / scale, y = (rect.minY * scale).rounded() / scale
+        // 14pt直下の浮動小数誤差で13.5ptに変わらない。外側辺だけ保守的に丸める。
+        let maxX = ceil(rect.maxX * scale - 0.00001) / scale
+        let maxY = ceil(rect.maxY * scale - 0.00001) / scale
+        return CGRect(x: x, y: y, width: maxX - x, height: maxY - y)
+    }
+
+    static func isBackControlShape(_ rect: CGRect) -> Bool {
+        guard [rect.minX, rect.minY, rect.width, rect.height].allSatisfy({ $0.isFinite }),
+              rect.width >= 28, rect.width <= 72, rect.height >= 28, rect.height <= 72 else { return false }
+        return (0.75...1.5).contains(rect.width / rect.height)
+    }
+
+    static func sameControlRow(_ a: CGRect, _ b: CGRect) -> Bool {
+        guard a.height > 0, b.height > 0 else { return false }
+        let overlap = max(0, min(a.maxY, b.maxY) - max(a.minY, b.minY))
+        // 隣接行/影の微小交差は同じ行としない。
+        return overlap >= min(a.height, b.height) * 0.5
+    }
+
+    static func classifyBackRectangles(_ candidates: [CGRect], right: CGRect, complete: Bool, stableRightEdge: CGFloat? = nil) -> LeadingMeasurement? {
+        guard complete else { return nil }
+        var distinct: [CGRect] = []
+        for rect in candidates where isBackControlShape(rect) {
+            if !distinct.contains(where: { abs($0.minX - rect.minX) <= 0.5 && abs($0.minY - rect.minY) <= 0.5 && abs($0.maxX - rect.maxX) <= 0.5 && abs($0.maxY - rect.maxY) <= 0.5 }) { distinct.append(rect) }
+        }
+        guard !distinct.isEmpty else { return nil }
+        let sameRow = distinct.filter { sameControlRow($0, right) }
+        let separate = distinct.filter { !sameControlRow($0, right) }
+        // 半端な交差は非占有と断定しない。独立した戻る行の既存判定も維持する。
+        guard separate.allSatisfy({ $0.minY >= right.maxY + 4 || $0.maxY <= right.minY - 4 }) else { return nil }
+        if sameRow.isEmpty {
+            guard distinct.count == 1 else { return nil }
+            return .backSeparateRow(distinct[0])
+        }
+        // 同じボタン行を観測できた場合だけ、別行のtab controlを一意性判定から外す。
+        // 右端も同一世代で安定済みの値だけを使う。境界をまたぐcontrolは除外しない。
+        let edge = stableRightEdge.flatMap { $0.isFinite && $0 > right.minX && $0 <= right.maxX + 0.5 ? $0 : nil }
+        let outside = sameRow.filter { rect in edge.map { rect.minX >= $0 } ?? false }
+        let remaining = sameRow.filter { rect in !outside.contains(rect) }
+        if remaining.isEmpty {
+            guard edge != nil, !outside.isEmpty else { return nil }
+            return .observedOutsideRight(outside.dropFirst().reduce(outside[0]) { $0.union($1) })
+        }
+        guard remaining.count == 1, let rect = remaining.first, rect.maxX + 4 <= right.minX else { return nil }
+        return .backSameRow(rect)
+    }
+
+    static func leadingEdge(_ value: LeadingMeasurement?, safe: CGRect,
+                            fallbackReserve: CGFloat, gap: CGFloat = 12) -> CGFloat {
+        switch value {
+        case .noBack?, .backSeparateRow?, .observedOutsideRight?: return safe.minX + 16
+        case .owned(let rect)?: return max(safe.minX, rect.maxX + gap)
+        case .backSameRow(let rect)?: return max(safe.minX + 16, rect.maxX + gap)
+        case nil: return safe.minX + fallbackReserve
+        }
+    }
+
+    static func anchoredWidth(right: CGFloat, left: CGFloat) -> CGFloat {
+        guard right.isFinite, left.isFinite else { return 0 }
+        return floor(max(0, right - left))
+    }
+
     /// 戻る操作・余白・システム表示の予約を除いた残りを操作ボタンへ配分する。
     /// systemReserveはsafe areaとは別の保守的な方針値で、実測値でも保証値でもない。
     static func speechWidth(safe: CGRect, obstruction: CGRect?, leadingReserve: CGFloat,
@@ -72,6 +189,15 @@ enum UpperButtonBarBudget {
         let visible: Range<Int>
         let overflow: Range<Int>
         let width: CGFloat
+    }
+
+    // 本文の28pt固定ボタン用。bootstrap/trimで1枠なら全操作を「…」へ入れる。
+    // 表示済みの個数を入力にしないため、予算が戻れば末尾側の操作を再表示する。
+    static func speechSelection(buttonCount: Int, maximumSlots: Int, spacing: CGFloat) -> Selection {
+        let slots = max(1, maximumSlots)
+        let available = CGFloat(slots) * 28 + CGFloat(slots - 1) * max(0, spacing)
+        return select(widths: Array(repeating: 28, count: max(0, buttonCount)),
+                      spacing: spacing, available: available)
     }
 
     /// 末尾側を優先。末尾+メニューも入らない場合は全項目をアプリ自身のメニューに入れる。

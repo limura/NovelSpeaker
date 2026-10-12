@@ -108,6 +108,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var upperButtonTrimPendingMeasure: (n: Int, overflow: CGFloat)? = nil
     // 現在のボタン群を組み立てた時の間隔設定。設定変更(間隔)を検知して作り直すために保持する。
     var currentBarButtonItemSpacing: CGFloat = -1
+    private let upperRightEdgeProbe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe()
+    private let upperLeadingProbe = NovelSpeakerUtility.UpperButtonBarLayout.LeadingProbe()
     var currentUpperButtonBarLayoutSignature: String?
 
     // 実測で決めたスロット上限をリセットして、次のレイアウトで再見積もり+再実測させる。
@@ -182,6 +184,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        self.upperRightEdgeProbe.restartAfterExternalEvent()
+        self.upperLeadingProbe.restartAfterExternalEvent()
         // 画面に入り直すたびに実測上限をリセットしてから測り直す(誤検出で縮んだままの固着を防ぐ)。
         self.resetUpperButtonFittedSlotLimit()
         // 画面が一度ナビゲーション階層から外れている間に設定変更が起きても、
@@ -212,6 +216,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             // 間隔が変わると使える幅も変わるので、作り直しフラグを立て、実測上限もリセットして測り直す。
             self.isUpperRightButtonsChanged = true
             self.resetUpperButtonFittedSlotLimit()
@@ -220,6 +226,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             // ボタンの表示/非表示が変わったので、実測上限もリセットして作り直し+trim をやり直す。
             self.resetUpperButtonFittedSlotLimit()
             self.isUpperRightButtonsChanged = true
@@ -229,6 +237,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         // Dynamic Type の文字サイズ変更で使える幅が変わるので、実測上限をリセットして測り直す。
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             self.resetUpperButtonFittedSlotLimit()
             self.forceUpdateUpperButtons()
             self.scheduleUpperButtonTrim()
@@ -901,6 +911,11 @@ body.NovelSpeakerBody {
                 case .change(_, let propertys):
                     for property in propertys {
                         if property.name == "speechViewButtonSettingArrayData" {
+                            DispatchQueue.main.async {
+                                self.upperRightEdgeProbe.restartAfterExternalEvent()
+                                self.upperLeadingProbe.restartAfterExternalEvent()
+                                self.resetUpperButtonFittedSlotLimit()
+                            }
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 let storyID = StorySpeaker.shared.storyID
                                 guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
@@ -1234,8 +1249,14 @@ body.NovelSpeakerBody {
             }
             let nowWidth = window.bounds.width
             guard nowWidth > 1 else { return }
-            let measuredCapacity = NovelSpeakerUtility.UpperButtonBarLayout.measuredAvailableWidth(viewController: self, leadingReservedWidth: 88)
-            let layoutSignature = measuredCapacity?.signature ?? "fallback-width=\(nowWidth)"
+            let edge = self.upperRightEdgeProbe.resolve(controller: self) { [weak self] in self?.forceUpdateUpperButtons() }
+            guard edge != nil || self.currentUpperButtonBarLayoutSignature == nil || self.upperRightEdgeProbe.usesBootstrap else {
+                return
+            }
+            let leading = self.upperLeadingProbe.resolve(controller: self, stableRightEdge: edge) { [weak self] in self?.forceUpdateUpperButtons() }
+            let measuredCapacity = edge.flatMap { NovelSpeakerUtility.UpperButtonBarLayout.measuredAvailableWidth(viewController: self, leadingReservedWidth: 88, rightEdge: $0, leadingMeasurement: leading) }
+            let layoutSignature = measuredCapacity?.signature ?? "bootstrap"
+            let center = NovelSpeakerUtility.UpperButtonBarLayout.upperTabBudget(viewController: self)?.occupied
             if let currentSignature = self.currentUpperButtonBarLayoutSignature,
                currentSignature != layoutSignature {
                 self.resetUpperButtonFittedSlotLimit()
@@ -1252,7 +1273,7 @@ body.NovelSpeakerBody {
             // (以前は WebView 側だけ 0.30/nowWidth 基準で、iPad 縦だと通常版より多く見積もって
             //  「…」が中央タブに潜って押せなくなっていた。飯村さん報告 2026-07-09)
             var maxButtons: Int = {
-                let containerMaxWidth = max(totalUnitWidth, measuredCapacity?.width ?? max(0, nowWidth - 88))
+                let containerMaxWidth = max(28, measuredCapacity?.width ?? 28)
 
                 return max(1, Int(floor((containerMaxWidth + spacing) / totalUnitWidth)))
             }()
@@ -1269,32 +1290,12 @@ body.NovelSpeakerBody {
             }
 
             let allButtons = barButtonArray
-            guard let lastButton = allButtons.last else { return }
+            guard !allButtons.isEmpty else { return }
 
-            var visibleButtons: [UIButton] = []
-            var overflowButtons: [UIButton] = []
-
-            if maxButtons == 1 && allButtons.count > 1 && measuredCapacity?.isUpperTab == true {
-                overflowButtons = allButtons
-            } else if allButtons.count <= maxButtons {
-                visibleButtons = allButtons
-            } else {
-                // lastButton を除いた残り
-                let others = Array(allButtons.dropLast())
-
-                // 表示可能数から lastButton と overflow 分を引く
-                let capacityForOthers = maxButtons - 2
-
-                if capacityForOthers > 0 {
-                    // 後ろから優先して残す
-                    let kept = others.suffix(capacityForOthers)
-                    overflowButtons = Array(others.prefix(others.count - kept.count))
-                    visibleButtons = Array(kept) + [lastButton]
-                } else {
-                    overflowButtons = others
-                    visibleButtons = [lastButton]
-                }
-            }
+            let selection = UpperButtonBarBudget.speechSelection(
+                buttonCount: allButtons.count, maximumSlots: maxButtons, spacing: spacing)
+            var visibleButtons = Array(allButtons[selection.visible])
+            let overflowButtons = Array(allButtons[selection.overflow])
             if !overflowButtons.isEmpty {
                 let actions = overflowButtons.map { button in
                     UIAction(title: button.accessibilityLabel ?? "",
@@ -1380,7 +1381,7 @@ body.NovelSpeakerBody {
             
             let container = UIView()
             container.translatesAutoresizingMaskIntoConstraints = false
-            let maxWidth = max(totalUnitWidth, measuredCapacity?.width ?? max(0, nowWidth - 88))
+            let maxWidth = max(28, measuredCapacity?.width ?? 28)
             container.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
             container.addSubview(stack)
             let barItem = UIBarButtonItem(customView: container)

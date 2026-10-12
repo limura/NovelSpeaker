@@ -2,6 +2,60 @@ import XCTest
 @testable import NovelSpeaker
 
 final class UpperButtonBarBudgetTest: XCTestCase {
+    func testSpeechBootstrapKeepsEveryActionInOneMenuAndExpands() {
+        let bootstrap = UpperButtonBarBudget.speechSelection(buttonCount: 14, maximumSlots: 1, spacing: 8)
+        XCTAssertTrue(bootstrap.visible.isEmpty)
+        XCTAssertEqual(bootstrap.overflow, 0..<14)
+        XCTAssertEqual(bootstrap.width, 28)
+        let partial = UpperButtonBarBudget.speechSelection(buttonCount: 14, maximumSlots: 8, spacing: 8)
+        XCTAssertEqual(partial.visible, 7..<14)
+        XCTAssertEqual(Array(partial.overflow) + Array(partial.visible), Array(0..<14))
+        XCTAssertEqual(partial.width, 280)
+        let expanded = UpperButtonBarBudget.speechSelection(buttonCount: 14, maximumSlots: 14, spacing: 8)
+        XCTAssertEqual(expanded.visible, 0..<14)
+        XCTAssertTrue(expanded.overflow.isEmpty)
+        let bootstrapAgain = UpperButtonBarBudget.speechSelection(buttonCount: 14, maximumSlots: 1, spacing: 8)
+        XCTAssertEqual(bootstrapAgain.overflow, bootstrap.overflow)
+        XCTAssertEqual(bootstrapAgain.width, bootstrap.width)
+        let onlyAction = UpperButtonBarBudget.speechSelection(buttonCount: 1, maximumSlots: 1, spacing: 8)
+        XCTAssertEqual(onlyAction.visible, 0..<1)
+        XCTAssertTrue(onlyAction.overflow.isEmpty)
+    }
+
+    func testRightEdgeRequiresConsecutiveValidSamplesInSameGeometry() {
+        var probe = UpperButtonBarBudget.StableRightEdge()
+        XCTAssertNil(probe.observe(531, context: "open-P"))
+        XCTAssertEqual(probe.observe(531, context: "open-P"), 531)
+        XCTAssertNil(probe.observe(590, context: "closed-L-safeRight"))
+        XCTAssertEqual(probe.observe(590, context: "closed-L-safeRight"), 590)
+        // 同じ678x466でもsafe areaの側が違えば再確認する。
+        XCTAssertNil(probe.observe(654, context: "closed-L-safeLeft"))
+        XCTAssertNil(probe.observe(nil, context: "closed-L-safeLeft"))
+        XCTAssertNil(probe.observe(654, context: "closed-L-safeLeft"))
+        XCTAssertEqual(probe.observe(654, context: "closed-L-safeLeft"), 654)
+        XCTAssertNil(probe.observe(.infinity, context: "closed-L-safeLeft"))
+    }
+
+    func testAnchoredBudgetProtectsBackAndExpandsAfterNarrowLayout() {
+        let buttons = Array(repeating: CGFloat(28), count: 14)
+        func selected(right: CGFloat, left: CGFloat = 88) -> UpperButtonBarBudget.Selection {
+            UpperButtonBarBudget.select(widths: buttons, spacing: 8,
+                available: UpperButtonBarBudget.anchoredWidth(right: right, left: left))
+        }
+        let portrait = selected(right: 531)
+        XCTAssertFalse(portrait.overflow.isEmpty)
+        XCTAssertGreaterThanOrEqual(531 - portrait.width, 88)
+        let narrow = selected(right: 378)
+        XCTAssertLessThan(narrow.visible.count, portrait.visible.count)
+        let landscape = selected(right: 863)
+        XCTAssertEqual(landscape.visible.count, 14)
+        XCTAssertTrue(landscape.overflow.isEmpty)
+        XCTAssertEqual(selected(right: 531).visible, portrait.visible)
+        XCTAssertEqual(UpperButtonBarBudget.anchoredWidth(right: 820, left: 599), 221)
+        XCTAssertEqual(UpperButtonBarBudget.anchoredWidth(right: 35, left: 88), 0)
+        XCTAssertEqual(UpperButtonBarBudget.anchoredWidth(right: .nan, left: 88), 0)
+    }
+
     func testSpeechReservesBackAndSystemSpaceWithoutFixedCap() {
         for width in [CGFloat(320), 375, 669, 951] {
             let available = UpperButtonBarBudget.speechWidth(
@@ -190,6 +244,180 @@ final class UpperButtonBarBudgetTest: XCTestCase {
     }
 }
 
+
+@MainActor
+final class RightEdgeProbeRecoveryTest: XCTestCase {
+    private final class RetryQueue {
+        var jobs: [() -> Void] = []
+        var scheduled = 0
+        func enqueue(_ work: @escaping () -> Void) { scheduled += 1; jobs.append(work) }
+        func drain(file: StaticString = #filePath, line: UInt = #line) {
+            var count = 0
+            while !jobs.isEmpty && count < 100 {
+                count += 1
+                jobs.removeFirst()()
+            }
+            XCTAssertTrue(jobs.isEmpty, "retry queue must terminate", file: file, line: line)
+        }
+    }
+    private func fixture() -> (UIWindow, UINavigationController, UIViewController, UIView) {
+        let controller = UIViewController()
+        let custom = UIView(frame: CGRect(x: 0, y: 0, width: 28, height: 28))
+        controller.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: custom)
+        let navigation = UINavigationController(rootViewController: controller)
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 375, height: 667))
+        window.rootViewController = navigation
+        window.isHidden = false
+        navigation.view.frame = window.bounds
+        navigation.view.layoutIfNeeded()
+        let bar = navigation.navigationBar
+        bar.addSubview(custom)
+        custom.frame = CGRect(x: bar.bounds.maxX - 48, y: 8, width: 28, height: 28)
+        XCTAssertTrue(controller.view.window === window)
+        XCTAssertTrue(bar.window === window)
+        XCTAssertTrue(navigation.topViewController === controller)
+        XCTAssertTrue(bar.topItem === controller.navigationItem)
+        XCTAssertNil(navigation.transitionCoordinator)
+        return (window, navigation, controller, custom)
+    }
+    private func latch(_ probe: NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe,
+                       controller: UIViewController, queue: RetryQueue) {
+        var callbacks = 0
+        func request() {
+            XCTAssertNil(probe.resolve(controller: controller) { callbacks += 1; request() })
+        }
+        request()
+        queue.drain()
+        XCTAssertEqual(callbacks, 6)
+        XCTAssertTrue(probe.usesBootstrap)
+    }
+    private func confirm(_ probe: NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe,
+                         controller: UIViewController, queue: RetryQueue) {
+        XCTAssertNil(probe.resolve(controller: controller) {})
+        XCTAssertNotNil(probe.resolve(controller: controller) {})
+        XCTAssertFalse(probe.usesBootstrap)
+        queue.drain()
+    }
+
+    func testLateValidFrameRecoversInSameContextOnlyAfterTwoSamples() {
+        let (window, navigation, controller, custom) = fixture()
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let queue = RetryQueue()
+        let probe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe(scheduleRetry: queue.enqueue)
+        custom.isHidden = true
+        latch(probe, controller: controller, queue: queue)
+        let geometry = navigation.navigationBar.convert(navigation.navigationBar.bounds, to: window)
+        custom.isHidden = false
+        XCTAssertNotNil(NovelSpeakerUtility.UpperButtonBarLayout.trailingRightEdge(controller: controller))
+        XCTAssertNil(probe.resolve(controller: controller) {})
+        XCTAssertTrue(probe.usesBootstrap, "one valid sample is not yet stable")
+        XCTAssertNotNil(probe.resolve(controller: controller) {})
+        XCTAssertFalse(probe.usesBootstrap)
+        XCTAssertEqual(navigation.navigationBar.convert(navigation.navigationBar.bounds, to: window), geometry)
+        queue.drain()
+    }
+
+    func testMissingFramesStopAtSixRetriesAndDoNotPollWhileInBootstrap() {
+        let (window, _, controller, custom) = fixture()
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let queue = RetryQueue()
+        let probe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe(scheduleRetry: queue.enqueue)
+        custom.isHidden = true
+        latch(probe, controller: controller, queue: queue)
+        for _ in 0..<20 { XCTAssertNil(probe.resolve(controller: controller) { XCTFail("no polling") }) }
+        XCTAssertEqual(queue.scheduled, 6)
+        XCTAssertTrue(queue.jobs.isEmpty)
+        XCTAssertTrue(probe.usesBootstrap)
+    }
+
+    func testRepeatedMissingAndValidFramesRecoverMoreThanOnceInSameContext() {
+        let (window, _, controller, custom) = fixture()
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let queue = RetryQueue()
+        let probe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe(scheduleRetry: queue.enqueue)
+        for _ in 0..<3 {
+            custom.isHidden = true
+            latch(probe, controller: controller, queue: queue)
+            custom.isHidden = false
+            confirm(probe, controller: controller, queue: queue)
+        }
+    }
+
+    func testAutomaticRecoveryBurstsAreFiniteAndExternalEventReopensBudget() {
+        let (window, _, controller, custom) = fixture()
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let queue = RetryQueue()
+        let probe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe(scheduleRetry: queue.enqueue)
+        for _ in 0..<6 {
+            custom.isHidden = true
+            latch(probe, controller: controller, queue: queue)
+            custom.isHidden = false
+            confirm(probe, controller: controller, queue: queue)
+        }
+        custom.isHidden = true
+        latch(probe, controller: controller, queue: queue)
+        custom.isHidden = false
+        let scheduled = queue.scheduled
+        for _ in 0..<20 { XCTAssertNil(probe.resolve(controller: controller) { XCTFail("loop must stop") }) }
+        XCTAssertEqual(queue.scheduled, scheduled)
+        XCTAssertTrue(probe.usesBootstrap)
+        probe.restartAfterExternalEvent()
+        confirm(probe, controller: controller, queue: queue)
+        // 次の一時失敗も、同じcontextで再び回復できる。
+        custom.isHidden = true
+        latch(probe, controller: controller, queue: queue)
+        custom.isHidden = false
+        confirm(probe, controller: controller, queue: queue)
+    }
+
+    func testExternalEventRestartsFailureBudgetAndDiscardsOldPendingCallback() {
+        let (window, _, controller, custom) = fixture()
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let queue = RetryQueue()
+        let probe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe(scheduleRetry: queue.enqueue)
+        custom.isHidden = true
+        var oldCallbacks = 0
+        XCTAssertNil(probe.resolve(controller: controller) { oldCallbacks += 1 })
+        XCTAssertEqual(queue.jobs.count, 1)
+        probe.restartAfterExternalEvent()
+        latch(probe, controller: controller, queue: queue)
+        XCTAssertEqual(oldCallbacks, 0)
+        probe.restartAfterExternalEvent()
+        XCTAssertFalse(probe.usesBootstrap)
+        latch(probe, controller: controller, queue: queue)
+        custom.isHidden = false
+        confirm(probe, controller: controller, queue: queue)
+    }
+
+    func testGeometryChangeReopensBudgetAndRequiresTwoNewSamples() {
+        let (window, navigation, controller, custom) = fixture()
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let queue = RetryQueue()
+        let probe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe(scheduleRetry: queue.enqueue)
+        custom.isHidden = true
+        latch(probe, controller: controller, queue: queue)
+        navigation.navigationBar.frame.origin.y += 1
+        XCTAssertNil(probe.resolve(controller: controller) {})
+        XCTAssertFalse(probe.usesBootstrap)
+        queue.drain()
+        custom.isHidden = false
+        confirm(probe, controller: controller, queue: queue)
+    }
+
+    func testPendingRetryDoesNotCallInactiveController() {
+        let (window, navigation, controller, custom) = fixture()
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let queue = RetryQueue()
+        let probe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe(scheduleRetry: queue.enqueue)
+        custom.isHidden = true
+        var callbacks = 0
+        XCTAssertNil(probe.resolve(controller: controller) { callbacks += 1 })
+        navigation.pushViewController(UIViewController(), animated: false)
+        queue.drain()
+        XCTAssertEqual(callbacks, 0)
+    }
+}
+
 final class UpperTabSideSpaceTest: XCTestCase {
     func testObservedPortraitRegionKeepsEachSideSeparate() {
         let spaces = UpperButtonBarBudget.tabSideSpaces(usable: CGRect(x: 20, y: 0, width: 780, height: 108),
@@ -327,5 +555,167 @@ final class SpeechViewButtonImageCompatibilityTest: XCTestCase {
             XCTAssertTrue(image === marker)
             XCTAssertEqual(requested.count, 1)
         }
+    }
+}
+
+
+final class LeadingBoundaryBudgetTest: XCTestCase {
+    func testSubpixelRoundoffDoesNotMoveOwnedAnchor() {
+        let a=UpperButtonBarBudget.quantizedLeadingRect(CGRect(x:14.000000000000004,y:7,width:66,height:30),scale:2)
+        let b=UpperButtonBarBudget.quantizedLeadingRect(CGRect(x:13.999999999999996,y:7,width:124,height:30),scale:2)
+        XCTAssertEqual(a.minX,14);XCTAssertEqual(b.minX,14)
+        XCTAssertEqual(UpperButtonBarBudget.LeadingMeasurement.owned(a).stabilityKey,UpperButtonBarBudget.LeadingMeasurement.owned(b).stabilityKey)
+    }
+    func testObservedShortTitlesAreRejectedWhileBackControlsPass() {
+        for size in [CGSize(width: 16, height: 21), CGSize(width: 35.67, height: 23.33), CGSize(width: 19.67, height: 25.33)] {
+            XCTAssertFalse(UpperButtonBarBudget.isBackControlShape(CGRect(origin: .zero, size: size)))
+        }
+        for size in [CGFloat(38), 44, 48] { XCTAssertTrue(UpperButtonBarBudget.isBackControlShape(CGRect(x: 20, y: 0, width: size, height: size))) }
+    }
+    func testAmbiguousIncompleteAndRightSideControlsAreNotMeasured() {
+        let a = CGRect(x: 16, y: 0, width: 44, height: 44), b = CGRect(x: 80, y: 0, width: 32, height: 32)
+        let right = CGRect(x: 150, y: 4, width: 180, height: 40)
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([a,b], right: right, complete: true))
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([a], right: right, complete: false))
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([], right: right, complete: true))
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([CGRect(x: 280,y: 0,width: 44,height: 44)], right: right, complete: true))
+        XCTAssertEqual(UpperButtonBarBudget.classifyBackRectangles([a,a], right: right, complete: true), .backSameRow(a))
+    }
+    func testSeparateRowIsSuccessWithoutLeadingReservation() {
+        let back = CGRect(x: 879,y: 96,width: 48,height: 48), right = CGRect(x: 367,y: 4,width: 496,height: 40)
+        let result = UpperButtonBarBudget.classifyBackRectangles([back], right: right, complete: true)
+        XCTAssertEqual(result, .backSeparateRow(back))
+        let safe = CGRect(x: 0,y: 0,width: 867,height: 58)
+        XCTAssertEqual(UpperButtonBarBudget.leadingEdge(result, safe: safe, fallbackReserve: 88), 16)
+        XCTAssertEqual(UpperButtonBarBudget.leadingEdge(nil, safe: safe, fallbackReserve: 88), 88)
+    }
+    func testDuoClosedRightExcludesObservedTabRowBeforeUniqueness() {
+        let right = CGRect(x: 16, y: 4, width: 574, height: 40)
+        let back = CGRect(x: 606, y: 0, width: 48, height: 48)
+        let tab = CGRect(x: 608, y: 150, width: 44, height: 58)
+        let result = UpperButtonBarBudget.classifyBackRectangles([back, tab, tab], right: right, complete: true, stableRightEdge: 590)
+        XCTAssertEqual(result, .observedOutsideRight(back))
+        XCTAssertEqual(UpperButtonBarBudget.leadingEdge(result, safe: CGRect(x: 0,y: 0,width: 594,height: 58), fallbackReserve: 88), 16)
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([back,tab],right:right,complete:true))
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([],right:right,complete:true,stableRightEdge:590))
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([back,tab],right:right,complete:false,stableRightEdge:590))
+    }
+    func testRowExclusionRetainsSameRowBackAndSeparateBack() {
+        let right = CGRect(x: 150,y: 4,width: 180,height: 40)
+        let back = CGRect(x: 16,y: 0,width: 44,height: 44)
+        let tab = CGRect(x: 200,y: 150,width: 44,height: 44)
+        XCTAssertEqual(UpperButtonBarBudget.classifyBackRectangles([tab,back,tab],right:right,complete:true,stableRightEdge:330), .backSameRow(back))
+        XCTAssertEqual(UpperButtonBarBudget.classifyBackRectangles([tab],right:right,complete:true,stableRightEdge:330), .backSeparateRow(tab))
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([tab,CGRect(x:250,y:150,width:44,height:44)],right:right,complete:true,stableRightEdge:330))
+    }
+    func testOutsideRightCannotHideOverlapOrAmbiguity() {
+        let right = CGRect(x: 150,y: 4,width: 180,height: 40)
+        let outside = CGRect(x: 340,y: 0,width: 44,height: 44)
+        let back = CGRect(x: 16,y: 0,width: 44,height: 44)
+        XCTAssertEqual(UpperButtonBarBudget.classifyBackRectangles([back,outside],right:right,complete:true,stableRightEdge:330), .backSameRow(back))
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([CGRect(x:310,y:0,width:44,height:44)],right:right,complete:true,stableRightEdge:330))
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([back,CGRect(x:80,y:0,width:44,height:44),outside],right:right,complete:true,stableRightEdge:330))
+        for invalid in [CGFloat.nan, .infinity, 100, 400] {
+            XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([outside],right:right,complete:true,stableRightEdge:invalid))
+        }
+    }
+    func testOutsideRightNeedsFreshStableGeometryAndMissingReturnsFallback() {
+        var samples=UpperButtonBarBudget.StableLeadingMeasurement()
+        let value=UpperButtonBarBudget.LeadingMeasurement.observedOutsideRight(CGRect(x:606,y:0,width:48,height:48))
+        XCTAssertNil(samples.observe(value,context:"right590"));XCTAssertNil(samples.observe(value,context:"right590"));XCTAssertEqual(samples.observe(value,context:"right590"),value)
+        XCTAssertNil(samples.observe(value,context:"right580"))
+        XCTAssertNil(samples.observe(nil,context:"right580"))
+        XCTAssertEqual(UpperButtonBarBudget.leadingEdge(nil,safe:CGRect(x:0,y:0,width:590,height:58),fallbackReserve:88),88)
+    }
+    func testTinyRowIntersectionIsAmbiguous() {
+        let back=CGRect(x:16,y:40,width:44,height:44), right=CGRect(x:100,y:4,width:100,height:40)
+        XCTAssertNil(UpperButtonBarBudget.classifyBackRectangles([back],right:right,complete:true))
+    }
+    func testOwnedAnchorStableDespiteAllocatedWidthAndChangesInvalidate() {
+        var samples=UpperButtonBarBudget.StableLeadingMeasurement()
+        XCTAssertNil(samples.observe(.owned(CGRect(x:14,y:7,width:66,height:30)),context:"a"))
+        XCTAssertNil(samples.observe(.owned(CGRect(x:14,y:7,width:124,height:30)),context:"a"))
+        XCTAssertNotNil(samples.observe(.owned(CGRect(x:14,y:7,width:66,height:30)),context:"a"))
+        XCTAssertNil(samples.observe(.owned(CGRect(x:24,y:7,width:66,height:30)),context:"a"))
+        XCTAssertNil(samples.observe(.owned(CGRect(x:24,y:7,width:66,height:30)),context:"rotated"))
+        XCTAssertNil(samples.observe(nil,context:"rotated"))
+    }
+    func testBackNeedsThreeMatchesAndNoBackIsDistinctFromUnavailable() {
+        var samples=UpperButtonBarBudget.StableLeadingMeasurement()
+        let back=UpperButtonBarBudget.LeadingMeasurement.backSameRow(CGRect(x:16,y:0,width:44,height:44))
+        XCTAssertNil(samples.observe(back,context:"a"));XCTAssertNil(samples.observe(back,context:"a"));XCTAssertEqual(samples.observe(back,context:"a"),back)
+        XCTAssertNil(samples.observe(.noBack,context:"a"));XCTAssertNil(samples.observe(.noBack,context:"a"));XCTAssertEqual(samples.observe(.noBack,context:"a"),.noBack)
+        XCTAssertNil(samples.observe(nil,context:"a"))
+    }
+}
+
+final class LeadingBoundaryProbeRecoveryTest: XCTestCase {
+    private final class Queue {
+        var jobs:[()->Void]=[]
+        func enqueue(_ job:@escaping()->Void){jobs.append(job)}
+        func drain(){var count=0;while !jobs.isEmpty && count<100 {count += 1;jobs.removeFirst()()};XCTAssertTrue(jobs.isEmpty)}
+    }
+    func testFallbackStopsAndLateValueRecoversWithThreeSamples() {
+        let q=Queue(),p=NovelSpeakerUtility.UpperButtonBarLayout.LeadingProbe(scheduleRetry:q.enqueue)
+        var value:UpperButtonBarBudget.LeadingMeasurement?,result:UpperButtonBarBudget.LeadingMeasurement?
+        func run(){result=p.resolve(context:"a",value:value,active:{true},retry:run)}
+        run();q.drain();XCTAssertTrue(p.usesFallback);XCTAssertNil(result)
+        for _ in 0..<20 {run()};XCTAssertTrue(q.jobs.isEmpty)
+        value = .noBack;run();XCTAssertNil(result);q.drain();XCTAssertEqual(result,.noBack);XCTAssertFalse(p.usesFallback)
+        value=nil;run();q.drain();XCTAssertTrue(p.usesFallback)
+        value = .noBack;run();q.drain();XCTAssertEqual(result,.noBack)
+    }
+    func testEpochAndInactiveControllerDiscardQueuedRetry() {
+        let q=Queue(),p=NovelSpeakerUtility.UpperButtonBarLayout.LeadingProbe(scheduleRetry:q.enqueue)
+        var calls=0,active=true
+        _=p.resolve(context:"a",value:nil,active:{active},retry:{calls += 1})
+        p.restartAfterExternalEvent();q.drain();XCTAssertEqual(calls,0)
+        _=p.resolve(context:"a",value:nil,active:{active},retry:{calls += 1})
+        active=false;q.drain();XCTAssertEqual(calls,0)
+    }
+    func testAutomaticRecoveryIsFiniteAndExternalEventReopensIt() {
+        let q=Queue(),p=NovelSpeakerUtility.UpperButtonBarLayout.LeadingProbe(scheduleRetry:q.enqueue)
+        var value:UpperButtonBarBudget.LeadingMeasurement?
+        func run(){_=p.resolve(context:"a",value:value,active:{true},retry:run)}
+        run();q.drain()
+        for _ in 0..<6 {value = .noBack;run();q.drain();XCTAssertFalse(p.usesFallback);value=nil;run();q.drain();XCTAssertTrue(p.usesFallback)}
+        value = .noBack;run();XCTAssertTrue(p.usesFallback);XCTAssertTrue(q.jobs.isEmpty)
+        p.restartAfterExternalEvent();run();q.drain();XCTAssertFalse(p.usesFallback)
+    }
+    func testContextChangeRequiresFreshSamples() {
+        let p=NovelSpeakerUtility.UpperButtonBarLayout.LeadingProbe(scheduleRetry:{_ in})
+        for _ in 0..<3 {_=p.resolve(context:"old",value:.noBack,active:{true},retry:{})}
+        XCTAssertNil(p.resolve(context:"new",value:.noBack,active:{true},retry:{}))
+    }
+}
+
+@MainActor
+final class LeadingBoundaryUIKitTest: XCTestCase {
+    private func fixture()->(UIWindow,UINavigationController,UIViewController){
+        let c=UIViewController(),n=UINavigationController(),w=UIWindow(frame:CGRect(x:0,y:0,width:375,height:667))
+        n.setViewControllers([c],animated:false);w.rootViewController=n;w.isHidden=false;n.view.frame=w.bounds;n.view.layoutIfNeeded()
+        return(w,n,c)
+    }
+    func testRootHasNoBackRatherThanMissingMeasurement(){
+        let(w,_,c)=fixture();defer{w.isHidden=true}
+        XCTAssertEqual(NovelSpeakerUtility.UpperButtonBarLayout.leadingMeasurement(controller:c).value,.noBack)
+    }
+    func testLegacyOwnedCustomViewPathMeasuresAndRejectsClipping(){
+        let(w,n,c)=fixture();defer{w.isHidden=true}
+        let v=UIView(frame:CGRect(x:20,y:7,width:66,height:30));c.navigationItem.leftBarButtonItem=UIBarButtonItem(customView:v)
+        n.navigationBar.addSubview(v);v.frame=CGRect(x:20,y:7,width:66,height:30)
+        guard case .owned(let rect)?=NovelSpeakerUtility.UpperButtonBarLayout.leadingMeasurement(controller:c,preferPublicItemFrames:false).value else{return XCTFail("legacy custom coordinates unavailable")}
+        XCTAssertEqual(rect.minX,20,accuracy:0.5)
+        let clip=UIView(frame:CGRect(x:20,y:7,width:30,height:30));clip.clipsToBounds=true;n.navigationBar.addSubview(clip);clip.addSubview(v);v.frame=CGRect(x:0,y:0,width:66,height:30)
+        XCTAssertNil(NovelSpeakerUtility.UpperButtonBarLayout.leadingMeasurement(controller:c,preferPublicItemFrames:false).value)
+    }
+    func testLeadingGroupPathUsesOwnedAnchor(){
+        let(w,n,c)=fixture();defer{w.isHidden=true}
+        guard #available(iOS 16.0,*) else{return}
+        let v=UIView(frame:CGRect(x:14,y:7,width:124,height:30));let item=UIBarButtonItem(customView:v)
+        c.navigationItem.leadingItemGroups=[.fixedGroup(representativeItem:nil,items:[item])];n.navigationBar.addSubview(v);v.frame=CGRect(x:14,y:7,width:124,height:30)
+        guard case .owned(let rect)?=NovelSpeakerUtility.UpperButtonBarLayout.leadingMeasurement(controller:c,preferPublicItemFrames:false).value else{return XCTFail("leading group unavailable")}
+        XCTAssertEqual(rect.minX,14,accuracy:0.5)
+        v.isHidden=true;XCTAssertNil(NovelSpeakerUtility.UpperButtonBarLayout.leadingMeasurement(controller:c,preferPublicItemFrames:false).value)
     }
 }

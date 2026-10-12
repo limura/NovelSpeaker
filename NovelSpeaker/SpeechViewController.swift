@@ -78,6 +78,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
 
     // 現在のボタン群を組み立てた時の間隔設定。設定変更(間隔)を検知して作り直すために保持する。
     var currentBarButtonItemSpacing: CGFloat = -1
+    private let upperRightEdgeProbe = NovelSpeakerUtility.UpperButtonBarLayout.RightEdgeProbe()
+    private let upperLeadingProbe = NovelSpeakerUtility.UpperButtonBarLayout.LeadingProbe()
     var currentUpperButtonBarLayoutSignature: String?
     private weak var compactBackItem: UINavigationItem?
     private var savedBackDisplayMode: Int?
@@ -187,6 +189,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        self.upperRightEdgeProbe.restartAfterExternalEvent()
+        self.upperLeadingProbe.restartAfterExternalEvent()
         // 設定画面から戻った場合も幅予算を更新する。
         self.invalidateUpperButtonBudget()
         // 画面が一度ナビゲーション階層から外れている間に設定変更が起きても、
@@ -666,28 +670,20 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             let nowWidth = window.bounds.width
             guard nowWidth > 1 else { return }
             guard let bar = self.navigationController?.navigationBar, bar.window === window else { return }
-            let safe = bar.bounds.inset(by: bar.safeAreaInsets)
-            let layoutFrame = bar.bounds.inset(by: bar.layoutMargins)
             let compactHeight = self.traitCollection.verticalSizeClass == .compact
-            let tabs = self.tabBarController?.tabBar
-            let obstruction = tabs.flatMap { tab -> CGRect? in
-                guard tab.window === window, !tab.isHidden else { return nil }
-                let frame = tab.convert(tab.bounds, to: bar)
-                return frame.intersects(bar.bounds) ? frame : nil
-            }
             let metrics = UIFontMetrics(forTextStyle: .headline)
             let reserve = metrics.scaledValue(for: self.compactBackItem == nil ? 88 : 44, compatibleWith: self.traitCollection)
-            // regular幅では時計等がNavigationBarと同じ行に置かれる場合がある。
-            // Duoで観測した右端の内寄せ約138ptに余裕を加えた方針値であり、
-            // OSの予約幅を取得したものではない。iPadでも保守的に同じ予約を残す。
-            // compact幅は従来どおりsafe areaと公開TabBar領域で扱う。
-            let systemReserve: CGFloat = self.traitCollection.horizontalSizeClass == .regular
-                ? metrics.scaledValue(for: 160, compatibleWith: self.traitCollection) : 0
-            let upper = NovelSpeakerUtility.UpperButtonBarLayout.upperTabBudget(viewController: self)
-            let available = upper?.spaces.trailing ?? UpperButtonBarBudget.speechWidth(safe: safe, obstruction: obstruction,
-                                                            leadingReserve: reserve, systemReserve: systemReserve,
-                                                            layoutFrame: layoutFrame, compactHeight: compactHeight)
-            let layoutSignature = upper?.signature ?? "safe=\(safe) layoutFrame=\(layoutFrame) compactHeight=\(compactHeight) obstruction=\(String(describing: obstruction)) reserve=\(reserve) systemReserve=\(systemReserve) available=\(available)"
+            let edge = self.upperRightEdgeProbe.resolve(controller: self) { [weak self] in self?.forceUpdateUpperButtons() }
+            // 初回だけ「…」1個で配置する。遷移中の未取得値で既存配分を作り直さない。
+            guard edge != nil || self.currentUpperButtonBarLayoutSignature == nil || self.upperRightEdgeProbe.usesBootstrap else {
+                return
+            }
+            let leading = self.upperLeadingProbe.resolve(controller: self, stableRightEdge: edge) { [weak self] in self?.forceUpdateUpperButtons() }
+            let leftReserve = max(16, bar.layoutMargins.left - bar.safeAreaInsets.left) + reserve + 12 + (compactHeight ? 24 : 0)
+            let measured = edge.flatMap { NovelSpeakerUtility.UpperButtonBarLayout.measuredAvailableWidth(viewController: self, leadingReservedWidth: leftReserve, rightEdge: $0, leadingMeasurement: leading) }
+            let available = measured?.width ?? 28
+            let layoutSignature = measured?.signature ?? "bootstrap"
+            let center = NovelSpeakerUtility.UpperButtonBarLayout.upperTabBudget(viewController: self)?.occupied
             if let currentSignature = self.currentUpperButtonBarLayoutSignature,
                currentSignature != layoutSignature {
                 self.invalidateUpperButtonBudget()
@@ -1012,6 +1008,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.BarButtonSpacingChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             // 間隔設定を幅予算に反映する。
             self.isUpperRightButtonsChanged = true
             self.invalidateUpperButtonBudget()
@@ -1019,6 +1017,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.SpeechViewRightTopButtonTitleChanged, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             // 表示設定からボタン群を選び直す。
             self.invalidateUpperButtonBudget()
             self.isUpperRightButtonsChanged = true
@@ -1028,6 +1028,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         // 戻る操作の予約幅も再計算する。
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIContentSizeCategory.didChangeNotification, queue: .main) { [weak self] (notification) in
             guard let self = self else { return }
+            self.upperRightEdgeProbe.restartAfterExternalEvent()
+            self.upperLeadingProbe.restartAfterExternalEvent()
             self.invalidateUpperButtonBudget()
             self.forceUpdateUpperButtons()
         }
@@ -1045,6 +1047,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 case .change(_, let propertys):
                     for property in propertys {
                         if property.name == "speechViewButtonSettingArrayData" {
+                            DispatchQueue.main.async {
+                                self.upperRightEdgeProbe.restartAfterExternalEvent()
+                                self.upperLeadingProbe.restartAfterExternalEvent()
+                                self.invalidateUpperButtonBudget()
+                            }
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
                                 self.assignUpperButtons(novelID: novel.novelID, novelType: novel.type, aliveButtonSettings: buttonSettings)

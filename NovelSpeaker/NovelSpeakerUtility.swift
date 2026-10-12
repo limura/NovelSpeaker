@@ -28,6 +28,7 @@ class NovelSpeakerUtility: NSObject {
         }
     }
 
+
     enum IPadUpperTabRegion {
         case outsideGate
         case lower
@@ -4619,6 +4620,329 @@ class NovelSpeakerUtility: NSObject {
     // そこで viewDidLayoutSubviews で実レイアウト後にこのヘルパで実残り幅を測り、はみ出して
     // いれば1スロットずつ減らして溢れ分を「…」オーバーフローへ退避させ、収束させる。
     enum UpperButtonBarLayout {
+        // controllerごとの確認状態。古いsceneや画面の値は共有しない。
+        final class LeadingProbe {
+            private var samples = UpperButtonBarBudget.StableLeadingMeasurement()
+            private var context = ""
+            private var retries = 0
+            private var pending = false
+            private var epoch = 0
+            private var recoveryBursts = 6
+            private var recovering = false
+            private let scheduleRetry: (@escaping () -> Void) -> Void
+            private(set) var usesFallback = false
+            private(set) var diagnostic = "pending"
+            private(set) var candidateRects: [CGRect] = []
+
+            init(scheduleRetry: @escaping (@escaping () -> Void) -> Void = {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.08, execute: $0)
+            }) { self.scheduleRetry = scheduleRetry }
+
+            func restartAfterExternalEvent() {
+                epoch += 1; samples = UpperButtonBarBudget.StableLeadingMeasurement()
+                retries = 0; pending = false; recoveryBursts = 6; recovering = false
+                usesFallback = false; diagnostic = "pending"
+            }
+
+            // 生の計測と再試行状態を分離し、late valid/旧callback/有限回復を単体検証できるようにする。
+            func resolve(context key: String, value: UpperButtonBarBudget.LeadingMeasurement?,
+                         active: @escaping () -> Bool, retry: @escaping () -> Void) -> UpperButtonBarBudget.LeadingMeasurement? {
+                guard active() else { return nil }
+                if context != key { restartAfterExternalEvent(); context = key }
+                if usesFallback && !recovering {
+                    guard value != nil, recoveryBursts > 0 else { return nil }
+                    recoveryBursts -= 1; recovering = true; retries = 0
+                    samples = UpperButtonBarBudget.StableLeadingMeasurement()
+                }
+                if let result = samples.observe(value, context: key) {
+                    retries = 0; recovering = false; usesFallback = false
+                    return result
+                }
+                if retries >= 6 { usesFallback = true; recovering = false; return nil }
+                if !pending {
+                    pending = true; retries += 1
+                    let savedEpoch = epoch
+                    scheduleRetry { [weak self] in
+                        guard let self, self.epoch == savedEpoch else { return }
+                        self.pending = false
+                        guard active() else { return }
+                        retry()
+                    }
+                }
+                return nil
+            }
+
+            func resolve(controller: UIViewController, stableRightEdge: CGFloat? = nil, retry: @escaping () -> Void) -> UpperButtonBarBudget.LeadingMeasurement? {
+                guard let window = controller.viewIfLoaded?.window, let nav = controller.navigationController,
+                      nav.topViewController === controller, nav.navigationBar.window === window else { return nil }
+                let bar = nav.navigationBar
+                let key = "\(ObjectIdentifier(window))|\(ObjectIdentifier(controller.navigationItem))|\(window.bounds)|\(bar.convert(bar.bounds, to: window))|\(bar.safeAreaInsets)|\(bar.layoutMargins)|\(controller.traitCollection.preferredContentSizeCategory.rawValue)|\(controller.traitCollection.horizontalSizeClass.rawValue)|\(controller.traitCollection.verticalSizeClass.rawValue)|\(controller.navigationItem.hidesBackButton)|\(String(describing: bar.backItem.map { ObjectIdentifier($0) }))|\(NovelSpeakerUtility.IsNeedOverrideTabBarTraits())|right=\(String(describing: stableRightEdge))"
+                var currentCandidates: [CGRect] = []
+                let measurement = leadingMeasurement(controller: controller, stableRightEdge: stableRightEdge, candidateObserver: { currentCandidates = $0 })
+                candidateRects = currentCandidates
+                let scale = window.screen.scale
+                func rounded(_ rect: CGRect) -> CGRect { UpperButtonBarBudget.quantizedLeadingRect(rect, scale: scale) }
+                let value: UpperButtonBarBudget.LeadingMeasurement? = measurement.value.map {
+                    switch $0 {
+                    case .noBack: return .noBack
+                    case .owned(let rect): return .owned(rounded(rect))
+                    case .backSameRow(let rect): return .backSameRow(rounded(rect))
+                    case .backSeparateRow(let rect): return .backSeparateRow(rounded(rect))
+                    case .observedOutsideRight(let rect): return .observedOutsideRight(rounded(rect))
+                    }
+                }
+                let result = resolve(context: key, value: value, active: { [weak controller, weak window] in
+                    guard let controller, let window else { return false }
+                    return controller.viewIfLoaded?.window === window && controller.navigationController?.topViewController === controller
+                }, retry: retry)
+                diagnostic = result.map { $0.stabilityKey } ?? "fallback:\(measurement.reason):exhausted=\(usesFallback)"
+                return result
+            }
+        }
+
+        private static func leadingItems(_ item: UINavigationItem) -> [UIBarButtonItem] {
+            var items = item.leftBarButtonItems ?? []
+            if #available(iOS 16.0, *) { items += item.leadingItemGroups.flatMap { $0.barButtonItems } }
+            var seen: Set<ObjectIdentifier> = []
+            return items.filter { seen.insert(ObjectIdentifier($0)).inserted }
+        }
+
+        private static func completeFrame(_ view: UIView, bar: UINavigationBar, window: UIWindow) -> CGRect? {
+            guard visible(view, in: window) else { return nil }
+            let rect = view.convert(view.bounds, to: bar)
+            guard [rect.minX, rect.minY, rect.width, rect.height].allSatisfy({ $0.isFinite }),
+                  rect.width > 1, rect.height > 1 else { return nil }
+            var ancestor = view.superview
+            while let node = ancestor, node !== window {
+                if node.clipsToBounds {
+                    let clip = node.convert(node.bounds, to: bar)
+                    guard rect.minX >= clip.minX - 0.5, rect.maxX <= clip.maxX + 0.5,
+                          rect.minY >= clip.minY - 0.5, rect.maxY <= clip.maxY + 0.5 else { return nil }
+                }
+                ancestor = node.superview
+            }
+            return rect
+        }
+
+        static func leadingMeasurement(controller: UIViewController, preferPublicItemFrames: Bool = true, stableRightEdge: CGFloat? = nil,
+                                       candidateObserver: (([CGRect]) -> Void)? = nil)
+            -> (value: UpperButtonBarBudget.LeadingMeasurement?, reason: String) {
+            guard let window = controller.viewIfLoaded?.window, let nav = controller.navigationController,
+                  nav.topViewController === controller, nav.navigationBar.topItem === controller.navigationItem,
+                  nav.navigationBar.window === window, nav.transitionCoordinator == nil,
+                  controller.transitionCoordinator == nil, controller.presentedViewController == nil else { return (nil, "inactiveOrTransition") }
+            let bar = nav.navigationBar
+            guard visible(bar, in: window), bar.bounds.width > 1, bar.bounds.height > 1 else { return (nil, "barInvisible") }
+            let ownLeft = leadingItems(controller.navigationItem)
+            if !ownLeft.isEmpty {
+                var frames: [CGRect] = []
+                for item in ownLeft {
+                    guard let custom = item.customView, let rect = completeFrame(custom, bar: bar, window: window),
+                          rect.intersects(bar.bounds), rect.minX >= bar.bounds.minX - 0.5,
+                          rect.maxX <= bar.bounds.maxX - max(0, bar.safeAreaInsets.right) + 0.5 else { return (nil, "ownedLeftUnavailableOrClipped") }
+                    if #available(iOS 17.0, *), preferPublicItemFrames, let publicRect = item.frame(in: bar),
+                       abs(publicRect.minX - rect.minX) > 0.5 || abs(publicRect.maxX - rect.maxX) > 0.5 { return (nil, "ownedLeftPublicMismatch") }
+                    frames.append(rect)
+                }
+                return (.owned(frames.dropFirst().reduce(frames[0]) { $0.union($1) }), "owned")
+            }
+            // 戻るなしと取得不能は別状態。実際の前画面と公開backItemを両方確認する。
+            guard let index = nav.viewControllers.firstIndex(where: { $0 === controller }) else { return (nil, "stackMismatch") }
+            if index == 0 || controller.navigationItem.hidesBackButton { return (.noBack, "noBack") }
+            guard let backItem = bar.backItem, backItem === nav.viewControllers[index - 1].navigationItem,
+                  let right = rightBarCustomView(for: controller.navigationItem),
+                  let rightRect = completeFrame(right, bar: bar, window: window), rightRect.intersects(bar.bounds) else { return (nil, "previousOrRightUnavailable") }
+            guard let content = controller.viewIfLoaded, !bar.isDescendant(of: content) else { return (nil, "contentOwnsBar") }
+            var owned: [UIView] = [right, content]
+            var items = controller.navigationItem.rightBarButtonItems ?? []
+            if #available(iOS 16.0, *) {
+                items += controller.navigationItem.trailingItemGroups.flatMap { $0.barButtonItems }
+                items += controller.navigationItem.pinnedTrailingGroup?.barButtonItems ?? []
+            }
+            owned += items.compactMap { $0.customView }
+            if let title = controller.navigationItem.titleView { owned.append(title) }
+            let band = CGRect(x: 0, y: 0, width: window.bounds.width,
+                              height: min(window.bounds.height, bar.convert(bar.bounds, to: window).maxY + 128))
+            let tabRegion = upperTabBudget(viewController: controller)?.occupied
+            var visited = 0, incomplete = false
+            var candidates: [CGRect] = []
+            func carriesCurrentTitle(_ view: UIView) -> Bool {
+                guard let title = controller.navigationItem.title, !title.isEmpty else { return false }
+                var inspected = 0
+                func search(_ node: UIView, depth: Int) -> Bool {
+                    guard inspected < 64, depth < 12 else { return false }
+                    inspected += 1
+                    if node.accessibilityLabel == title || (node as? UILabel)?.text == title || (node as? UIButton)?.title(for: .normal) == title { return true }
+                    return node.subviews.contains { search($0, depth: depth + 1) }
+                }
+                return search(view, depth: 0)
+            }
+            func walk(_ view: UIView, depth: Int) {
+                guard visited < 2048, depth < 64 else { incomplete = true; return }
+                visited += 1
+                if owned.contains(where: { view === $0 || view.isDescendant(of: $0) }) { return }
+                let hostsOwn = owned.contains { $0.isDescendant(of: view) }
+                if view is UIControl, !hostsOwn, view.isUserInteractionEnabled, !carriesCurrentTitle(view),
+                   let rect = completeFrame(view, bar: bar, window: window),
+                   view.convert(view.bounds, to: window).intersects(band), UpperButtonBarBudget.isBackControlShape(rect),
+                   tabRegion.map({ !$0.intersects(rect) }) ?? true {
+                    // 同じ小さなwrapper領域だけを含める。大きなhost/別controlを含むancestorは使わない。
+                    var occupied = rect
+                    var ancestor = view.superview
+                    while let node = ancestor, node !== bar, node !== window,
+                          let outer = completeFrame(node, bar: bar, window: window),
+                          UpperButtonBarBudget.isBackControlShape(outer), outer.contains(rect),
+                          !owned.contains(where: { $0.isDescendant(of: node) }) {
+                        occupied = occupied.union(outer)
+                        ancestor = node.superview
+                    }
+                    candidates.append(occupied)
+                }
+                for child in view.subviews { walk(child, depth: depth + 1) }
+            }
+            walk(window, depth: 0)
+            candidateObserver?(candidates)
+            guard !incomplete else { return (nil, "incompleteTree") }
+            guard let value = UpperButtonBarBudget.classifyBackRectangles(candidates, right: rightRect, complete: !incomplete, stableRightEdge: stableRightEdge) else { return (nil, "ambiguousMissingOrRow:count=\(candidates.count)") }
+            switch value {
+            case .backSameRow: return (value, "backSameRow")
+            case .backSeparateRow: return (value, "backSeparateRow")
+            case .observedOutsideRight: return (value, "observedOutsideRight")
+            default: return (nil, "invalidClassification")
+            }
+        }
+
+        final class RightEdgeProbe {
+            private var samples = UpperButtonBarBudget.StableRightEdge()
+            private var context = ""
+            private var retries = 0
+            private var retryPending = false
+            private var epoch = 0
+            private var recoveryBurstsRemaining = 6
+            private var recovering = false
+            private let scheduleRetry: (@escaping () -> Void) -> Void
+            private(set) var usesBootstrap = false
+
+            init(scheduleRetry: @escaping (@escaping () -> Void) -> Void = {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.08, execute: $0)
+            }) {
+                self.scheduleRetry = scheduleRetry
+            }
+
+            // 再表示/設定変更だけで再開する。通常のlayout/assign/trimからは呼ばない。
+            func restartAfterExternalEvent() {
+                epoch += 1
+                samples = UpperButtonBarBudget.StableRightEdge()
+                retries = 0
+                retryPending = false
+                recoveryBurstsRemaining = 6
+                recovering = false
+                usesBootstrap = false
+            }
+
+            func resolve(controller: UIViewController, retry: @escaping () -> Void) -> CGFloat? {
+                guard let window = controller.viewIfLoaded?.window,
+                      let nav = controller.navigationController,
+                      nav.topViewController === controller,
+                      nav.navigationBar.window === window,
+                      nav.navigationBar.topItem === controller.navigationItem else { return nil }
+                let bar = nav.navigationBar
+                let key = "\(ObjectIdentifier(window))|\(window.bounds)|\(bar.convert(bar.bounds, to: window))|\(bar.safeAreaInsets)|\(bar.layoutMargins)|\(controller.traitCollection.preferredContentSizeCategory.rawValue)|\(controller.traitCollection.verticalSizeClass.rawValue)|\(controller.traitCollection.horizontalSizeClass.rawValue)"
+                if context != key {
+                    restartAfterExternalEvent()
+                    context = key
+                }
+                let edge = nav.transitionCoordinator == nil ? trailingRightEdge(controller: controller) : nil
+                if usesBootstrap && !recovering {
+                    // 退避中も後から有効になったframeは読める。nilではタイマーを追加しない。
+                    // 回復→拡張→退避が自己誘発しても、同じepoch内の回復burstは有限。
+                    guard edge != nil, recoveryBurstsRemaining > 0 else { return nil }
+                    recoveryBurstsRemaining -= 1
+                    recovering = true
+                    retries = 0
+                    samples = UpperButtonBarBudget.StableRightEdge()
+                }
+                let scale = window.screen.scale
+                let stable = samples.observe(edge.map { floor($0 * scale) / scale }, context: key)
+                if let stable {
+                    retries = 0
+                    recovering = false
+                    usesBootstrap = false
+                    // 安定しただけでは回復burst予算を補充しない。
+                    return stable
+                }
+                if edge == nil && retries >= 6 && nav.transitionCoordinator == nil {
+                    usesBootstrap = true
+                    recovering = false
+                    return nil
+                }
+                if !retryPending && retries < 6 {
+                    retryPending = true
+                    retries += 1
+                    let scheduledEpoch = epoch
+                    scheduleRetry { [weak self, weak controller] in
+                        guard let self, self.epoch == scheduledEpoch else { return }
+                        self.retryPending = false
+                        guard let controller, controller.viewIfLoaded?.window != nil,
+                              controller.navigationController?.topViewController === controller else { return }
+                        retry()
+                    }
+                }
+                return nil
+            }
+        }
+
+        private static func visible(_ view: UIView, in window: UIWindow) -> Bool {
+            guard view.window === window else { return false }
+            var current: UIView? = view
+            while let node = current {
+                if node.isHidden || node.alpha <= 0.01 { return false }
+                if node.layer.animationKeys()?.isEmpty == false { return false }
+                if node === window { return true }
+                current = node.superview
+            }
+            return false
+        }
+
+        // 自前customViewだけを対象とする。APIがnilでも可視な自前Viewなら同じ座標で測れる。
+        // UIKitの内部Viewやクラス名からbar itemを探さない。
+        static func trailingRightEdge(controller: UIViewController) -> CGFloat? {
+            guard let window = controller.viewIfLoaded?.window,
+                  let nav = controller.navigationController,
+                  nav.topViewController === controller,
+                  let bar = controller.navigationController?.navigationBar,
+                  bar.window === window, bar.topItem === controller.navigationItem else { return nil }
+            var item = controller.navigationItem.rightBarButtonItems?.last
+            if #available(iOS 16.0, *), let pinned = controller.navigationItem.pinnedTrailingGroup?.barButtonItems.last {
+                item = pinned
+            }
+            guard let item, let custom = item.customView, visible(custom, in: window),
+                  visible(bar, in: window), custom.bounds.width >= 20, custom.bounds.height >= 20,
+                  bar.bounds.width > 1, bar.bounds.height > 1 else { return nil }
+            let own = custom.convert(custom.bounds, to: bar)
+            func valid(_ frame: CGRect) -> Bool {
+                [frame.minX, frame.minY, frame.width, frame.height].allSatisfy { $0.isFinite }
+                    && frame.width >= 20 && frame.height >= 20 && frame.intersects(bar.bounds)
+                    && frame.maxX <= bar.bounds.maxX + 0.5 && frame.maxX > bar.bounds.minX
+            }
+            guard valid(own) else { return nil }
+            var frame = own
+            if #available(iOS 17.0, *), let publicFrame = item.frame(in: bar), valid(publicFrame),
+               abs(publicFrame.maxX - own.maxX) <= 0.5 {
+                frame = publicFrame
+            }
+            // 祖先による右端のクリップは予算の根拠にしない。
+            var ancestor = custom.superview
+            while let node = ancestor, node !== window {
+                if node.clipsToBounds {
+                    let clip = node.convert(node.bounds, to: bar)
+                    guard frame.maxX <= clip.maxX + 0.5, frame.intersects(clip) else { return nil }
+                }
+                ancestor = node.superview
+            }
+            return min(frame.maxX, bar.bounds.maxX - max(0, bar.safeAreaInsets.right))
+        }
+
         static func rightBarCustomView(for navigationItem: UINavigationItem) -> UIView? {
             if let customView = navigationItem.rightBarButtonItem?.customView {
                 return customView
@@ -4645,7 +4969,7 @@ class NovelSpeakerUtility: NSObject {
         // NavigationBar上で右側のcustomViewに割り当てられる幅を実測する。
         // UIScreen.main.bounds は、iPadのウインドウやDuoの開閉状態では対象Viewの
         // 座標系と一致しないため、ここではNavigationBarと同じWindow内の値だけを使う。
-        static func measuredAvailableWidth(viewController: UIViewController, leadingReservedWidth: CGFloat, gap: CGFloat = 4) -> (width: CGFloat, signature: String, isUpperTab: Bool)? {
+        static func measuredAvailableWidth(viewController: UIViewController, leadingReservedWidth: CGFloat, rightEdge: CGFloat, leadingMeasurement: UpperButtonBarBudget.LeadingMeasurement? = nil, gap: CGFloat = 4) -> (width: CGFloat, signature: String, isUpperTab: Bool)? {
             guard let view = viewController.viewIfLoaded,
                   let window = view.window,
                   let navigationBar = viewController.navigationController?.navigationBar,
@@ -4656,19 +4980,20 @@ class NovelSpeakerUtility: NSObject {
             }
 
             if let upper = upperTabBudget(viewController: viewController) {
-                return (upper.spaces.trailing, upper.signature, true)
+                let width = UpperButtonBarBudget.anchoredWidth(right: rightEdge, left: upper.occupied.maxX + 12)
+                return (width, upper.signature + " right=\(rightEdge)", true)
             }
             // 検出不能/対象外では従来の公開TabBar・戻る予約による動作を維持する。
             let safeAreaRight = max(0, navigationBar.safeAreaInsets.right)
-            let rightEdge = max(navigationBar.bounds.minX, navigationBar.bounds.maxX - safeAreaRight)
-            var leftEdge = max(navigationBar.bounds.minX, leadingReservedWidth)
+            var leftEdge = UpperButtonBarBudget.leadingEdge(leadingMeasurement, safe: navigationBar.bounds.inset(by: navigationBar.safeAreaInsets), fallbackReserve: leadingReservedWidth)
 
             // 検索ボタンなど、左側のcustomViewが実レイアウト済みならその右端を使う。
             // 初回レイアウト前は frame が0になるため、呼び出し側の保守的な値を残す。
-            let leftBarFrames = viewController.navigationItem.leftBarButtonItems?.compactMap { item -> CGRect? in
-                guard let customView = item.customView, customView.bounds.width > 1 else { return nil }
-                return customView.convert(customView.bounds, to: navigationBar)
-            } ?? []
+            let leftBarFrames = leadingItems(viewController.navigationItem).compactMap { item -> CGRect? in
+                guard let customView = item.customView, visible(customView, in: window), customView.bounds.width > 1 else { return nil }
+                let frame = customView.convert(customView.bounds, to: navigationBar)
+                return frame.maxX.isFinite && frame.intersects(navigationBar.bounds) ? frame : nil
+            }
             if let leftBarMaxX = leftBarFrames.map(\.maxX).max() {
                 leftEdge = max(leftEdge, leftBarMaxX + gap)
             }
@@ -4679,6 +5004,7 @@ class NovelSpeakerUtility: NSObject {
             let tabFrame: CGRect? = {
                 guard let tabBarController = viewController.tabBarController else { return nil }
                 let tabBar = tabBarController.tabBar
+                guard visible(tabBar, in: window) else { return nil }
                 return tabBar.convert(tabBar.bounds, to: navigationBar)
             }()
             if let tabFrame,
@@ -4695,6 +5021,7 @@ class NovelSpeakerUtility: NSObject {
                 NSCoder.string(for: navigationBar.bounds),
                 String(format: "safeRight=%.2f", safeAreaRight),
                 String(format: "left=%.2f", leftEdge),
+                leadingMeasurement?.stabilityKey ?? "leading=fallback",
                 String(format: "right=%.2f", rightEdge),
                 tabFrame.map { NSCoder.string(for: $0) } ?? "tab=nil",
                 leftBarFrames.map { NSCoder.string(for: $0) }.joined(separator: ",")
