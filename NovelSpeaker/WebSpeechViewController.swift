@@ -63,6 +63,12 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var speakFromHereLongPressRecognizer:UILongPressGestureRecognizer? = nil
 
     // 画面下部のボタン群(右上のボタン群とは独立した設定。既定では何も表示しない)
+    // 全画面では safeArea の外側も使い、画面の4辺から8ptを確保する。
+    private var normalWebConstraints: [NSLayoutConstraint] = []
+    private var fullscreenWebConstraints: [NSLayoutConstraint] = []
+    private var normalScrollAdjustment: UIScrollView.ContentInsetAdjustmentBehavior?
+    private var normalScrollInsets: UIEdgeInsets?
+    private var normalTabBarHidden: Bool?
     private(set) var isReaderInterfaceHidden = false
     var bottomButtonBar:SpeechViewBottomButtonBar? = nil {
         didSet { bottomButtonBar?.isHidden = isReaderInterfaceHidden }
@@ -122,12 +128,22 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        // 全画面の生成本文だけ可視アンカーを保存する。通常表示の既存挙動は変えない。
+        let storyID = StorySpeaker.shared.storyID
+        var readerAnchor: WebSpeechViewTool.VisibleReaderAnchor?
+        if isReaderInterfaceHidden {
+            webSpeechTool.getReaderVisibleAnchor { readerAnchor = $0 }
+        }
         super.viewWillTransition(to: size, with: coordinator)
         // 回転等で使える幅が変わるので、実測上限を捨てて新しい幅で再見積もり+再実測する
         self.resetUpperButtonFittedSlotLimit()
         coordinator.animate(alongsideTransition: nil) { _ in
             self.forceUpdateUpperButtons()
             self.scheduleUpperButtonTrim()
+            if self.isReaderInterfaceHidden, StorySpeaker.shared.storyID == storyID, let anchor = readerAnchor {
+                self.view.layoutIfNeeded()
+                self.webSpeechTool.restoreReaderVisibleAnchor(anchor)
+            }
         }
     }
 
@@ -501,16 +517,24 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.speakFromHereLongPressRecognizer = longPressRecognizer
         (webView as? CustomWKWebView)?.speakFromHereSelector = #selector(self.speakFromHere(sender:))
         (webView as? CustomWKWebView)?.speakFromHereTarget = self
-        NSLayoutConstraint.activate([
+        normalWebConstraints = [
             webView.topAnchor.constraint(equalTo: safeAreaGuide.topAnchor, constant: 8),
             webView.bottomAnchor.constraint(equalTo: previousChapterButton.topAnchor, constant: -8),
             webView.leftAnchor.constraint(equalTo: safeAreaGuide.leftAnchor, constant: 8),
             webView.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: -8),
-        ])
+        ]
+        NSLayoutConstraint.activate(normalWebConstraints)
+        fullscreenWebConstraints = [
+            webView.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -8),
+            webView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 8),
+            webView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -8),
+        ]
         
         let toggleInterfaceButton = UIButton()
         toggleInterfaceButton.translatesAutoresizingMaskIntoConstraints = false
-        toggleInterfaceButton.isAccessibilityElement = false
+        toggleInterfaceButton.isAccessibilityElement = true
+        toggleInterfaceButton.accessibilityIdentifier = "WebReaderToggleInterface"
         //toggleInterfaceButton.backgroundColor = foregroundColor
         //toggleInterfaceButton.setTitleColor(backgroundColor, for: .normal)
         //toggleInterfaceButton.layer.cornerRadius = 3
@@ -596,8 +620,65 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         return "unknown(\(String(describing: body))"
     }
 
+    override var prefersStatusBarHidden: Bool {
+        isReaderInterfaceHidden || super.prefersStatusBarHidden
+    }
+
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        isReaderInterfaceHidden || super.prefersHomeIndicatorAutoHidden
+    }
+
+    private func updateReaderFullscreenLayout(hidden: Bool) {
+        guard let webView = textWebView else { return }
+        if hidden {
+            if normalScrollAdjustment == nil {
+                normalScrollAdjustment = webView.scrollView.contentInsetAdjustmentBehavior
+                normalScrollInsets = webView.scrollView.contentInset
+            }
+            NSLayoutConstraint.deactivate(normalWebConstraints)
+            NSLayoutConstraint.activate(fullscreenWebConstraints)
+            webView.scrollView.contentInsetAdjustmentBehavior = .never
+            webView.scrollView.contentInset = .zero
+        } else {
+            NSLayoutConstraint.deactivate(fullscreenWebConstraints)
+            NSLayoutConstraint.activate(normalWebConstraints)
+            if let adjustment = normalScrollAdjustment { webView.scrollView.contentInsetAdjustmentBehavior = adjustment }
+            if let insets = normalScrollInsets { webView.scrollView.contentInset = insets }
+            normalScrollAdjustment = nil
+            normalScrollInsets = nil
+        }
+        // 次章のHTMLも、現在の全画面状態で生成する。
+        webSpeechTool.isReaderFullscreen = hidden
+        setNeedsStatusBarAppearanceUpdate()
+        navigationController?.setNeedsStatusBarAppearanceUpdate()
+        tabBarController?.setNeedsStatusBarAppearanceUpdate()
+        setNeedsUpdateOfHomeIndicatorAutoHidden()
+        navigationController?.setNeedsUpdateOfHomeIndicatorAutoHidden()
+        tabBarController?.setNeedsUpdateOfHomeIndicatorAutoHidden()
+        view.setNeedsLayout()
+    }
+
+    private func setReaderTabBarHidden(_ hidden: Bool, animated: Bool) {
+        guard let controller = tabBarController else { return }
+        if hidden && normalTabBarHidden == nil {
+            if #available(iOS 18.0, *) {
+                normalTabBarHidden = controller.isTabBarHidden
+            } else {
+                normalTabBarHidden = controller.tabBar.isHidden
+            }
+        }
+        let target = hidden ? true : (normalTabBarHidden ?? false)
+        if #available(iOS 18.0, *) {
+            controller.setTabBarHidden(target, animated: animated)
+        } else {
+            controller.tabBar.isHidden = target
+        }
+        if !hidden { normalTabBarHidden = nil }
+    }
+
     func hideTopAndDownComponents(animated:Bool = false, animateCompletion: (()->Void)? = nil) {
         isReaderInterfaceHidden = true
+        updateReaderFullscreenLayout(hidden: true)
         bottomButtonBar?.isHidden = true
         if let bottomConstraint = self.previousChapterBottomConstraint {
             bottomConstraint.isActive = false
@@ -618,16 +699,16 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             self.chapterSlider.isHidden = true
             self.chapterPositionLabel.isHidden = true
             self.navigationController?.setNavigationBarHidden(true, animated: animated)
-            // setTabBarVisible を使うと SafeAreaGuide 周りが壊れるぽいので封印します。(´・ω・`)
-            //self.tabBarController?.setTabBarVisible(visible:false, animated: animated, animateCompletion: animateCompletion)
-            self.tabBarController?.tabBar.isHidden = true
+            self.setReaderTabBarHidden(true, animated: animated)
         } completion: { finished in
-            animateCompletion?()
+            self.view.layoutIfNeeded()
+            self.webSpeechTool.updateReaderFullscreenStyle { animateCompletion?() }
         }
         self.assignDisplayToToggleInterfaceButton()
     }
     func displayTopAndDownComponents(animated:Bool = false, animateCompletion: (()->Void)? = nil) {
         isReaderInterfaceHidden = false
+        updateReaderFullscreenLayout(hidden: false)
         bottomButtonBar?.isHidden = false
         if let topConstraint = self.previousChapterTopConstraint {
             topConstraint.isActive = false
@@ -648,10 +729,10 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             self.chapterPositionLabel.isHidden = false
 
             self.navigationController?.setNavigationBarHidden(false, animated: animated)
-            //self.tabBarController?.setTabBarVisible(visible:true, animated: animated, animateCompletion: animateCompletion)
-            self.tabBarController?.tabBar.isHidden = false
+            self.setReaderTabBarHidden(false, animated: animated)
         } completion: { finished in
-            animateCompletion?()
+            self.view.layoutIfNeeded()
+            self.webSpeechTool.updateReaderFullscreenStyle { animateCompletion?() }
         }
         self.assignHideToToggleInterfaceButton()
     }
@@ -1288,7 +1369,6 @@ body.NovelSpeakerBody {
                 // 表示されているボタンを直接タップして使うという場面が VoiceOver でもあるようなので、あえて重ねられるような仕様は封印しておきます
                 //maxButtons = 999
             }
-
             let allButtons = barButtonArray
             guard !allButtons.isEmpty else { return }
 
@@ -1821,6 +1901,7 @@ body.NovelSpeakerBody {
     
     func assignHideToToggleInterfaceButton() {
         guard let toggleInterfaceButton = self.toggleInterfaceButton else { return }
+        toggleInterfaceButton.accessibilityLabel = NSLocalizedString("WebSpechViewController_ToggleInterfaceButton_Hide_Title", comment: "本文のみへ")
         DispatchQueue.main.async {
             if #available(iOS 13.0, *), let img = UIImage(systemName: "dock.arrow.down.rectangle", withConfiguration:  UIImage.SymbolConfiguration(pointSize: 24, weight: .light, scale: .default)) {
                 toggleInterfaceButton.setImage(img, for: .normal)
@@ -1834,6 +1915,7 @@ body.NovelSpeakerBody {
     }
     func assignDisplayToToggleInterfaceButton() {
         guard let toggleInterfaceButton = self.toggleInterfaceButton else { return }
+        toggleInterfaceButton.accessibilityLabel = NSLocalizedString("WebSpechViewController_ToggleInterfaceButton_Display_Title", comment: "ボタン表示")
         DispatchQueue.main.async {
             if #available(iOS 13.0, *), let img = UIImage(systemName: "dock.arrow.up.rectangle", withConfiguration:  UIImage.SymbolConfiguration(pointSize: 24, weight: .light, scale: .default)) {
                 toggleInterfaceButton.setImage(img, for: .normal)
@@ -1846,44 +1928,36 @@ body.NovelSpeakerBody {
         }
     }
 
-    @objc func toggleInterfaceButtonClicked(_ sender:UIButton){
-        func highlight(overrideLocation:Int?, scrollRatio:Double?){
-            RealmUtil.RealmBlock { realm in
-                guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) else { return }
-                let readLocation = story.readLocation(realm: realm)
-                DispatchQueue.main.async {
-                    self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1) {
-                        if let overrideLocation = overrideLocation, overrideLocation > 0 {
-                            self.webSpeechTool.scrollToIndex(location: overrideLocation, length: 1, scrollRatio: scrollRatio ?? 0.5)
-                        }else{
-                            self.webSpeechTool.scrollToIndex(location: readLocation, length: 1, scrollRatio: 0.3)
+    @objc func toggleInterfaceButtonClicked(_ sender: UIButton) {
+        let storyID = StorySpeaker.shared.storyID
+        let vertical = currentViewTypeCache == .webViewVertical || currentViewTypeCache == .webViewVertical2Column
+        webSpeechTool.getReaderVisibleAnchor { [weak self] anchor in
+            guard let self, StorySpeaker.shared.storyID == storyID else { return }
+            self.webSpeechTool.getCurrentDisplayLocation(xRatio: vertical ? 0.99 : 0.5, yRatio: vertical ? 0.5 : 0.03) { currentLocation in
+                guard StorySpeaker.shared.storyID == storyID else { return }
+                func restore() {
+                    guard StorySpeaker.shared.storyID == storyID else { return }
+                    RealmUtil.RealmBlock { realm in
+                        guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) else { return }
+                        let readLocation = story.readLocation(realm: realm)
+                        self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1) {
+                            if let anchor {
+                                self.webSpeechTool.restoreReaderVisibleAnchor(anchor)
+                            } else {
+                                self.webSpeechTool.scrollToIndex(location: currentLocation ?? readLocation, length: 1, scrollRatio: 0.95)
+                            }
                         }
                     }
                 }
-            }
-        }
-        print("width: \(self.textWebView?.frame.width ?? -1)")
-        let xRaito:Double
-        let yRaito:Double
-        let scrollRaito:Double
-        if self.currentViewTypeCache == .webViewVertical || self.currentViewTypeCache == .webViewVertical2Column {
-            xRaito = 0.99
-            yRaito = 0.5
-            scrollRaito = 0.95
-        }else{
-            xRaito = 0.5
-            yRaito = 0.03
-            scrollRaito = 0.95
-        }
-        self.webSpeechTool.getCurrentDisplayLocation(xRatio: xRaito, yRatio: yRaito) { currentDisplayLocation in
-            if((self.navigationController?.isNavigationBarHidden ?? false) == false){
-                self.hideTopAndDownComponents(animated: false, animateCompletion: { highlight(overrideLocation: currentDisplayLocation, scrollRatio: scrollRaito) })
-            }else{
-                self.displayTopAndDownComponents(animated: false, animateCompletion: { highlight(overrideLocation: currentDisplayLocation, scrollRatio: scrollRaito) })
+                if self.isReaderInterfaceHidden {
+                    self.displayTopAndDownComponents(animated: false, animateCompletion: restore)
+                } else {
+                    self.hideTopAndDownComponents(animated: false, animateCompletion: restore)
+                }
             }
         }
     }
-    
+
     @objc func leftSwipe(_ sender: UISwipeGestureRecognizer) {
         disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in

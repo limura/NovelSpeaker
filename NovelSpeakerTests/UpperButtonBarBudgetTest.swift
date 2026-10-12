@@ -1,4 +1,5 @@
 import XCTest
+import WebKit
 @testable import NovelSpeaker
 
 final class UpperButtonBarBudgetTest: XCTestCase {
@@ -717,5 +718,91 @@ final class LeadingBoundaryUIKitTest: XCTestCase {
         guard case .owned(let rect)?=NovelSpeakerUtility.UpperButtonBarLayout.leadingMeasurement(controller:c,preferPublicItemFrames:false).value else{return XCTFail("leading group unavailable")}
         XCTAssertEqual(rect.minX,14,accuracy:0.5)
         v.isHidden=true;XCTAssertNil(NovelSpeakerUtility.UpperButtonBarLayout.leadingMeasurement(controller:c,preferPublicItemFrames:false).value)
+    }
+}
+
+@MainActor
+final class WebReaderFullscreenTest: XCTestCase {
+    private func makeReader() -> (UIWindow, CustomWKWebView, WebSpeechViewTool) {
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 900, height: 900))
+        let controller = UIViewController()
+        window.rootViewController = controller
+        window.isHidden = false
+        let web = CustomWKWebView(frame: CGRect(x: 0, y: 0, width: 700, height: 450), configuration: WKWebViewConfiguration())
+        controller.view.addSubview(web)
+        return (window, web, WebSpeechViewTool())
+    }
+
+    func testFullscreenMarginRestoresAndSurvivesChapterReload() {
+        let (window, web, tool) = makeReader()
+        defer { window.isHidden = true }
+        let done = expectation(description: "generated chapter styling")
+        func checkMargin(_ expected: String, then: @escaping () -> Void) {
+            web.evaluateJavaScript("getComputedStyle(document.body).marginTop") { value, error in
+                XCTAssertNil(error)
+                XCTAssertEqual(value as? String, expected)
+                then()
+            }
+        }
+        func load(_ text: String, then: @escaping () -> Void) {
+            tool.applyFromNovelSpeakerString(webView: web, content: text, foregroundColor: .black, backgroundColor: .white, font: .systemFont(ofSize: 18), viewType: .webViewVertical, lineSpacingDisplayValue: 3, baseURL: nil, completionHandler: then)
+        }
+        load("最初の章の本文です。") {
+            checkMargin("8px") {
+                tool.isReaderFullscreen = true
+                tool.updateReaderFullscreenStyle {
+                    checkMargin("0px") {
+                        load("次の短い章です。") {
+                            checkMargin("0px") {
+                                tool.isReaderFullscreen = false
+                                tool.updateReaderFullscreenStyle { checkMargin("8px") { done.fulfill() } }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        waitForExpectations(timeout: 15)
+    }
+
+    func testVerticalVisibleAnchorSurvivesViewportResize() { checkAnchorResize(.webViewVertical) }
+    func testHorizontalVisibleAnchorSurvivesViewportResize() { checkAnchorResize(.webViewHorizontal) }
+
+    private func checkAnchorResize(_ type: RealmDisplaySetting.ViewType) {
+        let (window, web, tool) = makeReader()
+        defer { window.isHidden = true }
+        tool.isReaderFullscreen = true
+        web.scrollView.contentInsetAdjustmentBehavior = .never
+        web.scrollView.contentInset = .zero
+        let done = expectation(description: "same character after viewport resize")
+        let text = String(repeating: "これは回転前後の可視文字の位置を確認するための長い本文です。", count: 400)
+        tool.applyFromNovelSpeakerString(webView: web, content: text, foregroundColor: .black, backgroundColor: .white, font: .systemFont(ofSize: 18), viewType: type, lineSpacingDisplayValue: 3, baseURL: nil) {
+            let vertical = type == .webViewVertical
+            // 生成本文の既存スクロールAPIで確実に途中の文字へ移動する。
+            // 読込直後のnative contentSizeはまだ更新途中の場合がある。
+            tool.scrollToIndex(location: 400, length: 1, scrollRatio: 0.95)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                tool.getReaderVisibleAnchor { anchor in
+                    guard let anchor else { XCTFail("visible character missing"); done.fulfill(); return }
+                    XCTAssertGreaterThan(anchor.index, 0)
+                    web.frame.size = CGSize(width: 450, height: 650)
+                    web.layoutIfNeeded()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        tool.restoreReaderVisibleAnchor(anchor) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                tool.evaluateJsToStringDoubleDictionary(jsString: "GetReaderAnchorRect(\(anchor.index));") { rect in
+                                    guard let rect else { XCTFail("saved character missing"); done.fulfill(); return }
+                                    let actual = vertical ? rect["x"]! : rect["y"]!
+                                    let expected = vertical ? anchor.xRatio * Double(web.bounds.width) : anchor.yRatio * Double(web.bounds.height)
+                                    XCTAssertEqual(actual, expected, accuracy: 1.5)
+                                    done.fulfill()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        waitForExpectations(timeout: 15)
     }
 }

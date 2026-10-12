@@ -413,3 +413,37 @@ function GetCurrentDisplayLocation(xRatio, yRatio) {
 
 var elementArray = CreateElementArray();
 "OK";
+
+// 生成本文の可視位置を保存する。保存済み発話位置/selectionとは別の一時アンカー。
+function GetReaderVisibleAnchor() {
+    if (!document.body.classList.contains('NovelSpeakerBody')) return null;
+    const vertical = getComputedStyle(document.body).writingMode.startsWith('vertical');
+    let index = 0;
+    for (const data of elementArray) {
+        const node = data.element, text = data.text;
+        if (node.nodeType === Node.TEXT_NODE) {
+            const whole = document.createRange(); whole.selectNodeContents(node);
+            const box = whole.getBoundingClientRect();
+            if (box.right > 0 && box.bottom > 0 && box.left < innerWidth && box.top < innerHeight) {
+                for (let i = 0; i < text.length; i++) {
+                    if (!text[i].trim()) continue;
+                    const range = document.createRange(); range.setStart(node, i); range.setEnd(node, i + 1);
+                    const rect = range.getBoundingClientRect();
+                    if (rect.width > 0 && rect.height > 0 && rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight) {
+                        return {index: index + i, xRatio: rect.left / innerWidth, yRatio: rect.top / innerHeight, vertical: vertical ? 1 : 0};
+                    }
+                }
+            }
+        }
+        index += text.length;
+    }
+    return null;
+}
+
+function GetReaderAnchorRect(index) {
+    const data = SearchElementFromIndex(elementArray, index);
+    if (!data || data.element.nodeType !== Node.TEXT_NODE || data.index >= data.text.length) return null;
+    const range = document.createRange(); range.setStart(data.element, data.index); range.setEnd(data.element, data.index + 1);
+    const rect = range.getBoundingClientRect();
+    return {x: rect.left, y: rect.top};
+}

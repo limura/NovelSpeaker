@@ -100,6 +100,28 @@ public class CustomWKWebView: WKWebView {
 
 class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     var wkWebView:CustomWKWebView? = nil
+    // WebView側で8ptを確保するため、生成した本文だけの標準body余白を全画面時に取り除く。
+    // WebViewOriginalで読み込む外部サイトのCSSには適用しない。
+    var isReaderFullscreen = false
+    private static let readerFullscreenStyleID = "NovelSpeakerReaderFullscreenStyle"
+    private static let readerFullscreenCSS = "body.NovelSpeakerBody { margin: 0; padding: 0; }"
+
+    func updateReaderFullscreenStyle(completionHandler: (() -> Void)? = nil) {
+        guard let webView = wkWebView else { completionHandler?(); return }
+        let script = """
+        (() => {
+          const id = '\(Self.readerFullscreenStyleID)';
+          if (\(isReaderFullscreen ? "true" : "false") && document.body?.classList.contains('NovelSpeakerBody')) {
+            let style = document.getElementById(id);
+            if (!style) { style = document.createElement('style'); style.id = id; document.head.appendChild(style); }
+            style.textContent = '\(Self.readerFullscreenCSS)';
+          } else { document.getElementById(id)?.remove(); }
+          // CSS再配置を確定させてから可視位置を復元する。
+          return document.body?.getBoundingClientRect().height ?? 0;
+        })()
+        """
+        webView.evaluateJavaScript(script) { _, _ in completionHandler?() }
+    }
     var loadCompletionHandler:(() -> Void)? = nil
     var siteInfoArray:[StorySiteInfo] = []
     var allowUrl:URL? = nil
@@ -270,6 +292,41 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     func scrollToIndex(location:Int, length:Int, scrollRatio:Double, completionHandler:(()->Void)? = nil){
         evaluateJsToString(jsString: "ScrollToIndex(\(location), \(scrollRatio)); \"OK\";", completionHandler: { _ in completionHandler?() })
     }
+    struct VisibleReaderAnchor {
+        let index: Int
+        let xRatio: Double
+        let yRatio: Double
+        let vertical: Bool
+    }
+
+    func getReaderVisibleAnchor(completionHandler: @escaping (VisibleReaderAnchor?) -> Void) {
+        evaluateJsToStringDoubleDictionary(jsString: "GetReaderVisibleAnchor();") { result in
+            guard let result, let index = result["index"], let x = result["xRatio"], let y = result["yRatio"], let vertical = result["vertical"] else {
+                completionHandler(nil); return
+            }
+            completionHandler(VisibleReaderAnchor(index: Int(index), xRatio: x, yRatio: y, vertical: vertical != 0))
+        }
+    }
+
+    func restoreReaderVisibleAnchor(_ anchor: VisibleReaderAnchor, completionHandler: (() -> Void)? = nil) {
+        // DOMの再配置後の矩形差分をnative scrollViewへ適用する。CSS smooth scrollや
+        // 保存済み発話位置を変更せず、縦書きは横方向、横書きは縦方向だけを調整する。
+        evaluateJsToStringDoubleDictionary(jsString: "GetReaderAnchorRect(\(anchor.index));") { [weak self] result in
+            guard let web = self?.wkWebView, let result, let x = result["x"], let y = result["y"] else { completionHandler?(); return }
+            let scroll = web.scrollView
+            var offset = scroll.contentOffset
+            if anchor.vertical {
+                offset.x += CGFloat(x - anchor.xRatio * Double(web.bounds.width))
+                offset.x = min(max(0, offset.x), max(0, scroll.contentSize.width - scroll.bounds.width))
+            } else {
+                offset.y += CGFloat(y - anchor.yRatio * Double(web.bounds.height))
+                offset.y = min(max(0, offset.y), max(0, scroll.contentSize.height - scroll.bounds.height))
+            }
+            scroll.setContentOffset(offset, animated: false)
+            completionHandler?()
+        }
+    }
+
     // 自動スクロールの一時停止中は、ハイライトは動かすが selection の張り替えはしないようにする。
     func setKeepUserSelection(_ value:Bool) {
         evaluateJsToString(jsString: "SetKeepUserSelection(\(value ? "true" : "false"));", completionHandler: { _ in })
@@ -421,6 +478,7 @@ body.NovelSpeakerBody {
   scroll-behavior: smooth;
 }
 </style>
+\(isReaderFullscreen ? "<style id='\(Self.readerFullscreenStyleID)'>\(Self.readerFullscreenCSS)</style>" : "")
 </head>
 <html><body class="NovelSpeakerBody">
 """
