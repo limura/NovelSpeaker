@@ -572,7 +572,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 barButtonArray.append(button)
             case .detail:
                 let button = createBarButtonItem(
-                    image: UIImage(systemName: "book.pages"),
+                    image: NovelSpeakerUtility.speechViewButtonImage(.detail),
                     action: #selector(self.detailButtonClicked(_:)),
                     accessibilityLabel: NSLocalizedString("SpeechViewController_Detail", comment: "詳細")
                 )
@@ -615,7 +615,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 barButtonArray.append(button)
             case .addPageToOtherNovel:
                 let button = createBarButtonItem(
-                    image: UIImage(systemName: "book.badge.plus"),
+                    image: NovelSpeakerUtility.speechViewButtonImage(.addPageToOtherNovel),
                     action: #selector(self.addPageToOtherNovelButtonClicked(_:)),
                     accessibilityLabel: NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
                 )

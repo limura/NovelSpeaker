@@ -149,7 +149,7 @@ class SpeechViewBottomButtonSettingsViewController: FormViewController {
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Detail", comment: "小説の詳細を表示する")
                         $0.value = setting.isOn
-                        $0.cell.imageView?.image = UIImage(systemName: "book.pages")
+                        $0.cell.imageView?.image = NovelSpeakerUtility.speechViewButtonImage(.detail)
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .skipBackward:
@@ -186,7 +186,7 @@ class SpeechViewBottomButtonSettingsViewController: FormViewController {
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_AddPageToOtherNovel", comment: "他の小説にこのページを追加する")
                         $0.value = setting.isOn
-                        $0.cell.imageView?.image = UIImage(systemName: "book.badge.plus")
+                        $0.cell.imageView?.image = NovelSpeakerUtility.speechViewButtonImage(.addPageToOtherNovel)
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 }

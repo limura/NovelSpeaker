@@ -302,3 +302,30 @@ final class UpperTabRegionDetectionTest: XCTestCase {
         }
     }
 }
+
+final class SpeechViewButtonImageCompatibilityTest: XCTestCase {
+    func testUnavailableNewSymbolsUseRenderableOldSymbols() {
+        for (type, preferred, fallback) in [(SpeechViewButtonTypes.detail, "book.pages", "book"), (.addPageToOtherNovel, "book.badge.plus", "plus.square")] {
+            var requested: [String] = []
+            let image = NovelSpeakerUtility.speechViewButtonImage(type) { name in
+                requested.append(name)
+                return name == preferred ? nil : UIImage(systemName: name)
+            }
+            XCTAssertEqual(requested, [preferred, fallback])
+            XCTAssertNotNil(image)
+        }
+    }
+
+    func testAvailableNewSymbolsKeepTheirExistingAppearance() {
+        for type in [SpeechViewButtonTypes.detail, .addPageToOtherNovel] {
+            var requested: [String] = []
+            let marker = UIImage()
+            let image = NovelSpeakerUtility.speechViewButtonImage(type) { name in
+                requested.append(name)
+                return marker
+            }
+            XCTAssertTrue(image === marker)
+            XCTAssertEqual(requested.count, 1)
+        }
+    }
+}

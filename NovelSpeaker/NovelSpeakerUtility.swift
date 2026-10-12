@@ -15,6 +15,19 @@ import RealmSwift
 import AVFoundation
 
 class NovelSpeakerUtility: NSObject {
+    // 本文・上下ボタン設定で同じ旧OS fallbackを使う。
+    static func speechViewButtonImage(_ type: SpeechViewButtonTypes,
+                                      imageNamed: (String) -> UIImage? = { UIImage(systemName: $0) }) -> UIImage? {
+        switch type {
+        case .detail:
+            return imageNamed("book.pages") ?? imageNamed("book")
+        case .addPageToOtherNovel:
+            return imageNamed("book.badge.plus") ?? imageNamed("plus.square")
+        default:
+            return nil
+        }
+    }
+
     enum IPadUpperTabRegion {
         case outsideGate
         case lower
