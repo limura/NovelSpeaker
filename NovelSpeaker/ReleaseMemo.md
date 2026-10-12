@@ -4690,3 +4690,68 @@ Bug fixes
 - Fixed crashes that could occur when skipping across chapter boundaries
 - Fixed a crash when creating backup data via “Create backup” in the “Settings” tab.
 - Fixed an issue that caused the app to crash when opening “Specify the portion of each website to be included.” from the “Settings” tab.
+
+# Version 2.14.1
+
+インタフェース・内部動作の変更
+
+- バックアップ生成用の App Intent を追加
+- iPhone Duo への対応
+- 本棚画面や小説本文画面での右上のボタン群に表示される数を出来るだけ多めに表示できるように変更
+- 「設定タブ」の「普段は使用する必要のないもの」内に「必須設定を修復する」ボタンを追加
+
+問題の修正
+
+- 「設定タブ」→「読み上げ時の間の設定」で「非推奨型」の場合にVOICEVOXの話者での間がおかしなことになっていたのを修正
+- 「設定タブ」→「読み上げ時の間の設定」で「標準型」を選択していて、「システムの音声」を利用している時に正しく間が開いていなかった問題を修正
+- 小説本文画面右上のボタン群のうち、iOS 15 などで一部のアイコンが表示されなくなっていた問題を修正
+- キーボード表示や画面の回転に伴うダイアログ位置ずれの修正
+
+以下にざっくりと説明します。
+
+- バックアップ生成用の App Intent を追加
+  iOS 17以降であれば、ショートカットアプリから「ことせかい」の「ことせかい のバックアップを作成」が選べるようになります。
+  これで、ショートカットアプリを使って定期実行か何かさせて、ことせかい のバックアップを生成させることができるようになるはずです。
+  ことせかい 側ではバックアップファイルの出力しかしないので、保存する場合にはショートカットアプリ側の「ファイルを保存」などを利用する形でご利用ください。
+
+- iPhone Duo への対応
+  シミュレータでしか確認していないのですが、Wi-Fiのアイコンなどが表示されるナビゲーションバーやタブバー的な領域が白一色になってしまって戻るボタンやタブが見えなくなっている可能性があったのを修正したり、Duo の新しいレイアウトへの対応を追加しています。
+
+- 本棚画面や小説本文画面での右上のボタン群に表示される数を出来るだけ多めに表示できるように変更
+  今までの横幅推定よりもより現実的な横幅の推定をするようにして、表示できる領域が余ってるように見えるのにボタンが「…」にまとめられちゃうなぁということが減るように努力しています。
+
+- 「設定タブ」の「普段は使用する必要のないもの」内に「必須設定を修復する」ボタンを追加
+  設定として保存されていない場合に誤動作するような必須設定がなんらかの問題で消えているという事象を確認したので、その問題を直接的ではないにしろ緩和する方法として導入しています。
+  緩和できる状態になっているときはボタンが押せる状態になるはずです。
+
+- 「設定タブ」→「読み上げ時の間の設定」で「非推奨型」の場合にVOICEVOXの話者での間がおかしなことになっていたのを修正
+  具体的には「非推奨型」の「間」に使われる「。_。」といった文字列をそのままVOICEVOXに渡す形になっていたので、おそらく「間」が開かなかったはずです。
+
+- 「設定タブ」→「読み上げ時の間の設定」で「標準型」を選択していて、「システムの音声」を利用している時に正しく間が開いていなかった問題を修正
+  こちらはVOICEVOX対応を入れた時に誤動作するようになっていたはずで、上記の条件の場合は「間」が開かなくなっていたはずです。
+  ついでに指定できる秒数を0.1秒刻みから0.01秒刻みに変更しています。
+  ただし、「0.01以上の値が入っている場合には、システムの音声をその文字の部分で止め、その後指定された秒数待った後にシステムの音声の発話を開始する」という仕組みになっていることと、システムの音声の発話が開始の指示から実際に声が出るまでにいくばくかの時間がかかる(実測値では 0.08秒〜0.17秒(M3 iPad Air) や、0.07秒〜0.34秒(SE 2) といった時間がかかる)ことが確認されているため、その発話が実際に開始されるまでの時間に加えて何秒待つか、という指定になるために、0.01 を指定しても 0.08秒 後からの発話になるなどといった結果になります。
+
+- 小説本文画面右上のボタン群のうち、iOS 15 などで一部のアイコンが表示されなくなっていた問題を修正
+  古い iOS には存在しないアイコンを使っている場合に、それを表示できずに空欄になっていたので、代替のアイコンを入れるようにしています。
+
+- キーボード表示や画面の回転に伴うダイアログ位置ずれの修正
+  これはそのままの意味ですね。
+
+以上となります。
+
+# Version 2.14.1
+
+Interface and internal behavior changes
+
+- Added an App Intent for creating backups
+- Added support for iPhone Duo
+- Adjusted the upper-right button groups on the Bookshelf and novel text screens to show as many buttons as possible within the available space
+- Added “Repair required settings” under “Things you don't normally need to use” in the “Settings” tab
+
+Bug fixes
+
+- Fixed incorrect pauses for VOICEVOX voices when “experimental” was selected under “Settings” → “Setting for punctuation delays”
+- Fixed an issue where pauses were not applied correctly when “default” was selected under “Settings” → “Setting for punctuation delays” while using “System Voice”
+- Fixed an issue where some icons in the upper-right button group on the novel text screen were missing on older versions of iOS, such as iOS 15
+- Fixed dialog positioning issues when the keyboard appeared or the screen rotated
