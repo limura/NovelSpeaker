@@ -16,6 +16,22 @@
 import Foundation
 import AVFoundation
 
+// 停止通知が届く前に別の話者で再開しても、古い通知で新しいキューを消費させない。
+fileprivate final class SpeechQueueDelegate: SpeakRangeDelegate {
+    weak var owner: MultiVoiceSpeaker?
+    let generation: Int
+    init(owner: MultiVoiceSpeaker, generation: Int) {
+        self.owner = owner
+        self.generation = generation
+    }
+    func willSpeakRange(range: NSRange) {
+        owner?.willSpeakRange(range: range, generation: generation)
+    }
+    func finishSpeak(isCancel: Bool, speechString: String) {
+        owner?.finishSpeak(isCancel: isCancel, speechString: speechString, generation: generation)
+    }
+}
+
 fileprivate class SpeechQueue {
     let text:String
     let voiceIdentifier:String?
@@ -89,6 +105,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
 
     let speechQueueLock = NSLock()
     fileprivate var speechQueue:[SpeechQueue] = []
+    private var speechGeneration = 0
     var isStopping = false
     
     // 指定された話者のidentifierに対して「似ていると思われる(要定義)」話者を生成して返します。
@@ -203,6 +220,8 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
 
     fileprivate func startSpeech(queue:SpeechQueue) {
         let speaker = getSpeaker(voiceIdentifier: queue.voiceIdentifier, locale: queue.locale, type: queue.type)
+        speechGeneration += 1
+        speaker.delegate = SpeechQueueDelegate(owner: self, generation: speechGeneration)
         isStopping = false
         queue.enqueue(speaker: speaker)
     }
@@ -236,23 +255,33 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     }
     
     func willSpeakRange(range:NSRange) {
+        willSpeakRange(range: range, generation: nil)
+    }
+
+    fileprivate func willSpeakRange(range: NSRange, generation: Int?) {
         var willSpeakDelegate:SpeakRangeDelegate? = nil
         self.speechQueueLock.lock()
         defer {
             self.speechQueueLock.unlock()
             willSpeakDelegate?.willSpeakRange(range: range)
         }
+        guard generation == nil || generation == speechGeneration else { return }
         if let queue = speechQueue.first, queue.isDummy == false {
             willSpeakDelegate = delegate
         }
     }
     func finishSpeak(isCancel: Bool, speechString: String) {
+        finishSpeak(isCancel: isCancel, speechString: speechString, generation: nil)
+    }
+
+    fileprivate func finishSpeak(isCancel: Bool, speechString: String, generation: Int?) {
         var finishDelegate:SpeakRangeDelegate? = nil
         self.speechQueueLock.lock()
         defer {
             self.speechQueueLock.unlock()
             finishDelegate?.finishSpeak(isCancel: isCancel, speechString: speechString)
         }
+        guard generation == nil || generation == speechGeneration else { return }
         var isDummy = false
         if speechQueue.count > 0 {
             let queue = speechQueue.removeFirst()

@@ -50,6 +50,9 @@
 		210DD99825840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210DD99725840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift */; };
 		210EFEDC23C80694007C3016 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
 		210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */; };
+		CD842C5E6E714101AF4C2521 /* HeadlessWebViewThreadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2522 /* HeadlessWebViewThreadTest.swift */; };
+		CD842C5E6E714101AF4C2511 /* SpeechWaitStopTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2512 /* SpeechWaitStopTest.swift */; };
+		CD842C5E6E714101AF4C2501 /* UIImageResizeTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2502 /* UIImageResizeTest.swift */; };
 		210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
@@ -528,6 +531,9 @@
 		210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryTextClassifier.swift; sourceTree = "<group>"; };
 		210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerTest.swift; sourceTree = "<group>"; };
+		CD842C5E6E714101AF4C2522 /* HeadlessWebViewThreadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessWebViewThreadTest.swift; sourceTree = "<group>"; };
+		CD842C5E6E714101AF4C2512 /* SpeechWaitStopTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechWaitStopTest.swift; sourceTree = "<group>"; };
+		CD842C5E6E714101AF4C2502 /* UIImageResizeTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageResizeTest.swift; sourceTree = "<group>"; };
 		210EFEE023C8A92D007C3016 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
@@ -1352,6 +1358,9 @@
 				210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */,
 				212323F422B7049E00543543 /* RealmTests.swift */,
 				210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */,
+				CD842C5E6E714101AF4C2522 /* HeadlessWebViewThreadTest.swift */,
+				CD842C5E6E714101AF4C2512 /* SpeechWaitStopTest.swift */,
+				CD842C5E6E714101AF4C2502 /* UIImageResizeTest.swift */,
 				2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */,
 				E929B0010000000000000004 /* UpperButtonBarBudgetTest.swift */,
 				21143D7F25B2DC390078C2BA /* DownloadTest.swift */,
@@ -2233,6 +2242,9 @@
 				965A700D346C4946904A989C /* VoicevoxAccentPreviewTest.swift in Sources */,
 				E6C2672C699346ABAAC08AE4 /* VoicevoxSynthesisSchedulerTest.swift in Sources */,
 				210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */,
+				CD842C5E6E714101AF4C2521 /* HeadlessWebViewThreadTest.swift in Sources */,
+				CD842C5E6E714101AF4C2511 /* SpeechWaitStopTest.swift in Sources */,
+				CD842C5E6E714101AF4C2501 /* UIImageResizeTest.swift in Sources */,
 				21A55E292F179C00004FAAB5 /* NovelDownloaderMissingChapterTests.swift in Sources */,
 				21143D8025B2DC390078C2BA /* DownloadTest.swift in Sources */,
 				212323F522B7049E00543543 /* RealmTests.swift in Sources */,

@@ -323,6 +323,7 @@ final class SpeechCompletionWait {
 
 class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
     private let completionWait = SpeechCompletionWait()
+    private var speechGeneration = 0
     var synthesizer = AVSpeechSynthesizer()
     var m_Voice:AVSpeechSynthesisVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
     var m_Pitch:Float = 1.0
@@ -350,6 +351,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
     }
 
     func Speech(text:String) {
+        speechGeneration += 1
         if NiftyUtility.isTesting() {
             return
         }
@@ -378,10 +380,21 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
     }
     
     func Stop() {
+        speechGeneration += 1
+        let stoppedGeneration = speechGeneration
         let wasWaiting = completionWait.isActive
         completionWait.cancel()
         synthesizer.stopSpeaking(at: .immediate)
-        if wasWaiting { delegate?.finishSpeak(isCancel: true, speechString: "") }
+        if wasWaiting {
+            // MultiVoiceSpeaker.Stop()はキューのロックを保持している。
+            // 同期通知ではそのロックへ再入するため、VOICEVOX側と同様に非同期で返す。
+            // 再開・再停止・synth再作成後には古い通知で新しいキューを消費させない。
+            let stoppedDelegate = delegate
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.speechGeneration == stoppedGeneration else { return }
+                stoppedDelegate?.finishSpeak(isCancel: true, speechString: "")
+            }
+        }
     }
     
     func Pause() {
@@ -501,6 +514,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, SpeechEngineSpeaking {
     }
     
     func reloadSynthesizer() {
+        speechGeneration += 1
         completionWait.cancel()
         synthesizer = AVSpeechSynthesizer()
         synthesizer.delegate = self

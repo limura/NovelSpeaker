@@ -99,10 +99,11 @@ class HeadlessHttpClient {
     func ReloadWebView(config:WKWebViewConfiguration){
         releaseCurrentWebView()
         self.config = config
-        // smart-wait の ready 通知用ハンドラを登録(冪等: 二重 add は例外になるため一旦 remove)。
-        config.userContentController.removeScriptMessageHandler(forName: HeadlessReadyMessageHandler.name)
-        config.userContentController.add(readyHandler, name: HeadlessReadyMessageHandler.name)
         dispatch_sync_on_main_thread {
+            // ハンドラ操作もWebView生成と同じメインスレッドで行う。
+            // 冪等: 二重addは例外になるため一旦removeする。
+            config.userContentController.removeScriptMessageHandler(forName: HeadlessReadyMessageHandler.name)
+            config.userContentController.add(readyHandler, name: HeadlessReadyMessageHandler.name)
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
             self.webView = WKWebView(frame: frame, configuration: config)
             if #available(iOS 16.4, *) {

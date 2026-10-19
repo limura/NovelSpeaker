@@ -10,14 +10,27 @@ import UIKit
 
 extension UIImage {
     func resize(newSize:CGSize) -> UIImage {
-        let wRatio:CGFloat = newSize.width / self.size.width;
-        let hRatio:CGFloat = newSize.height / self.size.height;
-        let ratio:CGFloat = wRatio < hRatio ? wRatio : hRatio;
-        let targetSize = CGSize(width: self.size.width * ratio, height: self.size.height * ratio)
-        UIGraphicsBeginImageContextWithOptions(targetSize, false, 0.0);
-        draw(in: CGRect(x: 0.0, y: 0.0, width: targetSize.width, height: targetSize.height))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return newImage ?? self
+        guard newSize.width.isFinite, newSize.height.isFinite,
+              newSize.width > 0, newSize.height > 0,
+              size.width.isFinite, size.height.isFinite,
+              size.width > 0, size.height > 0 else { return self }
+
+        // 再生情報のアートワーク用。元画像より拡大せず、画面倍率にも依存させない。
+        // OSから大きなサイズを要求されても、生成する画像は最大1024×1024ピクセルに抑える。
+        let maximumDimension: CGFloat = 1024
+        let ratio = min(1, newSize.width / size.width, newSize.height / size.height,
+                        maximumDimension / max(size.width, size.height))
+        let targetSize = CGSize(width: floor(size.width * ratio), height: floor(size.height * ratio))
+        guard targetSize.width.isFinite, targetSize.height.isFinite,
+              targetSize.width >= 1, targetSize.height >= 1 else { return self }
+        if targetSize == size && scale == 1 { return self }
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.preferredRange = .standard
+        format.opaque = false
+        return UIGraphicsImageRenderer(size: targetSize, format: format).image { _ in
+            draw(in: CGRect(origin: .zero, size: targetSize))
+        }
     }
 }
