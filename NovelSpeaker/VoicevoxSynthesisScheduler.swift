@@ -31,8 +31,17 @@ import Foundation
 /// 本物は VoicevoxCore(CPU予算・分割・スレッド数の調整込み)。
 /// テストでは、C 呼び出しをせずに呼び出し履歴だけ記録する偽物を与える。
 protocol VoicevoxSynthesisEngine: Sendable {
+    func beginSynthesisBatch() -> VoicevoxModelUse?
+    func synthesizeBlock(request: VoicevoxSynthesisScheduler.Request) async throws -> Data
     /// 1ブロックぶんを合成して WAV を返す。
     func synthesizeBlock(text: String, styleId: UInt32) async throws -> Data
+}
+
+extension VoicevoxSynthesisEngine {
+    func beginSynthesisBatch() -> VoicevoxModelUse? { nil }
+    func synthesizeBlock(request: VoicevoxSynthesisScheduler.Request) async throws -> Data {
+        try await synthesizeBlock(text: request.text, styleId: request.styleId)
+    }
 }
 
 final class VoicevoxSynthesisScheduler: @unchecked Sendable {
@@ -42,6 +51,7 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
         let key: String
         let text: String
         let styleId: UInt32
+        var session: VoicevoxSynthesisSession? = nil
     }
 
     /// 作り足しの1件が持つ「どこへ置くか」。
@@ -130,6 +140,101 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
     private var nextFillOrder = 0
     private var isWorkerRunning = false
 
+    private var acceptingRequests = true
+    private var sessionGeneration: UInt64 = 0
+    private var suspensionReady = false
+    private var workerTask: Task<Void, Never>?
+    private var drainWaiters: [CheckedContinuation<Void, Never>] = []
+
+    var isAcceptingRequests: Bool {
+        lock.lock(); defer { lock.unlock() }
+        return acceptingRequests
+    }
+
+    func beginModelUse(lifetime: VoicevoxModelLifetime) -> VoicevoxModelUse {
+        // 受付確認と利用権取得の間に切り替えが入り、古い所有者が残るのを防ぐ。
+        lock.lock(); defer { lock.unlock() }
+        return acceptingRequests ? lifetime.beginUse() : VoicevoxModelUse(end: {})
+    }
+
+    func newSession() -> VoicevoxSynthesisSession {
+        lock.lock(); defer { lock.unlock() }
+        return VoicevoxSynthesisSession(generation: sessionGeneration)
+    }
+
+    func isSessionCurrent(_ session: VoicevoxSynthesisSession) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return acceptingRequests && session.generation == sessionGeneration
+    }
+
+    func checkSession(_ session: VoicevoxSynthesisSession) throws {
+        guard isSessionCurrent(session) else { throw CancellationError() }
+    }
+
+    private func admittedRequestLocked(_ request: Request) -> Request? {
+        guard acceptingRequests,
+              request.session == nil || request.session?.generation == sessionGeneration else { return nil }
+        var admitted = request
+        admitted.session = VoicevoxSynthesisSession(generation: sessionGeneration)
+        return admitted
+    }
+
+    /// 実行中のC呼び出しは待つが、待機要求とその待ち人は直ちにキャンセルする。
+    func suspendRequests() -> VoicevoxSynthesisSession {
+        lock.lock()
+        if acceptingRequests {
+            acceptingRequests = false
+            suspensionReady = false
+            sessionGeneration &+= 1
+            generation += 1
+        }
+        let session = VoicevoxSynthesisSession(generation: sessionGeneration)
+        let waiters = entries.values.flatMap { entry -> [CheckedContinuation<Data, Error>] in
+            let result = entry.waiters
+            entry.waiters = []
+            return result
+        }
+        entries.removeAll()
+        let task = workerTask
+        lock.unlock()
+        task?.cancel()
+        for waiter in waiters { waiter.resume(throwing: CancellationError()) }
+        return session
+    }
+
+    func waitUntilDrained() async {
+        await withCheckedContinuation { continuation in
+            lock.lock()
+            if isWorkerRunning {
+                drainWaiters.append(continuation)
+                lock.unlock()
+            } else {
+                lock.unlock()
+                continuation.resume()
+            }
+        }
+    }
+
+    func isSuspending(_ session: VoicevoxSynthesisSession) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return !acceptingRequests && session.generation == sessionGeneration
+    }
+
+    func completeSuspension(_ session: VoicevoxSynthesisSession) {
+        lock.lock(); defer { lock.unlock() }
+        if !acceptingRequests && session.generation == sessionGeneration { suspensionReady = true }
+    }
+
+    func resumeRequests() -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        if acceptingRequests { return true }
+        guard suspensionReady && !isWorkerRunning else { return false }
+        sessionGeneration &+= 1
+        acceptingRequests = true
+        suspensionReady = false
+        return true
+    }
+
     // MARK: - 積む
 
     /// 先行合成の予約を積む(積むだけで、完成は待たない)。
@@ -145,6 +250,7 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
     }
 
     private func enqueuePrefetchLocked(blockIndex: Int, request: Request) -> Bool {
+        guard let request = admittedRequestLocked(request) else { return false }
         if blockIndex < playbackIndex { return false }
         if let existing = entries[request.key] {
             // 同じ内容が、より手前のブロックとしても必要になった場合は優先度を上げる。
@@ -182,6 +288,11 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
     func resultForPlayback(request: Request) async throws -> Data {
         return try await withCheckedThrowingContinuation { continuation in
             lock.lock()
+            guard let request = admittedRequestLocked(request) else {
+                lock.unlock()
+                continuation.resume(throwing: CancellationError())
+                return
+            }
             let entry = entries[request.key] ?? {
                 let created = Entry(request: request, generation: generation)
                 entries[request.key] = created
@@ -204,6 +315,11 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
     func resultForBackgroundFill(request: Request, destination: FillDestination) async throws -> Data {
         return try await withCheckedThrowingContinuation { continuation in
             lock.lock()
+            guard let request = admittedRequestLocked(request) else {
+                lock.unlock()
+                continuation.resume(throwing: CancellationError())
+                return
+            }
             let entry = entries[request.key] ?? {
                 let created = Entry(request: request, generation: generation)
                 entries[request.key] = created
@@ -239,9 +355,12 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
     /// 誰かが完成を待っている物と、実行中の1本は止められないのでそのまま
     /// (実行中のC呼び出しはプリエンプトできない。完成品は世代番号で見分けて、
     ///  メモリ層には置かない)。
-    func cancelPendingPrefetch() {
+    func cancelPendingPrefetch(session: VoicevoxSynthesisSession? = nil) {
         lock.lock()
         defer { lock.unlock() }
+        if let session = session {
+            guard acceptingRequests && session.generation == sessionGeneration else { return }
+        }
         generation += 1
         for (key, entry) in entries {
             guard entry.isInFlight == false, entry.waiters.isEmpty, entry.fillDestination == nil else { continue }
@@ -286,26 +405,32 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
     /// 後回しにされ続ける事を、ディスク書き出しの遅延で実測済み)。
     private func startWorkerIfNeeded() {
         lock.lock()
-        if isWorkerRunning {
+        if isWorkerRunning || !acceptingRequests || entries.isEmpty {
             lock.unlock()
             return
         }
         isWorkerRunning = true
-        lock.unlock()
 
-        Task(priority: .userInitiated) { [weak self] in
+        workerTask = Task(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
-            while let entry = self.takeNextEntry() {
+            let use = self.engine.beginSynthesisBatch()
+            defer { withExtendedLifetime(use) {} }
+            while !Task.isCancelled, let entry = self.takeNextEntry() {
                 await self.process(entry)
             }
             self.lock.lock()
             self.isWorkerRunning = false
+            self.workerTask = nil
+            let drained = self.drainWaiters
+            self.drainWaiters = []
             self.lock.unlock()
+            for continuation in drained { continuation.resume() }
             // 終了を決めた直後に積まれた分を取り零さないよう、もう一度だけ確認する。
             if self.hasPendingEntry() {
                 self.startWorkerIfNeeded()
             }
         }
+        lock.unlock()
     }
 
     private func hasPendingEntry() -> Bool {
@@ -364,7 +489,7 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
         }
 
         do {
-            let wav = try await engine.synthesizeBlock(text: request.text, styleId: request.styleId)
+            let wav = try await engine.synthesizeBlock(request: request)
             // 待っている人(再生・作り足し)を先に起こす。置く作業で再生を待たせない。
             let flags = resolve(entry, with: .success(wav))
             if flags.storesToMemory {
@@ -377,7 +502,7 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
             storage.storeToDisk(request, wav, flags.fillDestination)
         } catch {
             let flags = resolve(entry, with: .failure(error))
-            if flags.hadWaiters == false {
+            if flags.hadWaiters == false && !(error is CancellationError) {
                 storage.onUnobservedError(request, error)
             }
         }
@@ -409,7 +534,7 @@ final class VoicevoxSynthesisScheduler: @unchecked Sendable {
     private func resolve(_ entry: Entry,
                          with result: Result<Data, Error>) -> (storesToMemory: Bool, fillDestination: FillDestination?, hadWaiters: Bool) {
         lock.lock()
-        entries.removeValue(forKey: entry.request.key)
+        if entries[entry.request.key] === entry { entries.removeValue(forKey: entry.request.key) }
         let waiters = entry.waiters
         entry.waiters = []
         // 停止/シークを跨いだ古い先行合成の完成品は、メモリ層に置かない

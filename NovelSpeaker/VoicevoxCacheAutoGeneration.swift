@@ -60,6 +60,10 @@ final class VoicevoxCacheAutoGeneration {
     }
 
     func evaluate() {
+        guard VoicevoxCore.shared.isAcceptingSynthesisRequests else {
+            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "音声合成エンジンの切り替え中")
+            return
+        }
         // この機能を使わない設定(0分)なら何もしない。
         guard VoicevoxCacheLead.keepGeneratingBelowMinutes > 0 else {
             VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "裏での作り足しが設定で無効になっているため")
@@ -74,6 +78,11 @@ final class VoicevoxCacheAutoGeneration {
         }
         guard StorySpeaker.shared.isPlayng else {
             VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "読み上げ中ではないため")
+            return
+        }
+        guard let session = StorySpeaker.shared.speaker.speaker.voicevoxSynthesisSession,
+              VoicevoxCore.shared.isSynthesisSessionCurrent(session) else {
+            VoicevoxCacheGenerator.shared.stopIfFollowingPlayback(reason: "切り替え前の読み上げのため")
             return
         }
         // 利用者が明示的に始めた生成が走っている時は、そちらに任せる。

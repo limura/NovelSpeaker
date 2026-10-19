@@ -12,7 +12,9 @@ import AVFoundation
 class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     let speaker = MultiVoiceSpeaker()
 
-    var speechBlockArray:[CombinedSpeechBlock] = []
+    var speechBlockArray:[CombinedSpeechBlock] = [] {
+        didSet { updateVoicevoxModelUse() }
+    }
     // 発話中の速度・音量変更(次のブロックから適用)用の倍率。
     // block には話者設定の値が焼き込まれているので、設定変更を発話中に反映したい時は
     // ここに「新しい値 ÷ 焼き込み時の値」を入れる(enqueue 時に block の値へ掛ける)。
@@ -21,7 +23,23 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var volumeMultiplier: Float = 1.0
     var currentSpeechBlockIndex:Int = 0
     var delegate:SpeakRangeDelegate? = nil
-    var m_IsSpeaking = false
+    private var voicevoxModelUse: VoicevoxModelUse?
+    var m_IsSpeaking = false {
+        didSet {
+            if m_IsSpeaking && !oldValue {
+                speaker.voicevoxSynthesisSession = VoicevoxCore.shared.newSynthesisSession()
+            }
+            updateVoicevoxModelUse()
+        }
+    }
+
+    private func updateVoicevoxModelUse() {
+        if !m_IsSpeaking || !speechBlockArray.contains(where: { $0.type == "VOICEVOX" }) {
+            voicevoxModelUse = nil
+        } else if voicevoxModelUse == nil {
+            voicevoxModelUse = VoicevoxCore.shared.beginModelUse()
+        }
+    }
     // 現在のblockの先頭部分が全体のDisplayStringに対してどれだけのオフセットを持っているかの値
     var currentDisplayStringOffset = 0
     // Blockの先頭からの読み上げ開始位置のズレ(読み上げを開始する時はBlockの途中から始まる可能性があり、そのズレを表す)
@@ -249,6 +267,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     // 待ち行列側が重複・上限・優先順位を全て面倒見るようになったので、
     // 毎回「現在位置の直後から」走査すれば良い。
     private func refillVoicevoxPrefetchIfNeeded() {
+        guard let session = speaker.voicevoxSynthesisSession,
+              VoicevoxCore.shared.isSynthesisSessionCurrent(session) else { return }
         // バックグラウンド かつ バッテリー駆動の時は、iOS の「60秒平均 CPU 80%」上限で
         // プロセスが強制終了されるため、先読みを最小限に絞る(VoicevoxPrefetchThrottle 参照)。
         // 前景・充電中は従来どおりの積極的な先読みのまま。
@@ -313,7 +333,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             // 既にキャッシュ済み/予約済みのブロックは弾かれる。弾かれた分を
             // 「予約した本数」に数えると、実際には1件も積めていないのに上限に達したと
             // 誤認して走査を打ち切ってしまうので、実際に積めた物だけを数える。
-            if VoicevoxCore.shared.schedulePrefetch(blockIndex: index, text: text, styleId: styleId) {
+            if VoicevoxCore.shared.schedulePrefetch(blockIndex: index, text: text, styleId: styleId, session: speaker.voicevoxSynthesisSession) {
                 prefetchedBlockCount += 1
             }
             accumulated += text.count
@@ -369,7 +389,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
                     lastImmediateEnsuredBlockIndex = blockIndex
                     // 待ち行列は再生順で手前のものほど優先するので、積まれている
                     // (もっと先の)先行合成より自動的に先に合成される。
-                    VoicevoxCore.shared.schedulePrefetch(blockIndex: blockIndex, text: text, styleId: styleId)
+                    VoicevoxCore.shared.schedulePrefetch(blockIndex: blockIndex, text: text, styleId: styleId, session: speaker.voicevoxSynthesisSession)
                 }
             } else {
                 lastImmediateEnsuredBlockIndex = blockIndex
@@ -786,7 +806,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // 完成済みのキャッシュは残すので、同じ位置から再開した時は再利用できる。
         // (これをしないと、長時間再生で本の残り全ブロックが先読みキューに積まれたまま、
         //  停止後も延々と合成が走り続けてCPU/電池/メモリを浪費する)
-        VoicevoxCore.shared.scheduleCancelPendingPrefetch()
+        VoicevoxCore.shared.scheduleCancelPendingPrefetch(session: speaker.voicevoxSynthesisSession)
         guard stopSpeechHandler != nil else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [weak self] in
             guard let self = self else { return }
@@ -910,6 +930,13 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func finishSpeak(isCancel: Bool, speechString: String) {
+        if m_IsSpeaking, let session = speaker.voicevoxSynthesisSession,
+           speechBlockArray.contains(where: { $0.type == "VOICEVOX" }),
+           !VoicevoxCore.shared.isSynthesisSessionCurrent(session) {
+            StopSpeech()
+            delegate?.finishSpeak(isCancel: true, speechString: speechString)
+            return
+        }
         // 読み上げを停止させられている場合は何もしません。
         // これは、Stop() した時でも finishSpeak() が呼び出されるためです。
         if m_IsSpeaking != true {

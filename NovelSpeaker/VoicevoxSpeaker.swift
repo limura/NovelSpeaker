@@ -44,7 +44,17 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
     // 経ていない)スピーカーが「再生中」を報告し続け、MultiVoiceSpeaker.isAnySynthesizerActive が
     // 真のままになって次の再生開始時に上記の「▶️のまま」不具合を引き起こす。
     // performSpeech で true、再生完了/停止で false にする。
-    private var m_IsUtteranceActive: Bool = false
+    var synthesisSession: VoicevoxSynthesisSession?
+    private var modelUse: VoicevoxModelUse?
+    private var m_IsUtteranceActive: Bool = false {
+        didSet {
+            if m_IsUtteranceActive {
+                if modelUse == nil { modelUse = VoicevoxCore.shared.beginModelUse() }
+            } else {
+                modelUse = nil
+            }
+        }
+    }
 
 
     // 現在再生中(または直前に再生した)テキスト。finishSpeak の speechString に使う。
@@ -274,16 +284,23 @@ class VoicevoxSpeaker: NSObject, SpeechEngineSpeaking {
         currentSpeechText = text
         generation += 1
         let myGeneration = generation
+        let session = synthesisSession ?? VoicevoxCore.shared.newSynthesisSession()
 
         // 今まさに再生に必要な合成なので、優先度は先行合成(.utility)より高くしておく
         // (actor上での順番待ちが少しでも有利になるように。実行中のC呼び出し自体を
         // 割り込ませることはできないため、完全な保証ではない)。
         Task(priority: .userInitiated) {
             do {
-                let wavData = try await VoicevoxCore.shared.synthesize(text: text, styleId: styleId)
+                let wavData = try await VoicevoxCore.shared.synthesize(text: text, styleId: styleId, session: session)
                 let buffer = try Self.pcmBuffer(fromWavData: wavData)
                 await MainActor.run {
                     self.playBuffer(buffer, generation: myGeneration, text: text)
+                }
+            } catch is CancellationError {
+                await MainActor.run {
+                    guard myGeneration == self.generation else { return }
+                    self.m_IsUtteranceActive = false
+                    self.m_Delegate?.finishSpeak(isCancel: true, speechString: text)
                 }
             } catch {
                 // ★音声モデルが無いだけなら、端末の音声で代わりに読む。

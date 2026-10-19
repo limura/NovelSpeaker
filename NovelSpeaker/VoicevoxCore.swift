@@ -92,6 +92,90 @@ struct VoicevoxStyle {
     let vvmPath: String
 }
 
+/// 生産者の世代。切り替え前から残った読み上げ・生成バッチを再開後も拒否する。
+struct VoicevoxSynthesisSession: Equatable, Sendable {
+    let generation: UInt64
+}
+
+enum VoicevoxEngineSwitchError: Error {
+    case switchInProgress
+}
+
+/// 読み上げ全体・生成バッチ・合成ワーカーが共有する利用権。破棄で一度だけ返却する。
+final class VoicevoxModelUse: Sendable {
+    private let end: @Sendable () -> Void
+    init(end: @escaping @Sendable () -> Void) { self.end = end }
+    deinit { end() }
+}
+
+/// actorの合成中でも、利用開始・終了を待たずに記録できるようにする。
+/// タイマーは世代番号を持ち、actorへ届くまでに再開した場合も古い解放を無効にする。
+final class VoicevoxModelLifetime: @unchecked Sendable {
+    static let idleDelay: TimeInterval = 30
+    private let lock = NSLock()
+    private let delay: TimeInterval
+    private var users = 0
+    private var usageEpoch: UInt64 = 0
+    private var generation: UInt64 = 0
+    private var pending: DispatchWorkItem?
+    private var onIdle: (@Sendable (UInt64) -> Void)?
+
+    init(delay: TimeInterval = VoicevoxModelLifetime.idleDelay) { self.delay = delay }
+
+    func setIdleHandler(_ handler: @escaping @Sendable (UInt64) -> Void) {
+        lock.lock(); defer { lock.unlock() }
+        onIdle = handler
+    }
+
+    func beginUse() -> VoicevoxModelUse {
+        lock.lock()
+        users += 1
+        let epoch = usageEpoch
+        generation &+= 1
+        pending?.cancel()
+        pending = nil
+        lock.unlock()
+        return VoicevoxModelUse { [weak self] in self?.endUse(epoch: epoch) }
+    }
+
+    func invalidateAllUses() {
+        lock.lock(); defer { lock.unlock() }
+        usageEpoch &+= 1
+        generation &+= 1
+        users = 0
+        pending?.cancel()
+        pending = nil
+    }
+
+    private func endUse(epoch: UInt64) {
+        lock.lock(); defer { lock.unlock() }
+        guard epoch == usageEpoch else { return }
+        users -= 1
+        generation &+= 1
+        guard users == 0 else { return }
+        let idleGeneration = generation
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            self.lock.lock()
+            let handler = self.users == 0 && self.generation == idleGeneration ? self.onIdle : nil
+            self.lock.unlock()
+            handler?(idleGeneration)
+        }
+        pending = work
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay, execute: work)
+    }
+
+    func isIdle(generation expected: UInt64) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return users == 0 && generation == expected
+    }
+
+    var activeUseCount: Int {
+        lock.lock(); defer { lock.unlock() }
+        return users
+    }
+}
+
 #if !targetEnvironment(macCatalyst) && !os(watchOS)
 
 enum VoicevoxCoreError: LocalizedError {
@@ -147,6 +231,78 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     private(set) var styles: [VoicevoxStyle] = []
     // 一度ロードした声モデルのVVMパスの集合(再ロードによる数百ms級の待ちを避けるため)
     private var loadedVvmPaths: Set<String> = []
+    private typealias ModelID = (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+                                UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8)
+    private var loadedModelIDs: [String: ModelID] = [:]
+    nonisolated private let modelLifetime = VoicevoxModelLifetime()
+    private(set) var modelLoadCount = 0
+    private(set) var modelUnloadCount = 0
+
+    nonisolated func beginModelUse() -> VoicevoxModelUse {
+        scheduler.beginModelUse(lifetime: modelLifetime)
+    }
+
+    nonisolated var isAcceptingSynthesisRequests: Bool { scheduler.isAcceptingRequests }
+    nonisolated func newSynthesisSession() -> VoicevoxSynthesisSession { scheduler.newSession() }
+    nonisolated func isSynthesisSessionCurrent(_ session: VoicevoxSynthesisSession) -> Bool {
+        scheduler.isSessionCurrent(session)
+    }
+
+    /// 他エンジンへ移る前にawaitする。受付停止は合成actorの空きを待たずに行う。
+    /// 実行中のC呼び出しとワーカーの終了後に解放し、明示的な再有効化まで受付を閉じる。
+    nonisolated func suspendForEngineSwitch() async throws {
+        let session = scheduler.suspendRequests()
+        await MainActor.run {
+            VoicevoxCacheGenerator.shared.stop(reason: .stoppedAutomatically("音声合成エンジンの切り替え"))
+        }
+        await scheduler.waitUntilDrained()
+        try await finishEngineSwitch(session: session)
+    }
+
+    private func finishEngineSwitch(session: VoicevoxSynthesisSession) throws {
+        guard scheduler.isSuspending(session) else { return }
+        // 音声の再生にはモデル不要。古い読み上げ・生成の利用権は以後返却されても無視する。
+        modelLifetime.invalidateAllUses()
+        try unloadModels()
+        scheduler.completeSuspension(session)
+    }
+
+    /// 切り替え完了後、VOICEVOXを再度選んだ時だけ呼ぶ。モデルは次の合成で遅延ロードする。
+    func resumeAfterEngineSwitch() throws {
+        guard scheduler.resumeRequests() else { throw VoicevoxEngineSwitchError.switchInProgress }
+    }
+
+    struct ModelLifecycleSnapshot: Sendable {
+        let loadedModels: Int
+        let loads: Int
+        let unloads: Int
+        let activeUses: Int
+    }
+
+    func modelLifecycleSnapshot() -> ModelLifecycleSnapshot {
+        ModelLifecycleSnapshot(loadedModels: loadedVvmPaths.count, loads: modelLoadCount,
+                               unloads: modelUnloadCount, activeUses: modelLifetime.activeUseCount)
+    }
+
+    private func unloadModelsIfIdle(generation: UInt64) {
+        guard modelLifetime.isIdle(generation: generation) else { return }
+        do { try unloadModels() }
+        catch {
+            AppInformationLogger.AddLog(message: "VoicevoxCore: モデル解放に失敗(\(error))", isForDebug: true)
+        }
+    }
+
+    private func unloadModels() throws {
+        // C API完了までawaitしない。合成とアンロードは同じactorで直列化される。
+        guard let synth = synthesizer else { return }
+        for (path, var id) in loadedModelIDs {
+            let result = withUnsafePointer(to: &id) { voicevox_synthesizer_unload_voice_model(synth, $0) }
+            guard result == VOICEVOX_RESULT_OK else { throw VoicevoxCoreError.core(result) }
+            loadedVvmPaths.remove(path)
+            loadedModelIDs.removeValue(forKey: path)
+            modelUnloadCount += 1
+        }
+    }
 
     // 合成済み音声の置き場所(メモリ→ディスクの探索順)はこの層に隠されている。
     // 参照の入り口を一つに絞る事で「片方の置き場所だけ見て、もう片方を見落とす」を
@@ -307,6 +463,9 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     }
 
     private init() {
+        modelLifetime.setIdleHandler { [weak self] generation in
+            Task { await self?.unloadModelsIfIdle(generation: generation) }
+        }
         let provider = audioProvider
         schedulerStorage = VoicevoxSynthesisScheduler(
             engine: self,
@@ -652,7 +811,11 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
         guard loadResult == VOICEVOX_RESULT_OK else {
             throw VoicevoxCoreError.core(loadResult)
         }
+        var id: ModelID = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        voicevox_voice_model_file_id(model, &id)
+        loadedModelIDs[style.vvmPath] = id
         loadedVvmPaths.insert(style.vvmPath)
+        modelLoadCount += 1
     }
 
     /// 今の状況で使いたい CPU スレッド数(0 = 全コア)。
@@ -689,6 +852,7 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
             }
             // 音声モデルは synthesizer に紐づいてロードされているので、読み直しが必要。
             loadedVvmPaths.removeAll()
+            loadedModelIDs.removeAll()
             try createSynthesizer(onnxruntime: ort, openJTalk: jtalk, threadCount: desired)
             // 文字数あたりの CPU 秒はスレッド数で変わるので、見積りは切り替える。
             // 捨てるのではなく**スレッド数ごとに覚えておく**(行き来しても既定値に戻らない)。
@@ -809,7 +973,9 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     /// 短い会話文が、遠く先の長い段落の先行合成が終わるまでHIT扱いにすらならず
     /// 数秒待たされる、という現象を確認したため)。cache MISS の場合のみ actor 隔離の
     /// 低速パスに委譲する。
-    nonisolated func synthesize(text: String, styleId: UInt32) async throws -> Data {
+    nonisolated func synthesize(text: String, styleId: UInt32, session: VoicevoxSynthesisSession? = nil) async throws -> Data {
+        let session = session ?? newSynthesisSession()
+        try scheduler.checkSession(session)
         let key = Self.cacheKey(text: text, styleId: styleId)
         // メモリに無くても、事前に作ってディスクに貯めてあれば、そこから即座に返せる。
         // 背面バッテリーでは実時間合成が原理的に不可能(必要CPU率128〜226%に対し使えるのは80%)
@@ -837,7 +1003,7 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
         // それに相乗りして同じ結果を受け取る。完成品はワーカーがディスクへも積むので、
         // 次に同じ所を聴く時には出来ている。
         return try await scheduler.resultForPlayback(
-            request: VoicevoxSynthesisScheduler.Request(key: key, text: text, styleId: styleId))
+            request: VoicevoxSynthesisScheduler.Request(key: key, text: text, styleId: styleId, session: session))
     }
 
     /// 待機中の先行合成として溜めておける本数。
@@ -865,14 +1031,15 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     /// prefetch() だったせいで、予約が登録されるまで実機で19秒かかっていた。
     /// - Returns: 実際に予約が積まれたら true(既にキャッシュ済み/予約済み/上限で弾かれたら false)。
     @discardableResult
-    nonisolated func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) -> Bool {
+    nonisolated func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32, session: VoicevoxSynthesisSession? = nil) -> Bool {
+        let session = session ?? newSynthesisSession()
         let key = Self.cacheKey(text: text, styleId: styleId)
         // 既に出来ている物は積まない。ここを見ないと、事前生成しておいたのに
         // 再生の度に先行合成が走り、ディスクキャッシュがあってもCPUを使ってしまう。
         if audioProvider.isAvailable(key: key) { return false }
         return scheduler.enqueuePrefetch(
             blockIndex: blockIndex,
-            request: VoicevoxSynthesisScheduler.Request(key: key, text: text, styleId: styleId))
+            request: VoicevoxSynthesisScheduler.Request(key: key, text: text, styleId: styleId, session: session))
     }
 
     /// CPU予算を守りながら1ブロックぶんを合成する。
@@ -885,11 +1052,23 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     /// `await Task.sleep` で待つ間 actor は空くので、再生側の要求はその間も処理できる。
     /// 一本の待ち行列(VoicevoxSynthesisScheduler)から呼ばれる、合成の実体。
     /// CPU予算・分割・スレッド数の調整込み。actor 隔離なのでC呼び出しは直列になる。
+    nonisolated func beginSynthesisBatch() -> VoicevoxModelUse? { beginModelUse() }
+
     func synthesizeBlock(text: String, styleId: UInt32) async throws -> Data {
-        return try await performSynthesizeWithinBudget(text: text, styleId: styleId, limitRatio: Self.synthesisCPULimitRatio)
+        return try await synthesizeBlock(request: .init(key: Self.cacheKey(text: text, styleId: styleId),
+                                                       text: text, styleId: styleId, session: newSynthesisSession()))
     }
 
-    private func performSynthesizeWithinBudget(text: String, styleId: UInt32, limitRatio: Double) async throws -> Data {
+    func synthesizeBlock(request: VoicevoxSynthesisScheduler.Request) async throws -> Data {
+        let session = request.session ?? newSynthesisSession()
+        try scheduler.checkSession(session)
+        // CPU予算待ちのawait中も利用中。直接呼ばれる場合にもアンロードさせない。
+        let use = beginModelUse()
+        defer { withExtendedLifetime(use) {} }
+        return try await performSynthesizeWithinBudget(text: request.text, styleId: request.styleId, limitRatio: Self.synthesisCPULimitRatio, session: session)
+    }
+
+    private func performSynthesizeWithinBudget(text: String, styleId: UInt32, limitRatio: Double, session: VoicevoxSynthesisSession) async throws -> Data {
         // 前景/背面や電源状態が変わっていれば、ここでスレッド数を合わせる。
         // 通知を取り零しても、次の合成で必ず追いつけるようにするため
         // (「前景で再生開始 → ロック → 電源を抜く」で全コアのまま走り続けると
@@ -911,10 +1090,14 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
             // 実行中の合成には効かないし、途中で中断する手段も無い)ので、
             // 「今から走らせる1本」を減らす事でしか間に合わせられない。
             // ここが無いと、1つ目の途中で背面に落ちた時に残りの塊まで全コアで走ってしまう。
+            try Task.checkCancellation()
+            try scheduler.checkSession(session)
             if index > 0 {
                 applyThreadCountIfNeeded()
             }
             await waitForCPUBudget(text: chunk, styleId: styleId, limitRatio: limitRatio)
+            try Task.checkCancellation()
+            try scheduler.checkSession(session)
             wavs.append(try performSynthesize(text: chunk, styleId: styleId))
         }
         guard let joined = VoicevoxWavJoiner.join(wavs: wavs) else {
@@ -962,10 +1145,12 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     /// (以前はここが見えておらず、合成のちょうど半分が二度手間になっていた)。
     nonisolated func synthesizeForBackgroundFill(text: String, styleId: UInt32,
                                                  novelID: String, chapterNumber: Int,
-                                                 isPermanent: Bool) async throws {
+                                                 isPermanent: Bool, session: VoicevoxSynthesisSession? = nil) async throws {
+        let session = session ?? newSynthesisSession()
+        try scheduler.checkSession(session)
         let key = Self.cacheKey(text: text, styleId: styleId)
         _ = try await scheduler.resultForBackgroundFill(
-            request: VoicevoxSynthesisScheduler.Request(key: key, text: text, styleId: styleId),
+            request: VoicevoxSynthesisScheduler.Request(key: key, text: text, styleId: styleId, session: session),
             destination: VoicevoxSynthesisScheduler.FillDestination(
                 novelID: novelID, chapterNumber: chapterNumber, isPermanent: isPermanent))
     }
@@ -975,8 +1160,8 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
     /// 直近の先読み結果は再利用できる。読み上げ停止時に呼ぶ想定。
     /// (実際に走っているC呼び出し1本はプリエンプトできないが、その1本が終われば
     ///  後続は isStale 判定で即抜けるので、バックログは速やかに解消される)
-    nonisolated func cancelPendingPrefetch() {
-        scheduler.cancelPendingPrefetch()
+    nonisolated func cancelPendingPrefetch(session: VoicevoxSynthesisSession? = nil) {
+        scheduler.cancelPendingPrefetch(session: session)
     }
 
     /// 先行合成キャッシュを全て破棄し、待機中の先行合成もキャンセルする
@@ -992,8 +1177,8 @@ actor VoicevoxCore: VoicevoxSynthesisEngine {
         clearPrefetchCache()
     }
 
-    nonisolated func scheduleCancelPendingPrefetch() {
-        cancelPendingPrefetch()
+    nonisolated func scheduleCancelPendingPrefetch(session: VoicevoxSynthesisSession? = nil) {
+        cancelPendingPrefetch(session: session)
     }
 
     /// 前景/背面や電源状態が変わった時に呼ぶ。スレッド数を今の状況に合わせ直す。
@@ -1045,7 +1230,15 @@ final class VoicevoxCore {
 
     private init() {}
 
+    func beginModelUse() -> VoicevoxModelUse { VoicevoxModelUse(end: {}) }
+
     var isSetUp: Bool { return false }
+    var isAcceptingSynthesisRequests: Bool { false }
+    func newSynthesisSession() -> VoicevoxSynthesisSession { .init(generation: 0) }
+    // この環境ではモデル切り替えを行わない。システム音声へのフォールバックは止めない。
+    func isSynthesisSessionCurrent(_ session: VoicevoxSynthesisSession) -> Bool { true }
+    func suspendForEngineSwitch() async throws {}
+    func resumeAfterEngineSwitch() throws {}
 
     static func logTimestamp() -> String {
         let formatter = DateFormatter()
@@ -1057,13 +1250,13 @@ final class VoicevoxCore {
     static func currentVoiceModelFilePaths() -> [String] { return [] }
     static func reloadStyleCatalogFromCurrentFiles() {}
 
-    func synthesize(text: String, styleId: UInt32) async throws -> Data {
+    func synthesize(text: String, styleId: UInt32, session: VoicevoxSynthesisSession? = nil) async throws -> Data {
         throw VoicevoxCoreError.notSetUp
     }
 
     func synthesizeForBackgroundFill(text: String, styleId: UInt32,
                                      novelID: String, chapterNumber: Int,
-                                     isPermanent: Bool) async throws {
+                                     isPermanent: Bool, session: VoicevoxSynthesisSession? = nil) async throws {
         throw VoicevoxCoreError.notSetUp
     }
 
@@ -1076,10 +1269,10 @@ final class VoicevoxCore {
     }
 
     @discardableResult
-    func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32) -> Bool { return false }
+    func schedulePrefetch(blockIndex: Int, text: String, styleId: UInt32, session: VoicevoxSynthesisSession? = nil) -> Bool { return false }
     func notePlaybackBlockIndex(_ index: Int) {}
     func schedulePrefetchCacheClear() {}
-    func scheduleCancelPendingPrefetch() {}
+    func scheduleCancelPendingPrefetch(session: VoicevoxSynthesisSession? = nil) {}
 
     func isPrefetchedForTesting(text: String, styleId: UInt32) -> Bool { return false }
 

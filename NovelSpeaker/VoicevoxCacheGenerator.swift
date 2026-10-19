@@ -111,6 +111,8 @@ final class VoicevoxCacheGenerator {
     // MARK: - 開始と停止
 
     func start(novelID: String, mode: Mode = .manual) {
+        guard VoicevoxCore.shared.isAcceptingSynthesisRequests else { return }
+        let session = VoicevoxCore.shared.newSynthesisSession()
         stop()
         // 前回の小説の物が残っていると、鍵が食い違って全部作り直しになる。
         speechSettings = nil
@@ -147,7 +149,7 @@ final class VoicevoxCacheGenerator {
 
         task = Task(priority: .utility) { [weak self] in
             guard let self = self else { return }
-            let reason = await self.run(novelID: novelID)
+            let reason = await self.run(novelID: novelID, session: session)
             self.finish(reason: reason, serial: serial)
         }
     }
@@ -223,7 +225,10 @@ final class VoicevoxCacheGenerator {
 
     // MARK: - 本体
 
-    private func run(novelID: String) async -> StopReason {
+    private func run(novelID: String, session: VoicevoxSynthesisSession) async -> StopReason {
+        // 文章間・章間・一時待機も同じ生成バッチ。stop要求後も実処理が抜けるまで返却しない。
+        let modelUse = VoicevoxCore.shared.beginModelUse()
+        defer { withExtendedLifetime(modelUse) {} }
         guard let start = startPosition(novelID: novelID) else {
             return .failed("読み込む話が見つかりません")
         }
@@ -283,7 +288,9 @@ final class VoicevoxCacheGenerator {
                     try await VoicevoxCore.shared.synthesizeForBackgroundFill(
                         text: target.text, styleId: target.styleId,
                         novelID: novelID, chapterNumber: chapterNumber,
-                        isPermanent: runningMode == .manual)
+                        isPermanent: runningMode == .manual, session: session)
+                } catch is CancellationError {
+                    return .stoppedByUser
                 } catch {
                     // 1ブロックの失敗で全体を止めない(記号だけのブロック等で形態素解析に
                     // 失敗する事がある)。数十分かけた生成が1件で止まる方が困る。
@@ -370,11 +377,17 @@ final class VoicevoxCacheGenerator {
             self.lock.lock()
             self.lastChapterNumberUnsafe = lastChapterNumber
             self.lock.unlock()
-            guard let story = self.story(novelID: novelID, chapterNumber: start.chapterNumber) else {
+            // 進捗表示と生成本体は並行して動く。生成側の可変キャッシュを共有しない。
+            let initial = RealmUtil.RealmBlock { realm -> (Story, StoryTextClassifier.StorySpeechSettings)? in
+                guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID,
+                                                                chapterNumber: start.chapterNumber) else { return nil }
+                return (story, StoryTextClassifier.GatherStorySpeechSettings(realm: realm, novelID: novelID))
+            }
+            guard let (story, settings) = initial else {
                 self.notifyProgressChanged()
                 return
             }
-            let targets = VoicevoxCacheBlockSource.synthesisTargets(story: story, settings: self.settings(novelID: novelID))
+            let targets = VoicevoxCacheBlockSource.synthesisTargets(story: story, settings: settings)
             let generatedCount = targets.filter { $0.blockIndex < start.blockIndex }.count
             self.updateProgress(novelID: novelID, story: story, generatedCount: generatedCount, totalCount: targets.count)
         }

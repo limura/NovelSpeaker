@@ -88,6 +88,12 @@ class HeadlessHttpClient {
     private func releaseCurrentWebView() {
         dispatch_sync_on_main_thread {
             self.webView?.stopLoading()
+            // ErikのハンドラはlayoutEngineを強参照し、layoutEngineはWebViewを持つ。
+            // ページ取得中は維持し、クライアント破棄・WebView交換時にだけ循環参照を切る。
+            let controller = self.webView?.configuration.userContentController
+            controller?.removeScriptMessageHandler(forName: "erikError")
+            controller?.removeScriptMessageHandler(forName: "erikEnd")
+            controller?.removeScriptMessageHandler(forName: HeadlessReadyMessageHandler.name)
             self.webView?.navigationDelegate = nil
             self.webView?.uiDelegate = nil
             self.webView?.removeFromSuperview()

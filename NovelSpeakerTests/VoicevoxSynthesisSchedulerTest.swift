@@ -421,4 +421,62 @@ class VoicevoxSynthesisSchedulerTest: XCTestCase {
         XCTAssertEqual(stores.memory[target.key], Data("wav:普通の先行合成".utf8))
         XCTAssertEqual(stores.disk[target.key], Data("wav:普通の先行合成".utf8))
     }
+    func testEngineSwitchCancelsQueueAndWaitsForInFlightWork() async throws {
+        engine.gate(text: "in-flight")
+        let running = Task { try await self.scheduler.resultForPlayback(request: self.request("in-flight")) }
+        await waitUntil { self.engine.synthesizedTexts == ["in-flight"] }
+        scheduler.enqueuePrefetch(blockIndex: 1, request: request("prefetch"))
+        let fill = Task { try await self.scheduler.resultForBackgroundFill(request: self.request("fill"), destination: self.fillDestination()) }
+        await waitUntil { self.scheduler.status(key: "1::fill") == .pending }
+        let closed = scheduler.suspendRequests()
+        XCTAssertFalse(scheduler.resumeRequests())
+        XCTAssertFalse(scheduler.enqueuePrefetch(blockIndex: 2, request: request("late")))
+        for task in [running, fill] {
+            do { _ = try await task.value; XCTFail("切り替えで要求を取り消すこと") }
+            catch is CancellationError {} catch { XCTFail("unexpected: \(error)") }
+        }
+        let drained = expectation(description: "drained after native work")
+        let waiting = Task {
+            await self.scheduler.waitUntilDrained()
+            self.engine.events.append("drained")
+            drained.fulfill()
+        }
+        try await Task.sleep(nanoseconds: 20_000_000)
+        XCTAssertFalse(engine.events.events.contains("drained"))
+        XCTAssertEqual(engine.synthesizedTexts, ["in-flight"])
+        engine.openGate(text: "in-flight")
+        await fulfillment(of: [drained], timeout: 2)
+        await waiting.value
+        scheduler.completeSuspension(closed)
+        XCTAssertTrue(scheduler.resumeRequests())
+        _ = try await scheduler.resultForPlayback(request: request("new"))
+        XCTAssertEqual(engine.synthesizedTexts, ["in-flight", "new"])
+    }
+
+    func testOldProducerIsRejectedAfterExplicitResume() async throws {
+        let oldSession = scheduler.newSession()
+        let closed = scheduler.suspendRequests()
+        await scheduler.waitUntilDrained()
+        scheduler.completeSuspension(closed)
+        XCTAssertTrue(scheduler.resumeRequests())
+        var stale = request("old-producer")
+        stale.session = oldSession
+        XCTAssertFalse(scheduler.enqueuePrefetch(blockIndex: 0, request: stale))
+        do {
+            _ = try await scheduler.resultForBackgroundFill(request: stale, destination: fillDestination())
+            XCTFail("古い生成バッチは再有効化後も取り消す")
+        } catch is CancellationError {} catch { XCTFail("unexpected: \(error)") }
+        engine.gate(text: "new-producer")
+        let fresh = Task { try await self.scheduler.resultForPlayback(request: self.request("new-producer")) }
+        await waitUntil { self.engine.synthesizedTexts == ["new-producer"] }
+        scheduler.enqueuePrefetch(blockIndex: 1, request: request("fresh-prefetch"))
+        scheduler.cancelPendingPrefetch(session: oldSession)
+        XCTAssertEqual(scheduler.status(key: "1::fresh-prefetch"), .pending,
+                       "古い読み上げの終了処理で新しい先読みを取り消さない")
+        engine.openGate(text: "new-producer")
+        _ = try await fresh.value
+        await waitUntil { self.engine.synthesizedTexts.contains("fresh-prefetch") }
+        XCTAssertEqual(engine.synthesizedTexts, ["new-producer", "fresh-prefetch"])
+    }
+
 }

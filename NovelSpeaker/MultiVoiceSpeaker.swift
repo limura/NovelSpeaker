@@ -96,6 +96,7 @@ fileprivate class SpeechQueue {
 }
 
 class MultiVoiceSpeaker: SpeakRangeDelegate {
+    var voicevoxSynthesisSession: VoicevoxSynthesisSession?
     var speakerCache:[String:SpeechEngineSpeaking] = [:]
     var voiceCache:[String:AVSpeechSynthesisVoice] = [:]
     var defaultVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
@@ -220,6 +221,9 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
 
     fileprivate func startSpeech(queue:SpeechQueue) {
         let speaker = getSpeaker(voiceIdentifier: queue.voiceIdentifier, locale: queue.locale, type: queue.type)
+        #if !os(watchOS)
+        (speaker as? VoicevoxSpeaker)?.synthesisSession = voicevoxSynthesisSession
+        #endif
         speechGeneration += 1
         speaker.delegate = SpeechQueueDelegate(owner: self, generation: speechGeneration)
         isStopping = false
