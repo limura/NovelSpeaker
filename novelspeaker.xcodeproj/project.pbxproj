@@ -50,9 +50,6 @@
 		210DD99825840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210DD99725840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift */; };
 		210EFEDC23C80694007C3016 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
 		210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */; };
-		CD842C5E6E714101AF4C2521 /* HeadlessWebViewThreadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2522 /* HeadlessWebViewThreadTest.swift */; };
-		CD842C5E6E714101AF4C2511 /* SpeechWaitStopTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2512 /* SpeechWaitStopTest.swift */; };
-		CD842C5E6E714101AF4C2501 /* UIImageResizeTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2502 /* UIImageResizeTest.swift */; };
 		210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
@@ -345,6 +342,9 @@
 		CC3F925EFBBECACD1BFB87B5 /* ProcessCPUClock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDCF3F2D96CA21DDB253F2 /* ProcessCPUClock.swift */; };
 		CC479BDE52E00388A482EF7E /* VoicevoxSilenceReporterTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E8588651825815F021CDC1 /* VoicevoxSilenceReporterTest.swift */; };
 		CC6D4B643AE8DC7E86FEC894 /* VoicevoxCacheKeyAlignmentTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB57008EE7663A97334C710 /* VoicevoxCacheKeyAlignmentTest.swift */; };
+		CD842C5E6E714101AF4C2501 /* UIImageResizeTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2502 /* UIImageResizeTest.swift */; };
+		CD842C5E6E714101AF4C2511 /* SpeechWaitStopTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2512 /* SpeechWaitStopTest.swift */; };
+		CD842C5E6E714101AF4C2521 /* HeadlessWebViewThreadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD842C5E6E714101AF4C2522 /* HeadlessWebViewThreadTest.swift */; };
 		CF4FABFDCD0CF23021361A50 /* VoicevoxCacheGenerationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7378F5BEEECE2E792A74FB /* VoicevoxCacheGenerationTest.swift */; };
 		D004756D4AA220A917F5A7B6 /* VoicevoxStyleList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33BF3A585337EFF153056CEA /* VoicevoxStyleList.swift */; };
 		D03FDE49B5A124B909AC670A /* VoicevoxVoiceModelConsentTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF33428A88145DF0E2E2A0B /* VoicevoxVoiceModelConsentTest.swift */; };
@@ -531,9 +531,6 @@
 		210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryTextClassifier.swift; sourceTree = "<group>"; };
 		210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerTest.swift; sourceTree = "<group>"; };
-		CD842C5E6E714101AF4C2522 /* HeadlessWebViewThreadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessWebViewThreadTest.swift; sourceTree = "<group>"; };
-		CD842C5E6E714101AF4C2512 /* SpeechWaitStopTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechWaitStopTest.swift; sourceTree = "<group>"; };
-		CD842C5E6E714101AF4C2502 /* UIImageResizeTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageResizeTest.swift; sourceTree = "<group>"; };
 		210EFEE023C8A92D007C3016 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
@@ -879,6 +876,9 @@
 		C834AE17042CBAF160674EC9 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		C8ACD829CC876FC0650DFD61 /* VoicevoxVoiceModelFileInspector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxVoiceModelFileInspector.swift; sourceTree = "<group>"; };
 		C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; sourceTree = "<group>"; };
+		CD842C5E6E714101AF4C2502 /* UIImageResizeTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageResizeTest.swift; sourceTree = "<group>"; };
+		CD842C5E6E714101AF4C2512 /* SpeechWaitStopTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechWaitStopTest.swift; sourceTree = "<group>"; };
+		CD842C5E6E714101AF4C2522 /* HeadlessWebViewThreadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessWebViewThreadTest.swift; sourceTree = "<group>"; };
 		D0A098806FB1DD0B2419C081 /* VoicevoxCacheGenerationDialog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxCacheGenerationDialog.swift; sourceTree = "<group>"; };
 		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
 		D655DCC8F6CF39F7F5B04702 /* VoicevoxWedgeDetectionTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxWedgeDetectionTest.swift; sourceTree = "<group>"; };
@@ -1763,7 +1763,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */;
+			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "NovelSpeaker" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -2506,7 +2506,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWatch/NovelSpeakerWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -2540,7 +2540,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2583,7 +2583,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2723,7 +2723,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2765,7 +2765,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2929,7 +2929,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWatchWidget/NovelSpeakerWatchWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_PREVIEWS = YES;
@@ -2962,7 +2962,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWidget/NovelSpeakerWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_PREVIEWS = YES;
@@ -2993,7 +2993,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWidget/NovelSpeakerWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -3027,7 +3027,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWatch/NovelSpeakerWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -3053,7 +3053,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = NovelSpeakerWatchWidget/NovelSpeakerWatchWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.14.5;
+				CURRENT_PROJECT_VERSION = 2.14.6;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -3110,7 +3110,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */ = {
+		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "NovelSpeaker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21F054F91917E0F200CC6BA9 /* Debug */,

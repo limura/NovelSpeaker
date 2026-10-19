@@ -1433,6 +1433,9 @@
 - Fixed an issue where pauses were not applied correctly when “default” was selected under “Settings” → “Setting for punctuation delays” while using “System Voice”
 - Fixed an issue where some icons in the upper-right button group on the novel text screen were missing on older versions of iOS, such as iOS 15
 - Fixed dialog positioning issues when the keyboard appeared or the screen rotated
+- Fixed a deadlock that occurred when stopping read-aloud playback during a pause with “default” selected under “Settings” → “Setting for punctuation delays”.
+- Fixed a memory leak where internal WKWebView instances were not released, causing memory usage to increase when repeatedly checking for novel updates or downloading novels.
+- Fixed an issue where VOICEVOX voice models remained loaded in memory after read-aloud playback or audio pre-generation had finished.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -1452,6 +1455,9 @@ Bug fixes
 - Fixed an issue where pauses were not applied correctly when “default” was selected under “Settings” → “Setting for punctuation delays” while using “System Voice”
 - Fixed an issue where some icons in the upper-right button group on the novel text screen were missing on older versions of iOS, such as iOS 15
 - Fixed dialog positioning issues when the keyboard appeared or the screen rotated
+- Fixed a deadlock that occurred when stopping read-aloud playback during a pause with “default” selected under “Settings” → “Setting for punctuation delays”.
+- Fixed a memory leak where internal WKWebView instances were not released, causing memory usage to increase when repeatedly checking for novel updates or downloading novels.
+- Fixed an issue where VOICEVOX voice models remained loaded in memory after read-aloud playback or audio pre-generation had finished.
 
 
 

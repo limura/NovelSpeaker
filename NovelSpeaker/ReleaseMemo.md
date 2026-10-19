@@ -4706,6 +4706,9 @@ Bug fixes
 - 「設定タブ」→「読み上げ時の間の設定」で「標準型」を選択していて、「システムの音声」を利用している時に正しく間が開いていなかった問題を修正
 - 小説本文画面右上のボタン群のうち、iOS 15 などで一部のアイコンが表示されなくなっていた問題を修正
 - キーボード表示や画面の回転に伴うダイアログ位置ずれの修正
+- 「設定タブ」→「読み上げ時の間の設定」の「標準型」で「間」をあけているときに、読み上げを停止するとデッドロックする問題を修正
+- 小説の更新確認やダウンロードを繰り返すと、内部で使用するWKWebViewが解放されず、メモリ使用量が増えていく問題を修正
+- VOICEVOXの読み上げや事前生成が終了した後も、音声モデルがメモリ上に残り続ける問題を修正
 
 以下にざっくりと説明します。
 
@@ -4738,6 +4741,11 @@ Bug fixes
 - キーボード表示や画面の回転に伴うダイアログ位置ずれの修正
   これはそのままの意味ですね。
 
+- 「設定タブ」→「読み上げ時の間の設定」の「標準型」で「間」をあけているときに、読み上げを停止するとデッドロックする問題を修正
+- 小説の更新確認やダウンロードを繰り返すと、内部で使用するWKWebViewが解放されず、メモリ使用量が増えていく問題を修正
+- VOICEVOXの読み上げや事前生成が終了した後も、音声モデルがメモリ上に残り続ける問題を修正
+  これらもそのままの意味です。
+
 以上となります。
 
 # Version 2.14.1
@@ -4755,3 +4763,6 @@ Bug fixes
 - Fixed an issue where pauses were not applied correctly when “default” was selected under “Settings” → “Setting for punctuation delays” while using “System Voice”
 - Fixed an issue where some icons in the upper-right button group on the novel text screen were missing on older versions of iOS, such as iOS 15
 - Fixed dialog positioning issues when the keyboard appeared or the screen rotated
+- Fixed a deadlock that occurred when stopping read-aloud playback during a pause with “default” selected under “Settings” → “Setting for punctuation delays”.
+- Fixed a memory leak where internal WKWebView instances were not released, causing memory usage to increase when repeatedly checking for novel updates or downloading novels.
+- Fixed an issue where VOICEVOX voice models remained loaded in memory after read-aloud playback or audio pre-generation had finished.
