@@ -12,6 +12,60 @@ final class NovelSpeakerUITests: XCTestCase {
         app.launchArguments += ["-UITestingAllowRotation"]
     }
 
+    func testCloudRecoveryWarningCanBeCancelled() throws {
+        app.launchArguments += ["-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"]
+        app.launch()
+        let settings = app.buttons["設定"].firstMatch
+        XCTAssertTrue(settings.waitForExistence(timeout: 30))
+        settings.tap()
+        let row = app.tables.cells.containing(.staticText, identifier: "iCloudの処理を確認・再開する").firstMatch
+        for _ in 0..<25 {
+            if row.exists && row.isHittable { break }
+            app.tables.firstMatch.swipeUp()
+        }
+        XCTAssertTrue(row.isHittable)
+        row.tap()
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.staticTexts["iCloudの処理を確認・再開する"].exists)
+        XCTAssertTrue(alert.buttons["確認・再開"].exists)
+        XCTAssertFalse(alert.buttons["削除"].exists)
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "cloud-recovery-warning"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        alert.buttons["キャンセル"].tap()
+        XCTAssertTrue(alert.waitForNonExistence(timeout: 5))
+    }
+
+    func testCloudDataRemovalWarningCanBeCancelled() throws {
+        app.launchArguments += ["-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"]
+        app.launch()
+        let settings = app.buttons["設定"].firstMatch
+        XCTAssertTrue(settings.waitForExistence(timeout: 30))
+        settings.tap()
+        let row = app.tables.cells.containing(.staticText, identifier: "iCloud上のことせかいのデータを削除").firstMatch
+        for _ in 0..<25 {
+            if row.exists && row.isHittable { break }
+            app.tables.firstMatch.swipeUp()
+        }
+        if !row.exists { print(app.debugDescription) }
+        XCTAssertTrue(row.isHittable)
+        row.tap()
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.staticTexts["iCloud上のことせかいのデータを削除"].exists)
+        XCTAssertTrue(alert.buttons["削除"].exists)
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "cloud-data-removal-warning"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        // 実際のCloudKitへの削除要求は送らない。
+        alert.buttons["キャンセル"].tap()
+        XCTAssertTrue(alert.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(row.exists)
+    }
+
     func testLaunchOnSimulator() throws {
         app.launch()
         XCTAssertTrue(app.waitForExistence(timeout: 30))

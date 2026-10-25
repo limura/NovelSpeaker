@@ -2797,3 +2797,27 @@ First release.
 "RequiredSettingsRepair_Failed" = "The data source changed or the settings could not be saved. Check the current data source and try again.";
 "RequiredSettingsRepair_DeletedGlobal" = "Deleted global settings still exist. Restoring or resetting their values requires a separate decision. No repair was made.";
 "RequiredSettingsRepair_DeletedStandard" = "A deleted setting has the same name as the standard setting. Restoring or overwriting it requires a separate decision. No repair was made.";
+
+// iCloud同期データの削除
+"CloudDataRemoval_Title" = "Delete NovelSpeaker data in iCloud";
+"CloudDataRemoval_DisableSync" = "Turn off “Use iCloud sync” first. You can then delete the data in iCloud while keeping the data on this device.";
+"CloudDataRemoval_Confirm" = "Delete all NovelSpeaker novels, settings, and other app data stored in iCloud? This cannot be undone. Novels and settings on this device and separately saved backup files will be kept.\n\nTurn off NovelSpeaker iCloud sync on your other devices first. Otherwise, they may upload data again.";
+"CloudDataRemoval_Delete" = "Delete";
+"CloudDataRemoval_Progress" = "Deleting iCloud data";
+"CloudDataRemoval_KeepOpen" = "Keep the app open and connected to the internet.";
+"CloudDataRemoval_Done" = "Novels, settings, and other app data stored in iCloud have been deleted. The storage display in Settings may take time to update.";
+"CloudDataRemoval_Failed" = "Deletion could not be completed or verified. Some data may already have been deleted. Check your connection and sync settings on other devices, then try again.";
+"CloudDataRemoval_Busy" = "An iCloud operation is in progress. Please wait.";
+"CloudDataRemoval_Timeout" = "The operation timed out.";
+"CloudDataRemoval_RemainingOperations" = "Outstanding iCloud operations remain.";
+"CloudDataRemoval_RemainingData" = "Data or sync notification subscriptions remain in iCloud. Stop sync on your other devices as well.";
+"CloudDataRemoval_UnsupportedOperation" = "An unsupported iCloud operation remains.";
+
+// iCloudの保留処理の確認・再開
+"CloudRecovery_Title" = "Check and resume iCloud operations";
+"CloudRecovery_DisableSync" = "Turn off “Use iCloud sync” before continuing.";
+"CloudRecovery_Confirm" = "An earlier iCloud sync operation may remain and keep the indicator visible. This checks and resumes outstanding operations, then checks whether they have finished.\n\nYour novels and settings will not be deleted. Pending data may be sent to iCloud. “Use iCloud sync” will remain off.\n\nAn internet connection is required.";
+"CloudRecovery_Run" = "Check and Resume";
+"CloudRecovery_Progress" = "Checking iCloud operations";
+"CloudRecovery_Done" = "Outstanding iCloud operations have been checked and cleared. If the indicator remains visible, another operation may be running.";
+"CloudRecovery_Failed" = "The iCloud operations could not be completed or verified. Check your connection and try again.";

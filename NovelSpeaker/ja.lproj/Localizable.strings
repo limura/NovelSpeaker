@@ -2836,3 +2836,27 @@ Version 2.6.3
 "RequiredSettingsRepair_Failed" = "保存先が変わったか、設定の書き込みに失敗しました。現在の保存先を確認して、もう一度お試しください。";
 "RequiredSettingsRepair_DeletedGlobal" = "削除扱いの全体設定が残っています。値の復活や初期化は自動で判断できないため、修復は行いませんでした。";
 "RequiredSettingsRepair_DeletedStandard" = "標準と同じ名前の削除済み設定が残っています。復活や上書きは自動で判断できないため、修復は行いませんでした。";
+
+// iCloud同期データの削除
+"CloudDataRemoval_Title" = "iCloud上のことせかいのデータを削除";
+"CloudDataRemoval_DisableSync" = "先に「iCloud 同期を使用する」をOFFにしてください。同期をOFFにすると、この端末のデータを残した状態でiCloud上のデータを削除できます。";
+"CloudDataRemoval_Confirm" = "iCloud上に保存されたことせかいの小説・設定などを全て削除します。この操作は元に戻せません。この端末の小説・設定や、別途保存したバックアップファイルは削除しません。\n\n他の端末でも、ことせかいのiCloud同期をOFFにしてから実行してください。他の端末で同期が続いていると、データが再び保存される場合があります。\n\niCloud上のことせかいのデータを削除しますか？";
+"CloudDataRemoval_Delete" = "削除";
+"CloudDataRemoval_Progress" = "iCloud上のデータを削除しています";
+"CloudDataRemoval_KeepOpen" = "通信できる状態で、アプリを開いたままお待ちください。";
+"CloudDataRemoval_Done" = "iCloudに保存された小説・設定などの削除が完了しました。設定アプリのストレージ表示への反映には時間がかかる場合があります。";
+"CloudDataRemoval_Failed" = "削除を完了・確認できませんでした。一部のデータが削除されている場合があります。通信状態と他の端末の同期設定を確認して、もう一度お試しください。";
+"CloudDataRemoval_Busy" = "iCloudの処理を実行中です。完了するまでお待ちください。";
+"CloudDataRemoval_Timeout" = "処理が時間内に完了しませんでした。";
+"CloudDataRemoval_RemainingOperations" = "iCloudへの保留中の処理が残っています。";
+"CloudDataRemoval_RemainingData" = "確認時にiCloud上のデータまたは同期通知の登録が残っていました。他の端末の同期も停止してください。";
+"CloudDataRemoval_UnsupportedOperation" = "整理できない種類のiCloud処理が残っています。";
+
+// iCloudの保留処理の確認・再開
+"CloudRecovery_Title" = "iCloudの処理を確認・再開する";
+"CloudRecovery_DisableSync" = "先に「iCloud 同期を使用する」をOFFにしてからお試しください。";
+"CloudRecovery_Confirm" = "以前のiCloud同期の処理が残り、右上のゲージが表示され続けることがあります。残っている処理を再開し、終了したか確認します。\n\n小説や設定は削除しません。ただし、送信待ちのデータがある場合はiCloudへ送信します。「iCloud 同期を使用する」の設定はOFFのまま変わりません。\n\n通信できる状態で実行してください。";
+"CloudRecovery_Run" = "確認・再開";
+"CloudRecovery_Progress" = "iCloudの処理を確認しています";
+"CloudRecovery_Done" = "iCloudに残っている処理の確認が完了しました。右上のゲージが消えない場合は、他の処理が動作している可能性があります。";
+"CloudRecovery_Failed" = "iCloudの処理を完了・確認できませんでした。通信状態を確認して、もう一度お試しください。";

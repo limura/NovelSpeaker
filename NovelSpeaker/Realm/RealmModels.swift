@@ -423,6 +423,9 @@ final class MemoryTraceLogger {
     static func EnableSyncEngine() throws {
         lock.lock()
         defer { lock.unlock() }
+        #if !os(watchOS)
+        guard !cloudDataRemovalInProgress else { throw CloudDataRemovalError.busy }
+        #endif
         if syncEngine != nil { return }
         self.syncEngine = try CreateSyncEngine()
     }
@@ -430,6 +433,56 @@ final class MemoryTraceLogger {
     static func stopSyncEngine() {
         syncEngine = nil
     }
+    #if !os(watchOS)
+    // lockで同期エンジンの開始と排他する。回収の重複や削除中のZone再作成を防ぐ。
+    private static var cloudDataRemovalInProgress = false
+    private static var cloudDataRemoval: CloudDataRemoval?
+
+    static func RemoveAllCloudSyncData(completion: @escaping (Result<Void, Error>) -> Void) {
+        RunCloudMaintenance(removeData: true, completion: completion)
+    }
+
+    static func RecoverOutstandingCloudOperations(completion: @escaping (Result<Void, Error>) -> Void) {
+        RunCloudMaintenance(removeData: false, completion: completion)
+    }
+
+    private static func RunCloudMaintenance(removeData: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
+        lock.lock()
+        guard !cloudDataRemovalInProgress, !IsUseCloudRealm() else {
+            let error: CloudDataRemovalError = cloudDataRemovalInProgress ? .busy : .syncEnabled
+            lock.unlock()
+            DispatchQueue.main.async { completion(.failure(error)) }
+            return
+        }
+        cloudDataRemovalInProgress = true
+        syncEngine = nil
+        let removal = CloudDataRemoval(client: CloudKitDataRemovalClient(container: GetContainer()),
+                                       mode: removeData ? .removeData : .recoverOutstanding)
+        cloudDataRemoval = removal
+        lock.unlock()
+        removal.start { result in
+            // 一部だけ削除できた場合も、次回同期時に古いZoneやtokenを再利用しない。
+            // 端末のRealmは削除しない。
+            if removeData { ForceRemoveIceCreamDatabaseSyncTokens() }
+            lock.lock()
+            cloudDataRemoval = nil
+            cloudDataRemovalInProgress = false
+            lock.unlock()
+            if case .success = result {
+                ActivityIndicatorManager.disable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID())
+            }
+            switch result {
+            case .success:
+                AppInformationLogger.AddLog(message: removeData ? "iCloud同期データの削除と確認が完了しました" : "iCloudの保留処理の回収と確認が完了しました", isForDebug: true)
+            case .failure(let error):
+                let operation = removeData ? "iCloud同期データの削除" : "iCloudの保留処理の回収"
+                AppInformationLogger.AddLog(message: "\(operation)を完了できませんでした: \(error)", isForDebug: true)
+            }
+            completion(result)
+        }
+    }
+    #endif
+
     static func FetchAllLongLivedOperationIDs(completionHandler: @escaping ([CKOperation.ID]?, Error?) -> Void) {
         let container = GetContainer()
         container.fetchAllLongLivedOperationIDs(completionHandler: completionHandler)

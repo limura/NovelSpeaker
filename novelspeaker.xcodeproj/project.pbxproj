@@ -388,6 +388,8 @@
 		FB9ABC5E6FA631E314E5785D /* VoicevoxTestVoiceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A24C54D8CC9AC56EBA360F3 /* VoicevoxTestVoiceModel.swift */; };
 		FC5D9F103C975C9375485032 /* VoicevoxPrefetchThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7096A312D405A0326E6C436 /* VoicevoxPrefetchThrottle.swift */; };
 		FE4A532FE638418FBCA44D21 /* VoicevoxSynthesisScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50333FAF9C4D45B19DD5D119 /* VoicevoxSynthesisScheduler.swift */; };
+		C0DE26100000000000000011 /* CloudDataRemoval.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE26100000000000000001 /* CloudDataRemoval.swift */; };
+		C0DE26100000000000000012 /* CloudDataRemovalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE26100000000000000002 /* CloudDataRemovalTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -901,6 +903,8 @@
 		F718E05AE23A99C36C6AC15F /* VoicevoxRepeatedSynthesisDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxRepeatedSynthesisDetector.swift; sourceTree = "<group>"; };
 		F7A11E1BFA811FF6B06814D1 /* VoicevoxSilenceReporter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoicevoxSilenceReporter.swift; sourceTree = "<group>"; };
 		F8A7FEB0C160633879907522 /* WatchTextSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchTextSettings.swift; sourceTree = "<group>"; };
+		C0DE26100000000000000001 /* CloudDataRemoval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDataRemoval.swift; sourceTree = "<group>"; };
+		C0DE26100000000000000002 /* CloudDataRemovalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDataRemovalTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1268,6 +1272,7 @@
 		21F054D21917E0F200CC6BA9 /* NovelSpeaker */ = {
 			isa = PBXGroup;
 			children = (
+				C0DE26100000000000000001 /* CloudDataRemoval.swift */,
 				21AED5D419B335CF00CE846D /* ReleaseMemo.md */,
 				21CAC81B21273C0A00F74092 /* UpdateMemo.txt */,
 				21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */,
@@ -1354,6 +1359,7 @@
 		21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */ = {
 			isa = PBXGroup;
 			children = (
+				C0DE26100000000000000002 /* CloudDataRemovalTest.swift */,
 				21F054F21917E0F200CC6BA9 /* Supporting Files */,
 				210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */,
 				212323F422B7049E00543543 /* RealmTests.swift */,
@@ -2076,6 +2082,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE26100000000000000011 /* CloudDataRemoval.swift in Sources */,
 				314871F0CA138073EC18AAD9 /* RubyNotationExtractor.swift in Sources */,
 				2C9F5918E9F2FD8DC21C237D /* RubyNotationSpeechModCreateViewController.swift in Sources */,
 				FE4A532FE638418FBCA44D21 /* VoicevoxSynthesisScheduler.swift in Sources */,
@@ -2238,6 +2245,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE26100000000000000012 /* CloudDataRemovalTest.swift in Sources */,
 				A9CDC81183C0EBDA9C84BB1A /* RubyNotationExtractorTest.swift in Sources */,
 				965A700D346C4946904A989C /* VoicevoxAccentPreviewTest.swift in Sources */,
 				E6C2672C699346ABAAC08AE4 /* VoicevoxSynthesisSchedulerTest.swift in Sources */,

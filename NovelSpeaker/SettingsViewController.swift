@@ -22,6 +22,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     var globalDataNotificationToken:NotificationToken? = nil
     private var requiredSettingsNotificationTokens: [NotificationToken] = []
     private(set) var isRequiredSettingsRepairPending = false
+    private var isRemovingCloudData = false
     static let requiredSettingsRepairRowTag = "RequiredSettingsRepair"
     
     override func viewDidLoad() {
@@ -1881,6 +1882,23 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section <<< ButtonRow("RecoverCloudOperations") {
+                $0.title = NSLocalizedString("CloudRecovery_Title", comment: "iCloudの処理を確認・再開する")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ [weak self] _, _ in
+                self?.confirmRecoverCloudOperations()
+            }).cellUpdate({ cell, _ in
+                cell.accessibilityIdentifier = "RecoverCloudOperations"
+            })
+            section <<< ButtonRow("RemoveCloudSyncData") {
+                $0.title = NSLocalizedString("CloudDataRemoval_Title", comment: "iCloud上のことせかいのデータを削除")
+                $0.cell.accessibilityIdentifier = "RemoveCloudSyncData"
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ [weak self] _, _ in
+                self?.confirmRemoveCloudSyncData()
+            }).cellUpdate({ cell, _ in
+                cell.accessibilityIdentifier = "RemoveCloudSyncData"
+            })
             section
             <<< SwitchRow("IsDynamicNovelDownloadThrottleEnabled") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsDynamicNovelDownloadThrottleEnabled", comment: "端末が熱い場合などにダウンロードの並列数を減らす")
@@ -3081,6 +3099,76 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
     
+    private func confirmRecoverCloudOperations() {
+        guard !isRemovingCloudData else { return }
+        guard !RealmUtil.IsUseCloudRealm() else {
+            NiftyUtility.EasyDialogMessageDialog(viewController: self,
+                message: NSLocalizedString("CloudRecovery_DisableSync", comment: "先に同期をOFFにしてください"))
+            return
+        }
+        let alert = UIAlertController(
+            title: NSLocalizedString("CloudRecovery_Title", comment: "iCloudの処理を確認・再開する"),
+            message: NSLocalizedString("CloudRecovery_Confirm", comment: "処理を再開することの説明"),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel_button", comment: "キャンセル"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("CloudRecovery_Run", comment: "確認・再開"), style: .default) { [weak self, weak alert] _ in
+            alert?.dismiss(animated: true) { self?.removeCloudSyncData(removeData: false) }
+        })
+        present(alert, animated: true)
+    }
+
+    private func confirmRemoveCloudSyncData() {
+        guard !isRemovingCloudData else { return }
+        guard !RealmUtil.IsUseCloudRealm() else {
+            NiftyUtility.EasyDialogMessageDialog(viewController: self,
+                message: NSLocalizedString("CloudDataRemoval_DisableSync", comment: "先に同期をOFFにしてください"))
+            return
+        }
+        let alert = UIAlertController(
+            title: NSLocalizedString("CloudDataRemoval_Title", comment: "iCloud上のことせかいのデータを削除"),
+            message: NSLocalizedString("CloudDataRemoval_Confirm", comment: "iCloudデータ削除の警告"),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel_button", comment: "キャンセル"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("CloudDataRemoval_Delete", comment: "削除"), style: .destructive) { [weak self, weak alert] _ in
+            alert?.dismiss(animated: true) { self?.removeCloudSyncData() }
+        })
+        present(alert, animated: true)
+    }
+
+    private func removeCloudSyncData(removeData: Bool = true) {
+        guard !isRemovingCloudData else { return }
+        isRemovingCloudData = true
+        let syncRow = form.rowBy(tag: "IsUseiCloud") as? SwitchRow
+        syncRow?.disabled = true
+        syncRow?.updateCell()
+        let progress = UIAlertController(
+            title: NSLocalizedString(removeData ? "CloudDataRemoval_Progress" : "CloudRecovery_Progress", comment: "iCloud処理の進行状況"),
+            message: NSLocalizedString("CloudDataRemoval_KeepOpen", comment: "アプリを開いたままお待ちください"),
+            preferredStyle: .alert)
+        progress.isModalInPresentation = true
+        present(progress, animated: true) {
+            let completion: (Result<Void, Error>) -> Void = { [weak self] result in
+                guard let self = self else { return }
+                self.isRemovingCloudData = false
+                syncRow?.disabled = false
+                syncRow?.updateCell()
+                let message: String
+                switch result {
+                case .success:
+                    message = NSLocalizedString(removeData ? "CloudDataRemoval_Done" : "CloudRecovery_Done", comment: "処理が完了しました")
+                case .failure(let error):
+                    message = NSLocalizedString(removeData ? "CloudDataRemoval_Failed" : "CloudRecovery_Failed", comment: "処理を完了できませんでした")
+                        + "\n\n" + error.localizedDescription
+                }
+                progress.dismiss(animated: true) {
+                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: message)
+                }
+            }
+            if removeData { RealmUtil.RemoveAllCloudSyncData(completion: completion) }
+            else { RealmUtil.RecoverOutstandingCloudOperations(completion: completion) }
+        }
+    }
+
     func ConifirmiCloudDisable() {
         if RealmUtil.CheckIsLocalRealmCreated() {
             DispatchQueue.main.async {

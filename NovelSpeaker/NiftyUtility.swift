@@ -2460,6 +2460,10 @@ class NiftyUtility: NSObject {
     }
     
     static func isTesting() -> Bool {
+        #if DEBUG
+        // UIテストのアプリプロセスにはXCTestの環境変数やクラスが渡らない場合がある。
+        if ProcessInfo.processInfo.arguments.contains("-UITesting") { return true }
+        #endif
         // https://qiita.com/takecian/items/b106675e0b2ded41db57
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil { return true }
         if ProcessInfo.processInfo.environment["XCTestSessionIdentifier"] != nil { return true }
