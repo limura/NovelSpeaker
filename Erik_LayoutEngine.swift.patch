@@ -1,0 +1,27 @@
+--- LayoutEngine.swift.orig
++++ LayoutEngine.swift
+@@ -86,7 +86,7 @@
+             case .navigationDelegate:
+                 return { engine in
+                     if let delegate = engine.navigable {
+-                        assert(engine.navigable as? WKNavigationDelegate === engine.webView.navigationDelegate)
++                        // The WebKit delegate assertion is performed on main in handleLoadRequestCompletion.
+                         return delegate.navigate
+                     }
+                     assertionFailure("No navigation deletage found")
+@@ -260,4 +260,15 @@
+     fileprivate func handleLoadRequestCompletion(completionHandler: (Error?) -> Void) {
++        // NovelSpeaker: validate the WebKit delegate on main, once per wait.
++        // The condition runs on ErikLoading; do not read WKWebView from that queue
++        // or enqueue a diagnostic on every iteration of the existing wait loop.
++        #if DEBUG
++        if self.pageLoadedPolicy == .navigationDelegate {
++            DispatchQueue.main.async { [weak self] in
++                guard let self = self else { return }
++                assert(self.navigable as? WKNavigationDelegate === self.webView.navigationDelegate)
++            }
++        }
++        #endif
+         // wait load finish
+         let condition = pageLoadedPolicy.continueCondition
+         let max = Date().timeIntervalSince1970 + pageLoadTimeout

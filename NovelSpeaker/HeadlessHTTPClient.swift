@@ -204,65 +204,86 @@ class HeadlessHttpClient {
             let requestID = "HeadlessLoadDCL" + url.absoluteString
             ActivityIndicatorManager.enable(id: requestID)
             let request = self.generateUrlRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess)
-            var finished = false
-            func finish(_ error: Error?) {
-                if finished { return }
-                finished = true
-                ActivityIndicatorManager.disable(id: requestID)
-                completion(error)
+            let operation = DCLLoadOperation(client: self, activityID: requestID, completion: completion)
+            self.pendingDCLLoads[operation.id] = operation
+            // Preserve the existing hard deadline for navigation/DCL failure.
+            operation.armTimeout(after: timeoutInterval + 2.5)
+            operation.begin(request: request, url: url)
+        }
+    }
+
+    // Pending requests own the client until completion. Terminal cleanup breaks this
+    // ownership; queued timeout/poll/JS callbacks retain only a weak operation.
+    private var pendingDCLLoads: [UUID: DCLLoadOperation] = [:]
+    private final class DCLLoadOperation {
+        let id = UUID()
+        private var client: HeadlessHttpClient?
+        private var completion: ((Error?) -> Void)?
+        private var timeout: DispatchWorkItem?
+        private var finished = false
+        private let activityID: String
+
+        init(client: HeadlessHttpClient, activityID: String, completion: @escaping (Error?) -> Void) {
+            self.client = client; self.activityID = activityID; self.completion = completion
+        }
+        private func finish(_ error: Error?) {
+            guard !finished else { return }
+            finished = true
+            let owner = client
+            client = nil
+            owner?.pendingDCLLoads.removeValue(forKey: id)
+            timeout?.cancel(); timeout = nil
+            let callback = completion
+            completion = nil
+            ActivityIndicatorManager.disable(id: activityID)
+            // Keep the owner alive throughout callback delivery, including a caller's
+            // follow-up DOM work. No completed request owns it after this returns.
+            withExtendedLifetime(owner) { callback?(error) }
+        }
+        func armTimeout(after seconds: TimeInterval) {
+            let item = DispatchWorkItem { [weak self] in
+                guard let self, !self.finished, let owner = self.client else { return }
+                self.finish(owner.GenerateNSError(msg: NSLocalizedString("HeadlessHttpClient_ErikError_noContent", comment: "")))
             }
-            // ナビが始まらない/失敗する(=DOMContentLoaded に永遠に達しない)場合の保険。
-            // 従来 erik.load が使っていた pageLoadTimeout と同じ上限なので、待ちの上限は従来より悪化しない。
-            // (ネットワーク失敗時は従来 didFailProvisional で早く失敗していたが、本経路は delegate を持たないため
-            //  この上限まで待つ。直すなら custom navigationDelegate が要る=別課題。)
-            let hardCap = timeoutInterval + 2.5
-            DispatchQueue.main.asyncAfter(deadline: .now() + hardCap) {
-                finish(self.GenerateNSError(msg: NSLocalizedString("HeadlessHttpClient_ErikError_noContent", comment: "ErikError.noContent: 何も読み込めませんでした。なお、ネットワーク接続に問題がある場合などでもこのエラーが発生する場合があります。")))
-            }
-            // DOMContentLoaded(readyState が 'interactive' か 'complete')到達まで軽くポーリングする。
-            // load イベント(全サブリソース完了)は待たない=ハング回避。0.15秒間隔の非同期チェックで CPU はほぼ消費しない
-            // (本文出現の本待ちは後続 headlessWaitThenContent の MutationObserver smart-wait が担当)。
-            //
-            // ★重要: webView は取得をまたいで使い回されるため、load 直後はまだ「前のページ」または "about:blank" が
-            //   残っており、その readyState は既に 'complete'。それを見て早すぎる確定をすると空ドキュメントを掴んで
-            //   noContent になる(2026-06 検証で確認)。そこで「ロード前に現ドキュメントへマーカー window.__nsNavMark を
-            //   打ち、ナビで文書が置換されてマーカーが消えた後の readyState」を見ることで、確実に『新しくコミットされた
-            //   目的ページ』だけを掴む。リダイレクトや同一URL再読込でも新文書になるので確実に判定できる。
-            func startPolling() {
-                func waitDOMContentLoaded() {
-                    if finished { return }
-                    // 新文書なら __nsNavMark は無い。about:blank は除外。それ以外で readyState が loading を抜けたら確定。
-                    let js = "(window.__nsNavMark===true)?'old':((location.href==='about:blank')?'blank':document.readyState)"
-                    self.webView.evaluateJavaScript(js) { result, _ in
-                        if finished { return }
-                        if let s = result as? String, (s == "interactive" || s == "complete") {
-                            finish(nil)
-                            return
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { waitDOMContentLoaded() }
-                    }
+            timeout = item
+            DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: item)
+        }
+        private func startPolling() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in self?.poll() }
+        }
+        private func poll() {
+            guard !finished, let owner = client else { return }
+            let js = "(window.__nsNavMark===true)?'old':((location.href==='about:blank')?'blank':document.readyState)"
+            owner.webView.evaluateJavaScript(js) { [weak self] result, _ in
+                guard let self, !self.finished else { return }
+                if let state = result as? String, state == "interactive" || state == "complete" {
+                    self.finish(nil)
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in self?.poll() }
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { waitDOMContentLoaded() }
             }
-            // 現ドキュメントにマーカーを打ってから load する(打ち終えてから load を呼ぶことで取りこぼしを防ぐ)。
-            self.webView.evaluateJavaScript("window.__nsNavMark=true;true") { _, _ in
-                let stripFragment: (String) -> String = { $0.replacingOccurrences(of: "#.*$", with: "", options: .regularExpression, range: nil) }
-                if url.absoluteString.contains("#"), let currentUrl = self.webView.url,
-                   stripFragment(url.absoluteString) == stripFragment(currentUrl.absoluteString) {
-                    // 同一ページ内アンカー(# のみ変更)は WKWebView がナビゲーション(=新文書)を起こさず
-                    // __nsNavMark が消えないため、既存 HttpRequest と同様に about:blank を挟んで強制的に新文書にする。
-                    self.webView.load(URLRequest(url: URL(string: "about:blank")!))
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                        self.webView.load(request)
-                        startPolling()
+        }
+        func begin(request: URLRequest, url: URL) {
+            guard !finished, let owner = client else { return }
+            owner.webView.evaluateJavaScript("window.__nsNavMark=true;true") { [weak self] _, _ in
+                guard let self, !self.finished, let owner = self.client else { return }
+                let stripFragment: (String) -> String = { $0.replacingOccurrences(of: "#.*$", with: "", options: .regularExpression) }
+                if url.absoluteString.contains("#"), let currentURL = owner.webView.url,
+                   stripFragment(url.absoluteString) == stripFragment(currentURL.absoluteString) {
+                    owner.webView.load(URLRequest(url: URL(string: "about:blank")!))
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                        guard let self, !self.finished, let owner = self.client else { return }
+                        owner.webView.load(request)
+                        self.startPolling()
                     }
                 } else {
-                    self.webView.load(request)
-                    startPolling()
+                    owner.webView.load(request)
+                    self.startPolling()
                 }
             }
         }
     }
+
 
     public func GetCurrentContent(completionHandler:((Document?, Error?)->Void)?) {
         DispatchQueue.main.async {

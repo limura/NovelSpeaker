@@ -976,6 +976,15 @@ class NiftyUtility: NSObject {
     // siteInfoArrayOverride: smart-wait 判定と ready セレクタを、グローバルのキャッシュ済み SiteInfo ではなく
     // この配列で解決する(SiteInfoエディタの「編集中のSiteInfoでテスト」用。nil なら従来どおりURLでグローバル検索)。
     static func headlessWaitThenContent(client: HeadlessHttpClient, url: URL, withWaitSecond: TimeInterval?, siteInfoArrayOverride: [StorySiteInfo]? = nil, onContent: @escaping (Document?, Error?) -> Void) {
+        // Erik returns click/cookie callbacks on ErikCallBack, not on main.
+        // Keep the entire WebKit/watcher boundary on main without synchronously
+        // waiting for that worker or changing any ready/timeout/fetch policy.
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async {
+                headlessWaitThenContent(client: client, url: url, withWaitSecond: withWaitSecond, siteInfoArrayOverride: siteInfoArrayOverride, onContent: onContent)
+            }
+            return
+        }
         let selectors = resolveReadySelectors(url: url, siteInfoArrayOverride: siteInfoArrayOverride)
         if resolveAllowSmartWait(url: url, siteInfoArrayOverride: siteInfoArrayOverride) && !selectors.isEmpty {
             let startedAt = Date()

@@ -2816,7 +2816,7 @@ First release.
 // iCloudの保留処理の確認・再開
 "CloudRecovery_Title" = "Check and resume iCloud operations";
 "CloudRecovery_DisableSync" = "Turn off “Use iCloud sync” before continuing.";
-"CloudRecovery_Confirm" = "An earlier iCloud sync operation may remain and keep the indicator visible. This checks and resumes outstanding operations, then checks whether they have finished.\n\nYour novels and settings will not be deleted. Pending data may be sent to iCloud. “Use iCloud sync” will remain off.\n\nAn internet connection is required.";
+"CloudRecovery_Confirm" = "An earlier iCloud sync operation may remain and keep the indicator visible.\n\nThis resumes outstanding operations and checks whether they have finished. Pending saves and deletions may be carried out, potentially affecting synced data in iCloud and other devices with iCloud sync enabled.\n\nAn internet connection is required.";
 "CloudRecovery_Run" = "Check and Resume";
 "CloudRecovery_Progress" = "Checking iCloud operations";
 "CloudRecovery_Done" = "Outstanding iCloud operations have been checked and cleared. If the indicator remains visible, another operation may be running.";
