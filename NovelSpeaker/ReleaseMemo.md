@@ -4766,3 +4766,49 @@ Bug fixes
 - Fixed a deadlock that occurred when stopping read-aloud playback during a pause with “default” selected under “Settings” → “Setting for punctuation delays”.
 - Fixed a memory leak where internal WKWebView instances were not released, causing memory usage to increase when repeatedly checking for novel updates or downloading novels.
 - Fixed an issue where VOICEVOX voice models remained loaded in memory after read-aloud playback or audio pre-generation had finished.
+
+
+# Version 2.14.2
+
+インタフェース・内部動作の変更
+
+- 「設定タブ」→「通常は使用する必要の無いもの」内に「iCloudの処理を確認・再開する」と「iCloud上の ことせかい のデータを削除」を追加
+
+問題の修正
+
+- 小説の更新確認時に一部のWebサイトからの取り込み操作で強制終了する問題を修正
+- 小説の更新確認時に、内蔵ブラウザの解放がすぐに行われない場合があった問題を修正
+
+以下にざっくりと説明していきます。
+
+- 「設定タブ」→「通常は使用する必要の無いもの」内に「iCloudの処理を確認・再開する」と「iCloud上の ことせかい のデータを削除」を追加
+
+こちらは、iCloud同期 周りで、以前利用していたけれど今は使っていない、という方向けの後片付け用の機能です。
+
+「iCloudの処理を確認・再開する」は、ことせかい の画面右上に通信中または事前生成音声作成中のインジケータが出続けてしまって消えない、という場合のうち、過去に iCloud同期 を行なっていた場合に、その問題を解消することができるかもしれないという対策のボタンになります。
+このボタンの行うことは、過去に作成された iCloud同期 に使われた iCloud上 のデータに対する処理が残っている、つまりその処理が終了したことを受け取れていない場合に、その処理をもう一回行わせてから処理の終了通知を受け取るということをします。
+つまり、処理中という状態を検知できているのでインジケータが動くのですが、処理が終了していないまま何もされずに処理中という状態だけが残ってしまっているものについて、再送して処理の終了を確認することで、処理中のものを無くしてインジケータを止めるということをしています。
+そのため、他の端末ではまだ iCloud同期 をONで利用しているなどと言った場合にはそちらへの影響が発生する可能性があります。
+
+「iCloud上の ことせかい のデータを削除」は、iCloud上 に残っている ことせかい の同期データを削除するという操作です。
+基本的には必要ないはずなのですが、なんらかの原因で「設定アプリ」→「Apple Account、iCloud、およびその他」→「iCloud」→「ストレージ」で「ことせかい」を削除できなくなる場合があるようで、そういった場合に、ことせかい の側から明示的に iCloud上 に残っている同期データを削除するということをするためのぼたんになります。
+つまり、これを実行すると iCloud上 に同期されたデータを消そうとするので、全ての端末で iCloud同期 をOFFにしてから実行するようにしてください。同期がONになっている端末が存在した場合はその端末側のデータが消える可能性が高いです。
+
+- 小説の更新確認時に一部のWebサイトからの取り込み操作で強制終了する問題を修正
+これは、ボタンを押して次のページを開く形のWebページなどの更新確認を行なった時にアプリが強制終了するという問題を修正しています。
+
+- 小説の更新確認時に、内蔵ブラウザの解放がすぐに行われない場合があった問題を修正
+これは、更新確認時に使っている内臓ブラウザを更新確認が終わった後でも5分間保持し続けるという問題があったので、必要なくなったらすぐに解放するようにし他というものです。
+
+以上となります。
+
+# Version 2.14.2
+
+Changes in interface/internal operation
+
+- Added “Check and resume iCloud operations” and “Delete NovelSpeaker data in iCloud” under “Things you don't normally need to use” in the Settings tab.
+
+Bug fixes
+
+- Fixed a crash that could occur when retrieving content from certain websites while checking novels for updates.
+- Fixed an issue where the built-in browser used to check novels for updates was not promptly released after use.
