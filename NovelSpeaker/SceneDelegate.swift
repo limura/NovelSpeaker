@@ -45,6 +45,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
+        if ActivityIndicatorManager.isVisualUITesting { return }
         NSLog("scene did enter background.")
         GlobalDataSingleton.getInstance()?.saveContext()
         RealmUtil.SetCheckCloudDataIsValidInterrupt(isInterrupt: true)
@@ -54,6 +55,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
+        if ActivityIndicatorManager.isVisualUITesting { return }
         NSLog("scene did become active.")
         #if DEBUG
         NSLog("UI test active arguments: \(ProcessInfo.processInfo.arguments)")

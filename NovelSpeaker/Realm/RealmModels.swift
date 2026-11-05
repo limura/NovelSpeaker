@@ -755,7 +755,27 @@ final class MemoryTraceLogger {
         RealmObserverHandler.shared.AnnounceRestartObservers()
         RemoveCloudRealmFile()
     }
+    #if DEBUG
+    private final class TestRealmConfiguration: NSObject {
+        let value: Realm.Configuration
+        init(_ value: Realm.Configuration) { self.value = value }
+    }
+    static func withTemporaryRealmForTesting<T>(configuration: Realm.Configuration, operation: () throws -> T) rethrows -> T {
+        precondition(NiftyUtility.isTesting())
+        let key = "NovelSpeaker.TestRealmConfiguration"
+        let dictionary = Thread.current.threadDictionary
+        let previous = dictionary[key]
+        dictionary[key] = TestRealmConfiguration(configuration)
+        defer { if let previous { dictionary[key] = previous } else { dictionary.removeObject(forKey: key) } }
+        return try operation()
+    }
+    #endif
     static func GetRealm(queue:DispatchQueue? = nil) throws -> Realm {
+        #if DEBUG
+        if NiftyUtility.isTesting(), let test = Thread.current.threadDictionary["NovelSpeaker.TestRealmConfiguration"] as? TestRealmConfiguration {
+            return try Realm(configuration: test.value, queue: queue)
+        }
+        #endif
         if IsUseCloudRealm() {
             if syncEngine == nil {
                 try EnableSyncEngine()

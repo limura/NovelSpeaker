@@ -189,6 +189,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        syncReaderPlaybackControls()
         self.upperRightEdgeProbe.restartAfterExternalEvent()
         self.upperLeadingProbe.restartAfterExternalEvent()
         // 設定画面から戻った場合も幅予算を更新する。
@@ -294,6 +295,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     // 表示される直前に呼ばれる
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        syncReaderPlaybackControls()
         configureCompactBackButton()
         self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         applyTheme()
@@ -597,6 +599,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 if self.storySpeaker.isPlayng != true {
                     button.isEnabled = false
                 }
+                button.accessibilityIdentifier = "ReaderSkipBackward"
                 if isForBottomBar { self.bottomSkipBackwardButton = button } else { self.skipBackwardButtonItem = button }
                 barButtonArray.append(button)
             case .skipForward:
@@ -608,6 +611,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 if self.storySpeaker.isPlayng != true {
                     button.isEnabled = false
                 }
+                button.accessibilityIdentifier = "ReaderSkipForward"
                 if isForBottomBar { self.bottomSkipForwardButton = button } else { self.skipForwardButtonItem = button }
                 barButtonArray.append(button)
             case .showTableOfContents:
@@ -634,6 +638,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     action: #selector(self.voicevoxCacheGenerationButtonClicked(_:)),
                     accessibilityLabel: NSLocalizedString("SpeechViewButtonType_VoicevoxCacheGeneration", comment: "事前生成音声を作る")
                 )
+                button.accessibilityIdentifier = isForBottomBar ? "ReaderGenerationBottom" : "ReaderGenerationUpper"
                 if isForBottomBar {
                     self.bottomVoicevoxCacheGenerationButtonItem = button
                 } else {
@@ -691,7 +696,24 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             if abs(self.currentWindowWidth - nowWidth) < 0.0001 && self.isUpperRightButtonsChanged == false && self.currentUpperButtonBarLayoutSignature == layoutSignature {
                 return
             }
+            // Candidate creation must not detach state updates from the mounted bar.
+            let mountedBackwardButton = self.skipBackwardButtonItem
+            let mountedForwardButton = self.skipForwardButtonItem
+            let mountedPlaybackButton = self.startStopButton
+            let mountedGenerationButton = self.voicevoxCacheGenerationButtonItem
+            self.voicevoxCacheGenerationButtonItem = nil
+            self.skipBackwardButtonItem = nil
+            self.skipForwardButtonItem = nil
+            self.startStopButton = nil
             let barButtonArray = self.createSpeechViewButtonArray(novelID: novelID, novelType: novelType, aliveButtonSettings: aliveButtonSettings, buttonSize: 28, isForBottomBar: false)
+            let candidateBackwardButton = self.skipBackwardButtonItem
+            let candidateForwardButton = self.skipForwardButtonItem
+            self.skipBackwardButtonItem = mountedBackwardButton
+            self.skipForwardButtonItem = mountedForwardButton
+            let candidatePlaybackButton = self.startStopButton
+            let candidateGenerationButton = self.voicevoxCacheGenerationButtonItem
+            self.voicevoxCacheGenerationButtonItem = mountedGenerationButton
+            self.startStopButton = mountedPlaybackButton
 
             let spacing: CGFloat = CGFloat(NovelSpeakerUtility.GetBarButtonItemSpacing())
             let buttonWidth: CGFloat = 28
@@ -738,6 +760,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 let actions = overflowButtons.map { button in
                     UIAction(title: button.accessibilityLabel ?? "",
                              image: button.image(for: .normal),
+                             identifier: UIAction.Identifier((button.actions(forTarget: self, forControlEvent: .touchUpInside) ?? []).contains(NSStringFromSelector(#selector(self.startStopButtonClicked(_:)))) ? "reader.playback" : button.accessibilityIdentifier == "ReaderGenerationUpper" ? "reader.generation" : button.accessibilityIdentifier ?? UUID().uuidString),
                              attributes: button.isEnabled ? [] : [.disabled]) { _ in
                         button.sendActions(for: .touchUpInside)
                     }
@@ -800,6 +823,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     if isIdentical {
                         self.currentUpperButtonBarLayoutSignature = layoutSignature
                         self.isUpperRightButtonsChanged = false
+                        self.syncReaderPlaybackControls()
                         return
                     }
                 }
@@ -809,6 +833,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             self.currentUpperButtonBarLayoutSignature = layoutSignature
             self.isUpperRightButtonsChanged = false
 
+            self.skipBackwardButtonItem = candidateBackwardButton
+            self.skipForwardButtonItem = candidateForwardButton
+            self.startStopButton = candidatePlaybackButton
+            self.voicevoxCacheGenerationButtonItem = candidateGenerationButton
             let stack = UIStackView()
             stack.axis = .horizontal
             stack.alignment = .center
@@ -842,6 +870,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             } else {
                 self.navigationItem.rightBarButtonItem = barItem
             }
+            self.syncReaderPlaybackControls()
         }
     }
     
@@ -996,6 +1025,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: UIApplication.didBecomeActiveNotification, queue: .main) { [weak self] _ in self?.syncReaderPlaybackControls() }
+
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
@@ -1491,13 +1522,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
 
     @objc func voicevoxCacheProgressDidChange() {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID ?? "")
-            let isGenerating = VoicevoxCacheGenerator.shared.runningNovelID == novelID
-            let image = UIImage(systemName: isGenerating ? "v.circle.fill" : "v.circle")
-            // 上のボタン群と下のボタンバーの両方に出ている事があるので、どちらも直す。
-            self.voicevoxCacheGenerationButtonItem?.setImage(image, for: .normal)
-            self.bottomVoicevoxCacheGenerationButtonItem?.setImage(image, for: .normal)
+            self?.syncPreGeneratedAudioControls(generatingNovelID: VoicevoxCacheGenerator.shared.runningNovelID)
         }
     }
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
@@ -1802,33 +1827,73 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     // MARK: StorySpeakerDelegate
-    func storySpeakerStartSpeechEvent(storyID:String){
-        // 何故か self.startStopButton?.setImage(UIImage(systemName: "pause.fill"), for: .normal) が効かないのでボタン群を全部作り直します
-        self.currentWindowWidth = 0.0
-        forceUpdateUpperButtons()
-        return
-        DispatchQueue.main.async {
-            self.clearSearchView()
-            self.startStopButton?.setImage(UIImage(systemName: "pause.fill"), for: .normal)
-            self.startStopButton?.accessibilityLabel = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
-            self.skipBackwardButtonItem?.isEnabled = true
-            self.skipForwardButtonItem?.isEnabled = true
-            self.removeCustomUIMenu()
+    func syncPreGeneratedAudioControls(generatingNovelID: String?) {
+        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID ?? "")
+        let active = !novelID.isEmpty && generatingNovelID == novelID
+        let image = UIImage(systemName: active ? "v.circle.fill" : "v.circle")
+        func update(_ view: UIView) {
+            if let button = view as? UIButton {
+                if button.accessibilityIdentifier == "ReaderGenerationUpper" || button.accessibilityIdentifier == "ReaderGenerationBottom" {
+                    button.setImage(image, for: .normal)
+                    button.accessibilityTraits = active ? [.button, .selected] : [.button]
+                }
+                if let menu = button.menu {
+                    button.menu = menu.replacingChildren(menu.children.map { item in
+                        guard let action = item as? UIAction, action.identifier.rawValue == "reader.generation" else { return item }
+                        return UIAction(title: action.title, image: image, identifier: action.identifier, attributes: action.attributes, state: active ? .on : .off) { [weak self] _ in
+                            self?.voicevoxCacheGenerationButtonClicked(button)
+                        }
+                    })
+                }
+            }
+            for child in view.subviews { update(child) }
+        }
+        for button in [voicevoxCacheGenerationButtonItem, bottomVoicevoxCacheGenerationButtonItem].compactMap({ $0 }) { update(button) }
+        if let root = NovelSpeakerUtility.UpperButtonBarLayout.rightBarCustomView(for: navigationItem) { update(root) }
+        if let bottomButtonBar { update(bottomButtonBar); for button in bottomButtonBar.buttonsForStateUpdates { update(button) } }
+    }
+
+    func syncReaderPlaybackControls() {
+        DispatchQueue.main.async { [weak self] in
+            self?.applyReaderPlaybackControls(playing: StorySpeaker.shared.isPlayng)
         }
     }
-    func storySpeakerStopSpeechEvent(storyID:String){
-        // 何故か self.startStopButton?.setImage(UIImage(systemName: "pause.fill"), for: .normal) が効かないのでボタン群を全部作り直します
-        self.currentWindowWidth = 0.0
-        forceUpdateUpperButtons()
-        return
-        DispatchQueue.main.async {
-            self.startStopButton?.setImage(UIImage(systemName: "play.fill"), for: .normal)
-            self.startStopButton?.accessibilityLabel = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
-            self.skipBackwardButtonItem?.isEnabled = false
-            self.skipForwardButtonItem?.isEnabled = false
-            self.setCustomUIMenu()
+
+    func applyReaderPlaybackControls(playing: Bool) {
+        self.syncPreGeneratedAudioControls(generatingNovelID: VoicevoxCacheGenerator.shared.runningNovelID)
+        for button in [self.startStopButton, self.bottomStartStopButton] {
+            button?.isEnabled = true
+            button?.setImage(UIImage(systemName: playing ? "pause.fill" : "play.fill"), for: .normal)
+            button?.accessibilityLabel = NSLocalizedString(playing ? "SpeechViewController_Stop" : "SpeechViewController_Speak", comment: "")
         }
+        // Overflow actions snapshot the image/title, so refresh that snapshot too.
+        if let root = NovelSpeakerUtility.UpperButtonBarLayout.rightBarCustomView(for: self.navigationItem) {
+            func refreshMenu(_ view: UIView) {
+                if let button = view as? UIButton, let menu = button.menu {
+                    let children = menu.children.map { element -> UIMenuElement in
+                        guard let action = element as? UIAction else { return element }
+                        if ["ReaderSkipBackward", "ReaderSkipForward"].contains(action.identifier.rawValue) {
+                            action.attributes = playing ? [] : [.disabled]
+                            return action
+                        }
+                        guard action.identifier.rawValue == "reader.playback", let playback = self.startStopButton else { return element }
+                        return UIAction(title: playback.accessibilityLabel ?? "", image: playback.image(for: .normal), identifier: action.identifier) { [weak playback] _ in playback?.sendActions(for: .touchUpInside) }
+                    }
+                    button.menu = menu.replacingChildren(children)
+                }
+                for child in view.subviews { refreshMenu(child) }
+            }
+            refreshMenu(root)
+        }
+        self.skipBackwardButtonItem?.isEnabled = playing
+        self.skipForwardButtonItem?.isEnabled = playing
+        self.bottomSkipBackwardButton?.isEnabled = playing
+        self.bottomSkipForwardButton?.isEnabled = playing
+        self.bottomButtonBar?.refreshStateMenus()
+        if playing { self.clearSearchView(); self.removeCustomUIMenu() } else { self.setCustomUIMenu() }
     }
+    func storySpeakerStartSpeechEvent(storyID:String) { syncReaderPlaybackControls() }
+    func storySpeakerStopSpeechEvent(storyID:String) { syncReaderPlaybackControls() }
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange){
         DispatchQueue.main.async {
             // 自分でスクロールした直後は、強制スクロールも強制範囲選択もしない。

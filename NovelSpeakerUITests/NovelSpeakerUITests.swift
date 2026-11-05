@@ -189,3 +189,68 @@ final class NovelSpeakerUITests: XCTestCase {
         add(screenshot)
     }
 }
+
+final class ActivityIndicatorUITests: XCTestCase {
+    private func screenshot(_ name: String) {
+        let image = XCTAttachment(screenshot: XCUIApplication().screenshot())
+        image.name = name; image.lifetime = .keepAlways; add(image)
+    }
+    func testIndicatorSurvivesOverlappingJobs() {
+        continueAfterFailure = false
+        let app = XCUIApplication(); app.launchArguments = ["-ActivityIndicatorVisualUITesting", "-UITestingAllowRotation"]; app.launch()
+        app.buttons["IndicatorStartA"].tap()
+        let state = app.staticTexts["IndicatorVisualState"]
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "active=1"), evaluatedWith: state)
+        waitForExpectations(timeout: 5)
+        let image = XCTAttachment(screenshot: app.screenshot()); image.name = "FT-active-visual"; image.lifetime = .keepAlways; add(image)
+        XCTAssertTrue(state.label.contains("sceneViews=1") && state.label.contains("drawnViews=1"), state.label)
+        app.buttons["IndicatorStartB"].tap()
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "active=2"), evaluatedWith: state); waitForExpectations(timeout: 5)
+        app.buttons["IndicatorStopA"].tap()
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "active=1"), evaluatedWith: state); waitForExpectations(timeout: 5)
+        XCTAssertTrue(state.label.contains("sceneViews=1") && state.label.contains("drawnViews=1"), state.label)
+        app.buttons["IndicatorStopB"].tap()
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "active=0"), evaluatedWith: state); waitForExpectations(timeout: 5)
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "sceneViews=0"), evaluatedWith: state); waitForExpectations(timeout: 5)
+        app.buttons["IndicatorStartA"].tap()
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "active=1"), evaluatedWith: state); waitForExpectations(timeout: 5)
+        app.buttons["IndicatorPush"].tap()
+        XCTAssertTrue(app.navigationBars["Dark fixture"].waitForExistence(timeout: 5))
+        let dark = XCTAttachment(screenshot: app.screenshot()); dark.name = "FT-dark-navigation"; dark.lifetime = .keepAlways; add(dark)
+        app.buttons["IndicatorReturn"].tap()
+        XCTAssertTrue(state.waitForExistence(timeout: 5))
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let rotated = XCTAttachment(screenshot: app.screenshot()); rotated.name = "FT-landscape"; rotated.lifetime = .keepAlways; add(rotated)
+        XCUIDevice.shared.orientation = .portrait
+        XCTAssertTrue(state.label.contains("drawnViews=1"), state.label)
+
+    }
+    func testActivityIndicatorPadUsesSceneOverlay() {
+        let app = XCUIApplication(); app.launchArguments = ["-ActivityIndicatorVisualUITesting"]; app.launch()
+        app.buttons["IndicatorStartA"].tap()
+        let state = app.staticTexts["IndicatorVisualState"]
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "active=1"), evaluatedWith: state); waitForExpectations(timeout: 5)
+        expectation(for: NSPredicate(format: "label CONTAINS %@ AND label CONTAINS %@", "sceneViews=1", "drawnViews=1"), evaluatedWith: state); waitForExpectations(timeout: 5)
+        let image = XCTAttachment(screenshot: app.screenshot()); image.name = "indicator-ipad-scene-overlay"; image.lifetime = .keepAlways; add(image)
+        app.buttons["IndicatorStopA"].tap()
+    }
+    func testSceneIndicatorSurvivesTabsFullScreenAndRotation() {
+        continueAfterFailure=false
+        let app=XCUIApplication();app.launchArguments=["-ActivityIndicatorVisualUITesting","-UITestingAllowRotation","-IndicatorExtendedLayoutTesting"];app.launch()
+        app.buttons["IndicatorStartA"].tap();app.buttons["IndicatorShowLayout"].tap()
+        let second=app.buttons["Second"].firstMatch;screenshot("indicator-tabs-presented");XCTAssertTrue(second.waitForExistence(timeout:5),app.debugDescription);second.tap()
+        let state=app.staticTexts["IndicatorLayoutState"]
+        expectation(for:NSPredicate(format:"label CONTAINS %@ AND label CONTAINS %@", "active=1","drawnViews=1"),evaluatedWith:state);waitForExpectations(timeout:5)
+        screenshot("indicator-tabs-title-controls")
+        let toggle=app.buttons["IndicatorToggleFullScreen"];toggle.tap()
+        XCTAssertTrue(toggle.isHittable);XCTAssertTrue(app.buttons["IndicatorLayoutClose"].isHittable)
+        XCTAssertTrue(state.label.contains("drawnViews=1"));screenshot("indicator-full-screen-safe-area")
+        XCUIDevice.shared.orientation = .landscapeLeft
+        XCTAssertTrue(state.waitForExistence(timeout:5));XCTAssertTrue(state.label.contains("drawnViews=1"));screenshot("indicator-expanded-rotated")
+        XCUIDevice.shared.orientation = .portrait
+        toggle.tap();XCTAssertTrue(second.waitForExistence(timeout:5))
+        app.buttons["IndicatorLayoutClose"].tap();app.buttons["IndicatorStopA"].tap()
+        let original=app.staticTexts["IndicatorVisualState"]
+        expectation(for:NSPredicate(format:"label CONTAINS %@ AND label CONTAINS %@", "active=0","drawnViews=0"),evaluatedWith:original);waitForExpectations(timeout:5)
+    }
+}

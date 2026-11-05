@@ -2153,6 +2153,26 @@ class NovelSpeakerUtility: NSObject {
         }
     }
 
+    // Keep historical export spelling canonical. A present but invalid canonical
+    // field must not silently defer to a conflicting alias.
+    private static func backupSetting(_ dictionary: NSDictionary, canonical: String, alias: String) -> Any? {
+        dictionary.object(forKey: canonical) ?? dictionary.object(forKey: alias)
+    }
+    private static func backupMenuFlag(_ value: Any?) -> Bool? {
+        guard let number = value as? NSNumber, number.doubleValue == 0 || number.doubleValue == 1 else { return nil }
+        return number.boolValue
+    }
+    private static func backupDisplayColor(_ value: Any?) -> UIColor? {
+        guard let dictionary = value as? NSDictionary else { return nil }
+        var components: [CGFloat] = []
+        for key in ["red", "green", "blue", "alpha"] {
+            guard let number = dictionary.object(forKey: key) as? NSNumber,
+                  CFGetTypeID(number) != CFBooleanGetTypeID(), number.doubleValue.isFinite,
+                  (0...1).contains(number.doubleValue) else { return nil }
+            components.append(CGFloat(number.doubleValue))
+        }
+        return UIColor(red: components[0], green: components[1], blue: components[2], alpha: components[3])
+    }
     static func RestoreGlobalState_V_2_0_0(dic:NSDictionary, progressUpdate:@escaping(String)->Void) {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
@@ -2204,8 +2224,8 @@ class NovelSpeakerUtility: NSObject {
                 if let isForceSiteInfoReloadIsEnabled = dic.object(forKey: "isForceSiteInfoReloadIsEnabled") as? NSNumber {
                     RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: isForceSiteInfoReloadIsEnabled.boolValue)
                 }
-                if let isMenuItemIsAddNovelSpeakerItemsOnly = dic.object(forKey: "isMenuItemIsAddNovelSpeakerItemsOnly")  as? NSNumber {
-                    globalState.isMenuItemIsAddNovelSpeakerItemsOnly = isMenuItemIsAddNovelSpeakerItemsOnly.boolValue
+                if let value = backupMenuFlag(backupSetting(dic, canonical: "isMenuItemIsAddSpeechModSettingOnly", alias: "isMenuItemIsAddNovelSpeakerItemsOnly")) {
+                    globalState.isMenuItemIsAddNovelSpeakerItemsOnly = value
                 }
                 if let isPageTurningSoundEnabled = dic.object(forKey: "isPageTurningSoundEnabled") as? NSNumber {
                     globalState.isPageTurningSoundEnabled = isPageTurningSoundEnabled.boolValue
@@ -2217,12 +2237,8 @@ class NovelSpeakerUtility: NSObject {
                     globalState.currentReadingNovelID = currentReadingNovelID
                 }
                 if let readingDisplayColor = dic.object(forKey: "readingDisplayColor") as? NSDictionary {
-                    if let foregroundColor = readingDisplayColor.object(forKey: "foregroundColor") as? NSDictionary, let red = foregroundColor.object(forKey: "red") as? NSNumber, let green = foregroundColor.object(forKey: "green") as? NSNumber, let blue = foregroundColor.object(forKey: "blue") as? NSNumber, let alpha = foregroundColor.object(forKey: "alpha") as? NSNumber {
-                        globalState.foregroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
-                    }
-                    if let foregroundColor = readingDisplayColor.object(forKey: "backgroundColor") as? NSDictionary, let red = foregroundColor.object(forKey: "red") as? NSNumber, let green = foregroundColor.object(forKey: "green") as? NSNumber, let blue = foregroundColor.object(forKey: "blue") as? NSNumber, let alpha = foregroundColor.object(forKey: "alpha") as? NSNumber {
-                        globalState.backgroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
-                    }
+                    if let color = backupDisplayColor(backupSetting(readingDisplayColor, canonical: "foreground", alias: "foregroundColor")) { globalState.foregroundColor = color }
+                    if let color = backupDisplayColor(backupSetting(readingDisplayColor, canonical: "background", alias: "backgroundColor")) { globalState.backgroundColor = color }
                 }
                 if let currentWebSearchSite = dic.object(forKey: "currentWebSearchSite") as? String {
                     globalState.currentWebSearchSite = currentWebSearchSite

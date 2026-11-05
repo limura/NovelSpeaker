@@ -6,12 +6,17 @@
 //
 
 import UIKit
-import FTLinearActivityIndicator
 
 @objcMembers
 final class AppLaunchCoordinator: NSObject {
     @objc(runPreflight)
     static func runPreflight() -> Bool {
+        #if DEBUG && targetEnvironment(simulator)
+        if ActivityIndicatorManager.isVisualUITesting {
+            NovelSpeakerUtility.supportRotationMask = .all
+            return true
+        }
+        #endif
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("-UITestingAllowRotation") {
             NovelSpeakerUtility.supportRotationMask = .all
@@ -31,15 +36,24 @@ final class AppLaunchCoordinator: NSObject {
 
     @objc(createInitialRootViewController)
     static func createInitialRootViewController() -> UIViewController {
+        #if DEBUG && targetEnvironment(simulator)
+        if ActivityIndicatorManager.isVisualUITesting {
+            return UINavigationController(rootViewController: ActivityIndicatorVisualFixture())
+        }
+        #endif
         let context = AppLaunchContextBuilder.build()
         return AppRootViewControllerFactory.create(context: context)
     }
 
     @objc(runPostLaunchWithRootViewController:)
     static func runPostLaunch(rootViewController: UIViewController) {
+        if ActivityIndicatorManager.isVisualUITesting {
+            ActivityIndicatorManager.configureDisplay()
+            return
+        }
         NiftyUtility.RegisterToplevelViewController(viewController: rootViewController)
         NovelSpeakerUtility.RemoveInvalidKeyDataFromCookieStorage(storage: HTTPCookieStorage.shared)
-        UIApplication.configureLinearNetworkActivityIndicatorIfNeeded()
+        ActivityIndicatorManager.configureDisplay()
         configurePreferredFontsForTextStyle()
         NovelDownloadQueue.shared.RegisterBackgroundProcess()
         NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()

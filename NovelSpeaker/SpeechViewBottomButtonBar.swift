@@ -78,6 +78,14 @@ class SpeechViewBottomButtonBar: UIView {
         applyButtonsForCurrentWidth()
     }
 
+    // Rebuild only overflow snapshots from their actual source buttons, not the reader.
+    func refreshStateMenus() {
+        appliedVisibleButtonCount = -1
+        applyButtonsForCurrentWidth()
+    }
+
+    var buttonsForStateUpdates: [UIButton] { allButtons }
+
     var buttonCount: Int {
         return allButtons.count
     }
@@ -130,7 +138,9 @@ class SpeechViewBottomButtonBar: UIView {
     private func createMoreButton(overflowButtons:[UIButton]) -> UIButton {
         let actions = overflowButtons.map { button -> UIAction in
             let action = UIAction(title: button.accessibilityLabel ?? "",
-                                  image: button.image(for: .normal)) { _ in
+                                  image: button.image(for: .normal),
+                                  identifier: UIAction.Identifier(button.accessibilityIdentifier == "ReaderGenerationBottom" ? "reader.generation" : button.accessibilityIdentifier ?? UUID().uuidString),
+                                  state: button.accessibilityTraits.contains(.selected) ? .on : .off) { _ in
                 button.sendActions(for: .touchUpInside)
             }
             // 発話中でないと押せないボタン(少し戻す/少し進める)は、メニュー側でも押せないようにしておく

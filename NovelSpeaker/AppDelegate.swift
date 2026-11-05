@@ -35,6 +35,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
+        if ActivityIndicatorManager.isVisualUITesting { return }
         NSLog("application will terminate")
         GlobalDataSingleton.getInstance()?.saveContext()
         let queuedCount = NovelDownloadQueue.DownloadFlush()
