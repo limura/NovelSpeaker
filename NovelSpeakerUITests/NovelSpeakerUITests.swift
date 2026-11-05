@@ -254,3 +254,53 @@ final class ActivityIndicatorUITests: XCTestCase {
         expectation(for:NSPredicate(format:"label CONTAINS %@ AND label CONTAINS %@", "active=0","drawnViews=0"),evaluatedWith:original);waitForExpectations(timeout:5)
     }
 }
+
+extension ActivityIndicatorUITests {
+    func testRightPlacementWaitsForActualPortraitLandscapeAndHiddenStatusBar() throws {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-ActivityIndicatorVisualUITesting","-UITestingAllowRotation","-IndicatorExtendedLayoutTesting"]
+        XCUIDevice.shared.orientation = .portrait
+        app.launch();app.buttons["IndicatorStartA"].tap();app.buttons["IndicatorShowLayout"].tap()
+        let state=app.staticTexts["IndicatorLayoutState"]
+        XCTAssertTrue(state.waitForExistence(timeout:10))
+        func rect(_ key:String, _ text:String) -> CGRect? {
+            guard let start=text.range(of:key)?.upperBound,
+                  let opening=text[start...].firstIndex(of:"("),let closing=text[opening...].firstIndex(of:")") else {return nil}
+            let values=text[text.index(after:opening)..<closing].split(separator:",").compactMap {Double($0.trimmingCharacters(in:.whitespaces))}
+            guard values.count == 4 else {return nil}
+            return CGRect(x:values[0],y:values[1],width:values[2],height:values[3])
+        }
+        func check(portrait:Bool,hidden:Bool,name:String) throws {
+            expectation(for:NSPredicate(block:{_,_ in
+                let text=state.label
+                guard let bounds=rect("bounds=",text),let status=rect("status=",text) else{return false}
+                return (portrait ? bounds.height > bounds.width : bounds.width > bounds.height) && (hidden ? status.height == 0 : status.height > 0) && text.contains("drawnViews=1")
+            }),evaluatedWith:state)
+            waitForExpectations(timeout:15)
+            let bounds=try XCTUnwrap(rect("bounds=",state.label)),indicator=try XCTUnwrap(rect("indicatorWindowFrames=",state.label))
+            XCTAssertGreaterThan(indicator.midX,bounds.midX,state.label)
+            XCTAssertTrue(bounds.contains(indicator),state.label)
+            // The app-window snapshot can still use portrait coordinates during rotation.
+            // Wait for the display itself and capture the complete screen.
+            expectation(for:NSPredicate(block:{_,_ in
+                let size=XCUIScreen.main.screenshot().image.size
+                return portrait ? size.height > size.width : size.width > size.height
+            }),evaluatedWith:state)
+            waitForExpectations(timeout:15)
+            let attachment=XCTAttachment(screenshot:XCUIScreen.main.screenshot())
+            attachment.name=name+"-\(Int(bounds.width))x\(Int(bounds.height))"
+            attachment.lifetime = .keepAlways;add(attachment)
+        }
+        try check(portrait:true,hidden:false,name:"indicator-right-portrait")
+        app.buttons["IndicatorToggleFullScreen"].tap()
+        try check(portrait:true,hidden:true,name:"indicator-right-portrait-hidden")
+        XCUIDevice.shared.orientation = .landscapeLeft
+        try check(portrait:false,hidden:true,name:"indicator-right-landscape-hidden")
+        XCUIDevice.shared.orientation = .portrait
+        try check(portrait:true,hidden:true,name:"indicator-right-restored-portrait-hidden")
+        app.buttons["IndicatorToggleFullScreen"].tap()
+        try check(portrait:true,hidden:false,name:"indicator-right-restored-portrait")
+        app.buttons["IndicatorLayoutClose"].tap();app.buttons["IndicatorStopA"].tap()
+    }
+}

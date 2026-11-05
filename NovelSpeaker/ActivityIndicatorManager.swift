@@ -15,7 +15,8 @@ enum ActivityIndicatorPlacement {
         let portrait = bounds.height >= bounds.width
         let x: CGFloat
         let y: CGFloat
-        if !isPad && safeArea.top == 0 && safeArea.right >= 80 && statusBarHeight >= 0 && statusBarHeight <= 2 {
+        let usesSideRail = !isPad && safeArea.top == 0 && safeArea.right >= 80 && statusBarHeight >= 0 && statusBarHeight <= 2
+        if usesSideRail {
             // Public side-rail insets identify this layout. UIKit does not expose
             // the individual system clock/Wi-Fi frames; stay in its empty header.
             let compact = min(bounds.width, bounds.height) < 600
@@ -29,14 +30,23 @@ enum ActivityIndicatorPlacement {
             x = bounds.maxX - safeArea.right - 56
             y = max(2, safeArea.top - 5)
         } else if portrait {
-            // Above the right-hand status icons on phones with a tall status area.
-            x = statusBarHeight > 24 ? bounds.maxX - 104 : bounds.midX - 20
+            // Stay on the right even with a short or hidden status bar.
+            x = bounds.maxX - safeArea.right - (statusBarHeight > 24 ? 104 : 56)
             y = statusBarHeight > 24 ? min(12, max(6, (statusBarHeight - 32) / 2)) : 2
         } else {
             x = bounds.maxX - safeArea.right - 64
             y = 8
         }
-        return CGRect(x: max(bounds.minX + safeArea.left + 8, x), y: bounds.minY + y, width: 40, height: 3)
+        // The Duo side rail intentionally uses system-side space in some layouts.
+        // Other layouts stay within horizontal safe-area insets, including narrow scenes.
+        let left = min(bounds.maxX, max(bounds.minX, bounds.minX + safeArea.left + 8))
+        let rightInset = usesSideRail ? 0 : safeArea.right
+        let right = max(left, min(bounds.maxX, bounds.maxX - rightInset - 8))
+        let width = min(40, max(0, right - left))
+        let height = min(3, max(0, bounds.height))
+        return CGRect(x: max(left, min(x, right - width)),
+                      y: max(bounds.minY, min(bounds.minY + y, bounds.maxY - height)),
+                      width: width, height: height)
     }
 }
 private final class SceneIndicatorHost: UIView {

@@ -265,3 +265,56 @@ extension ReleaseBackportTest {
         }
     }
 }
+
+final class ActivityIndicatorPlacementTest: XCTestCase {
+    func testShortAndHiddenStatusBarsUseTheRightOnPortraitPhones() {
+        for width: CGFloat in [320,375,393,440] {
+            let bounds=CGRect(x:0,y:0,width:width,height:852)
+            for height: CGFloat in [0,20,24] {
+                let frame=ActivityIndicatorPlacement.frame(bounds:bounds,safeArea:.init(top:height == 0 ? 59 : height,left:0,bottom:0,right:0),statusBarHeight:height)
+                XCTAssertGreaterThan(frame.midX,bounds.midX)
+                XCTAssertEqual(frame.maxX,bounds.maxX-16)
+                XCTAssertEqual(frame.minY,2)
+                XCTAssertTrue(bounds.contains(frame))
+            }
+        }
+    }
+    func testPortraitAndLandscapeRespectHorizontalSafeArea() {
+        for bounds in [CGRect(x:10,y:20,width:320,height:568),CGRect(x:10,y:20,width:568,height:320)] {
+            for status: CGFloat in [0,20,54] {
+                let safe=UIEdgeInsets(top:20,left:23,bottom:0,right:17)
+                let frame=ActivityIndicatorPlacement.frame(bounds:bounds,safeArea:safe,statusBarHeight:status)
+                XCTAssertGreaterThan(frame.midX,bounds.midX)
+                XCTAssertGreaterThanOrEqual(frame.minX,bounds.minX+safe.left+8)
+                XCTAssertLessThanOrEqual(frame.maxX,bounds.maxX-safe.right-8)
+                XCTAssertTrue(bounds.contains(frame))
+            }
+        }
+    }
+    func testDuoDedicatedPortraitAndLandscapePlacementsRemainUnchanged() {
+        let cases: [(CGSize,CGPoint)] = [
+            (CGSize(width:466,height:678),CGPoint(x:334,y:40)),
+            (CGSize(width:678,height:466),CGPoint(x:616,y:46)),
+            (CGSize(width:744,height:1133),CGPoint(x:682,y:24)),
+            (CGSize(width:1133,height:744),CGPoint(x:1071,y:14))
+        ]
+        for (size,origin) in cases {
+            let bounds=CGRect(origin:.zero,size:size)
+            let frame=ActivityIndicatorPlacement.frame(bounds:bounds,safeArea:.init(top:0,left:0,bottom:34,right:84),statusBarHeight:2)
+            XCTAssertEqual(frame,CGRect(origin:origin,size:CGSize(width:40,height:3)))
+            XCTAssertGreaterThan(frame.midX,bounds.midX);XCTAssertTrue(bounds.contains(frame))
+        }
+    }
+    func testIPadStillUsesTheRightAtItsTopSafeArea() {
+        let frame=ActivityIndicatorPlacement.frame(bounds:CGRect(x:0,y:0,width:834,height:1210),safeArea:.init(top:24,left:0,bottom:25,right:0),statusBarHeight:24,isPad:true)
+        XCTAssertEqual(frame,CGRect(x:778,y:19,width:40,height:3))
+    }
+    func testSmallBoundsShrinkTheIndicatorInsteadOfOverflowing() {
+        for bounds in [CGRect(x:0,y:0,width:40,height:20),CGRect(x:5,y:7,width:12,height:2),.zero] {
+            let frame=ActivityIndicatorPlacement.frame(bounds:bounds,safeArea:.init(top:20,left:10,bottom:0,right:10),statusBarHeight:20)
+            XCTAssertGreaterThanOrEqual(frame.minX,bounds.minX);XCTAssertLessThanOrEqual(frame.maxX,bounds.maxX)
+            XCTAssertGreaterThanOrEqual(frame.minY,bounds.minY);XCTAssertLessThanOrEqual(frame.maxY,bounds.maxY)
+            XCTAssertGreaterThanOrEqual(frame.width,0);XCTAssertLessThanOrEqual(frame.width,40)
+        }
+    }
+}
