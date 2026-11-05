@@ -1423,15 +1423,26 @@
 "SettingsViewController_Section_Buttons" = "Buttons on the screen";
 "SettingsViewController_Section_About" = "About this app";
 
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.14.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.14.3
 
-- Added “Check and resume iCloud operations” and “Delete NovelSpeaker data in iCloud” under “Things you don't normally need to use” in the Settings tab.
-- Fixed a crash that could occur when retrieving content from certain websites while checking novels for updates.
-- Fixed an issue where the built-in browser used to check novels for updates was not promptly released after use.
+- Fixed an issue where a hidden browser was accessible to VoiceOver.
+- Fixed an issue where the indicator in the upper-right corner no longer appeared during update checks and other operations.
+- Fixed an issue where some settings were not restored correctly from a backup file.
+- Fixed an issue where some buttons in the upper-right corner of the novel reading screen did not update their icons correctly.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.14.3
+
+Bug Fixes
+
+- Fixed an issue where a hidden browser was accessible to VoiceOver.
+- Fixed an issue where the indicator in the upper-right corner no longer appeared during update checks and other operations.
+- Fixed an issue where some settings were not restored correctly from a backup file.
+- Fixed an issue where some buttons in the upper-right corner of the novel reading screen did not update their icons correctly.
+
+
 Version 2.14.2
 
 Changes in interface/internal operation

@@ -4812,3 +4812,41 @@ Bug fixes
 
 - Fixed a crash that could occur when retrieving content from certain websites while checking novels for updates.
 - Fixed an issue where the built-in browser used to check novels for updates was not promptly released after use.
+
+
+# Version 2.14.3
+
+問題の修正
+
+- VoiceOver環境下において、非表示のブラウザが「見える」状態になっていた問題を修正
+- 更新確認時などに右上に表示されるインジケータが表示されなくなっていた問題を修正
+- バックアップファイルからの復元が一部うまくいかない問題を修正
+- 小説本文画面右上に表示されるボタン群のうち、アイコンの表示が変わるものがうまく反映されていなかった問題を修正
+
+以下にざっくりと説明していきます。
+
+- VoiceOver環境下において、非表示のブラウザが「見える」状態になっていた問題を修正
+  更新確認時に利用していた内蔵ブラウザは本来は非表示なのですが、VoiceOver環境では観測できるようになっていたため、これを見えないようにしました。
+
+- 更新確認時などに右上に表示されるインジケータが表示されなくなっていた問題を修正
+  おそらく 2.14.1 の更新時に入っていた問題でした。この修正では表示の仕組み自体を変更しています。おそらく今までは表示されていなかった iPad でも表示できるようになっているはずです。
+
+- バックアップファイルからの復元が一部うまくいかない問題を修正
+  「本文の文字色」「本文の背景色」「本文中の長押しメニュー項目を減らす」のそれぞれの書き出しは行なっていましたが、復元がその値を読めていませんでした。
+
+- 小説本文画面右上に表示されるボタン群のうち、アイコンの表示が変わるものがうまく反映されていなかった問題を修正
+  具体的には再生停止しても停止ボタンのままになっていたりしていたはずです。
+
+以上となります。
+
+# Version 2.14.3
+
+Bug Fixes
+
+- Fixed an issue where a hidden browser was accessible to VoiceOver.
+- Fixed an issue where the indicator in the upper-right corner no longer appeared during update checks and other operations.
+- Fixed an issue where some settings were not restored correctly from a backup file.
+- Fixed an issue where some buttons in the upper-right corner of the novel reading screen did not update their icons correctly.
+
+
+
