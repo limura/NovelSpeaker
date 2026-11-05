@@ -112,6 +112,8 @@ class HeadlessHttpClient {
             config.userContentController.add(readyHandler, name: HeadlessReadyMessageHandler.name)
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
             self.webView = WKWebView(frame: frame, configuration: config)
+            // 取得用の内部ブラウザは、配下のWebページも含めてVoiceOverの対象から除外する。
+            self.webView.accessibilityElementsHidden = true
             if #available(iOS 16.4, *) {
                 self.webView.isInspectable = NovelSpeakerUtility.IsInspectableWkWebview()
             }
