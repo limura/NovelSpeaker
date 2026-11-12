@@ -1624,6 +1624,16 @@ class StoryHtmlDecoder {
 }
 
 class StoryFetcher {
+    static func scrollToJavaScript(xpath: String) -> String? {
+        // SiteInfo の XPath はコードではなく文字列として渡す。引用符・改行・バックスラッシュも保持する。
+        guard let data = try? JSONEncoder().encode(xpath),
+              let encodedXPath = String(data: data, encoding: .utf8) else { return nil }
+        let literal = encodedXPath
+            .replacingOccurrences(of: "\u{2028}", with: "\\u2028")
+            .replacingOccurrences(of: "\u{2029}", with: "\\u2029")
+        return "document.evaluate(\(literal), document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)?.singleNodeValue?.scrollIntoView({ behavior: 'auto' })"
+    }
+
     var novelIDForImportSetting:String? = nil
 
     // SiteInfoエディタの「編集中のSiteInfoだけでテスト」(InspectFetchSinglePageWith)用。
@@ -1932,7 +1942,7 @@ class StoryFetcher {
                 }
                 let scrollToJavaScript:String?
                 if let scrollTo = currentState.siteInfoArray.filter({$0.scrollTo != nil}).first?.scrollTo {
-                    scrollToJavaScript = "document.evaluate(\"\(scrollTo)\", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)?.singleNodeValue?.scrollIntoView({ behavior: 'auto' })"
+                    scrollToJavaScript = Self.scrollToJavaScript(xpath: scrollTo)
                 }else{
                     scrollToJavaScript = nil
                 }

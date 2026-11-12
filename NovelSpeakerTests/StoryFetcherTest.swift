@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import JavaScriptCore
 @testable import NovelSpeaker
 @testable import Kanna
 #if !os(watchOS)
@@ -14,6 +15,37 @@ import XCTest
 #endif
 
 class StoryFetcherTest: XCTestCase {
+    func testScrollToJavaScriptTreatsXPathAsData() throws {
+        let inputs = [
+            "//*[@id='content']",
+            "//*[@id=\"content\"]",
+            "//*[@title=\"日本語\\path\"]\n\r\t\u{0000}\u{2028}\u{2029}",
+            "\", document, null, 9, null); injected = true; //",
+            "\\\"); injected = true; //",
+            "${injected = true}`</script>"
+        ]
+        for xpath in inputs {
+            let context = try XCTUnwrap(JSContext())
+            context.evaluateScript("""
+                var injected = false;
+                var receivedXPath = null;
+                var scrolled = false;
+                var XPathResult = { FIRST_ORDERED_NODE_TYPE: 9 };
+                var document = { evaluate: function(xpath) {
+                    receivedXPath = xpath;
+                    return { singleNodeValue: { scrollIntoView: function(options) {
+                        scrolled = options.behavior === 'auto';
+                    } } };
+                } };
+                """)
+            context.evaluateScript(try XCTUnwrap(StoryFetcher.scrollToJavaScript(xpath: xpath)))
+            XCTAssertNil(context.exception, "XPath: \(xpath)")
+            XCTAssertEqual(context.objectForKeyedSubscript("receivedXPath")?.toString(), xpath)
+            XCTAssertEqual(context.objectForKeyedSubscript("injected")?.toBool(), false)
+            XCTAssertEqual(context.objectForKeyedSubscript("scrolled")?.toBool(), true)
+        }
+    }
+
     private let novelImportSettingTestURL = "https://example.com/siteinfo.csv"
     private let novelImportSettingTestSiteNumber = "999991"
     private var novelImportSettingTestSiteID:String {
