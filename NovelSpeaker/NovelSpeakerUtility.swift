@@ -839,9 +839,15 @@ class NovelSpeakerUtility: NSObject {
                 let removeTargetArray = DefaultSpeechModSettingsRemovalTargets(
                     Array(allSpeechModSettings), defaultSettings: speechModSettings)
                 guard removeTargetArray.isEmpty == false else { return }
+                let isUseCloudRealm = RealmUtil.IsUseCloudRealm()
                 RealmUtil.WriteWith(realm: realm) { (realm) in
                     for targetSpeechModSetting in removeTargetArray {
-                        targetSpeechModSetting.delete(realm: realm)
+                        // RealmUtil.Delete と同じ削除方法で、利用判定だけを全件で共有する。
+                        // 毎回の UserDefaults 登録・参照で大量削除が遅くなるのを避ける。
+                        targetSpeechModSetting.isDeleted = true
+                        if !isUseCloudRealm {
+                            realm.delete(targetSpeechModSetting)
+                        }
                     }
                 }
             }
