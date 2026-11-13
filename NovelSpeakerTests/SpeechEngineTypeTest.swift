@@ -269,6 +269,78 @@ class SpeechEngineTypeTest: XCTestCase {
         }
     }
 
+    // 実際の標準辞書全件について、初期登録・旧形式・移行後のいずれも削除できる。
+    func testDefaultRemovalIncludesFreshLegacyAndMigratedEntries() {
+        let defaults = Array(NovelSpeakerUtility.GetBundledDefaultSpeechModSettings().values)
+        XCTAssertFalse(defaults.isEmpty)
+        for mode in 0..<3 {
+            let settings = defaults.map { entry -> RealmSpeechModSetting in
+                let setting = RealmSpeechModSetting()
+                setting.before = entry.before
+                setting.after = entry.after
+                setting.isUseRegularExpression = entry.isRegexp ?? false
+                if mode != 0 {
+                    let types = entry.speechEngineTypes
+                    setting.setSpeechEngineTypes(mode == 2 && types.isEmpty ? [.avSpeechSynthesizer] : types)
+                    setting.voicevoxPronunciation = entry.voicevoxPronunciation ?? ""
+                    setting.voicevoxAccentType = entry.voicevoxAccentType ?? 0
+                    setting.voicevoxWordPriority = entry.voicevoxWordPriority ?? VoicevoxUserDictionaryEntry.defaultPriority
+                    setting.voicevoxWordType = entry.voicevoxWordType.map {
+                        VoicevoxUserDictionaryWordType(jsonName: $0).rawValue
+                    } ?? VoicevoxUserDictionaryWordType.properNoun.rawValue
+                }
+                return setting
+            }
+            XCTAssertEqual(NovelSpeakerUtility.DefaultSpeechModSettingsRemovalTargets(
+                settings, defaultSettings: defaults).count, settings.count, "登録状態: \(mode)")
+        }
+    }
+
+    func testDefaultRemovalPreservesEditedSettings() throws {
+        let defaults = Array(NovelSpeakerUtility.GetBundledDefaultSpeechModSettings().values)
+        let entry = try XCTUnwrap(defaults.first { $0.before == "鶏ガラ" })
+        let edits: [(RealmSpeechModSetting) -> Void] = [
+            { $0.setSpeechEngineTypes([.voicevox]) },
+            { $0.setSpeechEngineTypes([.any]) },
+            { $0.voicevoxPronunciation = "トリガラ" },
+            { $0.voicevoxAccentType = 1 },
+            { $0.voicevoxWordPriority = 10 },
+            { $0.voicevoxWordType = VoicevoxUserDictionaryWordType.commonNoun.rawValue },
+            { $0.after = "別の読み" },
+            { $0.isUseRegularExpression = true },
+        ]
+        for edit in edits {
+            let setting = RealmSpeechModSetting()
+            setting.before = entry.before
+            setting.after = entry.after
+            setting.setSpeechEngineTypes([.avSpeechSynthesizer])
+            edit(setting)
+            XCTAssertTrue(NovelSpeakerUtility.DefaultSpeechModSettingsRemovalTargets(
+                [setting], defaultSettings: defaults).isEmpty)
+        }
+    }
+
+    // エンジンを明示した標準項目でも、VOICEVOX の設定を変更した行は消さない。
+    func testDefaultRemovalPreservesEditedVoicevoxMetadataOnTaggedEntry() throws {
+        let defaults = Array(NovelSpeakerUtility.GetBundledDefaultSpeechModSettings().values)
+        let entry = try XCTUnwrap(defaults.first { $0.before == "黒剣" })
+        let setting = RealmSpeechModSetting()
+        setting.before = entry.before
+        setting.after = entry.after
+        setting.setSpeechEngineTypes(Array(entry.speechEngineTypes.reversed()))
+        setting.voicevoxPronunciation = entry.voicevoxPronunciation ?? ""
+        setting.voicevoxAccentType = entry.voicevoxAccentType ?? 0
+        setting.voicevoxWordPriority = entry.voicevoxWordPriority ?? VoicevoxUserDictionaryEntry.defaultPriority
+        setting.voicevoxWordType = entry.voicevoxWordType.map {
+            VoicevoxUserDictionaryWordType(jsonName: $0).rawValue
+        } ?? VoicevoxUserDictionaryWordType.properNoun.rawValue
+        XCTAssertEqual(NovelSpeakerUtility.DefaultSpeechModSettingsRemovalTargets(
+            [setting], defaultSettings: defaults).count, 1)
+        setting.voicevoxAccentType += 1
+        XCTAssertTrue(NovelSpeakerUtility.DefaultSpeechModSettingsRemovalTargets(
+            [setting], defaultSettings: defaults).isEmpty)
+    }
+
     private func deleteSetting(before: String) {
         RealmUtil.Write { realm in
             guard let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) else { return }

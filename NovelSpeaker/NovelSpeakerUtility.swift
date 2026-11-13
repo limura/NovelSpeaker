@@ -698,11 +698,16 @@ class NovelSpeakerUtility: NSObject {
         let voicevoxWordType: Int
     }
 
-    private static func FullSpeechModSettingMatchKey(_ setting: SpeechModSetting) -> SpeechModSettingMatchKey {
-        let engineTypes: [Int] = setting.targetSpeechEngineTypeArray?.compactMap { value -> Int? in
+    private static func FullSpeechModSettingMatchKey(_ setting: SpeechModSetting, migrated: Bool = false) -> SpeechModSettingMatchKey {
+        var engineTypes: [Int] = setting.targetSpeechEngineTypeArray?.compactMap { value -> Int? in
             if value == "any" { return SpeechEngineType.any.rawValue }
             return SpeechEngineType(typeString: value)?.rawValue
         }.sorted() ?? []
+        // 起動時の移行は、標準辞書の未指定を「端末の音声」として保存する。
+        // JSON のまま登録された状態と、移行後の状態の両方を標準値として照合する。
+        if migrated && engineTypes.isEmpty {
+            engineTypes = [SpeechEngineType.avSpeechSynthesizer.rawValue]
+        }
         return SpeechModSettingMatchKey(
             before: setting.before,
             after: setting.after,
@@ -742,6 +747,23 @@ class NovelSpeakerUtility: NSObject {
             && setting.voicevoxAccentType == 0
             && setting.voicevoxWordPriority == VoicevoxUserDictionaryEntry.defaultPriority
             && setting.voicevoxWordType == VoicevoxUserDictionaryWordType.properNoun.rawValue
+    }
+
+    /// 初期登録直後・移行後・旧形式の標準項目を対象とし、利用者の設定変更は保護する。
+    static func DefaultSpeechModSettingsRemovalTargets(
+        _ settings: [RealmSpeechModSetting], defaultSettings: [SpeechModSetting]
+    ) -> [RealmSpeechModSetting] {
+        let fullKeys = Set(defaultSettings.flatMap {
+            [FullSpeechModSettingMatchKey($0), FullSpeechModSettingMatchKey($0, migrated: true)]
+        })
+        let legacyKeys = Set(defaultSettings.map {
+            LegacySpeechModSettingMatchKey(before: $0.before, after: $0.after, isRegexp: $0.isRegexp ?? false)
+        })
+        return settings.filter {
+            fullKeys.contains(FullSpeechModSettingMatchKey($0))
+                || (CanUseLegacySpeechModSettingMatch($0)
+                    && legacyKeys.contains(LegacySpeechModSettingMatchKey($0)))
+        }
     }
 
     // 標準の読み替え辞書を上書き登録します。
@@ -814,20 +836,8 @@ class NovelSpeakerUtility: NSObject {
         getSpeechModSettings { (speechModSettings) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let allSpeechModSettings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
-                // 旧版の3項目照合を残しつつ、VOICEVOX の設定が違う利用者の行は消さない。
-                // 標準辞書側は Set にしておくので、5000件同士の二重ループにはしない。
-                let fullKeys = Set(speechModSettings.map { FullSpeechModSettingMatchKey($0) })
-                let legacyKeys = Set(speechModSettings.map {
-                    LegacySpeechModSettingMatchKey(before: $0.before, after: $0.after, isRegexp: $0.isRegexp ?? false)
-                })
-                var removeTargetArray:[RealmSpeechModSetting] = []
-                for targetSpeechModSetting in allSpeechModSettings {
-                    if fullKeys.contains(FullSpeechModSettingMatchKey(targetSpeechModSetting))
-                        || (CanUseLegacySpeechModSettingMatch(targetSpeechModSetting)
-                            && legacyKeys.contains(LegacySpeechModSettingMatchKey(targetSpeechModSetting))) {
-                        removeTargetArray.append(targetSpeechModSetting)
-                    }
-                }
+                let removeTargetArray = DefaultSpeechModSettingsRemovalTargets(
+                    Array(allSpeechModSettings), defaultSettings: speechModSettings)
                 guard removeTargetArray.isEmpty == false else { return }
                 RealmUtil.WriteWith(realm: realm) { (realm) in
                     for targetSpeechModSetting in removeTargetArray {
