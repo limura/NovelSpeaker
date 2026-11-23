@@ -1820,6 +1820,19 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     
     // Write transaction の中で使います
     static func RemoveStoryWith(realm:Realm, story:Story) -> Bool {
+        // Read the stored data, not a previously cached chapter or bulk.
+        storyCache = nil
+        bulkStoryArrayCacheID = nil
+        bulkStoryArrayCache = nil
+
+        // LoadStoryArray() may fill the bulk cache while deleting chapters.
+        // Clear it on every exit before the caller reloads the edited chapter.
+        defer {
+            storyCache = nil
+            bulkStoryArrayCacheID = nil
+            bulkStoryArrayCache = nil
+        }
+
         guard var storyBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: story.storyID) else { return false }
         var targetStory:Story? = story
         let targetNovelID = storyBulk.novelID

@@ -218,6 +218,68 @@ class RealmTests: XCTestCase {
         }
     }
 
+    func testRemoveStoryRefreshesCachedChapter() throws {
+        try assertChapterRemoval(cacheEnabled: false)
+    }
+
+    func testRemoveStoryRefreshesCachedChapterAndBulk() throws {
+        try assertChapterRemoval(cacheEnabled: true)
+    }
+
+    private func assertChapterRemoval(cacheEnabled: Bool) throws {
+        let previousCacheSetting = RealmStoryBulk.isLoadStoryArrayCacheEnabled
+        let previousStory = RealmStoryBulk.storyCache
+        let previousBulkID = RealmStoryBulk.bulkStoryArrayCacheID
+        let previousBulk = RealmStoryBulk.bulkStoryArrayCache
+        RealmStoryBulk.isLoadStoryArrayCacheEnabled = cacheEnabled
+        defer {
+            RealmStoryBulk.isLoadStoryArrayCacheEnabled = previousCacheSetting
+            RealmStoryBulk.storyCache = previousStory
+            RealmStoryBulk.bulkStoryArrayCacheID = previousBulkID
+            RealmStoryBulk.bulkStoryArrayCache = previousBulk
+        }
+
+        for (chapterCount, deletions) in [(4, [2, 2]), (201, [99]), (201, [100]), (201, [101]), (100, [100]), (101, [101])] {
+            let novelID = UUID().uuidString
+            let realm = try Realm(configuration: Realm.Configuration(inMemoryIdentifier: novelID))
+            let stories = createDummyStoryArray(content: "本文", novelID: novelID, count: chapterCount, startChapterNumber: 1)
+            let novel = RealmNovel()
+            novel.novelID = novelID
+            novel.type = .UserCreated
+            novel.m_lastChapterStoryID = try XCTUnwrap(stories.last).storyID
+            try realm.write {
+                RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: stories)
+                realm.add(novel)
+            }
+
+            var expectedContents = stories.map(\.content)
+            for chapter in deletions {
+                let context = "全\(expectedContents.count)章から第\(chapter)章を削除"
+                let storyID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: chapter)
+                try realm.write {
+                    let target = try XCTUnwrap(RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID))
+                    XCTAssertEqual(target.content, expectedContents.remove(at: chapter - 1), context)
+                    XCTAssertTrue(RealmStoryBulk.RemoveStoryWith(realm: realm, story: target), context)
+
+                    let (count, lastChapter, _) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novelID)
+                    XCTAssertEqual(count, expectedContents.count, context)
+                    XCTAssertEqual(lastChapter, expectedContents.count, context)
+                    let displayedStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID)
+                        ?? RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: lastChapter)
+                    XCTAssertEqual(displayedStory?.content, expectedContents[min(chapter, expectedContents.count) - 1], context)
+                }
+
+                let bulks = try XCTUnwrap(RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID))
+                let storedStories = try bulks.flatMap { bulk in
+                    let asset = try XCTUnwrap(bulk.storyListAsset)
+                    return try XCTUnwrap(RealmStoryBulk.StoryCreamAssetToStoryArray(asset: asset))
+                }
+                XCTAssertEqual(storedStories.map(\.content), expectedContents, context)
+                XCTAssertEqual(storedStories.map(\.chapterNumber), Array(1...expectedContents.count), context)
+            }
+        }
+    }
+
     func testInsertStory_under100() {
         let firstStoryCount = 50
         let insertStoryIndex = 25
