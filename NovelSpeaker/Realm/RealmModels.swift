@@ -431,6 +431,7 @@ final class MemoryTraceLogger {
     }
     
     static func stopSyncEngine() {
+        syncEngine?.stopPrivatePulls()
         syncEngine = nil
     }
     #if !os(watchOS)
@@ -455,11 +456,13 @@ final class MemoryTraceLogger {
             return
         }
         cloudDataRemovalInProgress = true
+        let retiringEngine = syncEngine
         syncEngine = nil
         let removal = CloudDataRemoval(client: CloudKitDataRemovalClient(container: GetContainer()),
                                        mode: removeData ? .removeData : .recoverOutstanding)
         cloudDataRemoval = removal
         lock.unlock()
+        retiringEngine?.stopPrivatePulls()
         removal.start { result in
             // 一部だけ削除できた場合も、次回同期時に古いZoneやtokenを再利用しない。
             // 端末のRealmは削除しない。
@@ -687,21 +690,25 @@ final class MemoryTraceLogger {
     // 将来的にこのままではおかしな動作になる可能性があります)
     // 効果としては、SyncEngine.pull() で取得される値が前回からの差分で更新があったもののみ、というのが「全て」に変わります。
     static func ForceRemoveIceCreamDatabaseSyncTokens() {
-        let defaults = UserDefaults.standard
-        let targetIceCreamKeyArray = [ // wow! magic word!
-            "icecream.keys.databaseChangesTokenKey",
-            "icecream.keys.zoneChangesTokenKey",
-            "icecream.keys.subscriptionIsLocallyCachedKey",
-            "icecream.keys.hasCustomZoneCreatedKey",
-        ]
-        for key in defaults.dictionaryRepresentation().keys {
-            for targetKey in targetIceCreamKeyArray {
-                if key.contains(targetKey) {
-                    print("delete IceCream Key: \(key)")
-                    defaults.removeObject(forKey: key)
+        let reset = {
+            let defaults = UserDefaults.standard
+            let targetIceCreamKeyArray = [ // wow! magic word!
+                "icecream.keys.databaseChangesTokenKey",
+                "icecream.keys.zoneChangesTokenKey",
+                "icecream.keys.subscriptionIsLocallyCachedKey",
+                "icecream.keys.hasCustomZoneCreatedKey",
+            ]
+            for key in defaults.dictionaryRepresentation().keys {
+                for targetKey in targetIceCreamKeyArray {
+                    if key.contains(targetKey) {
+                        print("delete IceCream Key: \(key)")
+                        defaults.removeObject(forKey: key)
+                    }
                 }
             }
         }
+        if let engine = syncEngine { engine.resetPrivatePullCheckpoints(reset) }
+        else { reset() }
     }
     @objc static func CloudPull() {
         syncEngine?.pull()

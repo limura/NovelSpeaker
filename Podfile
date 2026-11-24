@@ -2,9 +2,11 @@
 platform :ios, '15.0'
 
 require_relative 'scripts/patch_icecream_worker_startup'
+require_relative 'scripts/patch_icecream_private_receive_ack'
 
 post_install do |installer|
     NovelSpeakerIceCreamWorkerStartupPatch.install(installer)
+    NovelSpeakerIceCreamPrivateReceiveACK.install(installer)
     installer.generated_projects.each do |project|
           project.targets.each do |target|
               target.build_configurations.each do |config|

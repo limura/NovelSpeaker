@@ -1,0 +1,588 @@
+--- IceCream/Classes/CKRecordRecoverable.swift
++++ IceCream/Classes/CKRecordRecoverable.swift
+@@ -136,7 +136,8 @@
+                 recordValue = record.value(forKey: prop.name) as? Data
+             case .object:
+                 if let asset = record.value(forKey: prop.name) as? CKAsset {
+-                    recordValue = CreamAsset.parse(from: prop.name, record: record, asset: asset)
++                    guard let recovered = CreamAsset.parse(from: prop.name, record: record, asset: asset) else { return nil }
++                    recordValue = recovered
+                 } else if let owner = record.value(forKey: prop.name) as? CKRecord.Reference,
+                     let ownerType = prop.objectClassName,
+                     let schema = realm.schema.objectSchema.first(where: { $0.className == ownerType })
+--- IceCream/Classes/CreamAsset.swift
++++ IceCream/Classes/CreamAsset.swift
+@@ -67,10 +67,20 @@
+     /// - Returns: A CreamAsset if it was successful
+     static func parse(from propName: String, record: CKRecord, asset: CKAsset) -> CreamAsset? {
+         guard let url = asset.fileURL else { return nil }
+-        return CreamAsset.create(objectID: record.recordID.recordName,
+-                                 propName: propName,
+-                                 url: url,
+-                                 shouldOverwrite: true)
++        let recovered = CreamAsset(objectID: record.recordID.recordName, propName: propName)
++        let destination = recovered.filePath
++        guard installReceivedFile(at: url, to: destination) else { return nil }
++        return recovered
++    }
++
++    static func installReceivedFile(at url: URL, to destination: URL) -> Bool {
++        let staged = destination.deletingLastPathComponent().appendingPathComponent(".incoming-" + UUID().uuidString)
++        defer { try? FileManager.default.removeItem(at: staged) }
++        do { try FileManager.default.copyItem(at: url, to: staged) }
++        catch { return false }
++        // POSIX rename replaces the destination atomically on the same volume.
++        // The old file is untouched if either the copy or rename fails.
++        return rename(staged.path, destination.path) == 0
+     }
+ 
+     // MARK: - Factory methods
+--- IceCream/Classes/PrivateDatabaseManager.swift
++++ IceCream/Classes/PrivateDatabaseManager.swift
+@@ -15,55 +15,146 @@
+ 
+ final class PrivateDatabaseManager: DatabaseManager {
+     
+-    let container: CKContainer
+-    let database: CKDatabase
++    private let configuredContainer: CKContainer?
++    var container: CKContainer {
++        guard let c = configuredContainer else { preconditionFailure("Offline test accessed CloudKit container") }
++        return c
++    }
++    private let configuredDatabase: CKDatabase?
++    var database: CKDatabase {
++        guard let d = configuredDatabase else { preconditionFailure("Offline test accessed CloudKit database") }
++        return d
++    }
+     
+     let syncObjects: [Syncable]
+     
+     public init(objects: [Syncable], container: CKContainer) {
+         self.syncObjects = objects
+-        self.container = container
+-        self.database = container.privateCloudDatabase
+-    }
+-    
++        self.configuredContainer = container
++        self.configuredDatabase = container.privateCloudDatabase
++    }
++    
++    private final class Pull {
++        init(_ completions: [((Error?) -> Void)]) { self.completions = completions }
++        let completions: [((Error?) -> Void)]
++        var resetDatabase = false
++        var resetZones = Set<CKRecordZone.ID>()
++    }
++
++    #if ICECREAM_OFFLINE_ACK_TESTS
++    init(testObjects: [Syncable]) {
++        self.syncObjects = testObjects
++        self.configuredContainer = nil
++        self.configuredDatabase = nil
++    }
++    var submitPullForTesting: ((CKDatabaseOperation) -> Void)?
++    var loadDatabaseTokenForTesting: (() -> CKServerChangeToken?)?
++    var storeDatabaseTokenForTesting: ((CKServerChangeToken?) -> Void)?
++    #endif
++
++    private func submitPull(_ operation: CKDatabaseOperation) {
++        #if ICECREAM_OFFLINE_ACK_TESTS
++        if let submit = submitPullForTesting { submit(operation); return }
++        #endif
++        database.add(operation)
++    }
++
++    private var pullQueueDatabaseToken: CKServerChangeToken? {
++        get {
++            #if ICECREAM_OFFLINE_ACK_TESTS
++            if let load = loadDatabaseTokenForTesting { return load() }
++            #endif
++            return databaseChangeToken
++        }
++        set {
++            #if ICECREAM_OFFLINE_ACK_TESTS
++            if let store = storeDatabaseTokenForTesting { store(newValue); return }
++            #endif
++            databaseChangeToken = newValue
++        }
++    }
++
++    private let pullQueue = DispatchQueue(label: "icecream.private-pull")
++    private var activePull: Pull?
++    private var stopped = false
++    private var wantsAnotherPull = false
++    private var waitingCompletions: [((Error?) -> Void)] = []
++
+     func fetchChangesInDatabase(_ callback: ((Error?) -> Void)?) {
+-        let changesOperation = CKFetchDatabaseChangesOperation(previousServerChangeToken: databaseChangeToken)
+-        
+-        /// Only update the changeToken when fetch process completes
+-        changesOperation.changeTokenUpdatedBlock = { [weak self] newToken in
+-            self?.databaseChangeToken = newToken
+-        }
+-        
+-        changesOperation.fetchDatabaseChangesCompletionBlock = {
+-            [weak self]
+-            newToken, _, error in
+-            guard let self = self else { return }
+-            switch ErrorHandler.shared.resultType(with: error) {
+-            case .success:
+-                self.databaseChangeToken = newToken
+-                // Fetch the changes in zone level
+-                self.fetchChangesInZones(callback)
+-            case .retry(let timeToWait, _):
+-                ErrorHandler.shared.retryOperationIfPossible(retryAfter: timeToWait, block: {
+-                    self.fetchChangesInDatabase(callback)
+-                })
+-            case .recoverableError(let reason, _):
+-                switch reason {
+-                case .changeTokenExpired:
+-                    /// The previousServerChangeToken value is too old and the client must re-sync from scratch
+-                    self.databaseChangeToken = nil
+-                    self.fetchChangesInDatabase(callback)
+-                default:
+-                    return
++        pullQueue.async {
++            guard !self.stopped else {
++                if let callback = callback { DispatchQueue.main.async { callback(PrivatePullFailure.cancelled) } }
++                return
++            }
++            if let callback = callback { self.waitingCompletions.append(callback) }
++            self.wantsAnotherPull = true
++            self.startWaitingPull()
++        }
++    }
++
++    private func startWaitingPull() {
++        guard !stopped, activePull == nil, wantsAnotherPull else { return }
++        wantsAnotherPull = false
++        let pull = Pull(waitingCompletions)
++        activePull = pull
++        waitingCompletions.removeAll()
++        runDatabaseFetch(pull)
++    }
++
++    private func finish(_ pull: Pull, error: Error?) {
++        guard activePull === pull else { return }
++        activePull = nil
++        for completion in pull.completions {
++            DispatchQueue.main.async { completion(error) }
++        }
++        startWaitingPull()
++    }
++
++    // Synchronous fence for ordinary settings paths: the caller's reset cannot
++    // race a cursor commit, and already queued stale callbacks become no-ops.
++    func invalidatePulls(stop: Bool, operation: () -> Void) {
++        pullQueue.sync {
++            if stop { stopped = true }
++            let cancelled = (activePull?.completions ?? []) + waitingCompletions
++            activePull = nil
++            waitingCompletions.removeAll()
++            wantsAnotherPull = false
++            operation()
++            for completion in cancelled {
++                DispatchQueue.main.async { completion(PrivatePullFailure.cancelled) }
++            }
++        }
++    }
++
++    private func runDatabaseFetch(_ pull: Pull) {
++        guard activePull === pull else { return }
++        let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: pull.resetDatabase ? nil : pullQueueDatabaseToken)
++        operation.fetchAllChanges = true
++        // Intermediate cursors are not durable apply acknowledgements.
++        operation.fetchDatabaseChangesCompletionBlock = { [weak self] token, more, error in
++            guard let self = self else { return }
++            self.pullQueue.async {
++                guard self.activePull === pull else { return }
++                if let error = error {
++                    switch ErrorHandler.shared.resultType(with: error) {
++                    case .recoverableError(reason: .changeTokenExpired, _) where !pull.resetDatabase:
++                        pull.resetDatabase = true
++                        self.runDatabaseFetch(pull)
++                    case .retry(let seconds, _):
++                        self.pullQueue.asyncAfter(deadline: .now() + seconds) { self.runDatabaseFetch(pull) }
++                    default:
++                        self.finish(pull, error: error)
++                    }
++                } else if more {
++                    self.finish(pull, error: PrivatePullFailure.incompletePage)
++                } else {
++                    self.fetchChangesInZones(pull, databaseToken: token)
+                 }
+-            default:
+-                return
+-            }
+-        }
+-        
+-        database.add(changesOperation)
+-    }
+-    
++            }
++        }
++        submitPull(operation)
++    }
++
+     func createCustomZonesIfAllowed() {
+         let zonesToCreate = syncObjects.filter { !$0.isCustomZoneCreated }.map { CKRecordZone(zoneID: $0.zoneID) }
+         guard zonesToCreate.count > 0 else { return }
+@@ -73,6 +164,9 @@
+             guard let self = self else { return }
+             switch ErrorHandler.shared.resultType(with: error) {
+             case .success:
++                // An initial pull may have raced zone creation and held its
++                // checkpoints. Recheck only after the zones now exist.
++                self.fetchChangesInDatabase(nil)
+                 self.syncObjects.forEach { object in
+                     object.isCustomZoneCreated = true
+                     
+@@ -91,7 +185,7 @@
+             }
+         }
+         
+-        database.add(modifyOp)
++        submitPull(modifyOp)
+     }
+     
+     func createDatabaseSubscriptionIfHaveNot() {
+@@ -134,65 +228,107 @@
+         }
+     }
+     
+-    private func fetchChangesInZones(_ callback: ((Error?) -> Void)? = nil) {
+-        let changesOp = CKFetchRecordZoneChangesOperation(recordZoneIDs: zoneIds, optionsByRecordZoneID: zoneIdOptions)
+-        changesOp.fetchAllChanges = true
+-        
+-        changesOp.recordZoneChangeTokensUpdatedBlock = { [weak self] zoneId, token, _ in
+-            guard let self = self else { return }
+-            guard let syncObject = self.syncObjects.first(where: { $0.zoneID == zoneId }) else { return }
+-            syncObject.zoneChangesToken = token
+-        }
+-        
+-        changesOp.recordChangedBlock = { [weak self] record in
+-            /// The Cloud will return the modified record since the last zoneChangesToken, we need to do local cache here.
+-            /// Handle the record:
+-            guard let self = self else { return }
+-            guard let syncObject = self.syncObjects.first(where: { $0.recordType == record.recordType }) else { return }
+-            syncObject.add(record: record)
+-        }
+-        
+-        changesOp.recordWithIDWasDeletedBlock = { [weak self] recordId, _ in
+-            guard let self = self else { return }
+-            guard let syncObject = self.syncObjects.first(where: { $0.zoneID == recordId.zoneID }) else { return }
+-            syncObject.delete(recordID: recordId)
+-        }
+-        
+-        changesOp.recordZoneFetchCompletionBlock = { [weak self](zoneId ,token, _, _, error) in
+-            guard let self = self else { return }
+-            switch ErrorHandler.shared.resultType(with: error) {
+-            case .success:
+-                guard let syncObject = self.syncObjects.first(where: { $0.zoneID == zoneId }) else { return }
+-                syncObject.zoneChangesToken = token
+-            case .retry(let timeToWait, _):
+-                ErrorHandler.shared.retryOperationIfPossible(retryAfter: timeToWait, block: {
+-                    self.fetchChangesInZones(callback)
+-                })
+-            case .recoverableError(let reason, _):
+-                switch reason {
+-                case .changeTokenExpired:
+-                    /// The previousServerChangeToken value is too old and the client must re-sync from scratch
+-                    guard let syncObject = self.syncObjects.first(where: { $0.zoneID == zoneId }) else { return }
+-                    syncObject.zoneChangesToken = nil
+-                    self.fetchChangesInZones(callback)
+-                default:
+-                    return
++    private final class ZonePass {
++        var tokens: [CKRecordZone.ID: CKServerChangeToken?] = [:]
++        var expired = Set<CKRecordZone.ID>()
++        var error: Error?
++    }
++
++    private func fetchChangesInZones(_ pull: Pull, databaseToken: CKServerChangeToken?) {
++        guard activePull === pull else { return }
++        let zones = self.zoneIds
++        guard !zones.isEmpty else {
++            pullQueueDatabaseToken = databaseToken
++            finish(pull, error: nil)
++            return
++        }
++        var options = zoneIdOptions
++        for id in pull.resetZones { options[id]?.previousServerChangeToken = nil }
++        let operation = CKFetchRecordZoneChangesOperation(recordZoneIDs: zones, optionsByRecordZoneID: options)
++        operation.fetchAllChanges = true
++        let pass = ZonePass()
++
++        operation.recordWasChangedBlock = { [weak self] id, result in
++            guard let self = self else { return }
++            self.pullQueue.sync {
++                // Keep CKAsset's staged URL alive until its local copy completes.
++                // Successful preceding writes replay with no cursor committed.
++                guard self.activePull === pull, pass.error == nil else { return }
++                do {
++                    let record = try result.get()
++                    guard record.recordID == id else { throw PrivatePullFailure.invalidRecord }
++                    if record is CKShare { return } // CK system metadata, not app Realm state.
++                    guard let target = self.syncObjects.first(where: { $0.zoneID == id.zoneID && $0.recordType == record.recordType }) as? DurablePrivateSyncable else {
++                        throw PrivatePullFailure.unsupportedReceiver
++                    }
++                    try target.apply(record: record)
++                } catch { pass.error = pass.error ?? error }
++            }
++        }
++        operation.recordWithIDWasDeletedBlock = { [weak self] id, type in
++            guard let self = self else { return }
++            self.pullQueue.sync {
++                guard self.activePull === pull, pass.error == nil else { return }
++                do {
++                    if type == CKRecord.SystemType.share { return }
++                    guard let target = self.syncObjects.first(where: { $0.zoneID == id.zoneID && $0.recordType == type }) as? DurablePrivateSyncable else {
++                        throw PrivatePullFailure.unsupportedReceiver
++                    }
++                    try target.applyDeletion(recordID: id)
++                } catch { pass.error = pass.error ?? error }
++            }
++        }
++        operation.recordZoneFetchCompletionBlock = { [weak self] id, token, _, more, error in
++            guard let self = self else { return }
++            self.pullQueue.async {
++                guard self.activePull === pull else { return }
++                if let error = error {
++                    if (error as? CKError)?.code == .changeTokenExpired, !pull.resetZones.contains(id) {
++                        pass.expired.insert(id)
++                    } else {
++                        pass.error = pass.error ?? error
++                    }
++                } else if !zones.contains(id) {
++                    pass.error = pass.error ?? PrivatePullFailure.incompletePage
++                } else if !more {
++                    pass.tokens[id] = .some(token)
+                 }
+-            default:
+-                return
+-            }
+-        }
+-        
+-        changesOp.fetchRecordZoneChangesCompletionBlock = { [weak self] error in
+-            guard let self = self else { return }
+-            self.syncObjects.forEach {
+-                $0.resolvePendingRelationships()
+-            }
+-            callback?(error)
+-        }
+-        
+-        database.add(changesOp)
+-    }
++            }
++        }
++        operation.fetchRecordZoneChangesCompletionBlock = { [weak self] error in
++            guard let self = self else { return }
++            self.pullQueue.async {
++                guard self.activePull === pull else { return }
++                if let failure = pass.error {
++                    self.finish(pull, error: failure)
++                } else if !pass.expired.isEmpty,
++                          error == nil || (error as? CKError)?.code == .partialFailure || (error as? CKError)?.code == .changeTokenExpired {
++                    pull.resetZones.formUnion(pass.expired)
++                    self.fetchChangesInZones(pull, databaseToken: databaseToken)
++                } else if let error = error {
++                    if case .retry(let seconds, _) = ErrorHandler.shared.resultType(with: error) {
++                        self.pullQueue.asyncAfter(deadline: .now() + seconds) {
++                            self.fetchChangesInZones(pull, databaseToken: databaseToken)
++                        }
++                    } else {
++                        self.finish(pull, error: error)
++                    }
++                } else if pass.tokens.count != zones.count {
++                    self.finish(pull, error: PrivatePullFailure.incompletePage)
++                } else {
++                    for object in self.syncObjects {
++                        object.zoneChangesToken = pass.tokens[object.zoneID] ?? nil
++                    }
++                    // Existing UserDefaults keys, written only after every
++                    // required local apply, and the enclosing token last.
++                    self.pullQueueDatabaseToken = databaseToken
++                    self.finish(pull, error: nil)
++                }
++            }
++        }
++        submitPull(operation)
++    }
++
+ }
+ 
+ extension PrivateDatabaseManager {
+--- IceCream/Classes/SyncEngine.swift
++++ IceCream/Classes/SyncEngine.swift
+@@ -75,6 +75,18 @@
+         databaseManager.fetchChangesInDatabase(completionHandler)
+     }
+     
++    /// Stop private receives before their Realm is removed/replaced.
++    public func stopPrivatePulls() {
++        (databaseManager as? PrivateDatabaseManager)?.invalidatePulls(stop: true, operation: {})
++    }
++
++    /// Invalidate older private receives and synchronously reset checkpoint storage.
++    public func resetPrivatePullCheckpoints(_ reset: () -> Void) {
++        if let manager = databaseManager as? PrivateDatabaseManager {
++            manager.invalidatePulls(stop: false, operation: reset)
++        } else { reset() }
++    }
++
+     /// Push all existing local data to CloudKit
+     /// You should NOT to call this method too frequently
+     public func pushAll() {
+--- IceCream/Classes/SyncObject.swift
++++ IceCream/Classes/SyncObject.swift
+@@ -25,6 +25,10 @@
+     
+     public let realmConfiguration: Realm.Configuration
+     
++    #if ICECREAM_OFFLINE_ACK_TESTS
++    var beforeInboundCommitForTesting: (() throws -> Void)?
++    #endif
++
+     private let pendingUTypeRelationshipsWorker = PendingRelationshipsWorker<U>()
+     private let pendingVTypeRelationshipsWorker = PendingRelationshipsWorker<V>()
+     private let pendingWTypeRelationshipsWorker = PendingRelationshipsWorker<W>()
+@@ -43,7 +47,7 @@
+ 
+ // MARK: - Zone information
+ 
+-extension SyncObject: Syncable {
++extension SyncObject: DurablePrivateSyncable {
+     
+     public var recordType: String {
+         return T.recordType
+@@ -81,53 +85,70 @@
+     }
+     
+     public func add(record: CKRecord) {
+-        BackgroundWorker.shared.start {
+-            let realm = try! Realm(configuration: self.realmConfiguration)
+-            guard let object = T.parseFromRecord(
+-                record: record,
+-                realm: realm,
+-                notificationToken: self.notificationToken,
+-                pendingUTypeRelationshipsWorker: self.pendingUTypeRelationshipsWorker,
+-                pendingVTypeRelationshipsWorker: self.pendingVTypeRelationshipsWorker,
+-                pendingWTypeRelationshipsWorker: self.pendingWTypeRelationshipsWorker
+-            ) else {
+-                print("There is something wrong with the converson from cloud record to local object")
+-                return
+-            }
+-            self.pendingUTypeRelationshipsWorker.realm = realm
+-            self.pendingVTypeRelationshipsWorker.realm = realm
+-            self.pendingWTypeRelationshipsWorker.realm = realm
+-            
+-            /// If your model class includes a primary key, you can have Realm intelligently update or add objects based off of their primary key values using Realm().add(_:update:).
+-            /// https://realm.io/docs/swift/latest/#objects-with-primary-keys
+-            realm.beginWrite()
+-            realm.add(object, update: .modified)
+-            if let token = self.notificationToken {
+-                try! realm.commitWrite(withoutNotifying: [token])
+-            } else {
+-                try! realm.commitWrite()
+-            }
+-        }
+-    }
+-    
++        do { try apply(record: record) } catch { print("IceCream record apply failed: \(error)") }
++    }
++
+     public func delete(recordID: CKRecord.ID) {
+-        BackgroundWorker.shared.start {
+-            let realm = try! Realm(configuration: self.realmConfiguration)
+-            guard let object = realm.object(ofType: T.self, forPrimaryKey: T.primaryKeyForRecordID(recordID: recordID)) else {
+-                // Not found in local realm database
+-                return
+-            }
++        do { try applyDeletion(recordID: recordID) } catch { print("IceCream record deletion failed: \(error)") }
++    }
++
++    public func apply(record: CKRecord) throws {
++        try onWorker {
++            let realm = try Realm(configuration: self.realmConfiguration)
++            guard record.recordType == self.recordType, record.recordID.zoneID == self.zoneID,
++                  let key = T().objectSchema.primaryKeyProperty?.name,
++                  let configuredID = T.primaryKeyForRecordID(recordID: record.recordID) as? NSObject,
++                  configuredID.isEqual(record[key]),
++                  let object = T.parseFromRecord(
++                    record: record, realm: realm, notificationToken: self.notificationToken,
++                    pendingUTypeRelationshipsWorker: self.pendingUTypeRelationshipsWorker,
++                    pendingVTypeRelationshipsWorker: self.pendingVTypeRelationshipsWorker,
++                    pendingWTypeRelationshipsWorker: self.pendingWTypeRelationshipsWorker)
++            else { throw PrivatePullFailure.invalidRecord }
++            guard self.pendingUTypeRelationshipsWorker.pendingListElementPrimaryKeyValue.isEmpty,
++                  self.pendingVTypeRelationshipsWorker.pendingListElementPrimaryKeyValue.isEmpty,
++                  self.pendingWTypeRelationshipsWorker.pendingListElementPrimaryKeyValue.isEmpty else {
++                self.pendingUTypeRelationshipsWorker.pendingListElementPrimaryKeyValue.removeAll()
++                self.pendingVTypeRelationshipsWorker.pendingListElementPrimaryKeyValue.removeAll()
++                self.pendingWTypeRelationshipsWorker.pendingListElementPrimaryKeyValue.removeAll()
++                throw PrivatePullFailure.unresolvedRelationships
++            }
++            try self.commitInbound(realm) { realm.add(object, update: .modified) }
++        }
++    }
++
++    public func applyDeletion(recordID: CKRecord.ID) throws {
++        try onWorker {
++            let realm = try Realm(configuration: self.realmConfiguration)
++            guard let id = T.primaryKeyForRecordID(recordID: recordID) else { throw PrivatePullFailure.invalidRecord }
++            guard let object = realm.object(ofType: T.self, forPrimaryKey: id) else { return }
++            try self.commitInbound(realm) { realm.delete(object) }
+             CreamAsset.deleteCreamAssetFile(with: recordID.recordName)
+-            realm.beginWrite()
+-            realm.delete(object)
+-            if let token = self.notificationToken {
+-                try! realm.commitWrite(withoutNotifying: [token])
+-            } else {
+-                try! realm.commitWrite()
+-            }
+-        }
+-    }
+-    
++        }
++    }
++
++    private func commitInbound(_ realm: Realm, _ change: () -> Void) throws {
++        do {
++            try realm.write(withoutNotifying: notificationToken.map { [$0] } ?? []) {
++                change()
++                #if ICECREAM_OFFLINE_ACK_TESTS
++                try beforeInboundCommitForTesting?()
++                #endif
++            }
++        }
++        catch {
++            if realm.isInWriteTransaction { realm.cancelWrite() }
++            throw error
++        }
++    }
++
++    private func onWorker(_ block: @escaping () throws -> Void) throws {
++        var result: Result<Void, Error>?
++        BackgroundWorker.shared.start { result = Result { try block() } }
++        guard let result = result else { throw PrivatePullFailure.incompletePage }
++        try result.get()
++    }
++
+     /// When you commit a write transaction to a Realm, all other instances of that Realm will be notified, and be updated automatically.
+     /// For more: https://realm.io/docs/swift/latest/#writes
+     public func registerLocalDatabase() {
+--- IceCream/Classes/Syncable.swift
++++ IceCream/Classes/Syncable.swift
+@@ -36,3 +36,11 @@
+     var pipeToEngine: ((_ recordsToStore: [CKRecord], _ recordIDsToDelete: [CKRecord.ID]) -> ())? { get set }
+     
+ }
++
++public protocol DurablePrivateSyncable: Syncable {
++    func apply(record: CKRecord) throws
++    func applyDeletion(recordID: CKRecord.ID) throws
++}
++enum PrivatePullFailure: Error {
++    case unsupportedReceiver, invalidRecord, incompletePage, unresolvedRelationships, cancelled
++}
