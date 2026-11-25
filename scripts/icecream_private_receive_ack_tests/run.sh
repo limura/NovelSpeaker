@@ -38,6 +38,7 @@ if [[ $# -eq 2 ]]; then
   grep -q '^UPDATE-CHECKER-DISABLED$' "$work/realm-result"
   grep -q '^PASS_ASSET$' "$work/realm-result"
   grep -q '^PASS_REALM$' "$work/realm-result"
+  grep -q '^PASS_EMPTY_STRING_LIST$' "$work/realm-result"
 elif [[ $# -ne 0 ]]; then
   echo 'Usage: run.sh [BOOTED_DISPOSABLE_SIMULATOR_UDID LOCAL_IOS_BUILD_PRODUCTS]' >&2
   exit 2

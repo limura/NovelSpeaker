@@ -586,3 +586,19 @@
 +enum PrivatePullFailure: Error {
 +    case unsupportedReceiver, invalidRecord, incompletePage, unresolvedRelationships, cancelled
 +}
+--- IceCream/Classes/CKRecordConvertible.swift
++++ IceCream/Classes/CKRecordConvertible.swift
+@@ -90,9 +90,10 @@
+                     let array = Array(list)
+                     r[prop.name] = array as CKRecordValue
+                 case .string:
+-                    guard let list = item as? List<String>, !list.isEmpty else { break }
+-                    let array = Array(list)
+-                    r[prop.name] = array as CKRecordValue
++                    guard let list = item as? List<String> else { break }
++                    // With .changedKeys, omission preserves the old server array.
++                    // An explicit nil marks the field for removal, including on a fresh record.
++                    r[prop.name] = list.isEmpty ? nil : Array(list) as CKRecordValue
+                 case .bool:
+                     guard let list = item as? List<Bool>, !list.isEmpty else { break }
+                     let array = Array(list)

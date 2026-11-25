@@ -6,6 +6,8 @@ final class Fixture: Object, CKRecordConvertible, CKRecordRecoverable {
     @objc dynamic var id = ""
     @objc dynamic var value = 0
     @objc dynamic var isDeleted = false
+    let filters = List<String>()
+    let retained = List<String>()
     override static func primaryKey() -> String? { "id" }
 }
 enum Injected: Error { case localTransaction }
@@ -47,6 +49,48 @@ do { try sync.apply(record:malformed); fatalError("primary key mismatch") }
 catch PrivatePullFailure.invalidRecord { }
 realm.refresh()
 precondition(realm.objects(Fixture.self).count == 2)
+// Capture the same outbound CKRecord produced by IceCream after an actual
+// Realm list edit; hand-write neither the empty field nor its change bit.
+let outbound = DispatchSemaphore(value: 0)
+var captured: CKRecord?
+sync.pipeToEngine = { records, deletions in
+    precondition(records.count == 1 && deletions.isEmpty)
+    captured = records.first
+    outbound.signal()
+}
+func outboundRecord() -> CKRecord {
+    precondition(outbound.wait(timeout: .now() + 5) == .success)
+    return captured!
+}
+let edited = Fixture()
+edited.id = "filters"
+edited.filters.append("old filter")
+edited.retained.append("unrelated value")
+try realm.write { realm.add(edited) }
+let populated = outboundRecord()
+precondition((populated["filters"] as? [String]) == ["old filter"])
+try realm.write { edited.filters.removeAll() }
+let cleared = outboundRecord()
+precondition(cleared.recordID == populated.recordID)
+precondition(cleared.changedKeys().contains("filters") && !cleared.allKeys().contains("filters"))
+precondition(cleared["filters"] == nil)
+precondition((cleared["retained"] as? [String]) == ["unrelated value"])
+// Model the .changedKeys merge at the network boundary. A receiver of the
+// resulting full record must remove the stale list without changing its sibling.
+let replicaConfig = Realm.Configuration(inMemoryIdentifier: "list-peer-" + UUID().uuidString, objectTypes: [Fixture.self])
+let replica = try Realm(configuration: replicaConfig)
+let replicaSync = SyncObject<Fixture,Object,Object,Object>(realmConfiguration: replicaConfig, type: Fixture.self)
+try replicaSync.apply(record: populated)
+replica.refresh()
+precondition(replica.object(ofType: Fixture.self, forPrimaryKey: edited.id)?.filters.count == 1)
+let merged = CKRecord(recordType: populated.recordType, recordID: populated.recordID)
+for key in populated.allKeys() { merged[key] = populated[key] }
+for key in cleared.changedKeys() { merged[key] = cleared[key] }
+try replicaSync.apply(record: merged)
+replica.refresh()
+let received = replica.object(ofType: Fixture.self, forPrimaryKey: edited.id)!
+precondition(received.filters.isEmpty && Array(received.retained) == ["unrelated value"])
+print("PASS Realm List<String> clear: observed outbound changed key, simulated merge, receiver clears stale values")
 let assetRoot = FileManager.default.temporaryDirectory.appendingPathComponent("ack-asset-fixture-" + UUID().uuidString, isDirectory:true)
 try FileManager.default.createDirectory(at:assetRoot,withIntermediateDirectories:false)
 let expected = assetRoot.appendingPathComponent("asset")
@@ -62,6 +106,6 @@ precondition(replaced == Data([0x02,0x03]))
 try FileManager.default.removeItem(at:assetRoot)
 print("PASS exact asset stage: failed copy preserves old bytes; successful copy replaces file")
 print("PASS real in-memory Realm: A durable, B transaction rolled back, exact replay A/B stable, no feedback, wrong primary key rejected")
-if let report { try Data("UPDATE-CHECKER-DISABLED\nPASS_ASSET\nPASS_REALM\n".utf8).write(to: report, options: .atomic) }
+if let report { try Data("UPDATE-CHECKER-DISABLED\nPASS_ASSET\nPASS_REALM\nPASS_EMPTY_STRING_LIST\n".utf8).write(to: report, options: .atomic) }
 fflush(stdout)
 exit(0)
